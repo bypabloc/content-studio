@@ -1,0 +1,7 @@
+.venv-*/
+out/
+logs/
+models/
+__pycache__/
+.vscode/
+narration/voz/prueba/
