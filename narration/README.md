@@ -6,7 +6,9 @@ Genera narración en **español neutro latinoamericano** clonando una voz de ref
 narration/
 ├── README.md            este documento
 ├── tts.py               script único (CLI)
-├── guiones/             qué grabar y cómo: entonación, pausas, pronunciación
+├── docs/
+│   ├── formato-guion.md cómo escribir el texto a narrar: pausas, entonación, pronunciación
+│   └── guiones/         cómo grabar las referencias de voz: un guion por estilo
 ├── voz/                 referencias de voz: <estilo>.wav + <estilo>.txt
 │   └── prueba/          referencia de prueba (experta.wav + .txt) mientras no grabes las tuyas
 ├── .venv-qwen/          venv de Qwen3-TTS        (gitignoreado)
@@ -15,7 +17,7 @@ narration/
 
 Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Logs de corridas largas en `logs/`.
 
-**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [guiones/](guiones/README.md)), agrega `--ref narration/voz/prueba/experta.wav`.
+**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), agrega `--ref narration/voz/prueba/experta.wav`.
 
 ---
 
@@ -109,6 +111,10 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | carga
 2. **Qwen** genera varios bloques a la vez (el *lote*). El lote automático mide la VRAM libre y calcula cuántos entran (~1.15 GiB el primero y ~1.3 GiB cada uno extra, con un máximo de 4). **Chatterbox** no admite lotes y genera de a uno.
 3. Une los bloques con 0.25 s de silencio y aplica la velocidad del estilo con `ffmpeg atempo`, que no altera el tono.
 
+### Formato del guion
+
+Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pause]` o `<break>` se leen en voz alta**: las pausas solo se controlan con la puntuación. Las reglas y las pausas medidas por signo están en **[docs/formato-guion.md](docs/formato-guion.md)**.
+
 ---
 
 ## 4. Estilos
@@ -129,7 +135,7 @@ A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una inst
 
 ## 5. Grabar las referencias
 
-Todo lo necesario para grabar está en **[guiones/](guiones/README.md)**:
+Todo lo necesario para grabar está en **[docs/guiones/](docs/guiones/README.md)**:
 
 - La guía general: equipo, reglas del español neutro, cómo grabar, convertir con ffmpeg y probar la referencia, y el checklist.
 - Un guion por estilo, con actitud, versión marcada (pausas, énfasis y entonación), indicaciones frase por frase, palabras difíciles y el texto exacto.
