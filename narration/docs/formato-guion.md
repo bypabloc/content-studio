@@ -16,7 +16,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 
 ## Reglas obligatorias
 
-**Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. `tts.py` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion.
+**Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. Antes de generar, `tts.py` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion. Después de generar, `--evaluar` detecta las palabras que el modelo dijo mal y los silencios fuera de lugar (regla 24).
 
 **Marcas** ([Por qué no hay marcas](#por-qué-no-hay-marcas))
 
@@ -58,6 +58,13 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 19. Evita "registras": el modelo la deforma casi siempre ("registra", "regista", "digitas"). Usa una construcción impersonal: "queda registrado".
 20. Si un verbo en segunda persona sigue fallando ("eliges el diagnóstico", "recepción ve cuáles"), pasa la oración a impersonal: "el diagnóstico se elige con un clic" (de 1/5 a 4/5), "en recepción se ve cuáles están listas" (de 2/5 a 4/5).
 21. Si un párrafo tiene dos oraciones, separa las oraciones con `[pausa 0.6]`: entre oraciones del mismo bloque, el modelo a veces deja silencios de 1.4 s. La marca va dentro de la misma línea, así que no corre la numeración de `visuales`.
+22. La última palabra de un párrafo es la más frágil: en el 40–60 % de las generaciones cambia su vocal final ("cuenta" → "cuento", "parto" → "parte"). Si es una palabra que importa, no la dejes al final: agrega algo después ("cada segundo cuenta **mucho**", de 0/3 a 3/3) o reordena ("…, **inventario y pacientes nuevos**", no "…, pacientes nuevos e inventario", que falló en tres tandas seguidas).
+
+**Proceso** ([Guiones en JSON](#guiones-en-json) y `--evaluar` en el [README](../README.md#evaluar-las-salidas---evaluar))
+
+23. En un JSON con `visuales`, no cambies la cantidad de elementos de `texto`: cada `linea` de `visuales` apunta a uno. Para cortar dentro de una línea, usa `[pausa N]`.
+24. Todo guion se genera con `--evaluar --reintentos 4`, y se lee el informe. Si un párrafo falla en **todas** las rondas, el problema es la escritura: corrígelo con las reglas 17 a 22 y vuelve a generar ese guion. Si falla solo a veces, es azar del muestreo y lo resuelven los reintentos.
+25. Escucha lo que el evaluador no oye: la entonación, la pronunciación de la marca y los párrafos con aviso de ritmo.
 
 ### Ejemplo que cumple todas las reglas
 
@@ -84,8 +91,14 @@ Medido con `--evaluar` y experimentos de 3 a 5 generaciones por variante (las va
 | "Lo abres, inicias sesión" | 1/5 | "Lo abres, entras" | — |
 | "¡Comenta demo!" (párrafo propio) | 3/5 | "Comenta la palabra demo, y te enviamos…" | 20/20 |
 | "Registras los signos vitales" | 0/5 | "Anotas los signos vitales" | 2/5 |
+| "Registras los signos vitales… y eliges el diagnóstico" | 1/5 | "Los signos vitales quedan registrados… y el diagnóstico se elige con un clic" | 4/5 |
+| "y recepción ve cuáles están listas" | 2/5 | "y en recepción se ve cuáles están listas" | 4/5 |
+| "…cada segundo cuenta." (final del párrafo) | 0/3 | "…cada segundo cuenta mucho." | 3/3 |
+| "…pacientes nuevos e inventario." | falló 3 tandas | "…inventario y pacientes nuevos." | bien en la tanda siguiente |
 
-**Lo que no se arregla escribiendo.** La última palabra de un párrafo a veces cambia de vocal ("cuenta" → "cuento", "parto" → "parte", en el 40–60 % de las generaciones), y "gestacional" se oye a veces "estacional". Probé con temperaturas 0.5, 0.6 y 0.8 y no mejoró de forma consistente. Es azar del muestreo, así que la solución es regenerar ese párrafo: `--evaluar --reintentos 3` lo hace solo (ver el README).
+**Lo que no se arregla escribiendo.** La última palabra de un párrafo a veces cambia de vocal ("parto" → "parte", en el 40–60 % de las generaciones), y "gestacional" se oye a veces "estacional". Probé con temperaturas 0.5, 0.6 y 0.8 y no mejoró de forma consistente. Es azar del muestreo, así que la solución es regenerar ese párrafo: `--evaluar --reintentos 4` lo hace solo. Con los 22 guiones de prueba, ya corregidos con estas reglas, las rondas regeneraron 40 → 15 → 8 → 5 párrafos.
+
+**Lo que no es un error del audio.** Cuando una "s" final se junta con otra inicial, se oye una sola "s" y la frase es ambigua para cualquiera: whisper oyó "eres tú quien **decides** si" en 5 de 5 generaciones de "eres tú quien **decide** si". "Tú decides si incluir" salió bien en 4 de 5, así que se puede dejar. Las listas ("medicina general, odontología, pediatría…") se leen más lento a propósito, unas 2 palabras/s contra 3.3 de mediana; por eso el ritmo es solo un aviso.
 
 ## Por qué no hay marcas
 
@@ -148,6 +161,7 @@ La diferencia, unos 0.3 s, es la caída natural de la voz más un margen de 0.08
 
 - `¿…?` sube la entonación al final y `¡…!` le da más energía. Pon los dos signos, el de apertura y el de cierre.
 - Una oración larga sin puntuación se lee con un ritmo plano y continuo. Corta las ideas con comas o puntos.
+- Las enumeraciones se leen más despacio que el resto (medido: ~2 palabras/s contra 3.3). Es esperable; si te parece lento al escucharlo, acórtala.
 
 ## Pronunciación
 
