@@ -36,3 +36,25 @@ jobs:
           fi
           gh pr merge "$pr" -R "$REPO" --merge --auto
           echo "PR #$pr en auto-merge."
+
+          # GitHub calcula mergeable de forma asíncrona: esperar hasta ~1 min a que deje de ser UNKNOWN.
+          for _ in $(seq 1 12); do
+            estado=$(gh pr view "$pr" -R "$REPO" --json mergeable --jq .mergeable)
+            [ "$estado" != "UNKNOWN" ] && break
+            sleep 5
+          done
+          if [ "$estado" = "CONFLICTING" ]; then
+            gh pr comment "$pr" -R "$REPO" --body "**Conflicto entre main y dev**: este PR no se va a mergear solo. Para resolverlo:
+
+          \`\`\`bash
+          git switch dev && git pull
+          git switch -c fix/resolver-sync-main-dev
+          git merge origin/main        # resolver los conflictos y hacer commit
+          git push -u origin fix/resolver-sync-main-dev
+          gh pr create --base dev
+          \`\`\`
+
+          Cuando ese PR entre a dev, este se cierra solo. Ver \`.claude/rules/git-workflow.md\`."
+            echo "::error::PR #$pr (main → dev) tiene conflictos: hay que resolverlos a mano."
+            exit 1
+          fi
