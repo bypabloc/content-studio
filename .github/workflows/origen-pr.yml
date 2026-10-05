@@ -1,0 +1,40 @@
+name: origen-pr
+
+# Restringe la rama de origen de los PR. Check requerido por los rulesets de main y dev.
+#   main ← dev, fix/*
+#   dev  ← main (back-merge de hotfix) y los prefijos de PREFIJOS_DEV
+# Debe coincidir con .claude/rules/git-workflow.md.
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, reopened, synchronize, edited]
+
+permissions: {}
+
+jobs:
+  origen-permitido:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar rama de origen
+        env:
+          ORIGEN: ${{ github.head_ref }}
+          DESTINO: ${{ github.base_ref }}
+          MISMO_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          PREFIJOS_DEV: feature fix refactor docs test chore ci perf style experiment release
+        run: |
+          permitido=false
+          if [ "$MISMO_REPO" = "true" ]; then
+            case "$DESTINO" in
+              main)
+                { [ "$ORIGEN" = "dev" ] || [[ "$ORIGEN" == fix/* ]]; } && permitido=true ;;
+              dev)
+                [ "$ORIGEN" = "main" ] && permitido=true
+                for p in $PREFIJOS_DEV; do [[ "$ORIGEN" == "$p"/?* ]] && permitido=true; done ;;
+            esac
+          fi
+          if [ "$permitido" = "true" ]; then
+            echo "Origen permitido: $ORIGEN -> $DESTINO"
+          else
+            echo "::error::$DESTINO no acepta PRs desde '$ORIGEN'. Ver .claude/rules/git-workflow.md"
+            exit 1
+          fi
