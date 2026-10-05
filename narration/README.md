@@ -108,6 +108,42 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 | `--archivo` | uno o varios `.txt` o `.json` | uno de los dos | Guiones a narrar. Con varios, el modelo se carga una sola vez. Formato JSON en [docs/formato-guion.md](docs/formato-guion.md#guiones-en-json) |
 | `--salida` | ruta | `out/narration/` | Con un solo guion, el `.wav`; con varios, la carpeta. Nombre por defecto: `<id>-<modelo>.wav` (JSON) o `<modelo>-<estilo>.wav` |
 | `--lote` | entero | automático | Frases por pasada en Qwen: más rápido, pero usa más VRAM |
+| `--evaluar` | — | apagado | Al terminar, transcribe cada salida con whisper y la compara párrafo por párrafo con el texto pedido (ver abajo) |
+| `--reintentos` | entero | 0 | Con `--evaluar`: rondas en las que se regeneran **solo** los párrafos con observaciones y se vuelven a evaluar |
+
+### Evaluar las salidas (`--evaluar`)
+
+```bash
+python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar
+```
+
+Después de generar todo, libera el modelo de la VRAM y transcribe con whisper `medium` **cada párrafo por separado**, todos en una sola llamada. Con el audio completo, whisper a veces se saltaba media oración o pasaba palabras al párrafo vecino. Por cada guion imprime `OK` o `REVISAR` con lo que encontró:
+
+```
+REVISAR out/narration/organic/011-nunez-sin-tilde-qwen-0.6b.wav
+          párrafo 2: cambio "cuenta" -> "cuento"
+          párrafo 4: silencio de 1.6 s dentro del párrafo
+OK      out/narration/organic/017-tu-especialidad-hace-sus-cuentas-qwen-0.6b.wav
+          aviso, párrafo 5: ritmo 2.0 palabras/s (mediana 3.3)
+```
+
+| Revisa | Cómo | ¿Es error? |
+|---|---|---|
+| Palabras que faltan, sobran o cambian | Compara cada párrafo con lo que oyó whisper. Antes normaliza tildes, signos, números y siglas ("pe de efe" = "PDF" = "P D F") | Sí |
+| Silencios que nadie pidió | Silencios de más de 1.3 s **dentro** de un párrafo. Las pausas entre párrafos no se revisan, porque las inserta el script | Sí |
+| Ritmo | Párrafos con menos de 0.7× o más de 1.4× palabras por segundo que la mediana del guion, sin contar las pausas | No: es un **aviso**, porque una lista o una pregunta se leen distinto a propósito |
+
+Whisper no oye entonación ni acento, y a veces se equivoca él mismo. Las palabras que se escriben distinto pero suenan igual ("guasap" y "WhatsApp", "estok" y "stock", "de pendiente" y "dependiente") y los números ("siete" y "7") no cuentan como error. Un `REVISAR` significa "escucha este párrafo", no "está mal".
+
+**Reintentos.** El modelo muestrea al azar: la misma frase a veces sale bien y a veces no (por ejemplo, "parto" → "parte" en un 40–60 % de las generaciones). Con `--reintentos N`, después de evaluar se regeneran solo los párrafos con observaciones, se rearma el audio (el resto no se toca) y se vuelve a evaluar, hasta N rondas o hasta que no quede nada. El informe final es el de la última ronda:
+
+```bash
+python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar --reintentos 3
+```
+
+En los reintentos solo se vuelven a transcribir los párrafos regenerados. Con los 22 guiones de prueba y `--reintentos 4`, las rondas regeneraron 40 → 15 → 8 → 5 párrafos y terminaron con 18 de 22 guiones sin errores.
+
+Necesita el comando `whisper` en el PATH (`pip install openai-whisper`). Los párrafos y sus transcripciones quedan en `<carpeta de salida>/whisper/<guion>/<n>.wav` y `.json`.
 
 ### Cómo funciona
 
