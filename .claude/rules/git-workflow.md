@@ -49,7 +49,7 @@ git switch main && git pull && git switch -c fix/<nombre>
 gh pr create --base main --title "fix: ..." --body "..."
 ```
 
-**Sincronización automática main → dev**: cada push a `main` (el merge de un `fix/*` o de `dev`) dispara el workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml). Si `dev` está atrasada, el workflow abre el PR `main → dev` y lo deja en auto-merge, así que se mergea solo cuando pasa `origen-permitido`. **No abras ese PR a mano.** Si hay conflicto, el PR queda abierto: resuélvelo en una rama `fix/` desde `dev` o directamente en el PR. Usa el secret `SYNC_TOKEN` (token fine-grained con Contents y Pull requests en read/write): si vence, la sincronización falla con un error de autenticación y hay que renovar el token y el secret.
+**Sincronización automática main → dev**: cada push a `main` (el merge de un `fix/*` o de `dev`) dispara el workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml). Si `dev` está atrasada, el workflow abre el PR `main → dev` y lo deja en auto-merge, así que se mergea solo cuando pasa `origen-permitido`. **No abras ese PR a mano.** Si hay conflicto, el PR queda abierto, el workflow comenta en el PR los pasos para resolverlo y su run falla en rojo para avisar. Para resolverlo: crea `fix/resolver-sync-main-dev` desde `dev`, haz `git merge origin/main`, resuelve el conflicto y abre un PR a `dev`. Cuando ese PR entra, el PR automático se cierra solo (verificado con los PR #14 y #15). Usa el secret `SYNC_TOKEN` (token fine-grained con Contents y Pull requests en read/write): si vence, la sincronización falla con un error de autenticación y hay que renovar el token y el secret.
 
 ## Qué lo hace cumplir (en GitHub, no solo esta regla)
 
