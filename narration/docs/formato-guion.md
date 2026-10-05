@@ -12,6 +12,57 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 - **Las tildes son obligatorias**. Sin ellas, el modelo cambia la sílaba tónica.
 - Escribe **números, siglas y símbolos como se pronuncian**.
 - **Los respiros y el énfasis no se pueden pedir.** Salen de la grabación de referencia.
+- **Todas las reglas de la sección siguiente son obligatorias.**
+
+## Reglas obligatorias
+
+**Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. `tts.py` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion.
+
+**Marcas** ([Por qué no hay marcas](#por-qué-no-hay-marcas))
+
+1. Ninguna etiqueta ni marca: nada de `[…]` (salvo `[pausa N]`), `<…>`, `**`, `(pausa)` ni la notación de grabación (`/`, `//`, `↗`, `↘`, `→`, `[curiosa]`).
+2. Nada de mayúsculas para dar énfasis: no cambian nada. "DEMO" se escribe "demo".
+
+**Pausas** ([Pausas](#pausas))
+
+3. Toda oración termina en `.`, `?` o `!`.
+4. `,` para las pausas cortas: entre los elementos de una enumeración y antes de "y" o "pero" cuando unen dos ideas.
+5. `…` una o dos veces por guion, en la frase que más importa (*criterio*: con más, la voz suena dudosa).
+6. Nada de `;`: se cambia por `.`. El `:` solo antes de una enumeración ("tu historial completo: consultas, antecedentes…"). En los demás casos, `.`.
+
+**Pausas largas** ([Pausas largas](#pausas-largas))
+
+7. Una idea por párrafo: separados por una línea en blanco o, en JSON, un elemento de `texto` por idea.
+8. `[pausa 1]` después del gancho (la primera frase).
+9. `[pausa 0.8]` antes del cierre (la llamada a la acción).
+
+   Las dos van al final de la línea: `"¿Alguna vez buscaste la ficha de un paciente… y no apareció? [pausa 1]"`. Los valores 1 s y 0.8 s son un punto de partida: las pausas sí se midieron, pero no se comparó al oído qué duración funciona mejor.
+
+**Entonación** ([Entonación](#entonación))
+
+10. Toda pregunta lleva `¿…?` y toda exclamación `¡…!`, siempre con los dos signos. Sin el de apertura, el modelo no anticipa la entonación.
+11. Oraciones de 25 palabras como máximo (*criterio*). Una oración larga sin puntuación se lee con un ritmo plano.
+
+**Pronunciación** ([Pronunciación](#pronunciación))
+
+12. Tildes correctas en todas las palabras.
+13. Números en letras: "veinticuatro horas", no "24 horas".
+14. Siglas deletreadas: "pe de efe", "cu erre", "a, be, ce, de, e".
+15. Palabras en inglés escritas como se dicen: "guasap", "estok", "zum".
+16. Marcas y nombres escritos como suenan, con tilde en la sílaba tónica: "Clinikái", "nunes".
+
+### Ejemplo que cumple todas las reglas
+
+```json
+"texto": [
+  "¿Alguna vez buscaste la ficha de un paciente… y no apareció? [pausa 1]",
+  "Una carpeta extraviada es una historia clínica que se pierde, con todo lo que tenía adentro.",
+  "En Clinikái escribes su cédula o su nombre y, en segundos, tienes su historial completo: consultas, antecedentes, alergias y documentos.",
+  "Todo queda ordenado, en la nube y respaldado cada día.",
+  "Desde el navegador, sin instalar nada, para el consultorio independiente y para la policlínica. [pausa 0.8]",
+  "Comenta demo y te enviamos un video corto de cómo funciona."
+]
+```
 
 ## Por qué no hay marcas
 
@@ -54,7 +105,7 @@ Pausa medida después de una palabra en mitad de la oración. Es la mediana de 4
 
 **Regla práctica:** `,` para una pausa corta, `…` para una media y `.` para cerrar una idea. **Evita el `;`**: cámbialo por un punto ("Tú revisas y decides. El sistema solo calcula."). Los `:` antes de una enumeración pueden quedarse.
 
-### Pausas largas (las inserta `tts.py`)
+### Pausas largas
 
 El modelo no puede hacer pausas largas de forma confiable, así que `tts.py` corta el texto en esos puntos y agrega silencio real:
 
@@ -101,14 +152,18 @@ No se pueden indicar en el texto. El modelo copia la manera de hablar de la refe
 ## Ejemplo
 
 ```text
-Hola, bienvenidos al canal. Hoy te muestro cómo editar un video en menos de un minuto.
+¿Te toma horas editar un video? [pausa 1]
+
+Hoy te muestro cómo hacerlo en menos de un minuto.
 
 Primero, abre el editor… y arrastra tu clip a la línea de tiempo.
-[pausa 1.5]
-¿Quieres el truco final? Quédate hasta el final, porque vale la pena.
+
+Después, elige la resolución y exporta el video. [pausa 0.8]
+
+Comenta guía y te la enviamos completa.
 ```
 
-Hay 0.6 s de silencio después de "minuto." (línea en blanco) y 1.5 s después de "tiempo." (marca).
+Hay 1 s de silencio después del gancho, 0.6 s entre los párrafos (líneas en blanco) y 0.8 s antes del cierre.
 
 ## Guiones en JSON
 
@@ -120,8 +175,8 @@ Para generar varios guiones de una vez, cada uno puede ir en un `.json`:
   "titulo": "Núñez sin tilde",
   "estilo": "amistosa",
   "texto": [
-    "Escribe nunes, sin tilde ni eñe, y aparece Núñez.",
-    "En Clinikái buscas por nombre o por cédula, y encuentras al paciente.",
+    "Escribe nunes, sin tilde ni eñe… y aparece Núñez. [pausa 1]",
+    "En Clinikái buscas por nombre o por cédula, y encuentras al paciente. [pausa 0.8]",
     "Comenta demo y te enviamos un video corto de cómo funciona."
   ]
 }

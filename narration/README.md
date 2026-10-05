@@ -117,7 +117,7 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 
 ### Formato del guion
 
-Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pause]` o `<break>` se leen en voz alta** (el script avisa si encuentra alguna). Las pausas cortas se controlan con la puntuación. Para las largas, usa una línea en blanco (0.6 s) o `[pausa 1.5]`. Las reglas y las pausas medidas por signo están en **[docs/formato-guion.md](docs/formato-guion.md)**.
+Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pause]` o `<break>` se leen en voz alta** (el script avisa si encuentra alguna). Las pausas cortas se controlan con la puntuación. Para las largas, usa una línea en blanco (0.6 s) o `[pausa 1.5]`. Las **reglas obligatorias** de todo guion y las pausas medidas por signo están en **[docs/formato-guion.md](docs/formato-guion.md#reglas-obligatorias)**.
 
 ---
 
