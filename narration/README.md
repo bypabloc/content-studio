@@ -84,14 +84,17 @@ python narration/tts.py --modelo qwen-0.6b --ref narration/voz/prueba/experta.wa
 python narration/tts.py --modelo chatterbox --ref narration/voz/clara.wav \
   --estilo clara --archivo guion.txt
 
+# Varios guiones JSON en una corrida (estilo e id salen de cada JSON)
+python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic
+
 # Forzar el tamaño de lote (por defecto se calcula según la VRAM libre)
 python narration/tts.py --modelo qwen-0.6b --lote 4 --archivo guion.txt
 ```
 
-Al terminar imprime la duración, el lote usado, la velocidad y el pico de VRAM:
+Por cada guion imprime la duración, el lote usado, la velocidad y el pico de VRAM. El tiempo del primer guion incluye la carga del modelo:
 
 ```
-out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | carga+generación 44.6 s, 1.07x tiempo real | pico VRAM 5.70 GiB
+out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | generación 44.6 s, 1.07x tiempo real | pico VRAM 5.70 GiB
 ```
 
 ### Flags
@@ -100,20 +103,21 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | carga
 |---|---|---|---|
 | `--modelo` | `qwen-1.7b`, `qwen-0.6b`, `chatterbox` | obligatorio | Modelo a usar |
 | `--ref` | `.wav` o carpeta | `narration/voz` | Con una carpeta usa `<estilo>.wav`. La transcripción va en el `.txt` homónimo |
-| `--estilo` | `amistosa`, `suave`, `experta`, `clara`, `estable` | `experta` | Elige la referencia y los parámetros |
-| `--texto` / `--archivo` | texto / ruta | uno de los dos | Lo que se narra |
-| `--salida` | ruta `.wav` | `out/narration/<modelo>-<estilo>.wav` | Archivo de salida |
+| `--estilo` | `amistosa`, `suave`, `experta`, `clara`, `estable` | el `estilo` del JSON, o `experta` | Elige la referencia y los parámetros |
+| `--texto` | texto | uno de los dos | Lo que se narra |
+| `--archivo` | uno o varios `.txt` o `.json` | uno de los dos | Guiones a narrar. Con varios, el modelo se carga una sola vez. Formato JSON en [docs/formato-guion.md](docs/formato-guion.md#guiones-en-json) |
+| `--salida` | ruta | `out/narration/` | Con un solo guion, el `.wav`; con varios, la carpeta. Nombre por defecto: `<id>-<modelo>.wav` (JSON) o `<modelo>-<estilo>.wav` |
 | `--lote` | entero | automático | Frases por pasada en Qwen: más rápido, pero usa más VRAM |
 
 ### Cómo funciona
 
-1. El texto se divide en bloques de hasta ~300 letras, cortando en el final de cada oración.
+1. El texto se corta en cada línea en blanco y en cada marca `[pausa N]`. Cada tramo se divide en bloques de hasta ~300 letras, cortando en el final de cada oración.
 2. **Qwen** genera varios bloques a la vez (el *lote*). El lote automático mide la VRAM libre y calcula cuántos entran (~1.15 GiB el primero y ~1.3 GiB cada uno extra, con un máximo de 4). **Chatterbox** no admite lotes y genera de a uno.
-3. Une los bloques con 0.25 s de silencio y aplica la velocidad del estilo con `ffmpeg atempo`, que no altera el tono.
+3. Recorta el silencio que el modelo deja en los bordes de cada bloque (~0.5 s por lado) y une los bloques con silencio: 0.25 s entre bloques, 0.6 s en una línea en blanco y N s en `[pausa N]`. Después aplica la velocidad del estilo con `ffmpeg atempo`, que no altera el tono.
 
 ### Formato del guion
 
-Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pause]` o `<break>` se leen en voz alta**: las pausas solo se controlan con la puntuación. Las reglas y las pausas medidas por signo están en **[docs/formato-guion.md](docs/formato-guion.md)**.
+Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pause]` o `<break>` se leen en voz alta** (el script avisa si encuentra alguna). Las pausas cortas se controlan con la puntuación. Para las largas, usa una línea en blanco (0.6 s) o `[pausa 1.5]`. Las reglas y las pausas medidas por signo están en **[docs/formato-guion.md](docs/formato-guion.md)**.
 
 ---
 
