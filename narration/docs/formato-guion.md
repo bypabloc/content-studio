@@ -51,18 +51,41 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 15. Palabras en inglés escritas como se dicen: "guasap", "estok", "zum".
 16. Marcas y nombres escritos como suenan, con tilde en la sílaba tónica: "Clinikái", "nunes".
 
+**Palabras que el modelo pierde** ([Palabras que el modelo pierde](#palabras-que-el-modelo-pierde))
+
+17. Un verbo terminado en "-s" no va seguido de una palabra que empieza con "s": las dos "s" se funden y se oye otra persona ("escribes su" → "escribe su"). Cambia el artículo o el orden: "escribes **la** cédula", "**solo activas**", "**siempre lo** encuentras".
+18. Una palabra clave corta, como "demo", no va sola ni al final de un párrafo: "**Comenta la palabra demo, y te enviamos…**", no "¡Comenta demo!".
+19. Evita "registras": el modelo la deforma casi siempre ("registra", "regista", "digitas"). Usa una construcción impersonal: "queda registrado".
+20. Si un verbo en segunda persona sigue fallando ("eliges el diagnóstico", "recepción ve cuáles"), pasa la oración a impersonal: "el diagnóstico se elige con un clic" (de 1/5 a 4/5), "en recepción se ve cuáles están listas" (de 2/5 a 4/5).
+21. Si un párrafo tiene dos oraciones, separa las oraciones con `[pausa 0.6]`: entre oraciones del mismo bloque, el modelo a veces deja silencios de 1.4 s. La marca va dentro de la misma línea, así que no corre la numeración de `visuales`.
+
 ### Ejemplo que cumple todas las reglas
 
 ```json
 "texto": [
   "¿Alguna vez buscaste la ficha de un paciente… y no apareció? [pausa 1]",
   "Una carpeta extraviada es una historia clínica que se pierde, con todo lo que tenía adentro.",
-  "En Clinikái escribes su cédula o su nombre y, en segundos, tienes su historial completo: consultas, antecedentes, alergias y documentos.",
+  "En Clinikái escribes la cédula o el nombre y, en segundos, tienes el historial completo: consultas, antecedentes, alergias y documentos.",
   "Todo queda ordenado, en la nube y respaldado cada día.",
   "Desde el navegador, sin instalar nada, para el consultorio independiente y para la policlínica. [pausa 0.8]",
-  "Comenta demo y te enviamos un video corto de cómo funciona."
+  "Comenta la palabra demo, y te enviamos un video corto de cómo funciona."
 ]
 ```
+
+## Palabras que el modelo pierde
+
+Medido con `--evaluar` y experimentos de 3 a 5 generaciones por variante (las variantes se transcribieron con whisper `medium`):
+
+| Escritura | Bien | Escritura que la evita | Bien |
+|---|---|---|---|
+| "escribes su cédula… tienes su historial" | 1/5 | "escribes la cédula… tienes el historial" | 3/5 |
+| "Activas solo las que atiendes" | 2/5 | "Solo activas las que atiendes" | 5/5 |
+| "Y lo encuentras siempre" | 0/5 | "Y siempre lo encuentras" | 4/5 |
+| "Lo abres, inicias sesión" | 1/5 | "Lo abres, entras" | — |
+| "¡Comenta demo!" (párrafo propio) | 3/5 | "Comenta la palabra demo, y te enviamos…" | 20/20 |
+| "Registras los signos vitales" | 0/5 | "Anotas los signos vitales" | 2/5 |
+
+**Lo que no se arregla escribiendo.** La última palabra de un párrafo a veces cambia de vocal ("cuenta" → "cuento", "parto" → "parte", en el 40–60 % de las generaciones), y "gestacional" se oye a veces "estacional". Probé con temperaturas 0.5, 0.6 y 0.8 y no mejoró de forma consistente. Es azar del muestreo, así que la solución es regenerar ese párrafo: `--evaluar --reintentos 3` lo hace solo (ver el README).
 
 ## Por qué no hay marcas
 

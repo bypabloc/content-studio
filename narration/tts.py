@@ -17,12 +17,16 @@ Un .json trae "texto" (lista de párrafos), "estilo" e "id" (nombre de la salida
 """
 
 import argparse
+import difflib
 import json
 import os
 import re
+import shutil
+import statistics
 import subprocess
 import sys
 import time
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
@@ -57,6 +61,19 @@ PAUSA_PARRAFO = 0.6
 MARCA_PAUSA = re.compile(r'\[pausa\s+(\d+(?:[.,]\d+)?)\s*s?\]|\n[ \t]*\n', re.IGNORECASE)
 # Qwen Base lee estas marcas en voz alta ("[breath]" sonó "Braids"). Ver docs/formato-guion.md.
 ETIQUETA = re.compile(r'\[[^\]]*\]|<[^>]*>|\*\*|\(pausa\)', re.IGNORECASE)
+
+# --evaluar: whisper transcribe la salida y se compara con el texto pedido.
+WHISPER_MODELO = 'medium'  # small confundía palabras ("horarios" -> "cerrarios")
+SILENCIO_MAX = 1.3  # criterio: un silencio más largo dentro de un párrafo es una pausa que nadie pidió
+RITMO_TOLERANCIA = (0.7, 1.4)  # criterio: palabras/s del párrafo frente a la mediana del guion
+# Nombre de cada letra (sin tildes) -> letra, para que "pe de efe" y "PDF" se comparen igual.
+LETRA = {
+    'a': 'a', 'be': 'b', 'ce': 'c', 'de': 'd', 'e': 'e', 'efe': 'f', 'ge': 'g', 'hache': 'h', 'i': 'i',
+    'jota': 'j', 'ka': 'k', 'ele': 'l', 'eme': 'm', 'ene': 'n', 'o': 'o', 'pe': 'p', 'cu': 'q', 'erre': 'r',
+    'ese': 's', 'te': 't', 'u': 'u', 've': 'v', 'uve': 'v', 'equis': 'x', 'ye': 'y', 'zeta': 'z',
+}
+# Nombres de letra que no son palabras comunes: si una racha incluye uno, es una sigla.
+LETRA_CLARA = set(LETRA) - {'a', 'de', 'e', 'i', 'o', 'u', 'ye', 'te', 've', 'ese'}
 
 
 def usar_venv(venv: str) -> None:
@@ -156,8 +173,9 @@ def etiquetas(texto: str) -> list[str]:
 
 
 def recortar(audio, sr: int, umbral: float = 0.01, margen: float = 0.08):
-    """Quita el silencio que el modelo deja en los bordes de cada bloque (~0.5 s por lado),
-    para que las pausas insertadas duren lo indicado. Deja `margen` s para no cortar consonantes.
+    """Quita el silencio y el ruido bajo que el modelo deja en los bordes de cada bloque (de
+    0.5 s a más de 2 s), para que las pausas insertadas duren lo indicado. Deja `margen` s para
+    no cortar consonantes.
 
     >>> import numpy as np
     >>> x = np.r_[np.zeros(1000), np.full(500, 0.5), np.zeros(1000)].astype(np.float32)
@@ -165,14 +183,45 @@ def recortar(audio, sr: int, umbral: float = 0.01, margen: float = 0.08):
     660
     >>> len(recortar(np.zeros(100, dtype=np.float32), 1000))
     0
+    >>> cola = np.r_[np.full(500, 0.5), np.full(2000, 0.004), [0.012], np.zeros(10)].astype(np.float32)
+    >>> len(recortar(cola, 1000))  # ruido de cola con un pico suelto: no es voz
+    580
     """
     import numpy as np
 
-    voz = np.flatnonzero(np.abs(audio) > umbral)
+    # RMS por ventanas de 20 ms: un pico suelto en el ruido de cola no cuenta como voz.
+    n = max(1, int(sr * 0.02))
+    k = len(audio) // n
+    rms = np.sqrt((audio[:k * n].reshape(k, n).astype(np.float64) ** 2).mean(axis=1))
+    voz = np.flatnonzero(rms > umbral)
     if not voz.size:
         return audio[:0]
     m = int(sr * margen)
-    return audio[max(0, voz[0] - m):voz[-1] + 1 + m]
+    return audio[max(0, voz[0] * n - m):(voz[-1] + 1) * n + m]
+
+
+def tramos_silencio(audio, sr: int, minimo: float, umbral: float = 0.01) -> list[float]:
+    """Duración de cada silencio de al menos `minimo` s dentro del audio (RMS por ventanas de 20 ms).
+
+    >>> import numpy as np
+    >>> x = np.r_[np.full(500, 0.5), np.zeros(1500), np.full(300, 0.5), np.zeros(200), np.full(100, 0.5)]
+    >>> tramos_silencio(x.astype(np.float32), 1000, 1.0), tramos_silencio(x.astype(np.float32), 1000, 0.2)
+    ([1.5], [1.5, 0.2])
+    """
+    import numpy as np
+
+    n = max(1, int(sr * 0.02))
+    k = len(audio) // n
+    quieto = np.sqrt((audio[:k * n].reshape(k, n).astype(np.float64) ** 2).mean(axis=1)) <= umbral
+    tramos, corrida = [], 0
+    for q in [*quieto, False]:
+        if q:
+            corrida += 1
+        else:
+            if corrida * n / sr >= minimo:
+                tramos.append(round(corrida * n / sr, 2))
+            corrida = 0
+    return tramos
 
 
 def leer_json(d: dict) -> tuple[str, str | None]:
@@ -185,6 +234,124 @@ def leer_json(d: dict) -> tuple[str, str | None]:
     """
     t = d['texto']
     return '\n\n'.join(t) if isinstance(t, list) else t, d.get('estilo')
+
+
+def normalizar(texto: str) -> list[str]:
+    """Palabras comparables con lo que transcribe whisper: sin tildes, signos ni [pausa N],
+    y con las siglas juntas tanto deletreadas ("pe de efe") como en letras ("P D F").
+
+    >>> normalizar('Sale en pe de efe, con su código cu erre. [pausa 1]')
+    ['sale', 'en', 'pdf', 'con', 'su', 'codigo', 'qr']
+    >>> normalizar('Criterios A, B, C, D, E. ¿Vídeo?')
+    ['criterios', 'abcde', 'video']
+    >>> normalizar('Te enviamos un video y ese día ve la o eme ese.')
+    ['te', 'enviamos', 'un', 'video', 'y', 'ese', 'dia', 've', 'la', 'oms']
+    >>> normalizar('Son 32 piezas, 7 especialidades y 100 recetas.')
+    ['son', 'treinta', 'y', 'dos', 'piezas', 'siete', 'especialidades', 'y', 'cien', 'recetas']
+    """
+    t = unicodedata.normalize('NFD', MARCA_PAUSA.sub(' ', texto).lower())
+    palabras = re.findall(r'\w+', ''.join(c for c in t if unicodedata.category(c) != 'Mn'))
+    out: list[str] = []
+    racha: list[str] = []
+
+    def volcar() -> None:
+        sueltas = all(len(w) == 1 for w in racha) and any(w not in 'aeiouy' for w in racha)
+        if len(racha) >= 2 and (sueltas or LETRA_CLARA.intersection(racha)):
+            out.append(''.join(LETRA.get(w, w) for w in racha))
+        else:
+            out.extend(racha)
+        racha.clear()
+
+    for w in palabras:
+        if w.isdigit():
+            volcar()
+            out.extend(en_palabras(int(w)).split())
+        elif w in LETRA or len(w) == 1:
+            racha.append(w)
+        else:
+            volcar()
+            out.append(w)
+    volcar()
+    return out
+
+
+UNIDADES = [
+    'cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce',
+    'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiuno',
+    'veintidos', 'veintitres', 'veinticuatro', 'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho',
+    'veintinueve',
+]
+DECENAS = {3: 'treinta', 4: 'cuarenta', 5: 'cincuenta', 6: 'sesenta', 7: 'setenta', 8: 'ochenta', 9: 'noventa'}
+
+
+def en_palabras(n: int) -> str:
+    """Número de 0 a 100 en palabras, sin tildes (whisper escribe "24" aunque se diga "veinticuatro").
+
+    >>> en_palabras(7), en_palabras(24), en_palabras(32), en_palabras(40), en_palabras(2026)
+    ('siete', 'veinticuatro', 'treinta y dos', 'cuarenta', '2026')
+    """
+    if n < 30:
+        return UNIDADES[n]
+    if n < 100:
+        d, u = divmod(n, 10)
+        return DECENAS[d] + (f' y {UNIDADES[u]}' if u else '')
+    return 'cien' if n == 100 else str(n)
+
+
+def fonetica(palabra: str) -> str:
+    """Clave de cómo suena una palabra en español latinoamericano (seseo, yeísmo, b = v, h muda).
+
+    >>> [fonetica(w) for w in ('click', 'stock', 'whatsapp', 'zoom', 'clinicae', 'clinicay', 'corriges')]
+    ['clic', 'estoc', 'guasap', 'sum', 'clinicai', 'clinicai', 'corrijes']
+    >>> fonetica('cuenta') == fonetica('cuento')
+    False
+    """
+    w = palabra
+    for a, b in (('wh', 'gu'), ('w', 'gu'), ('ck', 'c'), ('k', 'c'), ('q', 'c'), ('z', 's'), ('ce', 'se'),
+                 ('ci', 'si'), ('ge', 'je'), ('gi', 'ji'), ('ll', 'y'), ('v', 'b'), ('h', ''), ('oo', 'u'),
+                 ('ts', 's')):
+        w = w.replace(a, b)
+    w = re.sub(r'([^r])\1', r'\1', w)  # rr suena distinto de r
+    w = re.sub(r'^s(?=[ptc])', 'es', w)
+    return re.sub(r'(ae|y)$', lambda m: 'ai' if m[1] == 'ae' else 'i', w)
+
+
+def comparar(esperado: list[str], oido: list[str]) -> list[tuple[str, str, str]]:
+    """Diferencias (tipo, esperado, oído) entre dos listas de palabras.
+
+    >>> comparar(normalizar('Cada segundo cuenta.'), normalizar('Cada segundo cuento.'))
+    [('cambio', 'cuenta', 'cuento')]
+    >>> comparar(['hola', 'mundo'], ['hola', 'mundo', 'braids'])
+    [('sobra', '', 'braids')]
+    >>> comparar(['hola', 'mundo'], ['mundo'])
+    [('falta', 'hola', '')]
+
+    Lo que suena igual no es un error: whisper escribe a su manera las palabras adaptadas.
+
+    >>> comparar(['clic', 'en', 'estok', 'por', 'guasap', 'sin', 'zum'], ['click', 'en', 'stock', 'por', 'whatsapp', 'sin', 'zoom'])
+    []
+    >>> comparar(['de', 'pendiente', 'en', 'clinikai'], ['dependiente', 'en', 'clinica', 'y'])
+    []
+    """
+    tipos = {'replace': 'cambio', 'delete': 'falta', 'insert': 'sobra'}
+    return [
+        (tipos[op], ' '.join(esperado[a1:a2]), ' '.join(oido[b1:b2]))
+        for op, a1, a2, b1, b2 in difflib.SequenceMatcher(None, esperado, oido, autojunk=False).get_opcodes()
+        if op != 'equal' and fonetica(''.join(esperado[a1:a2])) != fonetica(''.join(oido[b1:b2]))
+    ]
+
+
+def ritmo_raro(velocidades: list[float]) -> list[int]:
+    """Índices de los párrafos cuyo ritmo se aleja de la mediana más que RITMO_TOLERANCIA.
+
+    >>> ritmo_raro([3.0, 3.1, 2.9, 1.5, 3.0, 4.5])
+    [3, 5]
+    >>> ritmo_raro([2.0])
+    []
+    """
+    med = statistics.median(velocidades)
+    lo, hi = RITMO_TOLERANCIA
+    return [i for i, v in enumerate(velocidades) if not lo * med <= v <= hi * med]
 
 
 @lru_cache
@@ -244,7 +411,17 @@ def main() -> None:
         help='con un solo guion, el .wav; con varios, la carpeta. Por defecto out/narration/',
     )
     ap.add_argument('--lote', type=int, help='frases por pasada en Qwen; por defecto según la VRAM libre')
+    ap.add_argument(
+        '--evaluar', action='store_true',
+        help='al final transcribe cada salida con whisper y la compara, párrafo por párrafo, con el texto pedido',
+    )
+    ap.add_argument(
+        '--reintentos', type=int, default=0,
+        help='con --evaluar: rondas en las que se regeneran solo los párrafos con observaciones',
+    )
     a = ap.parse_args()
+    if a.reintentos and not a.evaluar:
+        ap.error('--reintentos necesita --evaluar')
 
     venv, repo, pesos = MODELOS[a.modelo]
     usar_venv(venv)
@@ -262,6 +439,7 @@ def main() -> None:
         else:
             guiones.append((None, f.read_text(encoding='utf-8'), None))
 
+    resultados = []
     for nombre, texto, estilo_json in guiones:
         estilo = a.estilo or estilo_json or 'experta'
         if estilo not in ESTILOS:
@@ -271,12 +449,41 @@ def main() -> None:
         else:
             wav = f'{nombre}-{a.modelo}.wav' if nombre else f'{a.modelo}-{estilo}.wav'
             salida = (a.salida or ROOT / 'out' / 'narration') / wav
-        narrar(a.modelo, repo, texto, estilo, a.ref, salida, lote)
+        resultados.append(narrar(a.modelo, repo, texto, estilo, a.ref, salida, lote))
+
+    if not a.evaluar:
+        return
+    if not shutil.which('whisper'):
+        sys.exit('Falta el comando whisper (pip install openai-whisper); no se puede evaluar.')
+    informe: dict[int, tuple[list[str], list[int]]] = {}  # guion -> (observaciones, bloques con error)
+    pendientes = {k: list(range(len(g['segs']))) for k, g in enumerate(resultados)}  # guion -> bloques
+    for ronda in range(a.reintentos + 1):
+        cargar_qwen.cache_clear()  # libera la VRAM para whisper
+        cargar_chatterbox.cache_clear()
+        torch.cuda.empty_cache()
+        transcribir([w for k, idx in pendientes.items() for w in guardar_bloques(resultados[k], idx)])
+        for k in pendientes:
+            informe[k] = revisar(resultados[k])
+        pendientes = {k: informe[k][1] for k in pendientes if informe[k][1]}
+        if not pendientes or ronda == a.reintentos:
+            break
+        n = sum(map(len, pendientes.values()))
+        print(f'Reintento {ronda + 1}/{a.reintentos}: regenerando {n} párrafo(s) de {len(pendientes)} guion(es)...')
+        for k, idx in pendientes.items():
+            regenerar(a.modelo, repo, resultados[k], idx, lote)
+
+    for k, g in enumerate(resultados):
+        problemas, fallidos = informe[k]
+        print(f'{"REVISAR" if fallidos else "OK     "} {g["salida"]}')
+        for linea in problemas:
+            print(f'          {linea}')
+    revisar_n = sum(bool(f) for _, f in informe.values())
+    print(f'{len(resultados) - revisar_n}/{len(resultados)} sin errores (los avisos de ritmo no cuentan).')
 
 
-def narrar(modelo, repo, texto, estilo, ref, salida, lote) -> None:
-    import numpy as np
-    import soundfile as sf
+def narrar(modelo, repo, texto, estilo, ref, salida, lote) -> dict:
+    """Genera todos los bloques del texto y escribe el .wav. Devuelve lo necesario para
+    evaluar y regenerar bloques sueltos."""
     import torch
 
     p = ESTILOS[estilo]
@@ -290,33 +497,114 @@ def narrar(modelo, repo, texto, estilo, ref, salida, lote) -> None:
     if not segs:
         sys.exit('El texto está vacío.')
 
-    generar = generar_chatterbox if modelo == 'chatterbox' else generar_qwen
+    g = {
+        'salida': salida, 'segs': segs, 'p': p, 'wav_ref': wav_ref, 'texto_ref': texto_ref,
+        'audios': [], 'sr': 0, 'bloques': [],
+    }
     t0 = time.perf_counter()
-    audios, sr = generar(repo, [t for t, _ in segs], wav_ref, texto_ref, p, lote)
+    regenerar(modelo, repo, g, range(len(segs)), lote)
     total_s = time.perf_counter() - t0
-
-    audio = np.concatenate([
-        x for a_, (_, seg) in zip(audios, segs)
-        for x in (recortar(np.asarray(a_, dtype=np.float32), sr), np.zeros(int(sr * seg), dtype=np.float32))
-    ])
-
-    salida.parent.mkdir(parents=True, exist_ok=True)
-    if p['velocidad'] == 1.0:
-        sf.write(salida, audio, sr)
-    else:
-        crudo = salida.with_suffix('.crudo.wav')
-        sf.write(crudo, audio, sr)
-        subprocess.run(
-            ['ffmpeg', '-y', '-loglevel', 'error', '-i', crudo, '-filter:a', f'atempo={p["velocidad"]}', salida],
-            check=True,
-        )
-        crudo.unlink()
-    dur = len(audio) / sr / p['velocidad']
+    dur = g['bloques'][-1][2]
     print(
         f'{salida} ({dur:.1f} s, {modelo}, {estilo}, lote {lote}) | '
         f'generación {total_s:.1f} s, {dur / total_s:.2f}x tiempo real | '
-        f'pico VRAM {torch.cuda.max_memory_reserved() / 2**30:.2f} GiB'
+        f'pico VRAM {torch.cuda.max_memory_reserved() / 2**30:.2f} GiB',
+        flush=True,
     )
+    return g
+
+
+def regenerar(modelo, repo, g: dict, indices, lote) -> None:
+    """(Re)genera los bloques indicados del guion `g` y vuelve a escribir su .wav."""
+    import numpy as np
+
+    indices = list(indices)
+    generar = generar_chatterbox if modelo == 'chatterbox' else generar_qwen
+    audios, g['sr'] = generar(repo, [g['segs'][i][0] for i in indices], g['wav_ref'], g['texto_ref'], g['p'], lote)
+    if not g['audios']:
+        g['audios'] = [None] * len(g['segs'])
+    for i, a_ in zip(indices, audios):
+        g['audios'][i] = recortar(np.asarray(a_, dtype=np.float32), g['sr'])
+    escribir(g)
+
+
+def escribir(g: dict) -> None:
+    """Une los bloques con sus pausas, aplica la velocidad del estilo y guarda dónde empieza
+    y termina cada bloque en el audio final (g['bloques'])."""
+    import numpy as np
+    import soundfile as sf
+
+    sr, vel, salida = g['sr'], g['p']['velocidad'], g['salida']
+    partes, g['bloques'], t = [], [], 0
+    for voz, (texto, seg) in zip(g['audios'], g['segs']):
+        g['bloques'].append((texto, t / sr / vel, (t + len(voz)) / sr / vel))
+        t += len(voz) + int(sr * seg)
+        partes += [voz, np.zeros(int(sr * seg), dtype=np.float32)]
+    audio = np.concatenate(partes)
+
+    salida.parent.mkdir(parents=True, exist_ok=True)
+    if vel == 1.0:
+        sf.write(salida, audio, sr)
+        return
+    crudo = salida.with_suffix('.crudo.wav')
+    sf.write(crudo, audio, sr)
+    subprocess.run(
+        ['ffmpeg', '-y', '-loglevel', 'error', '-i', crudo, '-filter:a', f'atempo={vel}', salida],
+        check=True,
+    )
+    crudo.unlink()
+
+
+def guardar_bloques(g: dict, indices) -> list[Path]:
+    """Escribe cada bloque como un .wav propio para transcribirlo por separado: así whisper no
+    se saltea tramos del audio largo ni reparte palabras entre párrafos vecinos."""
+    import soundfile as sf
+
+    carpeta = g['salida'].parent / 'whisper' / g['salida'].stem
+    carpeta.mkdir(parents=True, exist_ok=True)
+    rutas = []
+    for i in indices:
+        rutas.append(carpeta / f'{i + 1:02d}.wav')
+        sf.write(rutas[-1], g['audios'][i], g['sr'])
+    return rutas
+
+
+def transcribir(wavs: list[Path]) -> None:
+    """Whisper en una sola pasada (el modelo se carga una vez); deja <wav>.json junto a cada audio."""
+    carpetas: dict[Path, list[Path]] = {}
+    for w in wavs:
+        carpetas.setdefault(w.parent, []).append(w)
+    print(f'Evaluando {len(wavs)} párrafo(s) con whisper {WHISPER_MODELO}...', flush=True)
+    for carpeta, lista in carpetas.items():
+        subprocess.run(
+            ['whisper', *map(str, lista), '--model', WHISPER_MODELO, '--language', 'es',
+             '--output_format', 'json', '--output_dir', str(carpeta)],
+            check=True, capture_output=True,
+        )
+
+
+def revisar(g: dict) -> tuple[list[str], list[int]]:
+    """Compara, párrafo por párrafo, la transcripción de whisper con el texto pedido.
+
+    Whisper no oye entonación ni acento: marca palabras distintas, silencios largos dentro de
+    un párrafo y ritmos raros. Devuelve las observaciones y los índices de los bloques afectados.
+    """
+    carpeta = g['salida'].parent / 'whisper' / g['salida'].stem
+    problemas, fallidos, velocidades = [], set(), []
+    for i, ((texto, _), voz) in enumerate(zip(g['segs'], g['audios'])):
+        oido = json.loads((carpeta / f'{i + 1:02d}.json').read_text(encoding='utf-8'))['text']
+        for tipo, esperado, dicho in comparar(normalizar(texto), normalizar(oido)):
+            problemas.append(f'párrafo {i + 1}: {tipo} "{esperado}" -> "{dicho}"')
+            fallidos.add(i)
+        for d in tramos_silencio(voz, g['sr'], SILENCIO_MAX):
+            problemas.append(f'párrafo {i + 1}: silencio de {d:.1f} s dentro del párrafo')
+            fallidos.add(i)
+        con_voz = len(voz) / g['sr'] - sum(tramos_silencio(voz, g['sr'], 0.2))  # sin las pausas de … y .
+        velocidades.append(len(re.findall(r'\w+', texto)) / max(con_voz, 0.1))
+    med = statistics.median(velocidades)
+    for i in ritmo_raro(velocidades):  # aviso: una lista o una pregunta se leen distinto a propósito
+        problemas.append(f'aviso, párrafo {i + 1}: ritmo {velocidades[i]:.1f} palabras/s (mediana {med:.1f})')
+    return problemas, sorted(fallidos)
 
 
 if __name__ == '__main__':
