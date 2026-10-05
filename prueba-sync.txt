@@ -1,2 +1,2 @@
-Versión de dev (feature/prueba-conflicto)
+Versión 2 de dev (feature/prueba-conflicto-2)
 Versión de main (fix/prueba-conflicto)
