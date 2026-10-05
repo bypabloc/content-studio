@@ -4,7 +4,7 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herrami
 
 | Carpeta | Qué genera | Script | Documentación |
 | :--- | :--- | :--- | :--- |
-| `narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `narration/tts.py` | [narration/README.md](narration/README.md) · [guiones/](narration/guiones/README.md) |
+| `narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `narration/tts.py` | [narration/README.md](narration/README.md) · [formato del guion](narration/docs/formato-guion.md) · [grabar voces](narration/docs/guiones/README.md) |
 | `music/` | Música de fondo instrumental (ACE-Step 1.5, HeartMuLa) | `music/musica.py` | [music/README.md](music/README.md) · [INVESTIGACION.md](music/INVESTIGACION.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
