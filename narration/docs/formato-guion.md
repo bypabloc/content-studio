@@ -2,12 +2,13 @@
 
 Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar pausas, entonación y pronunciación.
 
-> **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `experta`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` no se midió.
+> **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `experta`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` solo se midieron las pausas largas (ver abajo); los signos y las etiquetas no.
 
 ## Resumen
 
-- Escribe **texto plano**. No hay etiquetas, SSML ni marcas especiales.
-- **La puntuación es el único control**, y es aproximado.
+- Escribe **texto plano**. El modelo no entiende etiquetas, SSML ni marcas especiales.
+- **La puntuación controla las pausas cortas**, de forma aproximada.
+- **Para pausas largas** usa una línea en blanco (0.6 s) o `[pausa N]` (N segundos). Las inserta `tts.py`, no el modelo.
 - **Las tildes son obligatorias**. Sin ellas, el modelo cambia la sílaba tónica.
 - Escribe **números, siglas y símbolos como se pronuncian**.
 - **Los respiros y el énfasis no se pueden pedir.** Salen de la grabación de referencia.
@@ -29,6 +30,8 @@ Las etiquetas que circulan en guías de internet (`[gasp]`, `[sighing]`, `[whisp
 | `**editor**` | "editor-editor" |
 | `EDITOR` en mayúsculas | Sin énfasis ni cambio |
 
+`tts.py` muestra un aviso antes de generar si el texto tiene `[…]`, `<…>`, `**` o `(pausa)`. La única excepción es `[pausa N]` (ver más abajo).
+
 Tampoco uses la notación de [guiones/](guiones/README.md) (`/`, `//`, `↗`, `[sonrisa]`). Sirve solo para grabar las referencias.
 
 ## Pausas
@@ -46,10 +49,26 @@ Pausa medida después de una palabra en mitad de la oración. Es la mediana de 4
 | varios espacios | ~0.1 s | Sin efecto útil |
 
 - El **punto** separa bien oraciones normales (~0.5–1 s), pero después de una oración muy corta ("Abre el editor.") la pausa fue inconsistente.
-- **Los saltos de línea y las líneas en blanco no sirven**: `tts.py` junta todo el texto en una sola línea antes de enviarlo.
+- **Un salto de línea simple no hace nada**: se une con la línea siguiente.
 - **Entre bloques** (cada ~300 caracteres) `tts.py` agrega 0.25 s fijos de silencio.
 
-**Regla práctica:** `,` para una pausa corta, `…` para una media y `.` para cerrar una idea. Hoy no hay forma confiable de pedir una pausa larga ni de fijar su duración exacta.
+**Regla práctica:** `,` para una pausa corta, `…` para una media y `.` para cerrar una idea. **Evita el `;`**: cámbialo por un punto ("Tú revisas y decides. El sistema solo calcula."). Los `:` antes de una enumeración pueden quedarse.
+
+### Pausas largas (las inserta `tts.py`)
+
+El modelo no puede hacer pausas largas de forma confiable, así que `tts.py` corta el texto en esos puntos y agrega silencio real:
+
+| Escribe | Silencio insertado | Medido con Qwen | Medido con Chatterbox |
+|---|---|---|---|
+| Una línea en blanco entre párrafos | 0.6 s | 0.90 s | 0.85 s |
+| `[pausa N]` (también `[pausa 1,5]` o `[pausa 2s]`) | N s | 2.28 s con N = 2 | 1.87 s con N = 1.5 |
+
+La diferencia, unos 0.3 s, es la caída natural de la voz más un margen de 0.08 s que se deja a cada lado del bloque para no cortar consonantes. El modelo deja además unos 0.5 s de silencio en cada borde de bloque; `tts.py` los recorta, porque si no las pausas se alargaban más de 1 s.
+
+- Si entre dos párrafos hay una `[pausa N]`, manda la marca y la línea en blanco no suma. Varias marcas seguidas se suman.
+- Una `[pausa N]` al final del texto deja ese silencio al final del audio. Al principio del texto no tiene efecto.
+- El silencio se acelera junto con el audio en los estilos con velocidad distinta de 1 (`amistosa` y `estable`, ×1.05; `clara`, ×0.97).
+- Cada corte termina un bloque. Antes de una pausa, cierra la idea con `.`, `?` o `!` para que la entonación baje bien.
 
 ## Entonación
 
@@ -60,7 +79,20 @@ Pausa medida después de una palabra en mitad de la oración. Es la mediana de 4
 
 - **Tildes:** sin tilde, "Hoy termino el guion" se leyó "Hoy terminó el guío". El modelo se guía por la tilde para decidir la sílaba tónica.
 - **Números:** escríbelos en letras ("quince", "dos mil veintiséis", "cincuenta por ciento"). Con dígitos no se pudo confirmar que la lectura sea correcta en español.
-- **Siglas y palabras en inglés:** escríbelas como suenan ("u ere ele", "yutuber") si el modelo las pronuncia mal. Mantén la misma grafía en todo el guion.
+- **Siglas:** deletréalas como se pronuncian. Tal cual, el modelo las lee como le parece. "criterios ABCDE" se oyó "criterios A, B, C, D" (sin la E), y deletreada salió completa.
+
+  | En pantalla | En el guion |
+  |---|---|
+  | PDF | pe de efe |
+  | QR | cu erre |
+  | IMC | i eme ce |
+  | OMS | o eme ese |
+  | ABCDE | a, be, ce, de, e |
+
+- **Palabras en inglés:** escríbelas como se dicen en español: "WhatsApp" → "guasap", "stock" → "estok", "zoom" → "zum".
+- **Marcas y nombres inventados:** escríbelos como suenan, con tilde en la sílaba tónica. "Klinikae" se oyó "ClaniKey"; escrito "Clinikái" sale bien. Lo mismo con palabras escritas a propósito de forma rara: "Escribe nunez" se oyó "Escribe en un es", y "nunes" salió bien.
+- Esa grafía es **solo para la narración**. En pantalla y en las publicaciones va la escritura real.
+- Una palabra en mayúsculas (DEMO) no cambia nada: escríbela en minúscula.
 
 ## Respiros y énfasis
 
@@ -70,9 +102,46 @@ No se pueden indicar en el texto. El modelo copia la manera de hablar de la refe
 
 ```text
 Hola, bienvenidos al canal. Hoy te muestro cómo editar un video en menos de un minuto.
+
 Primero, abre el editor… y arrastra tu clip a la línea de tiempo.
+[pausa 1.5]
 ¿Quieres el truco final? Quédate hasta el final, porque vale la pena.
 ```
+
+Hay 0.6 s de silencio después de "minuto." (línea en blanco) y 1.5 s después de "tiempo." (marca).
+
+## Guiones en JSON
+
+Para generar varios guiones de una vez, cada uno puede ir en un `.json`:
+
+```json
+{
+  "id": "011-nunez-sin-tilde",
+  "titulo": "Núñez sin tilde",
+  "estilo": "amistosa",
+  "texto": [
+    "Escribe nunes, sin tilde ni eñe, y aparece Núñez.",
+    "En Clinikái buscas por nombre o por cédula, y encuentras al paciente.",
+    "Comenta demo y te enviamos un video corto de cómo funciona."
+  ]
+}
+```
+
+| Campo | Uso |
+|---|---|
+| `texto` | Lista de párrafos, con las mismas reglas de este documento. Entre párrafos hay una pausa como la de una línea en blanco (0.6 s). También acepta un solo string |
+| `estilo` | `amistosa`, `suave`, `experta`, `clara` o `estable`. Elige la grabación de referencia de todo el guion. `--estilo` en la línea de comandos lo reemplaza |
+| `id` | Nombre del archivo de salida: `<id>-<modelo>.wav`. Si falta, se usa el nombre del `.json` |
+| otros (`titulo`, `idioma`…) | `tts.py` los ignora |
+
+Las marcas de actitud de la notación de grabación (`[curiosa]`, `[animada]`) no sirven aquí: el modelo las lee en voz alta. El tono sale del `estilo`.
+
+```bash
+# Varios guiones en una corrida: el modelo se carga una sola vez
+python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic
+```
+
+Medido con 3 guiones (unos 30 s de audio cada uno): el primero tardó 28.8 s con la carga del modelo incluida, y los siguientes 21.9 s y 18.7 s.
 
 ## Fuentes
 
