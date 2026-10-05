@@ -44,14 +44,19 @@ gh pr merge --merge --delete-branch          # cuando el check pase
 # Publicar: PR de dev a main
 gh pr create --base main --head dev --title "release: ..." --body "..."
 
-# Hotfix: fix/* desde main → PR a main → después PR de main a dev para sincronizar
+# Hotfix: fix/* desde main → PR a main. La sincronización a dev es automática (ver abajo)
+git switch main && git pull && git switch -c fix/<nombre>
+gh pr create --base main --title "fix: ..." --body "..."
 ```
+
+**Sincronización automática main → dev**: cada push a `main` (el merge de un `fix/*` o de `dev`) dispara el workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml). Si `dev` está atrasada, el workflow abre el PR `main → dev` y lo deja en auto-merge, así que se mergea solo cuando pasa `origen-permitido`. **No abras ese PR a mano.** Si hay conflicto, el PR queda abierto: resuélvelo en una rama `fix/` desde `dev` o directamente en el PR. Usa el secret `SYNC_TOKEN` (token fine-grained con Contents y Pull requests en read/write): si vence, la sincronización falla con un error de autenticación y hay que renovar el token y el secret.
 
 ## Qué lo hace cumplir (en GitHub, no solo esta regla)
 
 - **Ruleset `proteger-main-dev`** (main y dev): exige PR, bloquea force-push y borrado. Sin excepciones, ni siquiera para administradores.
 - **Ruleset `main-solo-desde-dev-o-fix`** (main) y **`dev-solo-desde-prefijos`** (dev): exigen que pase el check `origen-permitido`.
 - **Workflow [.github/workflows/origen-pr.yml](../../.github/workflows/origen-pr.yml)**: es el check `origen-permitido`. Valida la rama de origen según el destino y rechaza los PRs de forks. **Si cambias los prefijos, cambia la lista `PREFIJOS_DEV` en el workflow y la tabla de esta regla.**
+- **Workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml)**: tras cada push a `main`, abre el PR `main → dev` en auto-merge (el repo tiene activado *Allow auto-merge*).
 
 ## Commits y PRs
 
