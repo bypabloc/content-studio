@@ -49,6 +49,9 @@ out/music/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 B
 | `--compas` | `2`, `3`, `4` o `6` (2/4, 3/4, 4/4, 6/8) | el del preset, o `4` |
 | `--sin-lm` | solo ACE-Step | apagado |
 | `--carpeta` | carpeta de salida | `out/music/` |
+| `--variantes` | pistas por estilo; con más de 1 los archivos son `<modelo>-<estilo>-v1.wav`, `-v2.wav`… (la melodía cambia en cada una) | 1 |
+| `--evaluar` | solo ACE-Step: al final mide con demucs cuánta voz hay en cada pista (ver "Evaluar que no haya voz") | apagado |
+| `--reintentos` | con `--evaluar`: rondas que regeneran solo las pistas con voz | 0 |
 
 Si usas texto libre sin `--tono` y `--bpm`, el script se detiene antes de cargar el modelo y muestra el mensaje: `"bossa nova" no es un preset: define --tono y --bpm`. `--tono`, `--bpm` y `--compas` se aplican a **todos** los estilos de esa corrida.
 
@@ -68,11 +71,49 @@ Si usas texto libre sin `--tono` y `--bpm`, el script se detiene antes de cargar
 
 Las tonalidades son las que la guía oficial de ACE-Step considera estables: C, G, D, Am, Em y sus vecinas. Las tonalidades poco comunes "pueden ignorarse o desplazarse".
 
-Otros géneros que el modelo conoce (están en su vocabulario, pero no los probé): chillhop, chillwave, downtempo, trip hop, vaporwave, bossa nova, cinematic, orchestral, post-rock, epic, synthwave, 8-bit, chiptune, EDM, trap, phonk, drum and bass, techno, afrobeat, cumbia, reggaeton y latin. Úsalos como texto libre con `--tono` y `--bpm`.
+### Catálogo ampliado: 117 presets más
 
-Bajo una narración, los que mejor acompañan son `corporate`, `future-bass`, `deep-house` y `ambient`.
+Definidos en [estilos.py](estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
 
-Para agregar un preset, suma una entrada a `ESTILOS` en [musica.py](musica.py) con `caption` (descripción para ACE-Step), `tags` (etiquetas cortas para HeartMuLa), `tono`, `bpm` y `compas`.
+| Grupo | Presets |
+|:--|:--|
+| Tutoriales y explicativos | `tutorial-calmo` `tutorial-tech` `tutorial-guitarra` `explainer-animado` `explainer-minimal` `curso-online` `paso-a-paso` `codigo` `documental-suave` |
+| Corporativo y publicidad | `corporate-inspirador` `corporate-minimal` `corporate-energico` `corporate-startup` `corporate-confianza` `corporate-innovacion` `corporate-motivacional` `anuncio-alegre` `anuncio-premium` `anuncio-moda` `anuncio-deportivo` `anuncio-comida` `anuncio-lanzamiento` `anuncio-fintech` `anuncio-inmobiliario` `anuncio-salud` `anuncio-viajes` `anuncio-auto` |
+| Demos y tecnología | `demo-producto` `demo-saas` `demo-app-movil` `demo-futurista` `demo-ia` `demo-gadget` `demo-ecommerce` `demo-dashboard` `demo-videojuego` |
+| Lofi | `lofi-cafe` `lofi-guitarra` `lofi-atardecer` `lofi-nostalgico` `lofi-bossa` `chillhop-foco` `lofi-piano` `vaporwave` |
+| Ambient, foco y bienestar | `ambient-espacial` `ambient-piano` `ambient-cinematico` `ambient-bosque` `ambient-oceano` `meditacion` `yoga` `spa` `dormir` `foco-profundo` `new-age` `ambient-oscuro` |
+| Cinematográfico | `cinematico-emotivo` `cinematico-esperanza` `trailer-tension` `cinematico-minimal` `documental-naturaleza` `heroico` `misterio` `suspenso-tech` `ciencia-ficcion` `fantasia` `orquesta-calida` `piano-emotivo` `cuerdas-minimal` `neoclasico` |
+| Acústico y folk | `acustico-alegre` `acustico-calido` `folk-suave` `country-suave` `piano-pop` `ukulele-playa` `guitarra-clasica` `arpa-celestial` `celta` |
+| Jazz, latino y del mundo | `jazz-cafe` `jazz-suave` `bossa-nova` `lounge` `swing-alegre` `latin-suave` `cumbia-suave` `reggae-chill` `afrobeat-ligero` `tropical-house` |
+| Electrónica y pop | `pop-brillante` `synthwave` `retrowave-suave` `trap-suave` `drum-and-bass-ligero` `techno-minimal` `house-alegre` `tech-house` `edm-energico` `electropop` `downtempo` `chillwave` `future-garage` `chiptune-alegre` `funk-suave` `disco` `boom-bap` `rnb-suave` `rock-motivacional` `indie-pop` `post-rock-suave` |
+| Usos concretos | `navidad-suave` `infantil` `juego-casual` `entrenamiento` `noticias` `cocina` `vlog-viaje` |
+
+**Cómo se probaron**: una pista de 30 s por preset, con LM. Pasa si no tiene voz (`--evaluar`, umbral −25 dB), dura al menos 20 s tras recortar el silencio y no es casi muda. Pasaron 117 de 119: ninguna salió corta ni silenciosa (20,6–30 s, mediana 26,8 s) y se descartaron 2 por voz (ver [INVESTIGACION.md](INVESTIGACION.md)). **Nadie las escuchó**: las métricas no dicen si suenan bien ni si el estilo se reconoce. Con una sola muestra por preset, el resultado es indicativo.
+
+Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-producto`, `heroico`, `suspenso-tech`, `ambient-oceano`, `tutorial-tech`, `ciencia-ficcion`, `pop-brillante`, `demo-saas`. Si los vas a usar, genera con `--evaluar --reintentos 2`.
+
+Bajo una narración, los que mejor acompañan son los de tutoriales y explicativos, `corporate-minimal`, `deep-house` y `ambient`.
+
+Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
+
+## Evaluar que no haya voz (`--evaluar`)
+
+ACE-Step recibe `[Instrumental]`, pero a veces se le cuela una voz. `--evaluar` separa cada pista con **demucs** (`htdemucs`), mide el nivel del stem de voz respecto de la mezcla y marca como `VOZ` las que superan `VOZ_MAX_DB = -25` dB. Con `--reintentos N` regenera solo esas pistas (semilla nueva) hasta N rondas; si alguna sigue con voz, el script termina con error y las nombra.
+
+```bash
+python music/musica.py --modelo acestep --duracion 30 --variantes 4 --evaluar --reintentos 2 \
+  --carpeta out/music-variantes --estilo lofi-chill corporate ambient
+```
+
+```
+  ok   acestep-lofi-chill-v1.wav: voz -39.3 dB respecto de la mezcla
+  VOZ  acestep-lofi-chill-v2.wav: voz -4.9 dB respecto de la mezcla
+```
+
+- **Por qué demucs y no whisper**: whisper alucina frases sobre música instrumental (`"Outro Music"`, `"Let me know what you think about this video…"`) y marcó como "con voz" pistas que no la tenían. Sus métricas (`no_speech_prob`, `avg_logprob`) no separan la alucinación de la letra real.
+- **Calibración del umbral**: pistas instrumentales de ACE-Step, entre −35 y −44 dB; una pista cantada a propósito (letra y `vocal_language='en'`), −4,9 dB. Medido sobre pocas pistas: si aparece un falso positivo o negativo, ajusta `VOZ_MAX_DB`.
+- demucs vive solo en `.venv-acestep` (instalado con `--no-deps` para no tocar torch), así que `--evaluar` no funciona con `--modelo heartmula`.
+- Cada ronda recarga ACE-Step (~30 s) y carga demucs en la GPU tras liberar la VRAM del generador.
 
 ## Cómo funciona ACE-Step (y qué hace `--sin-lm`)
 
@@ -191,6 +232,13 @@ Los pesos se descargan solos en la primera corrida:
 - HeartMuLa → `models/heartmula-ckpt/` (HeartMuLaGen, HeartMuLa-oss-3B-happy-new-year, HeartCodec-oss-20260123).
 
 Si se corta la descarga, vuelve a correr el script: reanuda donde quedó.
+
+Para `--evaluar`, demucs en el venv de ACE-Step (sin dependencias, para no cambiar torch):
+
+```bash
+VIRTUAL_ENV=.venv-acestep uv pip install --no-deps demucs
+VIRTUAL_ENV=.venv-acestep uv pip install julius einops lameenc openunmix dora-search
+```
 
 Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si mueves `music/`, borra los `.venv-*` y vuelve a crearlos con los comandos de arriba (con la caché de uv tarda poco).
 

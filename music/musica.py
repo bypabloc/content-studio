@@ -31,48 +31,13 @@ MODELOS = {
     'heartmula': '.venv-heartmula',
 }
 
-# caption: descripción libre para ACE-Step. tags: etiquetas cortas para HeartMuLa.
-# tono/bpm/compas: metadatos que el LM de ACE-Step respeta en vez de inventarlos.
-# Tonalidades estables según la guía oficial (C, G, D, Am, Em); compás '4' = 4/4.
-ESTILOS = {
-    'lofi-chill': dict(
-        caption='lo-fi hip hop, chill, mellow Rhodes piano, dusty vinyl crackle, soft boom bap drums, warm bass, relaxing',
-        tags='lofi,hip hop,chill,piano,relaxing', tono='C Major', bpm=80, compas='4',
-    ),
-    'lofi-jazz': dict(
-        caption='jazzy lo-fi, smooth jazz chords, muted trumpet, upright bass, brushed drums, tape saturation, cozy',
-        tags='lofi,jazz,chill,trumpet,cozy', tono='D Minor', bpm=85, compas='4',
-    ),
-    'lofi-lluvia': dict(
-        caption='rainy lo-fi, melancholic piano, rain ambience, vinyl noise, slow lazy drums, nostalgic, calm',
-        tags='lofi,rain,melancholic,piano,calm', tono='E Minor', bpm=72, compas='4',
-    ),
-    'lofi-estudio': dict(
-        caption='lo-fi study beats, soft guitar, gentle keys, steady laid-back groove, focused, minimal, background music',
-        tags='lofi,study,guitar,focus,minimal', tono='G Major', bpm=78, compas='4',
-    ),
-    'lofi-nocturno': dict(
-        caption='late night lo-fi, dreamy synth pads, deep sub bass, slow swing drums, city night atmosphere, ambient',
-        tags='lofi,night,dreamy,synth,ambient', tono='A Minor', bpm=70, compas='4',
-    ),
-    'corporate': dict(
-        caption='corporate background music, uplifting, clean electric piano, light plucks, soft claps, optimistic, modern tech',
-        tags='corporate,uplifting,piano,positive,background', tono='C Major', bpm=110, compas='4',
-    ),
-    'future-bass': dict(
-        caption='soft future bass, bright supersaw chords, gentle sidechain, airy plucks, positive, polished, background',
-        tags='future bass,electronic,bright,positive,soft', tono='G Major', bpm=100, compas='4',
-    ),
-    'deep-house': dict(
-        caption='deep house, warm groove, smooth chords, round bass, crisp hi-hats, elegant, minimal, background',
-        tags='deep house,groove,warm,minimal,elegant', tono='A Minor', bpm=120, compas='4',
-    ),
-    'ambient': dict(
-        caption='ambient, evolving soft pads, gentle piano notes, airy textures, calm, spacious, no drums',
-        tags='ambient,calm,pads,piano,spacious', tono='D Major', bpm=70, compas='4',
-    ),
-}
+from estilos import ESTILOS  # catálogo: caption, tags (HeartMuLa), tono, bpm y compás de cada preset
+
 SILENCIO_DB = -50  # por debajo de esto, la cola final se considera silencio y se recorta
+
+# --evaluar: demucs separa el stem de voz; si suena por encima del umbral, la pista tiene voz.
+# Whisper se descartó: alucina frases ("Outro Music") sobre música instrumental.
+VOZ_MAX_DB = -25  # criterio: voz relativa a la mezcla. Medido: instrumentales de -35 a -44, cantada -5
 
 
 def usar_venv(venv: str) -> None:
@@ -120,6 +85,56 @@ def recortar_silencio(ruta: Path) -> float:
         capture_output=True, text=True, check=True,
     ).stdout
     return float(dur)
+
+
+def voz_relativa_db(modelo, ruta: Path) -> float:
+    """Nivel del stem de voz (htdemucs) respecto de la mezcla, en dB. Cerca de 0 = canta; muy negativo = instrumental."""
+    import soundfile as sf
+    import torch
+    import torchaudio
+    from demucs.apply import apply_model
+
+    datos, sr = sf.read(ruta, dtype='float32', always_2d=True)  # soundfile: torchaudio.load exige torchcodec
+    wav = torchaudio.functional.resample(torch.from_numpy(datos.T), sr, modelo.samplerate)
+    ref = wav.mean(0)  # demucs separa mal sin esta normalización (todo salía a -75 dB)
+    with torch.no_grad():
+        fuentes = apply_model(modelo, ((wav - ref.mean()) / ref.std())[None], device='cuda', split=True)[0]
+    voz = fuentes[modelo.sources.index('vocals')] * ref.std() + ref.mean()
+
+    def rms_db(x) -> float:
+        return 20 * torch.log10(x.pow(2).mean().sqrt() + 1e-9).item()
+
+    return rms_db(voz) - rms_db(wav)
+
+
+def liberar_gpu() -> None:
+    """Demucs necesita la VRAM que dejó el modelo de música."""
+    import gc
+
+    import torch
+
+    gc.collect()
+    torch.cuda.empty_cache()
+
+
+def con_voz(salidas: list[Path]) -> list[Path]:
+    """Devuelve las pistas donde se oye una voz (demucs, un solo modelo cargado).
+    Una pista que no existe (la generación falló) también se devuelve, para reintentarla."""
+    from demucs.pretrained import get_model
+
+    print(f'Evaluando {len(salidas)} pista(s) con demucs (umbral {VOZ_MAX_DB} dB)...', flush=True)
+    modelo = get_model('htdemucs').eval()
+    malas = []
+    for s in salidas:
+        if not s.exists():
+            print(f'  FALTA {s.name}: no se generó')
+            malas.append(s)
+            continue
+        db = voz_relativa_db(modelo, s)
+        con = db > VOZ_MAX_DB
+        print(f'  {"VOZ " if con else "ok  "} {s.name}: voz {db:.1f} dB respecto de la mezcla')
+        malas += [s] if con else []
+    return malas
 
 
 def generar_acestep(trabajos, a) -> None:
@@ -214,19 +229,54 @@ def main() -> None:
     ap.add_argument('--compas', choices=['2', '3', '4', '6'], help='2/4, 3/4, 4/4 o 6/8 (por defecto 4/4)')
     ap.add_argument('--sin-lm', action='store_true', help='ACE-Step sin el planificador LM 0.6B: ~3x más rápido')
     ap.add_argument('--carpeta', type=Path, default=AQUI.parent / 'out' / 'music', help='por defecto out/music/')
+    ap.add_argument(
+        '--variantes', type=int, default=1,
+        help='pistas por estilo (<modelo>-<estilo>-v1.wav ...); la melodía cambia en cada una',
+    )
+    ap.add_argument(
+        '--evaluar', action='store_true',
+        help='al final mide con demucs cuánta voz hay en cada pista y marca las que cantan (se quiere solo música)',
+    )
+    ap.add_argument(
+        '--reintentos', type=int, default=0,
+        help='con --evaluar: rondas en las que se regeneran solo las pistas con voz',
+    )
     a = ap.parse_args()
+    if a.reintentos and not a.evaluar:
+        ap.error('--reintentos necesita --evaluar')
+    if a.evaluar and a.modelo != 'acestep':
+        ap.error('--evaluar solo está en el venv de acestep (ahí está demucs)')
+    if a.variantes < 1:
+        ap.error('--variantes debe ser 1 o más')
 
     # Validar antes de relanzar en el venv y cargar el modelo.
     trabajos = []
     for valor in a.estilo:
         nombre, estilo = resolver_estilo(valor, a.tono, a.bpm, a.compas)
-        trabajos.append((estilo, (a.carpeta / f'{a.modelo}-{nombre}.wav').resolve()))
+        for i in range(1, a.variantes + 1):
+            sufijo = f'-v{i}' if a.variantes > 1 else ''
+            trabajos.append((estilo, (a.carpeta / f'{a.modelo}-{nombre}{sufijo}.wav').resolve()))
 
     usar_venv(MODELOS[a.modelo])
     a.carpeta.mkdir(parents=True, exist_ok=True)
 
     generar = generar_heartmula if a.modelo == 'heartmula' else generar_acestep
     generar(trabajos, a)
+    if not a.evaluar:
+        return
+
+    liberar_gpu()
+    pendientes = con_voz([t[1] for t in trabajos])
+    for _ in range(a.reintentos):
+        if not pendientes:
+            break
+        print(f'Regenerando {len(pendientes)} pista(s) con voz...', flush=True)
+        generar([t for t in trabajos if t[1] in pendientes], a)
+        liberar_gpu()
+        pendientes = con_voz(pendientes)
+    print(f'{len(trabajos) - len(pendientes)}/{len(trabajos)} pistas sin voz')
+    if pendientes:
+        sys.exit(f'Con voz tras los reintentos: {", ".join(p.name for p in pendientes)}')
 
 
 if __name__ == '__main__':
