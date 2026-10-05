@@ -1,0 +1,38 @@
+name: sync-dev
+
+# Tras cada push a main (merge de fix/* o de dev), abre un PR main → dev y lo deja en auto-merge.
+# Usa SYNC_TOKEN (fine-grained: Contents + Pull requests, read/write) porque un PR creado con
+# GITHUB_TOKEN no dispara el check requerido origen-permitido y quedaría bloqueado.
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: sync-dev
+  cancel-in-progress: false
+
+jobs:
+  pr-main-a-dev:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Abrir PR main → dev (si dev está atrasada)
+        run: |
+          atraso=$(gh api "repos/$REPO/compare/dev...main" --jq .ahead_by)
+          if [ "$atraso" = "0" ]; then
+            echo "dev ya contiene main; nada que sincronizar."
+            exit 0
+          fi
+          pr=$(gh pr list -R "$REPO" --base dev --head main --state open --json number --jq '.[0].number')
+          if [ -z "$pr" ]; then
+            pr=$(gh pr create -R "$REPO" --base dev --head main \
+              --title "chore: sincronizar dev con main" \
+              --body "PR automático (sync-dev): trae a dev los $atraso commit(s) de main que le faltan, por ejemplo un hotfix \`fix/*\`. Se mergea solo cuando pasan los checks; si hay conflicto, queda abierto para resolverlo a mano." \
+              | grep -o '[0-9]*$')
+          fi
+          gh pr merge "$pr" -R "$REPO" --merge --auto
+          echo "PR #$pr en auto-merge."
