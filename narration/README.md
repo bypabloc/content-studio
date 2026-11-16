@@ -10,9 +10,13 @@ narration/
 │   ├── formato-guion.md cómo escribir el texto a narrar: pausas, entonación, pronunciación
 │   └── guiones/         cómo grabar las referencias de voz: un guion por estilo
 ├── voz/                 referencias de voz: <estilo>.wav + <estilo>.txt
+│   ├── emociones/       (opcional) clips de emoción para IndexTTS
 │   └── prueba/          referencia de prueba (experta.wav + .txt) mientras no grabes las tuyas
+├── motores/             repos de IndexTTS 2.5 y CosyVoice 3, con su venv y sus pesos (gitignoreado)
 ├── .venv-qwen/          venv de Qwen3-TTS        (gitignoreado)
-└── .venv-chatterbox/    venv de Chatterbox V3    (gitignoreado)
+├── .venv-chatterbox/    venv de Chatterbox V3    (gitignoreado)
+├── .venv-omnivoice/     venv de OmniVoice        (gitignoreado)
+└── .venv-voxcpm/        venv de VoxCPM2          (gitignoreado)
 ```
 
 Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Logs de corridas largas en `logs/`.
@@ -48,18 +52,44 @@ En este proyecto, **Qwen 0.6B y 1.7B dieron el mejor resultado** al escucharlos.
 
 ## 2. Instalación
 
-Cada modelo necesita su propio venv porque fijan versiones de `transformers` incompatibles (Qwen 4.57.3, Chatterbox 5.2.0). Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
+Cada motor necesita su propio venv porque fijan versiones de `transformers` y de `torch` incompatibles entre sí. Qwen, Chatterbox, OmniVoice y VoxCPM2 viven en `narration/.venv-*`; IndexTTS 2.5 y CosyVoice 3 son repos clonados en `narration/motores/`, cada uno con su `.venv`. Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
 
 ```bash
+# Qwen3-TTS y Chatterbox V3
 uv venv -p 3.12 narration/.venv-qwen
 VIRTUAL_ENV=narration/.venv-qwen uv pip install qwen-tts soundfile
 
 uv venv -p 3.12 narration/.venv-chatterbox
 VIRTUAL_ENV=narration/.venv-chatterbox uv pip install soundfile \
   "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
+
+# OmniVoice y VoxCPM2 (pip). torch 2.15 da segfault en esta WSL: fijar 2.14.1
+uv venv -p 3.12 narration/.venv-omnivoice
+VIRTUAL_ENV=narration/.venv-omnivoice uv pip install omnivoice soundfile "torch==2.14.1" "torchaudio==2.11.1"
+uv venv -p 3.12 narration/.venv-voxcpm
+VIRTUAL_ENV=narration/.venv-voxcpm uv pip install voxcpm soundfile "torch==2.14.1" "torchaudio==2.11.1"
+
+# IndexTTS 2.5 (repo)
+git clone --depth 1 https://github.com/index-tts/index-tts narration/motores/index-tts
+(cd narration/motores/index-tts && uv sync --python 3.11 --extra webui \
+  && uv tool run --from 'huggingface_hub[cli]' hf download IndexTeam/IndexTTS-2.5 --local-dir=checkpoints)
+
+# CosyVoice 3 (repo): quitar deps de TRT/deepspeed/whisper fijado/gradio; setuptools<80; sin wetext
+git clone --depth 1 --recursive https://github.com/FunAudioLLM/CosyVoice narration/motores/CosyVoice
+cd narration/motores/CosyVoice && uv venv -p 3.10 .venv
+grep -v -i -E '^(torch|torchaudio|deepspeed|tensorrt|onnxruntime-gpu|--extra-index-url|openai-whisper|gradio)' requirements.txt > req-social-videos.txt
+VIRTUAL_ENV=.venv uv pip install "torch==2.14.1" "torchaudio==2.11.1" -r req-social-videos.txt onnxruntime openai-whisper huggingface_hub "setuptools<80"
+VIRTUAL_ENV=.venv uv pip uninstall wetext
+.venv/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B', ignore_patterns=['llm.rl.pt','*.fp32.onnx','*.batch.onnx'])"
+cd ../../..
+
+# Cada venv necesita numpy y soundfile (los importa tts.py)
+narration/motores/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
 ```
 
-Los pesos se bajan solos a `~/.cache/huggingface` la primera vez (Qwen 1.7B ≈ 4 GB, 0.6B ≈ 2 GB). También se necesita `ffmpeg` en el PATH.
+Los pesos de Qwen, Chatterbox, OmniVoice y VoxCPM2 se bajan solos a `~/.cache/huggingface` la primera vez (Qwen 1.7B ≈ 4 GB, 0.6B ≈ 2 GB). IndexTTS y CosyVoice guardan sus pesos dentro de su repo (`checkpoints/` y `pretrained_models/`). También se necesita `ffmpeg` en el PATH.
+
+Si mueves un repo de `motores/`, recrea su `.venv`: un venv movido deja de funcionar (sus scripts apuntan a rutas absolutas). Los pesos sí se mueven sin problema.
 
 ---
 

@@ -9,4 +9,6 @@ narration/voz/prueba/
 narration/voz/**/*.wav
 narration/voz/**/*.m4a
 narration/voz/**/*.mp3
+# Repos de motores que no son paquetes pip (código, venv y pesos). Ver narration/README.md §2.
+narration/motores/
 tmp/
