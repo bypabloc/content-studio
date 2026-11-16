@@ -11,16 +11,24 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herrami
 
 ## Atajos
 
+Todo se lanza desde `cli.py` (hecho con [Typer](https://typer.tiangolo.com)): `python cli.py <herramienta> <comando> [flags]`.
+
 ```bash
+python cli.py --help                     # herramientas y comandos
+python cli.py narration tts --help       # flags del script (pasan tal cual)
+
 # Narración (sin grabaciones propias todavía: usar la referencia de prueba)
-python narration/tts.py --modelo qwen-0.6b --estilo experta \
+python cli.py narration tts --modelo qwen-0.6b --estilo experta \
   --ref narration/voz/prueba/experta.wav --texto "..."            # → out/narration/
 
+# Grabar las voces de referencia
+python cli.py narration grabar --listar
+
 # Música (presets con tonalidad/BPM/compás definidos; texto libre exige --tono y --bpm)
-python music/musica.py --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
+python cli.py music --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
 ```
 
-Los scripts se relanzan solos en su venv, así que se pueden ejecutar con cualquier `python`.
+`cli.py` funciona con cualquier `python`: si no tiene typer, se relanza con `uv run --script` (las dependencias están en su cabecera PEP 723). Los scripts, a su vez, se relanzan solos en su venv, y se pueden seguir llamando directo (`python narration/tts.py ...`). Para agregar un comando nuevo, se registra en `cli.py` con `@<herramienta>.command(**PASO)`.
 
 ## Reglas
 
