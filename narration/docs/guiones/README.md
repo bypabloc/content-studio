@@ -67,6 +67,9 @@ El texto que dices tiene que coincidir **palabra por palabra** con `narration/vo
 
 ## Cómo grabar cada clip
 
+Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python narration/grabar.py --dispositivo <fuente> --estilo <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
+
+
 1. Lee la sección **Actitud** del guion y repasa la versión marcada en voz alta una vez.
 2. Graba **3 tomas seguidas**, con 2 s de silencio entre ellas.
 3. Escúchalas con audífonos y quédate con la que suene **más natural**, no con la más "actuada": una referencia sobreactuada hace que **toda** la narración suene sobreactuada.
