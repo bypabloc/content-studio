@@ -286,20 +286,20 @@ Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo d
 - **Segunda ronda (2026-10-04)**: confirmó la tabla con un margen de ±10 %. qwen-0.6b dio 0.65× / 1.19× (auto, lote 3) / 1.60× (lote 4); qwen-1.7b, 0.62× / 0.92× (auto, lote 2); chatterbox, 1.09×. Los picos de VRAM coinciden con la tabla con ±0.1 GiB de diferencia. También se comprobó lo siguiente: la falta de referencia corta con `No existe la referencia`; la falta de `.txt` muestra el aviso y genera igual; el estilo `amistosa` (×1.05) acorta el audio en la proporción esperada (46.8 s → 44.6 s); y los doctests pasan.
 - **Ojo con el lote automático en WSL**: se calcula con `torch.cuda.mem_get_info()`, que **no coincide con nvidia-smi**. En una medición sin nada del proyecto corriendo, torch dio 6.93 GiB libres y nvidia-smi 3.9 GB. En la segunda ronda, con 3.8 GB libres según nvidia-smi, el lote automático eligió 3 y el total de la GPU llegó a 7.9 de 8 GB sin desbordar. Si otra app de verdad está usando la GPU, el lote automático puede quedarse corto de margen: en ese caso, fuerza `--lote 1` o `--lote 2`.
 
-### 6.2 Motores de noviembre: primera medición (GPU compartida)
+### 6.2 Motores de noviembre (medido en dev)
 
-Medido con el texto del criterio 1 del spec (`c_tutorial`, una frase de ~80 letras, referencia de prueba `experta`, semilla 1, con `--evaluar`). **La GPU estaba compartida con otra aplicación** (entre 3.6 y 5 GB ocupados y carga de cómputo constante), así que las velocidades **no son el rendimiento del motor**: son un piso. Las cifras finales se medirán con la GPU libre.
+Medido en `dev` con un párrafo de ~290 letras (un bloque), referencia de prueba `experta`, semilla 1 y `--master voz` (por defecto). **La GPU seguía compartida** con otra aplicación (~3.5 GB ocupados), así que las velocidades son un piso: repítelas con la GPU libre antes de decidir por velocidad.
 
-| Motor | Audio | Generación | Velocidad | Pico VRAM | Evaluación |
+| Motor | Audio | Generación | Velocidad | Pico VRAM | Masterización |
 |---|---|---|---|---|---|
-| omnivoice | 3.8 s | 7.4 s | 0.51× | 5.34 GiB | OK |
-| voxcpm2 | 3.4 s | 29.2 s | 0.12× | 5.86 GiB | OK |
-| indextts | 4.4 s | 35.3 s | 0.12× | 6.02 GiB | OK |
-| cosyvoice3 | 3.6 s | 25.4 s | 0.14× | 3.79 GiB | OK |
-| chatterbox | 4.0 s | 17.2 s | 0.23× | 3.57 GiB | OK |
-| qwen-0.6b | 3.7 s | 14.0 s | 0.26× | 2.73 GiB | OK |
+| omnivoice | 14.6 s | 7.7 s | 1.89× | 5.34 GiB | −16.0 LUFS, −1.6 dBTP |
+| voxcpm2 | 13.9 s | 28.6 s | 0.49× | 6.04 GiB | −16.1 LUFS, −1.5 dBTP |
+| indextts | 20.2 s | 41.0 s | 0.49× | 6.02 GiB | −16.0 LUFS, −1.5 dBTP |
+| cosyvoice3 | 14.9 s | 25.2 s | 0.59× | 4.04 GiB | −16.0 LUFS, −1.5 dBTP |
+| chatterbox | 14.0 s | 22.8 s | 0.61× | 3.95 GiB | −16.1 LUFS, −1.5 dBTP |
+| qwen-0.6b | 14.5 s | 29.9 s | 0.48× | 3.20 GiB | −16.0 LUFS, −1.5 dBTP |
 
-Con `--master voz` (por defecto), las seis tomas quedaron entre −15.9 y −16.0 LUFS y con pico de −1.5 dBTP, **todas como normalización dinámica**: el pico real de estas voces no deja llegar a −16 LUFS con ganancia lineal (ver [§7](#7-problemas-conocidos)).
+Los seis picos de VRAM quedan por debajo de 6.5 GiB. Las seis tomas de `c_tutorial` (criterio 1) también salieron entre −15.9 y −16.0 LUFS con pico de −1.5 dBTP. En casi todas, la normalización es dinámica: el pico real de estas voces no deja llegar a −16 LUFS con ganancia lineal (ver [§7](#7-problemas-conocidos)). La toma de OmniVoice fue la única que necesitó reajustar el techo (ver `master.techo_tp` en su `.json`).
 
 ---
 
