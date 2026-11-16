@@ -106,21 +106,23 @@ Fuentes: [03](03-omnivoice.md) a [06](06-cosyvoice-3.md), Chatterbox README **(l
 
 **8–12 s por clip**, actitud desde el primer segundo, una emoción por clip, todo en la misma sesión. Maestro WAV 48 kHz 24 bits mono; copia de trabajo a −18 LUFS / −3 dBTP. Cada `.wav` con su `.txt`.
 
-| # | Archivo | Duración | Uso | Texto de ejemplo |
-| :--- | :--- | :--- | :--- | :--- |
-| 0 | `neutral.wav` | 10–12 s | Ancla de timbre; IndexTTS y VoxCPM2 con instrucción; comparación entre motores | "Este es un registro de mi voz para los proyectos del canal. Hablo con calma, a un ritmo normal, y pronuncio cada palabra con claridad: carro, pero, llave, gente y después." |
-| 1 | `amistosa.wav` | 10–12 s | Reels, saludos, llamadas a la acción suaves | Guion actual [01](../../../narration/docs/guiones/01-amistosa.md), grabado sonriendo |
-| 2 | `experta.wav` | 10–12 s | Demos y tutoriales | "Primero abre el panel de edición. Luego selecciona la pista que quieres recortar, ajusta el inicio con las flechas y guarda los cambios. Así de rápido queda listo." |
-| 3 | `clara.wav`, `estable.wav`, `suave.wav` | 10–12 s c/u | Explicativos, narración larga, temas sensibles | Guiones actuales recortados a 10–12 s |
-| 4 | `energica.wav` | 8–10 s | Publicidad, gancho de reel | "¡Llegó lo que estabas esperando! Treinta por ciento de descuento, solo este fin de semana. Entra ya, elige tu plan y empieza hoy mismo." |
-| 5 | `dramatica.wav` | 10–12 s | Storytelling, tráiler | "Nadie sabía lo que había pasado esa noche. La puerta estaba abierta… y en el piso, una carta sin firma. Ahí empezó todo." |
-| 6 | `triste.wav` | 10–12 s | Historias emotivas | "Hay días en que todo pesa un poco más. Ese año perdimos mucho, y aun así, aprendimos a seguir adelante, juntos." |
-| 7 | `intima.wav` | 8–10 s | Voz baja y cercana: secretos, cierres | "Te voy a contar algo que casi nadie sabe. Acércate un poco… porque esto cambia la forma en que lo ves." |
-| 8 | `susurro.wav` (opcional) | 6–8 s | Solo efectos; probar antes de usar | Mismo texto que 7, susurrado |
-| 9 | `neutral-en.wav` | 10–12 s | Videos en inglés (evita el acento cruzado) | "This is a sample of my voice for the channel. I'm speaking at a steady pace, clearly and naturally, the way I'd explain something to a friend." |
-| 10 | `neutral-fin.wav` | 10–12 s | Control: mismo texto que 0, al final de la sesión | Igual que 0 |
+**Los textos exactos, la actitud, la versión marcada y el orden de grabación de cada clip están en [narration/docs/guiones/](../../../narration/docs/guiones/README.md)** (decisión del usuario del 2026-11-15). Resumen:
 
-Opcional para IndexTTS 2.5: 4–6 clips de emoción de 5–8 s (alegría, enojo contenido, tristeza, sorpresa, calma) para usar como `emo_audio_prompt` sobre `neutral.wav`.
+| # | Archivo | Duración | Uso |
+| :--- | :--- | :--- | :--- |
+| 0 | `neutral.wav` | 10–12 s | Ancla de timbre; IndexTTS y VoxCPM2 con emoción por parámetro; comparación entre motores |
+| 1 | `amistosa.wav` | 9–11 s | Reels, saludos, llamadas a la acción, grabado sonriendo |
+| 2 | `experta.wav` | 10–12 s | Demos y tutoriales |
+| 3 | `clara.wav`, `estable.wav`, `suave.wav` | 10–12 s c/u | Tutoriales paso a paso, corporativo, temas sensibles |
+| 4 | `energica.wav` | 8–10 s | Publicidad, gancho de reel |
+| 5 | `dramatica.wav` | 10–12 s | Storytelling, tráiler |
+| 6 | `triste.wav` | 10–12 s | Historias emotivas |
+| 7 | `intima.wav` | 9–11 s | Voz baja y cercana: secretos, cierres |
+| 8 | `susurro.wav` (opcional) | 7–9 s | Solo efectos; probar antes de usar |
+| 9 | `neutral-en.wav` | 10–12 s | Videos en inglés (evita el acento cruzado) |
+| 10 | `neutral-fin.wav` | 10–12 s | Control: mismo texto que 0, al final de la sesión |
+
+Opcional para IndexTTS 2.5: 6 clips de emoción de 5–8 s (alegría, tristeza, enojo, miedo, sorpresa, calma) para usar como `emo_audio_prompt` sobre `neutral.wav` ([guion 11](../../../narration/docs/guiones/11-emociones.md)).
 
 **Qué referencia usa cada motor:**
 

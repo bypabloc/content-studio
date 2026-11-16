@@ -23,6 +23,8 @@
 | 13 | [Pruebas en GPU](13-pruebas-en-gpu.md) | Banco de pruebas, resultados por caso, etiquetas, emoción, velocidad, **audios para escuchar** |
 | 14 | [Replicación de VoiceStudio](14-replicacion-de-voicestudio.md) | El flujo de `/generate` replicado y comparado contra la app real en Docker |
 | 15 | [Aplicación a social-videos](15-aplicacion-social-videos.md) | Propuesta para `tts.py`: motores, parámetros, filtrado de marcas, piezas a reimplementar |
+| — | **[Spec de implementación](../../specs/narracion-motores-voicestudio.md)** | Todo lo que necesita `tts.py`: motores, gramática de estilo y emoción, traducción por motor, semilla, metadatos, masterización, pruebas y fases |
+| — | **[Guiones de grabación](../../../narration/docs/guiones/README.md)** | Qué grabar y qué decir: kit de 12 clips + 6 de emoción |
 | — | [Herramientas de VoiceStudio](herramientas/README.md) | **16 herramientas, una por archivo**: clonación, diseño, audiolibros, lotes, doblaje, aislamiento, diarización, transcripción, dictado, API y CLI, MCP, integraciones, marca de agua, modelos y hardware, fine-tuning, instalación |
 
 ---
@@ -80,16 +82,21 @@ Respuestas del usuario del 2026-11-15:
 | Licencia en la réplica | Aceptar la licencia de OmniVoice **solo** en el contenedor de prueba (borrado al terminar) |
 | Costos | **Nada pago**: todo corre local y gratis |
 
+### Segunda ronda (tras la investigación)
+
+| # | Pregunta | Decisión | Dónde quedó |
+| :--- | :--- | :--- | :--- |
+| 1 | ¿Qué motores implementar? | **Los cuatro**, comerciales y no comerciales: es software personal | [Spec](../../specs/narracion-motores-voicestudio.md) §3 |
+| 2 | ¿Monetización? | **Videos personales**: la licencia se informa, no bloquea | Spec §3 |
+| 3 | ¿Grabar el kit? | **Sí**, con guiones y textos exactos | [narration/docs/guiones/](../../../narration/docs/guiones/README.md): 12 clips + 6 de emoción |
+| 4 | ¿Masterización? | **La más precisa**: loudness lineal a −16 LUFS, pico real ≤ −1.5 dBTP, sin compresión | Spec §7 |
+| 5 | ¿Emoción por párrafo y traducción de marcas? | **Sí** | Spec §5 y §6 |
+| 6 | ¿Corregir las guías? | **Sí** | `guiones/` (8–12 s, entonación de listas, kit nuevo), [formato-guion.md](../../../narration/docs/formato-guion.md) (motores nuevos), `.gitignore` (`narration/voz/**/*.wav`) |
+| 7 | ¿Qué conservar en disco? | **Eliminar lo innecesario** | Borrados: imagen Docker (17.8 GB), pesos sin uso de CosyVoice (4.3 GB), clon de VoiceStudio. Conservados: los 4 motores con sus pesos, el banco de pruebas y los audios para escuchar |
+| — | ¿Implementar ya? | **No**: spec detallada en el PR | [docs/specs/narracion-motores-voicestudio.md](../../specs/narracion-motores-voicestudio.md) |
+
 ---
 
 ## Preguntas Abiertas
 
-| # | Pregunta | Por qué importa |
-| :--- | :--- | :--- |
-| 1 | ¿Qué motores implemento primero en `tts.py`? Propuesta: **VoxCPM2 y CosyVoice 3**, y OmniVoice e IndexTTS como opcionales no comerciales | Cada motor suma un venv y su filtrado de marcas |
-| 2 | ¿Los videos se monetizan o son para clientes? | Define si OmniVoice e IndexTTS pueden usarse fuera de pruebas |
-| 3 | ¿Grabas el kit de referencias (8–12 s) antes de implementar? | Todas las pruebas usan una referencia ajena; el acento y la similitud con tu voz no están medidos |
-| 4 | ¿Masterización `broadcast` por defecto, opcional o con un objetivo de loudness para redes (−14 LUFS)? | Cambia el volumen de todas las salidas |
-| 5 | ¿Implemento la emoción por párrafo (`[emocion: …]`) y la traducción de marcas por motor (`[risa]` → `[laughter]`)? | Es la pieza más útil y la más grande |
-| 6 | ¿Actualizo en el mismo PR de implementación las guías existentes? Duraciones de [guiones/](../../../narration/docs/guiones/README.md) (11–17 s → 8–12 s), "Respiros y énfasis no se pueden pedir" en [formato-guion.md](../../../narration/docs/formato-guion.md) y `narration/voz/**/*.wav` en `.gitignore` | Hoy contradicen lo medido |
-| 7 | ¿Qué conservo en disco? Imagen Docker de VoiceStudio (17.8 GB), repos de IndexTTS y CosyVoice en `tmp/` y venvs nuevos (~25 GB con pesos) | Espacio en disco |
+Ninguna bloqueante. Quedan para después de grabar el kit: el motor por defecto de cada tipo de video (spec §11.3) y los valores finales de `ESTILOS` para los estilos nuevos (spec §10).

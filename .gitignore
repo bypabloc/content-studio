@@ -5,4 +5,8 @@ models/
 __pycache__/
 .vscode/
 narration/voz/prueba/
+# Grabaciones de voz: nunca al repo (es público). Los .txt sí se versionan.
+narration/voz/**/*.wav
+narration/voz/**/*.m4a
+narration/voz/**/*.mp3
 tmp/

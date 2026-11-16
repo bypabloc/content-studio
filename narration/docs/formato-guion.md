@@ -3,6 +3,8 @@
 Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar pausas, entonación y pronunciación.
 
 > **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `experta`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` solo se midieron las pausas largas (ver abajo); los signos y las etiquetas no.
+>
+> **Motores nuevos (OmniVoice, VoxCPM2, IndexTTS 2.5, CosyVoice 3):** se midieron el 15 de noviembre de 2026 y algunos **sí** aceptan etiquetas, instrucciones de emoción o respiraciones. Lo que cambia por motor está en la [sección de motores nuevos](#motores-nuevos-qué-cambia) y en detalle en [docs/research/voicestudio-narracion/08](../../docs/research/voicestudio-narracion/08-guion-y-pronunciacion.md). Las reglas obligatorias siguen valiendo para todos los motores.
 
 ## Resumen
 
@@ -11,7 +13,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 - **Para pausas largas** usa una línea en blanco (0.6 s) o `[pausa N]` (N segundos). Las inserta `tts.py`, no el modelo.
 - **Las tildes son obligatorias**. Sin ellas, el modelo cambia la sílaba tónica.
 - Escribe **números, siglas y símbolos como se pronuncian**.
-- **Los respiros y el énfasis no se pueden pedir.** Salen de la grabación de referencia.
+- **Con Qwen y Chatterbox, los respiros y el énfasis no se pueden pedir**: salen de la grabación de referencia. CosyVoice 3 sí los acepta (`[breath]`, `<strong>`); ver [motores nuevos](#motores-nuevos-qué-cambia).
 - **Todas las reglas de la sección siguiente son obligatorias.**
 
 ## Reglas obligatorias
@@ -100,9 +102,9 @@ Medido con `--evaluar` y experimentos de 3 a 5 generaciones por variante (las va
 
 **Lo que no es un error del audio.** Cuando una "s" final se junta con otra inicial, se oye una sola "s" y la frase es ambigua para cualquiera: whisper oyó "eres tú quien **decides** si" en 5 de 5 generaciones de "eres tú quien **decide** si". "Tú decides si incluir" salió bien en 4 de 5, así que se puede dejar. Las listas ("medicina general, odontología, pediatría…") se leen más lento a propósito, unas 2 palabras/s contra 3.3 de mediana; por eso el ritmo es solo un aviso.
 
-## Por qué no hay marcas
+## Por qué no hay marcas (Qwen Base)
 
-El modelo Base (el que clona voz) recibe el texto tal cual, dentro de su plantilla de chat (`<|im_start|>assistant\n{texto}<|im_end|>`). No lo normaliza ni interpreta etiquetas. Tampoco acepta instrucciones de estilo: el parámetro `instruct` solo existe en CustomVoice y VoiceDesign, que no clonan voz.
+El modelo Base de Qwen (el que clona voz) recibe el texto tal cual, dentro de su plantilla de chat (`<|im_start|>assistant\n{texto}<|im_end|>`). No lo normaliza ni interpreta etiquetas. Tampoco acepta instrucciones de estilo: el parámetro `instruct` solo existe en CustomVoice y VoiceDesign, que no clonan voz.
 
 Las etiquetas que circulan en guías de internet (`[gasp]`, `[sighing]`, `[whispers]`…) son de la API en la nube de Qwen, no de los modelos abiertos.
 
@@ -180,11 +182,29 @@ La diferencia, unos 0.3 s, es la caída natural de la voz más un margen de 0.08
 - **Palabras en inglés:** escríbelas como se dicen en español: "WhatsApp" → "guasap", "stock" → "estok", "zoom" → "zum".
 - **Marcas y nombres inventados:** escríbelos como suenan, con tilde en la sílaba tónica. "Klinikae" se oyó "ClaniKey"; escrito "Clinikái" sale bien. Lo mismo con palabras escritas a propósito de forma rara: "Escribe nunez" se oyó "Escribe en un es", y "nunes" salió bien.
 - Esa grafía es **solo para la narración**. En pantalla y en las publicaciones va la escritura real.
-- Una palabra en mayúsculas (DEMO) no cambia nada: escríbela en minúscula.
+- Una palabra en mayúsculas (DEMO) no cambia nada: escríbela en minúscula. Esto vale para **todos** los motores abiertos medidos; las mayúsculas solo dan énfasis en servicios comerciales (ElevenLabs, Gemini).
 
 ## Respiros y énfasis
 
-No se pueden indicar en el texto. El modelo copia la manera de hablar de la referencia (ritmo, respiraciones, intensidad), así que para obtener otro resultado hay que cambiar la grabación. Ver [guiones/](guiones/README.md).
+Con **Qwen y Chatterbox** no se pueden indicar en el texto. El modelo copia la manera de hablar de la referencia (ritmo, respiraciones, intensidad), así que para obtener otro resultado hay que cambiar la grabación. Ver [guiones/](guiones/README.md). Con los motores nuevos, ver la sección siguiente.
+
+## Motores nuevos: qué cambia
+
+Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([pruebas](../../docs/research/voicestudio-narracion/13-pruebas-en-gpu.md)). Hasta que `tts.py` traduzca y filtre las marcas por motor ([spec](../../docs/specs/narracion-motores-voicestudio.md)), escribe el guion para el motor que vas a usar:
+
+| Escrito | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 |
+|---|---|---|---|---|
+| `[laughter]` | Risa | No se lee | **Se lee** | Risa |
+| `[sigh]` | Suspiro | Altera el inicio | **Se lee** | Suspiro |
+| `[breath]` | **Se lee** | Altera palabras vecinas | **Se lee** | Respiro |
+| `<strong>palabra</strong>` | **Rompe la salida** | **Se lee** | **Se lee** | Énfasis |
+| `[pause]` | **Rompe la salida** | No se lee | **Se lee** | **Se lee** ("pausa") |
+| `—` (raya) | Bien | Bien | **Se lee "menos"** | Bien |
+| `…` a mitad de oración | **Omite lo que sigue** | Bien | Bien | Bien |
+| Números en dígitos | Bien | Bien | **Mal** | Bien |
+| Siglas sin deletrear | **Mal** | Bien | Bien | Bien |
+
+`[pausa N]` y la línea en blanco siguen siendo de `tts.py` y funcionan igual con todos. La emoción por instrucción o por vector (VoxCPM2, IndexTTS, CosyVoice) va **fuera del texto**: ver [docs/research/voicestudio-narracion/10](../../docs/research/voicestudio-narracion/10-emociones-y-direccion.md).
 
 ## Ejemplo
 
