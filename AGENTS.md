@@ -11,11 +11,16 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herrami
 
 ## Atajos
 
-Todo se lanza desde `cli.py` (hecho con [Typer](https://typer.tiangolo.com)): `python cli.py <herramienta> <comando> [flags]`.
+Todo se lanza desde `cli.py`, hecho con [Typer](https://typer.tiangolo.com), [Rich](https://rich.readthedocs.io) y [questionary](https://questionary.readthedocs.io): `python cli.py <herramienta> <comando> [flags]`.
+
+- **Sin argumentos** abre un menú con flechas que muestra la VRAM libre y cuántas voces de referencia hay grabadas.
+- **Si falta un flag obligatorio o uno es inválido**, el asistente lo pide: listas con descripción (licencia, VRAM y si está instalado cada motor), casillas con filtro para los 126 estilos de música, rutas con Tab y números validados. Después muestra un resumen editable, con los valores por defecto en gris y el comando equivalente, para ejecutar, cambiar o agregar cualquier flag.
+- **Con todos los flags**, se ejecuta directo. **Sin TTY** (agentes, scripts, `| cat`), no pregunta nada y se comporta como el script.
 
 ```bash
-python cli.py --help                     # herramientas y comandos
-python cli.py narration tts --help       # flags del script (pasan tal cual)
+python cli.py                            # menú
+python cli.py narration tts              # asistente
+python cli.py narration tts --help       # ayuda en tabla: flags, valores, defecto y obligatorios
 
 # Narración (sin grabaciones propias todavía: usar la referencia de prueba)
 python cli.py narration tts --modelo qwen-0.6b --estilo experta \
@@ -28,7 +33,7 @@ python cli.py narration grabar --listar
 python cli.py music --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
 ```
 
-`cli.py` funciona con cualquier `python`: si no tiene typer, se relanza con `uv run --script` (las dependencias están en su cabecera PEP 723). Los scripts, a su vez, se relanzan solos en su venv, y se pueden seguir llamando directo (`python narration/tts.py ...`). Para agregar un comando nuevo, se registra en `cli.py` con `@<herramienta>.command(**PASO)`.
+`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Los scripts, a su vez, se relanzan solos en su venv, y se pueden seguir llamando directo (`python narration/tts.py ...`). El CLI lee los flags de cada script con su `construir_parser()`. Para agregar un comando, se registra en `COMANDOS` y con `@<herramienta>.command(**PASO)` en `cli.py`, y el script expone `construir_parser()`.
 
 ## Reglas
 

@@ -794,13 +794,14 @@ GENERADORES = {
 }
 
 
-def main() -> None:
+def construir_parser() -> argparse.ArgumentParser:
+    """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--modelo', choices=MOTORES, required=True)
-    ap.add_argument('--ref', type=Path, default=AQUI / 'voz')
+    ap.add_argument('--modelo', choices=MOTORES, required=True, help='motor TTS (ver narration/README.md)')
+    ap.add_argument('--ref', type=Path, default=AQUI / 'voz', help='carpeta de referencias o un .wav concreto')
     ap.add_argument('--estilo', choices=ESTILOS, help='por defecto el "estilo" del JSON, o experta')
     fuente = ap.add_mutually_exclusive_group(required=True)
-    fuente.add_argument('--texto')
+    fuente.add_argument('--texto', help='texto a narrar, entre comillas')
     fuente.add_argument('--archivo', type=Path, nargs='+', help='uno o varios .txt o .json; el modelo se carga una vez')
     ap.add_argument(
         '--salida', type=Path,
@@ -825,6 +826,11 @@ def main() -> None:
         '--reintentos', type=int, default=0,
         help='con --evaluar: rondas en las que se regeneran solo los párrafos con observaciones',
     )
+    return ap
+
+
+def main() -> None:
+    ap = construir_parser()
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:
         ap.error('--reintentos necesita --evaluar')
