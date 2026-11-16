@@ -1,6 +1,6 @@
 # Spec: Motores de VoiceStudio, Emoción y Masterización en `narration/tts.py`
 
-> Spec del 2026-11-15. Todo lo necesario para implementar en `narration/tts.py` los cuatro motores investigados (OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3), una gramática de guion con estilo y emoción por párrafo y gestos traducidos por motor, semilla reproducible, metadatos por toma, masterización de precisión y `--evaluar` adaptado. **No está implementado**: es el contrato para el PR de implementación. Base: [docs/research/voicestudio-narracion/](../research/voicestudio-narracion/README.md).
+> Spec del 2026-11-15. Todo lo necesario para implementar en `narration/tts.py` los cuatro motores investigados (OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3), una gramática de guion con estilo y emoción por párrafo y gestos traducidos por motor, semilla reproducible, metadatos por toma, masterización de precisión y `--evaluar` adaptado. **Implementado** en `feature/motores-voicestudio`: este documento sigue siendo el contrato, y las desviaciones están en la §15. Base: [docs/research/voicestudio-narracion/](../research/voicestudio-narracion/README.md).
 
 ---
 
@@ -406,3 +406,22 @@ Rama sugerida: `feature/motores-voicestudio` desde `dev`, un commit por fase.
 | Instrucción en inglés poco fiel en algunas voces | Generar 2–3 tomas (`--semilla` distinta) y elegir; `--evaluar` |
 | La referencia propia cambia el ranking de motores | §11.3 antes de fijar valores por defecto |
 | Licencias no comerciales usadas por error en un video monetizado | Aviso en cada ejecución y campo `comercial` en los metadatos |
+
+---
+
+## 15. Desviaciones de la implementación
+
+Lo que quedó distinto de este contrato, y por qué.
+
+| # | Spec | Qué quedó | Motivo |
+| :--- | :--- | :--- | :--- |
+| 1 | §3.1: VoxCPM2 acepta `seed=` en `generate` | No lo acepta (voxcpm 2.0.3). La semilla se fija con `random`, `numpy` y `torch` antes de cada bloque | El parámetro solo existe en el acelerador de entrenamiento |
+| 2 | §7.1: −16 LUFS y −1.5 dBTP sin compresión | Con −16 LUFS, la normalización lineal solo cabe si pico real − loudness ≤ 14.5 dB. Si no, queda `dynamic`, que limita el pico: se avisa y se registra en `master.tipo`. Las salidas de OmniVoice pasan de ese límite; para que sea lineal hace falta un objetivo más bajo (≈ −19 LUFS) | El limitador reduce el rango de loudness (medido: LRA 3.5 → 2.7 LU) |
+| 3 | §7.1: WAV a la frecuencia nativa | Se añade `aresample` tras `loudnorm` | `loudnorm` escribe a 192 kHz |
+| 4 | §5.1: `segmentos` devuelve bloques con estado | Devuelve diccionarios; los doctests de pausas conservan sus expectativas | Forma pedida por el spec |
+| 5 | §5: `[estilo:]` sin `voz/<nombre>.wav` es un error | Igual con `--ref` carpeta. Con `--ref` de un solo archivo el estilo no cambia la referencia y no hay error | Un solo archivo no tiene carpeta de estilos |
+| 6 | §6.3: cada reemplazo genera aviso | Avisan los quites, los `…` y `—` reemplazados y los dígitos. `[risa]` → `[laughter]` y `<strong>` no avisan | Son traducciones, no pérdidas; evita ruido |
+| 7 | §9: `--idioma en` sin normalizar números | Los números, y las unidades de moneda o porcentaje (`$7.20`, `5%`), no se comparan: se quitan de los dos lados | Whisper escribe cifras y símbolos; sin normalizador de números en inglés daba falsos errores (ponytail: sin num2words) |
+| 8 | §4 y §8: semilla y metadatos por toma | Además, cada bloque guarda su `semilla`, sus `avisos` y su `emocion` (en Chatterbox, `exaggeration` y `cfg_weight` efectivos). La toma guarda `master` y `evaluacion` | Reproducir y auditar una toma |
+| 9 | (no está en el spec) bloque sin voz | Si el motor no produce voz para un bloque, se avisa y queda en `avisos` | OmniVoice devuelve un arreglo vacío cuando el texto no termina en puntuación |
+| 10 | §11.1: un commit por fase | F1 y F2 están en un solo commit (`5c28fc5`) | Se confirmaron juntos; cada fase está verificada por separado |
