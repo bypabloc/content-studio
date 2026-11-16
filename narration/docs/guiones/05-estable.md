@@ -1,7 +1,7 @@
 # 5 · Estable → `narration/voz/estable.wav`
 
 **Intención**: parejo y profesional, sin énfasis exagerados; ritmo ágil.
-**Duración objetivo**: 11–13 s · **Ritmo**: ágil (~160 ppm) · **Tono**: medio, **sin subidas**.
+**Duración objetivo**: 10–11 s · **Ritmo**: ágil (~160 ppm) · **Tono**: medio, **sin subidas** · **Orden en la sesión**: 5.º
 
 ## Actitud
 
@@ -11,7 +11,7 @@ Eres un locutor de noticiero o de un video corporativo. Volumen e intensidad **c
 
 > [locutor] Esta es una plataforma de gestión de contenido /
 > para creadores y equipos pequeños. ↘ /
-> Integra guiones, → / grabación, → / edición y publicación /
+> Integra guiones, → / grabación, → / edición ↗ / y publicación ↘ /
 > en un solo lugar, /
 > con acceso seguro desde cualquier dispositivo. ↘
 
@@ -21,7 +21,7 @@ Eres un locutor de noticiero o de un video corporativo. Volumen e intensidad **c
 |---|---|
 | *Esta es una plataforma de gestión de contenido* | Presentación neutral, sin destacar ninguna palabra |
 | *para creadores y equipos pequeños.* | Cierra bajando, sin pausa larga después: el ritmo sigue |
-| *Integra guiones, grabación, edición y publicación* | Enumeración pareja: todos los elementos con el mismo tono y las mismas micro-pausas |
+| *Integra guiones, grabación, edición y publicación* | Enumeración pareja: los primeros nivelados, "edición" sube apenas y "publicación" cae, sin énfasis |
 | *en un solo lugar,* | Continúa sin énfasis |
 | *con acceso seguro desde cualquier dispositivo.* | Cierre bajo y firme, al mismo volumen del inicio |
 

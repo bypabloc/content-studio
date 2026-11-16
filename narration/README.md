@@ -177,10 +177,10 @@ A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una inst
 
 Todo lo necesario para grabar está en **[docs/guiones/](docs/guiones/README.md)**:
 
-- La guía general: equipo, reglas del español neutro, cómo grabar, convertir con ffmpeg y probar la referencia, y el checklist.
-- Un guion por estilo, con actitud, versión marcada (pausas, énfasis y entonación), indicaciones frase por frase, palabras difíciles y el texto exacto.
+- La guía general: el kit de **12 clips de 8–12 s** grabados en una sola sesión (5 estilos actuales, `neutral`, `energica`, `dramatica`, `triste`, `intima`, `neutral-en` y la neutral de control), equipo, técnica, reglas del español neutro, cómo convertir y verificar con ffmpeg, y el checklist.
+- Un guion por clip, con actitud, versión marcada (pausas, énfasis y entonación), indicaciones frase por frase, palabras difíciles y el texto exacto. Más 6 clips de emoción opcionales para IndexTTS 2.5.
 
-Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`.
+Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
 
 ---
 
