@@ -792,6 +792,11 @@ def main() -> None:
     ap.add_argument('--lote', type=int, help='frases por pasada en Qwen; por defecto según la VRAM libre')
     ap.add_argument('--semilla', type=int, help='semilla base; por defecto aleatoria. Se imprime y queda en el .json')
     ap.add_argument(
+        '--master', choices=['voz', 'no'], default='voz',
+        help='voz: loudness de --lufs con pasa-altos de 70 Hz, sin compresión salvo que el pico lo impida; no: sin procesar',
+    )
+    ap.add_argument('--lufs', type=float, default=-16.0, help='loudness objetivo de --master voz (por defecto -16)')
+    ap.add_argument(
         '--evaluar', action='store_true',
         help='al final transcribe cada salida con whisper y la compara, párrafo por párrafo, con el texto pedido',
     )
@@ -833,7 +838,7 @@ def main() -> None:
         else:
             wav = f'{nombre}-{a.modelo}.wav' if nombre else f'{a.modelo}-{estilo}.wav'
             salida = (a.salida or ROOT / 'out' / 'narration') / wav
-        resultados.append(narrar(a.modelo, texto, estilo, a.ref, salida, lote, semilla))
+        resultados.append(narrar(a.modelo, texto, estilo, a.ref, salida, lote, semilla, master=a.master, lufs=a.lufs))
 
     if a.evaluar:
         evaluar(a.modelo, resultados, lote, semilla, a.reintentos)
@@ -949,7 +954,7 @@ def preparar_bloques(motor: str, segs: list[dict], ref: Path) -> list[dict]:
     return pbs
 
 
-def narrar(modelo, texto, estilo, ref, salida, lote, semilla, idioma='es') -> dict:
+def narrar(modelo, texto, estilo, ref, salida, lote, semilla, idioma='es', master='voz', lufs=-16.0) -> dict:
     """Genera todos los bloques del texto y escribe el .wav. Devuelve lo necesario para evaluar,
     regenerar bloques sueltos y escribir los metadatos."""
     import torch
@@ -974,6 +979,7 @@ def narrar(modelo, texto, estilo, ref, salida, lote, semilla, idioma='es') -> di
     g = dict(
         salida=salida, segs=segs, pb=pb, estilo=estilo, p=ESTILOS[estilo], idioma=idioma, semilla=semilla,
         semillas=[], semilla_bloque=[None] * len(segs), audios=[], sr=0, bloques=[], tiempo_s=0.0,
+        master=master, lufs=lufs, master_info=None,
     )
     regenerar(modelo, g, range(len(segs)), lote, semilla)
     dur = g['bloques'][-1][2]
@@ -1043,7 +1049,55 @@ def escribir(g: dict) -> None:
     audio = np.concatenate(partes)
 
     salida.parent.mkdir(parents=True, exist_ok=True)
-    sf.write(salida, audio, sr)
+    if g['master'] == 'voz' and np.abs(audio).max(initial=0) > 1e-4:
+        g['master_info'] = masterizar(audio, sr, salida, g['lufs'])
+    else:
+        sf.write(salida, audio, sr, subtype='PCM_24')
+        g['master_info'] = {'modo': 'no'}
+
+
+def _json_de_ffmpeg(stderr: str) -> dict:
+    """loudnorm con print_format=json escribe su JSON al final de stderr."""
+    return json.loads(stderr[stderr.rindex('{', 0, stderr.rindex('}')):stderr.rindex('}') + 1])
+
+
+def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
+    """Masterización 'voz' (§7.1): pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `lufs`, con techo de
+    pico de −1.5 dBTP. Solo se limita la dinámica si el pico real no deja llegar a `lufs` (queda 'dynamic' y se
+    avisa). Escribe WAV de 24 bits a la frecuencia nativa y devuelve lo medido."""
+    import soundfile as sf
+
+    crudo = salida.with_suffix('.crudo.wav')
+    sf.write(crudo, audio, sr, subtype='FLOAT')
+    cadena = f'highpass=f=70,loudnorm=I={lufs}:TP=-1.5:LRA=11'
+    try:
+        # Pasada 1: medir. Pasada 2: aplicar esa ganancia a la frecuencia nativa (loudnorm sobremuestrea a 192 kHz).
+        med = _json_de_ffmpeg(subprocess.run(
+            ['ffmpeg', '-hide_banner', '-i', str(crudo), '-af', f'{cadena}:print_format=json', '-f', 'null', '-'],
+            capture_output=True, text=True, check=True,
+        ).stderr)
+        filtro = (f'{cadena}:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
+                  f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
+                  f':offset={med["target_offset"]}:print_format=json,aresample={sr}')
+        fin = _json_de_ffmpeg(subprocess.run(
+            ['ffmpeg', '-hide_banner', '-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)],
+            capture_output=True, text=True, check=True,
+        ).stderr)
+    finally:
+        crudo.unlink(missing_ok=True)
+    tipo = 'linear' if fin['normalization_type'] == 'linear' else 'dynamic'
+    # Pasada 3: verificar lo que quedó escrito.
+    veri = subprocess.run(
+        ['ffmpeg', '-hide_banner', '-i', str(salida), '-af', 'ebur128=peak=true', '-f', 'null', '-'],
+        capture_output=True, text=True, check=True,
+    ).stderr
+    final = float(re.search(r'^\s*I:\s+(-?[\d.]+) LUFS', veri, re.M)[1])
+    pico = float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1])
+    if tipo == 'dynamic':
+        print(f'Aviso: el pico real no deja llegar a {lufs} LUFS con ganancia lineal; se normalizó con dinámica.')
+    if abs(final - lufs) > 0.5 or pico > -1.5:
+        print(f'Aviso: masterización fuera de criterio: {final} LUFS (objetivo {lufs}), pico real {pico} dBTP.')
+    return {'modo': 'voz', 'lufs_objetivo': lufs, 'lufs_final': final, 'pico_real_final': pico, 'tipo': tipo}
 
 
 def guardar_metadatos(modelo: str, g: dict) -> None:
@@ -1067,6 +1121,7 @@ def guardar_metadatos(modelo: str, g: dict) -> None:
         'version_tts': version_tts(), 'fecha': datetime.now().astimezone().isoformat(timespec='seconds'),
         'motor': modelo, 'licencia': m['licencia'], 'comercial': m['comercial'], 'idioma': g['idioma'],
         'semilla': g['semilla'], 'semillas_por_ronda': g['semillas'], 'bloques': bloques,
+        'master': g['master_info'],
         'parametros': {**g['p'], **PARAMS_MOTOR.get(modelo, {})},
         'tiempo_generacion_s': round(g['tiempo_s'], 1), 'duracion_s': round(g['bloques'][-1][2], 2),
         'vram_pico_gib': round(torch.cuda.max_memory_reserved() / 2**30, 2),
