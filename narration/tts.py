@@ -1087,6 +1087,16 @@ def _json_de_ffmpeg(stderr: str) -> dict:
     return json.loads(stderr[stderr.rindex('{', 0, stderr.rindex('}')):stderr.rindex('}') + 1])
 
 
+def _medir(ruta) -> tuple[float, float]:
+    """Loudness integrado (LUFS) y pico real (dBTP) de un audio, con ebur128. Pasada 3 de la masterización."""
+    veri = subprocess.run(
+        ['ffmpeg', '-hide_banner', '-i', str(ruta), '-af', 'ebur128=peak=true', '-f', 'null', '-'],
+        capture_output=True, text=True, check=True,
+    ).stderr
+    return (float(re.search(r'^\s*I:\s+(-?[\d.]+) LUFS', veri, re.M)[1]),
+            float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1]))
+
+
 def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
     """Masterización 'voz' (§7.1): pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `lufs`, con techo de
     pico de −1.5 dBTP. Solo se limita la dinámica si el pico real no deja llegar a `lufs` (queda 'dynamic' y se
@@ -1095,35 +1105,38 @@ def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
 
     crudo = salida.with_suffix('.crudo.wav')
     sf.write(crudo, audio, sr, subtype='FLOAT')
-    cadena = f'highpass=f=70,loudnorm=I={lufs}:TP=-1.5:LRA=11'
+    base = f'highpass=f=70,loudnorm=I={lufs}'
     try:
         # Pasada 1: medir. Pasada 2: aplicar esa ganancia a la frecuencia nativa (loudnorm sobremuestrea a 192 kHz).
         med = _json_de_ffmpeg(subprocess.run(
-            ['ffmpeg', '-hide_banner', '-i', str(crudo), '-af', f'{cadena}:print_format=json', '-f', 'null', '-'],
+            ['ffmpeg', '-hide_banner', '-i', str(crudo), '-af', f'{base}:TP=-1.5:LRA=11:print_format=json',
+             '-f', 'null', '-'],
             capture_output=True, text=True, check=True,
         ).stderr)
-        filtro = (f'{cadena}:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
-                  f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
-                  f':offset={med["target_offset"]}:print_format=json,aresample={sr}')
-        fin = _json_de_ffmpeg(subprocess.run(
-            ['ffmpeg', '-hide_banner', '-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)],
-            capture_output=True, text=True, check=True,
-        ).stderr)
+        tp = -1.5
+        for _ in range(3):
+            filtro = (f'{base}:TP={tp}:LRA=11:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
+                      f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
+                      f':offset={med["target_offset"]}:print_format=json,aresample={sr}')
+            fin = _json_de_ffmpeg(subprocess.run(
+                ['ffmpeg', '-hide_banner', '-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)],
+                capture_output=True, text=True, check=True,
+            ).stderr)
+            final, pico = _medir(salida)
+            if pico <= -1.5:
+                break
+            # El limitador dinámico se pasa unas décimas: se baja el techo en lo que sobró, con un margen.
+            tp = round(tp - (pico + 1.5 + 0.05), 2)
+            print(f'Aviso: pico real {pico} dBTP sobre -1.5; se repite con techo {tp} dBTP.')
     finally:
         crudo.unlink(missing_ok=True)
     tipo = 'linear' if fin['normalization_type'] == 'linear' else 'dynamic'
-    # Pasada 3: verificar lo que quedó escrito.
-    veri = subprocess.run(
-        ['ffmpeg', '-hide_banner', '-i', str(salida), '-af', 'ebur128=peak=true', '-f', 'null', '-'],
-        capture_output=True, text=True, check=True,
-    ).stderr
-    final = float(re.search(r'^\s*I:\s+(-?[\d.]+) LUFS', veri, re.M)[1])
-    pico = float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1])
     if tipo == 'dynamic':
         print(f'Aviso: el pico real no deja llegar a {lufs} LUFS con ganancia lineal; se normalizó con dinámica.')
     if abs(final - lufs) > 0.5 or pico > -1.5:
         print(f'Aviso: masterización fuera de criterio: {final} LUFS (objetivo {lufs}), pico real {pico} dBTP.')
-    return {'modo': 'voz', 'lufs_objetivo': lufs, 'lufs_final': final, 'pico_real_final': pico, 'tipo': tipo}
+    return {'modo': 'voz', 'lufs_objetivo': lufs, 'lufs_final': final, 'pico_real_final': pico, 'tipo': tipo,
+            'techo_tp': tp}
 
 
 def guardar_metadatos(modelo: str, g: dict) -> None:
