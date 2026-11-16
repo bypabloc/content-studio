@@ -126,7 +126,17 @@ LETRA = {
     'ese': 's', 'te': 't', 'u': 'u', 've': 'v', 'uve': 'v', 'equis': 'x', 'ye': 'y', 'zeta': 'z',
 }
 # Nombres de letra que no son palabras comunes: si una racha incluye uno, es una sigla.
-LETRA_CLARA = set(LETRA) - {'a', 'de', 'e', 'i', 'o', 'u', 'ye', 'te', 've', 'ese'}
+LETRA_CLARA = set(LETRA) - {'a', 'de', 'e', 'i', 'o', 'u', 'ye', 'te', 'ese', 've'}
+# En inglés los números no se comparan: whisper escribe "7", "seven" o "$7" según le parezca, y no hay normalizador
+# de números en inglés. Se quitan de los dos lados, junto con "and" ("one hundred and five") y con las unidades de
+# moneda y porcentaje que whisper cambia por símbolo ("$7.20", "5%").
+# ponytail: sin num2words; comparar números exigiría convertirlos a dígitos en los dos lados.
+NUMEROS_EN = {
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+    'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'forty',
+    'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred', 'thousand', 'million', 'and',
+    'dollar', 'dollars', 'cent', 'cents', 'percent',
+}
 SYS_COSYVOICE = 'You are a helpful assistant.'  # prompt de sistema que CosyVoice 3 espera en zero-shot
 IDIOMA_QWEN = {'es': 'Spanish', 'en': 'English'}
 
@@ -372,9 +382,10 @@ def leer_json(d: dict) -> tuple[str, str | None]:
     return '\n\n'.join(partes), d.get('estilo')
 
 
-def normalizar(texto: str) -> list[str]:
+def normalizar(texto: str, idioma: str = 'es') -> list[str]:
     """Palabras comparables con lo que transcribe whisper: sin tildes, signos ni marcas del guion,
-    y con las siglas juntas tanto deletreadas ("pe de efe") como en letras ("P D F").
+    y con las siglas juntas tanto deletreadas ("pe de efe") como en letras ("P D F"). En inglés no se
+    normalizan siglas ni números (ver NUMEROS_EN).
 
     >>> normalizar('Sale en pe de efe, con su código cu erre. [pausa 1]')
     ['sale', 'en', 'pdf', 'con', 'su', 'codigo', 'qr']
@@ -386,7 +397,13 @@ def normalizar(texto: str) -> list[str]:
     ['son', 'treinta', 'y', 'dos', 'piezas', 'siete', 'especialidades', 'y', 'cien', 'recetas']
     >>> normalizar('Me [risa] reí, [enfasis]sí[/enfasis] [estilo: dramatica]de verdad.')
     ['me', 'rei', 'si', 'de', 'verdad']
+    >>> normalizar('It costs 7 dollars and twenty cents, [risa] really.', 'en')
+    ['it', 'costs', 'really']
+    >>> normalizar('It cost $7.20 and 5 percent more.', 'en')
+    ['it', 'cost', 'more']
     """
+    if idioma == 'en':
+        return [w for w in re.findall(r'[a-z]+', SIN_MARCAS.sub(' ', texto).lower()) if w not in NUMEROS_EN]
     t = unicodedata.normalize('NFD', SIN_MARCAS.sub(' ', texto).lower())
     palabras = re.findall(r'\w+', ''.join(c for c in t if unicodedata.category(c) != 'Mn'))
     out: list[str] = []
@@ -797,6 +814,10 @@ def main() -> None:
     )
     ap.add_argument('--lufs', type=float, default=-16.0, help='loudness objetivo de --master voz (por defecto -16)')
     ap.add_argument(
+        '--idioma', choices=['es', 'en'], default='es',
+        help='idioma del motor y de whisper; con en, el estilo por defecto es neutral-en',
+    )
+    ap.add_argument(
         '--evaluar', action='store_true',
         help='al final transcribe cada salida con whisper y la compara, párrafo por párrafo, con el texto pedido',
     )
@@ -830,7 +851,7 @@ def main() -> None:
 
     resultados = []
     for nombre, texto, estilo_json in guiones:
-        estilo = a.estilo or estilo_json or 'experta'
+        estilo = a.estilo or estilo_json or ('neutral-en' if a.idioma == 'en' else 'experta')
         if estilo not in ESTILOS:
             sys.exit(f'Estilo desconocido "{estilo}" en {nombre}. Opciones: {", ".join(ESTILOS)}')
         if len(guiones) == 1 and a.salida:
@@ -838,22 +859,26 @@ def main() -> None:
         else:
             wav = f'{nombre}-{a.modelo}.wav' if nombre else f'{a.modelo}-{estilo}.wav'
             salida = (a.salida or ROOT / 'out' / 'narration') / wav
-        resultados.append(narrar(a.modelo, texto, estilo, a.ref, salida, lote, semilla, master=a.master, lufs=a.lufs))
+        resultados.append(narrar(
+            a.modelo, texto, estilo, a.ref, salida, lote, semilla, idioma=a.idioma, master=a.master, lufs=a.lufs,
+        ))
 
     if a.evaluar:
-        evaluar(a.modelo, resultados, lote, semilla, a.reintentos)
+        evaluar(a.modelo, resultados, lote, semilla, a.reintentos, a.idioma)
+    elif a.modelo == 'omnivoice':
+        print('Sugerencia: usa --evaluar con omnivoice')
     for g in resultados:
         guardar_metadatos(a.modelo, g)
 
 
-def evaluar(modelo: str, resultados: list[dict], lote: int, semilla: int, reintentos: int) -> None:
+def evaluar(modelo: str, resultados: list[dict], lote: int, semilla: int, reintentos: int, idioma: str) -> None:
     if not shutil.which('whisper'):
         sys.exit('Falta el comando whisper (pip install openai-whisper); no se puede evaluar.')
     informe: dict[int, tuple[list[str], list[int]]] = {}  # guion -> (observaciones, bloques con error)
     pendientes = {k: list(range(len(g['segs']))) for k, g in enumerate(resultados)}  # guion -> bloques
     for ronda in range(reintentos + 1):
         liberar()  # libera la VRAM para whisper
-        transcribir([w for k, idx in pendientes.items() for w in guardar_bloques(resultados[k], idx)])
+        transcribir([w for k, idx in pendientes.items() for w in guardar_bloques(resultados[k], idx)], idioma)
         for k in pendientes:
             informe[k] = revisar(resultados[k])
         pendientes = {k: informe[k][1] for k in pendientes if informe[k][1]}
@@ -866,6 +891,7 @@ def evaluar(modelo: str, resultados: list[dict], lote: int, semilla: int, reinte
 
     for k, g in enumerate(resultados):
         problemas, fallidos = informe[k]
+        g['evaluacion'] = {'rondas': ronda + 1, 'observaciones': problemas, 'ok': not fallidos}
         print(f'{"REVISAR" if fallidos else "OK     "} {g["salida"]}')
         for linea in problemas:
             print(f'          {linea}')
@@ -1121,7 +1147,7 @@ def guardar_metadatos(modelo: str, g: dict) -> None:
         'version_tts': version_tts(), 'fecha': datetime.now().astimezone().isoformat(timespec='seconds'),
         'motor': modelo, 'licencia': m['licencia'], 'comercial': m['comercial'], 'idioma': g['idioma'],
         'semilla': g['semilla'], 'semillas_por_ronda': g['semillas'], 'bloques': bloques,
-        'master': g['master_info'],
+        'master': g['master_info'], 'evaluacion': g.get('evaluacion'),
         'parametros': {**g['p'], **PARAMS_MOTOR.get(modelo, {})},
         'tiempo_generacion_s': round(g['tiempo_s'], 1), 'duracion_s': round(g['bloques'][-1][2], 2),
         'vram_pico_gib': round(torch.cuda.max_memory_reserved() / 2**30, 2),
@@ -1153,7 +1179,7 @@ def guardar_bloques(g: dict, indices) -> list[Path]:
     return rutas
 
 
-def transcribir(wavs: list[Path]) -> None:
+def transcribir(wavs: list[Path], idioma: str) -> None:
     """Whisper en una sola pasada (el modelo se carga una vez); deja <wav>.json junto a cada audio."""
     carpetas: dict[Path, list[Path]] = {}
     for w in wavs:
@@ -1161,7 +1187,7 @@ def transcribir(wavs: list[Path]) -> None:
     print(f'Evaluando {len(wavs)} párrafo(s) con whisper {WHISPER_MODELO}...', flush=True)
     for carpeta, lista in carpetas.items():
         subprocess.run(
-            ['whisper', *map(str, lista), '--model', WHISPER_MODELO, '--language', 'es',
+            ['whisper', *map(str, lista), '--model', WHISPER_MODELO, '--language', idioma,
              '--output_format', 'json', '--output_dir', str(carpeta)],
             check=True, capture_output=True,
         )
@@ -1178,14 +1204,14 @@ def revisar(g: dict) -> tuple[list[str], list[int]]:
     for i, (b, voz) in enumerate(zip(g['segs'], g['audios'])):
         texto = b['texto']
         oido = json.loads((carpeta / f'{i + 1:02d}.json').read_text(encoding='utf-8'))['text']
-        for tipo, esperado, dicho in comparar(normalizar(texto), normalizar(oido)):
+        for tipo, esperado, dicho in comparar(normalizar(texto, g['idioma']), normalizar(oido, g['idioma'])):
             problemas.append(f'párrafo {i + 1}: {tipo} "{esperado}" -> "{dicho}"')
             fallidos.add(i)
         for d in tramos_silencio(voz, g['sr'], SILENCIO_MAX):
             problemas.append(f'párrafo {i + 1}: silencio de {d:.1f} s dentro del párrafo')
             fallidos.add(i)
         con_voz = len(voz) / g['sr'] - sum(tramos_silencio(voz, g['sr'], 0.2))  # sin las pausas de … y .
-        velocidades.append(len(normalizar(texto)) / max(con_voz, 0.1))
+        velocidades.append(len(normalizar(texto, g['idioma'])) / max(con_voz, 0.1))
     med = statistics.median(velocidades)
     for i in ritmo_raro(velocidades):  # aviso: una lista o una pregunta se leen distinto a propósito
         problemas.append(f'aviso, párrafo {i + 1}: ritmo {velocidades[i]:.1f} palabras/s (mediana {med:.1f})')
