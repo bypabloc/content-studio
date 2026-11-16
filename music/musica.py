@@ -216,12 +216,13 @@ def generar_heartmula(trabajos, a) -> None:
         print(f'{salida} ({quedan:.1f} s tras recortar el silencio)')
 
 
-def main() -> None:
+def construir_parser() -> argparse.ArgumentParser:
+    """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--modelo', choices=MODELOS, required=True)
+    ap.add_argument('--modelo', choices=MODELOS, required=True, help='acestep (recomendado) o heartmula (lento)')
     ap.add_argument(
         '--estilo', nargs='+', default=['lofi-chill'],
-        help=f'uno o más: {", ".join(ESTILOS)} o texto libre entre comillas',
+        help=f'uno o más de los {len(ESTILOS)} presets (music/ESTILOS.md) o texto libre entre comillas',
     )
     ap.add_argument('--duracion', type=float, default=60, help='segundos antes del recorte (ACE ≤600, HeartMuLa ≤240)')
     ap.add_argument('--tono', help='tonalidad, ej. "C Major", "A Minor" (obligatoria con texto libre)')
@@ -241,6 +242,11 @@ def main() -> None:
         '--reintentos', type=int, default=0,
         help='con --evaluar: rondas en las que se regeneran solo las pistas con voz',
     )
+    return ap
+
+
+def main() -> None:
+    ap = construir_parser()
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:
         ap.error('--reintentos necesita --evaluar')

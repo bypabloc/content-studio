@@ -251,7 +251,7 @@ Todo lo necesario para grabar está en **[docs/guiones/](docs/guiones/README.md)
 - La guía general: el kit de **12 clips de 8–12 s** grabados en una sola sesión (5 estilos actuales, `neutral`, `energica`, `dramatica`, `triste`, `intima`, `neutral-en` y la neutral de control), equipo, técnica, reglas del español neutro, cómo convertir y verificar con ffmpeg, y el checklist.
 - Un guion por clip, con actitud, versión marcada (pausas, énfasis y entonación), indicaciones frase por frase, palabras difíciles y el texto exacto. Más 6 clips de emoción opcionales para IndexTTS 2.5, que van en `voz/emociones/`.
 
-Para grabar desde el equipo, usa `narration/grabar.py`. Lista los dispositivos de audio disponibles (`--listar`) y te deja elegir uno en el menú; muestra el texto de cada referencia y graba tomas hasta que pulses Enter. Al aceptar una toma, recorta el silencio de los bordes a 0.4 s, la normaliza a −18 LUFS y la guarda como `voz/<estilo>.wav` (WAV mono, 48 kHz, 24 bits). Después verifica los criterios de la guía (duración, formato, loudness, pico, piso de ruido y pausas) e indica cuáles no cumple:
+Para grabar desde el equipo, usa `python cli.py narration grabar`. Eliges el micrófono con las flechas y marcas las referencias en una lista con casillas, que muestra cuáles faltan. Mientras grabas, una pantalla en vivo muestra el texto, el tiempo contra la duración de la guía (amarillo, verde o rojo), un vúmetro con la zona de −12 a −6 dB y la forma de onda; Enter o espacio paran. Después de cada toma ves su duración, su pico con un consejo y su onda, y eliges si usarla, escucharla (ffplay), grabar otra o saltar el estilo. Al aceptar una toma, recorta el silencio de los bordes a 0.4 s, la normaliza a −18 LUFS y la guarda como `voz/<estilo>.wav` (WAV mono, 48 kHz, 24 bits). Después verifica los criterios de la guía (duración, formato, loudness, pico, piso de ruido y pausas) e indica cuáles no cumple:
 
 ```bash
 python cli.py narration grabar --listar                        # dispositivos de audio disponibles
@@ -259,7 +259,7 @@ python cli.py narration grabar                                 # menú: disposit
 python cli.py narration grabar --dispositivo RDPSource --todos # el kit completo, en el orden de la guía
 ```
 
-Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando solo usa ffmpeg y ffprobe, y graba desde PulseAudio o PipeWire: en WSL el micrófono de Windows llega como `RDPSource`. No cubre los clips de emoción ni la verificación con whisper de la guía.
+Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando usa ffmpeg, ffprobe y ffplay (para escuchar), más rich y questionary (los instala `uv` según la cabecera del script). Necesita una terminal interactiva y graba desde PulseAudio o PipeWire: en WSL el micrófono de Windows llega como `RDPSource`. No cubre los clips de emoción ni la verificación con whisper de la guía.
 
 Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
 
