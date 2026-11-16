@@ -163,7 +163,7 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 ### Salidas
 
 - **`.wav`**: PCM de 24 bits a la frecuencia nativa del motor. Con `--master voz`, a `--lufs` y con pico de −1.5 dBTP; con `--master no`, sin procesar.
-- **`.json`** (junto al `.wav`): motor, licencia y `comercial`; `semilla` y `semillas_por_ronda`; por bloque, el texto del guion, el texto enviado al motor, el estilo, la referencia con su SHA-256, la emoción, el modo, la semilla, los avisos y los tiempos de inicio y fin; `master` (lo medido en la masterización); `evaluacion`, si usaste `--evaluar`; y `version_tts` (el commit del script, con `-dirty` si había cambios sin confirmar).
+- **`.json`** (junto al `.wav`): motor, licencia y `comercial`; `semilla` y `semillas_por_ronda`; por bloque, el texto del guion, el texto enviado al motor, el estilo, la referencia con su SHA-256, la emoción, el modo, la semilla, los avisos y los tiempos de inicio y fin; `master` (lo medido en la masterización, y el techo de pico usado en `techo_tp`); `evaluacion`, si usaste `--evaluar`; y `version_tts` (el commit del script, con `-dirty` si había cambios sin confirmar).
 
 ### Estilo y emoción por párrafo
 
