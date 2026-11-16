@@ -190,7 +190,7 @@ Con **Qwen y Chatterbox** no se pueden indicar en el texto. El modelo copia la m
 
 ## Motores nuevos: qué cambia
 
-Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([pruebas](../../docs/research/voicestudio-narracion/13-pruebas-en-gpu.md)). Hasta que `tts.py` traduzca y filtre las marcas por motor ([spec](../../docs/specs/narracion-motores-voicestudio.md)), escribe el guion para el motor que vas a usar:
+Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([pruebas](../../docs/research/voicestudio-narracion/13-pruebas-en-gpu.md)). `tts.py` traduce cada marca al motor que elijas ([tabla de traducción](#traducción-por-motor)). Esta tabla muestra lo que cada motor hace con lo que escribes:
 
 | Escrito | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 |
 |---|---|---|---|---|
@@ -204,7 +204,44 @@ Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([prueba
 | Números en dígitos | Bien | Bien | **Mal** | Bien |
 | Siglas sin deletrear | **Mal** | Bien | Bien | Bien |
 
-`[pausa N]` y la línea en blanco siguen siendo de `tts.py` y funcionan igual con todos. La emoción por instrucción o por vector (VoxCPM2, IndexTTS, CosyVoice) va **fuera del texto**: ver [docs/research/voicestudio-narracion/10](../../docs/research/voicestudio-narracion/10-emociones-y-direccion.md).
+`[pausa N]` y la línea en blanco siguen siendo de `tts.py` y funcionan igual con todos. La emoción no va en el texto: `tts.py` la convierte en referencia, parámetros, vector o instrucción según el motor ([estilo y emoción](#estilo-y-emoción-por-párrafo); más detalle en [docs/research/voicestudio-narracion/10](../../docs/research/voicestudio-narracion/10-emociones-y-direccion.md)).
+
+### Traducción por motor
+
+Lo que `tts.py` envía al motor (`TRADUCCION` en [tts.py](../tts.py)). Cada marca que se quita, y cada reemplazo que cambia la lectura, deja un aviso en la consola y en el `.json` del bloque:
+
+| Marca | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 | Qwen y Chatterbox |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `[risa]` | `[laughter]` | se quita | se quita | `[laughter]` | se quita |
+| `[suspiro]` | `[sigh]` | se quita | se quita | `[sigh]` | se quita |
+| `[respiro]` | se quita | se quita | se quita | `[breath]` | se quita |
+| `[enfasis]x[/enfasis]` | `x` | `x` | `x` | `<strong>x</strong>` | `x` |
+| `…` a mitad de oración | `,` (omite lo que sigue) | se deja | se deja | se deja | se deja |
+| `—` | se deja | se deja | `,` (lo lee «menos») | se deja | se deja |
+| `(`, `)`, `*` | se dejan | se quitan | se dejan | se dejan | se dejan |
+| Dígitos | se dejan | se dejan | aviso | se dejan | aviso (regla 13) |
+
+## Estilo y emoción por párrafo
+
+Un guion puede cambiar de estilo (la referencia de voz) y de emoción en cualquier punto:
+
+| Marca | Qué hace |
+| :--- | :--- |
+| `[estilo: dramatica]` | Desde ese punto usa `voz/dramatica.wav` (con su `.txt`) hasta el próximo `[estilo:]`. Si la referencia no existe, el script se detiene antes de generar |
+| `[emocion: triste]` o `[emocion: triste 0.4]` | Emoción desde ese punto hasta el próximo `[emocion:]`. La intensidad va de 0 a 1 (por defecto 0.6). `[emocion:]` vacío la quita |
+
+Emociones: `alegre`, `triste`, `enojado`, `miedo`, `sorpresa`, `calma`, `urgente` y `susurro`. Cada motor la aplica a su manera:
+
+- **Qwen y OmniVoice**: cambian la referencia por la del estilo que la representa: `alegre` y `urgente` usan `energica`; `triste`, `triste`; `miedo`, `dramatica`; `sorpresa`, `amistosa`; `calma`, `suave`; `susurro`, `intima`. `enojado` no tiene referencia: se genera con el estilo del párrafo y avisa.
+- **Chatterbox**: ajusta `exaggeration` y `cfg_weight` según la intensidad. `susurro` no tiene valores y avisa.
+- **IndexTTS 2.5**: vector de emoción, o el clip `voz/emociones/<emoción>.wav` si existe. `susurro` no tiene vector y avisa.
+- **VoxCPM2**: escribe la instrucción en inglés delante del texto, en modo controlable (sin la transcripción de la referencia, que se leería). La intensidad no se controla: avisa si pides otra distinta de 0.6.
+- **CosyVoice 3**: usa la instrucción (`instruct2`). `susurro` no la sigue y avisa.
+
+Dos reglas:
+
+- `[estilo:]` y `[emocion:]` cortan el bloque. Si caen a mitad de oración, el script avisa: pon el cambio entre oraciones.
+- Un bloque que termina sin `.`, `?` o `!` puede salir vacío con OmniVoice (por ejemplo, cuando un cambio de estilo corta la oración). El script avisa y deja el aviso en el `.json` del bloque.
 
 ## Ejemplo
 
@@ -241,8 +278,8 @@ Para generar varios guiones de una vez, cada uno puede ir en un `.json`:
 
 | Campo | Uso |
 |---|---|
-| `texto` | Lista de párrafos, con las mismas reglas de este documento. Entre párrafos hay una pausa como la de una línea en blanco (0.6 s). También acepta un solo string |
-| `estilo` | `amistosa`, `suave`, `experta`, `clara` o `estable`. Elige la grabación de referencia de todo el guion. `--estilo` en la línea de comandos lo reemplaza |
+| `texto` | Lista de párrafos, con las mismas reglas de este documento. Entre párrafos hay una pausa como la de una línea en blanco (0.6 s). También acepta un solo string. Un párrafo puede ser un objeto `{"texto": "…", "estilo": "dramatica", "emocion": "triste 0.4"}`, que equivale a anteponer esas marcas |
+| `estilo` | Uno de los estilos de la [README §4](../README.md#4-estilos). Elige la grabación de referencia del guion. `--estilo` en la línea de comandos lo reemplaza |
 | `id` | Nombre del archivo de salida: `<id>-<modelo>.wav`. Si falta, se usa el nombre del `.json` |
 | otros (`titulo`, `idioma`…) | `tts.py` los ignora |
 
