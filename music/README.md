@@ -10,27 +10,27 @@ Desde la raíz del repo, con cualquier Python: el script se relanza solo en el v
 
 ```bash
 # Un preset (tonalidad, BPM y compás ya definidos)
-python music/musica.py --modelo acestep --estilo lofi-chill --duracion 60
+python cli.py music --modelo acestep --estilo lofi-chill --duracion 60
 
 # Varios presets para escucharlos y comparar (el modelo se carga una sola vez)
-python music/musica.py --modelo acestep --duracion 30 \
+python cli.py music --modelo acestep --duracion 30 \
   --estilo lofi-chill corporate future-bass deep-house ambient
 
 # Texto libre: exige --tono y --bpm (--compas es opcional, 4/4 por defecto)
-python music/musica.py --modelo acestep --duracion 30 --tono "E Minor" --bpm 105 \
+python cli.py music --modelo acestep --duracion 30 --tono "E Minor" --bpm 105 \
   --estilo "synthwave, retro 80s, driving arpeggios"
 
 # Un preset con otra tonalidad o tempo (los flags pisan los valores del preset)
-python music/musica.py --modelo acestep --estilo lofi-jazz --tono "G Major" --bpm 90
+python cli.py music --modelo acestep --estilo lofi-jazz --tono "G Major" --bpm 90
 
 # Sin el planificador LM: ~3x más rápido (ver "Qué hace --sin-lm")
-python music/musica.py --modelo acestep --estilo ambient --sin-lm
+python cli.py music --modelo acestep --estilo ambient --sin-lm
 
 # Otra carpeta de salida
-python music/musica.py --modelo acestep --estilo corporate --carpeta out/mi-proyecto
+python cli.py music --modelo acestep --estilo corporate --carpeta out/mi-proyecto
 
 # HeartMuLa (lento; ignora --tono, --bpm y --compas)
-python music/musica.py --modelo heartmula --estilo lofi-lluvia --duracion 30
+python cli.py music --modelo heartmula --estilo lofi-lluvia --duracion 30
 ```
 
 **Salida**: `out/music/<modelo>-<estilo>.wav` (en la raíz del repo; 48 kHz, estéreo) con el **silencio final ya recortado**. Cambia la carpeta con `--carpeta`. Al terminar imprime cuántos segundos quedaron, la tonalidad y el BPM:
@@ -101,7 +101,7 @@ Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](estilos.py):
 ACE-Step recibe `[Instrumental]`, pero a veces se le cuela una voz. `--evaluar` separa cada pista con **demucs** (`htdemucs`), mide el nivel del stem de voz respecto de la mezcla y marca como `VOZ` las que superan `VOZ_MAX_DB = -25` dB. Con `--reintentos N` regenera solo esas pistas (semilla nueva) hasta N rondas; si alguna sigue con voz, el script termina con error y las nombra.
 
 ```bash
-python music/musica.py --modelo acestep --duracion 30 --variantes 4 --evaluar --reintentos 2 \
+python cli.py music --modelo acestep --duracion 30 --variantes 4 --evaluar --reintentos 2 \
   --carpeta out/music-variantes --estilo lofi-chill corporate ambient
 ```
 

@@ -114,25 +114,25 @@ El script se re-ejecuta solo con el venv que corresponde, así que se puede lanz
 
 ```bash
 # Texto directo, referencia por defecto (narration/voz/<estilo>.wav)
-python narration/tts.py --modelo qwen-0.6b --estilo amistosa \
+python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
   --texto "Hola, bienvenidos al canal. Hoy te muestro cómo editar un video en un minuto."
 
 # Guion desde archivo, modelo grande, salida con nombre
-python narration/tts.py --modelo qwen-1.7b --estilo experta \
+python cli.py narration tts --modelo qwen-1.7b --estilo experta \
   --archivo guion.txt --salida out/narration/guion-experta.wav
 
 # Con la referencia de prueba (mientras no haya grabaciones propias)
-python narration/tts.py --modelo qwen-0.6b --ref narration/voz/prueba/experta.wav \
+python cli.py narration tts --modelo qwen-0.6b --ref narration/voz/prueba/experta.wav \
   --texto "Hola, esto es una prueba."
 
 # Estilo y emoción por párrafo, semilla fija y evaluación (ver formato-guion.md)
-python narration/tts.py --modelo omnivoice --ref narration/voz --archivo guion.txt --semilla 7 --evaluar
+python cli.py narration tts --modelo omnivoice --ref narration/voz --archivo guion.txt --semilla 7 --evaluar
 
 # En inglés: el estilo por defecto es neutral-en (voz/neutral-en.wav)
-python narration/tts.py --modelo chatterbox --idioma en --archivo guion-en.txt
+python cli.py narration tts --modelo chatterbox --idioma en --archivo guion-en.txt
 
 # Varios guiones JSON en una corrida (estilo e id salen de cada JSON)
-python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic
+python cli.py narration tts --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic
 ```
 
 Por cada guion imprime la semilla, la duración, el lote usado, la velocidad y el pico de VRAM. El tiempo del primer guion incluye la carga del modelo:
@@ -172,7 +172,7 @@ Un guion puede cambiar de estilo y de emoción en cualquier punto, con `[estilo:
 ### Evaluar las salidas (`--evaluar`)
 
 ```bash
-python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar
+python cli.py narration tts --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar
 ```
 
 Después de generar todo, libera el modelo de la VRAM y transcribe con whisper `medium` **cada párrafo por separado**, todos en una sola llamada. Con el audio completo, whisper a veces se saltaba media oración o pasaba palabras al párrafo vecino. Por cada guion imprime `OK` o `REVISAR` con lo que encontró:
@@ -200,7 +200,7 @@ El `.json` de cada guion guarda `evaluacion`: las observaciones, las rondas usad
 **Reintentos.** El modelo muestrea al azar: la misma frase a veces sale bien y a veces no (por ejemplo, "parto" → "parte" en un 40–60 % de las generaciones). Con `--reintentos N`, después de evaluar se regeneran solo los párrafos con observaciones, con la semilla de la ronda (base + n), se rearma el audio (el resto no se toca) y se vuelve a evaluar, hasta N rondas o hasta que no quede nada. El informe final es el de la última ronda:
 
 ```bash
-python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar --reintentos 3
+python cli.py narration tts --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic --evaluar --reintentos 3
 ```
 
 En los reintentos solo se vuelven a transcribir los párrafos regenerados. Con los 22 guiones de prueba y `--reintentos 4`, las rondas regeneraron 40 → 15 → 8 → 5 párrafos y terminaron con 18 de 22 guiones sin errores.
@@ -254,9 +254,9 @@ Todo lo necesario para grabar está en **[docs/guiones/](docs/guiones/README.md)
 Para grabar desde el equipo, usa `narration/grabar.py`. Lista los dispositivos de audio disponibles (`--listar`) y te deja elegir uno en el menú; muestra el texto de cada referencia y graba tomas hasta que pulses Enter. Al aceptar una toma, recorta el silencio de los bordes a 0.4 s, la normaliza a −18 LUFS y la guarda como `voz/<estilo>.wav` (WAV mono, 48 kHz, 24 bits). Después verifica los criterios de la guía (duración, formato, loudness, pico, piso de ruido y pausas) e indica cuáles no cumple:
 
 ```bash
-python narration/grabar.py --listar                        # dispositivos de audio disponibles
-python narration/grabar.py                                 # menú: dispositivo y estilos
-python narration/grabar.py --dispositivo RDPSource --todos # el kit completo, en el orden de la guía
+python cli.py narration grabar --listar                        # dispositivos de audio disponibles
+python cli.py narration grabar                                 # menú: dispositivo y estilos
+python cli.py narration grabar --dispositivo RDPSource --todos # el kit completo, en el orden de la guía
 ```
 
 Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando solo usa ffmpeg y ffprobe, y graba desde PulseAudio o PipeWire: en WSL el micrófono de Windows llega como `RDPSource`. No cubre los clips de emoción ni la verificación con whisper de la guía.

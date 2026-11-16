@@ -67,7 +67,7 @@ El texto que dices tiene que coincidir **palabra por palabra** con `narration/vo
 
 ## Cómo grabar cada clip
 
-Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python narration/grabar.py --dispositivo <fuente> --estilo <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
+Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python cli.py narration grabar --dispositivo <fuente> --estilo <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
 
 
 1. Lee la sección **Actitud** del guion y repasa la versión marcada en voz alta una vez.
@@ -117,7 +117,7 @@ ffmpeg -hide_banner -nostats -i "$f" -af silencedetect=n=-45dB:d=0.25 -f null - 
 ## Probar la referencia
 
 ```bash
-python narration/tts.py --modelo qwen-0.6b --estilo amistosa \
+python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
   --texto "Hola, ¿cómo estás? Hoy te muestro cómo editar un video en menos de un minuto."
 ```
 
