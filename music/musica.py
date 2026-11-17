@@ -18,6 +18,7 @@ su propio venv: music/.venv-acestep / music/.venv-heartmula (ver music/README.md
 import argparse
 import os
 import re
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -44,9 +45,12 @@ def usar_venv(venv: str) -> None:
     destino = AQUI / venv
     if Path(sys.prefix).resolve() == destino.resolve():
         return
-    py = destino / 'bin' / 'python'
+    py = destino / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
     if not py.exists():
         sys.exit(f'Falta music/{venv}. Ver la instalación en music/README.md.')
+    if os.name == 'nt':  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        sys.exit(subprocess.call([str(py), __file__, *sys.argv[1:]]))
     os.execv(py, [str(py), __file__, *sys.argv[1:]])
 
 

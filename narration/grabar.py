@@ -20,15 +20,24 @@ import argparse
 import json
 import math
 import os
+import queue
 import re
-import select
 import shutil
+import signal
 import subprocess
 import sys
-import termios
-import tty
+import threading
 from array import array
+from contextlib import contextmanager
 from pathlib import Path
+
+WINDOWS = os.name == 'nt'
+if WINDOWS:
+    import msvcrt
+else:
+    import select
+    import termios
+    import tty
 
 try:
     import questionary
@@ -41,7 +50,11 @@ try:
     from rich.text import Text
 except ImportError:  # python sin rich/questionary: uv los instala según la cabecera de arriba
     if __name__ == '__main__':
-        os.execvp('uv', ['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
+        args = ['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]]
+        if WINDOWS:  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            sys.exit(subprocess.call(args))
+        os.execvp('uv', args)
     raise
 
 AQUI = Path(__file__).resolve().parent
@@ -72,9 +85,60 @@ LUFS_OBJ, TP_MAX = -18.0, -3.0
 
 
 def fuentes() -> list[tuple[str, str, bool]]:
-    """Fuentes de PulseAudio o PipeWire, como las lista `ffmpeg -sources pulse`."""
+    """Micrófonos activos (Windows) o fuentes de PulseAudio/PipeWire (Linux, WSL)."""
+    if WINDOWS:
+        return microfonos_windows()
     r = subprocess.run(['ffmpeg', '-hide_banner', '-sources', 'pulse'], capture_output=True, text=True)
     return parsear_fuentes(r.stdout + r.stderr)
+
+
+def microfonos_windows() -> list[tuple[str, str, bool]]:
+    """Micrófonos activos según el registro (MMDevices), con el nombre que usa DirectShow: "<desc> (<interfaz>)".
+    No se listan con `ffmpeg -list_devices true -f dshow`, porque ffmpeg se cae (0xC0000005) al enumerar
+    algunas cámaras virtuales antes de llegar al audio."""
+    import winreg
+    base = r'SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture'
+    lista = []
+    with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, base) as k:
+        for i in range(winreg.QueryInfoKey(k)[0]):
+            with winreg.OpenKey(k, winreg.EnumKey(k, i)) as d, winreg.OpenKey(d, 'Properties') as p:
+                if winreg.QueryValueEx(d, 'DeviceState')[0] != 1:  # 1 = activo; desactivado/desconectado no
+                    continue
+                desc = winreg.QueryValueEx(p, '{a45c254e-df1c-4efd-8020-67d146a850e0},2')[0]
+                interfaz = winreg.QueryValueEx(p, '{b3f8fa53-0004-438e-9003-51a46e139bfc},6')[0]
+                lista.append((f'{desc} ({interfaz})', 'DirectShow', False))
+    return sorted(lista)
+
+
+def entrada(fuente: str) -> list[str]:
+    """Flags de entrada de ffmpeg para grabar de `fuente`. En DirectShow, un búfer de 50 ms para que el
+    vúmetro no vaya medio segundo atrasado."""
+    if WINDOWS:
+        return ['-f', 'dshow', '-audio_buffer_size', '50', '-i', f'audio={fuente}']
+    return ['-f', 'pulse', '-i', fuente]
+
+
+@contextmanager
+def teclado_crudo():
+    """Teclas sin Enter y sin eco mientras se graba; Ctrl+C sigue funcionando. En Windows, msvcrt ya las lee así."""
+    if WINDOWS:
+        yield
+        return
+    fd = sys.stdin.fileno()
+    modo = termios.tcgetattr(fd)
+    try:
+        tty.setcbreak(fd)
+        yield
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, modo)
+
+
+def tecla_parar() -> bool:
+    """True si se pulsó Enter o espacio (sin bloquear)."""
+    if WINDOWS:
+        return msvcrt.kbhit() and msvcrt.getwch() in '\r\n '
+    fd = sys.stdin.fileno()
+    return bool(select.select([fd], [], [], 0)[0]) and os.read(fd, 1) in (b'\n', b'\r', b' ')
 
 
 def parsear_fuentes(texto: str) -> list[tuple[str, str, bool]]:
@@ -199,7 +263,7 @@ def grabar_toma(fuente: str, destino: Path, estilo: str, n: int, texto: str) -> 
     manda una copia a 16 kHz por stdout para medir el nivel; se cierra limpio con 'q'.
     Devuelve (llegó audio, niveles en dB por bloque de 50 ms)."""
     proc = subprocess.Popen(
-        ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'pulse', '-i', fuente,
+        ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', *entrada(fuente),
          '-map', '0:a', '-ac', '1', '-ar', '48000', '-c:a', 'pcm_s24le', str(destino),
          '-map', '0:a', '-ac', '1', '-ar', str(MUESTREO), '-f', 's16le', 'pipe:1'],
         stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -207,25 +271,37 @@ def grabar_toma(fuente: str, destino: Path, estilo: str, n: int, texto: str) -> 
     bloque = int(MUESTREO * BLOQUE_S) * 2
     niveles: list[float] = []
     pendiente = b''
-    tecla = sys.stdin.fileno()
-    modo = termios.tcgetattr(tecla)
+    # Un hilo lee el audio: select() no sirve con tuberías en Windows. b'' marca que ffmpeg terminó.
+    cola: queue.Queue[bytes] = queue.Queue()
+
+    def leer():
+        try:
+            while dato := proc.stdout.read1(8192):
+                cola.put(dato)
+        except (OSError, ValueError):  # communicate() cerró la tubería al parar
+            pass
+        cola.put(b'')
+    threading.Thread(target=leer, daemon=True).start()
 
     def vista():
         return Align.center(vista_grabacion(estilo, n, texto, len(niveles) * BLOQUE_S, niveles),
                             vertical='middle', height=console.size.height)
     try:
-        tty.setcbreak(tecla)  # teclas sin Enter y sin eco; Ctrl+C sigue funcionando
         # Pantalla alternativa: cada frame se dibuja desde la esquina, sin mover el cursor relativo, así que
         # no deja restos aunque la terminal maneje distinto las líneas de ancho completo. Al parar, vuelve.
-        with Live(vista(), console=console, refresh_per_second=20, screen=True) as live:
-            while True:
-                listos, _, _ = select.select([tecla, proc.stdout], [], [], 0.05)
-                if tecla in listos and os.read(tecla, 1) in (b'\n', b'\r', b' '):
-                    break
-                if proc.stdout in listos:
-                    dato = os.read(proc.stdout.fileno(), 8192)
+        with teclado_crudo(), Live(vista(), console=console, refresh_per_second=20, screen=True) as live:
+            terminado = False
+            while not terminado and not tecla_parar():
+                try:
+                    datos = [cola.get(timeout=BLOQUE_S)]
+                    while not cola.empty():
+                        datos.append(cola.get_nowait())
+                except queue.Empty:
+                    datos = []
+                for dato in datos:
                     if not dato:
-                        break  # ffmpeg terminó solo: el dispositivo se cerró
+                        terminado = True  # ffmpeg terminó solo: el dispositivo se cerró
+                        break
                     pendiente += dato
                     while len(pendiente) >= bloque:
                         muestras = array('h', pendiente[:bloque])
@@ -236,7 +312,6 @@ def grabar_toma(fuente: str, destino: Path, estilo: str, n: int, texto: str) -> 
     except KeyboardInterrupt:
         pass
     finally:
-        termios.tcsetattr(tecla, termios.TCSADRAIN, modo)
         try:
             proc.stdin.write(b'q')
             proc.stdin.flush()
@@ -446,7 +521,8 @@ def main() -> None:
     a = construir_parser().parse_args()
     lista = fuentes()
     if not lista:
-        sys.exit('No hay fuentes de audio de PulseAudio o PipeWire (ffmpeg -sources pulse no devolvió nada).')
+        sys.exit('No hay micrófonos de DirectShow (ffmpeg -list_devices true -f dshow no devolvió nada).' if WINDOWS
+                 else 'No hay fuentes de audio de PulseAudio o PipeWire (ffmpeg -sources pulse no devolvió nada).')
     if a.listar:
         t = Table(title='Dispositivos de audio', title_style=f'bold {ACENTO}', header_style='bold', border_style='grey35')
         t.add_column('#', justify='right', style='dim')
