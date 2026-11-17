@@ -16,6 +16,7 @@ su propio venv: music/.venv-acestep / music/.venv-heartmula (ver music/README.md
 """
 
 import argparse
+import importlib.util
 import os
 import re
 import signal
@@ -200,6 +201,9 @@ def generar_heartmula(trabajos, a) -> None:
 
     # torchaudio 2.10 guarda vía torchcodec, que choca con el CUDA de este torch.
     torchaudio.save = lambda ruta, wav, sr: sf.write(ruta, wav.T.numpy(), sr)
+    # heartlib usa torch.compile, que necesita triton (no existe en Windows) y falla recién al generar.
+    if importlib.util.find_spec('triton') is None:
+        torch._dynamo.config.disable = True
     descargar_heartmula()
     # lazy_load: carga HeartMuLa, la descarga y recién ahí carga el codec (pico ~6 GB).
     pipe = HeartMuLaGenPipeline.from_pretrained(
