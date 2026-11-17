@@ -12,12 +12,11 @@ Uso:
 
 Mientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.
 Cada toma se guarda en narration/voz/tomas/ (gitignoreado). Al aceptar una, se recortan los bordes a 0.4 s,
-se normaliza con ganancia lineal y queda en narration/voz/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
+se normaliza a -18 LUFS (limitando solo los picos) y queda en narration/voz/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
 Después se verifica con los criterios de docs/guiones/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).
 """
 
 import argparse
-import json
 import math
 import os
 import queue
@@ -363,29 +362,28 @@ def nivel_toma(pico: float) -> str:
     return 'ok'
 
 
-def _json(stderr: str) -> dict:
-    """loudnorm con print_format=json escribe su JSON al final de stderr."""
-    return json.loads(stderr[stderr.rindex('{', 0, stderr.rindex('}')):stderr.rindex('}') + 1])
+def procesar(toma: Path, final: Path) -> None:
+    """Recorta los bordes a 0.4 s y lleva la toma a -18 LUFS con pico real ≤ -3 dBTP, en WAV mono 48 kHz, 24 bits.
 
-
-def procesar(toma: Path, final: Path) -> bool:
-    """Recorta los bordes a 0.4 s y normaliza con ganancia lineal (-18 LUFS, pico ≤ -3 dBTP), en WAV mono
-    48 kHz, 24 bits. Devuelve False si no pudo ser lineal: la toma tiene picos demasiado altos."""
-    tmp = final.with_suffix('.tmp.wav')
+    La voz sin comprimir tiene picos (plosivas) unos 21-25 dB sobre su loudness, y la ganancia lineal sola
+    solo cabe si esa distancia es ≤ 15 dB. Por eso: ganancia hasta el objetivo, limitador rápido que recorta
+    solo esos transitorios, y una ganancia lineal final acotada por el pico, que siempre cabe."""
+    recortada, limitada = final.with_suffix('.rec.wav'), final.with_suffix('.lim.wav')
     recorte = (f'silenceremove=start_periods=1:start_threshold=-45dB:start_silence={BORDE_S}'
                f':stop_periods=-1:stop_threshold=-45dB:stop_silence={BORDE_S}')
     formato = ['-ac', '1', '-ar', '48000', '-c:a', 'pcm_s24le']
-    _ffmpeg('-y', '-i', str(toma), '-af', recorte, *formato, str(tmp))
-    base = f'loudnorm=I={LUFS_OBJ}:TP={TP_MAX}:LRA=11'
     try:
-        med = _json(_ffmpeg('-i', str(tmp), '-af', f'{base}:print_format=json', '-f', 'null', '-'))
-        fin = _json(_ffmpeg('-y', '-i', str(tmp), '-af',
-                            f'{base}:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
-                            f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
-                            f':offset={med["target_offset"]}:print_format=json', *formato, str(final)))
+        _ffmpeg('-y', '-i', str(toma), '-af', recorte, *formato, str(recortada))
+        lufs, _ = loudness(recortada)
+        techo = 10 ** ((TP_MAX - 2) / 20)  # 2 dB de margen: el limitador baja ~1-1.5 LU, y el pico real excede la muestra
+        _ffmpeg('-y', '-i', str(recortada), '-af', f'aformat=sample_fmts=dbl,volume={LUFS_OBJ - lufs:.2f}dB,'
+                f'alimiter=limit={techo:.4f}:level=0:attack=5:release=50', *formato, str(limitada))
+        lufs, tp = loudness(limitada)
+        _ffmpeg('-y', '-i', str(limitada), '-af', f'volume={min(LUFS_OBJ - lufs, TP_MAX - tp):.2f}dB',
+                *formato, str(final))
     finally:
-        tmp.unlink(missing_ok=True)
-    return fin['normalization_type'] == 'linear'
+        recortada.unlink(missing_ok=True)
+        limitada.unlink(missing_ok=True)
 
 
 def verificar(estilo: str, final: Path) -> list[tuple[bool, str]]:
@@ -489,19 +487,15 @@ def grabar_estilo(fuente: str, estilo: str, sobrescribir: bool, i: int, total: i
             return 'saltada'
         if accion == 'usar':
             with console.status('Recortando, normalizando y verificando…', spinner='dots'):
-                lineal = procesar(toma, final)
-                checks = verificar(estilo, final) if lineal else []
-            if lineal:
-                t = Table(box=None, padding=(0, 1), show_header=False)
-                for cumple, detalle in checks:
-                    t.add_row(Text('✓' if cumple else '✗', style='green' if cumple else 'red'), detalle)
-                todo = all(c for c, _ in checks)
-                console.print(Panel(t, title=f'[bold]{"✓" if todo else "⚠"} {final.relative_to(AQUI.parent)}[/]',
-                                    title_align='left', border_style='green' if todo else 'yellow', padding=(0, 2)))
-                return 'lista' if todo else 'lista con observaciones'
-            console.print('[red]✗ La normalización no pudo ser lineal: la toma tiene picos demasiado altos.[/] '
-                          'Repite alejándote un poco del micrófono.')
-            final.unlink(missing_ok=True)
+                procesar(toma, final)
+                checks = verificar(estilo, final)
+            t = Table(box=None, padding=(0, 1), show_header=False)
+            for cumple, detalle in checks:
+                t.add_row(Text('✓' if cumple else '✗', style='green' if cumple else 'red'), detalle)
+            todo = all(c for c, _ in checks)
+            console.print(Panel(t, title=f'[bold]{"✓" if todo else "⚠"} {final.relative_to(AQUI.parent)}[/]',
+                                title_align='left', border_style='green' if todo else 'yellow', padding=(0, 2)))
+            return 'lista' if todo else 'lista con observaciones'
         n += 1
 
 
