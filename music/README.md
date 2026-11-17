@@ -223,8 +223,8 @@ git clone --depth 1 https://github.com/HeartMuLa/heartlib.git models/heartlib
 # ACE-Step (Python 3.12, torch 2.10 cu128)
 (cd models/ACE-Step-1.5 && UV_PROJECT_ENVIRONMENT=../../.venv-acestep uv sync)
 
-# HeartMuLa (Python 3.10)
-uv venv -p 3.10 .venv-heartmula && VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib
+# HeartMuLa (Python 3.10). En Linux se resuelve datasets 2.14, que usa pa.PyExtensionType: pyarrow<21
+uv venv -p 3.10 .venv-heartmula && VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib "pyarrow<21"
 ```
 
 Los pesos se descargan solos en la primera corrida:

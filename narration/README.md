@@ -70,9 +70,9 @@ En este proyecto, **Qwen 0.6B y 1.7B dieron el mejor resultado** al escucharlos.
 Cada motor necesita su propio venv porque fijan versiones de `transformers` y de `torch` incompatibles entre sí. Qwen, Chatterbox, OmniVoice y VoxCPM2 viven en `narration/.venv-*`; IndexTTS 2.5 y CosyVoice 3 son repos clonados en `narration/motores/`, cada uno con su `.venv`. Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
 
 ```bash
-# Qwen3-TTS y Chatterbox V3
+# Qwen3-TTS y Chatterbox V3. torch 2.15 da segfault en esta WSL: fijar 2.14.1 (Chatterbox fija el suyo)
 uv venv -p 3.12 narration/.venv-qwen
-VIRTUAL_ENV=narration/.venv-qwen uv pip install qwen-tts soundfile
+VIRTUAL_ENV=narration/.venv-qwen uv pip install qwen-tts soundfile "torch==2.14.1" "torchaudio==2.11.1"
 
 uv venv -p 3.12 narration/.venv-chatterbox
 VIRTUAL_ENV=narration/.venv-chatterbox uv pip install soundfile \
