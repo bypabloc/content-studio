@@ -240,6 +240,14 @@ VIRTUAL_ENV=.venv-acestep uv pip install --no-deps demucs
 VIRTUAL_ENV=.venv-acestep uv pip install julius einops lameenc openunmix dora-search
 ```
 
+**En Windows** (PowerShell o Git Bash) los comandos son los mismos, salvo HeartMuLa: primero torch con CUDA desde el índice de PyTorch, porque desde PyPI llega la versión que solo usa CPU (y `--torch-backend` no sirve: busca `torchtune` solo en ese índice).
+
+```bash
+uv venv -p 3.10 .venv-heartmula
+VIRTUAL_ENV=.venv-heartmula uv pip install torch==2.10.0 torchaudio==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cu128
+VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib
+```
+
 Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si mueves `music/`, borra los `.venv-*` y vuelve a crearlos con los comandos de arriba (con la caché de uv tarda poco).
 
 ## Estructura

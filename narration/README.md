@@ -102,6 +102,14 @@ cd ../../..
 narration/motores/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
 ```
 
+**En Windows**, torch con CUDA no viene de PyPI. Qwen se instala con `--torch-backend=cu128`. Chatterbox fija `torch==2.6.0`, que solo existe para cu126, así que va primero:
+
+```bash
+VIRTUAL_ENV=narration/.venv-qwen uv pip install --torch-backend=cu128 qwen-tts soundfile
+VIRTUAL_ENV=narration/.venv-chatterbox uv pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
+VIRTUAL_ENV=narration/.venv-chatterbox uv pip install soundfile "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
+```
+
 Los pesos de Qwen, Chatterbox, OmniVoice y VoxCPM2 se bajan solos a `~/.cache/huggingface` la primera vez (Qwen 1.7B ≈ 4 GB, 0.6B ≈ 2 GB). IndexTTS y CosyVoice guardan sus pesos dentro de su repo (`checkpoints/` y `pretrained_models/`). También se necesita `ffmpeg` en el PATH, y `whisper` para `--evaluar`.
 
 Si mueves un repo de `motores/`, recrea su `.venv`: un venv movido deja de funcionar (sus scripts apuntan a rutas absolutas). Los pesos sí se mueven sin problema.
@@ -259,7 +267,7 @@ python cli.py narration grabar                                 # menú: disposit
 python cli.py narration grabar --dispositivo RDPSource --todos # el kit completo, en el orden de la guía
 ```
 
-Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando usa ffmpeg, ffprobe y ffplay (para escuchar), más rich y questionary (los instala `uv` según la cabecera del script). Necesita una terminal interactiva y graba desde PulseAudio o PipeWire: en WSL el micrófono de Windows llega como `RDPSource`. No cubre los clips de emoción ni la verificación con whisper de la guía.
+Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando usa ffmpeg, ffprobe y ffplay (para escuchar), más rich y questionary (los instala `uv` según la cabecera del script). Necesita una terminal interactiva. En Linux y WSL graba desde PulseAudio o PipeWire (en WSL, el micrófono de Windows llega como `RDPSource`). En Windows graba con DirectShow y lista los micrófonos activos desde el registro, con el mismo nombre que usa DirectShow (por ejemplo, `--dispositivo "Micrófono (HyperX QuadCast 2)"` o su número en `--listar`). No usa `ffmpeg -list_devices`, porque ffmpeg se cae al enumerar algunas cámaras virtuales. No cubre los clips de emoción ni la verificación con whisper de la guía.
 
 Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
 

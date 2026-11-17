@@ -23,9 +23,21 @@ import importlib.util
 import os
 import re
 import shlex
+import signal
 import subprocess
 import sys
 from pathlib import Path
+
+
+def relanzar(args: list[str]) -> None:
+    """os.exec*. En Windows no reemplaza el proceso (el padre sale y la terminal vuelve al prompt con el
+    hijo corriendo), así que ahí se espera al hijo, que se queda con el Ctrl+C."""
+    sys.stdout.flush()
+    if os.name == 'nt':
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        sys.exit(subprocess.call(args))
+    os.execvp(args[0], args)
+
 
 try:
     import questionary
@@ -37,7 +49,7 @@ try:
     from rich.text import Text
 except ImportError:
     try:
-        os.execvp('uv', ['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
+        relanzar(['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
     except FileNotFoundError:
         sys.exit('Falta uv (o instala typer, rich y questionary en este python). Ver "Requisitos" en AGENTS.md.')
 
@@ -355,8 +367,7 @@ def lanzar(clave: str, args: list[str]) -> None:
     if sys.stdout.isatty():
         console.rule(f'[bold {ACENTO}]{COMANDOS[clave]["icono"]}  {clave}[/] [dim]{shlex.join(args)}[/]',
                      align='left', style=ACENTO)
-    sys.stdout.flush()
-    os.execv(sys.executable, [sys.executable, str(RAIZ / COMANDOS[clave]['script']), *args])
+    relanzar([sys.executable, str(RAIZ / COMANDOS[clave]['script']), *args])
 
 
 def cancelar() -> None:
