@@ -87,7 +87,7 @@ ffmpeg -i narration/voz/bruto-amistosa.wav -af loudnorm=I=-18:TP=-3:LRA=11:linea
   -ac 1 -ar 48000 -c:a pcm_s24le narration/voz/amistosa.wav
 ```
 
-Si `loudnorm` avisa que no puede quedarse en modo lineal, la toma tiene picos demasiado altos: aléjate un poco del micrófono y vuelve a grabar.
+Con `linear=true`, `loudnorm` solo se mantiene lineal si el pico real queda a 15 dB o menos sobre la loudness. La voz sin comprimir suele estar entre 21 y 25 dB, y alejarse del micrófono no cambia esa distancia. En ese caso `loudnorm` pasa a modo dinámico. `python cli.py narration grabar` lo resuelve solo: aplica la ganancia, pasa un limitador rápido (`alimiter`) que recorta únicamente las plosivas y termina con una ganancia lineal acotada por el pico.
 
 ## Verificar cada clip
 
