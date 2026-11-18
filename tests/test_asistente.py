@@ -41,6 +41,10 @@ def test_asistente_pide_la_fuente_y_conserva_el_cero(correr):
     assert (clave, argv) == ('narration tts', ['--texto', 'hola', '--semilla', '0'])
 
 
-def test_menu_lleva_al_asistente_de_music(correr):
+def test_menu_lleva_al_asistente_de_music(correr, monkeypatch):
+    # Sin los venvs (CI, clon nuevo) los dos modelos salen deshabilitados y no hay nada que elegir.
+    from content_studio.music.motores.base import EspecMusica
+
+    monkeypatch.setattr(EspecMusica, 'instalado', lambda self: True)
     # music es el 4.º → --modelo acestep (1.º) → Ejecutar
     assert correr(ABAJO * 3 + ENTER + ENTER + ENTER, menu.menu) == ('music', ['--modelo', 'acestep'])
