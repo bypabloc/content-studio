@@ -53,3 +53,13 @@ def test_tts_avisa_antes_de_sobrescribir(tmp_path, capsys):
     avisar_sobrescritura([('t', 'experta', tmp_path / 'a.wav'), ('t', 'experta', tmp_path / 'b.wav')])
     err = capsys.readouterr().err
     assert 'a.wav' in err and 'b.wav' not in err
+
+
+def test_help_en_cp1252():
+    import os
+    import subprocess
+
+    env = {**os.environ, 'PYTHONIOENCODING': 'cp1252'}
+    for args in (['music/musica.py', '--help'], ['cli.py', 'music', '--help']):
+        r = subprocess.run([sys.executable, *args], cwd=RAIZ, env=env, capture_output=True)
+        assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')

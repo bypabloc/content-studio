@@ -53,6 +53,8 @@ except ImportError:
     except FileNotFoundError:
         sys.exit('Falta uv (o instala typer, rich y questionary en este python). Ver "Requisitos" en AGENTS.md.')
 
+for _f in (sys.stdout, sys.stderr):  # cp1252 (Windows, a una tubería) no tiene los íconos: que no reviente
+    _f.reconfigure(errors='replace')
 RAIZ = Path(__file__).resolve().parent
 console = Console(highlight=False)
 ACENTO = '#a78bfa'

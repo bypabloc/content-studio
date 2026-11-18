@@ -254,6 +254,8 @@ def construir_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    for f in (sys.stdout, sys.stderr):  # cp1252 (Windows, a una tubería) no tiene ≤ ni –: que no reviente el --help
+        f.reconfigure(errors='replace')
     ap = construir_parser()
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:
