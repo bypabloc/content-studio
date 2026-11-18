@@ -131,7 +131,7 @@ def unir(args: list[str]) -> str:
 def partir(texto: str) -> list[str]:
     r"""Rutas escritas en una línea. Si el texto entero es una ruta que existe (aunque tenga espacios), es una sola.
     En Windows sin el modo posix, que se come las \ (D:\a.json salía D:a.json), y sin las comillas."""
-    if Path(texto.strip()).exists():
+    if texto.strip() and Path(texto.strip()).exists():  # Path('') es '.', que existe
         return [texto.strip()]
     if os.name != 'nt':
         return shlex.split(texto)
