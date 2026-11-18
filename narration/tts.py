@@ -877,6 +877,16 @@ def main() -> None:
             ap.error(f'la voz {a.voz} es en "{ficha["idioma"]}": usa --idioma {ficha["idioma"]}')
         a.ref = VOCES / a.voz
 
+    # (nombre de salida o None, texto, estilo del JSON o None)
+    guiones = [(None, a.texto, None)] if a.texto else []
+    for f in a.archivo or []:
+        if f.suffix == '.json':
+            d = json.loads(f.read_text(encoding='utf-8'))
+            guiones.append((d.get('id', f.stem), *leer_json(d)))
+        else:
+            guiones.append((f.stem, f.read_text(encoding='utf-8'), None))
+    trabajos = planificar(a, guiones)  # valida estilos y rutas antes de relanzar y de cargar el modelo
+
     m = MOTORES[a.modelo]
     usar_venv(m['venv'])  # desde aquí corre en el venv del motor: los avisos se imprimen una sola vez
     if a.voz:
@@ -893,28 +903,8 @@ def main() -> None:
         print(f'Aviso: {a.modelo} es Apache-2.0, pero su model card dice "for academic purposes only" (sin aclarar). '
               'Ver docs/research/voicestudio-narracion/07.')
 
-    # (nombre de salida o None, texto, estilo del JSON o None)
-    guiones = [(None, a.texto, None)] if a.texto else []
-    for f in a.archivo or []:
-        if f.suffix == '.json':
-            d = json.loads(f.read_text(encoding='utf-8'))
-            guiones.append((d.get('id', f.stem), *leer_json(d)))
-        else:
-            guiones.append((f.stem, f.read_text(encoding='utf-8'), None))
-
-    resultados = []
-    for nombre, texto, estilo_json in guiones:
-        estilo = a.estilo or estilo_json or ('neutral-en' if a.idioma == 'en' else 'experta')
-        if estilo not in ESTILOS:
-            sys.exit(f'Estilo desconocido "{estilo}" en {nombre}. Opciones: {", ".join(ESTILOS)}')
-        if len(guiones) == 1 and a.salida:
-            salida = a.salida
-        else:
-            wav = f'{nombre}-{a.modelo}.wav' if nombre else f'{a.modelo}-{estilo}.wav'
-            salida = (a.salida or ROOT / 'out' / 'narration') / wav
-        resultados.append(narrar(
-            a.modelo, texto, estilo, a.ref, salida, lote, semilla, idioma=a.idioma, master=a.master, lufs=a.lufs,
-        ))
+    resultados = [narrar(a.modelo, texto, estilo, a.ref, salida, lote, semilla, idioma=a.idioma, master=a.master,
+                         lufs=a.lufs) for texto, estilo, salida in trabajos]
 
     if a.evaluar:
         evaluar(a.modelo, resultados, lote, semilla, a.reintentos, a.idioma)
@@ -922,6 +912,40 @@ def main() -> None:
         print('Sugerencia: usa --evaluar con omnivoice')
     for g in resultados:
         guardar_metadatos(a.modelo, g)
+
+
+def planificar(a, guiones: list[tuple]) -> list[tuple[str, str, Path]]:
+    """(texto, estilo, salida .wav) de cada guion. Con un solo guion, --salida es el .wav, salvo que sea una carpeta
+    (existe como tal o no tiene extensión). Falla antes de generar si la ruta no es .wav o dos guiones chocan.
+
+    >>> from argparse import Namespace
+    >>> a = Namespace(estilo=None, idioma='es', modelo='qwen-0.6b', salida=Path('out/lote'))
+    >>> [s.as_posix() for *_, s in planificar(a, [(None, 'Hola', None)])]
+    ['out/lote/qwen-0.6b-experta.wav']
+    >>> a.salida = Path('x.mp3'); planificar(a, [('a', 'Hola', None)])
+    Traceback (most recent call last):
+    SystemExit: --salida x.mp3: tiene que ser un .wav o una carpeta
+    >>> a.salida = None; len(planificar(a, [('a', 'Uno', None), ('a', 'Dos', 'suave')]))
+    Traceback (most recent call last):
+    SystemExit: Dos guiones van al mismo archivo: a-qwen-0.6b.wav (usa ids distintos)
+    """
+    archivo = len(guiones) == 1 and a.salida and a.salida.suffix and not a.salida.is_dir()
+    if archivo and a.salida.suffix.lower() != '.wav':
+        sys.exit(f'--salida {a.salida}: tiene que ser un .wav o una carpeta')
+    trabajos = []
+    for nombre, texto, estilo_json in guiones:
+        estilo = a.estilo or estilo_json or ('neutral-en' if a.idioma == 'en' else 'experta')
+        if estilo not in ESTILOS:
+            sys.exit(f'Estilo desconocido "{estilo}" en {nombre}. Opciones: {", ".join(ESTILOS)}')
+        if archivo:
+            salida = a.salida
+        else:
+            wav = f'{nombre}-{a.modelo}.wav' if nombre else f'{a.modelo}-{estilo}.wav'
+            salida = (a.salida or ROOT / 'out' / 'narration') / wav
+        if any(s == salida for *_, s in trabajos):
+            sys.exit(f'Dos guiones van al mismo archivo: {salida.name} (usa ids distintos)')
+        trabajos.append((texto, estilo, salida))
+    return trabajos
 
 
 def evaluar(modelo: str, resultados: list[dict], lote: int, semilla: int, reintentos: int, idioma: str) -> None:

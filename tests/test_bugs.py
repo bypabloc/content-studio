@@ -29,3 +29,18 @@ def test_musica_falla_sin_dejar_el_wav_viejo(tmp_path, monkeypatch):
         musica.main()
     assert e.value.code and 'acestep-lofi-chill.wav' in str(e.value.code)
     assert not vieja.exists()
+
+
+def test_tts_salida_carpeta_con_un_guion(tmp_path):
+    from argparse import Namespace
+
+    import pytest
+    from tts import planificar
+
+    a = Namespace(estilo=None, idioma='es', modelo='voxcpm2', salida=tmp_path)  # carpeta existente
+    assert [s for *_, s in planificar(a, [('g', 'Hola', None)])] == [tmp_path / 'g-voxcpm2.wav']
+    a.salida = tmp_path / 'toma.wav'
+    assert [s for *_, s in planificar(a, [('g', 'Hola', None)])] == [a.salida]
+    a.salida = tmp_path / 'toma.mp3'
+    with pytest.raises(SystemExit):
+        planificar(a, [('g', 'Hola', None)])
