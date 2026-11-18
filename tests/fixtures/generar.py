@@ -31,8 +31,17 @@ RAIZ = AQUI.parents[1]
 MODELOS = ['voxcpm2', 'cosyvoice3', 'qwen-1.7b', 'qwen-0.6b', 'chatterbox', 'omnivoice', 'indextts']
 # Las choices de --voz salen de narration/voces/<voz>/aprobacion.json, que está gitignoreado: se fijan las 9 voces
 # aprobadas en el equipo donde se generó la base, para que el resultado sea el mismo en CI.
-APROBADAS = ['karen-savage', 'mpinedag', 'yesid', 'andrea', 'hannah', 'colombia-m', 'peru-f', 'venezuela-f',
-             'vctk-p345']
+APROBADAS = [
+    'karen-savage',
+    'mpinedag',
+    'yesid',
+    'andrea',
+    'hannah',
+    'colombia-m',
+    'peru-f',
+    'venezuela-f',
+    'vctk-p345',
+]
 
 
 # El módulo con construir_parser de cada comando (la clave 'script' de la fixture).
@@ -51,7 +60,8 @@ def nuevo_tts() -> types.SimpleNamespace:
     from content_studio.narration.texto.segmentos import etiquetas, segmentos
 
     return types.SimpleNamespace(
-        segmentos=segmentos, etiquetas=etiquetas,
+        segmentos=segmentos,
+        etiquetas=etiquetas,
         preparar_bloques=lambda m, segs, ref: preparar_bloques(MOTORES[m].crear(), segs, ref),
         PARAMS_MOTOR={n: e.crear().params for n, e in MOTORES.items()},
     )
@@ -74,11 +84,17 @@ def relativo(v):
 
 def accion(a: argparse.Action) -> dict:
     return {
-        'option_strings': a.option_strings, 'dest': a.dest, 'accion': type(a).__name__,
+        'option_strings': a.option_strings,
+        'dest': a.dest,
+        'accion': type(a).__name__,
         'choices': list(a.choices) if a.choices is not None else None,
         'default': relativo(a.default) if a.default is not argparse.SUPPRESS else '==SUPPRESS==',
-        'required': a.required, 'nargs': a.nargs, 'const': a.const,
-        'type': getattr(a.type, '__name__', None), 'help': a.help, 'metavar': a.metavar,
+        'required': a.required,
+        'nargs': a.nargs,
+        'const': a.const,
+        'type': getattr(a.type, '__name__', None),
+        'help': a.help,
+        'metavar': a.metavar,
     }
 
 
@@ -92,10 +108,14 @@ def parsers(comandos: dict[str, tuple[str, types.ModuleType]]) -> dict:
                     pila.enter_context(mock.patch.object(mod, 'aprobadas', lambda _e: dict.fromkeys(APROBADAS, {})))
                 ap = mod.construir_parser()
             out[clave] = {
-                'script': script, 'docstring': mod.__doc__, 'description': ap.description,
+                'script': script,
+                'docstring': mod.__doc__,
+                'description': ap.description,
                 'acciones': [accion(a) for a in ap._actions],
-                'excluyentes': [{'required': g.required, 'dests': [a.dest for a in g._group_actions]}
-                                for g in ap._mutually_exclusive_groups],
+                'excluyentes': [
+                    {'required': g.required, 'dests': [a.dest for a in g._group_actions]}
+                    for g in ap._mutually_exclusive_groups
+                ],
                 'help': ap.format_help(),
             }
     return out
@@ -127,14 +147,22 @@ def bloques(tts) -> dict:
             return v
 
         segs = tts.segmentos(texto, 'experta')
-        out = {'texto': texto, 'estilo': 'experta', 'segmentos': limpio(segs), 'etiquetas': tts.etiquetas(texto),
-               'modelos': {}}
+        out = {
+            'texto': texto,
+            'estilo': 'experta',
+            'segmentos': limpio(segs),
+            'etiquetas': tts.etiquetas(texto),
+            'modelos': {},
+        }
         for m in MODELOS:
             salida = io.StringIO()
             with contextlib.redirect_stdout(salida):
                 pb = tts.preparar_bloques(m, segs, ref)
-            out['modelos'][m] = {'bloques': limpio(pb), 'stdout': salida.getvalue(),
-                                 'parametros_motor': tts.PARAMS_MOTOR.get(m, {})}
+            out['modelos'][m] = {
+                'bloques': limpio(pb),
+                'stdout': salida.getvalue(),
+                'parametros_motor': tts.PARAMS_MOTOR.get(m, {}),
+            }
     return out
 
 

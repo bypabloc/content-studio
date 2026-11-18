@@ -10,62 +10,125 @@ Los candidatos que fallan al probarlos se quitan de aquí y quedan anotados en I
 BASE = {
     'lofi-chill': dict(
         caption='lo-fi hip hop, chill, mellow Rhodes piano, dusty vinyl crackle, soft boom bap drums, warm bass, relaxing',
-        tags='lofi,hip hop,chill,piano,relaxing', tono='C Major', bpm=80, compas='4',
+        tags='lofi,hip hop,chill,piano,relaxing',
+        tono='C Major',
+        bpm=80,
+        compas='4',
     ),
     'lofi-jazz': dict(
         caption='jazzy lo-fi, smooth jazz chords, muted trumpet, upright bass, brushed drums, tape saturation, cozy',
-        tags='lofi,jazz,chill,trumpet,cozy', tono='D Minor', bpm=85, compas='4',
+        tags='lofi,jazz,chill,trumpet,cozy',
+        tono='D Minor',
+        bpm=85,
+        compas='4',
     ),
     'lofi-lluvia': dict(
         caption='rainy lo-fi, melancholic piano, rain ambience, vinyl noise, slow lazy drums, nostalgic, calm',
-        tags='lofi,rain,melancholic,piano,calm', tono='E Minor', bpm=72, compas='4',
+        tags='lofi,rain,melancholic,piano,calm',
+        tono='E Minor',
+        bpm=72,
+        compas='4',
     ),
     'lofi-estudio': dict(
         caption='lo-fi study beats, soft guitar, gentle keys, steady laid-back groove, focused, minimal, background music',
-        tags='lofi,study,guitar,focus,minimal', tono='G Major', bpm=78, compas='4',
+        tags='lofi,study,guitar,focus,minimal',
+        tono='G Major',
+        bpm=78,
+        compas='4',
     ),
     'lofi-nocturno': dict(
         caption='late night lo-fi, dreamy synth pads, deep sub bass, slow swing drums, city night atmosphere, ambient',
-        tags='lofi,night,dreamy,synth,ambient', tono='A Minor', bpm=70, compas='4',
+        tags='lofi,night,dreamy,synth,ambient',
+        tono='A Minor',
+        bpm=70,
+        compas='4',
     ),
     'corporate': dict(
         caption='corporate background music, uplifting, clean electric piano, light plucks, soft claps, optimistic, modern tech',
-        tags='corporate,uplifting,piano,positive,background', tono='C Major', bpm=110, compas='4',
+        tags='corporate,uplifting,piano,positive,background',
+        tono='C Major',
+        bpm=110,
+        compas='4',
     ),
     'future-bass': dict(
         caption='soft future bass, bright supersaw chords, gentle sidechain, airy plucks, positive, polished, background',
-        tags='future bass,electronic,bright,positive,soft', tono='G Major', bpm=100, compas='4',
+        tags='future bass,electronic,bright,positive,soft',
+        tono='G Major',
+        bpm=100,
+        compas='4',
     ),
     'deep-house': dict(
         caption='deep house, warm groove, smooth chords, round bass, crisp hi-hats, elegant, minimal, background',
-        tags='deep house,groove,warm,minimal,elegant', tono='A Minor', bpm=120, compas='4',
+        tags='deep house,groove,warm,minimal,elegant',
+        tono='A Minor',
+        bpm=120,
+        compas='4',
     ),
     'ambient': dict(
         caption='ambient, evolving soft pads, gentle piano notes, airy textures, calm, spacious, no drums',
-        tags='ambient,calm,pads,piano,spacious', tono='D Major', bpm=70, compas='4',
+        tags='ambient,calm,pads,piano,spacious',
+        tono='D Major',
+        bpm=70,
+        compas='4',
     ),
 }
 
 # nombre: (caption, tonalidad, bpm) o (caption, tonalidad, bpm, compás)
 NUEVOS = {
     # Tutoriales y explicativos: bajo, sin melodía que compita con la voz
-    'tutorial-calmo': ('soft piano, warm pad, light pluck, gentle, minimal, focused, tutorial background', 'C Major', 90),
-    'tutorial-tech': ('clean synth plucks, soft electric piano, minimal electronic beat, friendly, modern, explainer background', 'G Major', 100),
-    'tutorial-guitarra': ('fingerstyle acoustic guitar, soft shaker, warm, friendly, light, unobtrusive background', 'G Major', 95),
-    'explainer-animado': ('playful marimba, pizzicato strings, light claps, bright, curious, animated explainer', 'C Major', 115),
-    'explainer-minimal': ('minimal piano motif, soft sub bass, airy pad, clear, uncluttered, background', 'D Major', 85),
+    'tutorial-calmo': (
+        'soft piano, warm pad, light pluck, gentle, minimal, focused, tutorial background',
+        'C Major',
+        90,
+    ),
+    'tutorial-tech': (
+        'clean synth plucks, soft electric piano, minimal electronic beat, friendly, modern, explainer background',
+        'G Major',
+        100,
+    ),
+    'tutorial-guitarra': (
+        'fingerstyle acoustic guitar, soft shaker, warm, friendly, light, unobtrusive background',
+        'G Major',
+        95,
+    ),
+    'explainer-animado': (
+        'playful marimba, pizzicato strings, light claps, bright, curious, animated explainer',
+        'C Major',
+        115,
+    ),
+    'explainer-minimal': (
+        'minimal piano motif, soft sub bass, airy pad, clear, uncluttered, background',
+        'D Major',
+        85,
+    ),
     'curso-online': ('gentle kalimba, soft piano, warm pad, relaxed, educational, background', 'C Major', 88),
-    'paso-a-paso': ('steady soft pulse, muted pluck, light percussion, neutral, step by step tutorial background', 'A Minor', 100),
+    'paso-a-paso': (
+        'steady soft pulse, muted pluck, light percussion, neutral, step by step tutorial background',
+        'A Minor',
+        100,
+    ),
     'codigo': ('ambient electronic, soft arpeggio, deep pad, focused, coding background', 'D Minor', 92),
     'documental-suave': ('gentle piano and strings, reflective, documentary underscore', 'D Major', 76),
     # Corporativo y publicidad
-    'corporate-inspirador': ('uplifting corporate, acoustic guitar, piano, soft claps, inspiring, motivational', 'C Major', 112),
-    'corporate-minimal': ('minimal corporate, soft piano, subtle strings, clean, trustworthy, background', 'G Major', 100),
+    'corporate-inspirador': (
+        'uplifting corporate, acoustic guitar, piano, soft claps, inspiring, motivational',
+        'C Major',
+        112,
+    ),
+    'corporate-minimal': (
+        'minimal corporate, soft piano, subtle strings, clean, trustworthy, background',
+        'G Major',
+        100,
+    ),
     'corporate-energico': ('driving corporate, bright guitars, punchy claps, energetic, ambitious', 'D Major', 124),
     'corporate-startup': ('upbeat startup, glockenspiel, light synth, finger snaps, optimistic', 'G Major', 118),
     'corporate-confianza': ('warm strings, piano, slow build, trust, reassuring, finance', 'C Major', 84),
     'corporate-innovacion': ('futuristic, pulsing synth, clean bass, airy, innovation, technology', 'A Minor', 108),
-    'corporate-motivacional': ('motivational cinematic build, piano, strings, drums crescendo, inspiring', 'D Major', 100),
+    'corporate-motivacional': (
+        'motivational cinematic build, piano, strings, drums crescendo, inspiring',
+        'D Major',
+        100,
+    ),
     'anuncio-alegre': ('cheerful commercial, ukulele, whistle, claps, happy, bright', 'C Major', 120),
     'anuncio-premium': ('luxury brand, deep bass, glossy synth, sparse, elegant, premium', 'A Minor', 95),
     'anuncio-moda': ('fashion runway, deep house groove, sleek, sophisticated', 'A Minor', 122),
@@ -82,7 +145,11 @@ NUEVOS = {
     'demo-saas': ('SaaS demo, bubbly synth plucks, soft beat, tidy, positive', 'C Major', 110),
     'demo-app-movil': ('mobile app showcase, playful plucks, light percussion, fresh', 'D Major', 114),
     'demo-futurista': ('futuristic interface, glassy bells, sub pulses, sci-fi, clean', 'A Minor', 100),
-    'demo-ia': ('artificial intelligence, ambient electronic, evolving arpeggios, minimal percussion, curious', 'E Minor', 96),
+    'demo-ia': (
+        'artificial intelligence, ambient electronic, evolving arpeggios, minimal percussion, curious',
+        'E Minor',
+        96,
+    ),
     'demo-gadget': ('tech gadget unboxing, crisp beat, funky bass, stylish', 'A Minor', 105),
     'demo-ecommerce': ('e-commerce promo, upbeat pop instrumental, claps, bright, shiny', 'C Major', 118),
     'demo-dashboard': ('data dashboard, steady minimal techno, soft pad, analytical', 'A Minor', 112),
@@ -185,7 +252,9 @@ def _entrada(caption: str, tono: str, bpm: int, compas: str = '4') -> dict:
     >>> e['caption'], e['tags'], e['compas']
     ('lofi, soft piano, warm, calm, cozy, extra, no vocals', 'lofi,soft piano,warm,calm,cozy', '4')
     """
-    return dict(caption=f'{caption}, no vocals', tags=','.join(caption.split(', ')[:5]), tono=tono, bpm=bpm, compas=compas)
+    return dict(
+        caption=f'{caption}, no vocals', tags=','.join(caption.split(', ')[:5]), tono=tono, bpm=bpm, compas=compas
+    )
 
 
 ESTILOS = {**BASE, **{nombre: _entrada(*datos) for nombre, datos in NUEVOS.items()}}

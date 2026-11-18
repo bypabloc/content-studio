@@ -28,13 +28,15 @@ extend-exclude = ["narration/motores", "music/models", "tmp", "out", "logs"]
 [tool.ruff.format]
 # El código usa comillas simples: sin esto, `ruff format` cambiaría todas las cadenas al activarse.
 quote-style = "single"
+# Los bloques de código de los .md (docs, research) se escriben a mano: no se reformatean.
+exclude = ["*.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-# Temporal: el código viejo se migra a src/ en los pasos siguientes del refactor y ahí se limpia.
-"src/content_studio/music/estilos.py" = ["E501"]  # catálogo: captions largas, sin cambios
+# Captions del catálogo: cadenas largas que ruff format no parte.
+"src/content_studio/music/estilos.py" = ["E501"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
