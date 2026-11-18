@@ -444,7 +444,7 @@ def main() -> None:
     a = construir_parser().parse_args()
     lista = fuentes()
     if not lista:
-        sys.exit('No hay micrófonos de DirectShow (ffmpeg -list_devices true -f dshow no devolvió nada).' if WINDOWS
+        sys.exit('No hay micrófonos activos en el registro de Windows (MMDevices/Audio/Capture).' if WINDOWS
                  else 'No hay fuentes de audio de PulseAudio o PipeWire (ffmpeg -sources pulse no devolvió nada).')
     if a.listar:
         t = Table(title='Dispositivos de audio', title_style=f'bold {ACENTO}', header_style='bold', border_style='grey35')
