@@ -22,6 +22,7 @@ import re
 import signal
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent  # music/: venvs y models/ viven aquí; salidas en out/music/
@@ -64,6 +65,8 @@ def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, 
     >>> nombre, e = resolver_estilo('Synthwave, retro 80s!', tono='E Minor', bpm=105)
     >>> nombre, e['tags'], e['tono'], e['bpm'], e['compas']
     ('synthwave-retro-80s', 'Synthwave, retro 80s!', 'E Minor', 105, '4')
+    >>> resolver_estilo('Música épica', tono='C Major', bpm=90)[0], resolver_estilo('¡¿?!', tono='C Major', bpm=90)[0]
+    ('musica-epica', 'libre')
     >>> resolver_estilo('bossa nova')
     Traceback (most recent call last):
     SystemExit: "bossa nova" no es un preset: define --tono y --bpm (ej. --tono "C Major" --bpm 90)
@@ -73,7 +76,8 @@ def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, 
     else:
         if tono is None or bpm is None:
             sys.exit(f'"{valor}" no es un preset: define --tono y --bpm (ej. --tono "C Major" --bpm 90)')
-        nombre = re.sub(r'[^a-z0-9]+', '-', valor.lower()).strip('-')[:60]
+        ascii_ = unicodedata.normalize('NFKD', valor.lower()).encode('ascii', 'ignore').decode()  # música → musica
+        nombre = re.sub(r'[^a-z0-9]+', '-', ascii_).strip('-')[:60] or 'libre'
         base = dict(caption=valor, tags=valor, compas='4')
     pisar = {k: v for k, v in dict(tono=tono, bpm=bpm, compas=compas).items() if v is not None}
     return nombre, {**base, **pisar}
@@ -254,6 +258,8 @@ def construir_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    for f in (sys.stdout, sys.stderr):  # cp1252 (Windows, a una tubería) no tiene ≤ ni –: que no reviente el --help
+        f.reconfigure(errors='replace')
     ap = construir_parser()
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:
@@ -274,9 +280,18 @@ def main() -> None:
     usar_venv(MODELOS[a.modelo])
     a.carpeta.mkdir(parents=True, exist_ok=True)
 
-    generar = generar_heartmula if a.modelo == 'heartmula' else generar_acestep
-    generar(trabajos, a)
+    motor = generar_heartmula if a.modelo == 'heartmula' else generar_acestep
+
+    def generar(lista) -> None:
+        for _, salida in lista:  # si el motor falla, no queda la pista de una corrida anterior como si fuera nueva
+            salida.unlink(missing_ok=True)
+        motor(lista, a)
+
+    generar(trabajos)
     if not a.evaluar:
+        faltan = [s.name for _, s in trabajos if not s.exists()]
+        if faltan:
+            sys.exit(f'No se generaron: {", ".join(faltan)}')
         return
 
     liberar_gpu()
@@ -285,7 +300,7 @@ def main() -> None:
         if not pendientes:
             break
         print(f'Regenerando {len(pendientes)} pista(s) con voz...', flush=True)
-        generar([t for t in trabajos if t[1] in pendientes], a)
+        generar([t for t in trabajos if t[1] in pendientes])
         liberar_gpu()
         pendientes = con_voz(pendientes)
     print(f'{len(trabajos) - len(pendientes)}/{len(trabajos)} pistas sin voz')

@@ -39,6 +39,13 @@ def loudness(ruta: Path) -> tuple[float, float]:
             float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1]))
 
 
+def siguiente_numero(carpeta: Path, prefijo: str) -> int:
+    """Número de la toma siguiente: el mayor <prefijo>-<n>.wav más uno. Contar pisaba tomas con huecos, y el
+    glob `neutral-*` también contaba `neutral-en-*`."""
+    return max((int(m[1]) for p in carpeta.glob(f'{prefijo}-*.wav')
+                if (m := re.fullmatch(rf'{re.escape(prefijo)}-(\d+)', p.stem))), default=0) + 1
+
+
 def procesar(toma: Path, final: Path) -> None:
     """Recorta los bordes a 0.4 s y lleva la toma a -18 LUFS con pico real ≤ -3 dBTP, en WAV mono 48 kHz, 24 bits.
 

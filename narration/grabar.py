@@ -30,7 +30,7 @@ from array import array
 from contextlib import contextmanager
 from pathlib import Path
 
-from referencia import medir, procesar, verificar
+from referencia import medir, procesar, siguiente_numero, verificar
 
 WINDOWS = os.name == 'nt'
 if WINDOWS:
@@ -373,7 +373,7 @@ def grabar_estilo(fuente: str, estilo: str, sobrescribir: bool, i: int, total: i
         title=f'[bold {ACENTO}]{estilo}[/] [dim]· {i}/{total} · {fuente}[/]', title_align='left',
         border_style=ACENTO, padding=(1, 2))
     TOMAS.mkdir(parents=True, exist_ok=True)
-    n = len(list(TOMAS.glob(f'{estilo}-*.wav'))) + 1
+    n = siguiente_numero(TOMAS, estilo)
     escuchar = shutil.which('ffplay')
     previa = None  # ficha de la toma anterior, para compararla con la siguiente
     while True:
@@ -444,7 +444,7 @@ def main() -> None:
     a = construir_parser().parse_args()
     lista = fuentes()
     if not lista:
-        sys.exit('No hay micrófonos de DirectShow (ffmpeg -list_devices true -f dshow no devolvió nada).' if WINDOWS
+        sys.exit('No hay micrófonos activos en el registro de Windows (MMDevices/Audio/Capture).' if WINDOWS
                  else 'No hay fuentes de audio de PulseAudio o PipeWire (ffmpeg -sources pulse no devolvió nada).')
     if a.listar:
         t = Table(title='Dispositivos de audio', title_style=f'bold {ACENTO}', header_style='bold', border_style='grey35')
