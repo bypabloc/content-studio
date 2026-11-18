@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 
 from content_studio import rutas
 from content_studio.music.evaluacion import recortar_silencio
-from content_studio.music.motores.base import MotorMusica
+from content_studio.music.motores.base import MotorMusica, Trabajos
 
 HEART_CKPT = rutas.MUSIC / 'models' / 'heartmula-ckpt'
 
@@ -23,7 +24,7 @@ def descargar() -> None:
 
 
 class HeartMuLa(MotorMusica):
-    def generar(self, trabajos, a) -> None:
+    def generar(self, trabajos: Trabajos, a: argparse.Namespace) -> None:
         import soundfile as sf
         import torch
         import torchaudio

@@ -25,20 +25,20 @@ class ZipRemoto(io.RawIOBase):
         with urllib.request.urlopen(urllib.request.Request(url, method='HEAD', headers=UA)) as r:
             self.size = int(r.headers['Content-Length'])
 
-    def readable(self):
+    def readable(self) -> bool:
         return True
 
-    def seekable(self):
+    def seekable(self) -> bool:
         return True
 
-    def tell(self):
+    def tell(self) -> int:
         return self.pos
 
-    def seek(self, off, whence=0):
+    def seek(self, off: int, whence: int = 0) -> int:
         self.pos = {0: off, 1: self.pos + off, 2: self.size + off}[whence]
         return self.pos
 
-    def readinto(self, b):
+    def readinto(self, b: bytearray) -> int:
         if self.pos >= self.size:
             return 0
         fin = min(self.pos + len(b), self.size) - 1

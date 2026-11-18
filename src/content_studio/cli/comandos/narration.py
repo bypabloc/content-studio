@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import ModuleType
+
 from content_studio import rutas
 from content_studio.cli.comandos.base import Comando, Opcion
 
@@ -16,7 +18,7 @@ class Tts(Comando):
     ayuda = '🎙  Narrar un texto o guion (content_studio.narration.tts). Sin flags abre el asistente.'
     asistente = True
 
-    def catalogo(self, mod) -> dict[str, list[Opcion]]:
+    def catalogo(self, mod: ModuleType) -> dict[str, list[Opcion]]:
         from content_studio.narration.voces import catalogo as cv
 
         modelos = []

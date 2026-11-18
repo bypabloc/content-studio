@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import sys
 from functools import lru_cache
+from typing import TYPE_CHECKING, Any
 
 from content_studio import rutas
 from content_studio.narration.estilos import EMOCIONES
 from content_studio.narration.motores.base import MotorTTS, marca
 
+if TYPE_CHECKING:
+    from content_studio.narration.bloques import Referencias
+
 SISTEMA = 'You are a helpful assistant.'  # prompt de sistema que CosyVoice 3 espera en zero-shot
 
 
 @lru_cache
-def cargar(codigo, ckpt):
+def cargar(codigo: str, ckpt: str) -> Any:
     import soundfile as sf
     import torch
     import torchaudio
@@ -21,7 +25,9 @@ def cargar(codigo, ckpt):
     d = rutas.NARRATION / codigo
     sys.path[:0] = [str(d), str(d / 'third_party' / 'Matcha-TTS')]
 
-    def leer_wav(path, *_a, **_k):  # torchaudio 2.11 exige torchcodec; soundfile alcanza para WAV
+    def leer_wav(
+        path: str, *_a: object, **_k: object
+    ) -> tuple:  # torchaudio 2.11 exige torchcodec; soundfile alcanza para WAV
         data, sr = sf.read(str(path), dtype='float32', always_2d=True)
         return torch.from_numpy(data.T.copy()), sr
 
@@ -37,16 +43,16 @@ CACHES = (cargar,)
 class CosyVoice(MotorTTS):
     intensidad = False
 
-    def modo(self, texto_ref):
+    def modo(self, texto_ref: str | None) -> str:
         return 'zero_shot'
 
-    def emocion(self, pb, nombre, inten, refs):
+    def emocion(self, pb: dict, nombre: str, inten: float, refs: Referencias) -> None:
         if instruccion := EMOCIONES[nombre]['cosy']:
             pb['emo'], pb['modo'], pb['emocion'] = {'instruccion': instruccion}, 'instruct2', marca(nombre, inten)
         else:
             pb['avisos'].append(f'cosyvoice3 no sigue "{nombre}"; se genera sin emoción')
 
-    def generar(self, bloques, idioma):
+    def generar(self, bloques: list[dict], idioma: str) -> tuple[list, int]:
         import torch
 
         modelo = cargar(self.espec.codigo, self.espec.repo)

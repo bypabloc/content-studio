@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 from abc import ABC
+from types import ModuleType
 from typing import NamedTuple
 
 
@@ -27,11 +28,11 @@ class Comando(ABC):
     ayuda: str  # la línea del comando en --help
     asistente: bool = False  # pregunta los flags que faltan en una terminal
 
-    def cargar(self):
+    def cargar(self) -> ModuleType:
         """Importa el módulo liviano con el parser y los catálogos."""
         return importlib.import_module(self.parser)
 
-    def catalogo(self, mod) -> dict[str, list[Opcion]]:
+    def catalogo(self, mod: ModuleType) -> dict[str, list[Opcion]]:
         """Por flag (dest): sus opciones con descripción, para los menús."""
         return {}
 

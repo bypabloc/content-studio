@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Any
 
 from content_studio.narration.motores.base import MotorTTS
 
 
 @lru_cache
-def cargar(repo):
+def cargar(repo: str) -> Any:
     import torch
     from omnivoice import OmniVoice
 
@@ -16,7 +17,7 @@ def cargar(repo):
 
 
 @lru_cache
-def prompt(modelo, ref, texto_ref):
+def prompt(modelo: Any, ref: str, texto_ref: str | None) -> Any:
     return modelo.create_voice_clone_prompt(ref_audio=ref, ref_text=texto_ref)
 
 
@@ -27,7 +28,7 @@ class OmniVoice(MotorTTS):
     params = dict(num_step=32, guidance_scale=2.0)
     sugerir_evaluar = True
 
-    def generar(self, bloques, idioma):
+    def generar(self, bloques: list[dict], idioma: str) -> tuple[list, int]:
         modelo = cargar(self.espec.repo)
         audios = []
         for b in bloques:

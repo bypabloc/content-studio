@@ -6,14 +6,18 @@ import os
 import sys
 import tempfile
 from functools import lru_cache
+from typing import TYPE_CHECKING, Any
 
 from content_studio import rutas
 from content_studio.narration.estilos import EMOCIONES, normalizar_vec
 from content_studio.narration.motores.base import MotorTTS, marca
 
+if TYPE_CHECKING:
+    from content_studio.narration.bloques import Referencias
+
 
 @lru_cache
-def cargar(codigo, ckpt):
+def cargar(codigo: str, ckpt: str) -> Any:
     sys.path.insert(0, str(rutas.NARRATION / codigo))
     # IndexTTS escribe checkpoints/hf_cache relativo al directorio actual: se fija antes de importarlo.
     os.environ['HF_HUB_CACHE'] = str(rutas.NARRATION / ckpt / 'hf_cache')
@@ -36,7 +40,7 @@ CACHES = (cargar,)
 class IndexTTS(MotorTTS):
     params = dict(max_text_tokens_per_segment=60)
 
-    def emocion(self, pb, nombre, inten, refs):
+    def emocion(self, pb: dict, nombre: str, inten: float, refs: Referencias) -> None:
         clip = refs.carpeta / 'emociones' / f'{nombre}.wav'
         if clip.exists():
             pb['emo'], pb['modo'], pb['emocion'] = {'clip': clip, 'alpha': inten}, 'clip', marca(nombre, inten)
@@ -49,7 +53,7 @@ class IndexTTS(MotorTTS):
         else:
             pb['avisos'].append(f'IndexTTS no tiene vector para "{nombre}"; usa [estilo: intima]')
 
-    def generar(self, bloques, idioma):
+    def generar(self, bloques: list[dict], idioma: str) -> tuple[list, int]:
         import soundfile as sf
 
         modelo = cargar(self.espec.codigo, self.espec.repo)

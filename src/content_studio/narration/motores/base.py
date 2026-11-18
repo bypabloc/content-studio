@@ -10,9 +10,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from importlib import import_module
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from content_studio import rutas
 from content_studio.narration.estilos import EMOCIONES
+
+if TYPE_CHECKING:
+    from content_studio.narration.bloques import Referencias
 
 
 @dataclass(frozen=True)
@@ -56,7 +60,7 @@ class MotorTTS(ABC):
         """Modo de clonación de un bloque sin emoción."""
         return 'clonacion'
 
-    def emocion(self, pb: dict, nombre: str, inten: float, refs) -> None:
+    def emocion(self, pb: dict, nombre: str, inten: float, refs: Referencias) -> None:
         """Emoción del bloque `pb`. Por defecto, la referencia del estilo que la representa (Qwen, OmniVoice)."""
         sustituto = EMOCIONES[nombre]['ref']
         if sustituto and refs.tiene(sustituto):

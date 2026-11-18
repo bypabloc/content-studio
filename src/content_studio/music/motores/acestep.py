@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 from pathlib import Path
 
 from content_studio import rutas
 from content_studio.music.evaluacion import recortar_silencio
-from content_studio.music.motores.base import MotorMusica
+from content_studio.music.motores.base import MotorMusica, Trabajos
 
 ACE_REPO = rutas.MUSIC / 'models' / 'ACE-Step-1.5'
 
 
 class AceStep(MotorMusica):
-    def generar(self, trabajos, a) -> None:
+    def generar(self, trabajos: Trabajos, a: argparse.Namespace) -> None:
         os.environ['ACESTEP_PROJECT_ROOT'] = str(ACE_REPO)
         from acestep.handler import AceStepHandler
         from acestep.inference import GenerationConfig, GenerationParams, generate_music

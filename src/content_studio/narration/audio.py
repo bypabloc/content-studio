@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from content_studio.comun.ffmpeg import ffmpeg, json_loudnorm, loudness
 
+if TYPE_CHECKING:
+    import numpy as np
 
-def recortar(audio, sr: int, umbral: float = 0.01, margen: float = 0.08):
+
+def recortar(audio: np.ndarray, sr: int, umbral: float = 0.01, margen: float = 0.08) -> np.ndarray:
     """Quita el silencio y el ruido bajo que el modelo deja en los bordes de cada bloque (de
     0.5 s a más de 2 s), para que las pausas insertadas duren lo indicado. Deja `margen` s para
     no cortar consonantes.
@@ -36,7 +40,7 @@ def recortar(audio, sr: int, umbral: float = 0.01, margen: float = 0.08):
     return audio[max(0, voz[0] * n - m) : (voz[-1] + 1) * n + m]
 
 
-def estirar(audio, sr: int, vel: float):
+def estirar(audio: np.ndarray, sr: int, vel: float) -> np.ndarray:
     """Cambia la velocidad sin cambiar el tono: ffmpeg atempo por tuberías."""
     import numpy as np
 
@@ -93,7 +97,7 @@ def escribir(g: dict) -> None:
         g['master_info'] = {'modo': 'no'}
 
 
-def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
+def masterizar(audio: np.ndarray, sr: int, salida: Path, lufs: float) -> dict:
     """Masterización 'voz' (§7.1): pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `lufs`, con techo de
     pico de −1.5 dBTP. Solo se limita la dinámica si el pico real no deja llegar a `lufs` (queda 'dynamic' y se
     avisa). Escribe WAV de 24 bits a la frecuencia nativa y devuelve lo medido."""

@@ -6,6 +6,8 @@ import random
 import shutil
 import sys
 import time
+from collections.abc import Callable, Iterable
+from pathlib import Path
 
 from content_studio.narration.audio import escribir, recortar
 from content_studio.narration.bloques import preparar_bloques
@@ -32,7 +34,7 @@ def lote_auto(libre_gib: float, pesos_gib: float) -> int:
     return max(1, min(LOTE_MAX, 1 + int(sobra // GIB_POR_FRASE)))
 
 
-def lotes(indices: list[int], tam: int, clave) -> list[list[int]]:
+def lotes(indices: list[int], tam: int, clave: Callable[[int], object]) -> list[list[int]]:
     """Trozos de hasta `tam` índices consecutivos con la misma clave. Así Qwen agrupa por referencia.
 
     >>> lotes([0, 1, 2, 3, 4], 2, lambda i: i // 3)
@@ -60,7 +62,18 @@ def fijar(semilla: int) -> None:
     torch.cuda.manual_seed_all(semilla)
 
 
-def narrar(motor: MotorTTS, texto, estilo, ref, salida, lote, semilla, idioma='es', master='voz', lufs=-16.0) -> dict:
+def narrar(
+    motor: MotorTTS,
+    texto: str,
+    estilo: str,
+    ref: Path,
+    salida: Path,
+    lote: int,
+    semilla: int,
+    idioma: str = 'es',
+    master: str = 'voz',
+    lufs: float = -16.0,
+) -> dict:
     """Genera todos los bloques del texto y escribe el .wav. Devuelve lo necesario para evaluar,
     regenerar bloques sueltos y escribir los metadatos."""
     import torch
@@ -98,7 +111,7 @@ def narrar(motor: MotorTTS, texto, estilo, ref, salida, lote, semilla, idioma='e
     return g
 
 
-def regenerar(motor: MotorTTS, g: dict, indices, lote: int, semilla: int) -> None:
+def regenerar(motor: MotorTTS, g: dict, indices: Iterable[int], lote: int, semilla: int) -> None:
     """(Re)genera los bloques indicados del guion `g` con la semilla de la ronda y reescribe su .wav.
     Qwen genera hasta `lote` bloques de la misma referencia por pasada; el resto de a uno."""
     import numpy as np

@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import os
 import sys
+from collections.abc import Iterator
 from contextlib import contextmanager
 
 import questionary
@@ -36,7 +37,7 @@ BARRAS = '▁▂▃▄▅▆▇█'
 
 
 @contextmanager
-def teclado_crudo():
+def teclado_crudo() -> Iterator[None]:
     """Teclas sin Enter y sin eco mientras se graba; Ctrl+C sigue funcionando. En Windows, msvcrt ya las lee así."""
     if WINDOWS:
         yield

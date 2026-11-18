@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Collection
 
 from content_studio.rutas import VOCES
 
@@ -13,7 +14,7 @@ def catalogo() -> dict:
     return json.loads(CATALOGO.read_text(encoding='utf-8'))
 
 
-def aprobadas(estilos) -> dict[str, dict]:
+def aprobadas(estilos: Collection[str]) -> dict[str, dict]:
     """Voces del catálogo construidas y aprobadas en todos los `estilos`: {nombre: ficha del catálogo}."""
     out = {}
     for nombre, ficha in catalogo().items():
@@ -37,7 +38,7 @@ def mencion(ficha: dict) -> str | None:
     return ficha.get('atribucion')
 
 
-def estado(nombre: str, estilos) -> str:
+def estado(nombre: str, estilos: Collection[str]) -> str:
     """Texto corto para menús: aprobada, reprobada (cuántos estilos) o sin construir.
 
     >>> estado('no-existe', ['neutral'])

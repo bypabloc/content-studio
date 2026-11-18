@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import glob
 from pathlib import Path
+from typing import Any
 
 import questionary
 from questionary import Choice, Separator
@@ -32,7 +33,7 @@ ESTILO = questionary.Style(
 SEPARADOR = '  ' + '─' * 30
 
 
-def titulo(valor: str, desc: str, ancho: int = 16, plano: bool = False):
+def titulo(valor: str, desc: str, ancho: int = 16, plano: bool = False) -> str | list[tuple[str, str]]:
     """Valor y descripción en columnas. `plano`: texto sin estilos, que es lo único que el filtro de
     búsqueda de questionary sabe filtrar (con tuplas de estilo falla)."""
     if plano:
@@ -40,7 +41,7 @@ def titulo(valor: str, desc: str, ancho: int = 16, plano: bool = False):
     return [('', f'{valor:<{ancho}}'), ('class:desc', desc)]
 
 
-def _lista(acc: argparse.Action, msg: str, pista: str, opciones: list, actual, varios: bool):
+def _lista(acc: argparse.Action, msg: str, pista: str, opciones: list, actual: Any, varios: bool) -> Any:
     """Casillas (varios valores) o lista de una opción, con filtro si son muchas."""
     ancho = max((len(v) for v, _, _ in opciones), default=14) + 2
     filtro = dict(use_search_filter=True, use_jk_keys=False) if len(opciones) > 15 else {}
@@ -78,7 +79,7 @@ def _lista(acc: argparse.Action, msg: str, pista: str, opciones: list, actual, v
     ).unsafe_ask()
 
 
-def preguntar(acc: argparse.Action, cat: dict, actual):
+def preguntar(acc: argparse.Action, cat: dict, actual: Any) -> Any:
     """Pide un flag según su tipo: casilla, lista, ruta con autocompletado o texto validado."""
     msg = acc.dest.replace('_', ' ').capitalize()
     pista = f'{acc.option_strings[0]}' + (f' · {acc.help}' if acc.help else '')

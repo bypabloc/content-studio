@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 from pathlib import Path
@@ -22,7 +23,7 @@ from content_studio.cli.widgets import ACENTO, ESTILO, SEPARADOR, console, pregu
 from content_studio.comun.proceso import env_src, relanzar, unir
 
 
-def resumen(ap, valores: dict, cmd: Comando) -> Panel:
+def resumen(ap: argparse.ArgumentParser, valores: dict, cmd: Comando) -> Panel:
     t = Table(box=None, padding=(0, 2), show_header=False)
     t.add_column(style='bold cyan', no_wrap=True)
     t.add_column(ratio=1)
@@ -52,7 +53,7 @@ def resumen(ap, valores: dict, cmd: Comando) -> Panel:
     )
 
 
-def _obligatorios(ap, valores: dict, cat: dict) -> None:
+def _obligatorios(ap: argparse.ArgumentParser, valores: dict, cat: dict) -> None:
     """Pregunta los obligatorios que faltan, en el orden del parser. Un grupo excluyente es una elección previa."""
     for acc in flags(ap):
         grupo = next((g for g in ap._mutually_exclusive_groups if g.required and acc in g._group_actions), None)
@@ -70,7 +71,7 @@ def _obligatorios(ap, valores: dict, cat: dict) -> None:
         valores[acc.dest] = preguntar(acc, cat, None)
 
 
-def _editar(ap, valores: dict, cat: dict) -> None:
+def _editar(ap: argparse.ArgumentParser, valores: dict, cat: dict) -> None:
     """Elige una opción y la vuelve a preguntar. --archivo reemplaza a --texto y viceversa."""
     opciones = []
     for acc in flags(ap):

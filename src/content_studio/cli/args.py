@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import re
+from types import ModuleType
 
 from content_studio.comun.proceso import unir
 
@@ -20,7 +21,7 @@ def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
 
 
-def vacio(v) -> bool:
+def vacio(v: object) -> bool:
     """Sin valor: None, False o lista vacía. Con `in (None, False, [])` se perdía el 0, porque 0 == False.
 
     >>> [vacio(v) for v in (None, False, [], 0, 0.0, '')]
@@ -98,7 +99,7 @@ def a_argv(ap: argparse.ArgumentParser, valores: dict) -> list[str]:
     return argv
 
 
-def validar(mod, argv: list[str]) -> str | None:
+def validar(mod: ModuleType, argv: list[str]) -> str | None:
     """Error del parser real del script con estos flags, o None."""
     ap = mod.construir_parser()
     ap.error = _error

@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import TYPE_CHECKING, Any
 
 from content_studio.narration.estilos import EMOCIONES
 from content_studio.narration.motores.base import MotorTTS, marca
 
+if TYPE_CHECKING:
+    from content_studio.narration.bloques import Referencias
+
 
 @lru_cache
-def cargar(version):
+def cargar(version: str) -> Any:
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 
     return ChatterboxMultilingualTTS.from_pretrained(device='cuda', t3_model=version)
@@ -19,7 +23,7 @@ CACHES = (cargar,)
 
 
 class Chatterbox(MotorTTS):
-    def emocion(self, pb, nombre, inten, refs):
+    def emocion(self, pb: dict, nombre: str, inten: float, refs: Referencias) -> None:
         if not EMOCIONES[nombre]['chatterbox']:
             pb['avisos'].append(f'chatterbox no tiene valores para "{nombre}"; usa [estilo: intima]')
             return
@@ -29,7 +33,7 @@ class Chatterbox(MotorTTS):
         pb['p'].update(exaggeration=ex, cfg_weight=cfg)
         pb['modo'], pb['emocion'] = 'parametros', {**marca(nombre, inten), 'exaggeration': ex, 'cfg_weight': cfg}
 
-    def generar(self, bloques, idioma):
+    def generar(self, bloques: list[dict], idioma: str) -> tuple[list, int]:
         modelo = cargar(self.espec.repo)
         audios = [
             modelo.generate(

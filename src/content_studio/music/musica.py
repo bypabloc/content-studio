@@ -11,10 +11,13 @@ import unicodedata
 
 from content_studio.comun import proceso
 from content_studio.music.evaluacion import con_voz, liberar_gpu
+from content_studio.music.motores.base import Trabajos
 from content_studio.music.parser import ESTILOS, MODELOS, construir_parser
 
 
-def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, dict]:
+def resolver_estilo(
+    valor: str, tono: str | None = None, bpm: int | None = None, compas: str | None = None
+) -> tuple[str, dict]:
     """Devuelve (nombre de archivo, estilo). Los flags pisan los metadatos del preset;
     el texto libre sirve de caption y de tags, y exige tono y bpm.
 
@@ -65,7 +68,7 @@ def main() -> None:
     a.carpeta.mkdir(parents=True, exist_ok=True)
     motor = espec.crear()
 
-    def generar(lista) -> None:
+    def generar(lista: Trabajos) -> None:
         for _, salida in lista:  # si el motor falla, no queda la pista de una corrida anterior como si fuera nueva
             salida.unlink(missing_ok=True)
         motor.generar(lista, a)

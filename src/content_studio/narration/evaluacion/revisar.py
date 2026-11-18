@@ -5,9 +5,14 @@ from __future__ import annotations
 import json
 import statistics
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from content_studio.narration.evaluacion.comparar import comparar, normalizar
+
+if TYPE_CHECKING:
+    import numpy as np
 
 # --evaluar: whisper transcribe la salida y se compara con el texto pedido.
 WHISPER_MODELO = 'medium'  # small confundía palabras ("horarios" -> "cerrarios")
@@ -25,7 +30,7 @@ def semilla_ronda(base: int, ronda: int) -> int:
     return base + ronda
 
 
-def tramos_silencio(audio, sr: int, minimo: float, umbral: float = 0.01) -> list[float]:
+def tramos_silencio(audio: np.ndarray, sr: int, minimo: float, umbral: float = 0.01) -> list[float]:
     """Duración de cada silencio de al menos `minimo` s dentro del audio (RMS por ventanas de 20 ms).
 
     >>> import numpy as np
@@ -62,7 +67,7 @@ def ritmo_raro(velocidades: list[float]) -> list[int]:
     return [i for i, v in enumerate(velocidades) if not lo * med <= v <= hi * med]
 
 
-def guardar_bloques(g: dict, indices) -> list[Path]:
+def guardar_bloques(g: dict, indices: Iterable[int]) -> list[Path]:
     """Escribe cada bloque como un .wav propio para transcribirlo por separado: así whisper no
     se saltea tramos del audio largo ni reparte palabras entre párrafos vecinos."""
     import soundfile as sf

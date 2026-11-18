@@ -45,7 +45,7 @@ def voz_de_referencia(ref: Path) -> dict | None:
                       'consentimiento': ficha.get('consentimiento', False), 'mencion': mencion(ficha)}  # fmt: skip
 
 
-def sha256(ruta) -> str:
+def sha256(ruta: Path) -> str:
     return hashlib.sha256(Path(ruta).read_bytes()).hexdigest()
 
 

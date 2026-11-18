@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import shutil
+from pathlib import Path
 
 from content_studio.narration.estilos import ESTILOS
 from content_studio.narration.motores.registro import MOTORES, liberar_todo
@@ -123,14 +124,14 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
     asr = sv = fe = None
 
     @torch.no_grad()
-    def emb(path):
+    def emb(path: Path) -> torch.Tensor:
         import librosa
 
         y, _ = librosa.load(str(path), sr=16000, mono=True)
         x = fe(y, sampling_rate=16000, return_tensors='pt').to('cuda')
         return torch.nn.functional.normalize(sv(**x).embeddings, dim=-1)[0].cpu()
 
-    def evaluar(e, wav):
+    def evaluar(e: str, wav: Path) -> dict:
         nonlocal asr, sv, fe
         if asr is None:
             asr = whisper.load_model(WHISPER, device='cuda')

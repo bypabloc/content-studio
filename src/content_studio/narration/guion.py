@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -35,7 +36,7 @@ def leer_json(d: dict) -> tuple[str, str | None]:
     return '\n\n'.join(partes), d.get('estilo')
 
 
-def guiones(a) -> list[tuple[str | None, str, str | None]]:
+def guiones(a: argparse.Namespace) -> list[tuple[str | None, str, str | None]]:
     """(nombre de salida o None, texto, estilo del JSON o None) de --texto y de cada --archivo."""
     out = [(None, a.texto, None)] if a.texto else []
     for f in a.archivo or []:
@@ -47,7 +48,7 @@ def guiones(a) -> list[tuple[str | None, str, str | None]]:
     return out
 
 
-def planificar(a, guiones: list[tuple]) -> list[tuple[str, str, Path]]:
+def planificar(a: argparse.Namespace, guiones: list[tuple]) -> list[tuple[str, str, Path]]:
     """(texto, estilo, salida .wav) de cada guion. Con un solo guion, --salida es el .wav, salvo que sea una carpeta
     (existe como tal o no tiene extensión). Falla antes de generar si la ruta no es .wav o dos guiones chocan.
 

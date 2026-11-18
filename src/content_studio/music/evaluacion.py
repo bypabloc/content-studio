@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
+from typing import Any
 
 SILENCIO_DB = -50  # por debajo de esto, la cola final se considera silencio y se recorta
 
@@ -27,7 +28,7 @@ def recortar_silencio(ruta: Path) -> float:
     return float(dur)
 
 
-def voz_relativa_db(modelo, ruta: Path) -> float:
+def voz_relativa_db(modelo: Any, ruta: Path) -> float:
     """Nivel del stem de voz (htdemucs) respecto de la mezcla, en dB. ~0 = canta; muy negativo = instrumental."""
     import soundfile as sf
     import torch
@@ -41,7 +42,7 @@ def voz_relativa_db(modelo, ruta: Path) -> float:
         fuentes = apply_model(modelo, ((wav - ref.mean()) / ref.std())[None], device='cuda', split=True)[0]
     voz = fuentes[modelo.sources.index('vocals')] * ref.std() + ref.mean()
 
-    def rms_db(x) -> float:
+    def rms_db(x: Any) -> float:
         return 20 * torch.log10(x.pow(2).mean().sqrt() + 1e-9).item()
 
     return rms_db(voz) - rms_db(wav)

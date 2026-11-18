@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from typing import Any
 
 from content_studio.narration.motores.base import MotorTTS
 
@@ -10,7 +11,7 @@ IDIOMA = {'es': 'Spanish', 'en': 'English'}
 
 
 @lru_cache
-def cargar(repo):
+def cargar(repo: str) -> Any:
     import torch
     from qwen_tts import Qwen3TTSModel
 
@@ -18,7 +19,7 @@ def cargar(repo):
 
 
 @lru_cache
-def prompt(modelo, ref, texto_ref):
+def prompt(modelo: Any, ref: str, texto_ref: str | None) -> Any:
     return modelo.create_voice_clone_prompt(ref_audio=ref, ref_text=texto_ref, x_vector_only_mode=texto_ref is None)
 
 
@@ -26,7 +27,7 @@ CACHES = (cargar, prompt)
 
 
 class Qwen(MotorTTS):
-    def generar(self, bloques, idioma):
+    def generar(self, bloques: list[dict], idioma: str) -> tuple[list, int]:
         modelo = cargar(self.espec.repo)
         b = bloques[0]  # pipeline.lotes() agrupa bloques con la misma referencia y temperatura
         p = prompt(modelo, str(b['ref']), b['texto_ref'])

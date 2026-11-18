@@ -11,7 +11,7 @@
 - **Python 3.10 como mínimo** (el venv de CosyVoice es 3.10), con `from __future__ import annotations` para escribir `X | None`. Nada de `tomllib`, `Self`, `ExceptionGroup` ni `match` con sintaxis nueva. CI corre en 3.10 y 3.12.
 - **Dos capas.** En el nivel superior de un módulo solo va stdlib, salvo en `cli/` y `grabar/` (typer, rich, questionary). torch, numpy, soundfile y las librerías de cada motor se importan dentro de funciones, así `--help`, los parsers y el catálogo funcionan sin el venv del motor.
 - **Factory Method solo con dos o más productos**: motores TTS, motores de música y comandos del CLI. Lo que tiene un solo producto (referencia, catálogo de voces, fuentes, grabar) es una función o un módulo. SOLID y KISS: nada de interfaces, configuración ni autodescubrimiento que hoy no se usen.
-- Type hints en las firmas públicas.
+- Type hints en las firmas de src (ruff ANN001/ANN201 lo exige; los tests quedan fuera).
 
 ## Cómo agregar
 
