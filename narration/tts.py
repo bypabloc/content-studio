@@ -42,7 +42,8 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 ROOT = AQUI.parent
-sys.path.insert(0, str(AQUI))
+if str(AQUI) not in sys.path:  # cli.py lo carga más de una vez
+    sys.path.insert(0, str(AQUI))
 from voces import VOCES, aprobadas, mencion, catalogo as voces_catalogo  # noqa: E402  (stdlib: catálogo de voces)
 
 # Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.

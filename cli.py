@@ -81,7 +81,8 @@ COMANDOS = {
 def cargar(script: str):
     """Importa el script (sus imports de arriba son solo stdlib) para leer su parser y catálogos."""
     ruta = RAIZ / script
-    sys.path.insert(0, str(ruta.parent))
+    if str(ruta.parent) not in sys.path:
+        sys.path.insert(0, str(ruta.parent))
     spec = importlib.util.spec_from_file_location(f'_cli_{ruta.stem}', ruta)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -217,7 +218,8 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
     if sobra:
         avisos.append(f'no reconocido: {unir(sobra)}')
     dados = {acc.dest: getattr(ns, acc.dest) for acc in flags(ap)
-             if any(t == o or t.startswith(o + '=') for t in args for o in acc.option_strings)}
+             if any((c := t.split('=', 1)[0]) == o or (len(c) > 2 and c[0] == '-' and o.startswith(c))  # o abreviado
+                    for t in args for o in acc.option_strings)}
     return dados, avisos
 
 

@@ -43,3 +43,9 @@ else:
     assert cli.partir("a.json 'con espacio/b.json'") == ['a.json', 'con espacio/b.json']
     assert cli.unir(['--ref', 'a b.wav']) == "--ref 'a b.wav'"
 """)
+
+
+def test_abreviaturas_y_sys_path():
+    en_cli("assert cli.leer(tts.construir_parser(), ['--sem', '3', '--mod=qwen-0.6b']) == "
+           "({'semilla': 3, 'modelo': 'qwen-0.6b'}, [])\n"
+           "n = len(sys.path); cli.cargar('narration/tts.py'); assert len(sys.path) == n")
