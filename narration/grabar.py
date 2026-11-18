@@ -30,7 +30,7 @@ from array import array
 from contextlib import contextmanager
 from pathlib import Path
 
-from referencia import medir, procesar, verificar
+from referencia import medir, procesar, siguiente_numero, verificar
 
 WINDOWS = os.name == 'nt'
 if WINDOWS:
@@ -373,7 +373,7 @@ def grabar_estilo(fuente: str, estilo: str, sobrescribir: bool, i: int, total: i
         title=f'[bold {ACENTO}]{estilo}[/] [dim]· {i}/{total} · {fuente}[/]', title_align='left',
         border_style=ACENTO, padding=(1, 2))
     TOMAS.mkdir(parents=True, exist_ok=True)
-    n = len(list(TOMAS.glob(f'{estilo}-*.wav'))) + 1
+    n = siguiente_numero(TOMAS, estilo)
     escuchar = shutil.which('ffplay')
     previa = None  # ficha de la toma anterior, para compararla con la siguiente
     while True:
