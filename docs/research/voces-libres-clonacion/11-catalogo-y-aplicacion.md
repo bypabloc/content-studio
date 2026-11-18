@@ -38,7 +38,7 @@ flowchart LR
 | :--- | :--- |
 | [narration/voces/catalogo.json](../../../narration/voces/catalogo.json) | Única pieza versionada del catálogo. Por voz: `url`, `inicio_s`/`dur_s` (si es un tramo), `texto` exacto de la base, `idioma`, `licencia`, `descripcion`, `fuente`, `derechos` y `consentimiento` |
 | [narration/voces.py](../../../narration/voces.py) | `--listar` y `--construir <voz…\|todas> [--forzar]`. Su parte de arriba es stdlib (la importan `tts.py` y `cli.py`); la construcción se relanza en el venv de CosyVoice con `tts.usar_venv(…, __file__)` |
-| [narration/referencia.py](../../../narration/referencia.py) | `medir`, `loudness`, `procesar` y `verificar`, movidos desde `grabar.py` para que los dos scripts apliquen la misma normalización y los mismos criterios |
+| [referencia.py](../../../src/content_studio/narration/referencia.py) (antes `narration/referencia.py`) | `medir`, `loudness`, `procesar` y `verificar`, movidos desde `grabar.py` para que los dos scripts apliquen la misma normalización y los mismos criterios |
 | `narration/voces/<voz>/` | `<estilo>.wav` + `.txt` y `aprobacion.json` (gitignoreado; se regenera desde el catálogo) |
 | `narration/tts.py` | `--voz` (con `choices` = las voces aprobadas); comprueba que el idioma de la voz coincida con `--idioma`, usa la carpeta como `--ref` y **avisa si la voz no tiene consentimiento de su dueño** (karen-savage, mpinedag: regla 5 de `AGENTS.md`). También avisa de la nota "academic purposes" de CosyVoice 3 |
 | `cli.py` | Comando `narration voces` (sin flags lista el catálogo); lista de voces en el asistente de `narration tts`; contador "voces libres N/8" en el menú |
