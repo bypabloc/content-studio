@@ -30,3 +30,16 @@ def test_leer_flag_igual_valor_conserva_el_resto():
            "assert d == {'modelo': 'qwen-0.6b'} and '--lote=abc' in av[0], (d, av)\n"
            "d, av = cli.leer(tts.construir_parser(), ['--mod', 'nada', '--semilla', '3'])\n"
            "assert d == {'semilla': 3}, (d, av)")
+
+
+def test_rutas_windows_y_comandos():
+    en_cli(r"""
+import os
+assert cli.partir('cli.py') == ['cli.py']
+if os.name == 'nt':
+    assert cli.partir(r'D:\g\a.json "C:\con espacio\b.json"') == [r'D:\g\a.json', r'C:\con espacio\b.json']
+    assert cli.unir(['--ref', r'C:\a b\x.wav']) == r'--ref "C:\a b\x.wav"'
+else:
+    assert cli.partir("a.json 'con espacio/b.json'") == ['a.json', 'con espacio/b.json']
+    assert cli.unir(['--ref', 'a b.wav']) == "--ref 'a b.wav'"
+""")

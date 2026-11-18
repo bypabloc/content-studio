@@ -120,6 +120,21 @@ def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
 
 
+def unir(args: list[str]) -> str:
+    """Comando para mostrar, con las comillas del shell de este sistema (shlex.join pone comillas posix)."""
+    return subprocess.list2cmdline(args) if os.name == 'nt' else shlex.join(args)
+
+
+def partir(texto: str) -> list[str]:
+    r"""Rutas escritas en una línea. Si el texto entero es una ruta que existe (aunque tenga espacios), es una sola.
+    En Windows sin el modo posix, que se come las \ (D:\a.json salía D:a.json), y sin las comillas."""
+    if Path(texto.strip()).exists():
+        return [texto.strip()]
+    if os.name != 'nt':
+        return shlex.split(texto)
+    return [t[1:-1] if len(t) > 1 and t[0] == t[-1] and t[0] in '"\'' else t for t in shlex.split(texto, posix=False)]
+
+
 def vacio(v) -> bool:
     """Sin valor: None, False o lista vacía. Con `in (None, False, [])` se perdía el 0, porque 0 == False."""
     return v is None or v is False or (isinstance(v, list) and not v)
@@ -195,10 +210,10 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
             j = i + 1
             while '=' not in args[i] and j < len(args) and not args[j].startswith('--'):
                 j += 1
-            avisos.append(f'{shlex.join(args[i:j])} no es válido; lo eliges abajo')
+            avisos.append(f'{unir(args[i:j])} no es válido; lo eliges abajo')
             args = args[:i] + args[j:]
     if sobra:
-        avisos.append(f'no reconocido: {shlex.join(sobra)}')
+        avisos.append(f'no reconocido: {unir(sobra)}')
     dados = {acc.dest: getattr(ns, acc.dest) for acc in flags(ap)
              if any(t == o or t.startswith(o + '=') for t in args for o in acc.option_strings)}
     return dados, avisos
@@ -280,7 +295,7 @@ def preguntar(acc: argparse.Action, cat: dict, actual):
         console.print(f'[dim]  {pista}{" · admite comodines: guiones/*.json" if varios else ""} · tab completa[/]')
         texto = questionary.path(msg, style=ESTILO,
                                  default=str(actual[0] if isinstance(actual, list) else actual or '')).unsafe_ask()
-        rutas = [Path(r) for p in shlex.split(texto) for r in (sorted(glob.glob(p)) or [p])]
+        rutas = [Path(r) for p in partir(texto) for r in (sorted(glob.glob(p)) or [p])]
         return (rutas or None) if varios else (rutas[0] if rutas else None)
 
     def valido(t: str):
@@ -312,7 +327,7 @@ def resumen(ap, valores: dict, clave: str) -> Panel:
         v = v if len(v) < 300 else v[:297] + '…'
         t.add_row(Text(acc.option_strings[0], style='bold cyan' if dado else 'dim'),
                   Text(v, style='green') if dado else Text.assemble((v, 'dim'), ('  por defecto', 'dim italic')))
-    comando = shlex.join(['python', 'cli.py', *clave.split(), *a_argv(ap, valores)])
+    comando = unir(['python', 'cli.py', *clave.split(), *a_argv(ap, valores)])
     return Panel(Group(t, Text(''), Text('$ ' + comando, style='dim')),
                  title=f'{COMANDOS[clave]["icono"]}  [bold]{clave}[/]', title_align='left',
                  border_style=ACENTO, padding=(1, 2))
@@ -382,7 +397,7 @@ def asistente(clave: str, args: list[str], forzar: bool = False) -> None:
 # ── Lanzar ───────────────────────────────────────────────────────────────────────────────────────
 def lanzar(clave: str, args: list[str]) -> None:
     if sys.stdout.isatty():
-        console.rule(f'[bold {ACENTO}]{COMANDOS[clave]["icono"]}  {clave}[/] [dim]{shlex.join(args)}[/]',
+        console.rule(f'[bold {ACENTO}]{COMANDOS[clave]["icono"]}  {clave}[/] [dim]{unir(args)}[/]',
                      align='left', style=ACENTO)
     relanzar([sys.executable, str(RAIZ / COMANDOS[clave]['script']), *args])
 
