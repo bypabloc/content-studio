@@ -22,6 +22,7 @@ import re
 import signal
 import subprocess
 import sys
+import unicodedata
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent  # music/: venvs y models/ viven aquí; salidas en out/music/
@@ -64,6 +65,8 @@ def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, 
     >>> nombre, e = resolver_estilo('Synthwave, retro 80s!', tono='E Minor', bpm=105)
     >>> nombre, e['tags'], e['tono'], e['bpm'], e['compas']
     ('synthwave-retro-80s', 'Synthwave, retro 80s!', 'E Minor', 105, '4')
+    >>> resolver_estilo('Música épica', tono='C Major', bpm=90)[0], resolver_estilo('¡¿?!', tono='C Major', bpm=90)[0]
+    ('musica-epica', 'libre')
     >>> resolver_estilo('bossa nova')
     Traceback (most recent call last):
     SystemExit: "bossa nova" no es un preset: define --tono y --bpm (ej. --tono "C Major" --bpm 90)
@@ -73,7 +76,8 @@ def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, 
     else:
         if tono is None or bpm is None:
             sys.exit(f'"{valor}" no es un preset: define --tono y --bpm (ej. --tono "C Major" --bpm 90)')
-        nombre = re.sub(r'[^a-z0-9]+', '-', valor.lower()).strip('-')[:60]
+        ascii_ = unicodedata.normalize('NFKD', valor.lower()).encode('ascii', 'ignore').decode()  # música → musica
+        nombre = re.sub(r'[^a-z0-9]+', '-', ascii_).strip('-')[:60] or 'libre'
         base = dict(caption=valor, tags=valor, compas='4')
     pisar = {k: v for k, v in dict(tono=tono, bpm=bpm, compas=compas).items() if v is not None}
     return nombre, {**base, **pisar}
