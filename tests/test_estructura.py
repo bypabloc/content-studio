@@ -11,9 +11,7 @@ import pytest
 RAIZ = Path(__file__).resolve().parents[1]
 MAX_LINEAS = 300
 # Temporal: archivos viejos que ya pasaban el tope. Se dividen al migrar a src/ y se sacan de aquí; no pueden crecer.
-ALLOWLIST = {
-    'cli.py': 479,
-}
+ALLOWLIST: dict[str, int] = {}
 
 
 def archivos() -> list[Path]:

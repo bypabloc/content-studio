@@ -37,7 +37,7 @@ python cli.py narration tts --modelo cosyvoice3 --voz yesid --texto "..."
 python cli.py music --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
 ```
 
-`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Los scripts, a su vez, se relanzan solos en su venv, y se pueden seguir llamando directo (`python narration/tts.py ...`). El CLI lee los flags de cada script con su `construir_parser()`. Para agregar un comando, se registra en `COMANDOS` y con `@<herramienta>.command(**PASO)` en `cli.py`, y el script expone `construir_parser()`.
+`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Los scripts, a su vez, se relanzan solos en su venv, y se pueden seguir llamando directo (`python narration/tts.py ...`). El CLI lee los flags de cada script con su `construir_parser()`. El CLI vive en `src/content_studio/cli/` (`cli.py` es solo el shim). Para agregar un comando: una subclase de `Comando` en `cli/comandos/` y una línea en `REGISTRO` (`cli/comandos/__init__.py`), y el script expone `construir_parser()` en un módulo liviano.
 
 ## Reglas
 

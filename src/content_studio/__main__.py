@@ -1,4 +1,4 @@
-"""python -m content_studio: el mismo CLI que python cli.py (hasta que el CLI viva en src/)."""
+"""python -m content_studio: el mismo CLI que python cli.py, con su relanzamiento por uv si faltan las dependencias."""
 
 import runpy
 

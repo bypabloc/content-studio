@@ -10,6 +10,9 @@ dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1"]
 [dependency-groups]
 dev = ["pytest>=8", "ruff", "numpy"]
 
+[project.scripts]
+content-studio = "content_studio.cli.app:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -31,7 +34,6 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 # Temporal: el código viejo se migra a src/ en los pasos siguientes del refactor y ahí se limpia.
-"cli.py" = ["E501"]
 "src/content_studio/music/estilos.py" = ["E501"]  # catálogo: captions largas, sin cambios
 
 [tool.pytest.ini_options]
