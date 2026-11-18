@@ -8,7 +8,8 @@ Uso (ver narration/README.md):
     python narration/tts.py --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/lote
     python narration/tts.py --modelo omnivoice --archivo guion.txt --semilla 7 --evaluar
 
---ref acepta un .wav o una carpeta con <estilo>.wav (por defecto narration/voz).
+--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto narration/voz). --voz usa una voz libre
+del catálogo (narration/voces.py), solo si está aprobada en todos los estilos.
 La transcripción va al lado con el mismo nombre y extensión .txt.
 Cada motor corre en su propio venv (ver MOTORES). Cada toma deja un .json con sus metadatos.
 
@@ -41,6 +42,8 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 ROOT = AQUI.parent
+sys.path.insert(0, str(AQUI))
+from voces import VOCES, aprobadas  # noqa: E402  (stdlib: catálogo de voces libres)
 
 # Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.
 # txt: 'obligatorio' (no clona sin la transcripción), 'opcional' (clona peor sin ella) o None (no la usa).
@@ -180,7 +183,8 @@ TRADUCCION = {
 }
 
 
-def usar_venv(venv: str) -> None:
+def usar_venv(venv: str, script: str = __file__) -> None:
+    """Relanza `script` (por defecto este) con el python del venv, si no se está corriendo ya en él."""
     destino = AQUI / venv
     if Path(sys.prefix).resolve() == destino.resolve():
         return
@@ -189,8 +193,8 @@ def usar_venv(venv: str) -> None:
         sys.exit(f'Falta {destino}. Ver "Instalación" en narration/README.md.')
     if os.name == 'nt':  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
         signal.signal(signal.SIGINT, signal.SIG_IGN)
-        sys.exit(subprocess.call([str(py), __file__, *sys.argv[1:]]))
-    os.execv(py, [str(py), __file__, *sys.argv[1:]])
+        sys.exit(subprocess.call([str(py), script, *sys.argv[1:]]))
+    os.execv(py, [str(py), script, *sys.argv[1:]])
 
 
 def resolver_ref(ref: Path, estilo: str) -> tuple[Path, str | None]:
@@ -805,6 +809,8 @@ def construir_parser() -> argparse.ArgumentParser:
     ap.add_argument('--modelo', choices=MOTORES, default='voxcpm2',
                     help='motor TTS (por defecto voxcpm2; ver narration/README.md)')
     ap.add_argument('--ref', type=Path, default=AQUI / 'voz', help='carpeta de referencias o un .wav concreto')
+    ap.add_argument('--voz', choices=list(aprobadas(ESTILOS)),
+                    help='voz libre del catálogo, aprobada en todos los estilos (narration/voces.py); reemplaza --ref')
     ap.add_argument('--estilo', choices=ESTILOS, help='por defecto el "estilo" del JSON, o experta')
     fuente = ap.add_mutually_exclusive_group(required=True)
     fuente.add_argument('--texto', help='texto a narrar, entre comillas')
@@ -840,9 +846,18 @@ def main() -> None:
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:
         ap.error('--reintentos necesita --evaluar')
+    if a.voz:
+        ficha = aprobadas(ESTILOS)[a.voz]
+        if ficha['idioma'] != a.idioma:
+            ap.error(f'la voz {a.voz} es en "{ficha["idioma"]}": usa --idioma {ficha["idioma"]}')
+        a.ref = VOCES / a.voz
 
     m = MOTORES[a.modelo]
-    usar_venv(m['venv'])
+    usar_venv(m['venv'])  # desde aquí corre en el venv del motor: los avisos se imprimen una sola vez
+    if a.voz and not (ficha := aprobadas(ESTILOS)[a.voz]).get('consentimiento'):
+        print(f'Aviso: la voz {a.voz} ({ficha["fuente"]}) es de dominio público, pero su dueño no dio permiso para '
+              'clonarla (regla 5 de AGENTS.md). Uso personal; para uso comercial, pídele permiso o usa una voz con '
+              'consentimiento. Ver docs/research/voces-libres-clonacion/02.')
 
     import torch
 
@@ -851,6 +866,9 @@ def main() -> None:
     print(f'Semilla: {semilla}')
     if not m['comercial']:
         print(f'Aviso: {a.modelo} tiene licencia no comercial ({m["licencia"]}). Solo uso personal.')
+    elif 'academic' in m['licencia']:
+        print(f'Aviso: {a.modelo} es Apache-2.0, pero su model card dice "for academic purposes only" (sin aclarar). '
+              'Ver docs/research/voicestudio-narracion/07.')
 
     # (nombre de salida o None, texto, estilo del JSON o None)
     guiones = [(None, a.texto, None)] if a.texto else []

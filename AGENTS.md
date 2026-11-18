@@ -29,6 +29,10 @@ python cli.py narration tts --modelo qwen-0.6b --estilo experta \
 # Grabar las voces de referencia
 python cli.py narration grabar --listar
 
+# Voces libres (CC0 o dominio público), aprobadas en los 12 estilos: construir y narrar con una
+python cli.py narration voces --construir todas
+python cli.py narration tts --modelo cosyvoice3 --voz yesid --texto "..."
+
 # Música (presets con tonalidad/BPM/compás definidos; texto libre exige --tono y --bpm)
 python cli.py music --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
 ```

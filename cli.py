@@ -68,6 +68,8 @@ COMANDOS = {
                           desc='Voz clonada en español neutro · 7 motores', asistente=True),
     'narration grabar': dict(script='narration/grabar.py', icono='🎤', titulo='Grabar voces de referencia',
                              desc='Graba, mide y normaliza narration/voz/<estilo>.wav', asistente=False),
+    'narration voces': dict(script='narration/voces.py', icono='🗣', titulo='Voces libres del catálogo',
+                            desc='Construye y aprueba voces CC0 o de dominio público', asistente=False),
     'music': dict(script='music/musica.py', icono='🎵', titulo='Generar música de fondo',
                   desc='Instrumental con ACE-Step 1.5 o HeartMuLa', asistente=True),
 }
@@ -98,7 +100,13 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
             modelos.append((nombre, ' · '.join(partes), None if instalado else 'no instalado'))
         estilos = [(e, '● referencia grabada' if (voz / f'{e}.wav').exists() else '○ sin grabar: indica --ref', None)
                    for e in mod.ESTILOS]
-        return {'modelo': modelos, 'estilo': estilos}
+        import voces as catalogo_voces  # cargar() dejó narration/ en sys.path
+        voces = []
+        for n, f in catalogo_voces.catalogo().items():
+            est = catalogo_voces.estado(n, mod.ESTILOS)
+            voces.append((n, f'{f["idioma"]} · {f["licencia"]} · {f["descripcion"]}',
+                          None if est == 'aprobada' else f'{est}: python cli.py narration voces --construir {n}'))
+        return {'modelo': modelos, 'estilo': estilos, 'voz': voces}
     if clave == 'music':
         modelos = [(n, 'recomendado · ~30 s por pista' if n == 'acestep' else 'lento · ~5 min por pista',
                     None if (RAIZ / 'music' / v).exists() else 'no instalado') for n, v in mod.MODELOS.items()]
@@ -403,6 +411,10 @@ def estado() -> Text:
     voz = RAIZ / 'narration' / 'voz'
     grabadas = sum((voz / f'{t.stem}.wav').exists() for t in voz.glob('*.txt'))
     partes.append(f'voces de referencia [{"green" if grabadas else "yellow"}]{grabadas}/{len(list(voz.glob("*.txt")))}[/]')
+    tts = cargar(COMANDOS['narration tts']['script'])
+    libres = len(tts.aprobadas(tts.ESTILOS))
+    import voces as catalogo_voces
+    partes.append(f'voces libres [{"green" if libres else "yellow"}]{libres}/{len(catalogo_voces.catalogo())}[/]')
     return Text.from_markup('  ·  '.join(partes))
 
 
@@ -450,6 +462,12 @@ def tts(ctx: typer.Context) -> None:
 def grabar(ctx: typer.Context) -> None:
     """🎤  Grabar las voces de referencia (narration/grabar.py)."""
     ejecutar('narration grabar', ctx.args)
+
+
+@narration.command(**PASO)
+def voces(ctx: typer.Context) -> None:
+    """🗣  Construir y aprobar las voces libres del catálogo (narration/voces.py)."""
+    ejecutar('narration voces', ctx.args)
 
 
 @app.command(**PASO)
