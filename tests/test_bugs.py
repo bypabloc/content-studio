@@ -41,7 +41,8 @@ def test_tts_salida_carpeta_con_un_guion(tmp_path):
     from argparse import Namespace
 
     import pytest
-    from tts import planificar
+
+    from content_studio.narration.guion import planificar
 
     a = Namespace(estilo=None, idioma='es', modelo='voxcpm2', salida=tmp_path)  # carpeta existente
     assert [s for *_, s in planificar(a, [('g', 'Hola', None)])] == [tmp_path / 'g-voxcpm2.wav']
@@ -53,7 +54,7 @@ def test_tts_salida_carpeta_con_un_guion(tmp_path):
 
 
 def test_tts_avisa_antes_de_sobrescribir(tmp_path, capsys):
-    from tts import avisar_sobrescritura
+    from content_studio.narration.guion import avisar_sobrescritura
 
     (tmp_path / 'a.wav').touch()
     avisar_sobrescritura([('t', 'experta', tmp_path / 'a.wav'), ('t', 'experta', tmp_path / 'b.wav')])

@@ -29,8 +29,14 @@ import zipfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-VOCES = AQUI / 'voces'
-CATALOGO = VOCES / 'catalogo.json'
+if (_SRC := str(AQUI.parent / 'src')) not in sys.path:
+    sys.path.insert(0, _SRC)
+# Ya migrado a src/ (paso 6 del refactor); se re-importa para cli.py y grabar.py.
+from content_studio.comun import proceso  # noqa: E402
+from content_studio.narration.estilos import ESTILOS  # noqa: E402
+from content_studio.narration.motores.registro import MOTORES, liberar_todo  # noqa: E402
+from content_studio.narration.voces.catalogo import VOCES, catalogo, estado, mencion  # noqa: E402
+
 VOZ_PROPIA = AQUI / 'voz'  # textos del kit de grabación en español (<estilo>.txt)
 UA = {'User-Agent': 'content-studio-voces'}
 PAUSA_PARTES = 0.4  # s entre las partes de una base armada con varios clips
@@ -81,48 +87,6 @@ TEXTO_EN = {
     'susurro': "I'm going to tell you something almost nobody knows. Come a little closer… because this changes the "
                'way you see it.',
 }
-
-
-def catalogo() -> dict:
-    return json.loads(CATALOGO.read_text(encoding='utf-8'))
-
-
-def aprobadas(estilos) -> dict[str, dict]:
-    """Voces del catálogo construidas y aprobadas en todos los `estilos`: {nombre: ficha del catálogo}."""
-    out = {}
-    for nombre, ficha in catalogo().items():
-        ap = VOCES / nombre / 'aprobacion.json'
-        if not ap.exists():
-            continue
-        res = json.loads(ap.read_text(encoding='utf-8'))['estilos']
-        if all(res.get(e, {}).get('ok') and (VOCES / nombre / f'{e}.wav').exists() for e in estilos):
-            out[nombre] = ficha
-    return out
-
-
-def mencion(ficha: dict) -> str | None:
-    """Texto de crédito que hay que publicar con la narración (descripción del video), o None si la licencia no lo pide.
-
-    >>> mencion({'licencia': 'CC0'}) is None
-    True
-    >>> mencion({'licencia': 'CC BY 4.0', 'atribucion': 'Voz: X, CC BY 4.0'})
-    'Voz: X, CC BY 4.0'
-    """
-    return ficha.get('atribucion')
-
-
-def estado(nombre: str, estilos) -> str:
-    """Texto corto para menús: aprobada, reprobada (cuántos estilos) o sin construir.
-
-    >>> estado('no-existe', ['neutral'])
-    'sin construir'
-    """
-    ap = VOCES / nombre / 'aprobacion.json'
-    if not ap.exists():
-        return 'sin construir'
-    res = json.loads(ap.read_text(encoding='utf-8'))['estilos']
-    malos = [e for e in estilos if not res.get(e, {}).get('ok')]
-    return 'aprobada' if not malos else f'reprobada en {len(malos)}/{len(estilos)} estilos ({", ".join(malos)})'
 
 
 def texto_estilo(estilo: str, idioma: str) -> str:
@@ -233,8 +197,10 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
     import whisper
     from transformers import AutoFeatureExtractor, WavLMForXVector
 
-    import tts  # agrega src/ a sys.path
     from content_studio.narration.evaluacion.comparar import comparar, normalizar
+    from content_studio.narration.motores.cosyvoice import SISTEMA as sys_
+    from content_studio.narration.motores.cosyvoice import cargar as cargar_cosyvoice
+    from content_studio.narration.pipeline import fijar
     from referencia import procesar, verificar
 
     carpeta = VOCES / nombre
@@ -253,7 +219,7 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
     # Con una base nueva, lo aprobado antes (contra la base vieja) ya no vale.
     res = {} if nueva_base or not previo.exists() else json.loads(previo.read_text(encoding='utf-8'))['estilos']
     # Se regenera lo que falta o no aprobó; lo aprobado se conserva.
-    pendientes = [e for e in tts.ESTILOS if e != 'neutral'
+    pendientes = [e for e in ESTILOS if e != 'neutral'
                   and not ((carpeta / f'{e}.wav').exists() and res.get(e, {}).get('ok'))]
     if idioma == 'en' and 'neutral-en' in pendientes:  # en una voz inglesa, neutral-en es la propia base
         shutil.copy(base, carpeta / 'neutral-en.wav')
@@ -263,14 +229,13 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
     for e in pendientes:
         res.pop(e, None)
 
-    m = tts.MOTORES['cosyvoice3']
-    sys_ = tts.SYS_COSYVOICE
+    m = MOTORES['cosyvoice3']
 
     def guardar():
         """aprobacion.json tras cada ronda, de forma atómica: un corte no deja un JSON a medias."""
-        ok = all(res.get(e, {}).get('ok') for e in tts.ESTILOS)
+        ok = all(res.get(e, {}).get('ok') for e in ESTILOS)
         tmp = previo.with_suffix('.tmp')
-        tmp.write_text(json.dumps(dict(voz=nombre, aprobada=ok, licencia_motor=m['licencia'],
+        tmp.write_text(json.dumps(dict(voz=nombre, aprobada=ok, licencia_motor=m.licencia,
                                        criterios=dict(sim_min=SIM_MIN, wer_max=WER_MAX, duracion=DURACION),
                                        estilos=res), ensure_ascii=False, indent=1), encoding='utf-8')
         tmp.replace(previo)
@@ -308,11 +273,11 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
         if not faltan:
             break
         asr = sv = fe = None
-        tts.liberar()
-        modelo = tts.cargar_cosyvoice(m['codigo'], m['repo'])
+        liberar_todo()
+        modelo = cargar_cosyvoice(m.codigo, m.repo)
         crudos = {}
         for e in faltan:
-            tts.fijar(SEMILLA + ronda)
+            fijar(SEMILLA + ronda)
             texto = texto_estilo(e, idioma)
             # neutral-en de una voz en español: zero-shot con la transcripción en español. inference_cross_lingual
             # pierde la voz (SIM 0.71-0.91 con la base, a veces más cerca de una voz inglesa); ver research/…/10 §6.
@@ -326,7 +291,7 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
             crudos[e] = carpeta / f'{e}.crudo.wav'
             sf.write(str(crudos[e]), audio.astype(np.float32), modelo.sample_rate)
         del modelo
-        tts.liberar()  # CosyVoice fuera de la VRAM antes de whisper y WavLM
+        liberar_todo()  # CosyVoice fuera de la VRAM antes de whisper y WavLM
         if 'neutral' not in res:
             res['neutral'] = evaluar('neutral', base)
         for e, crudo in crudos.items():
@@ -358,21 +323,19 @@ def construir_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     a = construir_parser().parse_args()
-    sys.path.insert(0, str(AQUI))
-    import tts
-
     cat = catalogo()
     if not a.construir:
         for nombre, f in cat.items():
-            print(f'{nombre:<16} {f["idioma"]} · {f["licencia"]} · {f["descripcion"]}\n{"":<16} {estado(nombre, tts.ESTILOS)}')
+            print(f'{nombre:<16} {f["idioma"]} · {f["licencia"]} · {f["descripcion"]}\n{"":<16} {estado(nombre, ESTILOS)}')
             if m := mencion(f):
                 print(f'{"":<16} mención obligatoria: {m}')
         return
     nombres = list(cat) if a.construir == ['todas'] else a.construir
     if desconocidas := [n for n in nombres if n not in cat]:
         sys.exit(f'Voz desconocida: {", ".join(desconocidas)}. Opciones: {", ".join(cat)}')
-    tts.usar_venv(tts.MOTORES['cosyvoice3']['venv'], __file__)  # relanza este script en el venv de CosyVoice
-    print(f'Aviso: los estilos se generan con CosyVoice 3 ({tts.MOTORES["cosyvoice3"]["licencia"]}). '
+    # relanza este script en el venv de CosyVoice
+    proceso.usar_venv(MOTORES['cosyvoice3'].ruta_venv(), 'narration/README.md', script=__file__)
+    print(f'Aviso: los estilos se generan con CosyVoice 3 ({MOTORES["cosyvoice3"].licencia}). '
           'Ver docs/research/voces-libres-clonacion/02.')
     resultados = {n: construir(n, cat[n], a.forzar) for n in nombres}
     sys.exit(0 if all(resultados.values()) else 1)

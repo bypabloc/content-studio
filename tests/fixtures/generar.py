@@ -3,8 +3,8 @@
 Uso: uv run python tests/fixtures/generar.py [CARPETA]   (por defecto, junto a este archivo)
 
 Las fixtures se generaron con el código viejo de dev 31f9c20 y tests/test_caracterizacion.py compara contra ellas
-con estas mismas funciones. Para apuntar al código nuevo basta con otra fuente igual a `viejo()`: los 4 parsers
-por clave de comando y un objeto con segmentos, etiquetas, preparar_bloques(modelo, segs, ref) y PARAMS_MOTOR.
+con estas mismas funciones. La fuente es `actual()`: los 4 parsers por clave de comando y un objeto con
+segmentos, etiquetas, preparar_bloques(modelo, segs, ref) y PARAMS_MOTOR (nuevo_tts() lo arma sobre src/).
 Regenerar solo cuando un cambio de comportamiento es a propósito, y en un commit aparte.
 
 Solo stdlib (grabar.py importa rich y questionary arriba). soundfile se reemplaza por un falso (toda referencia
@@ -49,13 +49,26 @@ def cargar_script(script: str) -> types.ModuleType:
 
 
 # Lo ya migrado a src/: el parser se importa por módulo (la clave 'script' de la fixture sigue siendo la del shim).
-MODULOS = {'music': 'content_studio.music.parser'}
+MODULOS = {'narration tts': 'content_studio.narration.parser', 'music': 'content_studio.music.parser'}
 
 
-def viejo() -> tuple[dict[str, tuple[str, types.ModuleType]], types.ModuleType]:
-    """Fuente actual: (clave → (script, módulo con construir_parser)) y el módulo que prepara los bloques."""
+def nuevo_tts() -> types.SimpleNamespace:
+    """La forma del tts viejo (preparar_bloques por nombre de modelo y PARAMS_MOTOR) sobre los módulos de src/."""
+    from content_studio.narration.bloques import preparar_bloques
+    from content_studio.narration.motores.registro import MOTORES
+    from content_studio.narration.texto.segmentos import etiquetas, segmentos
+
+    return types.SimpleNamespace(
+        segmentos=segmentos, etiquetas=etiquetas,
+        preparar_bloques=lambda m, segs, ref: preparar_bloques(MOTORES[m].crear(), segs, ref),
+        PARAMS_MOTOR={n: e.crear().params for n, e in MOTORES.items()},
+    )
+
+
+def actual() -> tuple[dict[str, tuple[str, types.ModuleType]], types.SimpleNamespace]:
+    """Fuente actual: (clave → (script, módulo con construir_parser)) y lo que prepara los bloques."""
     mods = {c: importlib.import_module(MODULOS[c]) if c in MODULOS else cargar_script(s) for c, s in SCRIPTS.items()}
-    return {c: (SCRIPTS[c], m) for c, m in mods.items()}, cargar_script('narration/tts.py')
+    return {c: (SCRIPTS[c], m) for c, m in mods.items()}, nuevo_tts()
 
 
 def relativo(v):
@@ -140,7 +153,8 @@ def volcar(carpeta: Path, nombre: str, datos: dict) -> None:
 
 if __name__ == '__main__':
     carpeta = Path(sys.argv[1]) if len(sys.argv) > 1 else AQUI
-    comandos, tts = viejo()
+    carpeta.mkdir(parents=True, exist_ok=True)
+    comandos, tts = actual()
     volcar(carpeta, 'parsers.json', parsers(comandos))
     volcar(carpeta, 'bloques.json', bloques(tts))
     print(f'OK: {carpeta / "parsers.json"} y {carpeta / "bloques.json"}')

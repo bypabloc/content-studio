@@ -1,4 +1,4 @@
-"""El código (hoy el viejo de narration/ y music/) se comporta igual que las fixtures de tests/fixtures/."""
+"""El código (src/ y lo que queda en narration/) se comporta igual que las fixtures de tests/fixtures/."""
 
 from __future__ import annotations
 
@@ -20,17 +20,17 @@ def fixture(nombre: str) -> dict:
 
 
 def test_parsers_iguales_y_livianos(sin_pesadas):
-    comandos, _ = generar.viejo()
+    comandos, _ = generar.actual()
     assert generar.parsers(comandos) == fixture('parsers.json')
 
 
 def test_bloques_iguales():
-    _, tts = generar.viejo()
+    _, tts = generar.actual()
     assert generar.bloques(tts) == fixture('bloques.json')
 
 
-# Los de music ya están en src/: los corre pytest --doctest-modules.
-@pytest.mark.parametrize('script', ['narration/tts.py', 'narration/voces.py', 'narration/grabar.py'])
+# Los de music y tts ya están en src/: los corre pytest --doctest-modules.
+@pytest.mark.parametrize('script', ['narration/voces.py', 'narration/grabar.py'])
 def test_doctests_viejos(script):
     r = doctest.testmod(generar.cargar_script(script))
     assert r.attempted and not r.failed

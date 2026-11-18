@@ -56,8 +56,8 @@ ESTILO = questionary.Style([
 ])
 SEPARADOR = '  ' + '─' * 30
 COMANDOS = {
-    'narration tts': dict(script='narration/tts.py', icono='🎙', titulo='Narrar un texto o guion',
-                          desc='Voz clonada en español neutro · 7 motores', asistente=True),
+    'narration tts': dict(modulo='content_studio.narration.tts', parser='content_studio.narration.parser', icono='🎙',
+                          titulo='Narrar un texto o guion', desc='Voz clonada en español neutro · 7 motores', asistente=True),
     'narration grabar': dict(script='narration/grabar.py', icono='🎤', titulo='Grabar voces de referencia',
                              desc='Graba, mide y normaliza narration/voz/<estilo>.wav', asistente=False),
     'narration voces': dict(script='narration/voces.py', icono='🗣', titulo='Voces libres del catálogo',
@@ -87,15 +87,14 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
         voz = RAIZ / 'narration' / 'voz'
         modelos = []
         for nombre, m in mod.MOTORES.items():
-            partes = [m['nota']] if 'nota' in m else []
-            partes += [m['licencia'], 'uso comercial' if m['comercial'] else 'NO comercial']
-            if 'pesos' in m:
-                partes.append(f'{m["pesos"]:.1f} GB')
-            instalado = (RAIZ / 'narration' / m['venv']).exists()
-            modelos.append((nombre, ' · '.join(partes), None if instalado else 'no instalado'))
+            partes = [m.nota] if m.nota else []
+            partes += [m.licencia, 'uso comercial' if m.comercial else 'NO comercial']
+            if m.pesos is not None:
+                partes.append(f'{m.pesos:.1f} GB')
+            modelos.append((nombre, ' · '.join(partes), None if m.instalado() else 'no instalado'))
         estilos = [(e, '● referencia grabada' if (voz / f'{e}.wav').exists() else '○ sin grabar: indica --ref', None)
                    for e in mod.ESTILOS]
-        import voces as catalogo_voces  # cargar() dejó narration/ en sys.path
+        from content_studio.narration.voces import catalogo as catalogo_voces
         voces = []
         for n, f in catalogo_voces.catalogo().items():
             est = catalogo_voces.estado(n, mod.ESTILOS)
@@ -418,7 +417,7 @@ def estado() -> Text:
     partes.append(f'voces de referencia [{"green" if grabadas else "yellow"}]{grabadas}/{len(list(voz.glob("*.txt")))}[/]')
     tts = cargar(COMANDOS['narration tts'])
     libres = len(tts.aprobadas(tts.ESTILOS))
-    import voces as catalogo_voces
+    from content_studio.narration.voces import catalogo as catalogo_voces
     partes.append(f'voces libres [{"green" if libres else "yellow"}]{libres}/{len(catalogo_voces.catalogo())}[/]')
     return Text.from_markup('  ·  '.join(partes))
 
