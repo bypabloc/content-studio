@@ -23,3 +23,10 @@ def test_ceros_no_se_descartan():
            "assert cli.a_argv(ap, {'semilla': None, 'evaluar': False, 'archivo': []}) == []\n"
            "assert '0' in str(cli.resumen(ap, {'semilla': 0}, 'narration tts').renderable.renderables[0].columns[1]._cells)")
 
+
+
+def test_leer_flag_igual_valor_conserva_el_resto():
+    en_cli("d, av = cli.leer(tts.construir_parser(), ['--lote=abc', '--modelo', 'qwen-0.6b'])\n"
+           "assert d == {'modelo': 'qwen-0.6b'} and '--lote=abc' in av[0], (d, av)\n"
+           "d, av = cli.leer(tts.construir_parser(), ['--mod', 'nada', '--semilla', '3'])\n"
+           "assert d == {'semilla': 3}, (d, av)")

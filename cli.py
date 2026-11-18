@@ -187,11 +187,13 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
             break
         except ErrorArgs as e:
             m = re.search(r'argument (-[-\w]+)', str(e))
-            if not m or m[1] not in args:
+            # El token puede venir como --flag=valor o abreviado (--mod): el error de argparse cita el flag completo.
+            i = next((k for k, t in enumerate(args) if t.startswith('-') and m and (
+                (c := t.split('=', 1)[0]) == m[1] or (len(c) > 2 and m[1].startswith(c)))), None)
+            if i is None:
                 return {}, [str(e)]
-            i = j = args.index(m[1])
-            j += 1
-            while j < len(args) and not args[j].startswith('--'):
+            j = i + 1
+            while '=' not in args[i] and j < len(args) and not args[j].startswith('--'):
                 j += 1
             avisos.append(f'{shlex.join(args[i:j])} no es válido; lo eliges abajo')
             args = args[:i] + args[j:]
