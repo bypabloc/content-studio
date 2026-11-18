@@ -6,6 +6,9 @@ Genera narración en **español neutro latinoamericano** (o en inglés con `--id
 narration/
 ├── README.md            este documento
 ├── tts.py               script único (CLI)
+├── voces.py             catálogo de voces libres (CC0 o dominio público): construye y aprueba cada voz
+├── referencia.py        medir, normalizar y verificar una referencia (lo usan grabar.py y voces.py)
+├── voces/               catalogo.json (versionado) + <voz>/<estilo>.wav construidos (gitignoreado)
 ├── docs/
 │   ├── formato-guion.md cómo escribir el texto: pausas, estilo, emoción, gestos, pronunciación
 │   └── guiones/         cómo grabar las referencias de voz: un guion por estilo
@@ -21,7 +24,7 @@ narration/
 
 Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
 
-**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), agrega `--ref narration/voz/prueba/experta.wav`.
+**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) o agrega `--ref narration/voz/prueba/experta.wav`.
 
 ---
 
@@ -129,6 +132,10 @@ python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
 python cli.py narration tts --modelo qwen-1.7b --estilo experta \
   --archivo guion.txt --salida out/narration/guion-experta.wav
 
+# Con una voz libre del catálogo, aprobada en los 12 estilos (§5.1)
+python cli.py narration tts --modelo cosyvoice3 --voz yesid --estilo dramatica \
+  --texto "Nadie sabía lo que había pasado esa noche."
+
 # Con la referencia de prueba (mientras no haya grabaciones propias)
 python cli.py narration tts --modelo qwen-0.6b --ref narration/voz/prueba/experta.wav \
   --texto "Hola, esto es una prueba."
@@ -156,6 +163,7 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 |---|---|---|---|
 | `--modelo` | `voxcpm2` (recomendado), `cosyvoice3`, `qwen-1.7b`, `qwen-0.6b`, `chatterbox`, `omnivoice`, `indextts` | `voxcpm2` | Motor a usar ([§1](#1-modelos-elegidos)) |
 | `--ref` | `.wav` o carpeta | `narration/voz` | Con una carpeta usa `<estilo>.wav`; la transcripción va en el `.txt` homónimo. Un `[estilo:]` sin su `.wav` detiene el script antes de generar |
+| `--voz` | voces aprobadas del catálogo | — | Usa `narration/voces/<voz>/` en lugar de `--ref`. Solo acepta voces aprobadas en **todos** los estilos; el idioma de la voz tiene que coincidir con `--idioma` ([§5.1](#51-voces-libres-del-catálogo---voz)) |
 | `--estilo` | `amistosa`, `suave`, `experta`, `clara`, `estable`, `neutral`, `energica`, `dramatica`, `triste`, `intima`, `susurro`, `neutral-en` | el `estilo` del JSON, o `experta` (`neutral-en` con `--idioma en`) | Referencia y parámetros del estilo. Un `[estilo:]` dentro del texto lo cambia desde ese punto |
 | `--texto` | texto | uno de los dos | Lo que se narra |
 | `--archivo` | uno o varios `.txt` o `.json` | uno de los dos | Guiones a narrar. Con varios, el modelo se carga una sola vez. Formato JSON en [docs/formato-guion.md](docs/formato-guion.md#guiones-en-json) |
@@ -271,6 +279,28 @@ Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando usa ffmpeg
 
 Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
 
+### 5.1 Voces libres del catálogo (`--voz`)
+
+Para narrar sin grabarse, `voces.py` arma voces a partir de fuentes **CC0 o de dominio público**: lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar. El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
+
+```bash
+python cli.py narration voces --listar                    # catálogo, licencia y estado de cada voz
+python cli.py narration voces --construir yesid           # una voz (~5 min en la 4060)
+python cli.py narration voces --construir todas           # todo el catálogo
+python cli.py narration tts --modelo cosyvoice3 --voz yesid --texto "..."
+```
+
+Cómo se construye una voz (corre en el venv de CosyVoice 3):
+
+1. Baja la fuente (caché en `voces/.fuentes/`), recorta el tramo del catálogo y lo normaliza como una grabación propia (−18 LUFS, pico real ≤ −3 dBTP). Ese clip real es el estilo `neutral`.
+2. Genera los otros 11 estilos con CosyVoice 3, leyendo el texto del kit (`voz/<estilo>.txt`, o su versión en inglés):
+   - los estilos con instrucción (`triste`, `energica`, `dramatica`…) usan `instruct2`;
+   - `neutral-en` de una voz en español usa zero-shot, porque `cross_lingual` pierde la voz. En una voz inglesa, `neutral-en` es la base.
+3. Aprueba cada clip con estos criterios: similitud de hablante con la base ≥ 0.93 (WavLM-SV), WER ≤ 0.15 (whisper `large-v3-turbo`), 5–15 s, −20 a −16 LUFS, pico real ≤ −3 dBTP y sin pausas internas de 1 s o más. Si un clip no aprueba, lo regenera con otra semilla, hasta 3 rondas.
+4. Escribe `voces/<voz>/aprobacion.json`. **Una voz entra en `--voz` solo si aprueba los 12 estilos.** El menú de `cli.py` muestra las demás deshabilitadas, con el motivo.
+
+El acento y si cada estilo "suena" a lo que dice **no se miden**: escucha `voces/<voz>/*.wav` antes de usar una voz en un video. Las voces de LibriVox no tienen consentimiento para clonar. Para uso comercial, mira [docs/research/voces-libres-clonacion/02](../docs/research/voces-libres-clonacion/02-derechos-copyright-y-voz.md).
+
 ---
 
 ## 6. Rendimiento
@@ -338,4 +368,5 @@ Los seis picos de VRAM quedan por debajo de 6.5 GiB. Las seis tomas de `c_tutori
 - [Qwen3-TTS (GitHub)](https://github.com/QwenLM/Qwen3-TTS) · [acento inglés en español #230](https://github.com/QwenLM/Qwen3-TTS/discussions/230) · [voces en español #300](https://github.com/QwenLM/Qwen3-TTS/discussions/300) · [review 2026](https://aitoolanalysis.com/qwen3-tts-review/)
 - [Chatterbox (GitHub)](https://github.com/resemble-ai/chatterbox) · [review 2026](https://oakgen.ai/blog/chatterbox-tts-open-source-review) · [docs Clore](https://docs.clore.ai/guides/audio-and-voice/chatterbox-tts)
 - Comparativas: [BentoML](https://www.bentoml.com/blog/exploring-the-world-of-open-source-text-to-speech-models) · [Pinggy](https://pinggy.io/blog/best_open_source_self_hosted_text_to_speech_models/) · [LocalAIMaster](https://localaimaster.com/blog/best-local-tts-models)
+- Voces libres para clonar (fuentes CC0 y de dominio público, derechos, pruebas y catálogo): [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md)
 - Investigación de los motores de noviembre y especificación de la implementación: [docs/research/voicestudio-narracion/](../docs/research/voicestudio-narracion/README.md) · [docs/specs/narracion-motores-voicestudio.md](../docs/specs/narracion-motores-voicestudio.md) (desviaciones en su §15)

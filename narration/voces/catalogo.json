@@ -1,0 +1,90 @@
+{
+ "karen-savage": {
+  "url": "https://archive.org/download/angelina_1109_librivox/angelina_01_delgado.mp3",
+  "inicio_s": 66.99,
+  "dur_s": 11.66,
+  "texto": "El caserío de la hacienda próxima volvía ante mis ojos igual, idéntico, como una estampa admirada en la niñez y que el mejor día, cuando menos lo esperamos, viene a recordarnos épocas dichosas.",
+  "idioma": "es",
+  "licencia": "dominio público",
+  "descripcion": "femenina, F0 ~200 Hz, audiolibro; acento por verificar (M-AILABS la indica mexicana)",
+  "fuente": "LibriVox, Karen Savage (lector 103), Angelina de Rafael Delgado, cap. 1",
+  "derechos": "Dominio público (LibriVox: \"all our recordings are public domain\", en EE. UU.)",
+  "consentimiento": false
+ },
+ "mpinedag": {
+  "url": "https://archive.org/download/comphistoriacam_2511_librivox/comphistoriacam_01_gomez.mp3",
+  "inicio_s": 68.05,
+  "dur_s": 11.0,
+  "texto": "El general trata de los hechos relativos a una nación y la particular se circunscribe a los referentes a un período notable, a una época memorable o a una sección de un país.",
+  "idioma": "es",
+  "licencia": "dominio público",
+  "descripcion": "masculina grave, F0 ~90 Hz, audiolibro; acento por verificar",
+  "fuente": "LibriVox, mpinedag (lector 3796), Compendio de Historia de la América Central, cap. 1",
+  "derechos": "Dominio público (LibriVox: \"all our recordings are public domain\", en EE. UU.)",
+  "consentimiento": false
+ },
+ "yesid": {
+  "url": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-donations/Yesid.wav",
+  "texto": "Incluye una torre de cruce y un campanario. El disco de Relay vendió más de 6 millones de copias como sencillo.",
+  "idioma": "es",
+  "licencia": "CC0",
+  "descripcion": "masculina, F0 ~120 Hz, grabación casera; acento por verificar",
+  "fuente": "Kyutai tts-voices, voice-donations/Yesid.wav",
+  "derechos": "CC0-1.0 (Kyutai voice-donations: donación con consentimiento para clonación de voz)",
+  "consentimiento": true
+ },
+ "andrea": {
+  "url": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-donations/Andrea.wav",
+  "texto": "nadie va a venir a salvarte, no habrá un momento perfecto ni una señal mágica, todo lo que estás esperando",
+  "idioma": "es",
+  "licencia": "CC0",
+  "descripcion": "femenina, F0 ~180 Hz, grabación casera, tono motivacional; acento por verificar",
+  "fuente": "Kyutai tts-voices, voice-donations/Andrea.wav",
+  "derechos": "CC0-1.0 (Kyutai voice-donations: donación con consentimiento para clonación de voz)",
+  "consentimiento": true
+ },
+ "cori-samuel": {
+  "url": "https://archive.org/download/frankenstein_cs_librivox/frankenstein_01_shelley.mp3",
+  "inicio_s": 204.11,
+  "dur_s": 12.0,
+  "texto": "It is a subject also of additional interest to the author that this story was begun in the majestic region where the scene is principally laid, and in society which cannot cease to be regretted.",
+  "idioma": "en",
+  "licencia": "dominio público",
+  "descripcion": "femenina, F0 ~220 Hz, audiolibro, probablemente británica; lectora de Hi-Fi TTS",
+  "fuente": "LibriVox, Cori Samuel (lector 92), Frankenstein, cap. 1",
+  "derechos": "Dominio público (LibriVox: \"all our recordings are public domain\", en EE. UU.)",
+  "consentimiento": false
+ },
+ "john-van-stan": {
+  "url": "https://archive.org/download/frankenstein_4_2010_librivox/frankenstein4_01_shelley.mp3",
+  "inicio_s": 77.59,
+  "dur_s": 11.82,
+  "texto": "There, Margaret, the sun is forever visible. its broad disk just skirting the horizon, and diffusing a perpetual splendor.",
+  "idioma": "en",
+  "licencia": "dominio público",
+  "descripcion": "masculina grave, F0 ~100 Hz, audiolibro pausado; lector de Hi-Fi TTS",
+  "fuente": "LibriVox, John Van Stan (lector 9017), Frankenstein v4, cap. 1",
+  "derechos": "Dominio público (LibriVox: \"all our recordings are public domain\", en EE. UU.)",
+  "consentimiento": false
+ },
+ "hannah": {
+  "url": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-donations/Hannah.wav",
+  "texto": "I consent to my voice being used for voice cloning. Juveniles are also hunted by jackals. All motor vehicles are required to have a four stroke marine engine. Hey, this is Hannah. Okay, bye.",
+  "idioma": "en",
+  "licencia": "CC0",
+  "descripcion": "femenina, F0 ~230 Hz, ritmo rápido (~240 ppm), grabación casera",
+  "fuente": "Kyutai tts-voices, voice-donations/Hannah.wav",
+  "derechos": "CC0-1.0 (Kyutai voice-donations: donación con consentimiento para clonación de voz)",
+  "consentimiento": true
+ },
+ "nick": {
+  "url": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-donations/Nick.wav",
+  "texto": "for voice cloning. Diagnosis is typically based on the symptoms. It seems there are always new rumors about it.",
+  "idioma": "en",
+  "licencia": "CC0",
+  "descripcion": "masculina, F0 ~115 Hz, grabación casera",
+  "fuente": "Kyutai tts-voices, voice-donations/Nick.wav",
+  "derechos": "CC0-1.0 (Kyutai voice-donations: donación con consentimiento para clonación de voz)",
+  "consentimiento": true
+ }
+}
