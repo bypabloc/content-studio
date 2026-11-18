@@ -1,0 +1,30 @@
+name: calidad
+
+# ruff y pytest (doctests, caracterización, estructura y bugs) en 3.10, el mínimo por el venv de CosyVoice, y 3.12.
+# Sin GPU: los tests marcados `local` (venvs de los motores) no corren aquí.
+# Todavía no es check requerido de los rulesets: se agrega al cerrar el refactor, cuando ya haya corrido en main y dev.
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.12']
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --group dev --python ${{ matrix.python }}
+      - run: uv run ruff check
+      # - run: uv run ruff format --check   # se activa al cerrar el refactor, con el código ya migrado a src/
+      - run: uv run pytest
