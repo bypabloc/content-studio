@@ -120,6 +120,11 @@ def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
 
 
+def vacio(v) -> bool:
+    """Sin valor: None, False o lista vacía. Con `in (None, False, [])` se perdía el 0, porque 0 == False."""
+    return v is None or v is False or (isinstance(v, list) and not v)
+
+
 def obligatorio(acc: argparse.Action, ap: argparse.ArgumentParser) -> bool:
     return acc.required or any(g.required and acc in g._group_actions for g in ap._mutually_exclusive_groups)
 
@@ -151,7 +156,7 @@ def ayuda(clave: str) -> None:
             defecto = ' '.join(map(str, defecto))
         marca = ' [red]*[/]' if obligatorio(acc, ap) else ''
         t.add_row(', '.join(acc.option_strings) + marca, valores,
-                  '' if defecto in (None, False, []) else str(defecto), acc.help or '')
+                  '' if vacio(defecto) else str(defecto), acc.help or '')
     console.print(Panel(
         Group(Text(resumen, style='italic'), Text(''), t, Text(''),
               Text.from_markup('[red]*[/] obligatorio · si falta, el asistente lo pregunta · '
@@ -200,7 +205,7 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
 def a_argv(ap: argparse.ArgumentParser, valores: dict) -> list[str]:
     argv = []
     for acc in flags(ap):
-        if acc.dest not in valores or valores[acc.dest] in (None, False, []):
+        if acc.dest not in valores or vacio(valores[acc.dest]):
             continue
         v = valores[acc.dest]
         if isinstance(acc, argparse._StoreTrueAction):
@@ -296,9 +301,9 @@ def resumen(ap, valores: dict, clave: str) -> Panel:
     t.add_column(style='bold cyan', no_wrap=True)
     t.add_column(ratio=1)
     for acc in flags(ap):
-        dado = acc.dest in valores and valores[acc.dest] not in (None, False, [])
+        dado = acc.dest in valores and not vacio(valores[acc.dest])
         v = valores[acc.dest] if dado else acc.default
-        if v in (None, False, []):
+        if vacio(v):
             continue
         v = 'sí' if v is True else ' '.join(map(str, v)) if isinstance(v, list) else (
             os.path.relpath(v, RAIZ) if isinstance(v, Path) and v.is_absolute() else str(v))
@@ -359,7 +364,7 @@ def asistente(clave: str, args: list[str], forzar: bool = False) -> None:
         for acc in flags(ap):
             v = valores.get(acc.dest)
             estado = ('✓ ' + (' '.join(map(str, v)) if isinstance(v, list) else 'sí' if v is True else str(v))
-                      if v not in (None, False, []) else (acc.help or ''))
+                      if not vacio(v) else (acc.help or ''))
             opciones.append(Choice(titulo(acc.option_strings[0], estado[:90]), value=acc))
         acc = questionary.select('¿Qué opción?', choices=[*opciones, Separator(SEPARADOR), Choice('↩  Volver', None)],
                                  style=ESTILO, instruction='(↑↓ · enter)').unsafe_ask()
