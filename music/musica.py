@@ -274,9 +274,18 @@ def main() -> None:
     usar_venv(MODELOS[a.modelo])
     a.carpeta.mkdir(parents=True, exist_ok=True)
 
-    generar = generar_heartmula if a.modelo == 'heartmula' else generar_acestep
-    generar(trabajos, a)
+    motor = generar_heartmula if a.modelo == 'heartmula' else generar_acestep
+
+    def generar(lista) -> None:
+        for _, salida in lista:  # si el motor falla, no queda la pista de una corrida anterior como si fuera nueva
+            salida.unlink(missing_ok=True)
+        motor(lista, a)
+
+    generar(trabajos)
     if not a.evaluar:
+        faltan = [s.name for _, s in trabajos if not s.exists()]
+        if faltan:
+            sys.exit(f'No se generaron: {", ".join(faltan)}')
         return
 
     liberar_gpu()
@@ -285,7 +294,7 @@ def main() -> None:
         if not pendientes:
             break
         print(f'Regenerando {len(pendientes)} pista(s) con voz...', flush=True)
-        generar([t for t in trabajos if t[1] in pendientes], a)
+        generar([t for t in trabajos if t[1] in pendientes])
         liberar_gpu()
         pendientes = con_voz(pendientes)
     print(f'{len(trabajos) - len(pendientes)}/{len(trabajos)} pistas sin voz')
