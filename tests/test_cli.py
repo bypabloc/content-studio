@@ -36,6 +36,7 @@ def test_rutas_windows_y_comandos():
     en_cli(r"""
 import os
 assert cli.partir('cli.py') == ['cli.py']
+assert cli.partir('') == [] and cli.partir('  ') == []  # ruta opcional vacía: None, no '.'
 if os.name == 'nt':
     assert cli.partir(r'D:\g\a.json "C:\con espacio\b.json"') == [r'D:\g\a.json', r'C:\con espacio\b.json']
     assert cli.unir(['--ref', r'C:\a b\x.wav']) == r'--ref "C:\a b\x.wav"'
