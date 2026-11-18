@@ -48,3 +48,52 @@ def test_relanza_en_el_venv(venv, tmp_path):
         modulo, rutas.SRC / 'content_studio/comun/proceso.py'
     )
     assert args.strip() == "['arg 1']"
+
+
+# La librería de cada motor, importada en su venv tras crear() (lo que el factory method carga ya dentro del venv).
+LIBRERIAS = {
+    'qwen-0.6b': 'qwen_tts',
+    'chatterbox': 'chatterbox.mtl_tts',
+    'omnivoice': 'omnivoice',
+    'voxcpm2': 'voxcpm',
+    'cosyvoice3': 'cosyvoice.cli.cosyvoice',
+    'indextts': 'indextts.infer_v2_5',
+    'acestep': 'acestep.handler',
+    'heartmula': 'heartlib',
+}
+
+
+def _specs():
+    from content_studio.music.motores.registro import MODELOS
+    from content_studio.narration.motores.registro import MOTORES
+
+    return {**MOTORES, **MODELOS}
+
+
+@pytest.mark.local
+@pytest.mark.parametrize('nombre', LIBRERIAS)
+def test_importa_el_motor(nombre):
+    e = _specs()[nombre]
+    py = python_de(e.ruta_venv())
+    if not py.exists():
+        pytest.skip(f'{e.venv} no está instalado')
+    rutas_codigo = []
+    if getattr(e, 'codigo', None):
+        d = rutas.NARRATION / e.codigo
+        rutas_codigo = [str(d), str(d / 'third_party' / 'Matcha-TTS')]
+    sonda = (
+        f'import sys, importlib; sys.path[:0] = {rutas_codigo!r}\n'
+        f'from content_studio.music.motores.registro import MODELOS\n'
+        f'from content_studio.narration.motores.registro import MOTORES\n'
+        f'm = {{**MOTORES, **MODELOS}}[{nombre!r}].crear()\n'
+        f'importlib.import_module({LIBRERIAS[nombre]!r})\n'
+        f'print(type(m).__name__)\n'
+    )
+    env = {
+        **os.environ,
+        'PYTHONPATH': str(rutas.SRC),
+        'ACESTEP_PROJECT_ROOT': str(rutas.MUSIC / 'models' / 'ACE-Step-1.5'),
+    }
+    r = subprocess.run([str(py), '-c', sonda], capture_output=True, text=True, env=env, timeout=600, cwd=rutas.RAIZ)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.strip().splitlines()[-1] == e.clase
