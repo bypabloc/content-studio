@@ -233,7 +233,8 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
     import whisper
     from transformers import AutoFeatureExtractor, WavLMForXVector
 
-    import tts
+    import tts  # agrega src/ a sys.path
+    from content_studio.narration.evaluacion.comparar import comparar, normalizar
     from referencia import procesar, verificar
 
     carpeta = VOCES / nombre
@@ -291,8 +292,8 @@ def construir(nombre: str, ficha: dict, forzar: bool) -> bool:
             sv = WavLMForXVector.from_pretrained('microsoft/wavlm-base-plus-sv').to('cuda').eval()
         lengua = 'en' if e == 'neutral-en' else idioma
         oido = asr.transcribe(str(wav), language=lengua, condition_on_previous_text=False)['text']
-        esperado = tts.normalizar(wav.with_suffix('.txt').read_text(encoding='utf-8'), lengua)
-        difs = tts.comparar(esperado, tts.normalizar(oido, lengua))
+        esperado = normalizar(wav.with_suffix('.txt').read_text(encoding='utf-8'), lengua)
+        difs = comparar(esperado, normalizar(oido, lengua))
         wer = sum(max(len(a.split()), len(b.split())) for _, a, b in difs) / max(len(esperado), 1)
         sim = float(emb(wav) @ emb(base))
         checks = verificar(wav, *DURACION, piso=False)
