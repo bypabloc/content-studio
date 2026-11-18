@@ -45,7 +45,14 @@ ROOT = AQUI.parent
 # Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.
 # txt: 'obligatorio' (no clona sin la transcripción), 'opcional' (clona peor sin ella) o None (no la usa).
 # Medido en RTX 4060 8 GB, bf16. Licencias en narration/README.md.
+# Orden de preferencia (así salen en el menú del CLI): nota marca el ranking.
 MOTORES = {
+    'voxcpm2': dict(venv='.venv-voxcpm', repo='openbmb/VoxCPM2', licencia='Apache-2.0', comercial=True,
+                    txt='opcional', ref_max_s=30, nota='★ recomendado'),
+    'cosyvoice3': dict(venv='motores/CosyVoice/.venv', codigo='motores/CosyVoice',
+                       repo='motores/CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B',
+                       licencia='Apache-2.0 (card: "academic purposes")', comercial=True, txt='obligatorio',
+                       ref_max_s=30, nota='2.ª opción'),
     'qwen-1.7b': dict(venv='.venv-qwen', repo='Qwen/Qwen3-TTS-12Hz-1.7B-Base', pesos=3.95, lote=True,
                       licencia='Apache-2.0', comercial=True, txt='opcional', ref_max_s=60),
     'qwen-0.6b': dict(venv='.venv-qwen', repo='Qwen/Qwen3-TTS-12Hz-0.6B-Base', pesos=2.06, lote=True,
@@ -54,14 +61,8 @@ MOTORES = {
                        ref_max_s=10),
     'omnivoice': dict(venv='.venv-omnivoice', repo='k2-fsa/OmniVoice', licencia='CC-BY-NC + Higgs Audio 2',
                       comercial=False, txt='obligatorio', ref_max_s=10),
-    'voxcpm2': dict(venv='.venv-voxcpm', repo='openbmb/VoxCPM2', licencia='Apache-2.0', comercial=True,
-                    txt='opcional', ref_max_s=30),
     'indextts': dict(venv='motores/index-tts/.venv', codigo='motores/index-tts', repo='motores/index-tts/checkpoints',
                      licencia='bilibili Model Use License', comercial=False, txt=None, ref_max_s=15),
-    'cosyvoice3': dict(venv='motores/CosyVoice/.venv', codigo='motores/CosyVoice',
-                       repo='motores/CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B',
-                       licencia='Apache-2.0 (card: "academic purposes")', comercial=True, txt='obligatorio',
-                       ref_max_s=30),
 }
 # Parámetros fijos de cada motor, los medidos en la investigación (docs/research/voicestudio-narracion/13).
 PARAMS_MOTOR = {
@@ -801,7 +802,8 @@ GENERADORES = {
 def construir_parser() -> argparse.ArgumentParser:
     """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--modelo', choices=MOTORES, required=True, help='motor TTS (ver narration/README.md)')
+    ap.add_argument('--modelo', choices=MOTORES, default='voxcpm2',
+                    help='motor TTS (por defecto voxcpm2; ver narration/README.md)')
     ap.add_argument('--ref', type=Path, default=AQUI / 'voz', help='carpeta de referencias o un .wav concreto')
     ap.add_argument('--estilo', choices=ESTILOS, help='por defecto el "estilo" del JSON, o experta')
     fuente = ap.add_mutually_exclusive_group(required=True)
@@ -857,7 +859,7 @@ def main() -> None:
             d = json.loads(f.read_text(encoding='utf-8'))
             guiones.append((d.get('id', f.stem), *leer_json(d)))
         else:
-            guiones.append((None, f.read_text(encoding='utf-8'), None))
+            guiones.append((f.stem, f.read_text(encoding='utf-8'), None))
 
     resultados = []
     for nombre, texto, estilo_json in guiones:

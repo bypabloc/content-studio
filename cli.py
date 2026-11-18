@@ -90,7 +90,8 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
         voz = RAIZ / 'narration' / 'voz'
         modelos = []
         for nombre, m in mod.MOTORES.items():
-            partes = [m['licencia'], 'uso comercial' if m['comercial'] else 'NO comercial']
+            partes = [m['nota']] if 'nota' in m else []
+            partes += [m['licencia'], 'uso comercial' if m['comercial'] else 'NO comercial']
             if 'pesos' in m:
                 partes.append(f'{m["pesos"]:.1f} GB')
             instalado = (RAIZ / 'narration' / m['venv']).exists()

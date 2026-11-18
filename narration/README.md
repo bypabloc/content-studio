@@ -1,6 +1,6 @@
 # narration/ — Narración TTS local con clonación de voz
 
-Genera narración en **español neutro latinoamericano** (o en inglés con `--idioma en`) clonando una voz de referencia, 100 % local en una **RTX 4060 Laptop (8 GB VRAM)**. Sin APIs ni costo por uso. Siete motores: Qwen3-TTS (0.6B y 1.7B), Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.
+Genera narración en **español neutro latinoamericano** (o en inglés con `--idioma en`) clonando una voz de referencia, 100 % local en una **RTX 4060 Laptop (8 GB VRAM)**. Sin APIs ni costo por uso. Siete motores, en orden de preferencia: **VoxCPM2** (recomendado), **CosyVoice 3** (segunda opción), Qwen3-TTS (1.7B y 0.6B), Chatterbox V3, OmniVoice e IndexTTS 2.5.
 
 ```
 narration/
@@ -61,7 +61,7 @@ Los gestos y las emociones de cada motor se traducen por `tts.py`; la tabla comp
 
 **Descartados** (ver la investigación completa en [docs/research/voicestudio-narracion/](../docs/research/voicestudio-narracion/README.md)): Voxtral TTS (≥10 GB), Higgs Audio v3 (no comercial y lento en 8 GB), F5-TTS, XTTS v2 y Fish S1-mini (licencias no comerciales), Kokoro (acento inglés, no clona), Dia, Orpheus y Breeze TTS 2 (sin español).
 
-En este proyecto, **Qwen 0.6B y 1.7B dieron el mejor resultado** al escucharlos. Los motores de noviembre todavía no se han escuchado con tu voz: ver [§7](#7-problemas-conocidos).
+**Orden de preferencia en este proyecto**: 1) `voxcpm2` (motor estrella), 2) `cosyvoice3`, 3) `qwen-1.7b`, 4) `qwen-0.6b`, 5) `chatterbox`, y al final los no comerciales `omnivoice` e `indextts`. Es el orden en que aparecen en el menú de `cli.py`. Ver [§7](#7-problemas-conocidos).
 
 ---
 
@@ -154,7 +154,7 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 
 | Flag | Valores | Por defecto | Qué hace |
 |---|---|---|---|
-| `--modelo` | `qwen-1.7b`, `qwen-0.6b`, `chatterbox`, `omnivoice`, `voxcpm2`, `indextts`, `cosyvoice3` | obligatorio | Motor a usar ([§1](#1-modelos-elegidos)) |
+| `--modelo` | `voxcpm2` (recomendado), `cosyvoice3`, `qwen-1.7b`, `qwen-0.6b`, `chatterbox`, `omnivoice`, `indextts` | `voxcpm2` | Motor a usar ([§1](#1-modelos-elegidos)) |
 | `--ref` | `.wav` o carpeta | `narration/voz` | Con una carpeta usa `<estilo>.wav`; la transcripción va en el `.txt` homónimo. Un `[estilo:]` sin su `.wav` detiene el script antes de generar |
 | `--estilo` | `amistosa`, `suave`, `experta`, `clara`, `estable`, `neutral`, `energica`, `dramatica`, `triste`, `intima`, `susurro`, `neutral-en` | el `estilo` del JSON, o `experta` (`neutral-en` con `--idioma en`) | Referencia y parámetros del estilo. Un `[estilo:]` dentro del texto lo cambia desde ese punto |
 | `--texto` | texto | uno de los dos | Lo que se narra |
