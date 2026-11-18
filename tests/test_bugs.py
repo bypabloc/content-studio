@@ -8,7 +8,7 @@ sys.path[:0] = [str(RAIZ / 'narration'), str(RAIZ / 'music')]
 
 
 def test_tomas_max_mas_uno(tmp_path):
-    from referencia import siguiente_numero
+    from content_studio.comun.archivos import siguiente_numero
 
     assert siguiente_numero(tmp_path, 'neutral') == 1
     for n in ['neutral-1', 'neutral-3', 'neutral-en-7', 'neutral-fin-9', 'neutral-x']:

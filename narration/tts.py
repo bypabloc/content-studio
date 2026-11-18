@@ -29,7 +29,6 @@ import os
 import random
 import re
 import shutil
-import signal
 import statistics
 import subprocess
 import sys
@@ -42,8 +41,11 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 ROOT = AQUI.parent
-if str(AQUI) not in sys.path:  # cli.py lo carga más de una vez
-    sys.path.insert(0, str(AQUI))
+for _p in (str(AQUI), str(ROOT / 'src')):  # cli.py lo carga más de una vez
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+from content_studio.comun import proceso  # noqa: E402  (solo stdlib)
+from content_studio.comun.ffmpeg import ffmpeg, json_loudnorm, loudness  # noqa: E402  (solo stdlib)
 from voces import VOCES, aprobadas, mencion, catalogo as voces_catalogo  # noqa: E402  (stdlib: catálogo de voces)
 
 # Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.
@@ -186,16 +188,7 @@ TRADUCCION = {
 
 def usar_venv(venv: str, script: str = __file__) -> None:
     """Relanza `script` (por defecto este) con el python del venv, si no se está corriendo ya en él."""
-    destino = AQUI / venv
-    if Path(sys.prefix).resolve() == destino.resolve():
-        return
-    py = destino / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
-    if not py.exists():
-        sys.exit(f'Falta {destino}. Ver "Instalación" en narration/README.md.')
-    if os.name == 'nt':  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        sys.exit(subprocess.call([str(py), script, *sys.argv[1:]]))
-    os.execv(py, [str(py), script, *sys.argv[1:]])
+    proceso.usar_venv(AQUI / venv, 'narration/README.md', script=script)
 
 
 def avisos_voz(nombre: str, ficha: dict) -> None:
@@ -1168,21 +1161,6 @@ def escribir(g: dict) -> None:
         g['master_info'] = {'modo': 'no'}
 
 
-def _json_de_ffmpeg(stderr: str) -> dict:
-    """loudnorm con print_format=json escribe su JSON al final de stderr."""
-    return json.loads(stderr[stderr.rindex('{', 0, stderr.rindex('}')):stderr.rindex('}') + 1])
-
-
-def _medir(ruta) -> tuple[float, float]:
-    """Loudness integrado (LUFS) y pico real (dBTP) de un audio, con ebur128. Pasada 3 de la masterización."""
-    veri = subprocess.run(
-        ['ffmpeg', '-hide_banner', '-i', str(ruta), '-af', 'ebur128=peak=true', '-f', 'null', '-'],
-        capture_output=True, text=True, check=True,
-    ).stderr
-    return (float(re.search(r'^\s*I:\s+(-?[\d.]+) LUFS', veri, re.M)[1]),
-            float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1]))
-
-
 def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
     """Masterización 'voz' (§7.1): pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `lufs`, con techo de
     pico de −1.5 dBTP. Solo se limita la dinámica si el pico real no deja llegar a `lufs` (queda 'dynamic' y se
@@ -1194,21 +1172,14 @@ def masterizar(audio, sr: int, salida: Path, lufs: float) -> dict:
     base = f'highpass=f=70,loudnorm=I={lufs}'
     try:
         # Pasada 1: medir. Pasada 2: aplicar esa ganancia a la frecuencia nativa (loudnorm sobremuestrea a 192 kHz).
-        med = _json_de_ffmpeg(subprocess.run(
-            ['ffmpeg', '-hide_banner', '-i', str(crudo), '-af', f'{base}:TP=-1.5:LRA=11:print_format=json',
-             '-f', 'null', '-'],
-            capture_output=True, text=True, check=True,
-        ).stderr)
+        med = json_loudnorm(ffmpeg('-i', str(crudo), '-af', f'{base}:TP=-1.5:LRA=11:print_format=json', '-f', 'null', '-'))
         tp = -1.5
         for _ in range(3):
             filtro = (f'{base}:TP={tp}:LRA=11:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
                       f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
                       f':offset={med["target_offset"]}:print_format=json,aresample={sr}')
-            fin = _json_de_ffmpeg(subprocess.run(
-                ['ffmpeg', '-hide_banner', '-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)],
-                capture_output=True, text=True, check=True,
-            ).stderr)
-            final, pico = _medir(salida)
+            fin = json_loudnorm(ffmpeg('-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)))
+            final, pico = loudness(salida)
             if pico <= -1.5:
                 break
             # El limitador dinámico se pasa unas décimas: se baja el techo en lo que sobró, con un margen.

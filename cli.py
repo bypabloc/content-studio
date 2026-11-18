@@ -22,22 +22,13 @@ import glob
 import importlib.util
 import os
 import re
-import shlex
-import signal
 import subprocess
 import sys
 from pathlib import Path
 
-
-def relanzar(args: list[str]) -> None:
-    """os.exec*. En Windows no reemplaza el proceso (el padre sale y la terminal vuelve al prompt con el
-    hijo corriendo), así que ahí se espera al hijo, que se queda con el Ctrl+C."""
-    sys.stdout.flush()
-    if os.name == 'nt':
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        sys.exit(subprocess.call(args))
-    os.execvp(args[0], args)
-
+if (_SRC := str(Path(__file__).resolve().parent / 'src')) not in sys.path:
+    sys.path.insert(0, _SRC)
+from content_studio.comun.proceso import consola_utf8, partir, relanzar, unir  # noqa: E402  (solo stdlib)
 
 try:
     import questionary
@@ -53,8 +44,7 @@ except ImportError:
     except FileNotFoundError:
         sys.exit('Falta uv (o instala typer, rich y questionary en este python). Ver "Requisitos" en AGENTS.md.')
 
-for _f in (sys.stdout, sys.stderr):  # cp1252 (Windows, a una tubería) no tiene los íconos: que no reviente
-    _f.reconfigure(errors='replace')
+consola_utf8()
 RAIZ = Path(__file__).resolve().parent
 console = Console(highlight=False)
 ACENTO = '#a78bfa'
@@ -121,21 +111,6 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
 
 def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
-
-
-def unir(args: list[str]) -> str:
-    """Comando para mostrar, con las comillas del shell de este sistema (shlex.join pone comillas posix)."""
-    return subprocess.list2cmdline(args) if os.name == 'nt' else shlex.join(args)
-
-
-def partir(texto: str) -> list[str]:
-    r"""Rutas escritas en una línea. Si el texto entero es una ruta que existe (aunque tenga espacios), es una sola.
-    En Windows sin el modo posix, que se come las \ (D:\a.json salía D:a.json), y sin las comillas."""
-    if texto.strip() and Path(texto.strip()).exists():  # Path('') es '.', que existe
-        return [texto.strip()]
-    if os.name != 'nt':
-        return shlex.split(texto)
-    return [t[1:-1] if len(t) > 1 and t[0] == t[-1] and t[0] in '"\'' else t for t in shlex.split(texto, posix=False)]
 
 
 def vacio(v) -> bool:

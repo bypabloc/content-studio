@@ -5,18 +5,17 @@ Lo usan grabar.py (tomas propias) y voces.py (voces del catálogo), con los crit
 
 import re
 import subprocess
+import sys
 from pathlib import Path
+
+if (_SRC := str(Path(__file__).resolve().parents[1] / 'src')) not in sys.path:
+    sys.path.insert(0, _SRC)
+from content_studio.comun.ffmpeg import ffmpeg as _ffmpeg, loudness  # noqa: E402  (solo stdlib)
 
 PISO_DB = (-90.0, -60.0)
 BORDE_S = 0.4
 LUFS_RANGO = (-20.0, -16.0)
 LUFS_OBJ, TP_MAX = -18.0, -3.0
-
-
-def _ffmpeg(*args: str) -> str:
-    """Salida de error de ffmpeg: ahí escriben volumedetect, ebur128 y silencedetect."""
-    return subprocess.run(['ffmpeg', '-hide_banner', '-nostats', *args],
-                          capture_output=True, text=True, check=True).stderr
 
 
 def medir(ruta: Path) -> dict:
@@ -30,20 +29,6 @@ def medir(ruta: Path) -> dict:
     sil = _ffmpeg('-i', str(ruta), '-af', 'silencedetect=n=-45dB:d=1', '-f', 'null', '-')
     pausas = [float(d) for d in re.findall(r'silence_duration: ([\d.]+)', sil)]
     return {'duracion': dur, 'pico': pico, 'piso': piso, 'pausas': pausas}
-
-
-def loudness(ruta: Path) -> tuple[float, float]:
-    """Loudness integrada (LUFS) y pico real (dBTP) con ebur128."""
-    veri = _ffmpeg('-i', str(ruta), '-af', 'ebur128=peak=true', '-f', 'null', '-')
-    return (float(re.search(r'^\s*I:\s+(-?[\d.]+) LUFS', veri, re.M)[1]),
-            float(re.search(r'Peak:\s+(-?[\d.]+) dBFS', veri)[1]))
-
-
-def siguiente_numero(carpeta: Path, prefijo: str) -> int:
-    """Número de la toma siguiente: el mayor <prefijo>-<n>.wav más uno. Contar pisaba tomas con huecos, y el
-    glob `neutral-*` también contaba `neutral-en-*`."""
-    return max((int(m[1]) for p in carpeta.glob(f'{prefijo}-*.wav')
-                if (m := re.fullmatch(rf'{re.escape(prefijo)}-(\d+)', p.stem))), default=0) + 1
 
 
 def procesar(toma: Path, final: Path) -> None:

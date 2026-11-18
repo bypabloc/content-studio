@@ -19,7 +19,6 @@ import argparse
 import importlib.util
 import os
 import re
-import signal
 import subprocess
 import sys
 import unicodedata
@@ -34,7 +33,11 @@ MODELOS = {
     'heartmula': '.venv-heartmula',
 }
 
+if (_SRC := str(AQUI.parent / 'src')) not in sys.path:
+    sys.path.insert(0, _SRC)
 from estilos import ESTILOS  # catálogo: caption, tags (HeartMuLa), tono, bpm y compás de cada preset
+
+from content_studio.comun import proceso  # solo stdlib
 
 SILENCIO_DB = -50  # por debajo de esto, la cola final se considera silencio y se recorta
 
@@ -44,16 +47,7 @@ VOZ_MAX_DB = -25  # criterio: voz relativa a la mezcla. Medido: instrumentales d
 
 
 def usar_venv(venv: str) -> None:
-    destino = AQUI / venv
-    if Path(sys.prefix).resolve() == destino.resolve():
-        return
-    py = destino / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
-    if not py.exists():
-        sys.exit(f'Falta music/{venv}. Ver la instalación en music/README.md.')
-    if os.name == 'nt':  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        sys.exit(subprocess.call([str(py), __file__, *sys.argv[1:]]))
-    os.execv(py, [str(py), __file__, *sys.argv[1:]])
+    proceso.usar_venv(AQUI / venv, 'music/README.md', script=__file__)
 
 
 def resolver_estilo(valor: str, tono=None, bpm=None, compas=None) -> tuple[str, dict]:
@@ -258,8 +252,7 @@ def construir_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
-    for f in (sys.stdout, sys.stderr):  # cp1252 (Windows, a una tubería) no tiene ≤ ni –: que no reviente el --help
-        f.reconfigure(errors='replace')
+    proceso.consola_utf8()  # cp1252 (Windows, a una tubería) no tiene ≤ ni –: que no reviente el --help
     ap = construir_parser()
     a = ap.parse_args()
     if a.reintentos and not a.evaluar:

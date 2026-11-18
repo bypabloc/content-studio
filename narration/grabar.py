@@ -22,7 +22,6 @@ import os
 import queue
 import re
 import shutil
-import signal
 import subprocess
 import sys
 import threading
@@ -30,7 +29,10 @@ from array import array
 from contextlib import contextmanager
 from pathlib import Path
 
-from referencia import medir, procesar, siguiente_numero, verificar
+from referencia import medir, procesar, verificar  # deja src/ en sys.path
+
+from content_studio.comun.archivos import siguiente_numero
+from content_studio.comun.proceso import relanzar
 
 WINDOWS = os.name == 'nt'
 if WINDOWS:
@@ -51,11 +53,7 @@ try:
     from rich.text import Text
 except ImportError:  # python sin rich/questionary: uv los instala según la cabecera de arriba
     if __name__ == '__main__':
-        args = ['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]]
-        if WINDOWS:  # Windows no tiene exec: el padre espera al hijo y le deja el Ctrl+C
-            signal.signal(signal.SIGINT, signal.SIG_IGN)
-            sys.exit(subprocess.call(args))
-        os.execvp('uv', args)
+        relanzar(['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
     raise
 
 AQUI = Path(__file__).resolve().parent
