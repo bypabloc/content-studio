@@ -1,9 +1,9 @@
 """Música instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.
 
 Uso:
-    python music/musica.py --modelo acestep --estilo lofi-chill --duracion 60
-    python music/musica.py --modelo acestep --duracion 30 --estilo corporate future-bass
-    python music/musica.py --modelo acestep --duracion 30 --tono "E Minor" --bpm 105 \
+    python cli.py music --modelo acestep --estilo lofi-chill --duracion 60
+    python cli.py music --modelo acestep --duracion 30 --estilo corporate future-bass
+    python cli.py music --modelo acestep --duracion 30 --tono "E Minor" --bpm 105 \
         --estilo "synthwave, retro 80s, driving arpeggios"
 
 --estilo acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa

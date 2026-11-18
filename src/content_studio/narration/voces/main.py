@@ -1,9 +1,9 @@
 r"""Catálogo de voces libres para narrar sin grabarse: construye y aprueba cada voz.
 
 Uso:
-    python narration/voces.py --listar                 # catálogo, licencia y estado de cada voz
-    python narration/voces.py --construir yesid        # descarga, genera los 12 estilos y los aprueba
-    python narration/voces.py --construir todas --forzar
+    python cli.py narration voces --listar                 # catálogo, licencia y estado de cada voz
+    python cli.py narration voces --construir yesid        # descarga, genera los 12 estilos y los aprueba
+    python cli.py narration voces --construir todas --forzar
 
 Cada voz del catálogo (narration/voces/catalogo.json) parte de un clip real de 8-12 s (o de varios clips cortos
 del mismo hablante, unidos) con licencia de uso comercial: CC0 o dominio público, o una que pide MENCIÓN
@@ -12,7 +12,7 @@ autor, con el texto `atribucion` del catálogo (mencion(); docs/research/voces-l
 Ese clip, normalizado, es el estilo `neutral`. El resto de ESTILOS se genera con CosyVoice 3
 (la misma voz leyendo el texto del kit de grabación, dirigido con una instrucción en inglés) y cada clip se
 aprueba si conserva la voz (similitud de hablante con la base), se entiende (WER con whisper) y cumple los
-criterios de referencia de docs/guiones/README.md. Una voz entra en `tts.py --voz` solo si aprueba TODOS los
+criterios de referencia de docs/guiones/README.md. Una voz entra en `narration tts --voz` solo si aprueba TODOS los
 estilos. Resultado: narration/voces/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).
 Investigación y mediciones: docs/research/voces-libres-clonacion/.
 """

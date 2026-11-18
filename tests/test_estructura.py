@@ -10,13 +10,10 @@ import pytest
 
 RAIZ = Path(__file__).resolve().parents[1]
 MAX_LINEAS = 300
-# Temporal: archivos viejos que ya pasaban el tope. Se dividen al migrar a src/ y se sacan de aquí; no pueden crecer.
-ALLOWLIST: dict[str, int] = {}
 
 
 def archivos() -> list[Path]:
-    fuera = [p for d in ('src', 'tests') if (RAIZ / d).is_dir() for p in (RAIZ / d).rglob('*.py')]
-    return sorted([*RAIZ.glob('*.py'), *RAIZ.glob('narration/*.py'), *RAIZ.glob('music/*.py'), *fuera])
+    return sorted([RAIZ / 'cli.py', *(RAIZ / 'src').rglob('*.py'), *(RAIZ / 'tests').rglob('*.py')])
 
 
 ARCHIVOS = archivos()
@@ -29,7 +26,7 @@ def nombre(p: Path) -> str:
 @pytest.mark.parametrize('ruta', ARCHIVOS, ids=nombre)
 def test_tope_de_lineas(ruta):
     lineas = len(ruta.read_text(encoding='utf-8').splitlines())
-    assert lineas <= ALLOWLIST.get(nombre(ruta), MAX_LINEAS), f'{nombre(ruta)}: {lineas} líneas'
+    assert lineas <= MAX_LINEAS, f'{nombre(ruta)}: {lineas} líneas'
 
 
 @pytest.mark.parametrize('ruta', ARCHIVOS, ids=nombre)
@@ -40,11 +37,10 @@ def test_sintaxis_310(ruta):
     ast.parse(fuente, str(ruta), feature_version=(3, 10))
 
 
-def test_allowlist_sin_sobrantes():
-    """Al dividir un archivo, sale de la ALLOWLIST: así el tope vuelve a regir para él."""
-    for clave in ALLOWLIST:
-        ruta = RAIZ / clave
-        assert ruta.exists() and len(ruta.read_text(encoding='utf-8').splitlines()) > MAX_LINEAS, clave
+def test_codigo_solo_en_src():
+    """narration/ y music/ son carpetas de datos; en la raíz solo queda el shim cli.py."""
+    sueltos = [*RAIZ.glob('*.py'), *RAIZ.glob('narration/*.py'), *RAIZ.glob('music/*.py')]
+    assert [nombre(p) for p in sueltos] == ['cli.py']
 
 
 def test_dependencias_cli_iguales_a_pyproject():

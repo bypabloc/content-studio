@@ -13,7 +13,7 @@ class Tts(Comando):
     icono = '🎙'
     titulo = 'Narrar un texto o guion'
     desc = 'Voz clonada en español neutro · 7 motores'
-    ayuda = '🎙  Narrar un texto o guion (narration/tts.py). Sin flags abre el asistente.'
+    ayuda = '🎙  Narrar un texto o guion (content_studio.narration.tts). Sin flags abre el asistente.'
     asistente = True
 
     def catalogo(self, mod) -> dict[str, list[Opcion]]:
@@ -46,7 +46,7 @@ class Grabar(Comando):
     icono = '🎤'
     titulo = 'Grabar voces de referencia'
     desc = 'Graba, mide y normaliza narration/voz/<estilo>.wav'
-    ayuda = '🎤  Grabar las voces de referencia (narration/grabar.py).'
+    ayuda = '🎤  Grabar las voces de referencia (content_studio.narration.grabar).'
 
     def estado(self) -> list[str]:
         txt = list(rutas.VOZ.glob('*.txt'))
@@ -60,7 +60,7 @@ class Voces(Comando):
     icono = '🗣'
     titulo = 'Voces libres del catálogo'
     desc = 'Construye y aprueba voces CC0 o de dominio público'
-    ayuda = '🗣  Construir y aprobar las voces libres del catálogo (narration/voces.py).'
+    ayuda = '🗣  Construir y aprobar las voces libres del catálogo (content_studio.narration.voces).'
 
     def estado(self) -> list[str]:
         from content_studio.narration.estilos import ESTILOS

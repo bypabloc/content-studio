@@ -29,15 +29,13 @@ from unittest import mock
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
 MODELOS = ['voxcpm2', 'cosyvoice3', 'qwen-1.7b', 'qwen-0.6b', 'chatterbox', 'omnivoice', 'indextts']
-SCRIPTS = {'narration tts': 'narration/tts.py', 'narration grabar': 'narration/grabar.py',
-           'narration voces': 'narration/voces.py', 'music': 'music/musica.py'}
 # Las choices de --voz salen de narration/voces/<voz>/aprobacion.json, que está gitignoreado: se fijan las 9 voces
 # aprobadas en el equipo donde se generó la base, para que el resultado sea el mismo en CI.
 APROBADAS = ['karen-savage', 'mpinedag', 'yesid', 'andrea', 'hannah', 'colombia-m', 'peru-f', 'venezuela-f',
              'vctk-p345']
 
 
-# El parser de cada comando, por módulo (la clave 'script' de la fixture sigue siendo la del shim).
+# El módulo con construir_parser de cada comando (la clave 'script' de la fixture).
 MODULOS = {
     'narration tts': 'content_studio.narration.parser',
     'narration grabar': 'content_studio.narration.grabar.main',
@@ -60,8 +58,8 @@ def nuevo_tts() -> types.SimpleNamespace:
 
 
 def actual() -> tuple[dict[str, tuple[str, types.ModuleType]], types.SimpleNamespace]:
-    """Fuente actual: (clave → (script, módulo con construir_parser)) y lo que prepara los bloques."""
-    return {c: (s, importlib.import_module(MODULOS[c])) for c, s in SCRIPTS.items()}, nuevo_tts()
+    """Fuente actual: (clave → (nombre del módulo, módulo con construir_parser)) y lo que prepara los bloques."""
+    return {c: (m, importlib.import_module(m)) for c, m in MODULOS.items()}, nuevo_tts()
 
 
 def relativo(v):
