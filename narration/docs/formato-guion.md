@@ -20,7 +20,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 
 **Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. Antes de generar, `narration tts` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion. Después de generar, `--evaluar` detecta las palabras que el modelo dijo mal y los silencios fuera de lugar (regla 24).
 
-**Marcas** ([Por qué no hay marcas](#por-qué-no-hay-marcas))
+**Marcas** ([Por qué no hay marcas](#por-qué-no-hay-marcas-qwen-base))
 
 1. Ninguna etiqueta ni marca: nada de `[…]` (salvo `[pausa N]`), `<…>`, `**`, `(pausa)` ni la notación de grabación (`/`, `//`, `↗`, `↘`, `→`, `[curiosa]`).
 2. Nada de mayúsculas para dar énfasis: no cambian nada. "DEMO" se escribe "demo".

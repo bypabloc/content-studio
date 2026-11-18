@@ -21,7 +21,7 @@ narration/
 
 El código está en `src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../AGENTS.md#arquitectura)) y se lanza con `python cli.py narration tts|voces|grabar`. Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
 
-**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) o agrega `--ref narration/voz/prueba/experta.wav`.
+**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) por ejemplo `--voz yesid`, que tiene el consentimiento de su dueño.
 
 ---
 
@@ -133,8 +133,8 @@ python cli.py narration tts --modelo qwen-1.7b --estilo experta \
 python cli.py narration tts --modelo cosyvoice3 --voz yesid --estilo dramatica \
   --texto "Nadie sabía lo que había pasado esa noche."
 
-# Con la referencia de prueba (mientras no haya grabaciones propias)
-python cli.py narration tts --modelo qwen-0.6b --ref narration/voz/prueba/experta.wav \
+# Mientras no haya grabaciones propias: una voz libre con consentimiento
+python cli.py narration tts --modelo qwen-0.6b --voz yesid \
   --texto "Hola, esto es una prueba."
 
 # Estilo y emoción por párrafo, semilla fija y evaluación (ver formato-guion.md)

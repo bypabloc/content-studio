@@ -1,4 +1,4 @@
-# social-videos
+# content-studio
 
 Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herramientas independientes. El código de las dos vive en `src/content_studio/`; sus carpetas (`narration/`, `music/`) guardan solo datos: docs, voces, catálogo, venvs y modelos.
 
@@ -22,9 +22,9 @@ python cli.py                            # menú
 python cli.py narration tts              # asistente
 python cli.py narration tts --help       # ayuda en tabla: flags, valores, defecto y obligatorios
 
-# Narración (sin grabaciones propias todavía: usar la referencia de prueba)
+# Narración (sin grabaciones propias todavía: una voz libre del catálogo con consentimiento)
 python cli.py narration tts --modelo qwen-0.6b --estilo experta \
-  --ref narration/voz/prueba/experta.wav --texto "..."            # → out/narration/
+  --voz yesid --texto "..."                                       # → out/narration/
 
 # Grabar las voces de referencia
 python cli.py narration grabar --listar
@@ -76,7 +76,7 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento.
 3. **La música es siempre instrumental**: nada de voz ni de letra.
 4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). El gusto lo decide el usuario: entrégale las rutas.
-5. **Licencias**: Qwen3-TTS (Apache 2.0), Chatterbox (MIT), ACE-Step (MIT) y HeartMuLa (Apache 2.0) permiten uso comercial. Clona solo voces con permiso de su dueño.
+5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial. OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `src/content_studio/narration/motores/registro.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.
 7. Los archivos se crean y editan con las herramientas de edición del agente. Bash se usa solo para ejecutar los scripts y ffmpeg. Muestra los resultados con rutas clicables a `out/`.
 
