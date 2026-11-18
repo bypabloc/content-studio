@@ -15,3 +15,6 @@ narration/voces/*
 # Repos de motores que no son paquetes pip (código, venv y pesos). Ver narration/README.md §2.
 narration/motores/
 tmp/
+.venv/
+.pytest_cache/
+.ruff_cache/
