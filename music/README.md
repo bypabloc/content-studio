@@ -73,7 +73,7 @@ Las tonalidades son las que la guía oficial de ACE-Step considera estables: C, 
 
 ### Catálogo ampliado: 117 presets más
 
-Definidos en [estilos.py](estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
+Definidos en [estilos.py](../src/content_studio/music/estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
 
 | Grupo | Presets |
 |:--|:--|
@@ -94,7 +94,7 @@ Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-pro
 
 Bajo una narración, los que mejor acompañan son los de tutoriales y explicativos, `corporate-minimal`, `deep-house` y `ambient`.
 
-Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
+Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](../src/content_studio/music/estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
 
 ## Evaluar que no haya voz (`--evaluar`)
 

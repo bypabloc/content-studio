@@ -236,7 +236,7 @@ Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pau
 
 ## 4. Estilos
 
-A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([tts.py](tts.py), `ESTILOS`).
+A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([estilos.py](../src/content_studio/narration/estilos.py), `ESTILOS`).
 
 | Estilo | Intención | Velocidad | temperature | exaggeration* | cfg_weight* |
 |---|---|---|---|---|---|
