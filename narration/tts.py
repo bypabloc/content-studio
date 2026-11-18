@@ -43,7 +43,7 @@ from pathlib import Path
 AQUI = Path(__file__).resolve().parent
 ROOT = AQUI.parent
 sys.path.insert(0, str(AQUI))
-from voces import VOCES, aprobadas  # noqa: E402  (stdlib: catálogo de voces libres)
+from voces import VOCES, aprobadas, mencion, catalogo as voces_catalogo  # noqa: E402  (stdlib: catálogo de voces)
 
 # Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.
 # txt: 'obligatorio' (no clona sin la transcripción), 'opcional' (clona peor sin ella) o None (no la usa).
@@ -195,6 +195,31 @@ def usar_venv(venv: str, script: str = __file__) -> None:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         sys.exit(subprocess.call([str(py), script, *sys.argv[1:]]))
     os.execv(py, [str(py), script, *sys.argv[1:]])
+
+
+def avisos_voz(nombre: str, ficha: dict) -> None:
+    """Lo que hay que saber antes de publicar una narración con una voz del catálogo: permiso del dueño y mención."""
+    if not ficha.get('consentimiento'):
+        print(f'Aviso: la voz {nombre} ({ficha["fuente"]}) tiene licencia {ficha["licencia"]}, pero su dueño no dio '
+              'permiso para clonarla (regla 5 de AGENTS.md). Uso personal; para uso comercial, pídele permiso o usa una '
+              'voz con consentimiento. Ver docs/research/voces-libres-clonacion/02.')
+    if m := mencion(ficha):
+        print(f'MENCIÓN OBLIGATORIA ({ficha["licencia"]}): pon este crédito en la descripción del video. Queda en el .json.')
+        print(f'  {m}')
+    if 'BY-SA' in ficha['licencia']:
+        print('Aviso: licencia "compartir igual" (BY-SA). No pongas el clip original en el video, y si alguien considera '
+              'la narración una adaptación, tendría que publicarse con la misma licencia. Ver '
+              'docs/research/voces-libres-clonacion/12.')
+
+
+def voz_de_referencia(ref: Path) -> dict | None:
+    """Ficha del catálogo de la voz a la que pertenece una referencia (narration/voces/<voz>/<estilo>.wav), o None."""
+    ref = Path(ref).resolve()
+    if ref.parent.parent != VOCES.resolve():
+        return None
+    ficha = voces_catalogo().get(ref.parent.name)
+    return ficha and {'voz': ref.parent.name, 'licencia': ficha['licencia'], 'fuente': ficha['fuente'],
+                      'consentimiento': ficha.get('consentimiento', False), 'mencion': mencion(ficha)}
 
 
 def resolver_ref(ref: Path, estilo: str) -> tuple[Path, str | None]:
@@ -854,10 +879,8 @@ def main() -> None:
 
     m = MOTORES[a.modelo]
     usar_venv(m['venv'])  # desde aquí corre en el venv del motor: los avisos se imprimen una sola vez
-    if a.voz and not (ficha := aprobadas(ESTILOS)[a.voz]).get('consentimiento'):
-        print(f'Aviso: la voz {a.voz} ({ficha["fuente"]}) es de dominio público, pero su dueño no dio permiso para '
-              'clonarla (regla 5 de AGENTS.md). Uso personal; para uso comercial, pídele permiso o usa una voz con '
-              'consentimiento. Ver docs/research/voces-libres-clonacion/02.')
+    if a.voz:
+        avisos_voz(a.voz, aprobadas(ESTILOS)[a.voz])
 
     import torch
 
@@ -1194,6 +1217,8 @@ def guardar_metadatos(modelo: str, g: dict) -> None:
         'parametros': {**g['p'], **PARAMS_MOTOR.get(modelo, {})},
         'tiempo_generacion_s': round(g['tiempo_s'], 1), 'duracion_s': round(g['bloques'][-1][2], 2),
         'vram_pico_gib': round(torch.cuda.max_memory_reserved() / 2**30, 2),
+        # Voces del catálogo usadas en la toma, con la mención que pide su licencia (para la descripción del video).
+        'voces': list({v['voz']: v for pb in g['pb'] if (v := voz_de_referencia(pb['ref']))}.values()) or None,
     }
     g['salida'].with_suffix('.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding='utf-8')
 

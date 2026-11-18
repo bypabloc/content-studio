@@ -281,7 +281,7 @@ Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo d
 
 ### 5.1 Voces libres del catálogo (`--voz`)
 
-Para narrar sin grabarse, `voces.py` arma voces a partir de fuentes **CC0 o de dominio público**: lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar. El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
+Para narrar sin grabarse, `voces.py` arma voces a partir de fuentes con licencia de uso comercial: **CC0 o dominio público** (lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar) y licencias que **piden mención** (ver abajo). El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
 
 ```bash
 python cli.py narration voces --listar                    # catálogo, licencia y estado de cada voz
@@ -298,6 +298,8 @@ Cómo se construye una voz (corre en el venv de CosyVoice 3):
    - `neutral-en` de una voz en español usa zero-shot, porque `cross_lingual` pierde la voz. En una voz inglesa, `neutral-en` es la base.
 3. Aprueba cada clip con estos criterios: similitud de hablante con la base ≥ 0.93 (WavLM-SV), WER ≤ 0.15 (whisper `large-v3-turbo`), 5–15 s, −20 a −16 LUFS, pico real ≤ −3 dBTP y sin pausas internas de 1 s o más. Si un clip no aprueba, lo regenera con otra semilla, hasta 3 rondas.
 4. Escribe `voces/<voz>/aprobacion.json`. **Una voz entra en `--voz` solo si aprueba los 12 estilos.** El menú de `cli.py` muestra las demás deshabilitadas, con el motivo.
+
+**Voces que piden mención.** Además de las CC0 o de dominio público, el catálogo tiene voces con licencias que exigen **mención**: CC BY (VCTK, Alba MacKenna), CC BY-SA (OpenSLR: Colombia, Perú y Venezuela) y Jenny (Dioco). "Mención" quiere decir **atribución**: puedes usar la voz, incluso con fines comerciales, si al publicar das crédito a su autor (quién es, de dónde sale, con qué licencia y que la usaste como referencia para una voz sintética). El texto exacto está en `atribucion` del catálogo. `tts.py --voz` lo imprime como "MENCIÓN OBLIGATORIA" y lo guarda en el `.json` de la toma (`voces[].mencion`). Pégalo en la descripción del video. Las BY-SA muestran además un aviso de "compartir igual". Detalle en [docs/research/voces-libres-clonacion/12](../docs/research/voces-libres-clonacion/12-voces-con-mencion.md).
 
 El acento y si cada estilo "suena" a lo que dice **no se miden**: escucha `voces/<voz>/*.wav` antes de usar una voz en un video. Las voces de LibriVox no tienen consentimiento para clonar. Para uso comercial, mira [docs/research/voces-libres-clonacion/02](../docs/research/voces-libres-clonacion/02-derechos-copyright-y-voz.md).
 

@@ -19,6 +19,7 @@
 | 09 | [Preparar una referencia](09-preparar-una-referencia.md) | Lista de control y comandos para LibriVox y Kyutai; errores que aparecieron al automatizarlo |
 | 10 | [Pruebas en GPU](10-pruebas-en-gpu.md) | **13 voces × 2 textos** con WER, SIM, UTMOS y ppm; experimentos de estilo (`instruct2`) y de inglés (`cross_lingual` frente a zero-shot); aprobación del catálogo; **audios para escuchar** |
 | 11 | [Catálogo y aplicación](11-catalogo-y-aplicacion.md) | `voces/catalogo.json`, `voces.py`, `--voz` y el menú del CLI: criterios, estilos, voces y preguntas abiertas |
+| 12 | [Voces que piden mención](12-voces-con-mencion.md) | **Qué es la "mención"** (atribución) y cómo se cumple en un video; CC BY, CC BY-SA y Jenny; OpenSLR (Colombia, Perú, Venezuela), VCTK, Alba MacKenna; zips remotos con `Range` y unión de clips |
 
 ---
 
@@ -35,7 +36,8 @@
 9. **Para que una voz en español hable inglés, `cross_lingual` pierde la voz** (SIM 0.71–0.91; Andrea quedó más cerca de una voz inglesa que de sí misma), y el **zero-shot la conserva** (0.90–0.98) ([10](10-pruebas-en-gpu.md) §6).
 10. **Catálogo: 5 de 8 voces aprobadas en los 12 estilos**. Aprobaron las 4 en español (Karen Savage, mpinedag, Yesid, Andrea) y Hannah. `instruct2` le quita la identidad a Cori Samuel (0.78–0.86), la mejor voz en zero-shot; John Van Stan y Nick quedaron a 0.01 del umbral en dos estilos alegres ([10](10-pruebas-en-gpu.md) §7).
 11. **Normalizar la referencia no debe tocar las pausas internas**: el recorte de `grabar.py` las comprimía a 0.4 s y escondía pausas de 1.3–1.5 s en *dramática*. Ahora recorta solo los bordes ([10](10-pruebas-en-gpu.md) §7).
-12. **No hace falta denoisear**: el clip procesado de Voice-Zero clonó igual que el crudo de LibriVox, y la comunidad midió que la limpieza baja la similitud (A) ([05](05-donaciones-cc0-kyutai-y-voice-zero.md) §3.1, [08](08-practicas-de-la-comunidad.md) §3.2).
+12. **"Mención" es atribución**: CC BY y CC BY-SA permiten el uso comercial si se da crédito (autor, fuente, licencia y aviso de modificación). La mejor fuente en español es Google crowdsourced de OpenSLR (cabina a 48 kHz, CC BY-SA), y en inglés, VCTK (CC BY). Aprobaron 4 de 7: Colombia, Perú, Venezuela y VCTK p345. `tts.py` imprime la mención y la guarda en el `.json` ([12](12-voces-con-mencion.md), [10](10-pruebas-en-gpu.md) §7.1).
+13. **No hace falta denoisear**: el clip procesado de Voice-Zero clonó igual que el crudo de LibriVox, y la comunidad midió que la limpieza baja la similitud (A) ([05](05-donaciones-cc0-kyutai-y-voice-zero.md) §3.1, [08](08-practicas-de-la-comunidad.md) §3.2).
 
 ---
 
@@ -52,6 +54,7 @@ Respuestas del usuario del 2026-11-17:
 | Ubicación (mensaje posterior) | `docs/research/`, con la estructura detallada de `voicestudio-narracion` |
 | Aplicación (mensaje posterior) | Elegir la voz desde el CLI, entre las **aprobadas en todos los estilos** ([11](11-catalogo-y-aplicacion.md)) |
 | Entrega (mensaje posterior) | Probar todo, commit, push y merge a `dev`, y volver a probar en `dev` |
+| Ampliación (2026-11-18) | Investigar **voces que piden mención**, descargarlas, sumarlas al sistema y dejar una nota sobre qué significa "mención" ([12](12-voces-con-mencion.md) §0) |
 
 Decisiones técnicas tomadas con los datos:
 
