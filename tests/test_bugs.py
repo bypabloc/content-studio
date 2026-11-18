@@ -63,3 +63,10 @@ def test_help_en_cp1252():
     for args in (['music/musica.py', '--help'], ['cli.py', 'music', '--help']):
         r = subprocess.run([sys.executable, *args], cwd=RAIZ, env=env, capture_output=True)
         assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')
+
+
+def test_licencias_by_traen_atribucion():
+    import voces
+
+    sin = [n for n, f in voces.catalogo().items() if 'BY' in f['licencia'] and not voces.mencion(f)]
+    assert not sin, f'licencia CC BY sin "atribucion" en catalogo.json: {sin}'
