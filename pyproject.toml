@@ -26,6 +26,10 @@ target-version = "py310"
 line-length = 120
 extend-exclude = ["narration/motores", "music/models", "tmp", "out", "logs"]
 
+[tool.ruff.format]
+# El código usa comillas simples: sin esto, `ruff format` cambiaría todas las cadenas al activarse.
+quote-style = "single"
+
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 
