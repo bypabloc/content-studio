@@ -33,7 +33,6 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 # Temporal: el código viejo se migra a src/ en los pasos siguientes del refactor y ahí se limpia.
 "cli.py" = ["E501"]
 "src/content_studio/music/estilos.py" = ["E501"]  # catálogo: captions largas, sin cambios
-"narration/*.py" = ["E501", "B905", "I001", "SIM105"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

@@ -7,7 +7,7 @@ con estas mismas funciones. La fuente es `actual()`: los 4 parsers por clave de 
 segmentos, etiquetas, preparar_bloques(modelo, segs, ref) y PARAMS_MOTOR (nuevo_tts() lo arma sobre src/).
 Regenerar solo cuando un cambio de comportamiento es a propósito, y en un commit aparte.
 
-Solo stdlib (grabar.py importa rich y questionary arriba). soundfile se reemplaza por un falso (toda referencia
+Solo stdlib (grabar importa rich y questionary arriba). soundfile se reemplaza por un falso (toda referencia
 dura 12 s: avisa en chatterbox y omnivoice) y la carpeta de referencias es sintética, así el resultado no depende
 de audio gitignoreado ni de la GPU.
 """
@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
-import importlib.util
+import importlib
 import io
 import json
 import os
@@ -37,19 +37,13 @@ APROBADAS = ['karen-savage', 'mpinedag', 'yesid', 'andrea', 'hannah', 'colombia-
              'vctk-p345']
 
 
-def cargar_script(script: str) -> types.ModuleType:
-    """Carga un script viejo por su ruta, con su carpeta en sys.path (usan imports implícitos entre ellos)."""
-    ruta = RAIZ / script
-    if str(ruta.parent) not in sys.path:
-        sys.path.insert(0, str(ruta.parent))
-    spec = importlib.util.spec_from_file_location(f'_base_{ruta.stem}', ruta)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-# Lo ya migrado a src/: el parser se importa por módulo (la clave 'script' de la fixture sigue siendo la del shim).
-MODULOS = {'narration tts': 'content_studio.narration.parser', 'music': 'content_studio.music.parser'}
+# El parser de cada comando, por módulo (la clave 'script' de la fixture sigue siendo la del shim).
+MODULOS = {
+    'narration tts': 'content_studio.narration.parser',
+    'narration grabar': 'content_studio.narration.grabar.main',
+    'narration voces': 'content_studio.narration.voces.main',
+    'music': 'content_studio.music.parser',
+}
 
 
 def nuevo_tts() -> types.SimpleNamespace:
@@ -67,8 +61,7 @@ def nuevo_tts() -> types.SimpleNamespace:
 
 def actual() -> tuple[dict[str, tuple[str, types.ModuleType]], types.SimpleNamespace]:
     """Fuente actual: (clave → (script, módulo con construir_parser)) y lo que prepara los bloques."""
-    mods = {c: importlib.import_module(MODULOS[c]) if c in MODULOS else cargar_script(s) for c, s in SCRIPTS.items()}
-    return {c: (SCRIPTS[c], m) for c, m in mods.items()}, nuevo_tts()
+    return {c: (s, importlib.import_module(MODULOS[c])) for c, s in SCRIPTS.items()}, nuevo_tts()
 
 
 def relativo(v):

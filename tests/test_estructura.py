@@ -12,9 +12,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 MAX_LINEAS = 300
 # Temporal: archivos viejos que ya pasaban el tope. Se dividen al migrar a src/ y se sacan de aquí; no pueden crecer.
 ALLOWLIST = {
-    'cli.py': 488,  # +2 desde el paso 4: lee los parsers de music y tts desde src/ y los lanza con -m
-    'narration/grabar.py': 482,
-    'narration/voces.py': 345,
+    'cli.py': 479,
 }
 
 

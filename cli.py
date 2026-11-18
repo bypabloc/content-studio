@@ -19,7 +19,7 @@ dependencias, el CLI se relanza con `uv run --script` (las lee del bloque de arr
 
 import argparse
 import glob
-import importlib.util  # también trae importlib.import_module
+import importlib
 import os
 import re
 import subprocess
@@ -58,9 +58,9 @@ SEPARADOR = '  ' + '─' * 30
 COMANDOS = {
     'narration tts': dict(modulo='content_studio.narration.tts', parser='content_studio.narration.parser', icono='🎙',
                           titulo='Narrar un texto o guion', desc='Voz clonada en español neutro · 7 motores', asistente=True),
-    'narration grabar': dict(script='narration/grabar.py', icono='🎤', titulo='Grabar voces de referencia',
+    'narration grabar': dict(modulo='content_studio.narration.grabar.main', parser='content_studio.narration.grabar.main', icono='🎤', titulo='Grabar voces de referencia',
                              desc='Graba, mide y normaliza narration/voz/<estilo>.wav', asistente=False),
-    'narration voces': dict(script='narration/voces.py', icono='🗣', titulo='Voces libres del catálogo',
+    'narration voces': dict(modulo='content_studio.narration.voces.main', parser='content_studio.narration.voces.main', icono='🗣', titulo='Voces libres del catálogo',
                             desc='Construye y aprueba voces CC0 o de dominio público', asistente=False),
     'music': dict(modulo='content_studio.music.musica', parser='content_studio.music.parser', icono='🎵', titulo='Generar música de fondo',
                   desc='Instrumental con ACE-Step 1.5 o HeartMuLa', asistente=True),
@@ -69,16 +69,8 @@ COMANDOS = {
 
 # ── Carga de los scripts ─────────────────────────────────────────────────────────────────────────
 def cargar(cmd: dict):
-    """Importa el módulo liviano con el parser y los catálogos (los de src/ por nombre; los viejos por ruta)."""
-    if 'parser' in cmd:
-        return importlib.import_module(cmd['parser'])
-    ruta = RAIZ / cmd['script']
-    if str(ruta.parent) not in sys.path:
-        sys.path.insert(0, str(ruta.parent))
-    spec = importlib.util.spec_from_file_location(f'_cli_{ruta.stem}', ruta)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+    """Importa el módulo liviano con el parser y los catálogos."""
+    return importlib.import_module(cmd['parser'])
 
 
 def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
@@ -378,9 +370,8 @@ def lanzar(clave: str, args: list[str]) -> None:
     if sys.stdout.isatty():
         console.rule(f'[bold {ACENTO}]{COMANDOS[clave]["icono"]}  {clave}[/] [dim]{unir(args)}[/]',
                      align='left', style=ACENTO)
-    cmd = COMANDOS[clave]  # los de src/ van con -m: el hijo se relanza solo en su venv y ve src/ por PYTHONPATH
-    relanzar([sys.executable, *(['-m', cmd['modulo']] if 'modulo' in cmd else [str(RAIZ / cmd['script'])]), *args],
-             env_src())
+    # -m: el hijo se relanza solo en su venv y ve src/ por PYTHONPATH
+    relanzar([sys.executable, '-m', COMANDOS[clave]['modulo'], *args], env_src())
 
 
 def cancelar() -> None:

@@ -73,7 +73,14 @@ def test_help_en_cp1252():
 
 
 def test_licencias_by_traen_atribucion():
-    import voces
+    from content_studio.narration.voces.catalogo import catalogo, mencion
 
-    sin = [n for n, f in voces.catalogo().items() if 'BY' in f['licencia'] and not voces.mencion(f)]
+    sin = [n for n, f in catalogo().items() if 'BY' in f['licencia'] and not mencion(f)]
     assert not sin, f'licencia CC BY sin "atribucion" en catalogo.json: {sin}'
+
+
+def test_el_kit_de_grabar_cubre_los_estilos_de_tts():
+    from content_studio.narration.estilos import ESTILOS
+    from content_studio.narration.grabar.kit import DURACION
+
+    assert set(ESTILOS) <= set(DURACION)
