@@ -48,9 +48,14 @@ def cargar_script(script: str) -> types.ModuleType:
     return mod
 
 
+# Lo ya migrado a src/: el parser se importa por módulo (la clave 'script' de la fixture sigue siendo la del shim).
+MODULOS = {'music': 'content_studio.music.parser'}
+
+
 def viejo() -> tuple[dict[str, tuple[str, types.ModuleType]], types.ModuleType]:
     """Fuente actual: (clave → (script, módulo con construir_parser)) y el módulo que prepara los bloques."""
-    return {clave: (s, cargar_script(s)) for clave, s in SCRIPTS.items()}, cargar_script('narration/tts.py')
+    mods = {c: importlib.import_module(MODULOS[c]) if c in MODULOS else cargar_script(s) for c, s in SCRIPTS.items()}
+    return {c: (SCRIPTS[c], m) for c, m in mods.items()}, cargar_script('narration/tts.py')
 
 
 def relativo(v):

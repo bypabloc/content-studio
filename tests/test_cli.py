@@ -12,7 +12,7 @@ DEPS = ['--with', 'typer>=0.29', '--with', 'rich>=14', '--with', 'questionary>=2
 def en_cli(codigo: str) -> None:
     previo = ("import importlib.util, sys; sys.path.insert(0, 'narration'); "
               "s = importlib.util.spec_from_file_location('cli', 'cli.py'); cli = importlib.util.module_from_spec(s); "
-              "s.loader.exec_module(cli); tts = cli.cargar('narration/tts.py'); ap = tts.construir_parser()\n")
+              "s.loader.exec_module(cli); tts = cli.cargar(cli.COMANDOS['narration tts']); ap = tts.construir_parser()\n")
     env = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
     r = subprocess.run(['uv', 'run', '-q', '--no-project', *DEPS, 'python', '-c', previo + codigo], cwd=RAIZ,
                        capture_output=True, text=True, encoding='utf-8', env=env)
@@ -51,4 +51,4 @@ else:
 def test_abreviaturas_y_sys_path():
     en_cli("assert cli.leer(tts.construir_parser(), ['--sem', '3', '--mod=qwen-0.6b']) == "
            "({'semilla': 3, 'modelo': 'qwen-0.6b'}, [])\n"
-           "n = len(sys.path); cli.cargar('narration/tts.py'); assert len(sys.path) == n")
+           "n = len(sys.path); cli.cargar(cli.COMANDOS['narration tts']); assert len(sys.path) == n")

@@ -19,7 +19,7 @@ dependencias, el CLI se relanza con `uv run --script` (las lee del bloque de arr
 
 import argparse
 import glob
-import importlib.util
+import importlib.util  # también trae importlib.import_module
 import os
 import re
 import subprocess
@@ -28,7 +28,7 @@ from pathlib import Path
 
 if (_SRC := str(Path(__file__).resolve().parent / 'src')) not in sys.path:
     sys.path.insert(0, _SRC)
-from content_studio.comun.proceso import consola_utf8, partir, relanzar, unir  # noqa: E402  (solo stdlib)
+from content_studio.comun.proceso import consola_utf8, env_src, partir, relanzar, unir  # noqa: E402  (solo stdlib)
 
 try:
     import questionary
@@ -62,15 +62,17 @@ COMANDOS = {
                              desc='Graba, mide y normaliza narration/voz/<estilo>.wav', asistente=False),
     'narration voces': dict(script='narration/voces.py', icono='🗣', titulo='Voces libres del catálogo',
                             desc='Construye y aprueba voces CC0 o de dominio público', asistente=False),
-    'music': dict(script='music/musica.py', icono='🎵', titulo='Generar música de fondo',
+    'music': dict(modulo='content_studio.music.musica', parser='content_studio.music.parser', icono='🎵', titulo='Generar música de fondo',
                   desc='Instrumental con ACE-Step 1.5 o HeartMuLa', asistente=True),
 }
 
 
 # ── Carga de los scripts ─────────────────────────────────────────────────────────────────────────
-def cargar(script: str):
-    """Importa el script (sus imports de arriba son solo stdlib) para leer su parser y catálogos."""
-    ruta = RAIZ / script
+def cargar(cmd: dict):
+    """Importa el módulo liviano con el parser y los catálogos (los de src/ por nombre; los viejos por ruta)."""
+    if 'parser' in cmd:
+        return importlib.import_module(cmd['parser'])
+    ruta = RAIZ / cmd['script']
     if str(ruta.parent) not in sys.path:
         sys.path.insert(0, str(ruta.parent))
     spec = importlib.util.spec_from_file_location(f'_cli_{ruta.stem}', ruta)
@@ -102,8 +104,7 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
                           None if est == 'aprobada' else f'{est}: python cli.py narration voces --construir {n}'))
         return {'modelo': modelos, 'estilo': estilos, 'voz': voces}
     if clave == 'music':
-        modelos = [(n, 'recomendado · ~30 s por pista' if n == 'acestep' else 'lento · ~5 min por pista',
-                    None if (RAIZ / 'music' / v).exists() else 'no instalado') for n, v in mod.MODELOS.items()]
+        modelos = [(n, e.desc, None if e.instalado() else 'no instalado') for n, e in mod.MODELOS.items()]
         estilos = [(n, f'{e["tono"]} · {e["bpm"]} BPM · {e.get("compas", "4")}/4', None) for n, e in mod.ESTILOS.items()]
         return {'modelo': modelos, 'estilo': estilos}
     return {}
@@ -125,7 +126,7 @@ def obligatorio(acc: argparse.Action, ap: argparse.ArgumentParser) -> bool:
 # ── Ayuda ────────────────────────────────────────────────────────────────────────────────────────
 def ayuda(clave: str) -> None:
     cmd = COMANDOS[clave]
-    mod = cargar(cmd['script'])
+    mod = cargar(cmd)
     ap = mod.construir_parser()
     resumen = (mod.__doc__ or '').strip().split('\n\n')[0]
     t = Table(box=None, padding=(0, 2), show_header=True, header_style=f'bold {ACENTO}')
@@ -314,7 +315,7 @@ def resumen(ap, valores: dict, clave: str) -> Panel:
 
 def asistente(clave: str, args: list[str], forzar: bool = False) -> None:
     cmd = COMANDOS[clave]
-    mod = cargar(cmd['script'])
+    mod = cargar(cmd)
     ap = mod.construir_parser()
     if not forzar and validar(mod, args) is None:
         lanzar(clave, args)
@@ -378,7 +379,9 @@ def lanzar(clave: str, args: list[str]) -> None:
     if sys.stdout.isatty():
         console.rule(f'[bold {ACENTO}]{COMANDOS[clave]["icono"]}  {clave}[/] [dim]{unir(args)}[/]',
                      align='left', style=ACENTO)
-    relanzar([sys.executable, str(RAIZ / COMANDOS[clave]['script']), *args])
+    cmd = COMANDOS[clave]  # los de src/ van con -m: el hijo se relanza solo en su venv y ve src/ por PYTHONPATH
+    relanzar([sys.executable, *(['-m', cmd['modulo']] if 'modulo' in cmd else [str(RAIZ / cmd['script'])]), *args],
+             env_src())
 
 
 def cancelar() -> None:
@@ -413,7 +416,7 @@ def estado() -> Text:
     voz = RAIZ / 'narration' / 'voz'
     grabadas = sum((voz / f'{t.stem}.wav').exists() for t in voz.glob('*.txt'))
     partes.append(f'voces de referencia [{"green" if grabadas else "yellow"}]{grabadas}/{len(list(voz.glob("*.txt")))}[/]')
-    tts = cargar(COMANDOS['narration tts']['script'])
+    tts = cargar(COMANDOS['narration tts'])
     libres = len(tts.aprobadas(tts.ESTILOS))
     import voces as catalogo_voces
     partes.append(f'voces libres [{"green" if libres else "yellow"}]{libres}/{len(catalogo_voces.catalogo())}[/]')
@@ -474,7 +477,7 @@ def voces(ctx: typer.Context) -> None:
 
 @app.command(**PASO)
 def music(ctx: typer.Context) -> None:
-    """🎵  Generar música instrumental (music/musica.py). Sin flags abre el asistente."""
+    """🎵  Generar música instrumental (content_studio.music). Sin flags abre el asistente."""
     ejecutar('music', ctx.args)
 
 

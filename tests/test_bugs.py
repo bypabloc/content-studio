@@ -17,13 +17,19 @@ def test_tomas_max_mas_uno(tmp_path):
 
 
 def test_musica_falla_sin_dejar_el_wav_viejo(tmp_path, monkeypatch):
-    import musica
     import pytest
+
+    from content_studio.music import musica
+    from content_studio.music.motores.base import EspecMusica, MotorMusica
+
+    class Falla(MotorMusica):  # el motor "falla": no escribe nada
+        def generar(self, trabajos, a):
+            pass
 
     vieja = tmp_path / 'acestep-lofi-chill.wav'
     vieja.write_bytes(b'corrida anterior')
-    monkeypatch.setattr(musica, 'usar_venv', lambda venv: None)
-    monkeypatch.setattr(musica, 'generar_acestep', lambda trabajos, a: None)  # el motor "falla": no escribe nada
+    monkeypatch.setattr(musica.proceso, 'usar_venv', lambda *a, **k: None)
+    monkeypatch.setattr(EspecMusica, 'crear', lambda espec: Falla(espec))
     monkeypatch.setattr(sys, 'argv', ['musica.py', '--modelo', 'acestep', '--carpeta', str(tmp_path)])
     with pytest.raises(SystemExit) as e:
         musica.main()

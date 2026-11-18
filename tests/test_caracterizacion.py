@@ -29,8 +29,8 @@ def test_bloques_iguales():
     assert generar.bloques(tts) == fixture('bloques.json')
 
 
-@pytest.mark.parametrize('script', ['narration/tts.py', 'narration/voces.py', 'narration/grabar.py',
-                                    'music/musica.py', 'music/estilos.py'])
+# Los de music ya están en src/: los corre pytest --doctest-modules.
+@pytest.mark.parametrize('script', ['narration/tts.py', 'narration/voces.py', 'narration/grabar.py'])
 def test_doctests_viejos(script):
     r = doctest.testmod(generar.cargar_script(script))
     assert r.attempted and not r.failed
