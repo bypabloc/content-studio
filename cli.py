@@ -104,7 +104,8 @@ def catalogo(clave: str, mod) -> dict[str, list[tuple[str, str, str | None]]]:
         voces = []
         for n, f in catalogo_voces.catalogo().items():
             est = catalogo_voces.estado(n, mod.ESTILOS)
-            voces.append((n, f'{f["idioma"]} · {f["licencia"]} · {f["descripcion"]}',
+            mencion = ' · pide mención' if catalogo_voces.mencion(f) else ''
+            voces.append((n, f'{f["idioma"]} · {f["licencia"]}{mencion} · {f["descripcion"]}',
                           None if est == 'aprobada' else f'{est}: python cli.py narration voces --construir {n}'))
         return {'modelo': modelos, 'estilo': estilos, 'voz': voces}
     if clave == 'music':

@@ -173,6 +173,26 @@ Lectura:
 3. **La primera corrida** (con el recorte viejo, que comprimía las pausas internas a 0.4 s) dio exactamente las mismas 5 aprobadas. **La corrida final rechazó 6 clips de *dramática*** con pausas internas de 1.3–1.5 s, que antes quedaban escondidas. Los reintentos dieron versiones sin pausas largas. El arreglo de `referencia.procesar()` (recortar solo los bordes) cambia el ritmo de toda referencia normalizada, incluidas las grabaciones propias de `grabar.py`.
 4. Ninguna voz necesitó más de 2 rondas para aprobar. Las reprobadas agotaron las 3.
 
+### 7.1 Voces que Piden Mención
+
+Corrida del 2026-11-18 (`--construir colombia-m peru-f venezuela-f vctk-p329 vctk-p345 alba-mackenna jenny`), con los mismos criterios ([12](12-voces-con-mencion.md)):
+
+| Voz | Idioma | Licencia | Resultado | SIM mín. | WER máx. | Rondas | Estilos que no aprobaron (SIM) |
+| :--- | :--- | :--- | :--- | ---: | ---: | ---: | :--- |
+| **colombia-m** | es | CC BY-SA 4.0 | **Aprobada 12/12** | 0.961 | 0.08 | 2 | — |
+| **peru-f** | es | CC BY-SA 4.0 | **Aprobada 12/12** | 0.966 | 0 | 2 | — |
+| **venezuela-f** | es | CC BY-SA 4.0 | **Aprobada 12/12** | 0.968 | 0.08 | **1** | — |
+| **vctk-p345** | en | CC BY 4.0 | **Aprobada 12/12** | 0.942 | 0 | 2 | — |
+| vctk-p329 | en | CC BY 4.0 | Reprobada 9/12 | 0.884 | 0 | 3 | amistosa 0.88, suave 0.93, dramatica 0.93 |
+| alba-mackenna | en | CC BY 4.0 | Reprobada 10/12 | 0.862 | 0.03 | 3 | energica 0.92, dramatica 0.86 |
+| jenny | en | Jenny (propia) | Reprobada 4/12 | 0.836 | 0.15 | 3 | amistosa 0.88, suave 0.88, experta 0.91, clara 0.89, estable 0.91, energica 0.93, dramatica 0.84, triste 0.93 |
+
+Lectura:
+
+1. **Las voces de OpenSLR son las que mejor conservan la identidad de todo el catálogo** (SIM mínima de 0.96–0.97), a pesar de que su base son frases de asistente unidas. Venezuela aprobó los 12 estilos en la primera ronda.
+2. **Se confirma el patrón de §7: en inglés, `instruct2` pierde la voz más seguido.** Contando las dos corridas, aprobaron las 7 voces en español y solo 2 de 8 en inglés (Hannah y VCTK p345). Ahora fallan voces de estudio (VCTK p329, Alba MacKenna) y una grabada para TTS (Jenny), así que no es un problema de calidad de la fuente. Una hipótesis **no verificada** es que, en inglés, `instruct2` se apoya más en voces "por defecto" del entrenamiento.
+3. Jenny *triste* dio 0.9298, que el informe redondea a 0.930: quedó debajo del umbral por milésimas.
+
 ---
 
 ## 8. Audios para Escuchar
