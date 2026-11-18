@@ -891,6 +891,7 @@ def main() -> None:
     usar_venv(m['venv'])  # desde aquí corre en el venv del motor: los avisos se imprimen una sola vez
     if a.voz:
         avisos_voz(a.voz, aprobadas(ESTILOS)[a.voz])
+    avisar_sobrescritura(trabajos)
 
     import torch
 
@@ -946,6 +947,13 @@ def planificar(a, guiones: list[tuple]) -> list[tuple[str, str, Path]]:
             sys.exit(f'Dos guiones van al mismo archivo: {salida.name} (usa ids distintos)')
         trabajos.append((texto, estilo, salida))
     return trabajos
+
+
+def avisar_sobrescritura(trabajos: list[tuple[str, str, Path]]) -> None:
+    """Las tomas pisan el .wav y el .json anteriores: se avisa antes de cargar el modelo, sin cambiar la ruta."""
+    for *_, salida in trabajos:
+        if salida.exists():
+            print(f'Aviso: sobrescribe {salida} y su .json', file=sys.stderr)
 
 
 def evaluar(modelo: str, resultados: list[dict], lote: int, semilla: int, reintentos: int, idioma: str) -> None:

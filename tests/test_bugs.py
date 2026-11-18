@@ -44,3 +44,12 @@ def test_tts_salida_carpeta_con_un_guion(tmp_path):
     a.salida = tmp_path / 'toma.mp3'
     with pytest.raises(SystemExit):
         planificar(a, [('g', 'Hola', None)])
+
+
+def test_tts_avisa_antes_de_sobrescribir(tmp_path, capsys):
+    from tts import avisar_sobrescritura
+
+    (tmp_path / 'a.wav').touch()
+    avisar_sobrescritura([('t', 'experta', tmp_path / 'a.wav'), ('t', 'experta', tmp_path / 'b.wav')])
+    err = capsys.readouterr().err
+    assert 'a.wav' in err and 'b.wav' not in err
