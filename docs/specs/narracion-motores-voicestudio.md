@@ -2,6 +2,8 @@
 
 > Spec del 2026-11-15. Todo lo necesario para implementar en `narration/tts.py` los cuatro motores investigados (OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3), una gramática de guion con estilo y emoción por párrafo y gestos traducidos por motor, semilla reproducible, metadatos por toma, masterización de precisión y `--evaluar` adaptado. **Implementado** en `feature/motores-voicestudio`: este documento sigue siendo el contrato, y las desviaciones están en la §15. Base: [docs/research/voicestudio-narracion/](../research/voicestudio-narracion/README.md).
 
+> **Nota (refactor a `src/`)**: `narration/tts.py` ya no existe. Su código está repartido en `src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../../AGENTS.md#arquitectura)); las rutas y números de línea de este spec son los de la versión de 2026-11-15.
+
 ---
 
 ## 0. Decisiones del Usuario (2026-11-15)

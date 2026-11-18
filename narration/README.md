@@ -5,9 +5,6 @@ Genera narración en **español neutro latinoamericano** (o en inglés con `--id
 ```
 narration/
 ├── README.md            este documento
-├── tts.py               script único (CLI)
-├── voces.py             catálogo de voces libres (CC0 o dominio público): construye y aprueba cada voz
-├── referencia.py        medir, normalizar y verificar una referencia (lo usan grabar.py y voces.py)
 ├── voces/               catalogo.json (versionado) + <voz>/<estilo>.wav construidos (gitignoreado)
 ├── docs/
 │   ├── formato-guion.md cómo escribir el texto: pausas, estilo, emoción, gestos, pronunciación
@@ -22,9 +19,9 @@ narration/
 └── .venv-voxcpm/        venv de VoxCPM2          (gitignoreado)
 ```
 
-Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
+El código está en `src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../AGENTS.md#arquitectura)) y se lanza con `python cli.py narration tts|voces|grabar`. Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
 
-**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) o agrega `--ref narration/voz/prueba/experta.wav`.
+**Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) por ejemplo `--voz yesid`, que tiene el consentimiento de su dueño.
 
 ---
 
@@ -60,7 +57,7 @@ Filtro aplicado: modelos abiertos que **soportan español** (o inglés), que **c
 | Gestos | `[risa]`, `[suspiro]` | No | No | `[risa]`, `[suspiro]`, `[respiro]`, énfasis |
 | Audio | 24 kHz | 48 kHz | 22.05 kHz | 24 kHz |
 
-Los gestos y las emociones de cada motor se traducen por `tts.py`; la tabla completa está en [docs/formato-guion.md](docs/formato-guion.md#traducción-por-motor).
+Los gestos y las emociones de cada motor se traducen por motor (`texto/traducir.py`); la tabla completa está en [docs/formato-guion.md](docs/formato-guion.md#traducción-por-motor).
 
 **Descartados** (ver la investigación completa en [docs/research/voicestudio-narracion/](../docs/research/voicestudio-narracion/README.md)): Voxtral TTS (≥10 GB), Higgs Audio v3 (no comercial y lento en 8 GB), F5-TTS, XTTS v2 y Fish S1-mini (licencias no comerciales), Kokoro (acento inglés, no clona), Dia, Orpheus y Breeze TTS 2 (sin español).
 
@@ -101,7 +98,7 @@ VIRTUAL_ENV=.venv uv pip uninstall wetext
 .venv/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B', ignore_patterns=['llm.rl.pt','*.fp32.onnx','*.batch.onnx'])"
 cd ../../..
 
-# Cada venv necesita numpy y soundfile (los importa tts.py)
+# Cada venv necesita numpy y soundfile (los importa content_studio.narration)
 narration/motores/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
 ```
 
@@ -136,8 +133,8 @@ python cli.py narration tts --modelo qwen-1.7b --estilo experta \
 python cli.py narration tts --modelo cosyvoice3 --voz yesid --estilo dramatica \
   --texto "Nadie sabía lo que había pasado esa noche."
 
-# Con la referencia de prueba (mientras no haya grabaciones propias)
-python cli.py narration tts --modelo qwen-0.6b --ref narration/voz/prueba/experta.wav \
+# Mientras no haya grabaciones propias: una voz libre con consentimiento
+python cli.py narration tts --modelo qwen-0.6b --voz yesid \
   --texto "Hola, esto es una prueba."
 
 # Estilo y emoción por párrafo, semilla fija y evaluación (ver formato-guion.md)
@@ -211,7 +208,7 @@ Whisper no oye entonación ni acento, y a veces se equivoca él mismo. Las palab
 
 Con `--idioma en`, whisper evalúa en inglés y **no se comparan los números ni las unidades de moneda o porcentaje**: whisper los escribe como cifras o símbolos ("seven dollars" → "$7"). Es una simplificación con límite conocido: un error de número en inglés no se detecta.
 
-El `.json` de cada guion guarda `evaluacion`: las observaciones, las rondas usadas y si quedó sin errores. Con OmniVoice y sin `--evaluar`, `tts.py` lo sugiere, porque omite palabras con frecuencia.
+El `.json` de cada guion guarda `evaluacion`: las observaciones, las rondas usadas y si quedó sin errores. Con OmniVoice y sin `--evaluar`, `narration tts` lo sugiere, porque omite palabras con frecuencia.
 
 **Reintentos.** El modelo muestrea al azar: la misma frase a veces sale bien y a veces no (por ejemplo, "parto" → "parte" en un 40–60 % de las generaciones). Con `--reintentos N`, después de evaluar se regeneran solo los párrafos con observaciones, con la semilla de la ronda (base + n), se rearma el audio (el resto no se toca) y se vuelve a evaluar, hasta N rondas o hasta que no quede nada. El informe final es el de la última ronda:
 
@@ -226,7 +223,7 @@ Necesita el comando `whisper` en el PATH (`pip install openai-whisper`). Los pá
 ### Cómo funciona
 
 1. El texto se corta en cada línea en blanco, en cada `[pausa N]`, en cada `[estilo:]` y en cada `[emocion:]`. Cada tramo se divide en bloques de hasta ~300 letras, cortando en el final de cada oración.
-2. Cada bloque recibe lo que su motor entiende: referencia, estilo, emoción y gestos traducidos (`TRADUCCION` en `tts.py`). Lo que un motor no soporta se quita y el script avisa.
+2. Cada bloque recibe lo que su motor entiende: referencia, estilo, emoción y gestos traducidos (`TRADUCCION` en [src/content_studio/narration/texto/traducir.py](../src/content_studio/narration/texto/traducir.py)). Lo que un motor no soporta se quita y el script avisa.
 3. **Qwen** genera varios bloques a la vez (el *lote*), agrupando los de la misma referencia. El lote automático mide la VRAM libre y calcula cuántos entran (~1.15 GiB el primero y ~1.3 GiB cada uno extra, con un máximo de 4). Los demás motores generan de a un bloque.
 4. Recorta el silencio que el modelo deja en los bordes de cada bloque (~0.5 s por lado) y une los bloques con silencio: 0.25 s entre bloques, 0.6 s en una línea en blanco y N s en `[pausa N]`. Cada bloque va a la velocidad de su estilo, con `ffmpeg atempo`, que no altera el tono.
 5. Con `--master voz`, masteriza: pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `--lufs`, verificado después con `ebur128`. Si el pico real no deja llegar al objetivo con ganancia lineal, la toma queda como normalización dinámica: se avisa y `master.tipo` lo registra.
@@ -239,7 +236,7 @@ Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pau
 
 ## 4. Estilos
 
-A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([tts.py](tts.py), `ESTILOS`).
+A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([estilos.py](../src/content_studio/narration/estilos.py), `ESTILOS`).
 
 | Estilo | Intención | Velocidad | temperature | exaggeration* | cfg_weight* |
 |---|---|---|---|---|---|
@@ -281,7 +278,7 @@ Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo d
 
 ### 5.1 Voces libres del catálogo (`--voz`)
 
-Para narrar sin grabarse, `voces.py` arma voces a partir de fuentes con licencia de uso comercial: **CC0 o dominio público** (lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar) y licencias que **piden mención** (ver abajo). El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
+Para narrar sin grabarse, `narration voces` arma voces a partir de fuentes con licencia de uso comercial: **CC0 o dominio público** (lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar) y licencias que **piden mención** (ver abajo). El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
 
 ```bash
 python cli.py narration voces --listar                    # catálogo, licencia y estado de cada voz
@@ -299,7 +296,7 @@ Cómo se construye una voz (corre en el venv de CosyVoice 3):
 3. Aprueba cada clip con estos criterios: similitud de hablante con la base ≥ 0.93 (WavLM-SV), WER ≤ 0.15 (whisper `large-v3-turbo`), 5–15 s, −20 a −16 LUFS, pico real ≤ −3 dBTP y sin pausas internas de 1 s o más. Si un clip no aprueba, lo regenera con otra semilla, hasta 3 rondas.
 4. Escribe `voces/<voz>/aprobacion.json`. **Una voz entra en `--voz` solo si aprueba los 12 estilos.** El menú de `cli.py` muestra las demás deshabilitadas, con el motivo.
 
-**Voces que piden mención.** Además de las CC0 o de dominio público, el catálogo tiene voces con licencias que exigen **mención**: CC BY (VCTK, Alba MacKenna), CC BY-SA (OpenSLR: Colombia, Perú y Venezuela) y Jenny (Dioco). "Mención" quiere decir **atribución**: puedes usar la voz, incluso con fines comerciales, si al publicar das crédito a su autor (quién es, de dónde sale, con qué licencia y que la usaste como referencia para una voz sintética). El texto exacto está en `atribucion` del catálogo. `tts.py --voz` lo imprime como "MENCIÓN OBLIGATORIA" y lo guarda en el `.json` de la toma (`voces[].mencion`). Pégalo en la descripción del video. Las BY-SA muestran además un aviso de "compartir igual". Detalle en [docs/research/voces-libres-clonacion/12](../docs/research/voces-libres-clonacion/12-voces-con-mencion.md).
+**Voces que piden mención.** Además de las CC0 o de dominio público, el catálogo tiene voces con licencias que exigen **mención**: CC BY (VCTK, Alba MacKenna), CC BY-SA (OpenSLR: Colombia, Perú y Venezuela) y Jenny (Dioco). "Mención" quiere decir **atribución**: puedes usar la voz, incluso con fines comerciales, si al publicar das crédito a su autor (quién es, de dónde sale, con qué licencia y que la usaste como referencia para una voz sintética). El texto exacto está en `atribucion` del catálogo. `narration tts --voz` lo imprime como "MENCIÓN OBLIGATORIA" y lo guarda en el `.json` de la toma (`voces[].mencion`). Pégalo en la descripción del video. Las BY-SA muestran además un aviso de "compartir igual". Detalle en [docs/research/voces-libres-clonacion/12](../docs/research/voces-libres-clonacion/12-voces-con-mencion.md).
 
 El acento y si cada estilo "suena" a lo que dice **no se miden**: escucha `voces/<voz>/*.wav` antes de usar una voz en un video. Las voces de LibriVox no tienen consentimiento para clonar. Para uso comercial, mira [docs/research/voces-libres-clonacion/02](../docs/research/voces-libres-clonacion/02-derechos-copyright-y-voz.md).
 
@@ -359,7 +356,7 @@ Los seis picos de VRAM quedan por debajo de 6.5 GiB. Las seis tomas de `c_tutori
 - **Sin `.txt` de referencia**, Qwen usa solo la huella de la voz (`x_vector_only_mode`) y clona peor. OmniVoice y CosyVoice 3 **no generan** sin `.txt`: el script se detiene y lo dice.
 - **Acento inglés en Qwen**: aparece sobre todo con referencias que no son nativas. Usa referencias grabadas en español neutro.
 - **Masterización dinámica con −16 LUFS**: con las voces de prueba, el pico real impide la normalización lineal. El limitador baja el rango de loudness (en una toma de OmniVoice, de 3.5 a 2.7 LU) y el `.json` lo registra en `master.tipo`. Si prefieres el audio sin limitar, usa un objetivo más bajo: en la toma de prueba de OmniVoice, `--lufs -19` quedó lineal.
-- **VoxCPM2 no tiene semilla propia**: la versión instalada no acepta `seed` en `generate`, así que `tts.py` fija el generador global. Es reproducible en la misma máquina con el mismo código; no está garantizado en GPU.
+- **VoxCPM2 no tiene semilla propia**: la versión instalada no acepta `seed` en `generate`, así que `narration tts` fija el generador global. Es reproducible en la misma máquina con el mismo código; no está garantizado en GPU.
 - **Bloques que terminan sin puntuación**: OmniVoice puede devolver un audio vacío si el bloque no termina en `.`, `?` o `!`, por ejemplo cuando un `[estilo:]` corta la oración. El script avisa y deja el aviso en el `.json`.
 - **Licencias**: OmniVoice (CC-BY-NC) e IndexTTS 2.5 **no son comerciales**: el script avisa en cada corrida. Qwen, Chatterbox, VoxCPM2 y CosyVoice 3 permiten uso comercial según su licencia. Clona solo voces con permiso de su dueño.
 - **GPU compartida**: si otra aplicación usa la GPU, el lote automático y los tiempos cambian (ver [§6](#6-rendimiento)). Cierra antes las apps que usen la GPU.

@@ -62,5 +62,5 @@ gh pr create --base main --title "fix: ..." --body "..."
 
 - Conventional Commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `ci:`, `perf:`, `style:`. El tipo coincide con el prefijo de la rama.
 - **Sin atribución de IA** en commits, PRs ni comentarios (nada de `Co-Authored-By: Claude`, "Generated with…", etc.).
-- Antes de confirmar cambios: correr los doctests (`python3 -m doctest music/musica.py narration/tts.py`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
+- Antes de confirmar cambios: correr `uv run ruff check`, `uv run ruff format --check` y `uv run pytest` (doctests incluidos; lo mismo que el workflow `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
 - Commit, push y merge solo cuando el usuario lo pida.

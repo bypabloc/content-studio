@@ -73,7 +73,7 @@ Las tonalidades son las que la guía oficial de ACE-Step considera estables: C, 
 
 ### Catálogo ampliado: 117 presets más
 
-Definidos en [estilos.py](estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
+Definidos en [estilos.py](../src/content_studio/music/estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
 
 | Grupo | Presets |
 |:--|:--|
@@ -94,7 +94,7 @@ Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-pro
 
 Bajo una narración, los que mejor acompañan son los de tutoriales y explicativos, `corporate-minimal`, `deep-house` y `ambient`.
 
-Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
+Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](../src/content_studio/music/estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
 
 ## Evaluar que no haya voz (`--evaluar`)
 
@@ -208,7 +208,7 @@ Detalles operativos:
 - **El nombre de salida se sobrescribe**: `<modelo>-<estilo>.wav` no lleva fecha. Para guardar variantes, usa `--carpeta out/<proyecto>` o renombra el archivo antes de regenerarlo.
 - **Primera corrida**: descarga ~11 GB (ACE-Step) o ~21 GB (HeartMuLa). Si se corta, vuelve a correrla.
 - **Logs**: las corridas largas se lanzan en segundo plano y su salida se guarda en `logs/` de la raíz (por ejemplo, `logs/music-<fecha>.log`). HeartMuLa tarda ~5 min por pista.
-- **Un modelo a la vez en la GPU**: no generes música mientras corre `narration/tts.py`, porque los dos juntos no caben en 8 GB y el desborde a la RAM compartida hace todo ~4× más lento. Antes de lanzar, revisa la VRAM libre con `nvidia-smi --query-gpu=memory.free --format=csv`: ACE-Step necesita ~6,5 GB. Otros procesos, como el daemon `laya` de Synapse, pueden estar ocupando varios GB.
+- **Un modelo a la vez en la GPU**: no generes música mientras corre `narration tts`, porque los dos juntos no caben en 8 GB y el desborde a la RAM compartida hace todo ~4× más lento. Antes de lanzar, revisa la VRAM libre con `nvidia-smi --query-gpu=memory.free --format=csv`: ACE-Step necesita ~6,5 GB. Otros procesos, como el daemon `laya` de Synapse, pueden estar ocupando varios GB.
 - El LM `acestep-5Hz-lm-1.7B` también está descargado en `checkpoints/`, pero no se usa: es el perfil de 8–16 GB y necesita vLLM.
 
 ## Instalación (desde cero)
@@ -256,13 +256,13 @@ Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si muev
 music/
 ├── README.md          # este archivo
 ├── INVESTIGACION.md   # modelos evaluados, descartes y fuentes
-├── musica.py          # script
+├── ESTILOS.md         # catálogo de presets
 ├── models/            # repos clonados y pesos (gitignoreado)
 ├── .venv-acestep/     # gitignoreado
 └── .venv-heartmula/   # gitignoreado
 ```
 
-Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
+El código está en `src/content_studio/music/` (parser, musica, estilos, evaluacion y `motores/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
 
 ## Cómo verificar un resultado
 

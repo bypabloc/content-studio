@@ -1,6 +1,6 @@
 # Estilos de música disponibles (126)
 
-Catálogo de presets de `music/musica.py`, definido en [estilos.py](estilos.py). Se usan con `--estilo <nombre>`. Los 117 nuevos se generaron a 30 s con ACE-Step y pasaron `--evaluar` (sin voz, al menos 20 s, no mudos); cómo se probaron y qué se descartó está en [INVESTIGACION.md](INVESTIGACION.md). **Nadie escuchó las pistas**: las métricas no dicen si el estilo se reconoce ni si suena bien.
+Catálogo de presets de `python cli.py music`, definido en [estilos.py](../src/content_studio/music/estilos.py). Se usan con `--estilo <nombre>`. Los 117 nuevos se generaron a 30 s con ACE-Step y pasaron `--evaluar` (sin voz, al menos 20 s, no mudos); cómo se probaron y qué se descartó está en [INVESTIGACION.md](INVESTIGACION.md). **Nadie escuchó las pistas**: las métricas no dicen si el estilo se reconoce ni si suena bien.
 
 Todos van en compás 4/4. Tono y BPM se pueden pisar con `--tono` y `--bpm`.
 

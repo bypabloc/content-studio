@@ -9,9 +9,12 @@ narration/voz/prueba/
 narration/voz/**/*.wav
 narration/voz/**/*.m4a
 narration/voz/**/*.mp3
-# Voces libres construidas por narration/voces.py: se regeneran desde catalogo.json (el único que se versiona).
+# Voces libres construidas por `cli.py narration voces`: se regeneran desde catalogo.json (el único que se versiona).
 narration/voces/*
 !narration/voces/catalogo.json
 # Repos de motores que no son paquetes pip (código, venv y pesos). Ver narration/README.md §2.
 narration/motores/
 tmp/
+.venv/
+.pytest_cache/
+.ruff_cache/
