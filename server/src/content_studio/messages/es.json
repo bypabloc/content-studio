@@ -1,0 +1,16 @@
+{
+  "unauthorized": "Falta el token de la sesión o no es válido.",
+  "forbidden_path": "La ruta está fuera de out/ y de los datos de referencia.",
+  "not_found": "No existe.",
+  "job_not_found": "No existe el trabajo {job_id}.",
+  "job_pending": "No se puede repetir el trabajo {job_id} hasta que termine.",
+  "unknown_kind": "No existe el tipo de trabajo {kind}.",
+  "unknown_engine": "No existe el motor {model}.",
+  "engine_not_installed": "El motor {model} no está instalado: sigue su README en server/data/.",
+  "unknown_style": "No existe el estilo {style}.",
+  "missing_style": "Falta el estilo.",
+  "unknown_voice": "La voz {voice} no está en el catálogo o no está aprobada en todos los estilos.",
+  "missing_text": "Falta el texto o el archivo del guion.",
+  "style_needs_key_bpm": "{style} no es un preset: define la tonalidad (key) y el bpm.",
+  "invalid_duration": "La duración debe estar entre 0 y {max} segundos."
+}

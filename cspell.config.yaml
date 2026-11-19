@@ -40,6 +40,9 @@ overrides:
   - filename: 'server/src/content_studio/narration/script_aliases.json'
     language: en,es
     words: [emocion, enfasis, energica, dramatica]
+  # Textos de error de la API en español (spec 004, D-5): catálogo de datos, como los de server/data.
+  - filename: 'server/src/content_studio/messages/es.json'
+    language: en,es
 ignorePaths:
   # Temporal (D-3): la UI en español de cli/ la retira la 004 y grabar/ la 007.
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).

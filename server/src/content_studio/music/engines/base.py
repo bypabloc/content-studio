@@ -23,6 +23,7 @@ class MusicSpec:
     kind: str
     desc: str  # para los menús del CLI
     evaluates: bool = False  # su venv trae demucs: admite --evaluate
+    recommended: bool = False  # la opción que la app marca con ★ (exactamente una por selector)
 
     def path_venv(self) -> Path:
         """Carpeta del venv del motor, en server/data/music/."""

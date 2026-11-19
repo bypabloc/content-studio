@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1"]
+# dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1", "fastapi>=0.162.5", "uvicorn>=0.54.0"]
 # ///
 """Punto de entrada único: python cli.py [<herramienta> <comando> [flags]]. El CLI vive en server/src/content_studio.
 

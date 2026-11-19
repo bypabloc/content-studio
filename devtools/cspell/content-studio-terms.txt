@@ -46,6 +46,7 @@ electropop
 endofprompt
 esac
 executescript
+fastapi
 ffprobe
 fingerpicked
 fingerstyle
@@ -60,6 +61,7 @@ heartmula
 higgs
 highpass
 htdemucs
+httpx
 huggingface
 indextts
 keyscale
@@ -104,6 +106,7 @@ timespec
 tobytes
 toplevel
 typer
+uvicorn
 vaporwave
 venv
 venvs

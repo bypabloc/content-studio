@@ -24,6 +24,7 @@ ENGINES: dict[str, EngineSpec] = {
         30,
         'openbmb/VoxCPM2',
         note='★ recommended',
+        recommended=True,
     ),
     'cosyvoice3': EngineSpec(
         'cosyvoice3',

@@ -90,6 +90,6 @@ def test_ac7_without_old_paths():
 
 def test_dependencies_cli_equal_a_pyproject():
     deps = r'dependencies = (\[.*?\])'
-    header = re.search(deps, (ROOT / 'cli.py').read_text(encoding='utf-8'))[1]
-    project = re.search(deps, (ROOT / 'server/pyproject.toml').read_text(encoding='utf-8'))[1]
+    header = re.search(deps, (ROOT / 'cli.py').read_text(encoding='utf-8'), re.DOTALL)[1]
+    project = re.search(deps, (ROOT / 'server/pyproject.toml').read_text(encoding='utf-8'), re.DOTALL)[1]
     assert ast.literal_eval(header) == ast.literal_eval(project)
