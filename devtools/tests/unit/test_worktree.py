@@ -51,14 +51,10 @@ def test_prepare_and_close_in_a_repo_real(tmp_path, monkeypatch):
     monkeypatch.chdir(main)
     assert worktree.prepare(main.resolve(), 'tema') == 0
     assert (wt / 'server/data/music/models/ace').is_dir() and (wt / 'tmp').is_dir()
-    (main / 'tmp/handoff/tema').mkdir(parents=True)
-    (main / 'tmp/handoff/.sessions').mkdir()
-    (main / 'tmp/handoff/.sessions/s1').write_text('tema')
     subprocess.run(['git', 'fetch', '-q', 'origin'], cwd=main, check=True)
-    assert worktree.close(main.resolve(), 'tema', 'tema') == 0
+    assert worktree.close(main.resolve(), 'tema') == 0
     assert not wt.exists() and (main / 'server/data/music/models/ace').is_dir()
-    assert not (main / 'tmp/handoff/tema').exists() and not (main / 'tmp/handoff/.sessions/s1').exists()
-    assert worktree.close(main.resolve(), 'tema', 'tema') == 2
+    assert worktree.close(main.resolve(), 'tema') == 2
 
 
 def test_missing_links_node_modules_so_spelling_works_in_a_worktree(tmp_path):
@@ -70,7 +66,7 @@ def test_missing_links_node_modules_so_spelling_works_in_a_worktree(tmp_path):
 
 def test_close_finishes_when_windows_cannot_delete_the_held_folder(tmp_path, monkeypatch):
     """Regresión: en Windows, `git worktree remove` vacía y desregistra el worktree pero falla al borrar la carpeta
-    que otro proceso tiene como cwd («Permission denied»); `close` cortaba ahí y dejaba las ramas y el handoff."""
+    que otro proceso tiene como cwd («Permission denied»); `close` cortaba ahí y dejaba las ramas."""
     main = tmp_path / 'repo'
     remote = tmp_path / 'remote.git'
     subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
@@ -93,7 +89,7 @@ def test_close_finishes_when_windows_cannot_delete_the_held_folder(tmp_path, mon
 
     monkeypatch.setattr(worktree, '_git', git_held)
     monkeypatch.chdir(main)
-    assert worktree.close(main.resolve(), 'tema', 'tema') == 0
+    assert worktree.close(main.resolve(), 'tema') == 0
     assert 'fix/tema' not in real(main, 'branch', '--list', 'fix/tema').stdout
     assert worktree.search(main.resolve(), 'tema') is None
 

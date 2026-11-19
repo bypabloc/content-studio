@@ -12,7 +12,7 @@ python -m devtools <comando> [args]
 | Comando | Qué hace |
 | :--- | :--- |
 | `worktree prepare <nombre>` | Enlaza venvs, motores, modelos y voces del principal en un worktree nuevo y copia los audios de referencia (`worktrees.md`) |
-| `worktree close <nombre> [--handoff=<t>]` | Cierra un worktree fusionado en `origin/dev`: enlaces, worktree, ramas y handoff |
+| `worktree close <nombre>` | Cierra un worktree fusionado en `origin/dev`: enlaces, worktree y ramas |
 | `gpu-turn status` | Quién tiene la GPU, VRAM en uso y sesiones abiertas del proyecto (exit 0 libre, 1 ocupada) |
 | `gpu-turn run --job=<t> -- <cmd>` | Corre `<cmd>` con el turno tomado y lo suelta al terminar (`turno-gpu.md`) |
 | `agent-context` | Mide lo que cargan Claude Code, Codex y Antigravity; exit 1 si algo pasa su límite. Lo corre el `pre-commit` |

@@ -7,7 +7,7 @@ description: Dónde vive el código, 300 líneas por .py, Python 3.10, dos capas
 
 ## Dónde vive el código
 
-- Todo el código vive en `server/src/content_studio/`. En la raíz solo queda `cli.py`, que es un shim. La excepción son los hooks de Claude Code en `.claude/hooks/`, con solo stdlib y probados en `.claude/hooks/tests/test_hooks.py`.
+- Todo el código vive en `server/src/content_studio/`. En la raíz solo queda `cli.py`, que es un shim. La excepción son los hooks de agentes, con solo stdlib: los de Claude Code en `.claude/hooks/` (probados en `.claude/hooks/tests/test_hooks.py`) y los compartidos con Codex y Antigravity en `.agents/hooks/` (probados en `.agents/hooks/tests/`).
 - `server/data/narration/` y `server/data/music/` son carpetas de datos: README, docs, voces, catálogo, venvs, `engines/` y `models/`. **No se mueven venvs ni assets**: hacerlo rompe los venvs o dispara descargas de varios GB. Un worktree los enlaza (`worktrees.md`).
 - Las herramientas del flujo de agentes viven en `server/src/content_studio/devtools/` (`devtools.md`).
 

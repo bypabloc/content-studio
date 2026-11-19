@@ -16,7 +16,7 @@ description: Nunca reportar "listo" sin correr el código real y medir la salida
 | Narración o música | La corrida real (con `gpu-turn run`) y la medición de §2 de cada salida |
 | CLI o asistente | `python cli.py <comando> --help`, un caso real y uno de error; sin TTY (`| cat`) no debe preguntar nada |
 | devtools | `python -m devtools <comando> --help`, un caso real y uno de error |
-| Hooks o configuración de agentes | `uv run pytest .claude/hooks/tests/test_hooks.py` y la validación headless (`agent-config-testing.md`) |
+| Hooks o configuración de agentes | `uv run pytest .claude/hooks/tests/test_hooks.py .agents/hooks` y la validación headless (`agent-config-testing.md`) |
 
 ## 2. Medir el audio
 

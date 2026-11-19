@@ -8,32 +8,30 @@ description: >
 
 # execute-spec — content-studio
 
-La ventana principal implementa la spec de principio a fin y conserva el contexto entre tareas. Reglas: `plan-format.md`, `git-workflow.md`, `worktrees.md`, `turno-gpu.md` y el plugin `session-handoff`.
+La ventana principal implementa la spec de principio a fin y conserva el contexto entre tareas. Reglas: `plan-format.md`, `git-workflow.md`, `worktrees.md` y `turno-gpu.md`.
 
 ## 1. Preparación
 
 1. Usa la spec que indique el usuario; si no indica una, lista `docs/specs/README.md` y pregunta.
 2. Lee `README.md`, `01-contexto-y-decision.md` y `02-plan.md` (y el README del lote si vive en uno). Corre su «Precondición». Ordena los grupos de commit por dependencia y omite los ya hechos.
 3. Worktree propio: `git fetch origin dev`, `git worktree add ../content-studio-worktrees/<NN>-<slug> -b <prefijo>/<NN>-<slug> origin/dev` y `python -m devtools worktree prepare <NN>-<slug>`; si ya existe, reutilízalo. Nunca commits en `dev` ni `main`.
-4. **Handoff**: dentro de `run-specs`, usa el del lote; suelta, crea `tmp/handoff/<NN>-<slug>/` en el principal (PROGRESS, DECISIONS, NOTES) y el vínculo de tu sesión; `Status: in-progress`, `Phase: implementation`.
-5. Resuelve contradicciones con las reglas antes de tocar archivos; lee las fichas de `docs/process/WARNING/` y `PENDING/` que cite.
+4. Resuelve contradicciones con las reglas antes de tocar archivos; lee las fichas de `docs/process/WARNING/` y `PENDING/` que cite.
 
 ## 2. Por cada grupo de commit
 
 1. TDD (skill `tdd-workflow`): test en rojo, implementación mínima, refactor. Solo los archivos del grupo. Marca las tareas como hechas en el README de la spec.
 2. Verify de cada tarea y `uv run ruff check && uv run ruff format --check && uv run pytest`. Nada que cargue un modelo por grupo.
 3. Si falla, diagnostica y repite solo lo afectado; no avances con el grupo en rojo.
-4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials` o `user-stop` (`.claude/session-handoff.json`); la elección sonora también es tuya (con el «debe sonar» de la spec, registrada en WARNING). Commits, push, PR, merge y cierre no se consultan: la spec ya los autoriza.
+4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials` o `user-stop` (categorías de `.claude/session-handoff.json`); la elección sonora también es tuya (con el «debe sonar» de la spec, registrada en WARNING). Commits, push, PR, merge y cierre no se consultan: la spec ya los autoriza.
 5. Commit con el mensaje exacto del grupo en `02-plan.md` tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
-6. Anota el hash en `PROGRESS.md` (Done, Current, Remaining, ETA, Next step).
 
 ## 3. Verificación final, PR y merge
 
-1. `Phase: verification`. Corre una vez la batería de `03-verificacion-final.md`: ruff, pytest, `pytest -m local` si toca un motor, la corrida real con `gpu-turn run --job=<NN>-<slug> -- …` y duración, volumen y espectrograma de cada salida (las imágenes las abre `image-reader`). Si toca configuración de agentes, la validación headless. Lo que falle se corrige con commits `fix(...)` y se repite solo eso.
+1. Corre una vez la batería de `03-verificacion-final.md`: ruff, pytest, `pytest -m local` si toca un motor, la corrida real con `gpu-turn run --job=<NN>-<slug> -- …` y duración, volumen y espectrograma de cada salida (las imágenes las abre `image-reader`). Si toca configuración de agentes, la validación headless. Lo que falle se corrige con commits `fix(...)` y se repite solo eso.
 2. Último commit: fichas de `docs/process/01-done/` si la spec es funcional; en una spec suelta, `git rm -r docs/specs/<NN>-<slug>/` y su fila del índice. Antes de borrar, todo lo importante tiene su ficha en WARNING o PENDING.
-3. `Phase: integration`: `git fetch origin dev` y merge de `origin/dev` en la rama si avanzó; un solo push; `gh pr list --head <rama>` y crea el PR a `dev` si no existe (cuerpo: problema, solución, cómo probar con comandos reales, fichas WARNING/PENDING).
-4. `gh pr checks <n> --watch` (`Phase: external-wait` mientras tanto); con todo verde, `gh pr merge <n> --merge`. El merge es siempre a `dev`. **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
-5. `Phase: closing`: desde el principal, `git fetch origin dev` y `python -m devtools worktree close <NN>-<slug>` (solo exige el merge en `origin/dev`). Si el principal está en `dev` y limpio, `git pull --ff-only`; si tiene cambios locales o archivos sin rastrear, no lo toques y sigue: no es `user-data` ni motivo para preguntar. Suelta, `Status: done`; en un lote, sigue `in-progress` con la spec en `Done` y `Next step` en la siguiente (`done` solo tras la última).
+3. `git fetch origin dev` y merge de `origin/dev` en la rama si avanzó; un solo push; `gh pr list --head <rama>` y crea el PR a `dev` si no existe (cuerpo: problema, solución, cómo probar con comandos reales, fichas WARNING/PENDING).
+4. `gh pr checks <n> --watch`; con todo verde, `gh pr merge <n> --merge`. El merge es siempre a `dev`. **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
+5. Cierre: desde el principal, `git fetch origin dev` y `python -m devtools worktree close <NN>-<slug>` (solo exige el merge en `origin/dev`). Si el principal está en `dev` y limpio, `git pull --ff-only`; si tiene cambios locales o archivos sin rastrear, no lo toques y sigue: no es `user-data` ni motivo para preguntar. En un lote, sigue con la spec siguiente.
 
 ## 4. Reporte final
 

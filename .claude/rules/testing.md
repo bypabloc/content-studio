@@ -19,7 +19,7 @@ Runner único de gates: `python -m devtools test-runner --type=all` (lint, spell
 | Bugs | `server/tests/integration/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
 | CLI y asistente | `server/tests/integration/test_cli.py`, `server/tests/unit/src/content_studio/cli/test_flow.py` | Typer, flags y el asistente sin TTY | Sí |
 | Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores y comandos registrados | Sí |
-| Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `devtools/tests/unit/` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
+| Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `.agents/hooks/tests/`, `devtools/tests/unit/` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
 | Local | `server/tests/integration/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
 | tdd efímero | `server/tests/tdd/test_<pieza>.py` o `devtools/tests/tdd/` | Razonar una pieza antes de su test permanente | **Nunca**: `guard-tdd` (pre-push y CI) falla si existe |
 

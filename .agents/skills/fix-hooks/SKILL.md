@@ -30,4 +30,4 @@ Reproduce el gate, corrige y repite hasta exit 0. Qué corre cada hook: `.agents
 
 - NUNCA `--no-verify` ni desactivar un chequeo para pasar el gate.
 - Reporta "Iteración N: X errores" hasta el verde.
-- Si un error exige una decisión de diseño que cambia el alcance, regístrala en `docs/process/WARNING/` (plugin `session-handoff`).
+- Si un error exige una decisión de diseño que cambia el alcance, regístrala en `docs/process/WARNING/`.

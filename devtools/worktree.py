@@ -3,7 +3,7 @@
 `prepare` deja el worktree listo para correr motores: `git worktree add` solo trae lo versionado, y los venvs, los
 repos de motores y los modelos pesan GB y no se mueven (codigo-python.md). Por eso los enlaza al checkout principal
 (symlink en POSIX, junction en Windows, que no pide permisos de administrador) y copia los audios de referencia que
-faltan, sin pisar nada. `close` borra el worktree ya fusionado en origin/dev, sus ramas y su handoff.
+faltan, sin pisar nada. `close` borra el worktree ya fusionado en origin/dev y sus ramas.
 """
 
 from __future__ import annotations
@@ -113,17 +113,8 @@ def remove_links(root: Path) -> int:
     return len(links)
 
 
-def delete_handoff(main: Path, job: str) -> None:
-    """Borra tmp/handoff/<trabajo>/ y los vínculos de sesión que apuntan a él."""
-    base = main / 'tmp/handoff'
-    shutil.rmtree(base / job, ignore_errors=True)
-    for link in (base / '.sessions').glob('*') if (base / '.sessions').is_dir() else []:
-        if link.read_text(encoding='utf-8').strip() == job:
-            link.unlink()
-
-
-def close(main: Path, name: str, job: str) -> int:
-    """Cierra el worktree `name` fusionado en origin/dev y borra sus enlaces, ramas y handoff."""
+def close(main: Path, name: str) -> int:
+    """Cierra el worktree `name` fusionado en origin/dev y borra sus enlaces y ramas."""
     wt = search(main, name)
     if not wt:
         print(f'there is no worktree named {name} (git worktree list)', file=sys.stderr)
@@ -156,7 +147,6 @@ def close(main: Path, name: str, job: str) -> int:
             return 1
     if wt['branch'] and _git(main, 'ls-remote', '--exit-code', '--heads', 'origin', wt['branch']).returncode == 0:
         _git(main, 'push', 'origin', '--delete', wt['branch'])
-    delete_handoff(main, job)
     print(f'{root} closed', file=sys.stderr)
     print(json.dumps({'closed': name, 'branch': wt['branch'] or None}))
     return 0
@@ -164,12 +154,11 @@ def close(main: Path, name: str, job: str) -> int:
 
 def main(argv: list[str]) -> int:
     """Entrada de `python -m devtools worktree`: prepare o close."""
-    handoff = next((a.split('=', 1)[1] for a in argv if a.startswith('--handoff=')), None)
     args = [a for a in argv if not a.startswith('--')]
     if len(args) != 2 or args[0] not in ('prepare', 'close') or '-h' in argv or '--help' in argv:
-        print('usage: worktree prepare <name> | worktree close <name> [--handoff=<job>]', file=sys.stderr)
+        print('usage: worktree prepare <name> | worktree close <name>', file=sys.stderr)
         return 0 if ('-h' in argv or '--help' in argv) else 2
     main_root = main_checkout(Path.cwd())
     if args[0] == 'prepare':
         return prepare(main_root, args[1])
-    return close(main_root, args[1], handoff or args[1])
+    return close(main_root, args[1])

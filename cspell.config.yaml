@@ -44,7 +44,7 @@ ignorePaths:
   # Temporal (D-3): la UI en español de cli/ la retira la 004 y grabar/ la 007.
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
-  # Prosa en español para el agente: configuración del plugin session-handoff (D-1, como handoff_text).
+  # Prosa en español para el agente: configuración del plugin session-handoff (D-1).
   - .claude/session-handoff.json
   # La config no se revisa a sí misma: lista rutas en español de carpetas que aún no se traducen.
   - cspell.config.yaml

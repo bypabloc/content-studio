@@ -44,10 +44,11 @@ convention = "google"
 "cli.py" = ["D"]
 ".claude/**" = ["D"]
 ".agents/**" = ["D"]
+".agents/hooks/tests/**" = ["ANN"]
 
 [tool.pytest.ini_options]
 pythonpath = ["server/src", "."]
-testpaths = ["server/src", "server/tests", "devtools", "tests", ".claude/hooks/tests"]
+testpaths = ["server/src", "server/tests", "devtools", "tests", ".claude/hooks/tests", ".agents/hooks"]
 # importlib: los conftest.py y test_*.py de cada carpeta tienen nombres repetidos y no son paquetes.
 addopts = "--doctest-modules --import-mode=importlib -m 'not local'"
 markers = ["local: needs this machine's engine venvs (does not run in CI)"]

@@ -19,6 +19,5 @@ Todo lo que carga un modelo: `narration tts`, `narration voices --build`, la eva
 * **Ocupada por otra sesión**: `SendMessage` a esa sesión pidiéndole que avise con «gpu libre»; `CronCreate` cada 10 min con «`gpu-turn status`; si está libre, toma el turno y sigue con la corrida» (solo mientras esperas). Mientras tanto sigue con lo que no usa GPU; si no queda nada, `Phase: external-wait`.
 * **Al terminar** (éxito, fallo o interrupción): «gpu libre» por `SendMessage` a cada sesión abierta y `CronDelete` del respaldo. Si llegan dos «ocupo» a la vez, gana el primero recibido.
 * Si recibes «gpu libre» u «ocupo la gpu», no respondas solo para acusar recibo: actúa según el estado.
-* El turno (`holding`/`waiting` y el id del cron) va en `PROGRESS.md` del handoff para que sobreviva a la compactación.
 * VRAM ocupada sin candado (otra app, un proceso colgado): `nvidia-smi`; no mates procesos ajenos sin preguntar.
 * Corridas largas (HeartMuLa ~5 min por pista) en segundo plano, con la salida en `logs/` (`command-output.md`).

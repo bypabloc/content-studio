@@ -17,7 +17,7 @@ Fuente: `.agents/rules/devtools.md`. Desde la raíz del checkout (o con `uv run 
 | Necesitas | Comando |
 | :--- | :--- |
 | Worktree nuevo listo para correr motores | `git worktree add ../content-studio-worktrees/<n> -b <prefijo>/<n> origin/dev` y `python -m devtools worktree prepare <n>` |
-| Cerrar tras el merge | `python -m devtools worktree close <n> [--handoff=<t>]` |
+| Cerrar tras el merge | `python -m devtools worktree close <n>` |
 | Saber si la GPU está libre | `python -m devtools gpu-turn status` (exit 0 libre, 1 ocupada) |
 | Correr algo que carga un modelo | `python -m devtools gpu-turn run --job=<t> -- python cli.py music ...` |
 | Medir lo que cargan los agentes | `python -m devtools agent-context` |

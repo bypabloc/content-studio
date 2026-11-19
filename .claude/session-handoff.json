@@ -11,5 +11,5 @@
   "specsDir": "docs/specs",
   "decisionsDir": "docs/process/WARNING",
   "pendingDir": "docs/process/PENDING",
-  "closing": "Status es done: confirma el merge a dev (nunca a main: ni PR ni merge a main hasta que el usuario lo pida) y cierra con `python -m devtools worktree close <nombre> --handoff=<trabajo>` desde el checkout principal, sin pull ni otros cambios en él si tiene cambios locales. En un lote (run-specs), no es done hasta la última spec: Next step pasa a la siguiente y se sigue en el mismo turno."
+  "closing": "Status es done: confirma el merge a dev (nunca a main sin pedido del usuario) y cierra con `python -m devtools worktree close <nombre>` desde el checkout principal, sin pull ni otros cambios en él si tiene cambios locales."
 }
