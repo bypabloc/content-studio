@@ -25,8 +25,18 @@ GROUPS = {'all': ['lint', 'spelling', 'validators', 'unit', 'typecheck', 'tdd']}
 FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}
 
 
+USAGE = (
+    'usage: python -m devtools test-runner [--type=<stages>] [--git-mode=changed|staged|unstaged|unmerged|all] '
+    '[--files=a.py,b.py] [--write-baseline]\n'
+    f'stages: {", ".join(STAGES)}; all = {", ".join(GROUPS["all"])}\n'
+)
+
+
 def main(argv: list[str]) -> int:
     """Entrada de `python -m devtools test-runner`: exit 0, 1 o 2 según el resultado."""
+    if argv and argv[0] in ('-h', '--help'):
+        print(USAGE, end='')
+        return 0
     try:
         options = parse(argv, list(STAGES), GROUPS)
     except ValueError as error:

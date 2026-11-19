@@ -28,10 +28,10 @@ Que un solo comando, `python -m devtools test-runner --type=<tipos>`, corra todo
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Validador de tamaño con baseline | PEN |
-| 2 | Espejo: mover los tests y la auditoría | PEN |
-| 3 | Cobertura, docstrings y typecheck | PEN |
-| 4 | test-runner que los une a todos, y gates en los hooks y la CI | PEN |
+| 1 | Validador de tamaño con baseline | DON |
+| 2 | Espejo: mover los tests y la auditoría | DON |
+| 3 | Cobertura, docstrings y typecheck | DON |
+| 4 | test-runner que los une a todos, y gates en los hooks y la CI | DON |
 
 ## Decisiones clave
 
