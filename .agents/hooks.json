@@ -1,0 +1,11 @@
+{
+  "session-handoff": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "r=$(git rev-parse --show-toplevel 2>/dev/null) && [ -f \"$r/.agents/hooks/session_handoff.py\" ] && uv run --no-project python \"$r/.agents/hooks/session_handoff.py\" || echo '{}'",
+        "timeout": 10
+      }
+    ]
+  }
+}

@@ -1,4 +1,5 @@
-"""Reglas de .claude/rules/codigo-python.md que se pueden comprobar: tope de líneas, sintaxis 3.10 y dependencias."""
+"""Reglas de .agents/rules/codigo-python.md que se pueden comprobar: tope de líneas, sintaxis 3.10, dependencias y
+la sincronía de reglas y skills entre .agents/ y .claude/ (agent-config-testing.md)."""
 
 from __future__ import annotations
 
@@ -8,12 +9,16 @@ from pathlib import Path
 
 import pytest
 
+from content_studio.devtools import reglas
+
 RAIZ = Path(__file__).resolve().parents[1]
 MAX_LINEAS = 300
+HOOKS = [RAIZ / '.agents/hooks', RAIZ / '.claude/hooks']
 
 
 def archivos() -> list[Path]:
-    return sorted([RAIZ / 'cli.py', *(RAIZ / 'src').rglob('*.py'), *(RAIZ / 'tests').rglob('*.py')])
+    fuentes = [RAIZ / 'cli.py', *(RAIZ / 'src').rglob('*.py'), *(RAIZ / 'tests').rglob('*.py')]
+    return sorted(fuentes + [p for h in HOOKS for p in h.glob('*.py')])
 
 
 ARCHIVOS = archivos()
@@ -41,6 +46,11 @@ def test_codigo_solo_en_src():
     """narration/ y music/ son carpetas de datos; en la raíz solo queda el shim cli.py."""
     sueltos = [*RAIZ.glob('*.py'), *RAIZ.glob('narration/*.py'), *RAIZ.glob('music/*.py')]
     assert [nombre(p) for p in sueltos] == ['cli.py']
+
+
+def test_reglas_y_skills_sincronizadas():
+    """Cada regla y skill de .claude/ tiene el cuerpo de su fuente en .agents/ (devtools reglas --sincronizar)."""
+    assert reglas.diferencias(RAIZ) == []
 
 
 def test_dependencias_cli_iguales_a_pyproject():

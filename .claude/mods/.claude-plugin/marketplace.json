@@ -1,0 +1,5 @@
+{
+  "name": "content-studio",
+  "owner": { "name": "Pablo Contreras" },
+  "plugins": [{ "name": "handoff-compact", "source": "./handoff-compact" }]
+}

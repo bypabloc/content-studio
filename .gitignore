@@ -1,7 +1,9 @@
-.venv-*/
+# Sin `/` final en lo que `devtools worktree prepare` enlaza (venvs, modelos, motores): en POSIX el enlace es un
+# symlink, que git no trata como carpeta, y con `/` quedaría sin ignorar.
+.venv-*
 out/
 logs/
-models/
+models
 __pycache__/
 .vscode/
 narration/voz/prueba/
@@ -13,8 +15,11 @@ narration/voz/**/*.mp3
 narration/voces/*
 !narration/voces/catalogo.json
 # Repos de motores que no son paquetes pip (código, venv y pesos). Ver narration/README.md §2.
-narration/motores/
+narration/motores
 tmp/
+# Grafo local de graphify (cada equipo lo genera con `graphify update .`) y worktrees que crea Claude Code.
+graphify-out/
+.claude/worktrees/
 .venv/
 .pytest_cache/
 .ruff_cache/

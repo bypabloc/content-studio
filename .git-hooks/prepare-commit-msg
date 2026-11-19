@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# prepare-commit-msg - content-studio (adaptado de klinikae)
+#
+# git-workflow.md prohíbe la atribución de IA en commits. Si se filtra una línea de atribución,
+# este hook la borra antes de confirmar el mensaje.
+
+set -euo pipefail
+
+MSG="${1:-}"
+[ -f "$MSG" ] || exit 0
+
+sed -i.bak \
+  -e '/Co-Authored-By:.*\(Claude\|Cursor\|Copilot\|anthropic\)/Id' \
+  -e '/Generated with.*\(Claude\|AI\)/Id' \
+  -e '/claude\.ai\/code/Id' \
+  "$MSG"
+rm -f "$MSG.bak"

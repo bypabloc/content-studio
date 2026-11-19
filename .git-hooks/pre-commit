@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#
+# pre-commit - content-studio (adaptado de klinikae)
+#
+# 1. Rama de trabajo con prefijo válido: nunca commits en main ni dev.
+# 2. Nada de salidas, modelos, venvs ni audio en el staging (el repo es público: las voces no se suben).
+# 3. Si hay .py, pyproject.toml, uv.lock o fixtures staged: ruff check, ruff format --check y pytest.
+# 4. Si hay instrucciones de agentes staged: contexto-agentes y reglas (devtools).
+#
+# Activación: git config core.hooksPath .git-hooks. Si falla, NO uses --no-verify: corrige.
+
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Misma lista que PREFIJOS_DEV en .github/workflows/origen-pr.yml y .claude/rules/git-workflow.md.
+PREFIJOS='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
+RAMA="$(git branch --show-current 2>/dev/null || true)"
+if ! [[ "$RAMA" =~ ^($PREFIJOS)/[a-z0-9][a-z0-9-]*$ ]]; then
+  echo "[pre-commit] La rama '$RAMA' no admite commits. Crea una desde dev: git switch -c feature/<nombre-kebab>" >&2
+  echo "[pre-commit] Prefijos: ${PREFIJOS//|/, }" >&2
+  exit 1
+fi
+
+STAGED="$(git diff --cached --name-only --diff-filter=ACMR)"
+PROHIBIDOS="$(grep -Ei '^(out|logs|models|tmp)/|^music/models/|^narration/motores/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
+if [ -n "$PROHIBIDOS" ]; then
+  echo "[pre-commit] Archivos que no se versionan (salidas, modelos, venvs o audio). Quítalos con git restore --staged <archivo>:" >&2
+  echo "$PROHIBIDOS" >&2
+  exit 1
+fi
+
+if grep -Eq '\.py$|^pyproject\.toml$|^uv\.lock$|^tests/fixtures/' <<<"$STAGED"; then
+  echo "[pre-commit] ruff + pytest"
+  uv run ruff check
+  uv run ruff format --check
+  uv run pytest -q
+else
+  echo "[pre-commit] Sin código Python staged: ruff y pytest omitidos"
+fi
+
+# Instrucciones de agentes: tamaño de lo que carga cada uno y sincronía .agents/ ↔ .claude/ (agent-config-testing.md).
+if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then
+  echo "[pre-commit] contexto-agentes + reglas"
+  PYTHONPATH=src uv run --no-project python -m content_studio.devtools contexto-agentes >/dev/null
+  PYTHONPATH=src uv run --no-project python -m content_studio.devtools reglas >/dev/null
+fi
+
+echo "[pre-commit] OK"
