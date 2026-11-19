@@ -1,8 +1,8 @@
 """Los motores TTS disponibles. Solo stdlib: lo leen el parser y el CLI sin cargar torch.
 
 Medido en RTX 4060 8 GB, bf16. Licencias en server/data/narration/README.md.
-Orden de preferencia (así salen en el menú del
-CLI): nota marca el ranking. Para agregar un motor: su archivo en engines/, una línea aquí y su venv.
+Orden de preferencia (así salen en los selectores de la API y de la app):
+nota marca el ranking. Para agregar un motor: su archivo en engines/, una línea aquí y su venv.
 """
 
 from __future__ import annotations
