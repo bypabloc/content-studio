@@ -14,7 +14,7 @@ from devtools import rules
 
 ROOT = Path(__file__).resolve().parents[2]
 MAX_LINES = 300
-HOOKS = [ROOT / '.agents/hooks', ROOT / '.claude/hooks']
+HOOKS = [ROOT / '.claude/hooks']
 
 
 def files() -> list[Path]:
@@ -24,7 +24,6 @@ def files() -> list[Path]:
         *(ROOT / 'server/tests').rglob('*.py'),
         *(ROOT / 'devtools').rglob('*.py'),
         *(ROOT / 'tests').rglob('*.py'),
-        *(ROOT / '.agents/hooks/tests').rglob('*.py'),
         *(ROOT / '.claude/hooks/tests').rglob('*.py'),
     ]
     return sorted(sources + [p for h in HOOKS for p in h.glob('*.py')])

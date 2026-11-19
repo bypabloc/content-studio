@@ -44,6 +44,8 @@ ignorePaths:
   # Temporal: cada spec de la serie saca una carpeta de esta lista al traducirla (ciclos 2 a 6 de la 002).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
+  # Prosa en español para el agente: configuración del plugin session-handoff (D-1, como handoff_text).
+  - .claude/session-handoff.json
   # La config no se revisa a sí misma: lista rutas en español de carpetas que aún no se traducen.
   - cspell.config.yaml
   # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).

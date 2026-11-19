@@ -17,7 +17,7 @@ Runner único: `uv run pytest` (con `--doctest-modules`; sin GPU, lo mismo que l
 | Bugs | `server/tests/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
 | CLI y asistente | `server/tests/test_cli.py`, `server/tests/test_asistente.py` | Typer, flags y el asistente sin TTY | Sí |
 | Registro | `server/tests/test_registro.py` | Motores y comandos registrados | Sí |
-| Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `.agents/hooks/tests/test_handoff.py`, `devtools/tests/test_devtools.py` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
+| Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `devtools/tests/test_devtools.py` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
 | Local | `server/tests/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
 | tdd efímero | `tests/tdd/test_<pieza>.py` | Razonar una pieza antes de su test permanente | **Nunca**: el `pre-push` falla si existe |
 
