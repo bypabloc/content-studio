@@ -79,7 +79,7 @@ def main(argv: list[str]) -> int:
     except RuntimeError as error:
         print(f'spelling: {error}', file=sys.stderr)
         return 2
-    print(json.dumps({'issues': len(detail), 'detail': detail}, ensure_ascii=False))
+    print(json.dumps({'issues': len(detail), 'detail': detail}))
     for line in detail:
         print(line, file=sys.stderr)
     return 1 if detail else 0

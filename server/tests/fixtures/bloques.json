@@ -145,7 +145,7 @@
         }
       ],
       "stdout": "",
-      "parametros_engine": {
+      "engine_params": {
         "cfg_value": 2.0,
         "inference_timesteps": 10,
         "retry_badcase_max_times": 1
@@ -252,7 +252,7 @@
         }
       ],
       "stdout": "",
-      "parametros_engine": {}
+      "engine_params": {}
     },
     "qwen-1.7b": {
       "blocks": [
@@ -351,7 +351,7 @@
         }
       ],
       "stdout": "",
-      "parametros_engine": {}
+      "engine_params": {}
     },
     "qwen-0.6b": {
       "blocks": [
@@ -450,7 +450,7 @@
         }
       ],
       "stdout": "",
-      "parametros_engine": {}
+      "engine_params": {}
     },
     "chatterbox": {
       "blocks": [
@@ -553,7 +553,7 @@
         }
       ],
       "stdout": "Notice: expert.wav lasts 12.0 s; for chatterbox use up to 10 s.\nNotice: dramatic.wav lasts 12.0 s; for chatterbox use up to 10 s.\n",
-      "parametros_engine": {}
+      "engine_params": {}
     },
     "omnivoice": {
       "blocks": [
@@ -652,7 +652,7 @@
         }
       ],
       "stdout": "Notice: expert.wav lasts 12.0 s; for omnivoice use up to 10 s.\nNotice: dramatic.wav lasts 12.0 s; for omnivoice use up to 10 s.\nNotice: energetic.wav lasts 12.0 s; for omnivoice use up to 10 s.\n",
-      "parametros_engine": {
+      "engine_params": {
         "num_step": 32,
         "guidance_scale": 2.0
       }
@@ -725,23 +725,14 @@
             "cfg_weight": 0.3
           },
           "emo": {
-            "vector": [
-              0.0,
-              0.0,
-              0.0,
-              0.8,
-              0.0,
-              0.0,
-              0.0,
-              0.0
-            ],
+            "clip": "emotions/fear.wav",
             "alpha": 0.4
           },
           "emotion": {
             "name": "fear",
             "intensity": 0.4
           },
-          "mode": "vector",
+          "mode": "clip",
           "notices": [
             "indextts: \"—\" changed to \",\" (the model reads it as \"minus\")"
           ]
@@ -780,7 +771,7 @@
         }
       ],
       "stdout": "",
-      "parametros_engine": {
+      "engine_params": {
         "max_text_tokens_per_segment": 60
       }
     }

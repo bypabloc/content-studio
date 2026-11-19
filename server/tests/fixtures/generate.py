@@ -64,7 +64,7 @@ def new_tts() -> types.SimpleNamespace:
         segments=segments,
         tags=tags,
         prepare_blocks=lambda m, secs, ref: prepare_blocks(ENGINES[m].create(), secs, ref),
-        PARAMS_ENGINE={n: e.create().params for n, e in ENGINES.items()},
+        ENGINE_PARAMS={n: e.create().params for n, e in ENGINES.items()},
     )
 
 
@@ -124,13 +124,13 @@ def parsers(commands: dict[str, tuple[str, types.ModuleType]]) -> dict:
     return out
 
 
-def ref_sintetica(d: Path) -> Path:
+def synthetic_refs(d: Path) -> Path:
     """Referencias falsas: los estilos del guion, una sin transcripción y un clip de emoción para IndexTTS."""
     for e in ['expert', 'dramatic', 'energetic', 'soft', 'intimate']:
         (d / f'{e}.wav').write_bytes(b'')
         (d / f'{e}.txt').write_text(f'Transcripción de {e}.', encoding='utf-8')
     (d / 'emotions').mkdir()
-    (d / 'emotions' / 'miedo.wav').write_bytes(b'')
+    (d / 'emotions' / 'fear.wav').write_bytes(b'')
     return d
 
 
@@ -138,7 +138,7 @@ def blocks(tts) -> dict:
     false = types.SimpleNamespace(info=lambda _path: types.SimpleNamespace(duration=12.0))
     text = (HERE / 'regresion.txt').read_text(encoding='utf-8')
     with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(sys.modules, soundfile=false):
-        ref = ref_sintetica(Path(tmp))
+        ref = synthetic_refs(Path(tmp))
 
         def clean(v):
             if isinstance(v, Path):
@@ -164,7 +164,7 @@ def blocks(tts) -> dict:
             out['models'][m] = {
                 'blocks': clean(pb),
                 'stdout': output.getvalue(),
-                'parametros_engine': tts.PARAMS_ENGINE.get(m, {}),
+                'engine_params': tts.ENGINE_PARAMS.get(m, {}),
             }
     return out
 

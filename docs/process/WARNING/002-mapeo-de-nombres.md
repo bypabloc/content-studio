@@ -53,6 +53,8 @@ Estilos: `amistosa→friendly`, `suave→soft`, `experta→expert`, `clara→cle
 | `text_enviado`, `pause_despues`, `fecha`, `time_generacion_s`, `observaciones` | `text_sent`, `pause_after`, `date`, `time_generation_s`, `observations` | metadatos `.json` de cada salida |
 | `--build todas` | `--build all` | `narration voices` |
 | `lufs_objetivo` | `target_lufs` | metadatos |
+| `emociones/<emoción>.wav` (clip de IndexTTS) | `emotions/<emotion>.wav` | carpeta de referencias. No hay clips en disco y `move-data` no los mueve |
+| `parametros_motor` (clave de las fixtures) | `engine_params` | `server/tests/fixtures/bloques.json` |
 
 ## Presets de música (`music/styles.py`, ciclo 5)
 
