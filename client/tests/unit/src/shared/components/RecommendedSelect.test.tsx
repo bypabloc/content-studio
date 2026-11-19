@@ -88,6 +88,14 @@ describe('RecommendedSelect', () => {
     expect((screen.getByRole('option', { name: 'Gama' }) as HTMLOptionElement).disabled).toBe(true);
   });
 
+  it('el nombre del selector se ve como etiqueta asociada, no solo como aria-label', () => {
+    mount(vi.fn(async () => reply({ key: 'select.demo', value: null })));
+
+    const label = screen.getByText('Demo') as HTMLLabelElement;
+    expect(label.tagName).toBe('LABEL');
+    expect(label.control).toBe(screen.getByRole('combobox', { name: 'Demo' }));
+  });
+
   it('sin opciones, el selector queda vacío y no falla', () => {
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })), { options: [] });
 

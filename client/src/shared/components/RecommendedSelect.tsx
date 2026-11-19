@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 
@@ -35,27 +36,33 @@ export function RecommendedSelect({
     onChange?.(next);
   };
 
+  const id = useId();
   return (
-    <select
-      aria-label={label}
-      value={value}
-      onChange={(event) => {
-        const next = event.target.value;
-        if (beforeChange) void beforeChange(next).then((allowed) => allowed && choose(next));
-        else choose(next);
-      }}
-      className="rounded-md border border-input bg-transparent px-2 py-1.5 text-sm"
-    >
-      {options.map((option) => (
-        <option
-          key={option.value}
-          value={option.value}
-          disabled={option.disabled}
-          title={option.recommended ? t('select.recommended') : option.hint}
-        >
-          {option.recommended ? `★ ${option.label}` : option.label}
-        </option>
-      ))}
-    </select>
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-medium">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => {
+          const next = event.target.value;
+          if (beforeChange) void beforeChange(next).then((allowed) => allowed && choose(next));
+          else choose(next);
+        }}
+        className="rounded-md border border-input bg-transparent px-2 py-1.5 text-sm"
+      >
+        {options.map((option) => (
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+            title={option.recommended ? t('select.recommended') : option.hint}
+          >
+            {option.recommended ? `★ ${option.label}` : option.label}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
