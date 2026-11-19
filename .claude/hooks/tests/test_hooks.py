@@ -45,7 +45,8 @@ def test_session_start_compact_injects_rules_again():
 
 
 @pytest.mark.parametrize(
-    'module', ['graphify_guard', 'image_read_guard', 'safe_compound', 'verify_state', 'worktree_guard']
+    'module',
+    ['graphify_guard', 'image_read_guard', 'main_write_guard', 'safe_compound', 'verify_state', 'worktree_guard'],
 )
 def test_doctests_of_the_hooks(module):
     sys.path.insert(0, str(ROOT / '.claude' / 'hooks'))
@@ -134,3 +135,28 @@ def test_every_block_says_what_why_and_instead():
     worktree = hook('worktree_guard.py', {'tool_input': {'command': command}, 'cwd': str(ROOT)}).stderr
     for stderr in (image, worktree):
         assert all(part in stderr for part in ('Blocked by', 'Why:', 'Instead:')), stderr
+
+
+def test_main_write_guard_blocks_tracked_files_of_the_main_checkout_on_dev(tmp_path):
+    main = tmp_path / 'repo'
+    main.mkdir()
+    subprocess.run(['git', 'init', '-q', '-b', 'dev', str(main)], check=True)
+    (main / '.gitignore').write_text('tmp/\n')
+    (main / 'a.md').write_text('a')
+    bare = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', 'core.hooksPath=']  # sin los hooks del repo
+    subprocess.run([*bare, 'add', '.'], cwd=main, check=True)
+    subprocess.run([*bare, 'commit', '-qm', 'base'], cwd=main, check=True)
+    wt = tmp_path / 'repo-worktrees' / 'tema'
+    subprocess.run(['git', 'worktree', 'add', '-q', str(wt), '-b', 'feature/tema'], cwd=main, check=True)
+
+    def edit(path, cwd=main):
+        return hook('main_write_guard.py', {'tool_input': {'file_path': str(path)}, 'cwd': str(cwd)})
+
+    blocked = edit(main / 'a.md', cwd=wt)
+    assert blocked.returncode == 2
+    assert all(part in blocked.stderr for part in ('Blocked by', 'Why:', 'Instead:', 'tema/a.md'))
+    assert edit(main / 'nuevo.md').returncode == 2  # un archivo nuevo, también
+    assert edit(main / 'tmp' / 'handoff' / 'PROGRESS.md').returncode == 0  # ignorado por git
+    assert edit(wt / 'a.md', cwd=wt).returncode == 0
+    subprocess.run(['git', 'switch', '-q', '-c', 'fix/chico'], cwd=main, check=True)
+    assert edit(main / 'a.md').returncode == 0  # el principal en una rama de trabajo
