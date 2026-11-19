@@ -18,12 +18,13 @@ def approved_voices(styles: Collection[str]) -> dict[str, dict]:
     """Voces del catálogo construidas y aprobadas en todos los `estilos`: {nombre: ficha del catálogo}."""
     out = {}
     for name, sheet in catalog().items():
-        # cspell:ignore aprobacion
+        # cspell:ignore aprobacion estilos
         # aprobacion.json: nombre en disco de las voces construidas (move-data no lo cambia, ver WARNING 002).
+        # Sus claves siguen en español (dato del usuario, AC-4): estilos, aprobada, criterios, duracion.
         ap = VOICES / name / 'aprobacion.json'
         if not ap.exists():
             continue
-        res = json.loads(ap.read_text(encoding='utf-8'))['styles']
+        res = json.loads(ap.read_text(encoding='utf-8'))['estilos']
         if all(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists() for e in styles):
             out[name] = sheet
     return out
@@ -49,6 +50,6 @@ def state(name: str, styles: Collection[str]) -> str:
     ap = VOICES / name / 'aprobacion.json'
     if not ap.exists():
         return 'not built'
-    res = json.loads(ap.read_text(encoding='utf-8'))['styles']
+    res = json.loads(ap.read_text(encoding='utf-8'))['estilos']
     bad = [e for e in styles if not res.get(e, {}).get('ok')]
     return 'approved' if not bad else f'rejected in {len(bad)}/{len(styles)} styles ({", ".join(bad)})'
