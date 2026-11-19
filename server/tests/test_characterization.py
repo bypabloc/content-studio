@@ -17,7 +17,7 @@ def fixture(name: str) -> dict:
     return json.loads((FIXTURES / name).read_text(encoding='utf-8'))
 
 
-def test_parsers_equal_y_livianos(no_heavy):
+def test_parsers_equal_and_light(no_heavy):
     commands, _ = generate.current()
     assert generate.parsers(commands) == fixture('parsers.json')
 

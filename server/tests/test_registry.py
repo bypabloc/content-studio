@@ -49,7 +49,7 @@ OLD = {
 
 }  # fmt: skip
 
-LIVIANOS = [
+LIGHT = [
 
     'content_studio.narration.parser', 'content_studio.narration.tts', 'content_studio.narration.blocks',
 
@@ -74,18 +74,18 @@ def test_registry_equal_al_old():
         assert e.path_venv() == paths.NARRATION / fields['venv']
 
 
-def test_create_cada_engine_no_cargarlo():
+def test_create_each_engine_without_loading_it():
 
     for e in ENGINES.values():
         assert e.create().spec is e
 
 
-def test_imports_livianos():
+def test_imports_light_modules():
     """Los módulos de narration se importan en un python sin torch, numpy ni soundfile (los mira el --help)."""
 
     heavy = ['torch', 'torchaudio', 'numpy', 'soundfile', 'transformers', 'whisper', 'typer', 'rich', 'questionary']
 
-    code = f'import sys\nfor p in {heavy!r}:\n    sys.modules[p] = None\n' + ''.join(f'import {m}\n' for m in LIVIANOS)
+    code = f'import sys\nfor p in {heavy!r}:\n    sys.modules[p] = None\n' + ''.join(f'import {m}\n' for m in LIGHT)
 
     env = {**os.environ, 'PYTHONPATH': str(paths.SRC)}
 

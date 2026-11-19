@@ -16,33 +16,33 @@ class Launched(Exception):
 
 
 @pytest.fixture
-def correr(monkeypatch):
+def drive(monkeypatch):
     def capture(cmd, args):
         raise Launched(cmd.key, args)
 
     monkeypatch.setattr(flow, 'lanzar', capture)
     monkeypatch.setattr(menu, 'lanzar', capture)
 
-    def correr(keys, f, *a):
+    def drive(keys, f, *a):
         with create_pipe_input() as entry, create_app_session(input=entry, output=DummyOutput()):
             entry.send_text(keys)
             with pytest.raises(Launched) as e:
                 f(*a)
         return e.value.args
 
-    return correr
+    return drive
 
 
-def test_assistant_pide_la_source_y_conserva_el_cero(correr):
+def test_assistant_asks_for_the_source_and_keeps_zero(drive):
     # Grupo excluyente → --text (1.º) → "hola" → Ejecutar
-    key, argv = correr(ENTER + 'hola' + ENTER + ENTER, flow.assistant, por_key('narration tts'), ['--seed', '0'])
+    key, argv = drive(ENTER + 'hola' + ENTER + ENTER, flow.assistant, por_key('narration tts'), ['--seed', '0'])
     assert (key, argv) == ('narration tts', ['--text', 'hola', '--seed', '0'])
 
 
-def test_menu_lleva_al_assistant_de_music(correr, monkeypatch):
+def test_menu_leads_to_the_music_assistant(drive, monkeypatch):
     # Sin los venvs (CI, clon nuevo) los dos modelos salen deshabilitados y no hay nada que elegir.
     from content_studio.music.engines.base import MusicSpec
 
     monkeypatch.setattr(MusicSpec, 'installed', lambda self: True)
     # music es el 4.º → --model acestep (1.º) → Ejecutar
-    assert correr(BELOW * 3 + ENTER + ENTER + ENTER, menu.menu) == ('music', ['--model', 'acestep'])
+    assert drive(BELOW * 3 + ENTER + ENTER + ENTER, menu.menu) == ('music', ['--model', 'acestep'])

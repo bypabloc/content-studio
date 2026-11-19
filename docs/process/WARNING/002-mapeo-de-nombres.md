@@ -63,3 +63,14 @@ Con `--style`, un nombre viejo ya no existe (no hay alias, D-6). `music/ESTILOS.
 ## Ayuda visible que sigue en español (desvío del ciclo 5)
 
 - La ayuda raíz de `cli.py` (`cli/app.py`) y el menú y el asistente (`cli/flow.py`, `cli/menu.py`, `cli/widgets.py`, `cli/help_text.py`) siguen en español: D-3 los deja a la 004, que los borra. La descripción de cada comando sale ya en inglés por `SUMMARY` en `music/parser.py` y `narration/parser.py`.
+
+## Ciclo 6: devtools, hooks y tests
+
+- **Módulos**: `devtools/contexto_agentes.py`→`agent_context.py`, `turno_gpu.py`→`gpu_turn.py`, `reglas.py`→`rules.py`, `rutas.py`→`paths.py`, `migraciones.py`→`migrations.py`; `tests/validators/test_estructura.py`→`test_structure.py`.
+- **Comandos y flags** (`python -m devtools …`): `turno-gpu`→`gpu-turn`, `--trabajo`→`--job`; `contexto-agentes`→`agent-context`; `reglas`→`rules`, `--sincronizar`→`--sync`. `worktree` y su `--handoff` no cambian.
+- **Lock de la GPU**: `tmp/turno-gpu/lock.json`→`tmp/gpu-turn/lock.json`.
+- **Claves JSON de `move-data`**: `de`→`from`, `a`→`to`, `accion`→`action`, `choques`→`clashes`, `nombres`→`names`, `aplicado`→`applied`, `movido`→`moved`, `reescrito`→`rewritten`. `plan` no cambia.
+- **Valores de `action`**: `colision`→`collision`, `fusionar`→`merge`, `mover`→`move`, `ya migrado`→`already migrated`, `nada`→`nothing`.
+- **Clave de `spelling`**: `detalle`→`detail`.
+- **Hooks**: los mensajes visibles de `format_on_save`, `graphify_update` e `image_read_guard` pasan a inglés. `.agents/hooks/handoff_text.py` sigue en español (D-1).
+- **Corrección**: `agent_context` usaba la clave `LIMITS["agy-regla"]`, que ya no existe (`agy-rule`). Fallaba con `KeyError` justo cuando un archivo pasaba el límite.

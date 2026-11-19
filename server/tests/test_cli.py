@@ -27,7 +27,7 @@ def cli(*args, python=(sys.executable,)) -> subprocess.CompletedProcess:
     )
 
 
-def test_ceros_no_se_descartan():
+def test_zeros_are_not_discarded():
     from content_studio.cli.flow import summary
 
     ap = build_parser()
@@ -37,14 +37,14 @@ def test_ceros_no_se_descartan():
     assert '0' in str(cells)
 
 
-def test_leer_flag_equal_value_conserva_el_rest():
+def test_read_flag_equal_value_keeps_the_rest():
     d, av = leer(build_parser(), ['--batch=abc', '--model', 'qwen-0.6b'])
     assert d == {'model': 'qwen-0.6b'} and '--batch=abc' in av[0], (d, av)
     d, av = leer(build_parser(), ['--mod', 'nada', '--seed', '3'])
     assert d == {'seed': 3}, (d, av)
 
 
-def test_abreviaturas():
+def test_abbreviations():
     assert leer(build_parser(), ['--see', '3', '--mod=qwen-0.6b']) == ({'seed': 3, 'model': 'qwen-0.6b'}, [])
 
 
@@ -78,16 +78,16 @@ def test_no_tty_no_question():
     assert r.returncode == 1 and '--key' in r.stderr, r.stdout + r.stderr
 
 
-def test_ac6_flags_en_ingles():
+def test_ac6_flags_in_english():
     """AC-6: el help muestra los flags en inglés y el flag viejo en español ya no existe."""
-    for comando in (('narration', 'tts'), ('music',)):
-        ayuda = cli(*comando, '--help')
-        assert ayuda.returncode == 0 and '--model' in ayuda.stdout and '--modelo' not in ayuda.stdout, ayuda.stdout
-    viejo = cli('narration', 'tts', '--modelo', 'qwen-0.6b')
-    assert viejo.returncode == 2, viejo.stdout + viejo.stderr
+    for command in (('narration', 'tts'), ('music',)):
+        out = cli(*command, '--help')
+        assert out.returncode == 0 and '--model' in out.stdout and '--modelo' not in out.stdout, out.stdout
+    old = cli('narration', 'tts', '--modelo', 'qwen-0.6b')
+    assert old.returncode == 2, old.stdout + old.stderr
 
 
-def test_python_no_typer_se_relanza_con_uv():
+def test_python_without_typer_relaunches_with_uv():
     """Un python efímero sin dependencias: cli.py se relanza con `uv run --script`."""
     no = ('uv', 'run', '-q', '--isolated', '--no-project', 'python')
     missing = subprocess.run([*no, '-c', 'import typer'], cwd=ROOT, capture_output=True)

@@ -1,7 +1,7 @@
-"""`turno-gpu status|run`: un modelo a la vez en la GPU, también entre sesiones y worktrees (regla turno-gpu.md).
+"""`gpu-turn status|run`: un modelo a la vez en la GPU, también entre sesiones y worktrees (regla turno-gpu.md).
 
 En 8 GB no caben dos modelos: si la VRAM desborda a la RAM compartida de WSL, todo va ~4× más lento. El turno es un
-candado en el checkout principal (tmp/turno-gpu/lock.json, compartido por todos los worktrees) que toma
+candado en el checkout principal (tmp/gpu-turn/lock.json, compartido por todos los worktrees) que toma
 `run -- <comando>` al empezar y suelta al terminar, también con Ctrl+C o un error. `status` dice quién lo tiene, la
 VRAM en uso y qué sesiones de Claude Code del proyecto hay que avisar con SendMessage.
 """
@@ -16,18 +16,18 @@ import sys
 import time
 from pathlib import Path
 
-from .worktree import principal
+from .worktree import main_checkout
 
 STILL_ACTIVE = 259
 
 
-def candado(main: Path) -> Path:
-    return main / 'tmp/turno-gpu/lock.json'
+def lock(main: Path) -> Path:
+    return main / 'tmp/gpu-turn/lock.json'
 
 
-def vivo(pid: int, plataforma: str) -> bool | None:
+def alive(pid: int, platform: str) -> bool | None:
     """True/False si el proceso vive; None si es de otro sistema (un candado de WSL visto desde Windows)."""
-    if plataforma != sys.platform:
+    if platform != sys.platform:
         return None
     if os.name == 'nt':
         import ctypes
@@ -49,40 +49,40 @@ def vivo(pid: int, plataforma: str) -> bool | None:
     return True
 
 
-def leer(main: Path) -> dict | None:
+def read(main: Path) -> dict | None:
     """Dueño del turno, o None si está libre (sin candado o con el proceso muerto)."""
     try:
-        dueño = json.loads(candado(main).read_text(encoding='utf-8'))
+        owner = json.loads(lock(main).read_text(encoding='utf-8'))
     except (OSError, ValueError):
         return None
-    if vivo(dueño.get('pid', 0), dueño.get('platform', '')) is False:
+    if alive(owner.get('pid', 0), owner.get('platform', '')) is False:
         return None
-    return dueño
+    return owner
 
 
-def tomar(main: Path, trabajo: str, comando: list[str]) -> dict | None:
+def take(main: Path, job: str, command: list[str]) -> dict | None:
     """Toma el turno (creación atómica); devuelve el dueño actual si está ocupado, o None si lo tomó."""
-    lock = candado(main)
-    lock.parent.mkdir(parents=True, exist_ok=True)
-    dueño = leer(main)
-    if dueño:
-        return dueño
-    lock.unlink(missing_ok=True)  # candado huérfano: su proceso murió
-    datos = {'pid': os.getpid(), 'platform': sys.platform, 'work': trabajo, 'command': ' '.join(comando)}
-    datos['since'] = time.strftime('%Y-%m-%dT%H:%M:%S')
+    lock_file = lock(main)
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    owner = read(main)
+    if owner:
+        return owner
+    lock_file.unlink(missing_ok=True)  # candado huérfano: su proceso murió
+    data = {'pid': os.getpid(), 'platform': sys.platform, 'work': job, 'command': ' '.join(command)}
+    data['since'] = time.strftime('%Y-%m-%dT%H:%M:%S')
     try:
-        with lock.open('x', encoding='utf-8') as f:
-            json.dump(datos, f, ensure_ascii=False)
+        with lock_file.open('x', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False)
     except FileExistsError:
-        return leer(main) or {'work': '?', 'command': 'otro proceso tomó el turno a la vez'}
+        return read(main) or {'work': '?', 'command': 'another process took the turn at the same time'}
     return None
 
 
-def soltar(main: Path) -> None:
-    lock = candado(main)
+def release(main: Path) -> None:
+    lock_file = lock(main)
     try:
-        if json.loads(lock.read_text(encoding='utf-8')).get('pid') == os.getpid():
-            lock.unlink()
+        if json.loads(lock_file.read_text(encoding='utf-8')).get('pid') == os.getpid():
+            lock_file.unlink()
     except (OSError, ValueError):
         return
 
@@ -93,14 +93,14 @@ def vram() -> str | None:
         return None
     q = ['nvidia-smi', '--query-gpu=memory.used,memory.total', '--format=csv,noheader,nounits']
     r = subprocess.run(q, capture_output=True, text=True, check=False)
-    partes = [p.strip() for p in r.stdout.splitlines()[0].split(',')] if r.returncode == 0 and r.stdout else []
-    return f'{partes[0]}/{partes[1]} MiB' if len(partes) == 2 else None
+    parts = [p.strip() for p in r.stdout.splitlines()[0].split(',')] if r.returncode == 0 and r.stdout else []
+    return f'{parts[0]}/{parts[1]} MiB' if len(parts) == 2 else None
 
 
-def sesiones(main: Path) -> list[dict]:
+def sessions(main: Path) -> list[dict]:
     """Sesiones de Claude Code abiertas en el proyecto (principal o ../<repo>-worktrees/), por su `cwd`."""
     base = Path(os.environ.get('CLAUDE_CONFIG_DIR') or Path.home() / '.claude') / 'sessions'
-    raices = [str(main).lower(), str(main.parent / f'{main.name}-worktrees').lower()]
+    roots = [str(main).lower(), str(main.parent / f'{main.name}-worktrees').lower()]
     out = []
     for f in sorted(base.glob('*.json')) if base.is_dir() else []:
         try:
@@ -108,50 +108,50 @@ def sesiones(main: Path) -> list[dict]:
         except (OSError, ValueError):
             continue
         cwd = str(s.get('cwd', '')).replace('/', os.sep).lower()
-        if any(cwd == r or cwd.startswith(r + os.sep) for r in raices) and vivo(s.get('pid', 0), sys.platform):
+        if any(cwd == r or cwd.startswith(r + os.sep) for r in roots) and alive(s.get('pid', 0), sys.platform):
             out.append({'pid': s.get('pid'), 'name': s.get('name'), 'cwd': s.get('cwd')})
     return out
 
 
 def status(main: Path) -> int:
-    dueño = leer(main)
-    datos = {'state': 'busy' if dueño else 'free', 'holder': dueño, 'vram': vram(), 'sessions': sesiones(main)}
-    print(json.dumps(datos, ensure_ascii=False))
-    if dueño:
-        print(f'ocupada: {dueño.get("work")} · {dueño.get("command")} · desde {dueño.get("since")}', file=sys.stderr)
+    owner = read(main)
+    data = {'state': 'busy' if owner else 'free', 'holder': owner, 'vram': vram(), 'sessions': sessions(main)}
+    print(json.dumps(data, ensure_ascii=False))
+    if owner:
+        print(f'busy: {owner.get("work")} · {owner.get("command")} · since {owner.get("since")}', file=sys.stderr)
     else:
-        print(f'libre (VRAM {datos["vram"] or "?"})', file=sys.stderr)
-    return 1 if dueño else 0
+        print(f'libre (VRAM {data["vram"] or "?"})', file=sys.stderr)
+    return 1 if owner else 0
 
 
-def run(main: Path, trabajo: str, comando: list[str]) -> int:
-    dueño = tomar(main, trabajo, comando)
-    if dueño:
+def run(main: Path, job: str, command: list[str]) -> int:
+    owner = take(main, job, command)
+    if owner:
         print(
-            f'turno-gpu: ocupada por {dueño.get("work")} ({dueño.get("command")}); espera su «gpu libre»',
+            f'gpu-turn: busy with {owner.get("work")} ({owner.get("command")}); wait for its "gpu free"',
             file=sys.stderr,
         )
         return 1
     try:
-        return subprocess.call(comando)
+        return subprocess.call(command)
     except KeyboardInterrupt:
         return 130
     finally:
-        soltar(main)
+        release(main)
 
 
 def main(argv: list[str]) -> int:
-    uso = 'uso: turno-gpu status | turno-gpu run --trabajo=<t> -- <comando ...>'
+    uso = 'usage: gpu-turn status | gpu-turn run --job=<j> -- <command ...>'
     if not argv or argv[0] in ('-h', '--help'):
         print(uso, file=sys.stderr)
         return 0
-    main_root = principal(Path.cwd())
+    main_root = main_checkout(Path.cwd())
     if argv == ['status']:
         return status(main_root)
     if argv[0] == 'run' and '--' in argv:
-        corte = argv.index('--')
-        trabajo = next((a.split('=', 1)[1] for a in argv[1:corte] if a.startswith('--trabajo=')), '')
-        if trabajo and argv[corte + 1 :]:
-            return run(main_root, trabajo, argv[corte + 1 :])
+        cut = argv.index('--')
+        job = next((a.split('=', 1)[1] for a in argv[1:cut] if a.startswith('--job=')), '')
+        if job and argv[cut + 1 :]:
+            return run(main_root, job, argv[cut + 1 :])
     print(uso, file=sys.stderr)
     return 2

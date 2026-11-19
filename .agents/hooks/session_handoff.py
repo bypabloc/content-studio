@@ -89,6 +89,7 @@ def stop_reply(store: Path, session_id: str, branch: str) -> str:
         log_event(store, {'event': 'stop.release', 'session': session_id, 'reason': 'cap', 'blocks': blocks}, work)
         return ''
     if decide:
+        # cspell:ignore motivo: prosa del agente en español (D-1)
         reason = f'[session-handoff] {T.DECIDE.format(reason=fields.get("reason", "sin motivo"))}'
     else:
         reason = T.STOP[blocks - 1].format(work=work, step=fields['next_step'][:160], blocks=blocks, cap=MAX_BLOCKS)

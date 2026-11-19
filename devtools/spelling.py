@@ -14,72 +14,72 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import url2pathname
 
-from . import rutas
+from . import paths
 
-CONFIG = rutas.RAIZ / 'cspell.config.yaml'
-LISTA = rutas.RAIZ / 'tmp' / 'spelling' / 'archivos.txt'
+CONFIG = paths.ROOT / 'cspell.config.yaml'
+LIST = paths.ROOT / 'tmp' / 'spelling' / 'files.txt'
 
 
 def git(*args: str, cwd: Path) -> str:
     return subprocess.run(['git', *args], cwd=cwd, capture_output=True, encoding='utf-8', check=True).stdout
 
 
-def archivos_versionados() -> list[Path]:
-    return [rutas.RAIZ / n for n in git('ls-files', cwd=rutas.RAIZ).splitlines() if n]
+def files_versioned() -> list[Path]:
+    return [paths.ROOT / n for n in git('ls-files', cwd=paths.ROOT).splitlines() if n]
 
 
-def archivos_staged() -> list[Path]:
+def files_staged() -> list[Path]:
     top = Path(git('rev-parse', '--show-toplevel', cwd=Path.cwd()).strip())
     return [top / n for n in git('diff', '--cached', '--name-only', '--diff-filter=ACMR', cwd=top).splitlines() if n]
 
 
-def ruta_de(issue: dict) -> Path:
+def path_of(issue: dict) -> Path:
     return Path(url2pathname(urlparse(issue['uri']).path))
 
 
-def relativa(ruta: Path) -> str:
+def relative(path: Path) -> str:
     try:
-        return ruta.relative_to(rutas.RAIZ).as_posix()
+        return path.relative_to(paths.ROOT).as_posix()
     except ValueError:
-        return str(ruta)
+        return str(path)
 
 
-def revisar(archivos: list[Path]) -> list[str]:
+def review(files: list[Path]) -> list[str]:
     """Una línea `archivo:línea palabra` por cada palabra que cspell no reconoce. Lanza RuntimeError si cspell falla."""
-    LISTA.parent.mkdir(parents=True, exist_ok=True)
-    LISTA.write_text('\n'.join(str(a) for a in archivos) + '\n', encoding='utf-8')
-    orden = ['bunx', 'cspell', 'lint', '--no-progress', '--config', str(CONFIG), '--file-list', str(LISTA)]
-    orden += ['--reporter', '@cspell/cspell-json-reporter']
+    LIST.parent.mkdir(parents=True, exist_ok=True)
+    LIST.write_text('\n'.join(str(a) for a in files) + '\n', encoding='utf-8')
+    order = ['bunx', 'cspell', 'lint', '--no-progress', '--config', str(CONFIG), '--file-list', str(LIST)]
+    order += ['--reporter', '@cspell/cspell-json-reporter']
     # UTF-8 explícito: en Windows el valor por defecto es cp1252 y el JSON de cspell trae nombres con tildes.
-    salida = subprocess.run(orden, cwd=rutas.RAIZ, capture_output=True, encoding='utf-8', errors='replace', check=False)
+    output = subprocess.run(order, cwd=paths.ROOT, capture_output=True, encoding='utf-8', errors='replace', check=False)
     try:
-        informe = json.loads(salida.stdout)
+        report = json.loads(output.stdout)
     except json.JSONDecodeError as error:
-        raise RuntimeError(f'cspell no devolvió JSON: {salida.stderr.strip() or error}') from error
-    if informe['result']['errors']:
-        raise RuntimeError(f'cspell con {informe["result"]["errors"]} errores: {informe["error"]}')
-    return [f'{relativa(ruta_de(i))}:{i["row"]} {i["text"]}' for i in informe['issues']]
+        raise RuntimeError(f'cspell did not return JSON: {output.stderr.strip() or error}') from error
+    if report['result']['errors']:
+        raise RuntimeError(f'cspell with {report["result"]["errors"]} errors: {report["error"]}')
+    return [f'{relative(path_of(i))}:{i["row"]} {i["text"]}' for i in report['issues']]
 
 
 def main(argv: list[str]) -> int:
     if argv and argv[0] in ('-h', '--help'):
-        print('uso: spelling [--staged] [archivo ...]  (sin argumentos: todo lo versionado)', file=sys.stderr)
+        print('usage: spelling [--staged] [file ...]  (no arguments: all tracked files)', file=sys.stderr)
         return 0
     staged = '--staged' in argv
-    indicados = [a for a in argv if a != '--staged']
-    if any(a.startswith('-') for a in indicados):
-        print('uso: spelling [--staged] [archivo ...]', file=sys.stderr)
+    indicated = [a for a in argv if a != '--staged']
+    if any(a.startswith('-') for a in indicated):
+        print('usage: spelling [--staged] [file ...]', file=sys.stderr)
         return 2
     if shutil.which('bun') is None:
-        print('Falta bun. Instálalo y corre `bun install` en la raíz del repo.', file=sys.stderr)
+        print('bun is missing. Install it and run `bun install` at the repo root.', file=sys.stderr)
         return 2
-    archivos = [Path(a).resolve() for a in indicados] or (archivos_staged() if staged else archivos_versionados())
+    files = [Path(a).resolve() for a in indicated] or (files_staged() if staged else files_versioned())
     try:
-        detalle = revisar(archivos) if archivos else []
+        detail = review(files) if files else []
     except RuntimeError as error:
         print(f'spelling: {error}', file=sys.stderr)
         return 2
-    print(json.dumps({'issues': len(detalle), 'detalle': detalle}, ensure_ascii=False))
-    for linea in detalle:
-        print(linea, file=sys.stderr)
-    return 1 if detalle else 0
+    print(json.dumps({'issues': len(detail), 'detail': detail}, ensure_ascii=False))
+    for line in detail:
+        print(line, file=sys.stderr)
+    return 1 if detail else 0

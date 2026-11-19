@@ -93,8 +93,8 @@ def main() -> None:
     if target:
         name = os.path.basename(os.path.normpath(target))
         print(
-            f'worktree_guard: bloqueado, `{target}` queda dentro del repo y sus reglas se cargarían duplicadas.'
-            f' Créalo en ../content-studio-worktrees/{name} (worktrees.md) y corrige la ruta en tu handoff.',
+            f'worktree_guard: blocked, `{target}` is inside the repo and its rules would load twice.'
+            f' Create it in ../content-studio-worktrees/{name} (worktrees.md) and fix the path in your handoff.',
             file=sys.stderr,
         )
         sys.exit(2)

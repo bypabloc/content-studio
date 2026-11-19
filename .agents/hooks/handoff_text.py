@@ -77,14 +77,14 @@ SOURCE_TEXT = {
 }
 GPU = (
     'Turno de la GPU (uno por equipo, regla turno-gpu.md): todo comando que carga un modelo (narration tts, voces '
-    '--construir, music, evaluación con whisper) va con `python -m devtools turno-gpu run '
-    '--trabajo <t> -- <comando>`. Antes, `turno-gpu status` y ListAgents. Ocupada: SendMessage a su sesión pidiendo '
+    '--construir, music, evaluación con whisper) va con `python -m devtools gpu-turn run '
+    '--job <j> -- <comando>`. Antes, `gpu-turn status` y ListAgents. Ocupada: SendMessage a su sesión pidiendo '
     '«gpu libre», CronCreate de 10 min para reintentar y sigue con lo que no usa GPU. Al terminar, «gpu libre» a las '
     'sesiones abiertas y CronDelete. El estado del turno va en PROGRESS.md.'
 )
 REREAD = 'Relee AGENTS.md y las reglas del área antes de seguir: la conversación previa puede estar resumida.'
 BLOCKED = (
-    'Status es blocked: {reason}. Primero comprueba si el motivo sigue en pie (turno de la GPU: `turno-gpu status`; '
+    'Status es blocked: {reason}. Primero comprueba si el motivo sigue en pie (turno de la GPU: `gpu-turn status`; '
     'CI: `gh pr checks`; un gate rojo: córrelo de nuevo). Si ya no aplica, pon `Status: in-progress` y sigue sin '
     'preguntar. Solo mientras siga en pie, muéstrale el motivo al usuario y pregunta qué falta.'
 )

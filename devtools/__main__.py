@@ -9,29 +9,32 @@ from __future__ import annotations
 import importlib
 import sys
 
-COMANDOS = {
+COMMANDS = {
     'worktree': ('devtools.worktree', 'prepare | close: worktrees en ../content-studio-worktrees/'),
-    'turno-gpu': ('devtools.turno_gpu', 'status | run: un modelo a la vez en la GPU entre sesiones'),
-    'agent-context': ('devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
-    'rules': ('devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
-    'move-data': ('devtools.move_data', 'mueve narration/ y music/ a server/data/ (sin --apply, solo imprime el plan)'),
-    'spelling': ('devtools.spelling', '[--staged] [archivo ...]: cspell sobre lo versionado o lo staged'),
+    'gpu-turn': ('devtools.gpu_turn', 'status | run: one model at a time on the GPU, across sessions'),
+    'agent-context': ('devtools.agent_context', 'size of what each agent loads'),
+    'rules': ('devtools.rules', '[--sync]: .claude/ with the same body as .agents/'),
+    'move-data': (
+        'devtools.move_data',
+        'moves narration/ and music/ to server/data/ (without --apply, only prints the plan)',
+    ),
+    'spelling': ('devtools.spelling', '[--staged] [file ...]: cspell over the tracked or staged files'),
 }
 
 
-def ayuda() -> str:
-    filas = '\n'.join(f'  {n:<17} {d}' for n, (_, d) in COMANDOS.items())
-    return f'uso: python -m devtools <comando> [args]\n\ncomandos:\n{filas}\n'
+def help() -> str:
+    rows = '\n'.join(f'  {n:<17} {d}' for n, (_, d) in COMMANDS.items())
+    return f'usage: python -m devtools <command> [args]\n\ncommands:\n{rows}\n'
 
 
 def main(argv: list[str]) -> int:
     if not argv or argv[0] in ('-h', '--help'):
-        sys.stderr.write(ayuda())
+        sys.stderr.write(help())
         return 0
-    if argv[0] not in COMANDOS:
-        sys.stderr.write(f'comando desconocido: {argv[0]}\n{ayuda()}')
+    if argv[0] not in COMMANDS:
+        sys.stderr.write(f'unknown command: {argv[0]}\n{help()}')
         return 2
-    modulo = importlib.import_module(COMANDOS[argv[0]][0])
+    modulo = importlib.import_module(COMMANDS[argv[0]][0])
     return modulo.main(argv[1:])
 
 

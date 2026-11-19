@@ -16,7 +16,7 @@ def test_takes_max_mas_uno(tmp_path):
     assert next_number(tmp_path, 'neutral') == 4  # contando daba 6, y con huecos pisaba una toma
 
 
-def test_music_falla_no_dejar_el_wav_old(tmp_path, monkeypatch):
+def test_music_failure_does_not_leave_the_old_wav(tmp_path, monkeypatch):
     import pytest
 
     from content_studio.music import music_main as music
@@ -53,7 +53,7 @@ def test_tts_output_folder_con_un_script(tmp_path):
         plan(a, [('g', 'Hola', None)])
 
 
-def test_tts_avisa_antes_de_overwrite(tmp_path, capsys):
+def test_tts_warns_before_overwrite(tmp_path, capsys):
     from content_studio.narration.script import warn_overwrite
 
     (tmp_path / 'a.wav').touch()
@@ -72,15 +72,15 @@ def test_help_en_cp1252():
         assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')
 
 
-def test_licencias_by_traen_atribucion():
+def test_cc_by_voices_have_attribution():
     from content_studio.narration.voices.catalog import catalog, mention
 
     no = [n for n, f in catalog().items() if 'BY' in f['license'] and not mention(f)]
     assert not no, f'licencia CC BY sin "atribucion" en catalog.json: {no}'
 
 
-def test_el_kit_de_grabar_cubre_los_styles_de_tts():
-    from content_studio.narration.grabar.kit import DURATION
+def test_recording_kit_covers_the_tts_styles():
+    from content_studio.narration.grabar.kit import DURATION  # cspell:ignore grabar
     from content_studio.narration.styles import STYLES
 
     assert set(STYLES) <= set(DURATION)

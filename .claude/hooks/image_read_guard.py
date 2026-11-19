@@ -10,26 +10,26 @@ import json
 import sys
 from pathlib import Path
 
-IMAGENES = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.avif', '.tif', '.tiff'}
-AGENTE = 'image-reader'
+IMAGES = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.avif', '.tif', '.tiff'}
+AGENT = 'image-reader'
 
 
-def bloqueado(ruta: str, agente: str | None) -> bool:
+def blocked(path: str, agent: str | None) -> bool:
     """True si `agente` no puede leer `ruta` por ser una imagen.
 
-    >>> bloqueado('out/spec.png', None), bloqueado('out/spec.PNG', 'image-reader'), bloqueado('a.wav', None)
+    >>> blocked('out/spec.png', None), blocked('out/spec.PNG', 'image-reader'), blocked('a.wav', None)
     (True, False, False)
     """
-    return Path(ruta).suffix.lower() in IMAGENES and agente != AGENTE
+    return Path(path).suffix.lower() in IMAGES and agent != AGENT
 
 
 def main() -> None:
     try:
-        datos = json.load(sys.stdin)
+        data = json.load(sys.stdin)
     except Exception:
         return
-    if bloqueado(datos.get('tool_input', {}).get('file_path', ''), datos.get('agent_type')):
-        print(f'image_read_guard: bloqueado; delega la imagen al agente {AGENTE} (Haiku)', file=sys.stderr)
+    if blocked(data.get('tool_input', {}).get('file_path', ''), data.get('agent_type')):
+        print(f'image_read_guard: blocked; delegate the image to the agent {AGENT} (Haiku)', file=sys.stderr)
         sys.exit(2)
 
 

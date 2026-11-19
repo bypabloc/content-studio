@@ -27,12 +27,12 @@ VENVS = [
 
 @pytest.mark.local
 @pytest.mark.parametrize('venv', VENVS)
-def test_relanza_en_el_venv(venv, tmp_path):
+def test_relaunches_in_the_venv(venv, tmp_path):
 
     destination = paths.ROOT / venv
 
     if not python_de(destination).exists():
-        pytest.skip(f'{venv} no está instalado')
+        pytest.skip(f'{venv} is not installed')
 
     probe = tmp_path / 'sonda.py'
 
@@ -42,14 +42,14 @@ def test_relanza_en_el_venv(venv, tmp_path):
         encoding='utf-8',
     )
 
-    lanzar = (
+    launch = (
         f'import sys; from pathlib import Path; from content_studio.common import proceso; '
         f'proceso.usar_venv(Path(r"{destination}"), "su README", script=r"{probe}")'
     )
 
     env = {**os.environ, 'PYTHONPATH': str(paths.SRC)}
 
-    r = subprocess.run([sys.executable, '-c', lanzar, 'arg 1'], capture_output=True, text=True, env=env, timeout=300)
+    r = subprocess.run([sys.executable, '-c', launch, 'arg 1'], capture_output=True, text=True, env=env, timeout=300)
 
     assert r.returncode == 0, r.stdout + r.stderr
 
@@ -64,7 +64,7 @@ def test_relanza_en_el_venv(venv, tmp_path):
 
 # La librería de cada motor, importada en su venv tras crear() (lo que el factory method carga ya dentro del venv).
 
-LIBRERIAS = {
+LIBRARIES = {
     'qwen-0.6b': 'qwen_tts',
     'chatterbox': 'chatterbox.mtl_tts',
     'omnivoice': 'omnivoice',
@@ -85,15 +85,15 @@ def _specs():
 
 
 @pytest.mark.local
-@pytest.mark.parametrize('name', LIBRERIAS)
-def test_importa_el_engine(name):
+@pytest.mark.parametrize('name', LIBRARIES)
+def test_imports_the_engine(name):
 
     e = _specs()[name]
 
     py = python_de(e.path_venv())
 
     if not py.exists():
-        pytest.skip(f'{e.venv} no está instalado')
+        pytest.skip(f'{e.venv} is not installed')
 
     paths_code = []
 
@@ -107,7 +107,7 @@ def test_importa_el_engine(name):
         f'from content_studio.music.engines.registry import MODELOS\n'
         f'from content_studio.narration.engines.registry import MOTORES\n'
         f'm = {{**MOTORES, **MODELOS}}[{name!r}].crear()\n'
-        f'importlib.import_module({LIBRERIAS[name]!r})\n'
+        f'importlib.import_module({LIBRARIES[name]!r})\n'
         f'print(type(m).__name__)\n'
     )
 

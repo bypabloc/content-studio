@@ -27,7 +27,7 @@ def notes(files: list[str], ruff_out: str, tdd: list[str]) -> list[str]:
     """Avisos para el systemMessage.
 
     >>> notes(['server/src/a.py'], '', [])
-    ['código cambió sin ningún test cambiado (TDD): server/src/a.py']
+    ['code changed without any test changed (TDD): server/src/a.py']
     >>> notes(['server/src/a.py', 'server/tests/test_a.py'], 'E501 ...', ['tests/tdd/test_x.py'])[0][:4]
     'ruff'
     """
@@ -35,10 +35,10 @@ def notes(files: list[str], ruff_out: str, tdd: list[str]) -> list[str]:
     if ruff_out.strip():
         out.append('ruff: ' + ' | '.join(ruff_out.strip().splitlines()[:5]))
     if tdd:
-        out.append('Tests tdd efímeros: bórralos o conviértelos en permanentes antes del push: ' + ', '.join(tdd))
-    codigo = [f for f in files if f.startswith(('server/src/', 'devtools/')) and f.endswith('.py')]
-    if codigo and not any(f.startswith(('server/tests/', 'devtools/tests/', 'tests/')) for f in files):
-        out.append('código cambió sin ningún test cambiado (TDD): ' + ', '.join(codigo[:5]))
+        out.append('Ephemeral tdd tests: delete them or make them permanent before the push: ' + ', '.join(tdd))
+    code = [f for f in files if f.startswith(('server/src/', 'devtools/')) and f.endswith('.py')]
+    if code and not any(f.startswith(('server/tests/', 'devtools/tests/', 'tests/')) for f in files):
+        out.append('code changed without any test changed (TDD): ' + ', '.join(code[:5]))
     return out
 
 
