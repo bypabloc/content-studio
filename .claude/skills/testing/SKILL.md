@@ -30,7 +30,7 @@ uv run python server/tests/fixtures/generar.py  # regenerar fixtures tras un cam
 - Sin red, sin descargas y sin GPU en lo que corre la CI: eso es `@pytest.mark.local` o una verificación real.
 - Nunca mockees la función bajo prueba; un mock no dice si el audio suena bien (`verify-before-claiming-done.md`).
 - `tests/tdd/` es efímero: el `pre-push` falla si quedan archivos.
-- `tests/validators/test_estructura.py` hace cumplir `codigo-python.md` y la sincronía `.agents/` ↔ `.claude/`: si falla, corrige el código, no el test.
+- `tests/validators/test_structure.py` hace cumplir `codigo-python.md` y la sincronía `.agents/` ↔ `.claude/`: si falla, corrige el código, no el test.
 
 ## Salida esperada
 

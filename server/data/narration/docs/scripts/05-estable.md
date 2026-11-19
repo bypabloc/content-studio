@@ -1,4 +1,4 @@
-# 5 · Estable → `server/data/narration/voz/estable.wav`
+# 5 · Estable → `server/data/narration/reference/steady.wav`
 
 **Intención**: parejo y profesional, sin énfasis exagerados; ritmo ágil.
 **Duración objetivo**: 10–11 s · **Ritmo**: ágil (~160 ppm) · **Tono**: medio, **sin subidas** · **Orden en la sesión**: 5.º
@@ -33,7 +33,7 @@ Eres un locutor de noticiero o de un video corporativo. Volumen e intensidad **c
 - *dispositivo*: completa, sin comerte la "s" ("dihpositivo" no).
 - No bajes la energía al final: el volumen se mantiene hasta la última sílaba.
 
-## Texto exacto (debe coincidir con `voz/estable.txt`)
+## Texto exacto (debe coincidir con `reference/steady.txt`)
 
 ```
 Esta es una plataforma de gestión de contenido para creadores y equipos pequeños. Integra guiones, grabación, edición y publicación en un solo lugar, con acceso seguro desde cualquier dispositivo.

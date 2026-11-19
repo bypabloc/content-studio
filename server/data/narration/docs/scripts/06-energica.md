@@ -1,4 +1,4 @@
-# 6 · Enérgica → `server/data/narration/voz/energica.wav`
+# 6 · Enérgica → `server/data/narration/reference/energetic.wav`
 
 **Intención**: publicidad con energía; ritmo rápido y urgente sin gritar.
 **Duración objetivo**: 8–10 s · **Ritmo**: rápido (~175 ppm) · **Tono**: medio-alto, con brillo · **Orden en la sesión**: 7.º
@@ -32,7 +32,7 @@ Tienes una gran noticia y poco tiempo para darla. Sonríe, sube un poco el volum
 - *elige*: "g" suave.
 - Rápido no es atropellado: cada palabra tiene que entenderse.
 
-## Texto exacto (debe coincidir con `voz/energica.txt`)
+## Texto exacto (debe coincidir con `reference/energetic.txt`)
 
 ```
 ¡Llegó lo que estabas esperando! Treinta por ciento de descuento, solo este fin de semana. Entra ya, elige tu plan y empieza hoy mismo.

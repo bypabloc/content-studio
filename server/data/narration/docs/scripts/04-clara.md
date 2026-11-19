@@ -1,4 +1,4 @@
-# 4 · Clara → `server/data/narration/voz/clara.wav`
+# 4 · Clara → `server/data/narration/reference/clear.wav`
 
 **Intención**: preciso y sereno; articulación nítida, ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~140 ppm) · **Tono**: medio, estable · **Orden en la sesión**: 4.º
@@ -32,7 +32,7 @@ Eres la voz de un tutorial: alguien está siguiendo tus pasos con el mouse en la
 - *confirmará*: con el acento en "rá", firme.
 - No exageres la articulación hasta sonar a robot: es nítida pero humana.
 
-## Texto exacto (debe coincidir con `voz/clara.txt`)
+## Texto exacto (debe coincidir con `reference/clear.txt`)
 
 ```
 Para comenzar, abre el panel principal. Luego selecciona Nuevo registro, completa los datos obligatorios y guarda los cambios. El sistema lo confirmará de inmediato.

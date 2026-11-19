@@ -25,6 +25,6 @@ Menos tokens es más precisión. El gasto inútil sale de ciclos de prueba y err
 ## 4. Varias sesiones en paralelo
 
 * Cada sesión trabaja en **su worktree** (`worktrees.md`) y su rama; nunca dos sesiones en el mismo checkout ni en la misma rama.
-* El recurso compartido es la GPU: **un modelo a la vez** con `turno-gpu` y avisos por `SendMessage` (`turno-gpu.md`). Lint y pytest no piden turno.
+* El recurso compartido es la GPU: **un modelo a la vez** con `gpu-turn` y avisos por `SendMessage` (`turno-gpu.md`). Lint y pytest no piden turno.
 * `ListAgents` da el nombre de cada sesión; `SendMessage` solo para el turno de la GPU o una coordinación real (dos trabajos que tocan el mismo archivo), nunca para acusar recibo.
 * Los merges a `dev` van de a uno: antes de fusionar, `git fetch origin dev` y merge de `origin/dev` en tu rama.

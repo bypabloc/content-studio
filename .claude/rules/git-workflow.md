@@ -63,7 +63,7 @@ Un cambio chico de una sola sesión puede hacerse en una rama del checkout princ
 - **Workflow [.github/workflows/origen-pr.yml](../../.github/workflows/origen-pr.yml)**: es el check `origen-permitido`. Valida la rama de origen según el destino y rechaza los PRs de forks. **Si cambias los prefijos, cambia la lista `PREFIJOS_DEV` en el workflow, `PREFIJOS` en `.git-hooks/pre-commit` y `pre-push`, y la tabla de esta regla.**
 - **Workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml)**: tras cada push a `main`, abre el PR `main → dev` en auto-merge (el repo tiene activado *Allow auto-merge*).
 - **Git hooks locales [.git-hooks/](../../.git-hooks/)** (se activan una vez por clon: `git config core.hooksPath .git-hooks`; el hook `SessionStart` avisa si faltan):
-  - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, ruff + pytest si hay Python staged, y `contexto-agentes` + `reglas` si hay instrucciones de agentes staged.
+  - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, ruff + pytest si hay Python staged, y `agent-context` + `reglas` si hay instrucciones de agentes staged.
   - `prepare-commit-msg`: borra las líneas de atribución de IA.
   - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo, y falla si quedan tests tdd efímeros (`tests/tdd/`).
   - Si un hook falla, se corrige la causa (skill `fix-hooks`): **nunca** `--no-verify`. La lista de prefijos está también en estos hooks.

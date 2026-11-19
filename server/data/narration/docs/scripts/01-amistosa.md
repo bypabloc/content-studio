@@ -1,4 +1,4 @@
-# 1 · Amistosa → `server/data/narration/voz/amistosa.wav`
+# 1 · Amistosa → `server/data/narration/reference/friendly.wav`
 
 **Intención**: cercano y tranquilo; ritmo ágil, como una conversación.
 **Duración objetivo**: 9–11 s · **Ritmo**: ágil (~165 ppm) · **Tono**: medio, algo más alto que tu voz de reposo · **Orden en la sesión**: 2.º
@@ -32,7 +32,7 @@ Le hablas a alguien que conoces y te cae bien. **Sonríe de verdad mientras habl
 - *Pruébalo*: acento en "prué"; no lo separes en "prué-ba-lo".
 - No aceleres tanto que se pierdan las pausas: ágil no es apurado.
 
-## Texto exacto (debe coincidir con `voz/amistosa.txt`)
+## Texto exacto (debe coincidir con `reference/friendly.txt`)
 
 ```
 Hola, ¿cómo estás? Te cuento algo que nos tiene muy contentos: ahora creas tus videos en minutos, desde tu celular y sin complicaciones. Pruébalo hoy.

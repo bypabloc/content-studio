@@ -33,7 +33,7 @@ def notices_voice(name: str, sheet: dict) -> None:
         )
 
 
-def voice_de_reference(ref: Path) -> dict | None:
+def voice_from_reference(ref: Path) -> dict | None:
     """Ficha del catálogo de la voz a la que pertenece una referencia
     (server/data/narration/voices/<voz>/<estilo>.wav), o None."""
     ref = Path(ref).resolve()
@@ -82,6 +82,6 @@ def save_metadata(engine: TTSEngine, g: dict) -> None:
         'time_generation_s': round(g['time_s'], 1), 'duration_s': round(g['blocks'][-1][2], 2),
         'vram_peak_gib': round(torch.cuda.max_memory_reserved() / 2**30, 2),
         # Voces del catálogo usadas en la toma, con la mención que pide su licencia (para la descripción del video).
-        'voices': list({v['voice']: v for pb in g['pb'] if (v := voice_de_reference(pb['ref']))}.values()) or None,
+        'voices': list({v['voice']: v for pb in g['pb'] if (v := voice_from_reference(pb['ref']))}.values()) or None,
     }  # fmt: skip
     g['output'].with_suffix('.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding='utf-8')

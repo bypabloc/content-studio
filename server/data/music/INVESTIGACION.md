@@ -62,7 +62,7 @@ Reglas de prompt que aplican a música instrumental de fondo:
 - **ACE-Step está entrenado sobre todo con canciones con voz**, así que asume que hay voz salvo que se le indique lo contrario. Las guías recomiendan dejar el campo de letra completamente vacío y elegir el idioma "Instrumental / Auto". Este script envía `[Instrumental]` en la letra y `instrumental=True`, y funciona en la mayoría de los casos, pero no en todos (ver abajo).
 - Compás: `4/4` es el más fiable; `3/4` y `6/8` suelen funcionar; los complejos (`5/4`, `7/8`) dependen del estilo.
 
-Para el uso que interesa (tutoriales, publicidad, demos), se armaron presets por **uso** y no solo por género: tutorial, explicativo animado, corporativo, anuncio por rubro (moda, comida, salud, fintech, inmobiliario, auto…), demo de producto (SaaS, app, IA, gadget, dashboard), ambient para foco, cinematográfico, acústico, jazz y latino, electrónica y usos concretos. El catálogo está en `estilos.py` y la lista, en el README.
+Para el uso que interesa (tutoriales, publicidad, demos), se armaron presets por **uso** y no solo por género: tutorial, explicativo animado, corporativo, anuncio por rubro (moda, comida, salud, fintech, inmobiliario, auto…), demo de producto (SaaS, app, IA, gadget, dashboard), ambient para foco, cinematográfico, acústico, jazz y latino, electrónica y usos concretos. El catálogo está en `styles.py` y la lista, en el README.
 
 ### Resultado de las pruebas de estilos
 
@@ -84,11 +84,11 @@ Duración tras recortar: 20,6–30 s, mediana 26,8 s.
 | `cinematico-epico` | epic cinematic, orchestral, taiko drums, strings, brass, powerful | Voz en la pista y en el reintento (−15,0 y −13,0 dB). Probable coro: el género "epic" lo trae en el entrenamiento |
 | `documental-historia` | historical documentary, solemn strings, cello, soft timpani | Voz en 3 de 4 muestras (−15,7, −15,7, −12,3 y una limpia a −33,0 dB) |
 
-Pistas que dieron voz una vez y salieron limpias al regenerar (se mantienen): `meditacion` (−17,6 dB), `afrobeat-ligero` (−22,0 dB), `demo-producto` y `anuncio-lanzamiento`. Hay ocho presets que pasan por poco (entre −25 y −32 dB) y se listan en el README.
+Pistas que dieron voz una vez y salieron limpias al regenerar (se mantienen): `meditation` (−17,6 dB), `afrobeat-light` (−22,0 dB), `demo-product` y `ad-launch`. Hay ocho presets que pasan por poco (entre −25 y −32 dB) y se listan en el README.
 
 ### Hallazgos del proceso
 
-- **Voz en instrumental**: aun con `[Instrumental]` e `instrumental=True`, aparece voz en una fracción pequeña de pistas: 2 de 36 en la primera tanda de variantes sobre 9 presets, y 6 de los 119 presets nuevos en la primera pasada (4 detectadas por `--evaluar` y 2 al medir después las 28 que no se evaluaron por el cuelgue). Sube en estilos corales u orquestales ("epic", "documental", "meditación"). Por eso `--evaluar --reintentos` es necesario y no opcional.
+- **Voz en instrumental**: aun con `[Instrumental]` e `instrumental=True`, aparece voz en una fracción pequeña de pistas: 2 de 36 en la primera tanda de variantes sobre 9 presets, y 6 de los 119 presets nuevos en la primera pasada (4 detectadas por `--evaluate` y 2 al medir después las 28 que no se evaluaron por el cuelgue). Sube en estilos corales u orquestales ("epic", "documental", "meditación"). Por eso `--evaluate --retries` es necesario y no opcional.
 - **Whisper no sirve para esto**: alucina frases ("Outro Music", "Let me know what you think about this video…") sobre música instrumental. Demucs mide la voz de verdad: instrumental entre −35 y −44 dB respecto de la mezcla, cantada a propósito −4,9 dB.
 - **La generación se puede colgar**: una corrida de 119 pistas se detuvo en la 29 (GPU al 0 % y proceso girando en CPU en el decodificador VAE) y nadie lo notó durante ~50 min. No se reprodujo al relanzar en lotes de 15, así que no se sabe la causa. Conviene lanzar corridas largas en lotes con límite de tiempo.
 - **Limitaciones**: una sola muestra por preset, y nadie escuchó las pistas. Las métricas no miden si el estilo se reconoce ni si suena bien.

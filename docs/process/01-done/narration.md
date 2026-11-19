@@ -13,13 +13,13 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 
 - `python cli.py narration tts`: texto o guion → WAV en `out/narration/`, con estilo (12 estilos), motor y voz; el asistente pide lo que falta.
 - Motores: VoxCPM2, Qwen3-TTS (0.6B y 1.7B), Chatterbox, CosyVoice 3, OmniVoice e IndexTTS, cada uno en su venv (licencias en `AGENTS.md`).
-- `narration voces`: catálogo de voces libres (CC0 o dominio público) que se construyen con `--construir`.
+- `narration voices`: catálogo de voces libres (CC0 o dominio público) que se construyen con `--build`.
 - `narration grabar`: kit para grabar las voces de referencia propias.
-- Evaluación con whisper contra el guion (`server/data/narration/evaluacion/`: comparar y revisar).
+- Evaluación con whisper contra el guion (`server/data/narration/evaluation/`: comparar y revisar).
 
 ## Dónde vive
 
-- Código: `server/src/content_studio/narration/` (motores en `motores/` con `registro.py`).
+- Código: `server/src/content_studio/narration/` (motores en `engines/` con `registry.py`).
 - Datos: `server/data/narration/` (README, docs, voces, venvs, motores). Uso y rendimiento: [server/data/narration/README.md](../../../server/data/narration/README.md).
 
 ## Historial

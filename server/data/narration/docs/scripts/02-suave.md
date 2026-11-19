@@ -1,4 +1,4 @@
-# 2 · Suave → `server/data/narration/voz/suave.wav`
+# 2 · Suave → `server/data/narration/reference/soft.wav`
 
 **Intención**: sereno y cálido; ritmo medio, frases limpias.
 **Duración objetivo**: 10–11 s · **Ritmo**: medio (~140 ppm) · **Tono**: medio-grave, más bajo que tu voz de reposo · **Orden en la sesión**: 6.º
@@ -30,7 +30,7 @@ Hablas como en una meditación guiada o en un spot de bienestar. Respira lento *
 - *calma*: no la alargues ("caaalma"); la calma está en el ritmo, no en estirar vocales.
 - No susurres: la voz es suave pero con cuerpo. Un susurro clona mal y suena con ruido.
 
-## Texto exacto (debe coincidir con `voz/suave.txt`)
+## Texto exacto (debe coincidir con `reference/soft.txt`)
 
 ```
 Respira con calma. Este espacio está pensado para ti: tus ideas, tus proyectos y tus notas, todo ordenado y a un clic de distancia.

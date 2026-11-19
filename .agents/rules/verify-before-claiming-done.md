@@ -12,8 +12,8 @@ description: Nunca reportar "listo" sin correr el código real y medir la salida
 | Área | Verificación |
 | :--- | :--- |
 | Cualquier `.py` | `uv run ruff check && uv run ruff format --check && uv run pytest` |
-| Un motor o su registro | `uv run pytest -m local` y una corrida real corta con `turno-gpu run` |
-| Narración o música | La corrida real (con `turno-gpu run`) y la medición de §2 de cada salida |
+| Un motor o su registro | `uv run pytest -m local` y una corrida real corta con `gpu-turn run` |
+| Narración o música | La corrida real (con `gpu-turn run`) y la medición de §2 de cada salida |
 | CLI o asistente | `python cli.py <comando> --help`, un caso real y uno de error; sin TTY (`| cat`) no debe preguntar nada |
 | devtools | `python -m devtools <comando> --help`, un caso real y uno de error |
 | Hooks o configuración de agentes | `uv run pytest .claude/hooks/tests/test_hooks.py` y la validación headless (`agent-config-testing.md`) |

@@ -10,30 +10,30 @@ Desde la raíz del repo, con cualquier Python: el script se relanza solo en el v
 
 ```bash
 # Un preset (tonalidad, BPM y compás ya definidos)
-python cli.py music --modelo acestep --estilo lofi-chill --duracion 60
+python cli.py music --model acestep --style lofi-chill --duration 60
 
 # Varios presets para escucharlos y comparar (el modelo se carga una sola vez)
-python cli.py music --modelo acestep --duracion 30 \
-  --estilo lofi-chill corporate future-bass deep-house ambient
+python cli.py music --model acestep --duration 30 \
+  --style lofi-chill corporate future-bass deep-house ambient
 
-# Texto libre: exige --tono y --bpm (--compas es opcional, 4/4 por defecto)
-python cli.py music --modelo acestep --duracion 30 --tono "E Minor" --bpm 105 \
-  --estilo "synthwave, retro 80s, driving arpeggios"
+# Texto libre: exige --key y --bpm (--time-signature es opcional, 4/4 por defecto)
+python cli.py music --model acestep --duration 30 --key "E Minor" --bpm 105 \
+  --style "synthwave, retro 80s, driving arpeggios"
 
 # Un preset con otra tonalidad o tempo (los flags pisan los valores del preset)
-python cli.py music --modelo acestep --estilo lofi-jazz --tono "G Major" --bpm 90
+python cli.py music --model acestep --style lofi-jazz --key "G Major" --bpm 90
 
-# Sin el planificador LM: ~3x más rápido (ver "Qué hace --sin-lm")
-python cli.py music --modelo acestep --estilo ambient --sin-lm
+# Sin el planificador LM: ~3x más rápido (ver "Qué hace --no-lm")
+python cli.py music --model acestep --style ambient --no-lm
 
 # Otra carpeta de salida
-python cli.py music --modelo acestep --estilo corporate --carpeta out/mi-proyecto
+python cli.py music --model acestep --style corporate --folder out/mi-proyecto
 
-# HeartMuLa (lento; ignora --tono, --bpm y --compas)
-python cli.py music --modelo heartmula --estilo lofi-lluvia --duracion 30
+# HeartMuLa (lento; ignora --key, --bpm y --time-signature)
+python cli.py music --model heartmula --style lofi-rain --duration 30
 ```
 
-**Salida**: `out/music/<modelo>-<estilo>.wav` (en la raíz del repo; 48 kHz, estéreo) con el **silencio final ya recortado**. Cambia la carpeta con `--carpeta`. Al terminar imprime cuántos segundos quedaron, la tonalidad y el BPM:
+**Salida**: `out/music/<modelo>-<estilo>.wav` (en la raíz del repo; 48 kHz, estéreo) con el **silencio final ya recortado**. Cambia la carpeta con `--folder`. Al terminar imprime cuántos segundos quedaron, la tonalidad y el BPM:
 
 ```
 out/music/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 BPM)
@@ -41,19 +41,19 @@ out/music/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 B
 
 | Flag | Valor | Por defecto |
 |:--|:--|:--|
-| `--modelo` | `acestep` \| `heartmula` | obligatorio |
-| `--estilo` | uno o más presets o textos libres | `lofi-chill` |
-| `--duracion` | segundos que se generan **antes** del recorte (ACE hasta 600, HeartMuLa hasta 240) | 60 |
-| `--tono` | tonalidad: `"C Major"`, `"A Minor"`, `"F# Minor"`… | la del preset (obligatoria con texto libre) |
+| `--model` | `acestep` \| `heartmula` | obligatorio |
+| `--style` | uno o más presets o textos libres | `lofi-chill` |
+| `--duration` | segundos que se generan **antes** del recorte (ACE hasta 600, HeartMuLa hasta 240) | 60 |
+| `--key` | tonalidad: `"C Major"`, `"A Minor"`, `"F# Minor"`… | la del preset (obligatoria con texto libre) |
 | `--bpm` | tempo, de 30 a 300 | el del preset (obligatorio con texto libre) |
-| `--compas` | `2`, `3`, `4` o `6` (2/4, 3/4, 4/4, 6/8) | el del preset, o `4` |
-| `--sin-lm` | solo ACE-Step | apagado |
-| `--carpeta` | carpeta de salida | `out/music/` |
-| `--variantes` | pistas por estilo; con más de 1 los archivos son `<modelo>-<estilo>-v1.wav`, `-v2.wav`… (la melodía cambia en cada una) | 1 |
-| `--evaluar` | solo ACE-Step: al final mide con demucs cuánta voz hay en cada pista (ver "Evaluar que no haya voz") | apagado |
-| `--reintentos` | con `--evaluar`: rondas que regeneran solo las pistas con voz | 0 |
+| `--time-signature` | `2`, `3`, `4` o `6` (2/4, 3/4, 4/4, 6/8) | el del preset, o `4` |
+| `--no-lm` | solo ACE-Step | apagado |
+| `--folder` | carpeta de salida | `out/music/` |
+| `--variants` | pistas por estilo; con más de 1 los archivos son `<modelo>-<estilo>-v1.wav`, `-v2.wav`… (la melodía cambia en cada una) | 1 |
+| `--evaluate` | solo ACE-Step: al final mide con demucs cuánta voz hay en cada pista (ver "Evaluar que no haya voz") | apagado |
+| `--retries` | con `--evaluate`: rondas que regeneran solo las pistas con voz | 0 |
 
-Si usas texto libre sin `--tono` y `--bpm`, el script se detiene antes de cargar el modelo y muestra el mensaje: `"bossa nova" no es un preset: define --tono y --bpm`. `--tono`, `--bpm` y `--compas` se aplican a **todos** los estilos de esa corrida.
+Si usas texto libre sin `--key` y `--bpm`, el script se detiene antes de cargar el modelo y muestra el mensaje: `"bossa nova" no es un preset: define --key y --bpm`. `--key`, `--bpm` y `--time-signature` se aplican a **todos** los estilos de esa corrida.
 
 ### Estilos predefinidos
 
@@ -61,9 +61,9 @@ Si usas texto libre sin `--tono` y `--bpm`, el script se detiene antes de cargar
 |:--|:--|:--|:--|:--|
 | `lofi-chill` | Rhodes, vinilo, boom bap suave | C Major | 80 | 4/4 |
 | `lofi-jazz` | Acordes de jazz, trompeta con sordina, escobillas | D Minor | 85 | 4/4 |
-| `lofi-lluvia` | Piano melancólico, ambiente de lluvia | E Minor | 72 | 4/4 |
-| `lofi-estudio` | Guitarra suave, groove relajado, minimal | G Major | 78 | 4/4 |
-| `lofi-nocturno` | Pads de sintetizador, sub bajo, ciudad de noche | A Minor | 70 | 4/4 |
+| `lofi-rain` | Piano melancólico, ambiente de lluvia | E Minor | 72 | 4/4 |
+| `lofi-study` | Guitarra suave, groove relajado, minimal | G Major | 78 | 4/4 |
+| `lofi-night` | Pads de sintetizador, sub bajo, ciudad de noche | A Minor | 70 | 4/4 |
 | `corporate` | Fondo tech optimista, piano eléctrico, plucks | C Major | 110 | 4/4 |
 | `future-bass` | Supersaw suaves, sidechain leve, brillante | G Major | 100 | 4/4 |
 | `deep-house` | Groove cálido, bajo redondo, elegante | A Minor | 120 | 4/4 |
@@ -73,36 +73,36 @@ Las tonalidades son las que la guía oficial de ACE-Step considera estables: C, 
 
 ### Catálogo ampliado: 117 presets más
 
-Definidos en [estilos.py](../../src/content_studio/music/estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
+Definidos en [styles.py](../../src/content_studio/music/styles.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluate` (ver más abajo). Se usan igual que los otros: `--style <nombre>`.
 
 | Grupo | Presets |
 |:--|:--|
-| Tutoriales y explicativos | `tutorial-calmo` `tutorial-tech` `tutorial-guitarra` `explainer-animado` `explainer-minimal` `curso-online` `paso-a-paso` `codigo` `documental-suave` |
-| Corporativo y publicidad | `corporate-inspirador` `corporate-minimal` `corporate-energico` `corporate-startup` `corporate-confianza` `corporate-innovacion` `corporate-motivacional` `anuncio-alegre` `anuncio-premium` `anuncio-moda` `anuncio-deportivo` `anuncio-comida` `anuncio-lanzamiento` `anuncio-fintech` `anuncio-inmobiliario` `anuncio-salud` `anuncio-viajes` `anuncio-auto` |
-| Demos y tecnología | `demo-producto` `demo-saas` `demo-app-movil` `demo-futurista` `demo-ia` `demo-gadget` `demo-ecommerce` `demo-dashboard` `demo-videojuego` |
-| Lofi | `lofi-cafe` `lofi-guitarra` `lofi-atardecer` `lofi-nostalgico` `lofi-bossa` `chillhop-foco` `lofi-piano` `vaporwave` |
-| Ambient, foco y bienestar | `ambient-espacial` `ambient-piano` `ambient-cinematico` `ambient-bosque` `ambient-oceano` `meditacion` `yoga` `spa` `dormir` `foco-profundo` `new-age` `ambient-oscuro` |
-| Cinematográfico | `cinematico-emotivo` `cinematico-esperanza` `trailer-tension` `cinematico-minimal` `documental-naturaleza` `heroico` `misterio` `suspenso-tech` `ciencia-ficcion` `fantasia` `orquesta-calida` `piano-emotivo` `cuerdas-minimal` `neoclasico` |
-| Acústico y folk | `acustico-alegre` `acustico-calido` `folk-suave` `country-suave` `piano-pop` `ukulele-playa` `guitarra-clasica` `arpa-celestial` `celta` |
-| Jazz, latino y del mundo | `jazz-cafe` `jazz-suave` `bossa-nova` `lounge` `swing-alegre` `latin-suave` `cumbia-suave` `reggae-chill` `afrobeat-ligero` `tropical-house` |
-| Electrónica y pop | `pop-brillante` `synthwave` `retrowave-suave` `trap-suave` `drum-and-bass-ligero` `techno-minimal` `house-alegre` `tech-house` `edm-energico` `electropop` `downtempo` `chillwave` `future-garage` `chiptune-alegre` `funk-suave` `disco` `boom-bap` `rnb-suave` `rock-motivacional` `indie-pop` `post-rock-suave` |
-| Usos concretos | `navidad-suave` `infantil` `juego-casual` `entrenamiento` `noticias` `cocina` `vlog-viaje` |
+| Tutoriales y explicativos | `tutorial-calm` `tutorial-tech` `tutorial-guitar` `explainer-animated` `explainer-minimal` `course-online` `step-by-step` `codigo` `documentary-soft` |
+| Corporativo y publicidad | `corporate-inspiring` `corporate-minimal` `corporate-energetic` `corporate-startup` `corporate-trust` `corporate-innovation` `corporate-motivational` `ad-happy` `ad-premium` `ad-fashion` `ad-sports` `ad-food` `ad-launch` `ad-fintech` `ad-realestate` `ad-health` `ad-travel` `ad-car` |
+| Demos y tecnología | `demo-product` `demo-saas` `demo-mobile-app` `demo-futuristic` `demo-ai` `demo-gadget` `demo-shop` `demo-dashboard` `demo-game` |
+| Lofi | `lofi-cafe` `lofi-guitar` `lofi-sunset` `lofi-nostalgic` `lofi-bossa` `chillhop-focus` `lofi-piano` `vaporwave` |
+| Ambient, foco y bienestar | `ambient-space` `ambient-piano` `ambient-cinematic` `ambient-forest` `ambient-ocean` `meditation` `yoga` `spa` `sleep` `deep-focus` `new-age` `ambient-dark` |
+| Cinematográfico | `cinematic-emotional` `cinematic-hope` `trailer-tension` `cinematic-minimal` `documentary-nature` `heroic` `mystery` `suspense-tech` `sci-fi` `fantasy` `orchestra-warm` `piano-emotional` `strings-minimal` `neoclassical` |
+| Acústico y folk | `acoustic-happy` `acoustic-warm` `folk-soft` `country-soft` `piano-pop` `ukulele-beach` `guitar-classical` `harp-celestial` `celtic` |
+| Jazz, latino y del mundo | `jazz-cafe` `jazz-soft` `bossa-nova` `lounge` `swing-happy` `latin-soft` `cumbia-soft` `reggae-chill` `afrobeat-light` `tropical-house` |
+| Electrónica y pop | `pop-bright` `synthwave` `retrowave-soft` `trap-soft` `drum-and-bass-light` `techno-minimal` `house-happy` `tech-house` `edm-energetic` `electropop` `downtempo` `chillwave` `future-garage` `chiptune-happy` `funk-soft` `disco` `boom-bap` `rnb-soft` `rock-motivational` `indie-pop` `post-rock-soft` |
+| Usos concretos | `christmas-soft` `kids` `casual-game` `workout` `news` `cooking` `vlog-travel` |
 
-**Cómo se probaron**: una pista de 30 s por preset, con LM. Pasa si no tiene voz (`--evaluar`, umbral −25 dB), dura al menos 20 s tras recortar el silencio y no es casi muda. Pasaron 117 de 119: ninguna salió corta ni silenciosa (20,6–30 s, mediana 26,8 s) y se descartaron 2 por voz (ver [INVESTIGACION.md](INVESTIGACION.md)). **Nadie las escuchó**: las métricas no dicen si suenan bien ni si el estilo se reconoce. Con una sola muestra por preset, el resultado es indicativo.
+**Cómo se probaron**: una pista de 30 s por preset, con LM. Pasa si no tiene voz (`--evaluate`, umbral −25 dB), dura al menos 20 s tras recortar el silencio y no es casi muda. Pasaron 117 de 119: ninguna salió corta ni silenciosa (20,6–30 s, mediana 26,8 s) y se descartaron 2 por voz (ver [INVESTIGACION.md](INVESTIGACION.md)). **Nadie las escuchó**: las métricas no dicen si suenan bien ni si el estilo se reconoce. Con una sola muestra por preset, el resultado es indicativo.
 
-Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-producto`, `heroico`, `suspenso-tech`, `ambient-oceano`, `tutorial-tech`, `ciencia-ficcion`, `pop-brillante`, `demo-saas`. Si los vas a usar, genera con `--evaluar --reintentos 2`.
+Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-product`, `heroic`, `suspense-tech`, `ambient-ocean`, `tutorial-tech`, `sci-fi`, `pop-bright`, `demo-saas`. Si los vas a usar, genera con `--evaluate --retries 2`.
 
 Bajo una narración, los que mejor acompañan son los de tutoriales y explicativos, `corporate-minimal`, `deep-house` y `ambient`.
 
-Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](../../src/content_studio/music/estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
+Para agregar un preset, suma una entrada a `NUEVOS` en [styles.py](../../src/content_studio/music/styles.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluate` antes de confiar en él.
 
-## Evaluar que no haya voz (`--evaluar`)
+## Evaluar que no haya voz (`--evaluate`)
 
-ACE-Step recibe `[Instrumental]`, pero a veces se le cuela una voz. `--evaluar` separa cada pista con **demucs** (`htdemucs`), mide el nivel del stem de voz respecto de la mezcla y marca como `VOZ` las que superan `VOZ_MAX_DB = -25` dB. Con `--reintentos N` regenera solo esas pistas (semilla nueva) hasta N rondas; si alguna sigue con voz, el script termina con error y las nombra.
+ACE-Step recibe `[Instrumental]`, pero a veces se le cuela una voz. `--evaluate` separa cada pista con **demucs** (`htdemucs`), mide el nivel del stem de voz respecto de la mezcla y marca como `VOZ` las que superan `VOZ_MAX_DB = -25` dB. Con `--retries N` regenera solo esas pistas (semilla nueva) hasta N rondas; si alguna sigue con voz, el script termina con error y las nombra.
 
 ```bash
-python cli.py music --modelo acestep --duracion 30 --variantes 4 --evaluar --reintentos 2 \
-  --carpeta out/music-variantes --estilo lofi-chill corporate ambient
+python cli.py music --model acestep --duration 30 --variants 4 --evaluate --retries 2 \
+  --folder out/music-variantes --style lofi-chill corporate ambient
 ```
 
 ```
@@ -112,10 +112,10 @@ python cli.py music --modelo acestep --duracion 30 --variantes 4 --evaluar --rei
 
 - **Por qué demucs y no whisper**: whisper alucina frases sobre música instrumental (`"Outro Music"`, `"Let me know what you think about this video…"`) y marcó como "con voz" pistas que no la tenían. Sus métricas (`no_speech_prob`, `avg_logprob`) no separan la alucinación de la letra real.
 - **Calibración del umbral**: pistas instrumentales de ACE-Step, entre −35 y −44 dB; una pista cantada a propósito (letra y `vocal_language='en'`), −4,9 dB. Medido sobre pocas pistas: si aparece un falso positivo o negativo, ajusta `VOZ_MAX_DB`.
-- demucs vive solo en `.venv-acestep` (instalado con `--no-deps` para no tocar torch), así que `--evaluar` no funciona con `--modelo heartmula`.
+- demucs vive solo en `.venv-acestep` (instalado con `--no-deps` para no tocar torch), así que `--evaluate` no funciona con `--model heartmula`.
 - Cada ronda recarga ACE-Step (~30 s) y carga demucs en la GPU tras liberar la VRAM del generador.
 
-## Cómo funciona ACE-Step (y qué hace `--sin-lm`)
+## Cómo funciona ACE-Step (y qué hace `--no-lm`)
 
 ACE-Step 1.5 usa dos modelos en cadena (fuente: `models/ACE-Step-1.5/docs/en/Tutorial.md` e `INFERENCE.md`):
 
@@ -129,14 +129,14 @@ caption + metadatos → [LM 5 Hz, 0.6B] → plan semántico → [DiT turbo, 2B] 
   3. **Genera "códigos semánticos" a 5 Hz**, que contienen la melodía, la orquestación y la estructura. Esos códigos guían al DiT.
 - **El DiT es el "ejecutor"**: un modelo de difusión que convierte el plan en audio en 8 pasos. Decide el timbre, la mezcla y los detalles.
 
-**`--sin-lm` apaga el planificador.** El DiT genera directamente a partir del caption y los metadatos (tonalidad, BPM y compás). En consecuencia:
+**`--no-lm` apaga el planificador.** El DiT genera directamente a partir del caption y los metadatos (tonalidad, BPM y compás). En consecuencia:
 
 - Es **~3× más rápido**: 12 s contra ~36 s en una pista de 20 s, porque se salta la generación de códigos, que es token a token.
 - Ahorra **poca VRAM**: ~0,2 GB.
 - **No hay plan de melodía ni de estructura**: el DiT improvisa sobre el caption. La guía oficial lo recomienda cuando "ya tienes los metadatos precisos" y quieres velocidad o control total. Recomienda dejar el LM activo para tener mejor estructura y variedad.
-- La tonalidad y el BPM se respetan igual, porque ahora los definen los presets o los flags. En la verificación, `ambient --sin-lm` dio D Major a 69,8 BPM, cuando se pidió D Major a 70 BPM.
+- La tonalidad y el BPM se respetan igual, porque ahora los definen los presets o los flags. En la verificación, `ambient --no-lm` dio D Major a 69,8 BPM, cuando se pidió D Major a 70 BPM.
 
-En resumen: con el LM, la estructura es mejor y cada corrida da una melodía distinta en la misma tonalidad. Sin el LM, la generación es más rápida y más plana. Conviene usar `--sin-lm` para iterar y el LM para la pista final.
+En resumen: con el LM, la estructura es mejor y cada corrida da una melodía distinta en la misma tonalidad. Sin el LM, la generación es más rápida y más plana. Conviene usar `--no-lm` para iterar y el LM para la pista final.
 
 ## Rendimiento medido
 
@@ -147,8 +147,8 @@ Equipo: RTX 4060 Laptop, 8 GiB, WSL2. Medido el 2026-10-04 en dos rondas indepen
 | 1 pista de 30 s | **43–51 s** | **283–296 s** |
 | 1 pista de 60 s | **47–51 s** | 296–416 s. Pedí 60 s y entregó 12 s una vez y 42 s otra |
 | 5 estilos de 30 s en una sola corrida | **103–121 s** (~15 s por cada pista extra) | no probado |
-| 1 pista de 20 s con `--sin-lm` | **12 s** (con LM: ~36 s) | — |
-| Pico de VRAM del proceso (nvidia-smi menos la base) | **~6,0 GB** (~5,8 GB con `--sin-lm`) | ~7,1 GB, la GPU llena |
+| 1 pista de 20 s con `--no-lm` | **12 s** (con LM: ~36 s) | — |
+| Pico de VRAM del proceso (nvidia-smi menos la base) | **~6,0 GB** (~5,8 GB con `--no-lm`) | ~7,1 GB, la GPU llena |
 | Pico de memoria que reporta torch | 5,96 GB | **12,67 GB** en el LM y 6,20 GB en el codec |
 | ¿Entra en 8 GB? | ✅ Sí, si hay ~6,5 GB libres | ⚠️ **No.** Corre porque el driver de Windows/WSL desborda a la RAM compartida, y por eso es lento |
 | Tonalidad, BPM y compás | ✅ Se respetan (verificado con análisis de croma y tempo) | ❌ No tiene esos parámetros |
@@ -164,14 +164,14 @@ Equipo: RTX 4060 Laptop, 8 GiB, WSL2. Medido el 2026-10-04 en dos rondas indepen
 |:--|:--|:--|
 | `lofi-chill` | C Major, 80 | A Minor, la relativa de C Major (mismas notas), con C Major como segunda opción; 161,5 = 2 × 80 |
 | `lofi-jazz` | D Minor, 85 | D Minor; 172 = 2 × 85 |
-| texto libre `--tono "E Minor" --bpm 105` | E Minor, 105 | E Minor; 103 |
-| `ambient --sin-lm` | D Major, 70 | D Major; 69,8 |
+| texto libre `--key "E Minor" --bpm 105` | E Minor, 105 | E Minor; 103 |
+| `ambient --no-lm` | D Major, 70 | D Major; 69,8 |
 
 Es normal que el detector de tempo marque el doble del BPM.
 
 ## El silencio final se recorta solo
 
-ACE-Step genera exactamente los segundos pedidos, pero suele **terminar la música antes** y rellenar el resto con silencio. Medido por debajo de −50 dB, quedaron 0,8 s de silencio en pistas de 60 s, entre 0 y 5 s en pistas de 30 s y 10–11 s en pistas de 20 s. El script recorta esa cola con ffmpeg (`areverse,silenceremove,areverse`, umbral `SILENCIO_DB = -50`), así que **la pista final puede durar menos que `--duracion`**. Por ejemplo, `lofi-jazz` pedido a 30 s quedó en 22,5 s.
+ACE-Step genera exactamente los segundos pedidos, pero suele **terminar la música antes** y rellenar el resto con silencio. Medido por debajo de −50 dB, quedaron 0,8 s de silencio en pistas de 60 s, entre 0 y 5 s en pistas de 30 s y 10–11 s en pistas de 20 s. El script recorta esa cola con ffmpeg (`areverse,silenceremove,areverse`, umbral `SILENCIO_DB = -50`), así que **la pista final puede durar menos que `--duration`**. Por ejemplo, `lofi-jazz` pedido a 30 s quedó en 22,5 s.
 
 Por eso conviene pedir **30 s o más**, con margen sobre lo que necesitas.
 
@@ -179,8 +179,8 @@ Por eso conviene pedir **30 s o más**, con margen sobre lo que necesitas.
 
 Flujo recomendado:
 
-1. **Mide la narración primero** (`ffprobe` sobre el `.wav` de `out/narration/`). Pide la música con `--duracion` = narración + 10 s (**mínimo 30**) y revisa los segundos que imprime el script: tienen que cubrir la narración.
-2. **Genera 3–5 presets en una sola corrida** con `--duracion 30` (o `--sin-lm` para ir más rápido) para que el usuario elija de oído. Después regenera el elegido con la duración final y con el LM activo. La tonalidad y el BPM se mantienen; la melodía cambia en cada corrida.
+1. **Mide la narración primero** (`ffprobe` sobre el `.wav` de `out/narration/`). Pide la música con `--duration` = narración + 10 s (**mínimo 30**) y revisa los segundos que imprime el script: tienen que cubrir la narración.
+2. **Genera 3–5 presets en una sola corrida** con `--duration 30` (o `--no-lm` para ir más rápido) para que el usuario elija de oído. Después regenera el elegido con la duración final y con el LM activo. La tonalidad y el BPM se mantienen; la melodía cambia en cada corrida.
 3. **No anuncies que suena bien sin escucharlo.** Verifica la duración, el volumen y el espectrograma (ver "Cómo verificar"). El gusto lo decide el usuario: entrégale las rutas.
 4. **Mezcla bajo la voz** con ducking: la música baja sola cuando hay narración. El comando está probado con una narración de Qwen y una pista de ACE-Step, y da una mezcla de −20 dB de media con picos de −4 dB:
 
@@ -196,16 +196,16 @@ Flujo recomendado:
    - `volume=0.25` es el nivel base de la música. Súbelo a 0.35 para un fondo más presente o bájalo a 0.15 si tapa la voz.
    - `duration=first` corta la mezcla al largo de la narración. Si quieres una cola musical, agrega `apad=pad_dur=3` a la voz y `afade=t=out:st=<fin-2>:d=2` al final.
 
-Tips para el prompt (texto libre de `--estilo`):
+Tips para el prompt (texto libre de `--style`):
 
 - Escríbelo **en inglés y con etiquetas separadas por comas**, siguiendo este orden: género, instrumentos, textura o producción, estado de ánimo y uso. Ejemplo: `"chillhop, nylon guitar, soft keys, vinyl crackle, warm, background music"`. Así están escritos los presets.
-- **No pongas el tempo ni la tonalidad en el caption**: van en `--tono` y `--bpm`. La guía oficial lo recomienda así y advierte que, si el caption contradice los metadatos (por ejemplo, "slow ballad" con 160 BPM), el modelo se confunde.
+- **No pongas el tempo ni la tonalidad en el caption**: van en `--key` y `--bpm`. La guía oficial lo recomienda así y advierte que, si el caption contradice los metadatos (por ejemplo, "slow ballad" con 160 BPM), el modelo se confunde.
 - Agrega `background`, `minimal` o `no drums` cuando la pista va bajo una narración. Una melodía muy cargada compite con la voz.
 - Elige un BPM coherente con el género: lofi entre 70 y 90, corporate entre 100 y 120, house entre 118 y 126.
 
 Detalles operativos:
 
-- **El nombre de salida se sobrescribe**: `<modelo>-<estilo>.wav` no lleva fecha. Para guardar variantes, usa `--carpeta out/<proyecto>` o renombra el archivo antes de regenerarlo.
+- **El nombre de salida se sobrescribe**: `<modelo>-<estilo>.wav` no lleva fecha. Para guardar variantes, usa `--folder out/<proyecto>` o renombra el archivo antes de regenerarlo.
 - **Primera corrida**: descarga ~11 GB (ACE-Step) o ~21 GB (HeartMuLa). Si se corta, vuelve a correrla.
 - **Logs**: las corridas largas se lanzan en segundo plano y su salida se guarda en `logs/` de la raíz (por ejemplo, `logs/music-<fecha>.log`). HeartMuLa tarda ~5 min por pista.
 - **Un modelo a la vez en la GPU**: no generes música mientras corre `narration tts`, porque los dos juntos no caben en 8 GB y el desborde a la RAM compartida hace todo ~4× más lento. Antes de lanzar, revisa la VRAM libre con `nvidia-smi --query-gpu=memory.free --format=csv`: ACE-Step necesita ~6,5 GB. Otros procesos, como el daemon `laya` de Synapse, pueden estar ocupando varios GB.
@@ -233,7 +233,7 @@ Los pesos se descargan solos en la primera corrida:
 
 Si se corta la descarga, vuelve a correr el script: reanuda donde quedó.
 
-Para `--evaluar`, demucs en el venv de ACE-Step (sin dependencias, para no cambiar torch):
+Para `--evaluate`, demucs en el venv de ACE-Step (sin dependencias, para no cambiar torch):
 
 ```bash
 VIRTUAL_ENV=.venv-acestep uv pip install --no-deps demucs
@@ -262,7 +262,7 @@ server/data/music/
 └── .venv-heartmula/   # gitignoreado
 ```
 
-El código está en `server/src/content_studio/music/` (parser, musica, estilos, evaluacion y `motores/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
+El código está en `server/src/content_studio/music/` (parser, musica, estilos, evaluacion y `engines/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
 
 ## Cómo verificar un resultado
 
@@ -278,4 +278,4 @@ El volumen medio sale entre −15 y −21 dB, con picos de −1 dB, porque ACE-S
 
 - **HeartMuLa no guarda el audio** (`TorchCodec is required` o `libnvrtc.so.13`): torchaudio 2.10 guarda mediante torchcodec, que no carga con este CUDA. El script ya lo resuelve guardando con `soundfile`. **No instales torchcodec** en `.venv-heartmula`.
 - **HeartMuLa entrega menos duración de la pedida**: el modelo cierra la pista cuando quiere. El script repite secciones `[Instrumental]` (una cada ~20 s) para estirarla, pero no está garantizado.
-- **ACE-Step con OOM**: cierra las apps que estén usando la GPU o usa `--sin-lm`.
+- **ACE-Step con OOM**: cierra las apps que estén usando la GPU o usa `--no-lm`.

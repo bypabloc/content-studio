@@ -1,4 +1,4 @@
-# 10 · Neutral en inglés → `server/data/narration/voz/neutral-en.wav`
+# 10 · Neutral en inglés → `server/data/narration/reference/neutral-en.wav`
 
 **Intención**: tu voz natural hablando inglés; ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~150 ppm) · **Tono**: el de tu voz en reposo · **Orden en la sesión**: 11.º
@@ -23,7 +23,7 @@ Como en `neutral.wav`: le cuentas algo a alguien, sin tono de locutor ni de clas
 - *steady pace*: sin acelerar.
 - Contracciones naturales (*I'm*, *I'd*): dilas contraídas, como están escritas.
 
-## Texto exacto (debe coincidir con `voz/neutral-en.txt`)
+## Texto exacto (debe coincidir con `reference/neutral-en.txt`)
 
 ```
 This is a sample of my voice for the channel. I'm speaking at a steady pace, clearly and naturally, the way I'd explain something to a friend.

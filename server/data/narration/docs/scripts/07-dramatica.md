@@ -1,4 +1,4 @@
-# 7 · Dramática → `server/data/narration/voz/dramatica.wav`
+# 7 · Dramática → `server/data/narration/reference/dramatic.wav`
 
 **Intención**: storytelling con tensión; ritmo lento y pausas que generan suspenso.
 **Duración objetivo**: 10–12 s · **Ritmo**: lento (~130 ppm) · **Tono**: medio-grave · **Orden en la sesión**: 8.º
@@ -34,7 +34,7 @@ Estás contando algo que pasó de verdad y que todavía te inquieta. Voz conteni
 - *carta*, *puerta*: la "r" antes de consonante clara.
 - No susurres ni engoles la voz: grave y contenida, no de película de terror.
 
-## Texto exacto (debe coincidir con `voz/dramatica.txt`)
+## Texto exacto (debe coincidir con `reference/dramatic.txt`)
 
 ```
 Nadie sabía lo que había pasado esa noche. La puerta estaba abierta… y en el piso, una carta sin firma. Ahí empezó todo.

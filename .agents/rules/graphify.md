@@ -14,7 +14,7 @@ description: Buscar código con el grafo de graphify (query, explain, path, affe
 3. Read del `src=`/`loc=` citado.
 4. Glob si el grafo no ubicó el archivo. 5. Grep como último recurso.
 
-Los nombres del código están en español (`relanzar`, `usar_venv`, `EspecMotor`, `MOTORES`): pregunta con ese vocabulario.
+Los nombres del código están en español (`relaunch`, `use_venv`, `EngineSpec`, `ENGINES`): pregunta con ese vocabulario.
 
 ## 2. Excepciones: Grep directo
 

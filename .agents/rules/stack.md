@@ -12,11 +12,11 @@ description: Stack de content-studio (Python 3.10+, uv, Typer/Rich/questionary, 
 | Python ≥ 3.10 (CI en 3.10 y 3.12) | Todo el código; 3.10 por el venv de CosyVoice | `server/src/content_studio/` |
 | uv | Venv de desarrollo (`uv sync`), `uv run ruff/pytest`, y relanzar `cli.py` con su cabecera PEP 723 si faltan dependencias | `pyproject.toml`, `uv.lock` |
 | Typer + Rich + questionary | CLI, menú con flechas, asistente y tablas; solo en `cli/` y `grabar/` | `server/src/content_studio/cli/` |
-| Un venv por motor | torch, numpy y la librería de cada motor, aislados; el comando se relanza solo en el suyo (`comun/proceso.usar_venv`) | `server/data/narration/.venv-*`, `server/data/music/.venv-*`, `server/data/narration/motores/*/.venv` |
-| Motores TTS | VoxCPM2, Qwen3-TTS, Chatterbox, CosyVoice 3, OmniVoice, IndexTTS (licencias en `AGENTS.md` y `registro.py`) | `server/data/narration/motores/registro.py` (`MOTORES`) |
-| Motores de música | ACE-Step 1.5, HeartMuLa | `server/data/music/motores/registro.py` (`MODELOS`) |
-| ffmpeg / ffprobe | Conversión, loudnorm, recortes, espectrogramas y medición | `comun/ffmpeg` |
-| whisper | Comparar y revisar la narración contra el guion | `server/data/narration/evaluacion/` |
+| Un venv por motor | torch, numpy y la librería de cada motor, aislados; el comando se relanza solo en el suyo (`common/process.use_venv`) | `server/data/narration/.venv-*`, `server/data/music/.venv-*`, `server/data/narration/engines/*/.venv` |
+| Motores TTS | VoxCPM2, Qwen3-TTS, Chatterbox, CosyVoice 3, OmniVoice, IndexTTS (licencias en `AGENTS.md` y `registry.py`) | `server/data/narration/engines/registry.py` (`ENGINES`) |
+| Motores de música | ACE-Step 1.5, HeartMuLa | `server/data/music/engines/registry.py` (`MODELS`) |
+| ffmpeg / ffprobe | Conversión, loudnorm, recortes, espectrogramas y medición | `common/ffmpeg` |
+| whisper | Comparar y revisar la narración contra el guion | `server/data/narration/evaluation/` |
 | ruff + pytest | Lint (`ANN001/ANN201`, comillas simples, 120 columnas) y pruebas con doctests | `pyproject.toml` |
 
 ## 2. Equipo

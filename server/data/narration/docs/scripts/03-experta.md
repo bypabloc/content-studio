@@ -1,4 +1,4 @@
-# 3 · Experta → `server/data/narration/voz/experta.wav`
+# 3 · Experta → `server/data/narration/reference/expert.wav`
 
 **Intención**: claro y seguro, como quien le explica algo a un colega; ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~150 ppm) · **Tono**: medio, tu voz natural · **Orden en la sesión**: 3.º
@@ -34,7 +34,7 @@ Sabes del tema y no necesitas convencer a nadie: **explicas**. Es una conversaci
 - *música*, *cámara*: esdrújulas, acento claro en la primera sílaba, sin cantar.
 - No caigas en tono de profesor: estás explicando, no dictando.
 
-## Texto exacto (debe coincidir con `voz/experta.txt`)
+## Texto exacto (debe coincidir con `reference/expert.txt`)
 
 ```
 Mira, el problema real no es la cámara: es la falta de una idea clara. Cuando el guion, la música y la edición cuentan lo mismo, el video funciona.

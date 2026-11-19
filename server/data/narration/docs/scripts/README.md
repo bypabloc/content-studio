@@ -8,20 +8,20 @@ Se graba **un clip por estilo**, todos el mismo día, en el mismo lugar y con el
 
 | Orden | Archivo a grabar | Guion | Duración | Ritmo | Para qué videos |
 |---|---|---|---|---|---|
-| 1 | `server/data/narration/voz/neutral.wav` | [00-neutral.md](00-neutral.md) | 10–12 s | medio (~150 ppm) | Ancla de timbre; base para IndexTTS y VoxCPM2 con emoción por parámetro |
-| 2 | `server/data/narration/voz/amistosa.wav` | [01-amistosa.md](01-amistosa.md) | 9–11 s | ágil (~165 ppm) | Reels, saludos, llamadas a la acción |
-| 3 | `server/data/narration/voz/experta.wav` | [03-experta.md](03-experta.md) | 10–12 s | medio (~150 ppm) | Demos y tutoriales |
-| 4 | `server/data/narration/voz/clara.wav` | [04-clara.md](04-clara.md) | 10–12 s | medio (~140 ppm) | Tutoriales paso a paso |
-| 5 | `server/data/narration/voz/estable.wav` | [05-estable.md](05-estable.md) | 10–11 s | ágil (~160 ppm) | Corporativo, explicativos largos |
-| 6 | `server/data/narration/voz/suave.wav` | [02-suave.md](02-suave.md) | 10–11 s | medio (~140 ppm) | Bienestar, temas sensibles |
-| 7 | `server/data/narration/voz/energica.wav` | [06-energica.md](06-energica.md) | 8–10 s | rápido (~175 ppm) | Publicidad, ganchos de reel |
-| 8 | `server/data/narration/voz/dramatica.wav` | [07-dramatica.md](07-dramatica.md) | 10–12 s | lento (~130 ppm) | Storytelling, tráiler |
-| 9 | `server/data/narration/voz/triste.wav` | [08-triste.md](08-triste.md) | 10–12 s | lento (~120 ppm) | Historias emotivas |
-| 10 | `server/data/narration/voz/intima.wav` | [09-intima.md](09-intima.md) | 9–11 s | lento (~125 ppm) | Secretos, cierres cercanos, suspenso |
-| 11 | `server/data/narration/voz/neutral-en.wav` | [10-neutral-en.md](10-neutral-en.md) | 10–12 s | medio (~150 ppm) | **Videos en inglés** (evita el acento cruzado) |
-| 12 | `server/data/narration/voz/neutral-fin.wav` | [00-neutral.md](00-neutral.md) (mismo texto) | 10–12 s | medio (~150 ppm) | Control de la sesión; también sirve de segunda neutral |
-| Opc. | `server/data/narration/voz/susurro.wav` | [09-intima.md](09-intima.md#variante-susurro) | 7–9 s | lento | Solo efectos; pierde timbre |
-| Opc. | `server/data/narration/voz/emociones/*.wav` | [11-emociones.md](11-emociones.md) | 5–8 s c/u | — | Clips de emoción para IndexTTS 2.5 (`emo_audio_prompt`) |
+| 1 | `server/data/narration/reference/neutral.wav` | [00-neutral.md](00-neutral.md) | 10–12 s | medio (~150 ppm) | Ancla de timbre; base para IndexTTS y VoxCPM2 con emoción por parámetro |
+| 2 | `server/data/narration/reference/friendly.wav` | [01-amistosa.md](01-amistosa.md) | 9–11 s | ágil (~165 ppm) | Reels, saludos, llamadas a la acción |
+| 3 | `server/data/narration/reference/expert.wav` | [03-experta.md](03-experta.md) | 10–12 s | medio (~150 ppm) | Demos y tutoriales |
+| 4 | `server/data/narration/reference/clear.wav` | [04-clara.md](04-clara.md) | 10–12 s | medio (~140 ppm) | Tutoriales paso a paso |
+| 5 | `server/data/narration/reference/steady.wav` | [05-estable.md](05-estable.md) | 10–11 s | ágil (~160 ppm) | Corporativo, explicativos largos |
+| 6 | `server/data/narration/reference/soft.wav` | [02-suave.md](02-suave.md) | 10–11 s | medio (~140 ppm) | Bienestar, temas sensibles |
+| 7 | `server/data/narration/reference/energetic.wav` | [06-energica.md](06-energica.md) | 8–10 s | rápido (~175 ppm) | Publicidad, ganchos de reel |
+| 8 | `server/data/narration/reference/dramatic.wav` | [07-dramatica.md](07-dramatica.md) | 10–12 s | lento (~130 ppm) | Storytelling, tráiler |
+| 9 | `server/data/narration/reference/sad.wav` | [08-triste.md](08-triste.md) | 10–12 s | lento (~120 ppm) | Historias emotivas |
+| 10 | `server/data/narration/reference/intimate.wav` | [09-intima.md](09-intima.md) | 9–11 s | lento (~125 ppm) | Secretos, cierres cercanos, suspenso |
+| 11 | `server/data/narration/reference/neutral-en.wav` | [10-neutral-en.md](10-neutral-en.md) | 10–12 s | medio (~150 ppm) | **Videos en inglés** (evita el acento cruzado) |
+| 12 | `server/data/narration/reference/neutral-end.wav` | [00-neutral.md](00-neutral.md) (mismo texto) | 10–12 s | medio (~150 ppm) | Control de la sesión; también sirve de segunda neutral |
+| Opc. | `server/data/narration/reference/whisper.wav` | [09-intima.md](09-intima.md#variante-susurro) | 7–9 s | lento | Solo efectos; pierde timbre |
+| Opc. | `server/data/narration/reference/emotions/*.wav` | [11-emociones.md](11-emociones.md) | 5–8 s c/u | — | Clips de emoción para IndexTTS 2.5 (`emo_audio_prompt`) |
 
 ppm = palabras por minuto.
 
@@ -31,7 +31,7 @@ ppm = palabras por minuto.
 
 - **Lugar**: un cuarto chico con ropa, cortinas o un sillón, que absorben el eco (un clóset con ropa funciona muy bien). Evita cocinas y baños. Apaga el ventilador, el aire acondicionado y aleja el refrigerador. **El modelo copia la sala**: una sala con eco clona con eco.
 - **Micrófono**: a **10–20 cm** de la boca, un poco de costado para que las "p" no golpeen, y **a la misma distancia en todas las tomas** (marca la posición con cinta). En una sala sin tratar, un micrófono dinámico rechaza mejor la habitación; un celular sirve si la sala es seca.
-- **Nivel**: los picos de la grabación entre **-12 y -6 dB**, nunca saturados. **No cambies la ganancia entre estilos**: la diferencia de volumen entre `intima` y `energica` es parte de la emoción y se normaliza después.
+- **Nivel**: los picos de la grabación entre **-12 y -6 dB**, nunca saturados. **No cambies la ganancia entre estilos**: la diferencia de volumen entre `intimate` y `energetic` es parte de la emoción y se normaliza después.
 - **Formato**: **WAV mono, 48 kHz, 24 bits** (16 bits también sirve). Nada de m4a, mp3 ni audios de WhatsApp: la compresión se clona y convertir a WAV no la recupera.
 - **Sin procesado**: sin compresor, sin ecualizador, sin reducción de ruido, sin "mejorar voz" del celular ni de Zoom. **El denoise baja la similitud con tu voz**: si hay ruido, vuelve a grabar.
 - **Bordes**: deja **0.3–0.5 s de silencio** al inicio y al final. Ninguna pausa interna de más de 1 s.
@@ -51,7 +51,7 @@ ppm = palabras por minuto.
 
 Las marcas **no se leen**. En una lista con "y" ("ideas, proyectos y notas"), el elemento antes de la "y" sube un poco y el último cae: así suena el español cuando cierra una enumeración.
 
-El texto que dices tiene que coincidir **palabra por palabra** con `server/data/narration/voz/<estilo>.txt`. Si cambias algo al leer, edita el `.txt`. Qwen, CosyVoice (zero-shot) y VoxCPM2 (modo Hi-Fi) usan esa transcripción: si no coincide, **clonan peor y pueden trabar la primera palabra**.
+El texto que dices tiene que coincidir **palabra por palabra** con `server/data/narration/reference/<estilo>.txt`. Si cambias algo al leer, edita el `.txt`. Qwen, CosyVoice (zero-shot) y VoxCPM2 (modo Hi-Fi) usan esa transcripción: si no coincide, **clonan peor y pueden trabar la primera palabra**.
 
 ## Español neutro: reglas para todas las grabaciones
 
@@ -67,24 +67,24 @@ El texto que dices tiene que coincidir **palabra por palabra** con `server/data/
 
 ## Cómo grabar cada clip
 
-Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python cli.py narration grabar --dispositivo <fuente> --estilo <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
+Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python cli.py narration grabar --device <fuente> --style <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
 
 
 1. Lee la sección **Actitud** del guion y repasa la versión marcada en voz alta una vez.
 2. Graba **3 tomas seguidas**, con 2 s de silencio entre ellas.
 3. Escúchalas con audífonos y quédate con la que suene **más natural**, no con la más "actuada": una referencia sobreactuada hace que **toda** la narración suene sobreactuada.
-4. Recórtala dejando 0.3–0.5 s de silencio en cada borde y guárdala como `server/data/narration/voz/<estilo>.wav`.
+4. Recórtala dejando 0.3–0.5 s de silencio en cada borde y guárdala como `server/data/narration/reference/<estilo>.wav`.
 5. Verifica la duración y los niveles (abajo). Si quedó fuera de rango, el ritmo no es el pedido: repite.
 
 ## Convertir, recortar y normalizar con ffmpeg
 
 ```bash
 # Recortar una toma (desde 4.2 s, durante 10.5 s) a WAV mono 48 kHz 24 bits
-ffmpeg -ss 4.2 -t 10.5 -i sesion.wav -ac 1 -ar 48000 -c:a pcm_s24le server/data/narration/voz/bruto-amistosa.wav
+ffmpeg -ss 4.2 -t 10.5 -i sesion.wav -ac 1 -ar 48000 -c:a pcm_s24le server/data/narration/reference/bruto-friendly.wav
 
 # Normalizar con ganancia lineal (no cambia la dinámica) a -18 LUFS y pico real <= -3 dB
-ffmpeg -i server/data/narration/voz/bruto-amistosa.wav -af loudnorm=I=-18:TP=-3:LRA=11:linear=true \
-  -ac 1 -ar 48000 -c:a pcm_s24le server/data/narration/voz/amistosa.wav
+ffmpeg -i server/data/narration/reference/bruto-friendly.wav -af loudnorm=I=-18:TP=-3:LRA=11:linear=true \
+  -ac 1 -ar 48000 -c:a pcm_s24le server/data/narration/reference/friendly.wav
 ```
 
 Con `linear=true`, `loudnorm` solo se mantiene lineal si el pico real queda a 15 dB o menos sobre la loudness. La voz sin comprimir suele estar entre 21 y 25 dB, y alejarse del micrófono no cambia esa distancia. En ese caso `loudnorm` pasa a modo dinámico. `python cli.py narration grabar` lo resuelve solo: aplica la ganancia, pasa un limitador rápido (`alimiter`) que recorta únicamente las plosivas y termina con una ganancia lineal acotada por el pico.
@@ -92,7 +92,7 @@ Con `linear=true`, `loudnorm` solo se mantiene lineal si el pico real queda a 15
 ## Verificar cada clip
 
 ```bash
-f=server/data/narration/voz/amistosa.wav
+f=server/data/narration/reference/friendly.wav
 # Duración, canales y sample rate
 ffprobe -v error -show_entries stream=channels,sample_rate:format=duration -of default=nw=1 "$f"
 # Loudness y pico real
@@ -117,19 +117,19 @@ ffmpeg -hide_banner -nostats -i "$f" -af silencedetect=n=-45dB:d=0.25 -f null - 
 ## Probar la referencia
 
 ```bash
-python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
-  --texto "Hola, ¿cómo estás? Hoy te muestro cómo editar un video en menos de un minuto."
+python cli.py narration tts --model qwen-0.6b --style friendly \
+  --text "Hola, ¿cómo estás? Hoy te muestro cómo editar un video en menos de un minuto."
 ```
 
-Compara la salida (`out/narration/qwen-0.6b-amistosa.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno ([spec](../../../../../docs/specs/narracion-motores-voicestudio.md)).
+Compara la salida (`out/narration/qwen-0.6b-friendly.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno ([spec](../../../../../docs/specs/narracion-motores-voicestudio.md)).
 
 ## Checklist final
 
-- [ ] 12 archivos en `server/data/narration/voz/`: `neutral`, `amistosa`, `experta`, `clara`, `estable`, `suave`, `energica`, `dramatica`, `triste`, `intima`, `neutral-en` y `neutral-fin` (`.wav`).
+- [ ] 12 archivos en `server/data/narration/reference/`: `neutral`, `friendly`, `expert`, `clear`, `steady`, `soft`, `energetic`, `dramatic`, `sad`, `intimate`, `neutral-en` y `neutral-end` (`.wav`).
 - [ ] Cada `.wav` dice exactamente lo de su `.txt`.
 - [ ] Todos grabados en la misma sesión, lugar, micrófono, distancia y ganancia.
 - [ ] Mono, 48 kHz, sin eco, sin ruido de fondo, sin saturar, sin procesar.
 - [ ] Duraciones y niveles dentro de los rangos.
-- [ ] `neutral.wav` y `neutral-fin.wav` suenan a la misma voz.
-- [ ] Los `.wav` **no** se suben al repo: `.gitignore` ignora `server/data/narration/voz/**/*.wav` (el repo es público).
+- [ ] `neutral.wav` y `neutral-end.wav` suenan a la misma voz.
+- [ ] Los `.wav` **no** se suben al repo: `.gitignore` ignora `server/data/narration/reference/**/*.wav` (el repo es público).
 - [ ] La persona que graba dio permiso para clonar su voz.

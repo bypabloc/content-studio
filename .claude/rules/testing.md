@@ -14,10 +14,10 @@ Runner único: `uv run pytest` (con `--doctest-modules`; sin GPU, lo mismo que l
 | :--- | :--- | :--- | :--- |
 | Doctest | El docstring de la función en `server/src/` | Funciones puras chicas: parsers, rutas, formatos | Sí |
 | Caracterización | `server/tests/test_caracterizacion.py` + `server/tests/fixtures/` | Que la salida de los parsers y bloques no cambie sin querer | Sí |
-| Estructura | `tests/validators/test_estructura.py` | Reglas de `codigo-python.md`: 300 líneas, sintaxis 3.10, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
+| Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: 300 líneas, sintaxis 3.10, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
 | Bugs | `server/tests/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
-| CLI y asistente | `server/tests/test_cli.py`, `server/tests/test_asistente.py` | Typer, flags y el asistente sin TTY | Sí |
-| Registro | `server/tests/test_registro.py` | Motores y comandos registrados | Sí |
+| CLI y asistente | `server/tests/test_cli.py`, `server/tests/test_assistant.py` | Typer, flags y el asistente sin TTY | Sí |
+| Registro | `server/tests/test_registry.py` | Motores y comandos registrados | Sí |
 | Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `devtools/tests/test_devtools.py` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
 | Local | `server/tests/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
 | tdd efímero | `tests/tdd/test_<pieza>.py` | Razonar una pieza antes de su test permanente | **Nunca**: el `pre-push` falla si existe |

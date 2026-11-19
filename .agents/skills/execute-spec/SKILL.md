@@ -29,7 +29,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 
 ## 3. Verificación final, PR y merge
 
-1. `Phase: verification`. Corre una vez la batería de `03-verificacion-final.md`: ruff, pytest, `pytest -m local` si toca un motor, la corrida real con `turno-gpu run --trabajo=<NN>-<slug> -- …` y duración, volumen y espectrograma de cada salida (las imágenes las abre `image-reader`). Si toca configuración de agentes, la validación headless. Lo que falle se corrige con commits `fix(...)` y se repite solo eso.
+1. `Phase: verification`. Corre una vez la batería de `03-verificacion-final.md`: ruff, pytest, `pytest -m local` si toca un motor, la corrida real con `gpu-turn run --job=<NN>-<slug> -- …` y duración, volumen y espectrograma de cada salida (las imágenes las abre `image-reader`). Si toca configuración de agentes, la validación headless. Lo que falle se corrige con commits `fix(...)` y se repite solo eso.
 2. Último commit: fichas de `docs/process/01-done/` si la spec es funcional; en una spec suelta, `git rm -r docs/specs/<NN>-<slug>/` y su fila del índice. Antes de borrar, todo lo importante tiene su ficha en WARNING o PENDING.
 3. `Phase: integration`: `git fetch origin dev` y merge de `origin/dev` en la rama si avanzó; un solo push; `gh pr list --head <rama>` y crea el PR a `dev` si no existe (cuerpo: problema, solución, cómo probar con comandos reales, fichas WARNING/PENDING).
 4. `gh pr checks <n> --watch` (`Phase: external-wait` mientras tanto); con todo verde, `gh pr merge <n> --merge`.

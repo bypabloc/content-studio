@@ -1,4 +1,4 @@
-# 8 · Triste → `server/data/narration/voz/triste.wav`
+# 8 · Triste → `server/data/narration/reference/sad.wav`
 
 **Intención**: emotivo y reflexivo; ritmo lento, voz baja pero con cuerpo.
 **Duración objetivo**: 10–12 s · **Ritmo**: lento (~120 ppm) · **Tono**: grave · **Orden en la sesión**: 9.º
@@ -32,7 +32,7 @@ Recuerdas algo que dolió pero ya aceptaste. **No llores ni quiebres la voz**: e
 - *adelante*: "d" completa.
 - No arrastres las vocales finales: la lentitud está en las pausas.
 
-## Texto exacto (debe coincidir con `voz/triste.txt`)
+## Texto exacto (debe coincidir con `reference/sad.txt`)
 
 ```
 Hay días en que todo pesa un poco más. Ese año perdimos mucho… y aun así, aprendimos a seguir adelante, juntos.
