@@ -20,18 +20,23 @@ import sys
 # Inicio de un comando simple: el comienzo, un operador o `do`/`then`/`else`, y variables de entorno delante.
 # Sin la comilla invertida: en un mensaje de commit es markdown, no una sustitución.
 START = r'(?:^|[;&|\n(]|\b(?:do|then|else)\b)\s*(?:\w+=\S*\s+)*'
+# El comando solo, no un nombre que empieza igual (`wsl=0`, `sleep_x`): lo sigue un espacio o el fin.
+END = r'(?=\s|$)'
+# Cada mensaje dice qué se bloqueó, por qué y qué hacer en su lugar.
 RULES = [
     (
-        re.compile(START + r'(?:sleep|Start-Sleep)\b', re.IGNORECASE),
-        'Blocked by .agents/hooks/shell_guard.py (command-output.md): no foreground `sleep`. Run the long command in '
-        'the background (run_in_background) and wait for its notification, block on the real signal (`gh pr checks '
-        '<n> --watch`, the command itself) or watch a condition with Monitor.',
+        re.compile(START + r'(?:sleep|Start-Sleep)' + END, re.IGNORECASE),
+        'Blocked by .agents/hooks/shell_guard.py: a foreground `sleep`. Why: it freezes the agent without progress, '
+        'and the real wait is already signalled by the harness or by the command itself (command-output.md). '
+        'Instead: run the long command in the background (run_in_background) and keep working until its notification, '
+        'block on the real signal (`gh pr checks <n> --watch`, the command itself) or watch a condition with Monitor.',
     ),
     (
-        re.compile(START + r'wsl(?:\.exe)?\b', re.IGNORECASE),
-        'Blocked by .agents/hooks/shell_guard.py (command-output.md): nothing runs in WSL, not tests, installs nor CI '
-        'reproductions. Read a Linux-only CI failure with `gh run view <id> --log-failed`, fix it here and validate '
-        'with the push; leave a PENDING note if it cannot be checked before.',
+        re.compile(START + r'wsl(?:\.exe)?' + END, re.IGNORECASE),
+        'Blocked by .agents/hooks/shell_guard.py: a `wsl` command. Why: WSL is another instance the user does not use '
+        'nor care about; what counts is this Windows checkout and the CI (command-output.md). Instead: read a '
+        'Linux-only CI failure with `gh run view <id> --log-failed`, fix it here and validate it with the push; leave '
+        'a note in docs/process/PENDING/ if it cannot be checked before.',
     ),
 ]
 
@@ -51,6 +56,8 @@ def reason(command: str) -> str | None:
     [False, False, False]
     >>> bool(reason('git commit -m "docs: nada de `sleep` ni `wsl`"'))
     False
+    >>> [bool(reason(c)) for c in ('out=[]; wsl=0; n=1', 'sleep_x=1 python a.py', 'ls; sleep', 'x && wsl')]
+    [False, False, True, True]
     """
     return next((text for pattern, text in RULES if pattern.search(command)), None)
 

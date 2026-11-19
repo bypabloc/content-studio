@@ -93,8 +93,9 @@ def main() -> None:
     if target:
         name = os.path.basename(os.path.normpath(target))
         print(
-            f'worktree_guard: blocked, `{target}` is inside the repo and its rules would load twice.'
-            f' Create it in ../content-studio-worktrees/{name} (worktrees.md).',
+            f'Blocked by .claude/hooks/worktree_guard.py: a worktree at `{target}`, inside the repo. Why: a session'
+            ' in the main checkout would load its rules twice (worktrees.md). Instead: create it in'
+            f' ../content-studio-worktrees/{name} with `git worktree add` from origin/dev.',
             file=sys.stderr,
         )
         sys.exit(2)
