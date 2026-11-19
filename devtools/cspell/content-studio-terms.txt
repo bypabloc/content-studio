@@ -1,0 +1,13 @@
+# Diccionario propio de cspell (cspell.config.yaml, D-1). Solo términos en inglés o nombres propios técnicos:
+# motores, modelos, voces y términos de audio. Nunca agregar palabras en español.
+acestep
+chatterbox
+cosyvoice
+heartmula
+indextts
+omnivoice
+qwen
+voxcpm
+yesid
+lufs
+ebur

@@ -1,0 +1,68 @@
+# cspell de content-studio, adaptado de klinikae (spec 002, D-1). El código y los datos van en inglés. Lo que queda en
+# español (docstrings, comentarios, docs y catálogos) no se revisa o se revisa con en,es. Diccionario propio:
+# devtools/cspell/content-studio-terms.txt. Nunca agregar palabras en español ahí.
+version: '0.2'
+import:
+  - '@cspell/dict-es-es/cspell-ext.json'
+language: en
+caseSensitive: false
+minWordLength: 4
+dictionaries:
+  - content-studio-terms
+dictionaryDefinitions:
+  - name: content-studio-terms
+    path: ./devtools/cspell/content-studio-terms.txt
+    addWords: true
+patterns:
+  - name: python-docstring
+    pattern: '/"""[\s\S]*?"""/g'
+  - name: hash-comment
+    pattern: '/#.*$/gm'
+  - name: string-literal
+    pattern: '/"[^"\n]*"|''[^'']*''/g'
+ignoreRegExpList:
+  - python-docstring
+  - hash-comment
+overrides:
+  # Los strings de los tests pueden estar en español (son datos de prueba, no identificadores).
+  - filename: '**/tests/**'
+    ignoreRegExpList:
+      - string-literal
+  # Textos para leer en voz alta y catálogos de datos: español permitido.
+  - filename: 'server/data/narration/docs/scripts/**'
+    language: en,es
+  - filename: 'server/data/**/*.json'
+    language: en,es
+ignorePaths:
+  # Temporal: cada spec de la serie saca una carpeta de esta lista al traducirla (ciclos 2 a 6 de la 002).
+  - server/src/**
+  - devtools/**
+  - server/tests/**
+  - tests/**
+  - .agents/hooks/**
+  - .claude/hooks/**
+  - cli.py
+  # Dependencias, salidas, grafo y datos que no son código: no se revisan.
+  - node_modules/**
+  - graphify-out/**
+  - tmp/**
+  - out/**
+  - logs/**
+  - docs/**
+  - .claude/rules/**
+  - .claude/skills/**
+  - .agents/rules/**
+  - .agents/skills/**
+  - '**/*.md'
+  - bun.lock
+  - uv.lock
+  - '**/*.lock'
+  - server/data/**/*.wav
+  - server/data/**/*.m4a
+  - server/data/**/*.mp3
+  - server/data/**/*.txt
+  - server/data/**/motores/**
+  - server/data/**/models/**
+  - server/data/**/.venv*/**
+  - server/data/**/voces/*/**
+  - server/data/**/voices/*/**

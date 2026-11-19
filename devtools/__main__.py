@@ -15,6 +15,7 @@ COMANDOS = {
     'contexto-agentes': ('devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
     'reglas': ('devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
     'move-data': ('devtools.move_data', 'mueve narration/ y music/ a server/data/ (sin --apply, solo imprime el plan)'),
+    'spelling': ('devtools.spelling', '[--staged] [archivo ...]: cspell sobre lo versionado o lo staged'),
 }
 
 

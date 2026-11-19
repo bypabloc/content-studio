@@ -1,0 +1,9 @@
+{
+  "name": "content-studio",
+  "private": true,
+  "workspaces": [],
+  "devDependencies": {
+    "@cspell/dict-es-es": "^3.0.9",
+    "cspell": "^10.5.2"
+  }
+}
