@@ -1,3 +1,5 @@
+import { Toaster } from 'sonner';
+import { QueuePanel } from '@/features/queue/QueuePanel';
 import { t } from '@/shared/i18n/t';
 import { useTheme } from '@/shared/theme/useTheme';
 import { CommandPalette } from './CommandPalette';
@@ -20,6 +22,7 @@ export function Shell({ version }: { version: string }) {
           <p className="text-xs text-muted-foreground">{t('app.version', { version })}</p>
         </header>
         <Sidebar />
+        <QueuePanel />
         <div className="mt-auto">
           <ThemeToggle mode={theme} onChange={setTheme} />
         </div>
@@ -29,6 +32,7 @@ export function Shell({ version }: { version: string }) {
         <p className="text-sm text-muted-foreground">{t('shell.empty')}</p>
       </main>
       <CommandPalette />
+      <Toaster />
     </div>
   );
 }

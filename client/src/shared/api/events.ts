@@ -13,22 +13,29 @@ export interface EventSourceLike {
   close(): void;
 }
 
+export interface EventsOptions {
+  /** Abre la conexión; por defecto, el EventSource del navegador (Tauri usa el de su webview). */
+  open?: (url: string) => EventSourceLike;
+  /** Se llama una vez por trabajo cuando pasa a `done` o `error`: ahí van los avisos. */
+  onFinished?: (job: Job) => void;
+}
+
 /**
  * Un único EventSource a /events: cada evento actualiza la caché de TanStack Query, sin volver a pedir los datos.
  * Devuelve la función que cierra la conexión.
  */
-export function connectEvents(
-  connection: Connection,
-  queryClient: QueryClient,
-  open: (url: string) => EventSourceLike = (url) => new EventSource(url),
-): () => void {
+export function connectEvents(connection: Connection, queryClient: QueryClient, options: EventsOptions = {}): () => void {
+  const open = options.open ?? ((url: string) => new EventSource(url));
   const source = open(`${connection.baseUrl}/events?token=${encodeURIComponent(connection.token)}`);
 
   source.addEventListener('job', (event) => {
     const changed = JSON.parse(event.data) as Job;
+    const before = queryClient.getQueryData<Job[]>(['jobs'])?.find((job) => job.id === changed.id)?.status;
     queryClient.setQueryData(['jobs', changed.id], changed);
     // Si la lista no se pidió todavía, el updater devuelve undefined y la caché no cambia.
     queryClient.setQueryData<Job[]>(['jobs'], (jobs) => (jobs ? upsert(jobs, changed) : jobs));
+    const finished = changed.status === 'done' || changed.status === 'error';
+    if (finished && before !== changed.status) options.onFinished?.(changed);
   });
 
   source.addEventListener('queue', (event) => {
@@ -49,7 +56,8 @@ function upsert(jobs: Job[], changed: Job): Job[] {
     : [...jobs, changed];
 }
 
-function sortedBy(jobs: Job[], order: number[]): Job[] {
+/** La lista en el orden de `order`; los que no aparecen van al final, en su orden. */
+export function sortedBy(jobs: Job[], order: number[]): Job[] {
   const rank = new Map(order.map((id, index) => [id, index]));
   return [...jobs].sort((a, b) => (rank.get(a.id) ?? order.length) - (rank.get(b.id) ?? order.length));
 }

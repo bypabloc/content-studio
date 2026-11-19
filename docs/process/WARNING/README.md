@@ -31,5 +31,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [005-tanstack-query](005-tanstack-query.md) | Dependencia nueva: TanStack Query guarda los datos del server, y SSE los actualiza | el merge a `dev` |
 | [005-typescript-5](005-typescript-5.md) | TypeScript 5.9.3, no 7: `openapi-typescript` necesita su API JavaScript | el merge a `dev` |
 | [005-cobertura-client](005-cobertura-client.md) | Cobertura del client al 80 % por archivo, sin shadcn ni `main.tsx` | el merge a `dev` |
+| [005-sonner](005-sonner.md) | Dependencia nueva: sonner para los toasts de los trabajos terminados | el merge a `dev` |
+| [005-dnd-kit](005-dnd-kit.md) | Dependencia nueva: @dnd-kit para reordenar la cola con teclado y ratón | el merge a `dev` |
+| [005-plugins-tauri-js](005-plugins-tauri-js.md) | Plugins JS de opener y notification de Tauri para abrir la carpeta y avisar en Windows | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

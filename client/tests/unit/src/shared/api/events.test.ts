@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { connectEvents, type EventSourceLike, type Job } from '@/shared/api/events';
 
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
@@ -37,15 +37,43 @@ class FakeSource implements EventSourceLike {
   }
 }
 
-function setup() {
+function setup(onFinished?: (job: Job) => void) {
   const queryClient = new QueryClient();
   const source = new FakeSource();
-  const disconnect = connectEvents(connection, queryClient, (url) => {
-    source.url = url;
-    return source;
+  const disconnect = connectEvents(connection, queryClient, {
+    open: (url) => {
+      source.url = url;
+      return source;
+    },
+    onFinished,
   });
   return { queryClient, source, disconnect };
 }
+
+describe('avisos de trabajos terminados', () => {
+  it('avisa una vez cuando un trabajo pasa a done, y no otra vez con el mismo estado', () => {
+    const onFinished = vi.fn();
+    const { queryClient, source } = setup(onFinished);
+    queryClient.setQueryData(['jobs'], [job(1, { status: 'running' })]);
+
+    source.emit('job', job(1, { status: 'done', progress: 1 }));
+    source.emit('job', job(1, { status: 'done', progress: 1 }));
+
+    expect(onFinished).toHaveBeenCalledTimes(1);
+    expect(onFinished).toHaveBeenCalledWith(expect.objectContaining({ id: 1, status: 'done' }));
+  });
+
+  it('un trabajo que pasa a error también avisa; uno en curso no', () => {
+    const onFinished = vi.fn();
+    const { source } = setup(onFinished);
+
+    source.emit('job', job(2, { status: 'running' }));
+    source.emit('job', job(2, { status: 'error' }));
+
+    expect(onFinished).toHaveBeenCalledTimes(1);
+    expect(onFinished).toHaveBeenCalledWith(expect.objectContaining({ id: 2, status: 'error' }));
+  });
+});
 
 describe('connectEvents', () => {
   it('abre un solo EventSource con el token en la URL', () => {
