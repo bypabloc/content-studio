@@ -45,7 +45,8 @@ def test_session_start_compact_injects_rules_again():
 
 
 @pytest.mark.parametrize(
-    'module', ['graphify_guard', 'image_read_guard', 'safe_compound', 'verify_state', 'worktree_guard']
+    'module',
+    ['graphify_guard', 'image_read_guard', 'progress_on_commit', 'safe_compound', 'verify_state', 'worktree_guard'],
 )
 def test_doctests_of_the_hooks(module):
     sys.path.insert(0, str(ROOT / '.claude' / 'hooks'))
@@ -126,3 +127,22 @@ def test_prepare_commit_msg_removes_attribution_and_pre_push_protects_main(repo,
     subprocess.run([*GIT[:5], 'commit', '-qm', 'test: tdd'], cwd=repo, check=True)
     tdd = subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, text=True)
     assert tdd.returncode == 1 and 'tests/tdd/test_x.py' in tdd.stderr
+
+
+def test_progress_on_commit_reminds_only_with_a_linked_handoff_and_a_new_hash(tmp_path, monkeypatch):
+    sessions = tmp_path / 'tmp' / 'handoff' / '.sessions'
+    sessions.mkdir(parents=True)
+    (sessions / 's1').write_text('lote\n', encoding='utf-8')
+    (tmp_path / 'tmp' / 'handoff' / 'lote').mkdir()
+    (tmp_path / 'tmp' / 'handoff' / 'lote' / 'PROGRESS.md').write_text('Done: 001 (abc1234)\n', encoding='utf-8')
+    monkeypatch.setenv('CLAUDE_PROJECT_DIR', str(tmp_path))
+
+    def run(session: str, stdout: str, command: str = 'git commit -m x') -> str:
+        payload = {'session_id': session, 'tool_input': {'command': command}, 'tool_response': {'stdout': stdout}}
+        return hook('progress_on_commit.py', payload).stdout
+
+    new = run('s1', '[chore/x 70ff3be] chore: y')
+    assert 'lote/PROGRESS.md' in json.loads(new)['hookSpecificOutput']['additionalContext']
+    assert run('s1', '[chore/x abc1234] chore: y') == ''  # ya anotado
+    assert run('otra', '[chore/x 70ff3be] chore: y') == ''  # sesión sin handoff
+    assert run('s1', '', 'git log -1') == ''  # no es un commit

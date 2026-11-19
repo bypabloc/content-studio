@@ -25,7 +25,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 3. Si falla, diagnostica y repite solo lo afectado; no avances con el grupo en rojo.
 4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials` o `user-stop` (`.claude/session-handoff.json`); la elección sonora también es tuya (con el «debe sonar» de la spec, registrada en WARNING). Commits, push, PR, merge y cierre no se consultan: la spec ya los autoriza.
 5. Commit con el mensaje exacto del grupo en `02-plan.md` tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
-6. Anota el hash en `PROGRESS.md` (Done, Current, Remaining, ETA, Next step).
+6. En la misma respuesta del commit, anota el hash en `PROGRESS.md` (Done, Current, Remaining, ETA, Next step), no al final de la spec: tras una compactación se retoma desde ahí. El hook `progress_on_commit.py` lo recuerda tras cada `git commit`.
 
 ## 3. Verificación final, PR y merge
 
