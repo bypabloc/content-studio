@@ -25,6 +25,10 @@ MIGRATIONS = [
     );
     CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL);
     """,
+    # El pid que corre el trabajo: al arrancar, el server solo interrumpe los de procesos que ya no viven.
+    """
+    ALTER TABLE jobs ADD COLUMN owner_pid INTEGER;
+    """,
 ]
 
 

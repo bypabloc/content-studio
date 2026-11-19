@@ -5,7 +5,9 @@ La base es la verdad: el worker lee estas filas. Estas funciones no corren nada.
 
 from __future__ import annotations
 
+import os
 import sqlite3
+import sys
 from collections.abc import Mapping
 from typing import Any
 
@@ -54,8 +56,8 @@ def retry(conn: sqlite3.Connection, job_id: int) -> int:
 def claim(conn: sqlite3.Connection, job_id: int) -> bool:
     """Pasa un trabajo `queued` a `running` si nadie lo tomó antes. Solo un actor gana (server o CLI)."""
     cursor = conn.execute(
-        "UPDATE jobs SET status = 'running', started_at = ? WHERE id = ? AND status = 'queued'",
-        (utc_now(), job_id),
+        "UPDATE jobs SET status = 'running', started_at = ?, owner_pid = ? WHERE id = ? AND status = 'queued'",
+        (utc_now(), os.getpid(), job_id),
     )
     return cursor.rowcount == 1
 
@@ -81,10 +83,33 @@ def paused(conn: sqlite3.Connection) -> bool:
     return bool(settings.get(conn, PAUSED, False))
 
 
+def _alive(pid: int | None) -> bool:
+    """Si el proceso dueño del trabajo sigue vivo. Sin dueño (trabajo anterior a la migración): muerto."""
+    if not pid:
+        return False
+    if sys.platform == 'win32':  # os.kill(pid, 0) termina el proceso en Windows: se pregunta al sistema
+        import ctypes
+
+        handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if handle:
+            ctypes.windll.kernel32.CloseHandle(handle)
+        return bool(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
 def recover_interrupted(conn: sqlite3.Connection) -> int:
-    """Los `running` que quedaron de una caída pasan a error `interrupted` (AC-11). Devuelve cuántos."""
-    cursor = conn.execute(
-        "UPDATE jobs SET status = 'error', error_code = 'interrupted', finished_at = ? WHERE status = 'running'",
-        (utc_now(),),
-    )
-    return cursor.rowcount
+    """Los `running` cuyo proceso ya no existe pasan a `interrupted` (AC-11). Los de un proceso vivo no se tocan."""
+    rows = conn.execute("SELECT id, owner_pid FROM jobs WHERE status = 'running'").fetchall()
+    dead = [job_id for job_id, owner in rows if not _alive(owner)]
+    for job_id in dead:
+        conn.execute(
+            "UPDATE jobs SET status = 'error', error_code = 'interrupted', finished_at = ? WHERE id = ?",
+            (utc_now(), job_id),
+        )
+    return len(dead)

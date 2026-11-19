@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from types import SimpleNamespace
 
 import pytest
@@ -84,3 +85,28 @@ def test_claim_moves_only_a_queued_job_to_running(conn):
     assert queue.claim(conn, job_id) is True
     assert jobs.get(conn, job_id)['status'] == 'running'
     assert queue.claim(conn, job_id) is False  # otro actor ya lo tomó: no se corre dos veces
+
+
+def test_claim_records_the_process_that_runs_the_job(conn):
+    job_id = jobs.insert(conn, 'fake', 'gpu', {})
+
+    queue.claim(conn, job_id)
+
+    assert conn.execute('SELECT owner_pid FROM jobs WHERE id = ?', (job_id,)).fetchone()[0] == os.getpid()
+
+
+def test_recover_keeps_a_running_job_whose_process_is_alive(conn):
+    job_id = jobs.insert(conn, 'fake', 'gpu', {})
+    queue.claim(conn, job_id)  # lo corre este proceso, que sigue vivo: el server no lo interrumpe
+
+    assert queue.recover_interrupted(conn) == 0
+    assert jobs.get(conn, job_id)['status'] == 'running'
+
+
+def test_recover_interrupts_a_running_job_whose_process_is_gone(conn):
+    job_id = jobs.insert(conn, 'fake', 'gpu', {})
+    conn.execute("UPDATE jobs SET status = 'running', owner_pid = ? WHERE id = ?", (999_999, job_id))
+
+    assert queue.recover_interrupted(conn) == 1
+    row = jobs.get(conn, job_id)
+    assert (row['status'], row['error_code']) == ('error', 'interrupted')

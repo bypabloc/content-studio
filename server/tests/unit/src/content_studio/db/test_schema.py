@@ -11,12 +11,12 @@ def _tables(conn) -> set[str]:
     return {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
 
 
-def test_ac1_migrate_twice_sets_version_1_and_creates_tables(tmp_path):
+def test_ac1_migrate_twice_sets_version_2_and_creates_tables(tmp_path):
     with closing(connection.connect(tmp_path / 'base.db')) as conn:
         schema.migrate(conn)
         schema.migrate(conn)
 
-        assert conn.execute('PRAGMA user_version').fetchone()[0] == 1
+        assert conn.execute('PRAGMA user_version').fetchone()[0] == 2
         assert {'jobs', 'settings'} <= _tables(conn)
 
 
