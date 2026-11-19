@@ -43,7 +43,7 @@
           },
           {
             "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/sleep_guard.py\""
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/shell_guard.py\""
           },
           {
             "type": "command",
