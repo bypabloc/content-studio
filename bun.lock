@@ -24,6 +24,7 @@
         "react": "19.3.1",
         "react-dom": "19.3.1",
         "sonner": "2.0.8",
+        "wavesurfer.js": "8.1.0",
       },
       "devDependencies": {
         "@tailwindcss/vite": "4.3.5",
@@ -792,6 +793,8 @@
     "vscode-uri": ["vscode-uri@3.2.0", "", {}, "sha512-m2gXo3bn0G1kT9InzMf07fTbqMbGtyckj3bH5ktLO+1Ssv+yiATZ4dhwaQv9UZWxJh6E9IFGnQyjgWVDWVBDrg=="],
 
     "w3c-xmlserializer": ["w3c-xmlserializer@6.0.0", "", { "dependencies": { "xml-name-validator": "^5.0.0" } }, "sha512-4Nsy8K5Tr6SPDH9jhKJOHf7ChDrc1zufZTVSF7x72hwuEXBqxqk9G6cK+K2NRUtB3iELRJqjXb4JPDMBjMTl2Q=="],
+
+    "wavesurfer.js": ["wavesurfer.js@8.1.0", "", {}, "sha512-7/FFjqZxrtZ5pYyjTbb5HPmMAwq5vx4qZRKFsMz1E1wLDVVkueKatR9RW3FjpKQTHFgCpc7VUYUpwTjyIZKLwQ=="],
 
     "webidl-conversions": ["webidl-conversions@8.0.1", "", {}, "sha512-BMhLD/Sw+GbJC21C/UgyaZX41nPt8bUTg+jWyDeg7e7YN4xOM05YPSIXceACnXVtqyEw/LMClUQMtMZ+PGGpqQ=="],
 

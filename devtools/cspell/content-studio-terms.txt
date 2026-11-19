@@ -116,6 +116,7 @@ venvs
 voicestudio
 volumedetect
 voxcpm
+wavesurfer
 wavlm
 wavs
 worktrees

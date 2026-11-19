@@ -16,6 +16,12 @@ vi.mock('@/features/narration/useScriptImport', () => ({
   },
 }));
 
+// El resultado tiene su propio test: aquí solo importa qué toma le llega.
+vi.mock('@/features/narration/NarrationResult', async () => {
+  const { createElement } = await import('react');
+  return { NarrationResult: ({ job }: { job: { id: number } }) => createElement('p', null, `resultado ${job.id}`) };
+});
+
 const CATALOG = {
   engines: [
     { id: 'voxcpm2', license: 'Apache-2.0', commercial: true, installed: true, recommended: true, note: '', batch: false },
@@ -26,9 +32,10 @@ const CATALOG = {
 const CLEAN_LINT = { issues: [], words: 3, seconds: 2, guide: 'formato-guion.md' };
 
 beforeEach(() => {
-  api.get.mockImplementation(async (path: string) =>
-    path === '/catalog/narration' ? CATALOG : { key: path.replace('/settings/', ''), value: null },
-  );
+  api.get.mockImplementation(async (path: string) => {
+    if (path === '/jobs') return [];
+    return path === '/catalog/narration' ? CATALOG : { key: path.replace('/settings/', ''), value: null };
+  });
   api.put.mockImplementation(async (path: string, body: { value: unknown }) => ({ key: path, value: body.value }));
   api.post.mockImplementation(async (path: string) => (path === '/jobs' ? { id: 1 } : CLEAN_LINT));
 });
@@ -95,6 +102,23 @@ describe('NarrationPage', () => {
         { kind: 'narration', params: expect.objectContaining({ file: ['C:/g/b.json'] }) },
       ]),
     );
+  });
+
+  it('muestra la última toma terminada de narración: no las que esperan en la cola ni las de música', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/jobs') {
+        return [
+          { id: 3, kind: 'narration', status: 'done' },
+          { id: 5, kind: 'narration', status: 'queued' },
+          { id: 4, kind: 'music', status: 'done' },
+          { id: 6, kind: 'narration.regenerate', status: 'done' },
+        ];
+      }
+      return path === '/catalog/narration' ? CATALOG : { key: path.replace('/settings/', ''), value: null };
+    });
+    await renderPage();
+
+    expect(await screen.findByText('resultado 6')).toBeTruthy();
   });
 
   it('con avisos del linter, el botón lo dice y aun así deja generar', async () => {

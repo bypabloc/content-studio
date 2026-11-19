@@ -43,6 +43,12 @@ describe('createApi', () => {
     expect(error).toMatchObject({ status: 404, code: 'job_not_found', message: 'No existe el trabajo 3' });
   });
 
+  it('fileUrl da la URL de un archivo con el token en la consulta, para el <audio> y la forma de onda', () => {
+    const url = createApi(connection, reply({})).fileUrl('D:/out/a b.wav');
+
+    expect(url).toBe('http://127.0.0.1:9000/files?path=D%3A%2Fout%2Fa%20b.wav&token=tok');
+  });
+
   it('ante un error sin código (validación de FastAPI) usa el texto genérico del catálogo', async () => {
     const error = await createApi(connection, reply({ detail: [] }, 422))
       .post('/jobs', {})

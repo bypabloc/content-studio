@@ -60,5 +60,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [006-editor-capa](006-editor-capa.md) | Los avisos del editor se pintan en una capa detrás del campo, con el texto del server en el tooltip | el merge a `dev` |
 | [006-licencia-y-opciones](006-licencia-y-opciones.md) | La licencia se guarda por motor (`license.accepted.<motor>`) y la elección espera a que se guarde | el merge a `dev` |
 | [006-masterizacion-cspell](006-masterizacion-cspell.md) | «Masterización» es palabra permitida de cspell en `client/messages/es.json` | el merge a `dev` |
+| [006-wavesurfer](006-wavesurfer.md) | Dependencia nueva: `wavesurfer.js` 8.1.0 (exacta) dibuja la onda con los picos del server | el merge a `dev` |
+| [006-tomas-desde-la-carpeta](006-tomas-desde-la-carpeta.md) | El resultado lee `script.json` y el `.json` de la toma de su carpeta; no hay endpoint nuevo | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

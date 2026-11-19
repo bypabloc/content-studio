@@ -92,5 +92,17 @@
   "narration.generate.shortcut": "Ctrl+Enter",
   "narration.generate.warnings": "{count} avisos: generar igual",
   "nav.group.generate": "Generar",
-  "nav.narration": "Narración"
+  "nav.narration": "Narración",
+  "player.play": "Reproducir",
+  "player.pause": "Pausar",
+  "narration.result.title": "Resultado",
+  "narration.result.loudness": "{lufs} LUFS · pico {peak} dB",
+  "narration.result.unevaluated": "Sin evaluar: marca «Evaluar con whisper» para ver las diferencias.",
+  "narration.result.silence": "{seconds} s de silencio dentro del párrafo",
+  "narration.result.rhythm": "ritmo {speed} palabras/s (mediana {median})",
+  "narration.result.diff.change": "se oyó distinto:",
+  "narration.result.diff.missing": "falta:",
+  "narration.result.diff.extra": "sobra:",
+  "narration.result.regenerate": "Regenerar",
+  "narration.result.other": "Otras observaciones"
 }

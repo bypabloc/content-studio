@@ -27,6 +27,9 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
     post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
     put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
     del: <T>(path: string) => request<T>('DELETE', path),
+    /** URL de un archivo de out/ para el <audio> o la forma de onda: sin cabeceras, el token va en la consulta. */
+    fileUrl: (path: string) =>
+      `${connection.baseUrl}/files?path=${encodeURIComponent(path)}&token=${encodeURIComponent(connection.token)}`,
   };
 }
 
