@@ -25,5 +25,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [004-cancelar-procesos](004-cancelar-procesos.md) | Cancelar termina el árbol del proceso: taskkill en Windows, grupo en POSIX | `main` (prueba en WSL) |
 | [004-recomendados-narracion-musica](004-recomendados-narracion-musica.md) | La narración recomienda VoxCPM2, no Qwen 0.6B | `main` (narración real, T9) |
 | [004-cli-salida-y-token](004-cli-salida-y-token.md) | `studio` rechaza `--output` y `--folder`; `serve` imprime el token que genera | `main` |
+| [004-duracion-musica](004-duracion-musica.md) | La música sale en 12 s y no en 15: el recorte de silencio del motor (PENDING 001) | `main` (decisión del usuario) |
+| [004-recuperacion-procesos](004-recuperacion-procesos.md) | Al arrancar, el server interrumpe solo los trabajos cuyo proceso murió | `main` (prueba en WSL) |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
