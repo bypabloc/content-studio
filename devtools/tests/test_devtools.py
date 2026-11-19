@@ -9,9 +9,8 @@ import sys
 
 import pytest
 
-from content_studio import rutas
-from content_studio.devtools import contexto_agentes, reglas, turno_gpu, worktree
-from content_studio.devtools.__main__ import main as devtools
+from devtools import contexto_agentes, reglas, rutas, turno_gpu, worktree
+from devtools.__main__ import main as devtools
 
 GIT = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t']
 
@@ -133,3 +132,10 @@ def test_es_enlace_reconoce_junctions(tmp_path):
     (tmp_path / 'destino').mkdir()
     worktree.enlazar(tmp_path / 'destino', tmp_path / 'enlace')
     assert worktree.es_enlace(tmp_path / 'enlace') and not worktree.es_enlace(tmp_path / 'destino')
+
+
+def test_ac3_help_lista_comandos():
+    """AC-3: devtools vive en la raíz; `python -m devtools --help` lista sus comandos y sale con 0."""
+    r = subprocess.run([sys.executable, '-m', 'devtools', '--help'], cwd=rutas.RAIZ, capture_output=True, text=True)
+    assert r.returncode == 0
+    assert all(c in r.stderr for c in ('worktree', 'turno-gpu', 'contexto-agentes', 'reglas', 'move-data'))

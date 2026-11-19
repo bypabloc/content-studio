@@ -16,7 +16,7 @@ import sys
 import time
 from pathlib import Path
 
-from content_studio.devtools.worktree import principal
+from .worktree import principal
 
 STILL_ACTIVE = 259
 

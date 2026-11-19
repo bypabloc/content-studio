@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-from content_studio import rutas
+from . import rutas
 
 SOLO_CLAUDE = {'claude-config-testing.md'}  # su versión general es .agents/rules/agent-config-testing.md
 _FRONT = re.compile(r'\A---\n.*?\n---\n\n?', re.DOTALL)

@@ -12,7 +12,7 @@ import re
 import sys
 from pathlib import Path
 
-from content_studio import rutas
+from . import rutas
 
 LIMITES = {
     'regla': 15_000,  # caracteres por regla o instrucción del repo (decisión del proyecto)

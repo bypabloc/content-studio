@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from content_studio.devtools import reglas
+from devtools import reglas
 
 RAIZ = Path(__file__).resolve().parents[1]
 MAX_LINEAS = 300

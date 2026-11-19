@@ -39,9 +39,10 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201"]
 # Captions del catálogo: cadenas largas que ruff format no parte.
 "src/content_studio/music/estilos.py" = ["E501"]
 "tests/**" = ["ANN"]
+"devtools/tests/**" = ["ANN"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["src", "tests"]
+pythonpath = ["src", "."]
+testpaths = ["src", "tests", "devtools"]
 addopts = "--doctest-modules -m 'not local'"
 markers = ["local: necesita los venvs de los motores de este equipo (no corre en CI)"]

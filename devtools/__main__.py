@@ -1,4 +1,4 @@
-"""Entrada de devtools: `python -m content_studio.devtools <comando> [args]`.
+"""Entrada de devtools: `python -m devtools <comando> [args]`.
 
 Cada comando es un módulo con `main(argv) -> int` que se importa solo al pedirlo. Exit codes: 0 éxito, 1 validación
 fallida u ocupado, 2 argumento inválido o error. stdout = resultado parseable (JSON); stderr = log humano.
@@ -10,16 +10,17 @@ import importlib
 import sys
 
 COMANDOS = {
-    'worktree': ('content_studio.devtools.worktree', 'prepare | close: worktrees en ../content-studio-worktrees/'),
-    'turno-gpu': ('content_studio.devtools.turno_gpu', 'status | run: un modelo a la vez en la GPU entre sesiones'),
-    'contexto-agentes': ('content_studio.devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
-    'reglas': ('content_studio.devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
+    'worktree': ('devtools.worktree', 'prepare | close: worktrees en ../content-studio-worktrees/'),
+    'turno-gpu': ('devtools.turno_gpu', 'status | run: un modelo a la vez en la GPU entre sesiones'),
+    'contexto-agentes': ('devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
+    'reglas': ('devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
+    'move-data': ('devtools.move_data', 'mueve narration/ y music/ a server/data/ (sin --apply, solo imprime el plan)'),
 }
 
 
 def ayuda() -> str:
     filas = '\n'.join(f'  {n:<17} {d}' for n, (_, d) in COMANDOS.items())
-    return f'uso: python -m content_studio.devtools <comando> [args]\n\ncomandos:\n{filas}\n'
+    return f'uso: python -m devtools <comando> [args]\n\ncomandos:\n{filas}\n'
 
 
 def main(argv: list[str]) -> int:
