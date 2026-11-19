@@ -96,6 +96,7 @@ python -m devtools test-runner --type=e2e   # Playwright sobre la app construida
    OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.
 7. Los archivos se crean y editan con las herramientas de edición del agente. Bash se usa solo para ejecutar los scripts y ffmpeg. Muestra los resultados con rutas clicables a `out/`.
+8. **YAGNI**: escribe solo lo que la tarea pide y prefiere la solución de una línea que se entienda de un vistazo. Nada de abstracciones, opciones ni código "por si acaso"; nunca recortes validación, manejo de errores ni seguridad ([plan-format](.agents/rules/plan-format.md) §0).
 
 ## Requisitos
 
