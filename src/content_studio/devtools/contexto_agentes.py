@@ -53,7 +53,9 @@ def medir(raiz: Path) -> tuple[dict, list[str]]:
         fallos.append(f'AGENTS.md: {codex} bytes > {LIMITES["codex"]} (Codex deja de leer)')
     for r in reglas_agy:
         datos = r.read_bytes()
-        trigger = re.search(r'^trigger:\s*(\S+)', frontmatter(datos.decode('utf-8')), re.MULTILINE)
+        # Los bytes cuentan para el límite; el texto se normaliza (en Windows, git hace checkout con CRLF).
+        texto = datos.decode('utf-8').replace('\r\n', '\n')
+        trigger = re.search(r'^trigger:\s*(\S+)', frontmatter(texto), re.MULTILINE)
         if not trigger or trigger.group(1) not in TRIGGERS:
             fallos.append(f'{r.relative_to(raiz).as_posix()}: sin trigger válido ({", ".join(sorted(TRIGGERS))})')
         if len(datos) > LIMITES['agy-regla']:
