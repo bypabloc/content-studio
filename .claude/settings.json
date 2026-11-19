@@ -3,18 +3,7 @@
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
   },
-  "autoCompactEnabled": true,
-  "enabledPlugins": {
-    "synapse@bypabloc": true,
-    "handoff-compact@content-studio": true
-  },
-  "extraKnownMarketplaces": {
-    "content-studio": {
-      "source": { "source": "directory", "path": "./.claude/mods" }
-    }
-  },
   "permissions": {
-    "additionalDirectories": ["../content-studio-worktrees"],
     "allow": [
       "Bash(uv run ruff:*)",
       "Bash(uv run pytest:*)",
@@ -38,6 +27,9 @@
       "Bash(head:*)",
       "Bash(tail:*)",
       "Bash(wc:*)"
+    ],
+    "additionalDirectories": [
+      "../content-studio-worktrees"
     ]
   },
   "hooks": {
@@ -45,41 +37,69 @@
       {
         "matcher": "^AskUserQuestion$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
+            "timeout": 10
+          }
         ]
       },
       {
         "matcher": "^Bash$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/worktree_guard.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/safe_compound.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" search" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/worktree_guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/safe_compound.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" search"
+          }
         ]
       },
       {
         "matcher": "^Grep$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" search" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" search"
+          }
         ]
       },
       {
         "matcher": "^Glob$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" read" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" read"
+          }
         ]
       },
       {
         "matcher": "^Read$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/image_read_guard.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" read" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/image_read_guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" read"
+          }
         ]
       }
     ],
     "PostToolBatch": [
       {
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_update.py\"" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_update.py\""
+          }
         ]
       }
     ],
@@ -87,16 +107,30 @@
       {
         "matcher": "^(Edit|Write)$",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/format_on_save.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/format_on_save.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
+            "timeout": 10
+          }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify_state.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify_state.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
+            "timeout": 10
+          }
         ]
       }
     ],
@@ -104,20 +138,33 @@
       {
         "matcher": "startup",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\"" },
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_update.py\"" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\""
+          },
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_update.py\""
+          }
         ]
       },
       {
         "matcher": "compact",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\" compact" }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\" compact"
+          }
         ]
       },
       {
         "matcher": "startup|resume|clear|compact|fork",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
+            "timeout": 10
+          }
         ]
       }
     ],
@@ -125,9 +172,26 @@
       {
         "matcher": "manual|auto",
         "hooks": [
-          { "type": "command", "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"", "timeout": 10 }
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
+            "timeout": 10
+          }
         ]
       }
     ]
-  }
+  },
+  "enabledPlugins": {
+    "handoff-compact@content-studio": true,
+    "synapse@bypabloc": true
+  },
+  "extraKnownMarketplaces": {
+    "content-studio": {
+      "source": {
+        "source": "directory",
+        "path": "./.claude/mods"
+      }
+    }
+  },
+  "autoCompactEnabled": true
 }
