@@ -21,7 +21,7 @@
 
 ## 3. Escucha
 
-Las rutas de las dos tomas (original y regenerada) van en el reporte para que el usuario compare los empalmes. Si el empalme se oye mal, es un fix de esta spec y no un `taste`.
+Las rutas de las dos tomas (original y regenerada) van en el reporte para que el usuario compare los empalmes. Si el empalme se oye mal, es un fix de esta spec y no una elección de gusto.
 
 ## 4. Cierre
 

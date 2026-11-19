@@ -19,7 +19,7 @@
 
 ## 3. Escucha
 
-Las rutas de la mezcla `transcript`, la `sidechain` y los dos videos van en el reporte. Los valores por defecto del ducking (-12 dB, 300 ms y -6 dB de la música) son un gusto. Si el usuario pide otros, se cambian en esta spec. Si quiere comparar varios juegos de valores, es un `blocked — taste`, con las rutas de cada uno.
+Las rutas de la mezcla `transcript`, la `sidechain` y los dos videos van en el reporte. Los valores por defecto del ducking (-12 dB, 300 ms y -6 dB de la música) son un gusto. Si el usuario pide otros, se cambian en esta spec. Si hay varios juegos de valores para comparar, el agente deja los por defecto, registra las rutas de cada uno en `docs/process/PENDING/` y sigue.
 
 ## 4. Cierre
 

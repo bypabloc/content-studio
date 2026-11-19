@@ -15,7 +15,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 1. Usa la spec que indique el usuario; si no indica una, lista `docs/specs/README.md` y pregunta.
 2. Lee `README.md`, `01-contexto-y-decision.md` y `02-plan.md` (y el README del lote si vive en uno). Corre su «Precondición». Ordena los grupos de commit por dependencia y omite los ya hechos.
 3. Worktree propio: `git fetch origin dev`, `git worktree add ../content-studio-worktrees/<NN>-<slug> -b <prefijo>/<NN>-<slug> origin/dev` y `python -m devtools worktree prepare <NN>-<slug>`; si ya existe, reutilízalo. Nunca commits en `dev` ni `main`.
-4. **Handoff**: crea `tmp/handoff/<NN>-<slug>/` en el principal (PROGRESS, DECISIONS, NOTES) y el vínculo de tu sesión; `Status: in-progress`, `Phase: implementation`.
+4. **Handoff**: dentro de `run-specs`, usa el del lote; suelta, crea `tmp/handoff/<NN>-<slug>/` en el principal (PROGRESS, DECISIONS, NOTES) y el vínculo de tu sesión; `Status: in-progress`, `Phase: implementation`.
 5. Resuelve contradicciones con las reglas antes de tocar archivos; lee las fichas de `docs/process/WARNING/` y `PENDING/` que cite.
 
 ## 2. Por cada grupo de commit
@@ -23,7 +23,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 1. TDD (skill `tdd-workflow`): test en rojo, implementación mínima, refactor. Solo los archivos del grupo. Marca las tareas como hechas en el README de la spec.
 2. Verify de cada tarea y `uv run ruff check && uv run ruff format --check && uv run pytest`. Nada que cargue un modelo por grupo.
 3. Si falla, diagnostica y repite solo lo afectado; no avances con el grupo en rojo.
-4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials`, `user-stop` o `taste` (plugin `session-handoff`).
+4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials` o `user-stop` (`.claude/session-handoff.json`); la elección sonora también es tuya (con el «debe sonar» de la spec, registrada en WARNING). Commits, push, PR, merge y cierre no se consultan: la spec ya los autoriza.
 5. Commit con el mensaje exacto del grupo en `02-plan.md` tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
 6. Anota el hash en `PROGRESS.md` (Done, Current, Remaining, ETA, Next step).
 
@@ -33,7 +33,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 2. Último commit: fichas de `docs/process/01-done/` si la spec es funcional; en una spec suelta, `git rm -r docs/specs/<NN>-<slug>/` y su fila del índice. Antes de borrar, todo lo importante tiene su ficha en WARNING o PENDING.
 3. `Phase: integration`: `git fetch origin dev` y merge de `origin/dev` en la rama si avanzó; un solo push; `gh pr list --head <rama>` y crea el PR a `dev` si no existe (cuerpo: problema, solución, cómo probar con comandos reales, fichas WARNING/PENDING).
 4. `gh pr checks <n> --watch` (`Phase: external-wait` mientras tanto); con todo verde, `gh pr merge <n> --merge`.
-5. `Phase: closing`: en el principal, `git switch dev && git pull` y `python -m devtools worktree close <NN>-<slug>`; `Status: done`.
+5. `Phase: closing`: desde el principal, `git fetch origin dev` y `python -m devtools worktree close <NN>-<slug>` (solo exige el merge en `origin/dev`). Si el principal está en `dev` y limpio, `git pull --ff-only`; si tiene cambios locales o archivos sin rastrear, no lo toques y sigue: no es `user-data` ni motivo para preguntar. Suelta, `Status: done`; en un lote, sigue `in-progress` con la spec en `Done` y `Next step` en la siguiente (`done` solo tras la última).
 
 ## 4. Reporte final
 

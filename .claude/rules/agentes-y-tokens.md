@@ -19,7 +19,8 @@ Menos tokens es más precisión. El gasto inútil sale de ciclos de prueba y err
 ## 3. Sesiones largas
 
 * Con trabajo de más de un turno, **handoff en disco** desde el inicio (plugin `session-handoff`, configurado en `.claude/session-handoff.json`): el disco sobrevive a la compactación, el resumen no.
-* Una spec o un lote se ejecutan con `run-specs` o `execute-spec` hasta el merge, sin parar por avisos de tokens. Entre una spec y la siguiente de un lote, `/compact`.
+* Una spec o un lote se ejecutan con `run-specs` o `execute-spec` hasta el merge de la última spec, en el mismo turno y sin pedir confirmación: ni por commits, push, merge o cierre, ni por avisos de tokens (la compactación es automática). Solo se para con un `blocked` de `.claude/session-handoff.json`; lo demás se decide y va a `docs/process/WARNING/` o `PENDING/`.
+* El checkout principal no se toca durante un lote (ni `pull` con cambios locales, ni respaldos, ni instalaciones, ni borrados): cada spec sale de `origin/dev` en su worktree.
 * Reporte periódico con `CronCreate` (cada 10 min) solo mientras corre una spec; se borra al terminar.
 
 ## 4. Varias sesiones en paralelo
