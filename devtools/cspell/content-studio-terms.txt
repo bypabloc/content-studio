@@ -63,6 +63,7 @@ htdemucs
 huggingface
 indextts
 keyscale
+killpg
 lastrowid
 lofi
 loudnorm
@@ -96,6 +97,7 @@ silenceremove
 subprocess
 supersaw
 synthwave
+taskkill
 testpaths
 timesignature
 timespec

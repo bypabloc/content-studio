@@ -7,6 +7,7 @@ from pathlib import Path
 
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices
 
+RESOURCE = 'gpu'  # la cola lo corre con el candado de la GPU: un modelo a la vez
 # Flags que pasan tal cual del trabajo al CLI del motor.
 FLAGS = {
     'voice': '--voice',

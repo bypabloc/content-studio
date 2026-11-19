@@ -7,6 +7,7 @@ from pathlib import Path
 
 from content_studio.music.parser import MODELS, STYLES
 
+RESOURCE = 'gpu'  # la cola lo corre con el candado de la GPU: un modelo a la vez
 DEFAULT_DURATION = 60  # el mismo default que el parser
 # shortcut: copia de los límites del help del parser (ACE ≤600, HeartMuLa ≤240), subir a MusicSpec si cambian
 MAX_SECONDS = {'acestep': 600, 'heartmula': 240}

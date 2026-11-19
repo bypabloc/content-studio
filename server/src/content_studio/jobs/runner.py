@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sqlite3
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
 
 from content_studio import paths
@@ -12,8 +13,18 @@ from content_studio.common import progress
 from content_studio.db import jobs
 
 
-def run(conn: sqlite3.Connection, job_id: int, command: list[str], log_dir: Path = paths.LOGS / 'jobs') -> int:
-    """Ejecuta `command` y devuelve su código de salida. Cada `@@progress` actualiza el trabajo."""
+def run(
+    conn: sqlite3.Connection,
+    job_id: int,
+    command: list[str],
+    log_dir: Path = paths.LOGS / 'jobs',
+    register: Callable[[subprocess.Popen], None] | None = None,
+) -> int:
+    """Ejecuta `command` y devuelve su código de salida. Cada `@@progress` actualiza el trabajo.
+
+    `register` recibe el proceso al arrancar, para que el worker lo pueda cancelar. En POSIX corre en su propio grupo
+    de procesos, así se terminan también los hijos (el motor se relanza en su venv).
+    """
     log_dir.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
     with (
@@ -26,8 +37,11 @@ def run(conn: sqlite3.Connection, job_id: int, command: list[str], log_dir: Path
             encoding='utf-8',
             errors='replace',
             env=env,
+            start_new_session=os.name != 'nt',
         ) as proc,
     ):
+        if register:
+            register(proc)
         assert proc.stdout is not None  # stdout=PIPE
         for line in proc.stdout:
             report = progress.parse(line)

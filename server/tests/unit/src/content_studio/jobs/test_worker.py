@@ -1,0 +1,152 @@
+"""Worker de la cola (spec 004, D-3; AC-2, AC-3, AC-4, AC-11): orden, pausa, cancelación, candado y recuperación."""
+
+from __future__ import annotations
+
+import json
+import sys
+import time
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from content_studio import gpu_lock
+from content_studio.db import connection, jobs, schema
+from content_studio.jobs import queue
+from content_studio.jobs.worker import Worker
+
+# Proceso falso: anota en el log cuándo arranca y termina, duerme `sleep` segundos y emite un progreso.
+SCRIPT = """
+import json, sys, time
+p = json.loads(sys.argv[1])
+def mark(what):
+    with open(p["log"], "a", encoding="utf-8") as f:
+        f.write(f"{what} {p['label']} {time.time()}\\n")
+mark("start")
+time.sleep(p["sleep"])
+print('@@progress {"p": 0.5, "stage": "half"}', flush=True)
+mark("end")
+"""
+
+
+def _build(params: dict, out_dir: Path) -> list[str]:
+    return [sys.executable, '-c', SCRIPT, json.dumps(params)]
+
+
+def _service(resource: str) -> SimpleNamespace:
+    return SimpleNamespace(RESOURCE=resource, validate=lambda params: [], build_command=_build)
+
+
+@pytest.fixture
+def env(tmp_path):
+    conn = connection.connect(tmp_path / 'base.db')
+    schema.migrate(conn)
+    services = {'gpu_fake': _service('gpu'), 'cpu_fake': _service('cpu')}
+    worker = Worker(
+        tmp_path / 'base.db',
+        main=tmp_path,
+        services=services,
+        out_root=tmp_path / 'out',
+        log_dir=tmp_path / 'logs',
+        poll=0.02,
+    )
+    yield SimpleNamespace(conn=conn, worker=worker, services=services, log=tmp_path / 'run.log', main=tmp_path)
+    worker.stop()
+    for job in jobs.list_jobs(conn, status='running'):
+        worker.cancel(job['id'])
+    conn.close()
+
+
+def _enqueue(env, label: str, sleep: float = 0.1, kind: str = 'gpu_fake') -> int:
+    return queue.enqueue(env.conn, kind, {'label': label, 'sleep': sleep, 'log': str(env.log)}, env.services)
+
+
+def _wait_for(predicate, timeout: float = 20.0) -> bool:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.02)
+    return False
+
+
+def _marks(env) -> list[list[str]]:
+    if not env.log.exists():
+        return []
+    return [line.split() for line in env.log.read_text(encoding='utf-8').splitlines()]
+
+
+def _spans(env) -> dict[str, tuple[float, float]]:
+    times: dict[str, dict[str, float]] = {}
+    for what, label, when in _marks(env):
+        times.setdefault(label, {})[what] = float(when)
+    return {label: (t['start'], t['end']) for label, t in times.items()}
+
+
+def test_ac2_paused_queue_runs_nothing_and_resume_follows_the_new_order(env):
+    ids = [_enqueue(env, label) for label in ('1', '2', '3')]
+    queue.reorder(env.conn, [ids[2], ids[0], ids[1]])
+    queue.pause(env.conn)
+    env.worker.start()
+
+    time.sleep(0.3)
+    assert [jobs.get(env.conn, i)['status'] for i in ids] == ['queued'] * 3
+
+    queue.resume(env.conn)
+    assert _wait_for(lambda: all(jobs.get(env.conn, i)['status'] == 'done' for i in ids))
+    assert [label for what, label, _ in _marks(env) if what == 'start'] == ['3', '1', '2']
+    assert Path(jobs.get(env.conn, ids[2])['output_dir'], 'params.json').is_file()
+
+
+def test_ac2_a_queued_job_cancelled_before_it_runs_never_starts(env):
+    first = _enqueue(env, 'a')
+    second = _enqueue(env, 'b')
+    queue.pause(env.conn)
+    env.worker.start()
+
+    assert env.worker.cancel(second)
+    queue.resume(env.conn)
+
+    assert _wait_for(lambda: jobs.get(env.conn, first)['status'] == 'done')
+    assert jobs.get(env.conn, second)['status'] == 'cancelled'
+    assert 'b' not in [label for _, label, _ in _marks(env)]
+
+
+def test_ac3_cancelling_a_running_gpu_job_stops_it_frees_the_lock_and_retry_keeps_params(env):
+    job = _enqueue(env, 'long', sleep=60)
+    env.worker.start()
+    assert _wait_for(lambda: jobs.get(env.conn, job)['status'] == 'running')
+
+    started = time.monotonic()
+    assert env.worker.cancel(job)
+    assert _wait_for(lambda: not gpu_lock.lock(env.main).exists(), timeout=6)
+    assert time.monotonic() - started < 6
+    assert jobs.get(env.conn, job)['status'] == 'cancelled'
+
+    queue.pause(env.conn)  # sin pausa, el worker arrancaría el reintento y dejaría el proceso de 60 s corriendo
+    retried = queue.retry(env.conn, job)
+    assert jobs.get(env.conn, retried)['params'] == jobs.get(env.conn, job)['params']
+
+
+def test_ac4_gpu_jobs_never_overlap_and_a_cpu_job_runs_alongside(env):
+    _enqueue(env, 'g1', sleep=0.6)
+    _enqueue(env, 'g2', sleep=0.6)
+    _enqueue(env, 'c', sleep=1.0, kind='cpu_fake')
+    env.worker.start()
+    assert _wait_for(lambda: all(job['status'] == 'done' for job in jobs.list_jobs(env.conn)))
+
+    spans = _spans(env)
+    (s1, e1), (s2, e2) = spans['g1'], spans['g2']
+    assert e1 <= s2 or e2 <= s1
+    cs, ce = spans['c']
+    assert any(cs < end and start < ce for start, end in ((s1, e1), (s2, e2)))
+
+
+def test_ac11_a_job_left_running_by_a_crash_becomes_an_interrupted_error(env):
+    job = jobs.insert(env.conn, 'gpu_fake', 'gpu', {'label': 'x', 'sleep': 0, 'log': str(env.log)})
+    jobs.update(env.conn, job, status='running')
+
+    env.worker.start()
+
+    row = jobs.get(env.conn, job)
+    assert (row['status'], row['error_code']) == ('error', 'interrupted')
