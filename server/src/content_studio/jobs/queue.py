@@ -63,9 +63,11 @@ def claim(conn: sqlite3.Connection, job_id: int) -> bool:
 
 
 def reorder(conn: sqlite3.Connection, ids: list[int]) -> None:
-    """Pone los trabajos en el orden dado: el primero de la lista sale primero."""
-    for position, job_id in enumerate(ids, 1):
-        jobs.update(conn, job_id, position=position)
+    """Pone los trabajos en el orden dado dentro de los puestos que ya ocupan: el resto de la cola no se mueve."""
+    rows = [row for row in (jobs.get(conn, job_id) for job_id in ids) if row is not None]
+    slots = sorted(row['position'] for row in rows)
+    for row, position in zip(rows, slots, strict=True):
+        jobs.update(conn, row['id'], position=position)
 
 
 def pause(conn: sqlite3.Connection) -> None:
