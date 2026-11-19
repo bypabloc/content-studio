@@ -3,7 +3,12 @@
 members = ["server"]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff", "numpy"]
+dev = [
+    "pytest>=8",
+    "ruff",
+    "numpy",
+    "pytest-cov>=7.1.0",
+]
 
 [tool.ruff]
 target-version = "py310"

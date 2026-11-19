@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-from devtools.test_runner.validators import run
+from devtools.test_runner.validators import run, write_baseline
 
 CONFIG = {
-    'exclude': ['**/node_modules/**'],
+    'exclude': ['**/node_modules/**', 'server/data/**'],
     'categories': [
         {
             'name': 'tests',
@@ -79,3 +79,25 @@ def test_ac2_file_in_baseline_under_limit_passes_and_suggests_removing_it(tmp_pa
 
     assert result['status'] == 'pass'
     assert 'baseline' in result['detail']
+
+
+def test_excluded_paths_are_not_measured(tmp_path):
+    root = project(tmp_path)
+
+    assert run([write(root, 'server/data/narration/big.py', 900)], root=root)['status'] == 'pass'
+
+
+def test_files_outside_every_category_are_not_measured(tmp_path):
+    root = project(tmp_path)
+
+    assert run([write(root, 'notes/readme.md', 900)], root=root)['status'] == 'pass'
+
+
+def test_write_baseline_records_only_the_files_over_their_limit(tmp_path):
+    root = project(tmp_path)
+    too_long = write(root, 'src/long.py', 301)
+    short = write(root, 'src/short.py', 3)
+
+    assert write_baseline([too_long, short], root=root) == 1
+    saved = json.loads((root / 'tests/validators/file-size.baseline.json').read_text(encoding='utf-8'))
+    assert saved == {'src/long.py': {'lines': 301, 'bytes': 1806, 'lineLength': 5}}

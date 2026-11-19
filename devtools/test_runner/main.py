@@ -23,7 +23,15 @@ def main(argv: list[str]) -> int:
         return 2
     picked = changeset.files(options.git_mode, options.files)
     if options.write_baseline:
-        print(json.dumps({'validators': validators.write_baseline(picked), 'unit': unit.write_baseline()}))
+        print(
+            json.dumps(
+                {
+                    'validators': validators.write_baseline(picked),
+                    'unit': unit.write_baseline(),
+                    'coverage': unit.write_coverage_baseline(),
+                }
+            )
+        )
         return 0
     results = [STAGES[name](picked) for name in options.types]
     for result in results:
