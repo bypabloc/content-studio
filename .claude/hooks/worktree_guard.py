@@ -94,7 +94,7 @@ def main() -> None:
         name = os.path.basename(os.path.normpath(target))
         print(
             f'worktree_guard: blocked, `{target}` is inside the repo and its rules would load twice.'
-            f' Create it in ../content-studio-worktrees/{name} (worktrees.md) and fix the path in your handoff.',
+            f' Create it in ../content-studio-worktrees/{name} (worktrees.md).',
             file=sys.stderr,
         )
         sys.exit(2)

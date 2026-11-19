@@ -27,7 +27,7 @@ Al fusionar el PR a `dev`, ciérralo en el mismo cierre, sin pedir permiso y des
 
 ```bash
 git fetch origin dev
-python -m devtools worktree close <nombre> [--handoff=<trabajo>]
+python -m devtools worktree close <nombre>
 ```
 
-Exige su HEAD en `origin/dev` y el árbol limpio (exit 1 si no). En orden: quita los enlaces de `prepare` (para que `git worktree remove` no entre en los venvs del principal), `git worktree remove` y `prune` (en Windows, si git ya lo desregistró pero un proceso con cwd ahí retiene la carpeta vacía, avisa y sigue), borra la rama local y la remota, y borra su handoff (`tmp/handoff/<trabajo>/`, por defecto `<nombre>`) y sus vínculos. No des el trabajo por cerrado mientras `git worktree list` lo muestre.
+Exige su HEAD en `origin/dev` y el árbol limpio (exit 1 si no). En orden: quita los enlaces de `prepare` (para que `git worktree remove` no entre en los venvs del principal), `git worktree remove` y `prune` (en Windows, si git ya lo desregistró pero un proceso con cwd ahí retiene la carpeta vacía, avisa y sigue) y borra la rama local y la remota. No des el trabajo por cerrado mientras `git worktree list` lo muestre.

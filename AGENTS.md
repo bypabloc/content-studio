@@ -76,7 +76,7 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 | Tests y TDD | [testing](.agents/rules/testing.md); skills `tdd-workflow`, `testing` |
 | Verificar antes de decir "listo" (duración, volumen, espectrograma) | [verify-before-claiming-done](.agents/rules/verify-before-claiming-done.md) |
 | Dónde va la salida de cada comando | [command-output](.agents/rules/command-output.md) |
-| Sesiones largas: handoff en disco y seguir hasta terminar | Plugin [session-handoff](https://github.com/bypabloc/claude-plugin-session-handoff) (solo Claude Code), configurado en `.claude/session-handoff.json` |
+| Sesiones largas y seguir hasta terminar | Plugin [session-handoff](https://github.com/bypabloc/claude-plugin-session-handoff) (solo Claude Code), configurado en `.claude/session-handoff.json` |
 | Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [gpu-turn](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
 | Buscar código | [graphify](.agents/rules/graphify.md); skills `graphify-query`, `graphify-ops` |
 | devtools del flujo de agentes | [devtools](.agents/rules/devtools.md) |

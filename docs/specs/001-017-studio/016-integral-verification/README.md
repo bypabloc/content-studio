@@ -69,7 +69,7 @@ Commits: `fix(<área>): …` por cada fallo (si los hay), `docs: cierre del lote
 
 1. Se actualizan las fichas de `docs/process/01-done/` y se revisan `WARNING/` (lo que bloquea el pase a `main` queda listado en el PR) y `PENDING/`.
 2. `git rm -r docs/specs/001-017-studio/` y su fila de `docs/specs/README.md`, con el próximo número libre en 018.
-3. PR `chore/016-integral-verification` a `dev`, checks y merge. Después, `worktree close 016-integral-verification` y `rm -r tmp/handoff/lote-studio/` con sus vínculos.
+3. PR `chore/016-integral-verification` a `dev`, checks y merge. Después, `worktree close 016-integral-verification`.
 4. `gh pr create --base main --head dev --title "release: content-studio como estudio de escritorio (lote 001-017)"`, con el informe, las fichas WARNING que bloquean y los pasos para publicar (`devtools version 0.1.0` y el tag). **No se fusiona**: `Status: done` del lote y se le entrega el PR al usuario.
 
 ## WARNING y PENDING

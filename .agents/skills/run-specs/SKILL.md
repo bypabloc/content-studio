@@ -17,20 +17,19 @@ argument-hint: "<spec> [<spec> ...]  (número, carpeta o ruta: 12 | 012-musica-c
 
 ## 2. Ejecutar
 
-* **Handoff del lote**: con más de una spec, `tmp/handoff/<lote>/` en el principal y el vínculo de tu sesión a él, con la lista de specs en `Remaining` y `Next step` en la próxima. Las specs no crean su propio handoff: así `worktree close` no te deja sin `Next step` entre una spec y la siguiente.
 * **Una spec**: lee todos sus archivos y el código que citan (con graphify) y ejecútala completa con la skill `execute-spec`.
 * **Varias**: lee solo el `README.md` de cada una. Ejecuta la primera completa con `execute-spec`. Está terminada solo cuando su PR está fusionado en `dev` y lo comprobaste (`git fetch origin dev`, merge commit en `origin/dev`, worktree cerrado en `git worktree list`). Recién entonces pasa a la siguiente, en el mismo turno y desde el `origin/dev` que ya la contiene. Nunca dos specs a la vez. La compactación es automática: no pares para pedirla.
 * **Sin pedir permiso**: el pedido del usuario ya autoriza todo el ciclo de cada spec (worktree, commits, push, PR, merge a `dev`, cierre). No preguntes «¿sigo?», «¿hago el merge?» ni «¿paso a la siguiente?». **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
-* Solo para con un `blocked` de las categorías de `.claude/session-handoff.json` (`user-data`, `cost`, `credentials`, `user-stop`): deja el estado en el reporte y pregunta. Todo lo demás lo decides tú, lo anotas en `docs/process/WARNING/` (crítico) o `PENDING/` (no bloquea) y sigues. Ver la tabla de §4.
+* Solo para con una categoría de bloqueo de `.claude/session-handoff.json` (`user-data`, `cost`, `credentials`, `user-stop`): deja el estado en el reporte y pregunta. Todo lo demás lo decides tú, lo anotas en `docs/process/WARNING/` (crítico) o `PENDING/` (no bloquea) y sigues. Ver la tabla de §4.
 
 ## 3. Reporte cada 10 minutos
 
-Al empezar, `CronCreate` cada 10 min (`*/10 * * * *`) con el reporte; el prompt del cron termina con «Después del reporte, si PROGRESS.md no dice `Status: done` ni `Status: blocked`, sigue en el mismo turno con su `Next step`». Al terminar la última spec, o si queda `blocked`, `CronDelete`. Al cerrar cada spec escribe su fila del reporte y **sigue en el mismo turno** con la siguiente: el turno termina solo tras la última spec o con un `blocked` válido. Un resumen al usuario a mitad del lote no es un cierre.
+Al empezar, `CronCreate` cada 10 min (`*/10 * * * *`) con el reporte; el prompt del cron termina con «Después del reporte, si el lote no terminó ni está bloqueado, sigue en el mismo turno con la spec en curso». Al terminar la última spec, o si queda `blocked`, `CronDelete`. Al cerrar cada spec escribe su fila del reporte y **sigue en el mismo turno** con la siguiente: el turno termina solo tras la última spec o con un bloqueo válido. Un resumen al usuario a mitad del lote no es un cierre.
 
 | title | qué se hizo | en qué está | qué falta | tiempo estimado |
 | :--- | :--- | :--- | :--- | :--- |
 
-Una fila por spec (también las pendientes y las terminadas), con celdas breves sacadas de `Done`, `Current`, `Remaining` y `ETA` de `PROGRESS.md`. El tiempo es lo que falta, no lo transcurrido.
+Una fila por spec (también las pendientes y las terminadas), con celdas breves. El tiempo es lo que falta, no lo transcurrido.
 
 ## 4. Reglas
 
@@ -44,5 +43,5 @@ Las de `execute-spec`, `git-workflow.md`, `worktrees.md` y `turno-gpu.md`: una s
 | Una disyuntiva técnica, un hallazgo que cambia el alcance, una regla ambigua | Eliges la opción correcta y la registras en `docs/process/WARNING/` |
 | Elegir entre audios u opciones de gusto | Eliges con el «debe sonar» de la spec, lo registras en WARNING y entregas las rutas de `out/` al final para que el usuario escuche |
 | Un hook, un test o un check de CI en rojo | Diagnosticas y corriges (`fix-hooks`); tras 3 intentos sin éxito, ficha en WARNING y sigues con lo que no depende de eso |
-| La GPU ocupada, CI pendiente, un merge ajeno | `Phase: external-wait` y lo que no dependa de eso |
-| Avisos de tokens, contexto o compactación | Nada: sigues con el `Next step` |
+| La GPU ocupada, CI pendiente, un merge ajeno | Esperas haciendo lo que no dependa de eso |
+| Avisos de tokens, contexto o compactación | Nada: sigues con el paso siguiente |

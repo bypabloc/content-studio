@@ -95,15 +95,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "^Bash$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/progress_on_commit.py\""
-          }
-        ]
-      },
-      {
         "matcher": "^(Edit|Write)$",
         "hooks": [
           {

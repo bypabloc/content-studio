@@ -24,7 +24,7 @@ RULES = """[Reglas críticas de content-studio reinyectadas]
 - Ramas feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release/<kebab> desde dev; nunca push a main/dev.
 - Conventional Commits en español, sin atribución de IA. Commit, push y merge solo cuando el usuario lo pida.
 - GPU: todo lo que carga un modelo va con `python -m devtools gpu-turn run --job=<j> -- <cmd>`.
-- Trabajo largo: handoff en tmp/handoff/<trabajo>/ (plugin session-handoff); worktrees en ../content-studio-worktrees/.
+- Worktrees en ../content-studio-worktrees/.
 - Specs en docs/specs/ con las plantillas de docs/specs/_plantilla/ (plan-format.md); estado en docs/process/."""
 
 
