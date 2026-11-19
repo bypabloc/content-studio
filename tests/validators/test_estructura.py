@@ -60,7 +60,7 @@ def test_codigo_solo_en_src():
 def test_ac2_producto_en_server():
     """AC-2: el producto vive en server/src/content_studio; en la raíz, cli.py es el único .py."""
     assert not (RAIZ / 'src').exists()
-    assert (RAIZ / 'server/src/content_studio/rutas.py').is_file()
+    assert (RAIZ / 'server/src/content_studio/paths.py').is_file()
     assert [nombre(p) for p in RAIZ.glob('*.py')] == ['cli.py']
     assert not [p for d in ('narration', 'music') for p in (RAIZ / 'server/data' / d).glob('*.py')]
 

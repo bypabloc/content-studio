@@ -18,3 +18,4 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | Ficha | Qué | Cuándo |
 | :--- | :--- | :--- |
 | [001-move-data](001-move-data.md) | `move-data` mueve `narration/` y `music/` a `server/data/` (datos del usuario) y reescribe sus `.pth` | Antes de pasar a `main`: correr `move-data --apply` en el principal, después del `git pull` |
+| [002-mapeo-de-nombres](002-mapeo-de-nombres.md) | Mapa de nombres de español a inglés (módulos, datos, valores de salida) y desvíos del plan en el ciclo 4 | Antes de pasar a `main`: revisar el mapa y correr `move-data --apply` (T9) |

@@ -6,25 +6,25 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from content_studio.comun.ffmpeg import ffmpeg, json_loudnorm, loudness
+from content_studio.common.ffmpeg import ffmpeg, json_loudnorm, loudness
 
 if TYPE_CHECKING:
     import numpy as np
 
 
-def recortar(audio: np.ndarray, sr: int, umbral: float = 0.01, margen: float = 0.08) -> np.ndarray:
+def trim(audio: np.ndarray, sr: int, threshold: float = 0.01, margin: float = 0.08) -> np.ndarray:
     """Quita el silencio y el ruido bajo que el modelo deja en los bordes de cada bloque (de
     0.5 s a más de 2 s), para que las pausas insertadas duren lo indicado. Deja `margen` s para
     no cortar consonantes.
 
     >>> import numpy as np
     >>> x = np.r_[np.zeros(1000), np.full(500, 0.5), np.zeros(1000)].astype(np.float32)
-    >>> len(recortar(x, 1000))
+    >>> len(trim(x, 1000))
     660
-    >>> len(recortar(np.zeros(100, dtype=np.float32), 1000))
+    >>> len(trim(np.zeros(100, dtype=np.float32), 1000))
     0
     >>> cola = np.r_[np.full(500, 0.5), np.full(2000, 0.004), [0.012], np.zeros(10)].astype(np.float32)
-    >>> len(recortar(cola, 1000))  # ruido de cola con un pico suelto: no es voz
+    >>> len(trim(cola, 1000))  # noise de cola con un peak suelto: no es voice
     580
     """
     import numpy as np
@@ -33,20 +33,20 @@ def recortar(audio: np.ndarray, sr: int, umbral: float = 0.01, margen: float = 0
     n = max(1, int(sr * 0.02))
     k = len(audio) // n
     rms = np.sqrt((audio[: k * n].reshape(k, n).astype(np.float64) ** 2).mean(axis=1))
-    voz = np.flatnonzero(rms > umbral)
-    if not voz.size:
+    voice = np.flatnonzero(rms > threshold)
+    if not voice.size:
         return audio[:0]
-    m = int(sr * margen)
-    return audio[max(0, voz[0] * n - m) : (voz[-1] + 1) * n + m]
+    m = int(sr * margin)
+    return audio[max(0, voice[0] * n - m) : (voice[-1] + 1) * n + m]
 
 
-def estirar(audio: np.ndarray, sr: int, vel: float) -> np.ndarray:
+def stretch(audio: np.ndarray, sr: int, vel: float) -> np.ndarray:
     """Cambia la velocidad sin cambiar el tono: ffmpeg atempo por tuberías."""
     import numpy as np
 
     if vel == 1.0 or not len(audio):
         return audio
-    salida = subprocess.run(
+    output = subprocess.run(
         [
             'ffmpeg',
             '-loglevel',
@@ -69,73 +69,73 @@ def estirar(audio: np.ndarray, sr: int, vel: float) -> np.ndarray:
         capture_output=True,
         check=True,
     ).stdout
-    return np.frombuffer(salida, dtype=np.float32)
+    return np.frombuffer(output, dtype=np.float32)
 
 
-def escribir(g: dict) -> None:
+def write(g: dict) -> None:
     """Une los bloques con sus pausas, cada uno a la velocidad de su estilo, y guarda dónde empieza y
     termina cada bloque en el audio final (g['bloques'])."""
     import numpy as np
     import soundfile as sf
 
-    sr, salida = g['sr'], g['salida']
-    partes, g['bloques'], t = [], [], 0
-    for voz, b, pb in zip(g['audios'], g['segs'], g['pb'], strict=False):
-        vel = pb['p']['velocidad']
-        voz = estirar(voz, sr, vel)
-        cola = estirar(np.zeros(int(sr * b['pausa']), dtype=np.float32), sr, vel)
-        g['bloques'].append((b['texto'], t / sr, (t + len(voz)) / sr))
-        t += len(voz) + len(cola)
-        partes += [voz, cola]
-    audio = np.concatenate(partes)
+    sr, output = g['sr'], g['output']
+    parts, g['blocks'], t = [], [], 0
+    for voice, b, pb in zip(g['audios'], g['secs'], g['pb'], strict=False):
+        vel = pb['p']['speed']
+        voice = stretch(voice, sr, vel)
+        cola = stretch(np.zeros(int(sr * b['pause']), dtype=np.float32), sr, vel)
+        g['blocks'].append((b['text'], t / sr, (t + len(voice)) / sr))
+        t += len(voice) + len(cola)
+        parts += [voice, cola]
+    audio = np.concatenate(parts)
 
-    salida.parent.mkdir(parents=True, exist_ok=True)
-    if g['master'] == 'voz' and np.abs(audio).max(initial=0) > 1e-4:
-        g['master_info'] = masterizar(audio, sr, salida, g['lufs'])
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if g['master'] == 'voice' and np.abs(audio).max(initial=0) > 1e-4:
+        g['master_info'] = master(audio, sr, output, g['lufs'])
     else:
-        sf.write(salida, audio, sr, subtype='PCM_24')
-        g['master_info'] = {'modo': 'no'}
+        sf.write(output, audio, sr, subtype='PCM_24')
+        g['master_info'] = {'mode': 'no'}
 
 
-def masterizar(audio: np.ndarray, sr: int, salida: Path, lufs: float) -> dict:
+def master(audio: np.ndarray, sr: int, output: Path, lufs: float) -> dict:
     """Masterización 'voz' (§7.1): pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `lufs`, con techo de
     pico de −1.5 dBTP. Solo se limita la dinámica si el pico real no deja llegar a `lufs` (queda 'dynamic' y se
     avisa). Escribe WAV de 24 bits a la frecuencia nativa y devuelve lo medido."""
     import soundfile as sf
 
-    crudo = salida.with_suffix('.crudo.wav')
-    sf.write(crudo, audio, sr, subtype='FLOAT')
+    raw = output.with_suffix('.raw.wav')
+    sf.write(raw, audio, sr, subtype='FLOAT')
     base = f'highpass=f=70,loudnorm=I={lufs}'
     try:
         # Pasada 1: medir. Pasada 2: aplicar esa ganancia a la frecuencia nativa (loudnorm sobremuestrea a 192 kHz).
-        medir = f'{base}:TP=-1.5:LRA=11:print_format=json'
-        med = json_loudnorm(ffmpeg('-i', str(crudo), '-af', medir, '-f', 'null', '-'))
+        measure = f'{base}:TP=-1.5:LRA=11:print_format=json'
+        med = json_loudnorm(ffmpeg('-i', str(raw), '-af', measure, '-f', 'null', '-'))
         tp = -1.5
         for _ in range(3):
-            filtro = (
+            filter = (
                 f'{base}:TP={tp}:LRA=11:linear=true:measured_I={med["input_i"]}:measured_TP={med["input_tp"]}'
                 f':measured_LRA={med["input_lra"]}:measured_thresh={med["input_thresh"]}'
                 f':offset={med["target_offset"]}:print_format=json,aresample={sr}'
             )
-            fin = json_loudnorm(ffmpeg('-y', '-i', str(crudo), '-af', filtro, '-c:a', 'pcm_s24le', str(salida)))
-            final, pico = loudness(salida)
-            if pico <= -1.5:
+            end = json_loudnorm(ffmpeg('-y', '-i', str(raw), '-af', filter, '-c:a', 'pcm_s24le', str(output)))
+            final, peak = loudness(output)
+            if peak <= -1.5:
                 break
             # El limitador dinámico se pasa unas décimas: se baja el techo en lo que sobró, con un margen.
-            tp = round(tp - (pico + 1.5 + 0.05), 2)
-            print(f'Aviso: pico real {pico} dBTP sobre -1.5; se repite con techo {tp} dBTP.')
+            tp = round(tp - (peak + 1.5 + 0.05), 2)
+            print(f'Notice: true peak {peak} dBTP above -1.5; retrying with ceiling {tp} dBTP.')
     finally:
-        crudo.unlink(missing_ok=True)
-    tipo = 'linear' if fin['normalization_type'] == 'linear' else 'dynamic'
-    if tipo == 'dynamic':
-        print(f'Aviso: el pico real no deja llegar a {lufs} LUFS con ganancia lineal; se normalizó con dinámica.')
-    if abs(final - lufs) > 0.5 or pico > -1.5:
-        print(f'Aviso: masterización fuera de criterio: {final} LUFS (objetivo {lufs}), pico real {pico} dBTP.')
+        raw.unlink(missing_ok=True)
+    kind = 'linear' if end['normalization_type'] == 'linear' else 'dynamic'
+    if kind == 'dynamic':
+        print(f'Notice: the true peak does not allow reaching {lufs} LUFS with linear gain; normalized with dynamics.')
+    if abs(final - lufs) > 0.5 or peak > -1.5:
+        print(f'Notice: mastering out of spec: {final} LUFS (target {lufs}), true peak {peak} dBTP.')
     return {
-        'modo': 'voz',
-        'lufs_objetivo': lufs,
+        'mode': 'voice',
+        'target_lufs': lufs,
         'lufs_final': final,
-        'pico_real_final': pico,
-        'tipo': tipo,
-        'techo_tp': tp,
+        'peak_real_final': peak,
+        'kind': kind,
+        'ceiling_tp': tp,
     }

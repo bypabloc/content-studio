@@ -6,7 +6,7 @@ import argparse
 import re
 from types import ModuleType
 
-from content_studio.comun.proceso import unir
+from content_studio.common.process import join
 
 
 class ErrorArgs(Exception):
@@ -21,16 +21,16 @@ def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
 
 
-def vacio(v: object) -> bool:
+def empty(v: object) -> bool:
     """Sin valor: None, False o lista vacía. Con `in (None, False, [])` se perdía el 0, porque 0 == False.
 
-    >>> [vacio(v) for v in (None, False, [], 0, 0.0, '')]
+    >>> [empty(v) for v in (None, False, [], 0, 0.0, '')]
     [True, True, True, False, False, False]
     """
     return v is None or v is False or (isinstance(v, list) and not v)
 
 
-def obligatorio(acc: argparse.Action, ap: argparse.ArgumentParser) -> bool:
+def required(acc: argparse.Action, ap: argparse.ArgumentParser) -> bool:
     return acc.required or any(g.required and acc in g._group_actions for g in ap._mutually_exclusive_groups)
 
 
@@ -38,7 +38,7 @@ def es_booleano(acc: argparse.Action) -> bool:
     return isinstance(acc, argparse._StoreTrueAction)
 
 
-def _indice(args: list[str], flag: str | None) -> int | None:
+def _index(args: list[str], flag: str | None) -> int | None:
     """Posición del token de `flag`, que puede venir como --flag=valor o abreviado (--mod)."""
     for k, t in enumerate(args):
         c = t.split('=', 1)[0]
@@ -55,23 +55,23 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
         acc.required = False
     for g in ap._mutually_exclusive_groups:
         g.required = False
-    avisos = []
+    notices = []
     while True:
         try:
-            ns, sobra = ap.parse_known_args(args)
+            ns, extra = ap.parse_known_args(args)
             break
         except ErrorArgs as e:
             m = re.search(r'argument (-[-\w]+)', str(e))  # el error de argparse cita el flag completo
-            i = _indice(args, m and m[1])
+            i = _index(args, m and m[1])
             if i is None:
                 return {}, [str(e)]
             j = i + 1
             while '=' not in args[i] and j < len(args) and not args[j].startswith('--'):
                 j += 1
-            avisos.append(f'{unir(args[i:j])} no es válido; lo eliges abajo')
+            notices.append(f'{join(args[i:j])} no es válido; lo eliges abajo')
             args = args[:i] + args[j:]
-    if sobra:
-        avisos.append(f'no reconocido: {unir(sobra)}')
+    if extra:
+        notices.append(f'no reconocido: {join(extra)}')
     dados = {
         acc.dest: getattr(ns, acc.dest)
         for acc in flags(ap)
@@ -81,15 +81,15 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
             for o in acc.option_strings
         )
     }
-    return dados, avisos
+    return dados, notices
 
 
-def a_argv(ap: argparse.ArgumentParser, valores: dict) -> list[str]:
+def a_argv(ap: argparse.ArgumentParser, values: dict) -> list[str]:
     argv = []
     for acc in flags(ap):
-        if acc.dest not in valores or vacio(valores[acc.dest]):
+        if acc.dest not in values or empty(values[acc.dest]):
             continue
-        v = valores[acc.dest]
+        v = values[acc.dest]
         if es_booleano(acc):
             argv.append(acc.option_strings[0])
         elif isinstance(v, list):
@@ -99,9 +99,9 @@ def a_argv(ap: argparse.ArgumentParser, valores: dict) -> list[str]:
     return argv
 
 
-def validar(mod: ModuleType, argv: list[str]) -> str | None:
+def validate(mod: ModuleType, argv: list[str]) -> str | None:
     """Error del parser real del script con estos flags, o None."""
-    ap = mod.construir_parser()
+    ap = mod.build_parser()
     ap.error = _error
     try:
         ap.parse_args(argv)

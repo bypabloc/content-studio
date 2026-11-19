@@ -3,61 +3,61 @@
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(RAIZ / 'server' / 'data' / 'narration'), str(RAIZ / 'server' / 'data' / 'music')]
+ROOT = Path(__file__).resolve().parents[2]
+sys.path[:0] = [str(ROOT / 'server' / 'data' / 'narration'), str(ROOT / 'server' / 'data' / 'music')]
 
 
-def test_tomas_max_mas_uno(tmp_path):
-    from content_studio.comun.archivos import siguiente_numero
+def test_takes_max_mas_uno(tmp_path):
+    from content_studio.common.files import next_number
 
-    assert siguiente_numero(tmp_path, 'neutral') == 1
+    assert next_number(tmp_path, 'neutral') == 1
     for n in ['neutral-1', 'neutral-3', 'neutral-en-7', 'neutral-fin-9', 'neutral-x']:
         (tmp_path / f'{n}.wav').touch()
-    assert siguiente_numero(tmp_path, 'neutral') == 4  # contando daba 6, y con huecos pisaba una toma
+    assert next_number(tmp_path, 'neutral') == 4  # contando daba 6, y con huecos pisaba una toma
 
 
-def test_musica_falla_sin_dejar_el_wav_viejo(tmp_path, monkeypatch):
+def test_music_falla_no_dejar_el_wav_old(tmp_path, monkeypatch):
     import pytest
 
-    from content_studio.music import musica
-    from content_studio.music.motores.base import EspecMusica, MotorMusica
+    from content_studio.music import music_main as music
+    from content_studio.music.engines.base import MusicEngine, MusicSpec
 
-    class Falla(MotorMusica):  # el motor "falla": no escribe nada
-        def generar(self, trabajos, a):
+    class Failure(MusicEngine):  # el motor "falla": no escribe nada
+        def generate(self, jobs, a):
             pass
 
-    vieja = tmp_path / 'acestep-lofi-chill.wav'
-    vieja.write_bytes(b'corrida anterior')
-    monkeypatch.setattr(musica.proceso, 'usar_venv', lambda *a, **k: None)
-    monkeypatch.setattr(EspecMusica, 'crear', lambda espec: Falla(espec))
-    monkeypatch.setattr(sys, 'argv', ['musica.py', '--modelo', 'acestep', '--carpeta', str(tmp_path)])
+    old = tmp_path / 'acestep-lofi-chill.wav'
+    old.write_bytes(b'corrida anterior')
+    monkeypatch.setattr(music.process, 'use_venv', lambda *a, **k: None)
+    monkeypatch.setattr(MusicSpec, 'create', lambda spec: Failure(spec))
+    monkeypatch.setattr(sys, 'argv', ['musica.py', '--model', 'acestep', '--folder', str(tmp_path)])
     with pytest.raises(SystemExit) as e:
-        musica.main()
+        music.main()
     assert e.value.code and 'acestep-lofi-chill.wav' in str(e.value.code)
-    assert not vieja.exists()
+    assert not old.exists()
 
 
-def test_tts_salida_carpeta_con_un_guion(tmp_path):
+def test_tts_output_folder_con_un_script(tmp_path):
     from argparse import Namespace
 
     import pytest
 
-    from content_studio.narration.guion import planificar
+    from content_studio.narration.script import plan
 
-    a = Namespace(estilo=None, idioma='es', modelo='voxcpm2', salida=tmp_path)  # carpeta existente
-    assert [s for *_, s in planificar(a, [('g', 'Hola', None)])] == [tmp_path / 'g-voxcpm2.wav']
-    a.salida = tmp_path / 'toma.wav'
-    assert [s for *_, s in planificar(a, [('g', 'Hola', None)])] == [a.salida]
-    a.salida = tmp_path / 'toma.mp3'
+    a = Namespace(style=None, language='es', model='voxcpm2', output=tmp_path)  # carpeta existente
+    assert [s for *_, s in plan(a, [('g', 'Hola', None)])] == [tmp_path / 'g-voxcpm2.wav']
+    a.output = tmp_path / 'toma.wav'
+    assert [s for *_, s in plan(a, [('g', 'Hola', None)])] == [a.output]
+    a.output = tmp_path / 'toma.mp3'
     with pytest.raises(SystemExit):
-        planificar(a, [('g', 'Hola', None)])
+        plan(a, [('g', 'Hola', None)])
 
 
-def test_tts_avisa_antes_de_sobrescribir(tmp_path, capsys):
-    from content_studio.narration.guion import avisar_sobrescritura
+def test_tts_avisa_antes_de_overwrite(tmp_path, capsys):
+    from content_studio.narration.script import warn_overwrite
 
     (tmp_path / 'a.wav').touch()
-    avisar_sobrescritura([('t', 'experta', tmp_path / 'a.wav'), ('t', 'experta', tmp_path / 'b.wav')])
+    warn_overwrite([('t', 'expert', tmp_path / 'a.wav'), ('t', 'expert', tmp_path / 'b.wav')])
     err = capsys.readouterr().err
     assert 'a.wav' in err and 'b.wav' not in err
 
@@ -66,21 +66,21 @@ def test_help_en_cp1252():
     import os
     import subprocess
 
-    env = {**os.environ, 'PYTHONIOENCODING': 'cp1252', 'PYTHONPATH': str(RAIZ / 'server' / 'src')}
-    for args in (['-m', 'content_studio.music.musica', '--help'], ['cli.py', 'music', '--help']):
-        r = subprocess.run([sys.executable, *args], cwd=RAIZ, env=env, capture_output=True)
+    env = {**os.environ, 'PYTHONIOENCODING': 'cp1252', 'PYTHONPATH': str(ROOT / 'server' / 'src')}
+    for args in (['-m', 'content_studio.music.music_main', '--help'], ['cli.py', 'music', '--help']):
+        r = subprocess.run([sys.executable, *args], cwd=ROOT, env=env, capture_output=True)
         assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')
 
 
 def test_licencias_by_traen_atribucion():
-    from content_studio.narration.voces.catalogo import catalogo, mencion
+    from content_studio.narration.voices.catalog import catalog, mention
 
-    sin = [n for n, f in catalogo().items() if 'BY' in f['licencia'] and not mencion(f)]
-    assert not sin, f'licencia CC BY sin "atribucion" en catalogo.json: {sin}'
+    no = [n for n, f in catalog().items() if 'BY' in f['license'] and not mention(f)]
+    assert not no, f'licencia CC BY sin "atribucion" en catalog.json: {no}'
 
 
-def test_el_kit_de_grabar_cubre_los_estilos_de_tts():
-    from content_studio.narration.estilos import ESTILOS
-    from content_studio.narration.grabar.kit import DURACION
+def test_el_kit_de_grabar_cubre_los_styles_de_tts():
+    from content_studio.narration.grabar.kit import DURATION
+    from content_studio.narration.styles import STYLES
 
-    assert set(ESTILOS) <= set(DURACION)
+    assert set(STYLES) <= set(DURATION)

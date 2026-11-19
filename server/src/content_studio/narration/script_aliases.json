@@ -1,0 +1,33 @@
+{
+  "_nota": "Alias del guion (spec 002, D-5). La forma canónica es la del código en inglés; las de la lista son las del español que ya usan los guiones. Un guion con cualquiera de las dos da los mismos bloques.",
+  "pause": ["pausa"],
+  "text": ["texto"],
+  "style": ["estilo"],
+  "emotion": ["emocion"],
+  "emphasis": ["enfasis"],
+  "laugh": ["risa"],
+  "sigh": ["suspiro"],
+  "breathing": ["respiro"],
+  "styles": {
+    "friendly": ["amistosa"],
+    "soft": ["suave"],
+    "expert": ["experta"],
+    "clear": ["clara"],
+    "steady": ["estable"],
+    "energetic": ["energica"],
+    "dramatic": ["dramatica"],
+    "intimate": ["intima"],
+    "whisper": ["susurro"],
+    "neutral-end": ["neutral-fin"]
+  },
+  "emotions": {
+    "happy": ["alegre"],
+    "sad": ["triste"],
+    "angry": ["enojado"],
+    "fear": ["miedo"],
+    "surprise": ["sorpresa"],
+    "calm": ["calma"],
+    "urgent": ["urgente"],
+    "whisper": ["susurro"]
+  }
+}

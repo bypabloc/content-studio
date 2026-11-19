@@ -17,3 +17,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
 | [001-duracion-de-audio](001-duracion-de-audio.md) | La duración de música y narración no coincide con la pedida (igual en `dev`) | Antes de publicar el lote | Usuario y agente |
+| [002-cspell-excepciones-temporales](002-cspell-excepciones-temporales.md) | Carpetas que cspell deja fuera hasta su ciclo, y 86 casos fuera de código (CI, hooks, reglas) | Ciclos 5, 6 y 8 de la 002; la 004 y la 007 | Agente |
+| [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |

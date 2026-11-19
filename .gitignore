@@ -6,15 +6,25 @@ logs/
 models
 __pycache__/
 .vscode/
-server/data/narration/voz/prueba/
+# Rutas de datos del usuario, nuevas (spec 002, D-4): grabaciones, tomas, voces construidas y repos de motores.
+server/data/narration/reference/prueba/
 # Grabaciones de voz: nunca al repo (es público). Los .txt sí se versionan.
+server/data/narration/reference/**/*.wav
+server/data/narration/reference/**/*.m4a
+server/data/narration/reference/**/*.mp3
+# Voces libres construidas por `cli.py narration voces`: se regeneran desde catalog.json (el único que se versiona).
+server/data/narration/voices/*
+!server/data/narration/voices/catalog.json
+# Repos de motores que no son paquetes pip (código, venv y pesos). Ver server/data/narration/README.md §2.
+server/data/narration/engines
+# Rutas viejas, vigentes hasta que `move-data --apply` mueva los datos del checkout principal (spec 002, T9).
+# Sin estas reglas, git añadiría grabaciones, voces construidas y repos de motores al repo público.
+server/data/narration/voz/prueba/
 server/data/narration/voz/**/*.wav
 server/data/narration/voz/**/*.m4a
 server/data/narration/voz/**/*.mp3
-# Voces libres construidas por `cli.py narration voces`: se regeneran desde catalogo.json (el único que se versiona).
 server/data/narration/voces/*
 !server/data/narration/voces/catalogo.json
-# Repos de motores que no son paquetes pip (código, venv y pesos). Ver server/data/narration/README.md §2.
 server/data/narration/motores
 tmp/
 # Grafo local de graphify (cada equipo lo genera con `graphify update .`) y worktrees que crea Claude Code.

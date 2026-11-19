@@ -23,6 +23,8 @@ patterns:
 ignoreRegExpList:
   - python-docstring
   - hash-comment
+  # Rutas del repo en español (docs, datos, devtools): son nombres de archivo, no palabras.
+  - '(?:server|docs|devtools)/[\w/.-]+'
 overrides:
   # Los strings de los tests pueden estar en español (son datos de prueba, no identificadores).
   - filename: '**/tests/**'
@@ -33,9 +35,20 @@ overrides:
     language: en,es
   - filename: 'server/data/**/*.json'
     language: en,es
+  # Alias del guion: nombres en español a propósito (narration/script_aliases.json, spec 002 D-5). Las formas sin
+  # tilde no están en el diccionario es-es, así que van por palabra.
+  - filename: 'server/src/content_studio/narration/script_aliases.json'
+    language: en,es
+    words: [emocion, enfasis, energica, dramatica]
 ignorePaths:
   # Temporal: cada spec de la serie saca una carpeta de esta lista al traducirla (ciclos 2 a 6 de la 002).
-  - server/src/**
+  # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
+  - server/data/narration/voices/catalog.json
+  # La config no se revisa a sí misma: lista rutas en español de carpetas que aún no se traducen.
+  - cspell.config.yaml
+  - server/src/content_studio/cli/**
+  - server/src/content_studio/music/**
+  - server/src/content_studio/narration/grabar/**
   - devtools/**
   - server/tests/**
   - tests/**
@@ -61,7 +74,7 @@ ignorePaths:
   - server/data/**/*.m4a
   - server/data/**/*.mp3
   - server/data/**/*.txt
-  - server/data/**/motores/**
+  - server/data/**/engines/**
   - server/data/**/models/**
   - server/data/**/.venv*/**
   - server/data/**/voces/*/**

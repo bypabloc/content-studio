@@ -6,14 +6,14 @@ import sys
 
 import typer
 
-from content_studio.cli.comandos import GRUPOS, REGISTRO, Comando
-from content_studio.cli.flujo import ejecutar
+from content_studio.cli.commands import GROUPS, REGISTRY, Command
+from content_studio.cli.flow import execute
 from content_studio.cli.menu import menu
 from content_studio.cli.widgets import console
-from content_studio.comun.proceso import consola_utf8
+from content_studio.common.process import console_utf8
 
 # Los flags pasan tal cual al parser del script: Typer no los interpreta.
-PASO = dict(context_settings={'allow_extra_args': True, 'ignore_unknown_options': True}, add_help_option=False)
+STEP = dict(context_settings={'allow_extra_args': True, 'ignore_unknown_options': True}, add_help_option=False)
 app = typer.Typer(
     help='Audio local para videos: narración y música. Sin argumentos abre el menú.',
     add_completion=False,
@@ -22,7 +22,7 @@ app = typer.Typer(
 
 
 @app.callback(invoke_without_command=True)
-def raiz(ctx: typer.Context) -> None:
+def root(ctx: typer.Context) -> None:
     if ctx.invoked_subcommand is None:
         if sys.stdin.isatty() and sys.stdout.isatty():
             menu()
@@ -30,31 +30,31 @@ def raiz(ctx: typer.Context) -> None:
             console.print(ctx.get_help())
 
 
-def _paso(cmd: Comando):
+def _step(cmd: Command):
     def correr(ctx: typer.Context) -> None:
-        ejecutar(cmd, ctx.args)
+        execute(cmd, ctx.args)
 
     return correr
 
 
-def registrar(destino: typer.Typer, comandos: list[Comando]) -> None:
-    grupos: dict[str, typer.Typer] = {}
-    for cmd in comandos:
-        *grupo, nombre = cmd.clave.split()
-        padre = destino
-        if grupo:
-            if grupo[0] not in grupos:
-                grupos[grupo[0]] = typer.Typer(help=GRUPOS[grupo[0]], no_args_is_help=True)
-                destino.add_typer(grupos[grupo[0]], name=grupo[0])
-            padre = grupos[grupo[0]]
-        padre.command(name=nombre, help=cmd.ayuda, **PASO)(_paso(cmd))
+def register(destination: typer.Typer, commands: list[Command]) -> None:
+    groups: dict[str, typer.Typer] = {}
+    for cmd in commands:
+        *group, name = cmd.clave.split()
+        parent = destination
+        if group:
+            if group[0] not in groups:
+                groups[group[0]] = typer.Typer(help=GROUPS[group[0]], no_args_is_help=True)
+                destination.add_typer(groups[group[0]], name=group[0])
+            parent = groups[group[0]]
+        parent.command(name=name, help=cmd.help, **STEP)(_step(cmd))
 
 
-registrar(app, REGISTRO)
+register(app, REGISTRY)
 
 
 def main() -> None:
-    consola_utf8()
+    console_utf8()
     try:
         app()
     except KeyboardInterrupt:
