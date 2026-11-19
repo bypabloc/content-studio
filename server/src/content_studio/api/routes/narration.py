@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from typing import Any
 
 from fastapi import APIRouter
 from pydantic import BaseModel
@@ -20,7 +21,28 @@ class ScriptIn(BaseModel):
     style: str = 'expert'
 
 
-@router.post('/narration/lint')
+class IssueOut(BaseModel):
+    """Un aviso del linter: la regla de formato-guion.md, su posición (1-based) y su texto ya en español."""
+
+    rule: int
+    code: str
+    line: int
+    col: int
+    length: int
+    params: dict[str, Any]
+    message: str
+
+
+class LintOut(BaseModel):
+    """Lo que devuelve el lint: los avisos, las palabras, los segundos estimados y la guía de formato."""
+
+    issues: list[IssueOut]
+    words: int
+    seconds: float
+    guide: str
+
+
+@router.post('/narration/lint', response_model=LintOut)
 def lint(body: ScriptIn) -> dict:
     """Incidencias con línea, columna y largo, cada una con el texto de su regla; también palabras y segundos."""
     issues = script_lint.lint(body.text)

@@ -57,5 +57,13 @@
   "theme.change": "{mode}: cambiar a {next}",
   "theme.dark": "Oscuro",
   "theme.light": "Claro",
-  "theme.system": "Sistema"
+  "theme.system": "Sistema",
+  "narration.editor.label": "Guion",
+  "narration.editor.placeholder": "Escribe el guion. Una línea en blanco es una pausa; [pausa 1.5] agrega 1.5 s.",
+  "narration.editor.stats": "{words} palabras · {seconds} s",
+  "narration.editor.issues_one": "1 aviso",
+  "narration.editor.issues_other": "{count} avisos",
+  "narration.import.button": "Importar",
+  "narration.import.filter": "Guiones (.txt, .json)",
+  "narration.import.rejected": "Solo se importan .txt y .json. Estos no: {names}"
 }

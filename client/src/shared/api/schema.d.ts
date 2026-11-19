@@ -382,6 +382,28 @@ export interface components {
             detail?: components["schemas"]["ValidationError"][];
         };
         /**
+         * IssueOut
+         * @description Un aviso del linter: la regla de formato-guion.md, su posición (1-based) y su texto ya en español.
+         */
+        IssueOut: {
+            /** Rule */
+            rule: number;
+            /** Code */
+            code: string;
+            /** Line */
+            line: number;
+            /** Col */
+            col: number;
+            /** Length */
+            length: number;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Message */
+            message: string;
+        };
+        /**
          * Job
          * @description Una fila de la cola: `GET /jobs`, `GET /jobs/{id}`, reintentar y el evento SSE `job`.
          */
@@ -433,6 +455,20 @@ export interface components {
             starred: boolean;
             /** Group Key */
             group_key?: string | null;
+        };
+        /**
+         * LintOut
+         * @description Lo que devuelve el lint: los avisos, las palabras, los segundos estimados y la guía de formato.
+         */
+        LintOut: {
+            /** Issues */
+            issues: components["schemas"]["IssueOut"][];
+            /** Words */
+            words: number;
+            /** Seconds */
+            seconds: number;
+            /** Guide */
+            guide: string;
         };
         /**
          * NewJob
@@ -975,9 +1011,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["LintOut"];
                 };
             };
             /** @description Validation Error */

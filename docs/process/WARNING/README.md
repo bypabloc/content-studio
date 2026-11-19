@@ -56,5 +56,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [006-migracion-3](006-migracion-3.md) | La migración de `starred` y `group_key` es la 3 del código: la 2 ya es `owner_pid` | el merge a `dev` |
 | [006-regenerar-sin-estado](006-regenerar-sin-estado.md) | Regenerar reconstruye los bloques desde `script.json` y copia los que no cambian | el merge a `dev` |
 | [006-tomas-y-grupo](006-tomas-y-grupo.md) | Las tomas de un mismo texto comparten `group_key`, que hereda la regeneración | el merge a `dev` |
+| [006-dialog-js](006-dialog-js.md) | Dependencia nueva: `@tauri-apps/plugin-dialog` (JS) para «Importar» con el diálogo del sistema | el merge a `dev` |
+| [006-editor-capa](006-editor-capa.md) | Los avisos del editor se pintan en una capa detrás del campo, con el texto del server en el tooltip | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
