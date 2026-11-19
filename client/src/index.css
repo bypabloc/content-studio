@@ -75,4 +75,9 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
+
+  /* El acento violeta de la paleta (decisión de la 005) pinta casillas, radios y barras de progreso nativas. */
+  html {
+    accent-color: var(--primary);
+  }
 }
