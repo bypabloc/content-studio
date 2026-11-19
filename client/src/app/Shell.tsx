@@ -1,11 +1,9 @@
-import { useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { QueuePanel } from '@/features/queue/QueuePanel';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { t } from '@/shared/i18n/t';
 import { useTheme } from '@/shared/theme/useTheme';
 import { CommandPalette } from './CommandPalette';
-import { blockContextMenu } from './native';
 import { NAV } from './nav';
 import { useSectionId } from './routes';
 import { Sidebar } from './Sidebar';
@@ -16,11 +14,6 @@ export function Shell({ version }: { version: string }) {
   const [theme, setTheme] = useTheme();
   const sectionId = useSectionId();
   const section = NAV.find((item) => item.id === sectionId);
-
-  useEffect(() => {
-    document.addEventListener('contextmenu', blockContextMenu);
-    return () => document.removeEventListener('contextmenu', blockContextMenu);
-  }, []);
 
   return (
     <div className="flex min-h-screen select-none">
@@ -40,7 +33,7 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'settings' ? <SettingsPage /> : <p className="text-sm text-muted-foreground">{t('shell.empty')}</p>}
       </main>
       <CommandPalette />
-      <Toaster />
+      <Toaster theme={theme} />
     </div>
   );
 }

@@ -117,13 +117,13 @@ describe('connectEvents', () => {
     expect(queryClient.getQueryData<Job[]>(['jobs'])?.map((item) => item.id)).toEqual([3, 1, 2]);
   });
 
-  it('un trabajo que no está en el orden nuevo va al final', () => {
+  it('un trabajo que no está en el orden nuevo (en curso o con error) se queda en su lugar', () => {
     const { queryClient, source } = setup();
-    queryClient.setQueryData(['jobs'], [job(1), job(2), job(9)]);
+    queryClient.setQueryData(['jobs'], [job(1), job(9), job(2)]);
 
     source.emit('queue', { order: [2, 1] });
 
-    expect(queryClient.getQueryData<Job[]>(['jobs'])?.map((item) => item.id)).toEqual([2, 1, 9]);
+    expect(queryClient.getQueryData<Job[]>(['jobs'])?.map((item) => item.id)).toEqual([2, 9, 1]);
   });
 
   it('un evento queue con order no crea la lista si todavía no se pidió', () => {

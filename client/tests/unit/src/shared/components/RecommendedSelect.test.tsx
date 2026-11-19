@@ -25,7 +25,10 @@ function mount(fetchMock: ReturnType<typeof vi.fn>, props: Partial<ComponentProp
       <ApiProvider connection={connection}>{children}</ApiProvider>
     </QueryClientProvider>
   );
-  return render(<RecommendedSelect settingKey="select.demo" label="Demo" options={options} {...props} />, { wrapper });
+  const result = render(<RecommendedSelect settingKey="select.demo" label="Demo" options={options} {...props} />, {
+    wrapper,
+  });
+  return { ...result, queryClient };
 }
 
 describe('RecommendedSelect', () => {
@@ -103,8 +106,12 @@ describe('RecommendedSelect', () => {
   });
 
   it('si la elección guardada ya no existe, vuelve a la recomendada', async () => {
-    mount(vi.fn(async () => reply({ key: 'select.demo', value: 'desaparecida' })));
+    const { queryClient } = mount(vi.fn(async () => reply({ key: 'select.demo', value: 'desaparecida' })));
 
-    await waitFor(() => expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).value).toBe('b'));
+    // La recomendada ya está por defecto: sin esperar la respuesta del server, la prueba no diría nada.
+    await waitFor(() =>
+      expect(queryClient.getQueryData(['settings', 'select.demo'])).toEqual({ key: 'select.demo', value: 'desaparecida' }),
+    );
+    expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).value).toBe('b');
   });
 });

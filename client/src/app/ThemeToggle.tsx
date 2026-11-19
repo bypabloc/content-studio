@@ -19,7 +19,7 @@ export function ThemeToggle({ mode, onChange }: { mode: ThemeMode; onChange: (mo
   return (
     <button
       type="button"
-      aria-label={t('theme.change', { mode: modeLabel(mode) })}
+      aria-label={t('theme.change', { mode: modeLabel(mode), next: modeLabel(NEXT[mode]) })}
       onClick={() => onChange(NEXT[mode])}
       className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-accent"
     >

@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { useApi } from '@/shared/api/context';
 import { sortedBy, type Job, type QueueState } from '@/shared/api/events';
+import { t } from '@/shared/i18n/t';
 
 /** La cola: los trabajos (los actualiza SSE), la pausa y las acciones de cada trabajo y de la cola. */
 export function useQueue() {
@@ -16,7 +18,14 @@ export function useQueue() {
     mutationFn: (paused: boolean) => api.post<QueueState>(paused ? '/queue/pause' : '/queue/resume'),
     onSuccess: (state) => queryClient.setQueryData(['queue'], state),
   });
-  const order = useMutation({ mutationFn: (ids: number[]) => api.put('/queue/order', { ids }) });
+  // Si el server no acepta el orden, vuelve a su lista y avisa (el reordenado se mostró antes de mandarlo).
+  const order = useMutation({
+    mutationFn: (ids: number[]) => api.put('/queue/order', { ids }),
+    onError: () => {
+      void refresh();
+      toast.error(t('queue.order_failed'));
+    },
+  });
 
   const paused = queue.data?.paused ?? false;
   return {

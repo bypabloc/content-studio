@@ -4,6 +4,7 @@
   "categories": { "correctness": "error", "suspicious": "warn" },
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "import/no-unassigned-import": "off"
+    "import/no-unassigned-import": "off",
+    "react/jsx-no-literals": "error"
   }
 }

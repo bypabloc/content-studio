@@ -28,4 +28,11 @@ describe('blockContextMenu', () => {
     expect(rightClick(child)).toBe(false);
     area.remove();
   });
+
+  it('en un campo de texto deja su menú (copiar y pegar)', () => {
+    const field = document.createElement('input');
+    document.body.append(field);
+    expect(rightClick(field)).toBe(false);
+    field.remove();
+  });
 });

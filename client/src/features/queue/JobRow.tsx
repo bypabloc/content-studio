@@ -45,9 +45,10 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
             aria-label={t('queue.drag')}
             className="cursor-grab rounded px-1 text-muted-foreground"
             {...attributes}
+            aria-roledescription={t('queue.drag_role')}
             {...listeners}
           >
-            ⋮⋮
+            {'⋮⋮'}
           </button>
         ) : null}
         {job.status === 'queued' || job.status === 'running' ? (
@@ -66,7 +67,9 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
 }
 
 function kindLabel(kind: string): string {
-  return kind === 'music' ? t('queue.kind.music') : kind;
+  if (kind === 'music') return t('queue.kind.music');
+  if (kind === 'narration') return t('queue.kind.narration');
+  return kind;
 }
 
 function statusLabel(status: Job['status']): string {

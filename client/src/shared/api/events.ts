@@ -56,8 +56,13 @@ function upsert(jobs: Job[], changed: Job): Job[] {
     : [...jobs, changed];
 }
 
-/** La lista en el orden de `order`; los que no aparecen van al final, en su orden. */
+/**
+ * Reordena solo los trabajos que trae `order` (los en espera): ocupan los mismos lugares y cambian entre ellos. Los
+ * demás (en curso, con error o terminados) se quedan donde estaban.
+ */
 export function sortedBy(jobs: Job[], order: number[]): Job[] {
   const rank = new Map(order.map((id, index) => [id, index]));
-  return [...jobs].sort((a, b) => (rank.get(a.id) ?? order.length) - (rank.get(b.id) ?? order.length));
+  const listed = jobs.filter((job) => rank.has(job.id)).sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+  let next = 0;
+  return jobs.map((job) => (rank.has(job.id) ? listed[next++] : job));
 }
