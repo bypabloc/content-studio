@@ -91,15 +91,15 @@
   "parts": [
    {
     "url": "https://openslr.elda.org/resources/72/es_co_male.zip",
-    "miembro": "com_05223_00098414506.wav"
+    "member": "com_05223_00098414506.wav"
    },
    {
     "url": "https://openslr.elda.org/resources/72/es_co_male.zip",
-    "miembro": "com_05223_00227411657.wav"
+    "member": "com_05223_00227411657.wav"
    },
    {
     "url": "https://openslr.elda.org/resources/72/es_co_male.zip",
-    "miembro": "com_05223_00127398886.wav"
+    "member": "com_05223_00127398886.wav"
    }
   ],
   "text": "En su teléfono hay una pestaña que dice aplicaciones, apriete el icono de color azul. Ambos restaurantes tienen cinco estrellas en la guía de mejores restaurantes de la ciudad. La nave encalló en los arrecifes.",
@@ -115,15 +115,15 @@
   "parts": [
    {
     "url": "https://openslr.elda.org/resources/73/es_pe_female.zip",
-    "miembro": "pef_06136_00003492229.wav"
+    "member": "pef_06136_00003492229.wav"
    },
    {
     "url": "https://openslr.elda.org/resources/73/es_pe_female.zip",
-    "miembro": "pef_06136_00018043305.wav"
+    "member": "pef_06136_00018043305.wav"
    },
    {
     "url": "https://openslr.elda.org/resources/73/es_pe_female.zip",
-    "miembro": "pef_06136_00037378198.wav"
+    "member": "pef_06136_00037378198.wav"
    }
   ],
   "text": "¿Me puedes confirmar si ya está hecha la reservación? La mermelada de zarzamora es muy fácil de hacer. ¿Le parece que contacte a todos sus contactos de Facebook?",
@@ -139,11 +139,11 @@
   "parts": [
    {
     "url": "https://openslr.elda.org/resources/75/es_ve_female.zip",
-    "miembro": "vef_02484_00099472497.wav"
+    "member": "vef_02484_00099472497.wav"
    },
    {
     "url": "https://openslr.elda.org/resources/75/es_ve_female.zip",
-    "miembro": "vef_02484_00223804236.wav"
+    "member": "vef_02484_00223804236.wav"
    }
   ],
   "text": "Las cornetas que te dije son enormes, ¿sabes qué se puede hacer con ellas? Las tejas rojas del tejado no son de México, son de Texas.",
