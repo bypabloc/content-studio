@@ -11,12 +11,12 @@
 | Tipo | feature |
 | Escala | Large (unos 25 archivos entre server y client) |
 | Rama | `feature/009-engines-storage` desde `origin/dev`, en `../content-studio-worktrees/009-engines-storage/` |
-| Depende de | [008](../008-music-section/README.md) (fusionada en `origin/dev`) |
+| Depende de | [008](../008-music-section/README.md) (fusionada en `origin/dev`) y [002](../002-english-cspell/README.md) (renombra las rutas que esta spec usa) |
 | Origen | Pedido del usuario (lote [001-017-studio](../README.md)) |
 
 ## Objetivo
 
-Que el estudio pueda instalar, verificar, reparar y desinstalar cada motor desde la UI, con su licencia, tamaño, requisitos de GPU y progreso. También detecta ffmpeg (y git) y los instala con winget si faltan, deja elegir dónde viven los modelos y las salidas, y guía el primer uso con un asistente de bienvenida.
+Que el estudio pueda instalar, verificar, reparar y desinstalar cada motor desde la UI, con su licencia, tamaño, requisitos de GPU y progreso. También detecta ffmpeg (y git) y los instala con winget si faltan, deja elegir dónde viven los modelos y las salidas, y guía el primer uso con un asistente de bienvenida. Por defecto, venvs y pesos viven fuera del checkout, en una carpeta que el usuario puede cambiar: el checkout solo guarda código y datos versionados.
 
 ## Índice
 
@@ -35,7 +35,7 @@ Que el estudio pueda instalar, verificar, reparar y desinstalar cada motor desde
 
 ## Decisiones clave
 
-* D-1: `paths` pasa a funciones que leen `storage.*` de `settings`. En modo dev, el valor por defecto es `server/data/` del checkout.
+* D-1: `paths` pasa a funciones que leen `storage.*` de `settings`. El valor por defecto es una carpeta fuera del checkout, también en dev (`%LOCALAPPDATA%\Content Studio\` o `~/.local/share/content-studio/`); el checkout solo guarda código y datos versionados.
 * D-2: recetas como datos (`engines/recipes/<engine>.json`) con pasos idempotentes: `python`, `venv`, `pip`, `git`, `hf` y `post`.
 * D-3: el instalador es un trabajo `engine.install` (recurso `cpu`; la descarga no usa GPU) con `@@progress` por paso y por bytes.
 * D-4: `HF_HOME` apunta a la carpeta de modelos, para que desinstalar sepa qué borrar. Cada instalación deja un `install.json` (dueño `app` o `external`).
