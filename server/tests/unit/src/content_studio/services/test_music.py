@@ -30,6 +30,12 @@ def test_build_command_runs_the_music_module_into_the_job_folder(tmp_path):
     assert cmd[cmd.index('--folder') + 1] == str(tmp_path / 'job')
 
 
+def test_no_lm_flag_reaches_the_engine_command(tmp_path):
+    cmd = music.build_command({**VALID, 'no_lm': True}, tmp_path / 'job')
+
+    assert '--no-lm' in cmd
+
+
 def test_valid_params_have_no_errors(installed):
     assert music.validate(VALID) == []
 

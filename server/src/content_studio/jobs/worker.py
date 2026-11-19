@@ -1,8 +1,9 @@
 """Worker de la cola (spec 004, D-3): una tarea de GPU a la vez con el candado compartido; las de CPU, en paralelo.
 
-Cada hilo abre su propia conexión a la base (SQLite no se comparte entre hilos). Cancelar marca la fila y termina el
-árbol de procesos: en Windows con taskkill /T /F, porque terminate() no alcanza a los hijos del motor. Cada cambio de
-un trabajo se entrega a `publish` (la API lo manda a /events).
+Cada hilo abre su propia conexión a la base (SQLite no se comparte entre hilos). Un trabajo se toma con `queue.claim`,
+así la CLI y el server no lo corren dos veces. Cancelar, desde este worker o desde otro proceso, termina el árbol de
+procesos: en Windows con taskkill /T /F, porque terminate() no alcanza a los hijos del motor. Cada cambio de un trabajo
+se entrega a `publish` (la API lo manda a /events).
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ import sqlite3
 import subprocess
 import sys
 import threading
+import time
 from collections.abc import Callable, Mapping
 from contextlib import closing
 from datetime import datetime
@@ -27,6 +29,8 @@ from content_studio.db import connection, jobs
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
 from content_studio.services.registry import SERVICES
+
+WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canceló desde otro proceso
 
 
 def stop_tree(proc: subprocess.Popen) -> None:
@@ -48,6 +52,11 @@ def _status(conn: sqlite3.Connection, job_id: int) -> str | None:
     """Estado actual del trabajo, o None si no existe."""
     row = jobs.get(conn, job_id)
     return row['status'] if row else None
+
+
+def _label(job: dict) -> str:
+    """Nombre del trabajo en el candado de la GPU (lo ven `gpu-turn status` y las otras sesiones)."""
+    return f'{job["kind"]}-{job["id"]}'
 
 
 class Worker:
@@ -98,6 +107,23 @@ class Worker:
             stop_tree(proc)
         return changed
 
+    def run_now(self, job_id: int) -> str | None:
+        """Corre un trabajo en este proceso, espera a que termine y devuelve su estado final (lo usa `studio`)."""
+        with closing(connection.connect(self.db_path)) as conn:
+            job = jobs.get(conn, job_id)
+            if job is None:
+                raise ValueError(f'job {job_id} does not exist')
+            if job['resource'] == 'gpu':
+                while not gpu_lock.acquire(self.main, _label(job), [job['kind']]):
+                    time.sleep(self.poll)  # otra sesión tiene la GPU: se espera
+                try:
+                    self._claim_and_run(conn, job)
+                finally:
+                    gpu_lock.release(self.main)
+            else:
+                self._claim_and_run(conn, job)
+            return _status(conn, job_id)
+
     def _notify(self, conn: sqlite3.Connection, job_id: int) -> None:
         """Publica el estado actual del trabajo como evento `job` (para /events)."""
         job = jobs.get(conn, job_id)
@@ -111,19 +137,25 @@ class Worker:
                     continue
                 cpu_job = jobs.next_queued(conn, 'cpu')
                 if cpu_job and self._cpu.acquire(blocking=False):
-                    jobs.update(conn, cpu_job['id'], status='running', started_at=utc_now())
-                    self._notify(conn, cpu_job['id'])
-                    threading.Thread(target=self._run_cpu, args=(cpu_job,), daemon=True).start()
-                    continue
+                    if queue.claim(conn, cpu_job['id']):
+                        self._notify(conn, cpu_job['id'])
+                        threading.Thread(target=self._run_cpu, args=(cpu_job,), daemon=True).start()
+                        continue
+                    self._cpu.release()
                 gpu_job = jobs.next_queued(conn, 'gpu')
                 if gpu_job and not self._gpu_busy:
                     self._gpu_busy = True
                     threading.Thread(target=self._run_gpu, args=(gpu_job,), daemon=True).start()
 
+    def _claim_and_run(self, conn: sqlite3.Connection, job: dict) -> None:
+        if queue.claim(conn, job['id']):
+            self._notify(conn, job['id'])
+            self._execute(conn, job)
+
     def _run_cpu(self, job: dict) -> None:
         try:
             with closing(connection.connect(self.db_path)) as conn:
-                self._execute(conn, job)
+                self._execute(conn, job)  # el despachador ya lo tomó: está en running
         finally:
             self._cpu.release()
 
@@ -131,14 +163,11 @@ class Worker:
         try:
             with closing(connection.connect(self.db_path)) as conn:
                 # Otra sesión puede tener la GPU: se espera sin bloquear las tareas de CPU.
-                while not gpu_lock.acquire(self.main, f'{job["kind"]}-{job["id"]}', [job['kind']]):
+                while not gpu_lock.acquire(self.main, _label(job), [job['kind']]):
                     if self._stop.wait(self.poll) or _status(conn, job['id']) != 'queued':
                         return
                 try:
-                    if _status(conn, job['id']) == 'queued':  # no se canceló mientras esperaba
-                        jobs.update(conn, job['id'], status='running', started_at=utc_now())
-                        self._notify(conn, job['id'])
-                        self._execute(conn, job)
+                    self._claim_and_run(conn, job)
                 finally:
                     gpu_lock.release(self.main)
         finally:
@@ -147,6 +176,8 @@ class Worker:
     def _execute(self, conn: sqlite3.Connection, job: dict) -> None:
         out_dir = self._output_dir(job)
         jobs.update(conn, job['id'], output_dir=str(out_dir))
+        finished = threading.Event()
+        threading.Thread(target=self._watch_cancel, args=(job['id'], finished), daemon=True).start()
         detail = ''
         try:
             command = self.services[job['kind']].build_command(job['params'], out_dir)
@@ -161,6 +192,7 @@ class Worker:
         except OSError as error:  # el proceso no arrancó (p. ej. falta el venv del motor)
             code, detail = -1, str(error)
         finally:
+            finished.set()
             self._processes.pop(job['id'], None)
         if _status(conn, job['id']) == 'cancelled':
             return
@@ -176,6 +208,15 @@ class Worker:
                 finished_at=utc_now(),
             )
         self._notify(conn, job['id'])
+
+    def _watch_cancel(self, job_id: int, finished: threading.Event) -> None:
+        """Mientras el proceso corre, mira la base: si el trabajo se canceló desde otro proceso, lo termina."""
+        with closing(connection.connect(self.db_path)) as conn:
+            while not finished.wait(WATCH_SECONDS):
+                proc = self._processes.get(job_id)
+                if proc is not None and _status(conn, job_id) == 'cancelled':
+                    stop_tree(proc)
+                    return
 
     def _register(self, job_id: int) -> Callable[[subprocess.Popen], None]:
         """Callback para runner.run: guarda el proceso para poder cancelarlo."""

@@ -76,3 +76,11 @@ def test_reorder_sets_the_given_order_and_the_pause_flag_round_trips(conn):
     assert queue.paused(conn)
     queue.resume(conn)
     assert not queue.paused(conn)
+
+
+def test_claim_moves_only_a_queued_job_to_running(conn):
+    job_id = jobs.insert(conn, 'fake', 'gpu', {})
+
+    assert queue.claim(conn, job_id) is True
+    assert jobs.get(conn, job_id)['status'] == 'running'
+    assert queue.claim(conn, job_id) is False  # otro actor ya lo tomó: no se corre dos veces

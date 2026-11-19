@@ -51,6 +51,15 @@ def retry(conn: sqlite3.Connection, job_id: int) -> int:
     return jobs.insert(conn, job['kind'], job['resource'], job['params'])
 
 
+def claim(conn: sqlite3.Connection, job_id: int) -> bool:
+    """Pasa un trabajo `queued` a `running` si nadie lo tomó antes. Solo un actor gana (server o CLI)."""
+    cursor = conn.execute(
+        "UPDATE jobs SET status = 'running', started_at = ? WHERE id = ? AND status = 'queued'",
+        (utc_now(), job_id),
+    )
+    return cursor.rowcount == 1
+
+
 def reorder(conn: sqlite3.Connection, ids: list[int]) -> None:
     """Pone los trabajos en el orden dado: el primero de la lista sale primero."""
     for position, job_id in enumerate(ids, 1):

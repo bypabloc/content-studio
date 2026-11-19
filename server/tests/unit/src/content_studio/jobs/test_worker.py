@@ -150,3 +150,21 @@ def test_ac11_a_job_left_running_by_a_crash_becomes_an_interrupted_error(env):
 
     row = jobs.get(env.conn, job)
     assert (row['status'], row['error_code']) == ('error', 'interrupted')
+
+
+def test_run_now_runs_one_job_in_this_process_and_returns_its_final_status(env):
+    job = _enqueue(env, 'solo', sleep=0.05)
+
+    assert env.worker.run_now(job) == 'done'
+    assert Path(jobs.get(env.conn, job)['output_dir'], 'params.json').is_file()
+
+
+def test_a_cancel_written_only_to_the_database_stops_a_running_process(env):
+    job = _enqueue(env, 'long', sleep=60)
+    env.worker.start()
+    assert _wait_for(lambda: jobs.get(env.conn, job)['status'] == 'running')
+
+    queue.cancel(env.conn, job)  # cancelado desde otro proceso: el worker lo ve en la base y termina el proceso
+
+    assert _wait_for(lambda: not gpu_lock.lock(env.main).exists(), timeout=6)
+    assert jobs.get(env.conn, job)['status'] == 'cancelled'

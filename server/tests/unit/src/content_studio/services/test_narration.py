@@ -30,6 +30,12 @@ def test_build_command_runs_the_tts_module_with_the_job_folder_as_output(tmp_pat
     assert cmd[cmd.index('--output') + 1] == str(tmp_path / 'job')
 
 
+def test_ref_and_voice_reach_the_engine_command(tmp_path):
+    cmd = narration.build_command({**VALID, 'ref': 'clara.wav'}, tmp_path / 'job')
+
+    assert cmd[cmd.index('--ref') + 1] == 'clara.wav'
+
+
 def test_valid_params_have_no_errors(installed):
     assert narration.validate(VALID) == []
 

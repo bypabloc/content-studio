@@ -17,6 +17,7 @@ FLAGS = {
     'lufs': '--lufs',
     'batch': '--batch',
     'retries': '--retries',
+    'ref': '--ref',
 }
 
 

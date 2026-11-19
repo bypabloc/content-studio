@@ -57,4 +57,6 @@ def build_command(params: dict, output_dir: Path) -> list[str]:
             args += [flag, str(params[key])]
     if params.get('evaluate'):
         args.append('--evaluate')
+    if params.get('no_lm'):
+        args.append('--no-lm')
     return [sys.executable, '-m', 'content_studio.music.music_main', *args]

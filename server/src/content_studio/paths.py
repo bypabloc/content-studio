@@ -1,6 +1,6 @@
 """Rutas del checkout. Única fuente: los datos (venvs, motores, modelos y voces) viven en server/data/.
 
->>> NARRATION.parent.name, (ROOT / 'cli.py').is_file()
+>>> NARRATION.parent.name, (SERVER / 'pyproject.toml').is_file()
 ('data', True)
 """
 

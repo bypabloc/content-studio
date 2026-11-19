@@ -44,7 +44,7 @@ overrides:
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
 ignorePaths:
-  # Temporal (D-3): la UI en español de cli/ la retira la 004 y grabar/ la 007.
+  # Temporal (D-3): la UI en español de grabar/ la retira la 007 (la CLI `studio` ya no la tiene).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
   # Prosa en español para el agente: configuración del plugin session-handoff (D-1).
@@ -54,16 +54,8 @@ ignorePaths:
   # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).
   - server/tests/integration/fixtures/*.json
   - server/tests/integration/fixtures/*.txt
-  # cli/ salvo commands/ (ciclo 5): la UI en español la retira la 004 (D-3).
-  - server/src/content_studio/cli/app.py
-  - server/src/content_studio/cli/args.py
-  - server/src/content_studio/cli/flow.py
-  - server/src/content_studio/cli/help_text.py
-  - server/src/content_studio/cli/menu.py
-  - server/src/content_studio/cli/widgets.py
-  - server/src/content_studio/cli/__init__.py
+  # grabar/ (legacy: rich y questionary, con la UI en español): la 007 la retira.
   - server/src/content_studio/narration/grabar/**
-  - cli.py
   # Dependencias, salidas, grafo y datos que no son código: no se revisan.
   - node_modules/**
   - graphify-out/**

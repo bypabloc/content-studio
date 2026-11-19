@@ -1,15 +1,15 @@
 r"""TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.
 
 Uso (ver server/data/narration/README.md):
-    python cli.py narration tts --model qwen-0.6b --style amistosa \
-        --text "Hola, bienvenidos al canal."
-    python cli.py narration tts --model chatterbox --ref server/data/narration/reference/clara.wav \
-        --style clara --file guion.txt --output out/narration/guion.wav
-    python cli.py narration tts --model qwen-0.6b --file guiones/*.json --output out/narration/lote
-    python cli.py narration tts --model omnivoice --file guion.txt --seed 7 --evaluate
+    studio narration tts --model qwen-0.6b --style friendly --text "Hola, bienvenidos al canal."
+    studio narration tts --model chatterbox --ref server/data/narration/reference/clara.wav \
+        --style clear --file guion.txt
+    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json
+    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate
 
---ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/voz). --voice usa una voz libre
-del catálogo (python cli.py narration voces), solo si está aprobada en todos los estilos.
+Con `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).
+--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/reference). --voice usa una voz
+libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.
 La transcripción va al lado con el mismo nombre y extensión .txt.
 Cada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.
 

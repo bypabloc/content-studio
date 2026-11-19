@@ -1,10 +1,10 @@
 r"""Graba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.
 
 Uso:
-    python cli.py narration grabar --list                # dispositivos de audio disponibles
-    python cli.py narration grabar                         # elige dispositivo y estilos en el menú
-    python cli.py narration grabar --device RDPSource --style neutral amistosa
-    python cli.py narration grabar --device 2 --all # el kit completo, en el orden de la guía
+    uv run --group legacy python -m content_studio.narration.grabar.main --list   # dispositivos de audio
+    uv run --group legacy python -m content_studio.narration.grabar.main          # elige dispositivo y estilos
+    uv run --group legacy python -m content_studio.narration.grabar.main --device RDPSource --style neutral friendly
+    uv run --group legacy python -m content_studio.narration.grabar.main --device 2 --all   # el kit completo
 
 Mientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.
 Cada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).
