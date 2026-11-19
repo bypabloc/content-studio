@@ -6,7 +6,7 @@
     "user-stop": "el usuario pidió parar"
   },
   "context": [
-    "Turno de la GPU (turno-gpu.md): todo lo que carga un modelo va con `python -m devtools turno-gpu run --trabajo=<t> -- <comando>`; antes, `turno-gpu status` y ListAgents. El estado del turno va en PROGRESS.md."
+    "Turno de la GPU (turno-gpu.md): todo lo que carga un modelo va con `python -m devtools gpu-turn run --job=<t> -- <comando>`; antes, solo `gpu-turn status`. Sin mensajes si está libre: «ocupo»/«gpu libre» solo con la sesión que la tiene o que te pidió aviso. Si esperas, el estado del turno (waiting y el id del cron) va en PROGRESS.md."
   ],
   "specsDir": "docs/specs",
   "decisionsDir": "docs/process/WARNING",
