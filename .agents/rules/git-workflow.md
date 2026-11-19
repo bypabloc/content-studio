@@ -49,7 +49,7 @@ gh pr checks <n> --watch && gh pr merge <n> --merge           # cuando los check
 git switch dev && git pull                                     # en el checkout principal
 python -m devtools worktree close <nombre>     # cierre obligatorio tras el merge
 
-# Publicar: PR de dev a main
+# Publicar: PR de dev a main (SOLO cuando el usuario lo pide explícitamente)
 gh pr create --base main --head dev --title "release: ..." --body "..."
 
 # Hotfix: fix/* desde main → PR a main. La sincronización a dev es automática (ver abajo)
@@ -80,3 +80,4 @@ Un cambio chico de una sola sesión puede hacerse en una rama del checkout princ
 - Antes de confirmar cambios: correr `uv run ruff check`, `uv run ruff format --check` y `uv run pytest` (doctests incluidos; lo mismo que el workflow `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
 - El cuerpo del PR enlaza las fichas de `docs/process/WARNING/` y `PENDING/` que dejó el cambio, o dice que no dejó ninguna.
 - Commit, push y merge solo cuando el usuario lo pida, o cuando lo pide una spec en ejecución (`execute-spec`).
+- **Todo merge va a `dev`**, con el cierre de la spec (`worktree close`). **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
