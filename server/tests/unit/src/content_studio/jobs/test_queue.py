@@ -79,6 +79,20 @@ def test_reorder_sets_the_given_order_and_the_pause_flag_round_trips(conn):
     assert not queue.paused(conn)
 
 
+def test_reorder_keeps_a_running_job_in_its_own_slot(conn):
+    """Reordenar los que esperan no empata sus puestos con el trabajo en curso: cada uno ocupa el suyo."""
+    running = jobs.insert(conn, 'fake', 'gpu', {})
+    first = jobs.insert(conn, 'fake', 'gpu', {})
+    second = jobs.insert(conn, 'fake', 'gpu', {})
+    jobs.update(conn, running, status='running')
+
+    queue.reorder(conn, [second, first])
+
+    listed = jobs.list_jobs(conn)
+    assert [job['id'] for job in listed] == [running, second, first]
+    assert [job['position'] for job in listed] == [1, 2, 3]
+
+
 def test_claim_moves_only_a_queued_job_to_running(conn):
     job_id = jobs.insert(conn, 'fake', 'gpu', {})
 

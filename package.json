@@ -1,7 +1,10 @@
 {
   "name": "content-studio",
   "private": true,
-  "workspaces": [],
+  "workspaces": [
+    "client",
+    "tests/e2e"
+  ],
   "devDependencies": {
     "@cspell/dict-es-es": "^3.0.9",
     "cspell": "^10.5.2"

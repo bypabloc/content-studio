@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
+from content_studio.api.schemas import Job
 from content_studio.db import jobs as store
 from content_studio.jobs import queue
 
@@ -31,7 +32,7 @@ def _found(conn: sqlite3.Connection, job_id: int) -> dict:
     return job
 
 
-@router.post('/jobs', status_code=201)
+@router.post('/jobs', status_code=201, response_model=Job)
 def create_job(body: NewJob, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Encola el trabajo. 422 con `code` y `message` si el tipo no existe o los parámetros no sirven."""
     services = request.app.state.services
@@ -45,7 +46,7 @@ def create_job(body: NewJob, request: Request, conn: Annotated[sqlite3.Connectio
     return _found(conn, job_id)
 
 
-@router.get('/jobs')
+@router.get('/jobs', response_model=list[Job])
 def list_jobs(
     conn: Annotated[sqlite3.Connection, Depends(get_conn)],
     kind: str | None = None,
@@ -55,7 +56,7 @@ def list_jobs(
     return store.list_jobs(conn, kind=kind, status=status)
 
 
-@router.get('/jobs/{job_id}')
+@router.get('/jobs/{job_id}', response_model=Job)
 def get_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Un trabajo, o 404 si no existe."""
     return _found(conn, job_id)
@@ -69,7 +70,7 @@ def cancel_job(job_id: int, request: Request, conn: Annotated[sqlite3.Connection
     return {'cancelled': changed}
 
 
-@router.post('/jobs/{job_id}/retry', status_code=201)
+@router.post('/jobs/{job_id}/retry', status_code=201, response_model=Job)
 def retry_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Crea un trabajo nuevo con los mismos parámetros. 409 si el original todavía no terminó."""
     _found(conn, job_id)

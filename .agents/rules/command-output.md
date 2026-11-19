@@ -9,7 +9,7 @@ description: Dónde va la salida de cada comando (out/, logs/, tmp/<comando>/) y
 
 * **Audio generado**: `out/narration/` y `out/music/`. Cada trabajo de `studio` sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/`, con su `params.json`; `studio` no acepta `--output` (narration) ni `--folder` (music). No se limpian.
 * **Logs de corridas**: `logs/<herramienta>-<descripción>.log` (`logs/music-heartmula-lofi.log`), en kebab-case; el log de un trabajo de `studio` es `logs/jobs/<id>.log`. Nunca en la raíz de `tmp/` ni de `out/`.
-* **Temporales de un comando o verificación**: `tmp/<comando>/<tema>.<ext>` (`tmp/verificar/spec.png`, `tmp/config-tests/<tema>.json`, `tmp/gpu-turn/`). Nunca `tmp/<algo>.log` suelto.
+* **Temporales de un comando o verificación**: `tmp/<comando>/<tema>.<ext>` (`tmp/verificar/spec.png`, `tmp/config-tests/<tema>.json`, `tmp/gpu-turn/`, `tmp/budget/report.json`, y `tmp/e2e/` con las capturas y `results/` de Playwright). Nunca `tmp/<algo>.log` suelto. La salida de Playwright va a `tmp/e2e/results/`, y las etapas `client-*` la devuelven en su detalle si fallan.
 * **Corridas largas** (HeartMuLa ~5 min por pista, un lote de voces): en segundo plano (`run_in_background`), con la salida en `logs/`; el harness avisa al terminar.
 * **Esperar sin `sleep`**: nunca `sleep`, `Start-Sleep` ni un bucle `until …; do sleep …` en primer plano, ni sondear un archivo. Lo bloquea `.agents/hooks/shell_guard.py`, conectado en `.claude/settings.json`, `.codex/hooks.json` y `.agents/hooks.json` (Antigravity; sin probar en Codex ni Antigravity, ver `docs/process/PENDING/`). Según lo que esperas:
 

@@ -28,6 +28,7 @@ chillhop
 chillwave
 chiptune
 ckpt
+compresslevel
 cosyvoice
 creationflags
 cspell
@@ -106,6 +107,7 @@ timespec
 tobytes
 toplevel
 typer
+urandom
 uvicorn
 vaporwave
 venv
@@ -117,3 +119,12 @@ wavlm
 wavs
 worktrees
 yesid
+geist
+tailwindcss
+tauri
+serde
+getrandom
+recv
+jobobject
+contentstudio
+unstub

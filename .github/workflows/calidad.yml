@@ -1,4 +1,4 @@
-# cspell:ignore calidad
+# cspell:ignore calidad dtolnay swatinem
 name: calidad
 
 # test-runner --type=all (lint, spelling, validators, unit con cobertura y espejo, typecheck y tdd) y guard-tdd, en 3.10,
@@ -34,3 +34,42 @@ jobs:
       - name: log de pytest si falla
         if: failure()
         run: tail -n 150 tmp/test-runner/pytest.log || true
+
+  # Gates del client (spec 005, D-9): e2e necesita Chromium, así que no va en `all`. Sin el Python de la matriz: devtools
+  # es stdlib.
+  client:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd tests/e2e playwright install --with-deps chromium
+      - run: uv run --no-project python -m devtools test-runner --type=e2e
+      - name: upload the e2e report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-tmp
+          path: tmp/e2e/
+
+  # cargo check del crate de Tauri (D-9). En Windows: ubuntu no trae webkit2gtk. `generate_context!` necesita client/dist.
+  tauri:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: client/src-tauri
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd client build
+      - run: uv run --no-project python -m devtools test-runner --type=tauri-check
+      # La prueba de regresión del Job Object (server.rs) usa cmd, ping y PowerShell: solo corre en Windows.
+      - run: cargo test --manifest-path client/src-tauri/Cargo.toml

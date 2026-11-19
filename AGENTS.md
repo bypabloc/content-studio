@@ -25,6 +25,8 @@ uv run studio jobs list --kind music         # también: jobs cancel ID y jobs r
 uv run --group legacy python -m content_studio.narration.grabar.main   # grabar voces (legacy: rich y questionary)
 ```
 
+**Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).
+
 `studio` es el script de `server/pyproject.toml`. Los motores se relanzan solos en el venv de cada uno (`common/process.py`); los módulos directos siguen con `PYTHONPATH=server/src python -m content_studio.narration.tts ...`.
 
 ## Arquitectura
@@ -68,6 +70,7 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib (rich y
 | Verificar antes de decir "listo" (duración, volumen, espectrograma) | [verify-before-claiming-done](.agents/rules/verify-before-claiming-done.md) |
 | Dónde va la salida de cada comando | [command-output](.agents/rules/command-output.md) |
 | Sesiones largas y seguir hasta terminar | Plugin [session-handoff](https://github.com/bypabloc/claude-plugin-session-handoff) (solo Claude Code), configurado en `.claude/session-handoff.json` |
+| Frontend del client (Tauri, React, textos, componentes) | [frontend-stack](.agents/rules/frontend-stack.md), [ui-components](.agents/rules/ui-components.md) |
 | Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [gpu-turn](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
 | Buscar código | [graphify](.agents/rules/graphify.md); skills `graphify-query`, `graphify-ops` |
 | devtools del flujo de agentes (`devtools/`, en la raíz) | [devtools](.agents/rules/devtools.md) |
@@ -80,6 +83,7 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib (rich y
 python -m devtools test-runner --type=all   # lo que corre CI (sin GPU)
 uv run pytest            # doctests y bugs (sin GPU)
 uv run pytest -m local   # además, cada venv de motor importa su librería (solo en este equipo)
+python -m devtools test-runner --type=e2e   # Playwright sobre la app construida (Chromium; en la CI, el job client)
 ```
 
 ## Reglas
@@ -95,4 +99,4 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 
 ## Requisitos
 
-`ffmpeg`, `uv` y GPU NVIDIA. La instalación de cada herramienta está en su README. Para los agentes, una vez por clon: `git config core.hooksPath .git-hooks` y `uv tool install graphifyy && graphify update .` (skill `graphify-ops`).
+`ffmpeg`, `uv`, `bun` (para el client), Rust con `cargo` (para la app de Tauri en `client/src-tauri`) y GPU NVIDIA. La instalación de cada herramienta está en su README. Para los agentes, una vez por clon: `git config core.hooksPath .git-hooks` y `uv tool install graphifyy && graphify update .` (skill `graphify-ops`).

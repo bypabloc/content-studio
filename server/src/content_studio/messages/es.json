@@ -12,5 +12,6 @@
   "unknown_voice": "La voz {voice} no está en el catálogo o no está aprobada en todos los estilos.",
   "missing_text": "Falta el texto o el archivo del guion.",
   "style_needs_key_bpm": "{style} no es un preset: define la tonalidad (key) y el bpm.",
-  "invalid_duration": "La duración debe estar entre 0 y {max} segundos."
+  "invalid_duration": "La duración debe estar entre 0 y {max} segundos.",
+  "invalid_prefix": "Solo se restablecen las elecciones de los selectores; {prefix} no lo es."
 }

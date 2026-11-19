@@ -18,3 +18,26 @@ def test_the_401_body_has_a_code_and_a_message(api):
 
     assert body['code'] == 'unauthorized'
     assert body['message']
+
+
+def test_the_tauri_window_origin_can_call_the_api(api):
+    """La ventana de Tauri (http://tauri.localhost en Windows) llama a 127.0.0.1: el preflight de CORS la deja pasar."""
+    response = api.client.options(
+        '/health',
+        headers={
+            'Origin': 'http://tauri.localhost',
+            'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'authorization',
+        },
+    )
+
+    assert response.headers['access-control-allow-origin'] == 'http://tauri.localhost'
+
+
+def test_another_origin_gets_no_cors_permission(api):
+    response = api.client.options(
+        '/health',
+        headers={'Origin': 'http://evil.example', 'Access-Control-Request-Method': 'GET'},
+    )
+
+    assert 'access-control-allow-origin' not in response.headers

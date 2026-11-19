@@ -57,11 +57,65 @@ def test_prepare_and_close_in_a_repo_real(tmp_path, monkeypatch):
     assert worktree.close(main.resolve(), 'tema') == 2
 
 
-def test_missing_links_node_modules_so_spelling_works_in_a_worktree(tmp_path):
+def test_node_modules_is_not_linked_because_bun_install_would_write_to_main(tmp_path):
+    """client/ y tests/e2e son workspaces de bun: `bun install` en el worktree crea su propio node_modules."""
     main, wt = tmp_path / 'main', tmp_path / 'wt'
     (main / 'node_modules/@cspell').mkdir(parents=True)
     wt.mkdir()
-    assert [p.as_posix() for p in worktree.missing(main, wt)[0]] == ['node_modules']
+    assert worktree.missing(main, wt)[0] == []
+
+
+def test_prepare_installs_with_bun_and_shares_the_cargo_target(tmp_path, monkeypatch):
+    """D-10: `prepare` corre `bun install` en el worktree y enlaza su target de Cargo a <principal>/tmp/cargo-target."""
+    main = tmp_path / 'repo'
+    remote = tmp_path / 'remote.git'
+    subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
+    subprocess.run(['git', 'clone', '-q', str(remote), str(main)], check=True, capture_output=True)
+    (main / '.gitignore').write_text('client/src-tauri/target\ntmp/\n')
+    (main / 'package.json').write_text('{}')
+    (main / 'client/src-tauri').mkdir(parents=True)
+    (main / 'client/src-tauri/Cargo.toml').write_text('')
+    subprocess.run([*GIT, 'add', '.'], cwd=main, check=True)
+    subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=main, check=True)
+    subprocess.run(['git', 'push', '-q', 'origin', 'HEAD:dev'], cwd=main, check=True, capture_output=True)
+    wt = tmp_path / 'repo-worktrees' / 'tema'
+    subprocess.run(['git', 'worktree', 'add', '-q', str(wt), '-b', 'feature/tema'], cwd=main, check=True)
+    installed = []
+    monkeypatch.setattr(worktree, '_bun_install', lambda root: installed.append(root) or 0)
+    monkeypatch.chdir(main)
+    assert worktree.prepare(main.resolve(), 'tema') == 0
+    assert installed == [wt]
+    assert worktree.is_link(wt / 'client/src-tauri/target') and (main / 'tmp/cargo-target').is_dir()
+    subprocess.run(['git', 'fetch', '-q', 'origin'], cwd=main, check=True)
+    assert worktree.close(main.resolve(), 'tema') == 0
+    assert (main / 'tmp/cargo-target').is_dir() and not wt.exists()
+
+
+def test_prepare_keeps_an_existing_cargo_target(tmp_path, monkeypatch):
+    main, wt = tmp_path / 'main', tmp_path / 'wt'
+    (main / 'client/src-tauri').mkdir(parents=True)
+    (wt / 'client/src-tauri/target/debug').mkdir(parents=True)
+    assert worktree._cargo_target(main, wt) is False
+    assert not worktree.is_link(wt / 'client/src-tauri/target') and (wt / 'client/src-tauri/target/debug').is_dir()
+
+
+def test_bun_install_returns_127_when_bun_is_not_installed(tmp_path, monkeypatch):
+    def no_bun(*args, **kwargs):
+        raise FileNotFoundError('bun')
+
+    monkeypatch.setattr(worktree.subprocess, 'run', no_bun)
+    assert worktree._bun_install(tmp_path) == 127
+
+
+def test_prepare_stops_and_says_so_when_bun_install_fails(tmp_path, monkeypatch, capsys):
+    main, wt = tmp_path / 'main', tmp_path / 'wt'
+    main.mkdir()
+    wt.mkdir()
+    (wt / 'package.json').write_text('{}')
+    monkeypatch.setattr(worktree, 'search', lambda main_root, name: {'root': str(wt), 'head': '', 'branch': ''})
+    monkeypatch.setattr(worktree, '_bun_install', lambda root: 1)
+    assert worktree.prepare(main, 'tema') == 1
+    assert 'bun install failed' in capsys.readouterr().err
 
 
 def test_close_finishes_when_windows_cannot_delete_the_held_folder(tmp_path, monkeypatch):
@@ -98,3 +152,42 @@ def test_is_link_recognizes_junctions(tmp_path):
     (tmp_path / 'destino').mkdir()
     worktree.link(tmp_path / 'destino', tmp_path / 'enlace')
     assert worktree.is_link(tmp_path / 'enlace') and not worktree.is_link(tmp_path / 'destino')
+
+
+def test_remove_links_takes_an_old_node_modules_link_and_keeps_its_target(tmp_path):
+    """Un worktree de antes del cambio tiene node_modules enlazado al principal: `close` lo quita sin borrarlo."""
+    principal = tmp_path / 'principal-node-modules'
+    principal.mkdir()
+    (principal / 'keep.txt').write_text('x', encoding='utf-8')
+    root = tmp_path / 'worktree'
+    root.mkdir()
+    worktree.link(principal, root / 'node_modules')
+
+    assert worktree.remove_links(root) == 1
+    assert not (root / 'node_modules').exists()
+    assert (principal / 'keep.txt').is_file()
+
+
+def test_prepare_drops_an_old_node_modules_link_before_bun_install(tmp_path, monkeypatch):
+    """bun install escribiría en el principal por el enlace heredado: `prepare` lo quita antes de instalar."""
+    main = tmp_path / 'repo'
+    remote = tmp_path / 'remote.git'
+    subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
+    subprocess.run(['git', 'clone', '-q', str(remote), str(main)], check=True, capture_output=True)
+    (main / '.gitignore').write_text('node_modules/\ntmp/\n')
+    (main / 'package.json').write_text('{}')
+    subprocess.run([*GIT, 'add', '.'], cwd=main, check=True)
+    subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=main, check=True)
+    subprocess.run(['git', 'push', '-q', 'origin', 'HEAD:dev'], cwd=main, check=True, capture_output=True)
+    wt = tmp_path / 'repo-worktrees' / 'tema'
+    subprocess.run(['git', 'worktree', 'add', '-q', str(wt), '-b', 'feature/tema'], cwd=main, check=True)
+    (main / 'node_modules').mkdir()
+    (main / 'node_modules' / 'keep.txt').write_text('x', encoding='utf-8')
+    worktree.link(main / 'node_modules', wt / 'node_modules')
+    seen = []
+    monkeypatch.setattr(worktree, '_bun_install', lambda root: seen.append((root / 'node_modules').exists()) or 0)
+    monkeypatch.chdir(main)
+
+    assert worktree.prepare(main.resolve(), 'tema') == 0
+    assert seen == [False]
+    assert (main / 'node_modules' / 'keep.txt').is_file()
