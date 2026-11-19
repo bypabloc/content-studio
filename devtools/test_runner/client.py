@@ -44,3 +44,8 @@ def tauri_check(files: list[Path], root: Path = paths.ROOT) -> dict:
     """`cargo check` del crate de Tauri: compila el Rust sin armar el instalador (D-9)."""
     manifest = root / 'client' / 'src-tauri' / 'Cargo.toml'
     return _run('tauri-check', ['cargo', 'check', '--manifest-path', str(manifest)], root)
+
+
+def e2e(files: list[Path], root: Path = paths.ROOT) -> dict:
+    """Playwright sobre la app construida, con la API simulada (tests/e2e, D-9). Necesita Chromium instalado."""
+    return _run('e2e', ['bun', 'run', 'test'], root / 'tests' / 'e2e')

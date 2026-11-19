@@ -56,3 +56,13 @@ def test_failing_script_fails_the_stage_and_keeps_its_output(monkeypatch, tmp_pa
 
     assert result['status'] == 'fail'
     assert 'TS2322' in result['detail']
+
+
+def test_e2e_runs_the_playwright_workspace(monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.setattr(subprocess, 'run', lambda command, **kwargs: calls.append((command, kwargs['cwd'])) or _Done(0))
+
+    result = client.e2e([], root=tmp_path)
+
+    assert calls == [(['bun', 'run', 'test'], tmp_path / 'tests' / 'e2e')]
+    assert result == {'stage': 'e2e', 'status': 'pass', 'detail': ''}

@@ -1,7 +1,8 @@
 """`test-runner`: corre las etapas de calidad (spec 003, D-1 y D-6).
 
 stdout = una línea JSON por etapa; stderr = resumen humano. Exit 0 si todas pasan, 1 si alguna falla, 2 con argumentos
-inválidos. `--type=all` = lint, spelling, validators, typecheck, unit y tdd; guard-tdd se pide aparte (pre-push y CI).
+inválidos. `--type=all` = GROUPS['all']: las etapas de calidad, las del client sin e2e (necesita Chromium) y budget.
+guard-tdd se pide aparte (pre-push y CI).
 """
 
 from __future__ import annotations
@@ -9,7 +10,7 @@ from __future__ import annotations
 import json
 import sys
 
-from . import changeset, client, guard_tdd, lint, spelling, tdd, typecheck, unit, validators
+from . import budget, changeset, client, guard_tdd, lint, spelling, tdd, typecheck, unit, validators
 from .flags import parse
 
 STAGES = {
@@ -24,6 +25,8 @@ STAGES = {
     'client-typecheck': client.typecheck,
     'client-unit': client.unit,
     'tauri-check': client.tauri_check,
+    'budget': budget.run,
+    'e2e': client.e2e,
 }
 GROUPS = {
     'all': [
@@ -36,6 +39,7 @@ GROUPS = {
         'client-lint',
         'client-typecheck',
         'client-unit',
+        'budget',
     ],
 }
 FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}

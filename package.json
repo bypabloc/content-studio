@@ -2,7 +2,8 @@
   "name": "content-studio",
   "private": true,
   "workspaces": [
-    "client"
+    "client",
+    "tests/e2e"
   ],
   "devDependencies": {
     "@cspell/dict-es-es": "^3.0.9",

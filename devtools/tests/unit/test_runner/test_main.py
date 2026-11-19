@@ -4,7 +4,13 @@ from __future__ import annotations
 
 import json
 
-from devtools.test_runner.main import main
+from devtools.test_runner.main import GROUPS, STAGES, main
+
+
+def test_all_includes_budget_and_leaves_e2e_out_because_it_needs_chromium():
+    """D-9 con el cambio de WARNING 005: `all` no lleva e2e (necesita Chromium); va en el job client."""
+    assert {'client-lint', 'client-typecheck', 'client-unit', 'budget'} <= set(GROUPS['all'])
+    assert 'e2e' not in GROUPS['all'] and 'e2e' in STAGES
 
 
 def test_ac8_unknown_type_exits_2(capsys):

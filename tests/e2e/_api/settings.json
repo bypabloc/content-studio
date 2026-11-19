@@ -1,0 +1,5 @@
+{
+  "notify.sound": true,
+  "notify.system": true,
+  "ui.theme": "light"
+}
