@@ -8,12 +8,12 @@ Todo lo que carga un modelo: `narration tts`, `narration voices --build`, la eva
 
 ## Protocolo
 
-* **Siempre con el candado**: `python -m devtools gpu-turn run --job=<trabajo> -- <comando>` (desde cualquier worktree: el candado vive en `tmp/gpu-turn/` del checkout principal). Toma el turno al empezar y lo suelta al terminar, también con Ctrl+C o un error. Exit 1 si está ocupada. Los trabajos de `studio` no van así: ver la viñeta siguiente.
-* **Trabajos de `studio` y del worker de la cola**: toman el candado de `server/src/content_studio/gpu_lock.py`, el mismo que usa `gpu-turn`. Un trabajo de GPU espera si otra sesión tiene la GPU, sin bloquear los de CPU. Cancelar un trabajo (`studio jobs cancel <id>`) termina su proceso. No los envuelvas en `gpu-turn run`: tomarían el candado dos veces.
-* **Antes**: `gpu-turn status` (exit 0 libre, 1 ocupada; dice quién la tiene, la VRAM en uso y las sesiones abiertas del proyecto) y `ListAgents` para el nombre exacto de cada sesión.
-* **Libre y sin otras sesiones**: corre, sin mensajes. **Libre con otras sesiones**: `SendMessage` a cada una con «ocupo la gpu: <trabajo> — <qué corre>» y corre.
-* **Ocupada por otra sesión**: `SendMessage` a esa sesión pidiéndole que avise con «gpu libre»; `CronCreate` cada 10 min con «`gpu-turn status`; si está libre, toma el turno y sigue con la corrida» (solo mientras esperas). Mientras tanto sigue con lo que no usa GPU; si no queda nada, `Phase: external-wait`.
-* **Al terminar** (éxito, fallo o interrupción): «gpu libre» por `SendMessage` a cada sesión abierta y `CronDelete` del respaldo. Si llegan dos «ocupo» a la vez, gana el primero recibido.
-* Si recibes «gpu libre» u «ocupo la gpu», no respondas solo para acusar recibo: actúa según el estado.
+* **Siempre con el candado**: `python -m devtools gpu-turn run --job=<trabajo> -- <comando>` (desde cualquier worktree: el candado vive en `tmp/gpu-turn/` del checkout principal). Toma el turno al empezar y lo suelta al terminar, también con Ctrl+C o un error. Exit 1 si está ocupada.
+* **Los trabajos de `studio` y del worker de la cola** toman el candado de `server/src/content_studio/gpu_lock.py`, el mismo que usa `gpu-turn`. Un trabajo de GPU espera si otra sesión tiene la GPU, sin bloquear los de CPU. Cancelar un trabajo (`studio jobs cancel <id>`) termina su proceso. No los envuelvas en `gpu-turn run`: tomarían el candado dos veces.
+* **El candado coordina; los mensajes no**. Antes de correr, solo `gpu-turn status` (exit 0 libre, 1 ocupada; dice quién la tiene y la VRAM en uso). Que haya otras sesiones abiertas no importa: si no tienen el candado, no usan la GPU.
+* **Libre**: corre con `gpu-turn run`, sin mensajes a nadie (ni «ocupo la gpu» ni «gpu libre» al terminar).
+* **Ocupada por otra sesión**: `ListAgents` para su nombre y un solo `SendMessage` a esa sesión pidiéndole que te avise con «gpu libre»; `CronCreate` cada 10 min con «`gpu-turn status`; si está libre, toma el turno y sigue con la corrida» (solo mientras esperas). Mientras tanto sigue con lo que no usa GPU; si no queda nada, espera el aviso.
+* **Al terminar** (éxito, fallo o interrupción): «gpu libre» solo a las sesiones que te pidieron aviso, y `CronDelete` de tu respaldo si esperabas. Si dos piden el turno a la vez, gana la primera que lo toma con `gpu-turn run`.
+* Si recibes «gpu libre», no respondas solo para acusar recibo: corre lo que esperabas.
 * VRAM ocupada sin candado (otra app, un proceso colgado): `nvidia-smi`; no mates procesos ajenos sin preguntar.
 * Corridas largas (HeartMuLa ~5 min por pista) en segundo plano, con la salida en `logs/` (`command-output.md`).
