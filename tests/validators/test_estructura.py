@@ -59,6 +59,7 @@ def test_ac2_producto_en_server():
     assert not (RAIZ / 'src').exists()
     assert (RAIZ / 'server/src/content_studio/rutas.py').is_file()
     assert [nombre(p) for p in RAIZ.glob('*.py')] == ['cli.py']
+    assert not [p for d in ('narration', 'music') for p in (RAIZ / 'server/data' / d).glob('*.py')]
 
 
 def test_reglas_y_skills_sincronizadas():

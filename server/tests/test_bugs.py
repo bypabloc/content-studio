@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(RAIZ / 'narration'), str(RAIZ / 'music')]
+sys.path[:0] = [str(RAIZ / 'server' / 'data' / 'narration'), str(RAIZ / 'server' / 'data' / 'music')]
 
 
 def test_tomas_max_mas_uno(tmp_path):

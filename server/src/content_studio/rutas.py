@@ -1,18 +1,20 @@
-"""Rutas del checkout. Única fuente: venvs, modelos y voces se quedan donde están (moverlos rompe los venvs).
+"""Rutas del checkout. Única fuente: los datos (venvs, motores, modelos y voces) viven en server/data/.
 
->>> (RAIZ / 'cli.py').is_file() and SRC.name == 'src'
-True
+>>> NARRATION.parent.name, (RAIZ / 'cli.py').is_file()
+('data', True)
 """
 
 from pathlib import Path
 
 # server/src/content_studio/rutas.py → raíz del repo (solo desde el checkout)
 RAIZ = Path(__file__).resolve().parents[3]
-SRC = RAIZ / 'server' / 'src'
+SERVER = RAIZ / 'server'
+SRC = SERVER / 'src'
+DATA = SERVER / 'data'
 OUT = RAIZ / 'out'
 LOGS = RAIZ / 'logs'
-NARRATION = RAIZ / 'narration'
-MUSIC = RAIZ / 'music'
+NARRATION = DATA / 'narration'
+MUSIC = DATA / 'music'
 VOZ = NARRATION / 'voz'
 TOMAS = VOZ / 'tomas'
 VOCES = NARRATION / 'voces'

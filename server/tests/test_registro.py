@@ -42,7 +42,7 @@ def test_registro_igual_al_viejo():
         e = MOTORES[nombre]
         assert e.nombre == nombre
         assert {k: getattr(e, k) for k in campos} == campos, nombre
-        assert e.ruta_venv() == rutas.RAIZ / 'narration' / campos['venv']
+        assert e.ruta_venv() == rutas.NARRATION / campos['venv']
 
 
 def test_crear_cada_motor_sin_cargarlo():

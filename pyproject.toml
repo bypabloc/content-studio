@@ -10,7 +10,7 @@ target-version = "py310"
 line-length = 120
 # Los imports de server/src son de primera parte (content_studio), igual que devtools y tests.
 src = [".", "server/src"]
-extend-exclude = ["narration/motores", "music/models", "tmp", "out", "logs"]
+extend-exclude = ["server/data/narration/motores", "server/data/music/models", "tmp", "out", "logs"]
 
 [tool.ruff.format]
 # El código usa comillas simples: sin esto, `ruff format` cambiaría todas las cadenas al activarse.
