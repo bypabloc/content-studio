@@ -102,6 +102,13 @@ def test_contexto_agentes_del_repo_sin_fallos():
     assert agentes['antigravity']['files'] > 0
 
 
+def test_contexto_agentes_acepta_reglas_con_crlf(tmp_path):
+    """Regresión: en Windows, git hace checkout con CRLF y el frontmatter no se reconocía."""
+    (tmp_path / '.agents/rules').mkdir(parents=True)
+    (tmp_path / '.agents/rules/x.md').write_bytes(b'---\r\ntrigger: always_on\r\n---\r\n\r\n# X\r\n')
+    assert contexto_agentes.medir(tmp_path)[1] == []
+
+
 def test_contexto_agentes_detecta_trigger_invalido(tmp_path):
     (tmp_path / '.agents/rules').mkdir(parents=True)
     (tmp_path / '.agents/rules/x.md').write_text('---\ntrigger: siempre\n---\n# X\n')
