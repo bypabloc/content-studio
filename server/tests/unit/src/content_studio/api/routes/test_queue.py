@@ -1,4 +1,4 @@
-"""Cola de la API (spec 004, D-3 y D-5): pausar, reanudar y reordenar."""
+"""Cola de la API (spec 004, D-3 y D-5): pausar, reanudar y reordenar; cada cambio se publica como evento `queue`."""
 
 from __future__ import annotations
 
@@ -19,3 +19,11 @@ def test_put_order_changes_the_position_of_the_jobs(api):
 
     assert response.status_code == 200
     assert [job['id'] for job in api.client.get('/jobs', headers=api.headers).json()] == [second, first]
+
+
+def test_pausing_publishes_a_queue_event(api):
+    box = api.app.state.broker.subscribe()
+
+    api.client.post('/queue/pause', headers=api.headers)
+
+    assert box.get(timeout=1) == {'type': 'queue', 'data': {'paused': True}}

@@ -20,6 +20,7 @@ def api(tmp_path: Path) -> SimpleNamespace:
     fake = SimpleNamespace(RESOURCE='gpu', validate=lambda params: [], build_command=lambda params, out: [])
     app = create_app(tmp_path / 'base.db', TOKEN, services={**SERVICES, 'fake': fake}, roots=[tmp_path / 'out'])
     return SimpleNamespace(
+        app=app,
         client=TestClient(app),
         headers={'Authorization': f'Bearer {TOKEN}'},
         token=TOKEN,

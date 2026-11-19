@@ -19,11 +19,12 @@ def run(
     command: list[str],
     log_dir: Path = paths.LOGS / 'jobs',
     register: Callable[[subprocess.Popen], None] | None = None,
+    on_progress: Callable[[], None] | None = None,
 ) -> int:
     """Ejecuta `command` y devuelve su código de salida. Cada `@@progress` actualiza el trabajo.
 
-    `register` recibe el proceso al arrancar, para que el worker lo pueda cancelar. En POSIX corre en su propio grupo
-    de procesos, así se terminan también los hijos (el motor se relanza en su venv).
+    `register` recibe el proceso al arrancar, para que el worker lo pueda cancelar; `on_progress` avisa tras cada
+    actualización. En POSIX corre en su propio grupo de procesos, así se terminan también los hijos.
     """
     log_dir.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
@@ -47,6 +48,8 @@ def run(
             report = progress.parse(line)
             if report:
                 jobs.update(conn, job_id, progress=report['p'], stage=report.get('stage'))
+                if on_progress:
+                    on_progress()
             else:
                 log.write(line)
         return proc.wait()

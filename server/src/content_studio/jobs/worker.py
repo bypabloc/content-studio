@@ -1,7 +1,8 @@
 """Worker de la cola (spec 004, D-3): una tarea de GPU a la vez con el candado compartido; las de CPU, en paralelo.
 
 Cada hilo abre su propia conexión a la base (SQLite no se comparte entre hilos). Cancelar marca la fila y termina el
-árbol de procesos: en Windows con taskkill /T /F, porque terminate() no alcanza a los hijos del motor.
+árbol de procesos: en Windows con taskkill /T /F, porque terminate() no alcanza a los hijos del motor. Cada cambio de
+un trabajo se entrega a `publish` (la API lo manda a /events).
 """
 
 from __future__ import annotations
@@ -61,14 +62,16 @@ class Worker:
         log_dir: Path = paths.LOGS / 'jobs',
         cpu_slots: int | None = None,
         poll: float = 0.2,
+        publish: Callable[[dict], None] | None = None,
     ) -> None:
         """Worker sobre la base `db_path`; `main` es el checkout principal (dueño del candado de la GPU)."""
         self.db_path = db_path
-        self.main = main  # checkout principal: ahí vive el candado de la GPU, compartido con devtools gpu-turn
+        self.main = main
         self.services = services
         self.out_root = out_root
         self.log_dir = log_dir
         self.poll = poll
+        self._publish = publish or (lambda event: None)
         self._cpu = threading.BoundedSemaphore(cpu_slots or max(1, (os.cpu_count() or 2) // 2))
         self._gpu_busy = False
         self._processes: dict[int, subprocess.Popen] = {}
@@ -88,10 +91,18 @@ class Worker:
         """Cancela un trabajo en espera o en curso y termina su proceso. True si cambió algo."""
         with closing(connection.connect(self.db_path)) as conn:
             changed = queue.cancel(conn, job_id)
+            if changed:
+                self._notify(conn, job_id)
         proc = self._processes.get(job_id)
         if proc is not None:
             stop_tree(proc)
         return changed
+
+    def _notify(self, conn: sqlite3.Connection, job_id: int) -> None:
+        """Publica el estado actual del trabajo como evento `job` (para /events)."""
+        job = jobs.get(conn, job_id)
+        if job is not None:
+            self._publish({'type': 'job', 'data': job})
 
     def _dispatch(self) -> None:
         with closing(connection.connect(self.db_path)) as conn:
@@ -101,6 +112,7 @@ class Worker:
                 cpu_job = jobs.next_queued(conn, 'cpu')
                 if cpu_job and self._cpu.acquire(blocking=False):
                     jobs.update(conn, cpu_job['id'], status='running', started_at=utc_now())
+                    self._notify(conn, cpu_job['id'])
                     threading.Thread(target=self._run_cpu, args=(cpu_job,), daemon=True).start()
                     continue
                 gpu_job = jobs.next_queued(conn, 'gpu')
@@ -125,6 +137,7 @@ class Worker:
                 try:
                     if _status(conn, job['id']) == 'queued':  # no se canceló mientras esperaba
                         jobs.update(conn, job['id'], status='running', started_at=utc_now())
+                        self._notify(conn, job['id'])
                         self._execute(conn, job)
                 finally:
                     gpu_lock.release(self.main)
@@ -137,7 +150,14 @@ class Worker:
         detail = ''
         try:
             command = self.services[job['kind']].build_command(job['params'], out_dir)
-            code = runner.run(conn, job['id'], command, self.log_dir, register=self._register(job['id']))
+            code = runner.run(
+                conn,
+                job['id'],
+                command,
+                self.log_dir,
+                register=self._register(job['id']),
+                on_progress=lambda: self._notify(conn, job['id']),
+            )
         except OSError as error:  # el proceso no arrancó (p. ej. falta el venv del motor)
             code, detail = -1, str(error)
         finally:
@@ -155,6 +175,7 @@ class Worker:
                 error_detail=detail or f'exit {code}',
                 finished_at=utc_now(),
             )
+        self._notify(conn, job['id'])
 
     def _register(self, job_id: int) -> Callable[[subprocess.Popen], None]:
         """Callback para runner.run: guarda el proceso para poder cancelarlo."""
