@@ -48,6 +48,17 @@ impl ServerState {
 
         let token = new_token();
         let mut child = server::spawn(&project_root(), &token)?;
+        // En Windows el proceso nace suspendido: el Job lo recibe y solo después corre, así sus hijos quedan en el Job.
+        #[cfg(windows)]
+        let job = match server::job::KillOnClose::assign(&child)
+            .and_then(|job| server::job::resume(&child).map(|()| job))
+        {
+            Ok(job) => job,
+            Err(_) => {
+                let _ = child.kill();
+                return Err(ServerError::Spawn);
+            }
+        };
         let stdout = child.stdout.take().ok_or(ServerError::Spawn)?;
         let port = match server::wait_for_ready(BufReader::new(stdout), READY_TIMEOUT) {
             Ok(port) => port,
@@ -55,14 +66,6 @@ impl ServerState {
                 let _ = child.kill();
                 let _ = child.wait();
                 return Err(error);
-            }
-        };
-        #[cfg(windows)]
-        let job = match server::job::KillOnClose::assign(&child) {
-            Ok(job) => job,
-            Err(_) => {
-                let _ = child.kill();
-                return Err(ServerError::Spawn);
             }
         };
         let connection = Connection {
