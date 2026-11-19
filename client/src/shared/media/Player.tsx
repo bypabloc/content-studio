@@ -7,6 +7,9 @@ function isTyping(target: EventTarget | null): boolean {
   return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
+// Las pistas en pantalla: cuando una empieza a sonar, las demás se pausan (Comparar, AC-10).
+const tracks = new Set<WaveSurfer>();
+
 /**
  * Un audio con su forma de onda y su botón. La onda usa los picos que calcula el server: wavesurfer.js no decodifica el
  * audio en el WebView. Espacio reproduce o pausa, salvo al escribir (AC-8).
@@ -27,10 +30,17 @@ export function Player({ src, peaks }: { src: string; peaks: number[] }) {
       progressColor: 'oklch(0.541 0.281 293)',
       normalize: true,
     });
-    instance.on('play', () => setPlaying(true));
+    tracks.add(instance);
+    instance.on('play', () => {
+      setPlaying(true);
+      for (const other of tracks) {
+        if (other !== instance) other.pause();
+      }
+    });
     instance.on('pause', () => setPlaying(false));
     wave.current = instance;
     return () => {
+      tracks.delete(instance);
       instance.destroy();
       wave.current = null;
     };

@@ -104,5 +104,19 @@
   "narration.result.diff.missing": "falta:",
   "narration.result.diff.extra": "sobra:",
   "narration.result.regenerate": "Regenerar",
-  "narration.result.other": "Otras observaciones"
+  "narration.result.other": "Otras observaciones",
+  "narration.compare.open": "Comparar",
+  "narration.compare.title": "Comparar tomas",
+  "narration.compare.choose": "Elegir",
+  "narration.compare.chosen": "Elegida",
+  "narration.compare.field.voice": "Voz",
+  "narration.compare.field.style": "Estilo",
+  "narration.compare.field.seed": "Semilla",
+  "narration.compare.field.duration": "Duración",
+  "narration.compare.field.loudness": "Volumen",
+  "narration.compare.field.evaluation": "Evaluación",
+  "narration.compare.seconds": "{n} s",
+  "narration.compare.ok": "OK",
+  "narration.compare.review": "REVISAR",
+  "narration.compare.unevaluated": "Sin evaluar"
 }

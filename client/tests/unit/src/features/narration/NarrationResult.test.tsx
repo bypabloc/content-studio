@@ -13,6 +13,11 @@ vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('wavesurfer.js', () => ({
   default: { create: vi.fn(() => ({ on: vi.fn(), playPause: vi.fn(), destroy: vi.fn() })) },
 }));
+// Las tomas de un mismo texto tienen su propio test (CompareTakes): aquí solo importa que el botón las abre.
+vi.mock('@/features/narration/CompareTakes', async () => {
+  const { createElement } = await import('react');
+  return { CompareTakes: ({ groupKey }: { groupKey: string }) => createElement('p', null, `tomas de ${groupKey}`) };
+});
 
 const DIR = 'D:/out/narration/2026-11-19-7-hola';
 const JOB = { id: 7, kind: 'narration', status: 'done', output_dir: DIR, params: { model: 'voxcpm2' } } as unknown as Job;
@@ -107,6 +112,15 @@ describe('NarrationResult', () => {
 
     expect(await screen.findByText(t('narration.result.unevaluated'))).toBeTruthy();
     expect(document.querySelector('del')).toBeNull();
+  });
+
+  it('Comparar abre las tomas del mismo texto, si el trabajo tiene grupo', async () => {
+    renderResult({ ...JOB, group_key: 'narration:abc' } as Job);
+    await screen.findByText('Adiós.');
+
+    fireEvent.click(screen.getByRole('button', { name: t('narration.compare.open') }));
+
+    expect(await screen.findByText('tomas de narration:abc')).toBeTruthy();
   });
 
   it('un trabajo sin carpeta de salida no pide nada', () => {

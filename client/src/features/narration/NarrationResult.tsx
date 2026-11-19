@@ -1,22 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
-import type { components } from '@/shared/api/schema';
 import { t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
-import { useMediaInfo, useMediaPeaks } from '@/shared/media/useMediaInfo';
-
-type Job = components['schemas']['Job'];
-
-/** `script.json` de la carpeta de un trabajo: el nombre de su .wav y los párrafos tal como se pidieron. */
-interface Script {
-  wav: string;
-  segments: { text: string }[];
-}
-
-/** El `.json` de la toma: la evaluación de whisper por párrafo, o null si no se evaluó (`save_metadata`). */
-interface Take {
-  evaluation: { observations: string[] } | null;
-}
+import { CompareTakes } from './CompareTakes';
+import { type Job, useTake } from './useTake';
 
 type DiffKind = 'change' | 'missing' | 'extra';
 
@@ -51,26 +39,13 @@ function parseNote(line: string): Note {
 
 /**
  * El resultado de una toma: su onda, su LUFS y su pico, y cada párrafo con lo que whisper oyó distinto. Regenerar un
- * párrafo encola `narration.regenerate` sobre este trabajo (AC-8, D-4).
+ * párrafo encola `narration.regenerate` sobre este trabajo (AC-8, D-4). «Comparar» abre las tomas del mismo texto.
  */
 export function NarrationResult({ job }: { job: Job }) {
   const api = useApi();
   const queryClient = useQueryClient();
-  const folder = job.output_dir ?? '';
-  const inFolder = (name: string) => `${folder}/${name}`;
-  const script = useQuery({
-    queryKey: ['takes', folder, 'script'],
-    queryFn: () => api.get<Script>(`/files?path=${encodeURIComponent(inFolder('script.json'))}`),
-    enabled: folder !== '',
-  });
-  const wav = script.data ? inFolder(script.data.wav) : '';
-  const take = useQuery({
-    queryKey: ['takes', wav, 'json'],
-    queryFn: () => api.get<Take>(`/files?path=${encodeURIComponent(wav.replace(/\.wav$/, '.json'))}`),
-    enabled: wav !== '',
-  });
-  const info = useMediaInfo(wav);
-  const peaks = useMediaPeaks(wav);
+  const [comparing, setComparing] = useState(false);
+  const { wav, script, take, info, peaks } = useTake(job);
   const regenerate = useMutation({
     mutationFn: (index: number) =>
       api.post('/jobs', { kind: 'narration.regenerate', params: { source_job: job.id, index } }),
@@ -84,7 +59,19 @@ export function NarrationResult({ job }: { job: Job }) {
 
   return (
     <section aria-label={t('narration.result.title')} className="flex flex-col gap-4 rounded-md border border-border p-4">
-      <h2 className="text-sm font-medium">{t('narration.result.title')}</h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-medium">{t('narration.result.title')}</h2>
+        {job.group_key && (
+          <button
+            type="button"
+            aria-expanded={comparing}
+            onClick={() => setComparing((open) => !open)}
+            className="rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
+          >
+            {t('narration.compare.open')}
+          </button>
+        )}
+      </div>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
       {info.data && (
         <p className="text-sm text-muted-foreground">
@@ -135,6 +122,7 @@ export function NarrationResult({ job }: { job: Job }) {
           ))}
         </div>
       )}
+      {comparing && job.group_key && <CompareTakes groupKey={job.group_key} />}
     </section>
   );
 }
