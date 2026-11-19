@@ -27,15 +27,15 @@ def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, str | None]:
 
 def validate(params: dict) -> list[dict]:
     """Errores como {'code', 'params'}; vacío si la toma existe, el bloque cae dentro y el motor está instalado."""
+    source = params.get('source')
+    if source is None:  # sin toma no hay motor que comprobar: el error es solo ese
+        return [{'code': 'source_not_done', 'params': {'job': params.get('source_job')}}]
     errors = []
     model = params.get('model')
     if model not in ENGINES:
         errors.append({'code': 'unknown_engine', 'params': {'model': model}})
     elif not ENGINES[model].installed():
         errors.append({'code': 'engine_not_installed', 'params': {'model': model}})
-    source = params.get('source')
-    if source is None:
-        return [*errors, {'code': 'source_not_done', 'params': {'job': params.get('source_job')}}]
     folder = Path(source).resolve()
     if not folder.is_relative_to(paths.OUT.resolve()):  # solo se leen tomas que el propio studio escribió
         return [*errors, {'code': 'source_outside_out', 'params': {'source': source}}]

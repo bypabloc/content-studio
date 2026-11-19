@@ -78,6 +78,13 @@ def test_a_missing_source_job_is_rejected(out, db):
     assert 'source_not_done' in codes(params)
 
 
+def test_a_missing_source_job_reports_only_that(out, db):
+    """Sin toma no hay motor que comprobar: el único error es el de la toma (la CLI lo muestra tal cual)."""
+    params, _ = regenerate.prepare(db, {'source_job': 999, 'index': 1})
+
+    assert codes(params) == ['source_not_done']
+
+
 def test_an_index_inside_the_take_is_valid(out):
     assert regenerate.validate({'model': MODEL, 'source': str(take(out)), 'index': 2}) == []
 
