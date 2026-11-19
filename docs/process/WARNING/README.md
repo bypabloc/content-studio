@@ -1,6 +1,6 @@
 # Decisiones y lo que se revisa antes de pasar a `main`
 
-Aquí va cada decisión que un agente tomó solo al ejecutar una spec (plugin `session-handoff`: la opción correcta, no la más rápida) y todo lo que hay que aplicar o revisar **antes** de publicar en `main`: un venv nuevo que instalar, un modelo que descargar, una licencia que confirmar para uso comercial, un paso manual. Cada ficha se borra al aplicarla, en un PR a `dev`, con su fila. Lo que se revisa **después** va en [`../PENDING/`](../PENDING/README.md).
+Aquí va cada decisión que un agente tomó solo al ejecutar una spec (la opción correcta, no la más rápida) y todo lo que hay que aplicar o revisar **antes** de publicar en `main`: un venv nuevo que instalar, un modelo que descargar, una licencia que confirmar para uso comercial, un paso manual. Cada ficha se borra al aplicarla, en un PR a `dev`, con su fila. Lo que se revisa **después** va en [`../PENDING/`](../PENDING/README.md).
 
 Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
