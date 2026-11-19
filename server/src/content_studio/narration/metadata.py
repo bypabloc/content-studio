@@ -45,6 +45,7 @@ def voice_from_reference(ref: Path) -> dict | None:
 
 
 def sha256(path: Path) -> str:
+    """SHA-256 del archivo."""
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 

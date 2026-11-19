@@ -22,24 +22,30 @@ class RemoteZip(io.RawIOBase):
     (los de OpenSLR pesan ~0.8 GB y cada clip ~1 MB)."""
 
     def __init__(self, url: str):
+        """Lee un archivo remoto por rangos HTTP, sin bajarlo entero."""
         self.url, self.pos = url, 0
         with urllib.request.urlopen(urllib.request.Request(url, method='HEAD', headers=UA)) as r:
             self.size = int(r.headers['Content-Length'])
 
     def readable(self) -> bool:
+        """Siempre legible."""
         return True
 
     def seekable(self) -> bool:
+        """Siempre buscable."""
         return True
 
     def tell(self) -> int:
+        """Posición actual."""
         return self.pos
 
     def seek(self, off: int, whence: int = 0) -> int:
+        """Mueve la posición como `io` (SEEK_SET, SEEK_CUR, SEEK_END)."""
         self.pos = {0: off, 1: self.pos + off, 2: self.size + off}[whence]
         return self.pos
 
     def readinto(self, b: bytearray) -> int:
+        """Lee en `b` desde la posición actual con un rango HTTP."""
         if self.pos >= self.size:
             return 0
         end = min(self.pos + len(b), self.size) - 1

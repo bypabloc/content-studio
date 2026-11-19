@@ -15,6 +15,8 @@ Jobs = list[tuple[dict, Path]]  # (estilo resuelto, ruta del .wav de salida)
 
 @dataclass(frozen=True)
 class MusicSpec:
+    """Descripción de un motor de música: su venv, su módulo y su clase."""
+
     name: str
     venv: str  # relativo a server/data/music/
     module: str  # se importa recién en crear(), ya dentro del venv
@@ -23,17 +25,23 @@ class MusicSpec:
     evaluates: bool = False  # su venv trae demucs: admite --evaluate
 
     def path_venv(self) -> Path:
+        """Carpeta del venv del motor, en server/data/music/."""
         return paths.MUSIC / self.venv
 
     def installed(self) -> bool:
+        """True si el venv del motor existe."""
         return self.path_venv().exists()
 
     def create(self) -> MusicEngine:
+        """Crea el motor, importando su módulo dentro del venv."""
         return getattr(import_module(self.module), self.kind)(self)
 
 
 class MusicEngine(ABC):
+    """Motor de música: genera pistas a partir de trabajos."""
+
     def __init__(self, spec: MusicSpec) -> None:
+        """Guarda la especificación del motor."""
         self.spec = spec
 
     @abstractmethod

@@ -10,6 +10,8 @@ from .changeset import GIT_MODES
 
 @dataclass
 class Options:
+    """Opciones de `test-runner` ya validadas."""
+
     types: list[str]
     git_mode: str
     files: list[Path] | None

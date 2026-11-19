@@ -17,7 +17,10 @@ ACE_REPO = paths.MUSIC / 'models' / 'ACE-Step-1.5'
 
 
 class AceStep(MusicEngine):
+    """Motor ACE-Step 1.5 (música)."""
+
     def generate(self, jobs: Jobs, a: argparse.Namespace) -> None:
+        """Genera las pistas con ACE-Step."""
         os.environ['ACESTEP_PROJECT_ROOT'] = str(ACE_REPO)
         from acestep.handler import AceStepHandler
         from acestep.inference import GenerationConfig, GenerationParams, generate_music

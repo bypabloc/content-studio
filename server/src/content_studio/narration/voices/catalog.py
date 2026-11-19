@@ -11,6 +11,7 @@ CATALOG = VOICES / 'catalog.json'
 
 
 def catalog() -> dict:
+    """Catálogo de voces libres (JSON)."""
     return json.loads(CATALOG.read_text(encoding='utf-8'))
 
 

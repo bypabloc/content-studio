@@ -9,6 +9,8 @@ from content_studio.cli.commands.base import Command, Option
 
 
 class Tts(Command):
+    """Comando `narration tts`: narración con clonación de voz."""
+
     key = 'narration tts'
     module = 'content_studio.narration.tts'
     parser = 'content_studio.narration.parser'
@@ -19,6 +21,7 @@ class Tts(Command):
     assistant = True
 
     def catalog(self, mod: ModuleType) -> dict[str, list[Option]]:
+        """Motores y voces de narración para el asistente."""
         from content_studio.narration.voices import catalog as cv
 
         models = []
@@ -44,6 +47,8 @@ class Tts(Command):
 
 class Record(Command):
     # cspell:ignore grabar: nombre del paquete narration/grabar/, que traduce la 007 (D-3)
+    """Comando `narration grabar`: graba las voces de referencia."""
+
     key = 'narration grabar'
     module = parser = 'content_studio.narration.grabar.main'
     icon = '🎤'
@@ -52,12 +57,15 @@ class Record(Command):
     help = '🎤  Record the reference voices (content_studio.narration.grabar).'
 
     def state(self) -> list[str]:
+        """Estado de las voces de referencia grabadas, para el menú."""
         txt = list(paths.REFERENCE.glob('*.txt'))
         recorded = sum((paths.REFERENCE / f'{t.stem}.wav').exists() for t in txt)
         return [f'reference voices [{"green" if recorded else "yellow"}]{recorded}/{len(txt)}[/]']
 
 
 class Voices(Command):
+    """Comando `narration voces`: voces libres del catálogo."""
+
     key = 'narration voces'
     module = parser = 'content_studio.narration.voices.main'
     icon = '🗣'
@@ -66,6 +74,7 @@ class Voices(Command):
     help = '🗣  Build and approve the free voices in the catalog (content_studio.narration.voices).'
 
     def state(self) -> list[str]:
+        """Cantidad de voces libres aprobadas, para el menú."""
         from content_studio.narration.styles import STYLES
         from content_studio.narration.voices.catalog import approved_voices, catalog
 

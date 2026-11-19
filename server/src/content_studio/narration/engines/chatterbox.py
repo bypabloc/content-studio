@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 @lru_cache
 def load(version: str) -> Any:
+    """Carga el modelo Chatterbox desde Hugging Face, en GPU."""
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
 
     return ChatterboxMultilingualTTS.from_pretrained(device='cuda', t3_model=version)
@@ -23,7 +24,10 @@ CACHES = (load,)
 
 
 class Chatterbox(TTSEngine):
+    """Motor Chatterbox (narración)."""
+
     def emotion(self, pb: dict, name: str, intensity: float, refs: References) -> None:
+        """Aplica la emoción con los valores medidos de Chatterbox."""
         if not EMOTIONS[name]['chatterbox']:
             pb['notices'].append(f'chatterbox has no values for "{name}"; use [style: intimate]')
             return
@@ -34,6 +38,7 @@ class Chatterbox(TTSEngine):
         pb['mode'], pb['emotion'] = 'params', {**mark(name, intensity), 'exaggeration': ex, 'cfg_weight': cfg}
 
     def generate(self, blocks: list[dict], language: str) -> tuple[list, int]:
+        """Genera el audio de los bloques con Chatterbox."""
         model = load(self.spec.repo)
         audios = [
             model.generate(

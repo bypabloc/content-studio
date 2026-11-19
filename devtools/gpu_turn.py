@@ -22,6 +22,7 @@ STILL_ACTIVE = 259
 
 
 def lock(main: Path) -> Path:
+    """Ruta del candado del turno de la GPU, en el checkout principal."""
     return main / 'tmp/gpu-turn/lock.json'
 
 
@@ -79,6 +80,7 @@ def take(main: Path, job: str, command: list[str]) -> dict | None:
 
 
 def release(main: Path) -> None:
+    """Suelta el turno si lo tiene esta sesión."""
     lock_file = lock(main)
     try:
         if json.loads(lock_file.read_text(encoding='utf-8')).get('pid') == os.getpid():
@@ -114,6 +116,7 @@ def sessions(main: Path) -> list[dict]:
 
 
 def status(main: Path) -> int:
+    """Imprime quién tiene la GPU, la VRAM y las sesiones abiertas; exit 1 si está ocupada."""
     owner = read(main)
     data = {'state': 'busy' if owner else 'free', 'holder': owner, 'vram': vram(), 'sessions': sessions(main)}
     print(json.dumps(data, ensure_ascii=False))
@@ -125,6 +128,7 @@ def status(main: Path) -> int:
 
 
 def run(main: Path, job: str, command: list[str]) -> int:
+    """Toma el turno, corre el comando y lo suelta al terminar, también con error."""
     owner = take(main, job, command)
     if owner:
         print(
@@ -141,6 +145,7 @@ def run(main: Path, job: str, command: list[str]) -> int:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools gpu-turn`."""
     uso = 'usage: gpu-turn status | gpu-turn run --job=<j> -- <command ...>'
     if not argv or argv[0] in ('-h', '--help'):
         print(uso, file=sys.stderr)

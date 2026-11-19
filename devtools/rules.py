@@ -72,6 +72,7 @@ def sync(root: Path) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools rules`: compara o, con --sync, reescribe las copias de .claude/."""
     if argv not in ([], ['--sync']):
         print('usage: rules [--sync]', file=sys.stderr)
         return 0 if argv[:1] in (['-h'], ['--help']) else 2

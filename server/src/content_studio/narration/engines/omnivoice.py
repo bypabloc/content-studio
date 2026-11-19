@@ -10,6 +10,7 @@ from content_studio.narration.engines.base import TTSEngine
 
 @lru_cache
 def load(repo: str) -> Any:
+    """Carga OmniVoice desde Hugging Face, en GPU."""
     import torch
     from omnivoice import OmniVoice
 
@@ -18,6 +19,7 @@ def load(repo: str) -> Any:
 
 @lru_cache
 def prompt(model: Any, ref: str, text_ref: str | None) -> Any:
+    """Prompt de clonación de una voz con su transcripción."""
     return model.create_voice_clone_prompt(ref_audio=ref, ref_text=text_ref)
 
 
@@ -25,10 +27,13 @@ CACHES = (load, prompt)
 
 
 class OmniVoice(TTSEngine):
+    """Motor OmniVoice (narración)."""
+
     params = dict(num_step=32, guidance_scale=2.0)
     suggest_evaluate = True
 
     def generate(self, blocks: list[dict], language: str) -> tuple[list, int]:
+        """Genera el audio de los bloques con OmniVoice."""
         model = load(self.spec.repo)
         audios = []
         for b in blocks:

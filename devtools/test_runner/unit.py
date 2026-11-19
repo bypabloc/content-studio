@@ -14,6 +14,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from .. import paths
 from .validators import matches
@@ -69,7 +70,8 @@ def listed(root: Path) -> tuple[list[str], list[str]]:
     return sorted(sources), sorted(tests)
 
 
-def load(root: Path, name: str = BASELINE) -> dict:
+def load(root: Path, name: str = BASELINE) -> Any:
+    """Lee el JSON `name` del repo; vacío si no existe."""
     path = root / name
     return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
 

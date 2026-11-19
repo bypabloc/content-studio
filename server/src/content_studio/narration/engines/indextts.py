@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 @lru_cache
 def load(code: str, ckpt: str) -> Any:
+    """Carga IndexTTS2 desde su código y su checkpoint."""
     sys.path.insert(0, str(paths.NARRATION / code))
     # IndexTTS escribe checkpoints/hf_cache relativo al directorio actual: se fija antes de importarlo.
     os.environ['HF_HUB_CACHE'] = str(paths.NARRATION / ckpt / 'hf_cache')
@@ -38,9 +39,12 @@ CACHES = (load,)
 
 
 class IndexTTS(TTSEngine):
+    """Motor IndexTTS (narración)."""
+
     params = dict(max_text_tokens_per_segment=60)
 
     def emotion(self, pb: dict, name: str, intensity: float, refs: References) -> None:
+        """Aplica la emoción con un audio de referencia, un vector o el texto."""
         clip = refs.folder / 'emotions' / f'{name}.wav'
         if clip.exists():
             pb['emo'], pb['mode'], pb['emotion'] = {'clip': clip, 'alpha': intensity}, 'clip', mark(name, intensity)
@@ -54,6 +58,7 @@ class IndexTTS(TTSEngine):
             pb['notices'].append(f'IndexTTS has no vector for "{name}"; use [style: intimate]')
 
     def generate(self, blocks: list[dict], language: str) -> tuple[list, int]:
+        """Genera el audio de los bloques con IndexTTS."""
         import soundfile as sf
 
         model = load(self.spec.code, self.spec.repo)

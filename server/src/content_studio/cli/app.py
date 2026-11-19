@@ -23,6 +23,7 @@ app = typer.Typer(
 
 @app.callback(invoke_without_command=True)
 def root(ctx: typer.Context) -> None:
+    """Callback de la app: sin subcomando abre el menú si hay TTY; si no, muestra la ayuda."""
     if ctx.invoked_subcommand is None:
         if sys.stdin.isatty() and sys.stdout.isatty():
             menu()
@@ -38,6 +39,7 @@ def _step(cmd: Command):
 
 
 def register(destination: typer.Typer, commands: list[Command]) -> None:
+    """Registra cada comando en su grupo de Typer (p. ej. `narration tts`)."""
     groups: dict[str, typer.Typer] = {}
     for cmd in commands:
         *group, name = cmd.key.split()
@@ -54,6 +56,7 @@ register(app, REGISTRY)
 
 
 def main() -> None:
+    """Entrada de `cli.py`: corre la app y sale en silencio con Ctrl+C."""
     console_utf8()
     try:
         app()

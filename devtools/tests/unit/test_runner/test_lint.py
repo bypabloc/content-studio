@@ -7,7 +7,7 @@ from devtools.test_runner.lint import run
 
 def test_clean_python_file_passes(tmp_path):
     clean = tmp_path / 'clean.py'
-    clean.write_text('x = 1\n', encoding='utf-8')
+    clean.write_text('"""Módulo de prueba."""\n\nx = 1\n', encoding='utf-8')
 
     assert run([clean])['status'] == 'pass'
 
@@ -27,3 +27,22 @@ def test_no_python_files_passes_without_running_ruff(tmp_path):
     notes.write_text('# nada\n', encoding='utf-8')
 
     assert run([notes]) == {'stage': 'lint', 'status': 'pass', 'detail': ''}
+
+
+def test_ac5_public_function_without_docstring_fails_with_d103(tmp_path):
+    undocumented = tmp_path / 'undocumented.py'
+    undocumented.write_text('def public() -> int:\n    return 1\n', encoding='utf-8')
+
+    result = run([undocumented])
+
+    assert result['status'] == 'fail'
+    assert 'D103' in result['detail']
+
+
+def test_ac5_documented_function_passes(tmp_path):
+    documented = tmp_path / 'documented.py'
+    documented.write_text(
+        '"""Módulo de prueba."""\n\n\ndef public() -> int:\n    """Devuelve 1."""\n    return 1\n', encoding='utf-8'
+    )
+
+    assert run([documented])['status'] == 'pass'

@@ -16,6 +16,7 @@ from content_studio.cli.widgets import ACCENT, STYLE, console
 
 
 def gpu() -> str:
+    """VRAM usada y total de la GPU, o un texto si nvidia-smi no responde."""
     try:
         query = ['nvidia-smi', '--query-gpu=memory.used,memory.total', '--format=csv,noheader,nounits']
         output = subprocess.run(query, capture_output=True, text=True, timeout=5).stdout
@@ -33,6 +34,7 @@ def state() -> Text:
 
 
 def menu() -> None:
+    """Menú interactivo de la CLI, con el estado de la GPU y las voces."""
     header = Text.from_markup(f'[bold {ACCENT}]content-studio[/]  [dim]audio local para videos[/]')
     console.print(Panel(Group(header, state()), border_style=ACCENT, padding=(0, 2), expand=False))
     try:

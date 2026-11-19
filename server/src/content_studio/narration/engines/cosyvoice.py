@@ -18,6 +18,7 @@ SYSTEM = 'You are a helpful assistant.'  # prompt de sistema que CosyVoice 3 esp
 
 @lru_cache
 def load(code: str, ckpt: str) -> Any:
+    """Carga CosyVoice 3 desde su código y su checkpoint."""
     import soundfile as sf
     import torch
     import torchaudio
@@ -41,18 +42,23 @@ CACHES = (load,)
 
 
 class CosyVoice(TTSEngine):
+    """Motor CosyVoice 3 (narración)."""
+
     intensity = False
 
     def mode(self, text_ref: str | None) -> str:
+        """Modo de clonación: siempre zero-shot."""
         return 'zero_shot'
 
     def emotion(self, pb: dict, name: str, intensity: float, refs: References) -> None:
+        """Aplica la emoción como instrucción de CosyVoice; sin instrucción, avisa."""
         if instruction := EMOTIONS[name]['cosy']:
             pb['emo'], pb['mode'], pb['emotion'] = {'instruction': instruction}, 'instruct2', mark(name, intensity)
         else:
             pb['notices'].append(f'cosyvoice3 does not follow "{name}"; generated without emotion')
 
     def generate(self, blocks: list[dict], language: str) -> tuple[list, int]:
+        """Genera el audio de los bloques con CosyVoice."""
         import torch
 
         model = load(self.spec.code, self.spec.repo)

@@ -135,6 +135,7 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
 
 
 def evaluate(engine: TTSEngine, results: list[dict], batch: int, seed: int, retries: int, language: str) -> None:
+    """Evalúa los audios con whisper y reintenta los bloques con error."""
     if not shutil.which('whisper'):
         sys.exit('The whisper command is missing (pip install openai-whisper); cannot evaluate.')
     report: dict[int, tuple[list[str], list[int]]] = {}  # guion -> (observaciones, bloques con error)

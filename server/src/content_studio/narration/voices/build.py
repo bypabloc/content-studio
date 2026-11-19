@@ -63,6 +63,7 @@ TEXT_EN = {
 
 
 def text_style(style: str, language: str) -> str:
+    """Texto de prueba de un estilo en el idioma indicado."""
     if style == 'neutral-en':
         return (REFERENCE / 'neutral-en.txt').read_text(encoding='utf-8').strip()
     if language == 'en':
@@ -71,6 +72,7 @@ def text_style(style: str, language: str) -> str:
 
 
 def build(name: str, sheet: dict, force: bool) -> bool:
+    """Construye una voz de referencia, la evalúa y la aprueba; True si pasó."""
     import numpy as np
     import soundfile as sf
     import torch

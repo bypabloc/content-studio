@@ -13,7 +13,7 @@ def test_ac8_unknown_type_exits_2(capsys):
 
 def test_ac8_clean_lint_prints_one_json_line_exits_0(tmp_path, capsys):
     clean = tmp_path / 'clean.py'
-    clean.write_text('x = 1\n', encoding='utf-8')
+    clean.write_text('"""Módulo de prueba."""\n\nx = 1\n', encoding='utf-8')
 
     assert main(['--type=lint', f'--files={clean}']) == 0
 

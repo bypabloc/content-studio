@@ -9,13 +9,14 @@ from __future__ import annotations
 import json
 import sys
 
-from . import changeset, lint, unit, validators
+from . import changeset, lint, typecheck, unit, validators
 from .flags import parse
 
-STAGES = {'lint': lint.run, 'validators': validators.run, 'unit': unit.run}
+STAGES = {'lint': lint.run, 'validators': validators.run, 'unit': unit.run, 'typecheck': typecheck.run}
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools test-runner`: exit 0, 1 o 2 según el resultado."""
     try:
         options = parse(argv, list(STAGES))
     except ValueError as error:

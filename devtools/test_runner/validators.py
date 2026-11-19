@@ -23,6 +23,7 @@ def matches(rel: str, pattern: str) -> bool:
 
 
 def category(rel: str, config: dict) -> dict | None:
+    """Categoría de tamaño del archivo `rel`, o None si está excluido o no casa con ninguna."""
     if any(matches(rel, pattern) for pattern in config.get('exclude', [])):
         return None
     for cat in config['categories']:
@@ -32,21 +33,25 @@ def category(rel: str, config: dict) -> dict | None:
 
 
 def measure(path: Path) -> dict:
+    """Líneas, bytes y columna más larga de un archivo, con CRLF normalizado."""
     raw = path.read_bytes().replace(b'\r\n', b'\n')  # el CRLF del checkout en Windows no cuenta: igual en la CI
     lines = raw.decode('utf-8', errors='replace').splitlines()
     return {'lines': len(lines), 'bytes': len(raw), 'lineLength': max((len(line) for line in lines), default=0)}
 
 
 def over_limit(measured: dict, limits: dict) -> list[str]:
+    """Medidas que superan su límite, en texto."""
     return [f'{name} {measured[name]} > {limits[name]}' for name in MEASURES if measured[name] > limits[name]]
 
 
 def load(root: Path, name: str) -> dict:
+    """Lee el JSON `name` del repo; vacío si no existe."""
     path = root / name
     return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
 
 
 def run(files: list[Path], root: Path = paths.ROOT) -> dict:
+    """Etapa `validators` sobre los archivos del changeset."""
     config, baseline = load(root, CONFIG), load(root, BASELINE)
     problems, notes = [], []
     for path in files:

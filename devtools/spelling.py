@@ -21,23 +21,28 @@ LIST = paths.ROOT / 'tmp' / 'spelling' / 'files.txt'
 
 
 def git(*args: str, cwd: Path) -> str:
+    """Corre git con `args` en `cwd` y devuelve su salida."""
     return subprocess.run(['git', *args], cwd=cwd, capture_output=True, encoding='utf-8', check=True).stdout
 
 
 def files_versioned() -> list[Path]:
+    """Archivos versionados del repo, para cspell."""
     return [paths.ROOT / n for n in git('ls-files', cwd=paths.ROOT).splitlines() if n]
 
 
 def files_staged() -> list[Path]:
+    """Archivos en el staging, para cspell en el pre-commit."""
     top = Path(git('rev-parse', '--show-toplevel', cwd=Path.cwd()).strip())
     return [top / n for n in git('diff', '--cached', '--name-only', '--diff-filter=ACMR', cwd=top).splitlines() if n]
 
 
 def path_of(issue: dict) -> Path:
+    """Ruta local de un problema reportado por cspell."""
     return Path(url2pathname(urlparse(issue['uri']).path))
 
 
 def relative(path: Path) -> str:
+    """Ruta relativa a la raíz del repo, o la original si está fuera."""
     try:
         return path.relative_to(paths.ROOT).as_posix()
     except ValueError:
@@ -62,6 +67,7 @@ def review(files: list[Path]) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools spelling`."""
     if argv and argv[0] in ('-h', '--help'):
         print('usage: spelling [--staged] [file ...]  (no arguments: all tracked files)', file=sys.stderr)
         return 0

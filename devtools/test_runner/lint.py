@@ -16,7 +16,11 @@ def run(files: list[Path]) -> dict:
     problems = []
     for order in ORDERS if py else []:
         done = subprocess.run(
-            ['uv', 'run', 'ruff', *order, *py], cwd=paths.ROOT, capture_output=True, encoding='utf-8', errors='replace'
+            ['uv', 'run', 'ruff', *order, '--config', str(paths.ROOT / 'pyproject.toml'), *py],
+            cwd=paths.ROOT,
+            capture_output=True,
+            encoding='utf-8',
+            errors='replace',
         )
         if done.returncode:
             problems.append((done.stdout + done.stderr).strip())
