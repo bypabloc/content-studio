@@ -17,8 +17,8 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 
 ## Dónde vive
 
-- Código: `src/content_studio/music/` (estilos en `estilos.py`, motores en `motores/` con `registro.py`).
-- Datos: `music/` (README, investigación, venvs, modelos). Uso y rendimiento: [music/README.md](../../../music/README.md).
+- Código: `server/src/content_studio/music/` (estilos en `estilos.py`, motores en `motores/` con `registro.py`).
+- Datos: `server/data/music/` (README, investigación, venvs, modelos). Uso y rendimiento: [server/data/music/README.md](../../../server/data/music/README.md).
 
 ## Historial
 

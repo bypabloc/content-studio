@@ -1,6 +1,6 @@
 """PostToolUse (Edit|Write): ruff format + ruff check --fix sobre el .py editado.
 
-Solo src/, tests/ y cli.py (lo que lintea CI). Nunca bloquea; si falta uv, lo avisa.
+Solo server/src/, server/tests/, devtools/, tests/ y cli.py (lo que lintea CI). Nunca bloquea; si falta uv, lo avisa.
 """
 
 from __future__ import annotations
@@ -22,7 +22,8 @@ def relativa(ruta: str) -> str | None:
         rel = p.relative_to(RAIZ).as_posix()
     except ValueError:
         return None
-    if p.suffix != '.py' or not (rel == 'cli.py' or rel.startswith(('src/', 'tests/'))):
+    codigo = rel == 'cli.py' or rel.startswith(('server/src/', 'server/tests/', 'devtools/', 'tests/'))
+    if p.suffix != '.py' or not codigo:
         return None
     return rel
 

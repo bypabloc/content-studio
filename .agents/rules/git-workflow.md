@@ -41,13 +41,13 @@ El separador `/` es obligatorio y después del prefijo tiene que venir un nombre
 ```bash
 git fetch origin dev
 git worktree add ../content-studio-worktrees/<nombre> -b feature/<nombre> origin/dev   # worktrees.md
-python -m content_studio.devtools worktree prepare <nombre>
+python -m devtools worktree prepare <nombre>
 # ... commits en el worktree ...
 git push -u origin feature/<nombre>
 gh pr create --base dev --title "feat: ..." --body "..."      # o /push-pr-verify
 gh pr checks <n> --watch && gh pr merge <n> --merge           # cuando los checks pasen
 git switch dev && git pull                                     # en el checkout principal
-python -m content_studio.devtools worktree close <nombre>     # cierre obligatorio tras el merge
+python -m devtools worktree close <nombre>     # cierre obligatorio tras el merge
 
 # Publicar: PR de dev a main
 gh pr create --base main --head dev --title "release: ..." --body "..."

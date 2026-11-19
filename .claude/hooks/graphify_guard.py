@@ -13,13 +13,14 @@ import sys
 from pathlib import Path
 
 SEARCH_TOKENS = ('rg ', 'grep', 'find ', 'fd ', 'ag ', 'ack ')
-# Datos (narration/, music/), docs y salidas: el grafo no los indexa o no aportan nodos.
+# Datos (server/data/narration/, server/data/music/), docs y salidas: el grafo no los indexa o no aportan nodos.
 EXCEPTION_PREFIXES = (
-    'tmp/', 'out/', 'logs/', 'models/', 'docs/', 'narration/', 'music/', 'graphify-out/', '.claude/', '.agents/',
-    'tests/fixtures/', '.venv', '~/.claude', '/tmp/',
+    'tmp/', 'out/', 'logs/', 'models/', 'docs/', 'server/data/narration/', 'server/data/music/', 'graphify-out/',
+    '.claude/', '.agents/',
+    'server/tests/fixtures/', '.venv', '~/.claude', '/tmp/',
 )  # fmt: skip
 EXCEPTION_SUFFIXES = ('.log', '.json', '.lock', '.png', '.md', '.txt', '.wav', '.toml', '.yml')
-CODE_PREFIXES = ('src/', 'tests/', 'cli.py')
+CODE_PREFIXES = ('server/src/', 'server/tests/', 'devtools/', 'tests/', 'cli.py')
 SUGGESTION = (
     'Sugerencia (graphify.md): para ubicar código, ver quién lo usa o qué rompe un cambio, '
     '`graphify query|explain|affected` responde con menos tokens que grep o una lectura a ciegas. '
@@ -36,7 +37,7 @@ def _relative(path: str, root: str) -> str:
 def is_exception(path: str) -> bool:
     """True si la ruta es un archivo que el grafo no indexa.
 
-    >>> is_exception('narration/README.md'), is_exception('src/content_studio/rutas.py')
+    >>> is_exception('server/data/narration/README.md'), is_exception('server/src/content_studio/rutas.py')
     (True, False)
     """
     return (
@@ -51,7 +52,7 @@ def should_suggest_bash(command: str, root: str) -> bool:
     """True si un comando Bash de búsqueda apunta a código (o no acota a una excepción). Un grep tras una tubería
     filtra la salida de otro comando: no es una búsqueda en el código.
 
-    >>> should_suggest_bash('git log | grep -v x', ''), should_suggest_bash('grep -rn relanzar src/', '')
+    >>> should_suggest_bash('git log | grep -v x', ''), should_suggest_bash('grep -rn relanzar server/src/', '')
     (False, True)
     """
     command = ' '.join(seg.split('|')[0] for seg in re.split(r'&&|\|\||;|\n', command))

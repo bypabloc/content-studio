@@ -21,7 +21,7 @@ Sin web ni MCP (engram incluido), la respuesta solo puede venir de los archivos 
 
 ## Prompts
 
-Cada prompt valida un **hecho discriminante**, algo que el modelo no adivinaría (p. ej. que el código vive en `src/content_studio/` y no en `narration/`, que la música nunca lleva voz, el tope de 300 líneas, el prefijo `experiment/`). Por regla modificada, como mínimo:
+Cada prompt valida un **hecho discriminante**, algo que el modelo no adivinaría (p. ej. que el código vive en `server/src/content_studio/` y no en `server/data/narration/`, que la música nunca lleva voz, el tope de 300 líneas, el prefijo `experiment/`). Por regla modificada, como mínimo:
 
 | Ángulo | Ejemplo |
 | :--- | :--- |
@@ -31,4 +31,4 @@ Cada prompt valida un **hecho discriminante**, algo que el modelo no adivinaría
 
 Aprueba si `is_error == false` y `result` contiene los hechos esperados sin contradecir las reglas. Máximo 4 ejecuciones a la vez; el resumen `N/N PASS` va en el cuerpo del commit.
 
-Los hooks se prueban además con `uv run pytest tests/test_hooks.py tests/test_handoff.py`, y el mod con `claude plugin test .claude/mods/handoff-compact`. La versión general de esta regla, para cualquier agente, es [agent-config-testing.md](agent-config-testing.md).
+Los hooks se prueban además con `uv run pytest .claude/hooks/tests/test_hooks.py .agents/hooks/tests/test_handoff.py`, y el mod con `claude plugin test .claude/mods/handoff-compact`. La versión general de esta regla, para cualquier agente, es [agent-config-testing.md](agent-config-testing.md).

@@ -11,8 +11,8 @@ Una sola vez, con todos los commits hechos y antes del push (`plan-format.md` §
 1. `uv run ruff check && uv run ruff format --check`
 2. `uv run pytest`
 3. `uv run pytest -m local` (si toca un motor o su registro).
-4. `python -m content_studio.devtools contexto-agentes` y `reglas` (si toca `.agents/`, `.claude/` o `AGENTS.md`), más la validación headless de `agent-config-testing.md`.
-5. Corrida real de lo que cambió, con el turno: `python -m content_studio.devtools turno-gpu run --trabajo=<NN>-<slug> -- python cli.py <…> --salida out/<herramienta>/spec-<NN>/` (si aplica).
+4. `python -m devtools contexto-agentes` y `reglas` (si toca `.agents/`, `.claude/` o `AGENTS.md`), más la validación headless de `agent-config-testing.md`.
+5. Corrida real de lo que cambió, con el turno: `python -m devtools turno-gpu run --trabajo=<NN>-<slug> -- python cli.py <…> --salida out/<herramienta>/spec-<NN>/` (si aplica).
 6. Mediciones de cada salida (`verify-before-claiming-done.md` §2): duración, LUFS y pico, y espectrograma en `tmp/spec-<NN>/` revisado por `image-reader` contra «debe sonar / no debe sonar» de `01`.
 7. CLI: `--help`, un caso real y uno de error; sin TTY no pregunta nada (si aplica).
 
@@ -31,4 +31,4 @@ Las rutas de `out/` van en el reporte y en el PR para que el usuario escuche. Si
 1. `git fetch origin dev` y merge de `origin/dev` si avanzó; un solo push.
 2. `gh pr list --head <rama>`; si no existe, `gh pr create --base dev` con problema, solución, cómo probar (comandos reales), rutas de `out/` y fichas WARNING/PENDING.
 3. `gh pr checks <n> --watch`; con todo verde, `gh pr merge <n> --merge`.
-4. En el principal: `git switch dev && git pull` y `python -m content_studio.devtools worktree close <NN>-<slug>`.
+4. En el principal: `git switch dev && git pull` y `python -m devtools worktree close <NN>-<slug>`.

@@ -22,14 +22,14 @@ if ! [[ "$RAMA" =~ ^($PREFIJOS)/[a-z0-9][a-z0-9-]*$ ]]; then
 fi
 
 STAGED="$(git diff --cached --name-only --diff-filter=ACMR)"
-PROHIBIDOS="$(grep -Ei '^(out|logs|models|tmp)/|^music/models/|^narration/motores/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
+PROHIBIDOS="$(grep -Ei '^(out|logs|models|tmp)/|^server/data/music/models/|^server/data/narration/motores/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
 if [ -n "$PROHIBIDOS" ]; then
   echo "[pre-commit] Archivos que no se versionan (salidas, modelos, venvs o audio). Quítalos con git restore --staged <archivo>:" >&2
   echo "$PROHIBIDOS" >&2
   exit 1
 fi
 
-if grep -Eq '\.py$|^pyproject\.toml$|^uv\.lock$|^tests/fixtures/' <<<"$STAGED"; then
+if grep -Eq '\.py$|^pyproject\.toml$|^server/pyproject\.toml$|^uv\.lock$|^server/tests/fixtures/' <<<"$STAGED"; then
   echo "[pre-commit] ruff + pytest"
   uv run ruff check
   uv run ruff format --check
@@ -41,8 +41,8 @@ fi
 # Instrucciones de agentes: tamaño de lo que carga cada uno y sincronía .agents/ ↔ .claude/ (agent-config-testing.md).
 if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then
   echo "[pre-commit] contexto-agentes + reglas"
-  PYTHONPATH=src uv run --no-project python -m content_studio.devtools contexto-agentes >/dev/null
-  PYTHONPATH=src uv run --no-project python -m content_studio.devtools reglas >/dev/null
+  PYTHONPATH=server/src uv run --no-project python -m devtools contexto-agentes >/dev/null
+  PYTHONPATH=server/src uv run --no-project python -m devtools reglas >/dev/null
 fi
 
 echo "[pre-commit] OK"
