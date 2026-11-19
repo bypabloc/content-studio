@@ -126,3 +126,11 @@ def test_prepare_commit_msg_removes_attribution_and_pre_push_protects_main(repo,
     subprocess.run([*GIT[:5], 'commit', '-qm', 'test: tdd'], cwd=repo, check=True)
     tdd = subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, text=True)
     assert tdd.returncode == 1 and 'server/tests/tdd/test_x.py' in tdd.stderr
+
+
+def test_every_block_says_what_why_and_instead():
+    image = hook('image_read_guard.py', {'tool_input': {'file_path': 'out/spec.png'}}).stderr
+    command = 'git worktree add .worktrees/x -b feature/x origin/dev'
+    worktree = hook('worktree_guard.py', {'tool_input': {'command': command}, 'cwd': str(ROOT)}).stderr
+    for stderr in (image, worktree):
+        assert all(part in stderr for part in ('Blocked by', 'Why:', 'Instead:')), stderr

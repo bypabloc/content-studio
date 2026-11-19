@@ -29,7 +29,12 @@ def main() -> None:
     except Exception:
         return
     if blocked(data.get('tool_input', {}).get('file_path', ''), data.get('agent_type')):
-        print(f'image_read_guard: blocked; delegate the image to the agent {AGENT} (Haiku)', file=sys.stderr)
+        print(
+            'Blocked by .claude/hooks/image_read_guard.py: reading an image in the main window. Why: an image costs '
+            f'many tokens, so only the {AGENT} agent (Haiku) opens them. Instead: delegate it to the '
+            f'{AGENT} agent with the path and what to look for.',
+            file=sys.stderr,
+        )
         sys.exit(2)
 
 
