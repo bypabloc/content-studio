@@ -48,7 +48,13 @@ def is_exception(path: str) -> bool:
 
 
 def should_suggest_bash(command: str, root: str) -> bool:
-    """True si un comando Bash de búsqueda apunta a código (o no acota a una excepción)."""
+    """True si un comando Bash de búsqueda apunta a código (o no acota a una excepción). Un grep tras una tubería
+    filtra la salida de otro comando: no es una búsqueda en el código.
+
+    >>> should_suggest_bash('git log | grep -v x', ''), should_suggest_bash('grep -rn relanzar src/', '')
+    (False, True)
+    """
+    command = ' '.join(seg.split('|')[0] for seg in re.split(r'&&|\|\||;|\n', command))
     if not any(token in command for token in SEARCH_TOKENS):
         return False
     words = [_relative(w, root) for w in re.split(r'\s+', command)]
