@@ -35,3 +35,7 @@ graphify-out/
 .pytest_cache/
 .ruff_cache/
 node_modules/
+
+# spec 005: client
+client/dist/
+client/coverage/

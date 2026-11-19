@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import sys
 
-from . import changeset, guard_tdd, lint, spelling, tdd, typecheck, unit, validators
+from . import changeset, client, guard_tdd, lint, spelling, tdd, typecheck, unit, validators
 from .flags import parse
 
 STAGES = {
@@ -20,8 +20,23 @@ STAGES = {
     'typecheck': typecheck.run,
     'tdd': tdd.run,
     'guard-tdd': guard_tdd.run,
+    'client-lint': client.lint,
+    'client-typecheck': client.typecheck,
+    'client-unit': client.unit,
 }
-GROUPS = {'all': ['lint', 'spelling', 'validators', 'unit', 'typecheck', 'tdd']}
+GROUPS = {
+    'all': [
+        'lint',
+        'spelling',
+        'validators',
+        'unit',
+        'typecheck',
+        'tdd',
+        'client-lint',
+        'client-typecheck',
+        'client-unit',
+    ],
+}
 FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}
 
 

@@ -117,3 +117,5 @@ wavlm
 wavs
 worktrees
 yesid
+geist
+tailwindcss
