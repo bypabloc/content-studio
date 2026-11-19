@@ -53,6 +53,8 @@ def review(files: list[Path]) -> list[str]:
     """Una línea `archivo:línea palabra` por cada palabra que cspell no reconoce. Lanza RuntimeError si cspell falla."""
     LIST.parent.mkdir(parents=True, exist_ok=True)
     LIST.write_text('\n'.join(str(a) for a in files) + '\n', encoding='utf-8')
+    if shutil.which('bunx') is None:
+        raise RuntimeError('bun is missing: install bun and run `bun install` at the repo root')
     order = ['bunx', 'cspell', 'lint', '--no-progress', '--config', str(CONFIG), '--file-list', str(LIST)]
     order += ['--reporter', '@cspell/cspell-json-reporter']
     # UTF-8 explícito: en Windows el valor por defecto es cp1252 y el JSON de cspell trae nombres con tildes.

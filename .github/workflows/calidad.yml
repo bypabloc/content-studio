@@ -30,3 +30,6 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: uv run python -m devtools test-runner --type=all
       - run: uv run python -m devtools test-runner --type=guard-tdd
+      - name: log de pytest si falla
+        if: failure()
+        run: tail -n 150 tmp/test-runner/pytest.log || true

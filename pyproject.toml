@@ -1,4 +1,4 @@
-# cspell:ignore mypy pydocstyle grabar interfaz toma
+# cspell:ignore mypy pydocstyle grabar interfaz toma dispositivos
 # Raíz del uv workspace: el paquete vive en server/ (server/pyproject.toml). Aquí van las herramientas compartidas.
 [tool.uv.workspace]
 members = ["server"]
@@ -88,3 +88,8 @@ module = [
     "devtools.move_data",
 ]
 ignore_errors = true
+
+# APIs solo de Windows (winreg, windll, CreateJunction): mypy en Linux (CI) no las ve. Solo se ignora attr-defined.
+[[tool.mypy.overrides]]
+module = ["devtools.worktree", "devtools.gpu_turn", "content_studio.narration.grabar.dispositivos"]
+disable_error_code = ["attr-defined"]
