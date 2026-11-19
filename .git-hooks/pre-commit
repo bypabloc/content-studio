@@ -4,30 +4,36 @@
 #
 # 1. Rama de trabajo con prefijo válido: nunca commits en main ni dev.
 # 2. Nada de salidas, modelos, venvs ni audio en el staging (el repo es público: las voces no se suben).
-# 3. Si hay .py, pyproject.toml, uv.lock o fixtures staged: ruff check, ruff format --check y pytest.
-# 4. Si hay instrucciones de agentes staged: contexto-agentes y reglas (devtools).
+# 3. spelling (cspell): identificadores en inglés en lo staged (spec 002).
+# 4. Si hay .py, pyproject.toml, uv.lock o fixtures staged: ruff check, ruff format --check y pytest.
+# 5. Si hay instrucciones de agentes staged: agent-context y rules (devtools).
 #
 # Activación: git config core.hooksPath .git-hooks. Si falla, NO uses --no-verify: corrige.
 
 set -euo pipefail
+# devtools sale del checkout de este hook, no del repo del commit (los tests de hooks commitean en repos temporales).
+HOOKS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$(git rev-parse --show-toplevel)"
 
 # Misma lista que PREFIJOS_DEV en .github/workflows/origen-pr.yml y .claude/rules/git-workflow.md.
-PREFIJOS='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
-RAMA="$(git branch --show-current 2>/dev/null || true)"
-if ! [[ "$RAMA" =~ ^($PREFIJOS)/[a-z0-9][a-z0-9-]*$ ]]; then
-  echo "[pre-commit] La rama '$RAMA' no admite commits. Crea una desde dev: git switch -c feature/<nombre-kebab>" >&2
-  echo "[pre-commit] Prefijos: ${PREFIJOS//|/, }" >&2
+PREFIXES='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
+BRANCH="$(git branch --show-current 2>/dev/null || true)"
+if ! [[ "$BRANCH" =~ ^($PREFIXES)/[a-z0-9][a-z0-9-]*$ ]]; then
+  echo "[pre-commit] Branch '$BRANCH' cannot take commits. Create one from dev: git switch -c feature/<kebab-name>" >&2
+  echo "[pre-commit] Prefixes: ${PREFIXES//|/, }" >&2
   exit 1
 fi
 
 STAGED="$(git diff --cached --name-only --diff-filter=ACMR)"
-PROHIBIDOS="$(grep -Ei '^(out|logs|models|tmp)/|^server/data/music/models/|^server/data/narration/motores/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
-if [ -n "$PROHIBIDOS" ]; then
-  echo "[pre-commit] Archivos que no se versionan (salidas, modelos, venvs o audio). Quítalos con git restore --staged <archivo>:" >&2
-  echo "$PROHIBIDOS" >&2
+FORBIDDEN="$(grep -Ei '^(out|logs|models|tmp)/|^server/data/music/models/|^server/data/narration/engines/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
+if [ -n "$FORBIDDEN" ]; then
+  echo "[pre-commit] Files that are not versioned (outputs, models, venvs or audio). Unstage them with: git restore --staged <file>" >&2
+  echo "$FORBIDDEN" >&2
   exit 1
 fi
+
+echo "[pre-commit] spelling"
+PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools spelling --staged >/dev/null
 
 if grep -Eq '\.py$|^pyproject\.toml$|^server/pyproject\.toml$|^uv\.lock$|^server/tests/fixtures/' <<<"$STAGED"; then
   echo "[pre-commit] ruff + pytest"
@@ -35,14 +41,14 @@ if grep -Eq '\.py$|^pyproject\.toml$|^server/pyproject\.toml$|^uv\.lock$|^server
   uv run ruff format --check
   uv run pytest -q
 else
-  echo "[pre-commit] Sin código Python staged: ruff y pytest omitidos"
+  echo "[pre-commit] No Python code staged: ruff and pytest skipped"
 fi
 
-# Instrucciones de agentes: tamaño de lo que carga cada uno y sincronía .agents/ ↔ .claude/ (agent-config-testing.md).
+# Agent instructions: size of what each agent loads and .agents/ <-> .claude/ sync (agent-config-testing.md).
 if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then
-  echo "[pre-commit] contexto-agentes + reglas"
-  PYTHONPATH=server/src uv run --no-project python -m devtools contexto-agentes >/dev/null
-  PYTHONPATH=server/src uv run --no-project python -m devtools reglas >/dev/null
+  echo "[pre-commit] agent-context + rules"
+  PYTHONPATH=server/src uv run --no-project python -m devtools agent-context >/dev/null
+  PYTHONPATH=server/src uv run --no-project python -m devtools rules >/dev/null
 fi
 
 echo "[pre-commit] OK"

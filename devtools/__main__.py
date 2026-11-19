@@ -12,8 +12,8 @@ import sys
 COMANDOS = {
     'worktree': ('devtools.worktree', 'prepare | close: worktrees en ../content-studio-worktrees/'),
     'turno-gpu': ('devtools.turno_gpu', 'status | run: un modelo a la vez en la GPU entre sesiones'),
-    'contexto-agentes': ('devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
-    'reglas': ('devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
+    'agent-context': ('devtools.contexto_agentes', 'tamaño de lo que carga cada agente'),
+    'rules': ('devtools.reglas', '[--sincronizar]: .claude/ con el mismo cuerpo que .agents/'),
     'move-data': ('devtools.move_data', 'mueve narration/ y music/ a server/data/ (sin --apply, solo imprime el plan)'),
     'spelling': ('devtools.spelling', '[--staged] [archivo ...]: cspell sobre lo versionado o lo staged'),
 }

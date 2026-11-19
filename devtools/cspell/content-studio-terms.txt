@@ -1,13 +1,34 @@
-# Diccionario propio de cspell (cspell.config.yaml, D-1). Solo términos en inglés o nombres propios técnicos:
-# motores, modelos, voces y términos de audio. Nunca agregar palabras en español.
+# Diccionario propio de cspell (cspell.config.yaml, D-1). Solo términos en inglés, nombres técnicos y nombres propios
+# de motores, modelos y voces. Nunca agregar palabras en español.
 acestep
+acmr
+autocompact
+bypabloc
 chatterbox
+ckpt
 cosyvoice
+devtools
+ebur
+ffprobe
+flac
+graphify
 heartmula
 indextts
+lufs
+numpy
 omnivoice
+onnx
+pipefail
+pycache
+pyproject
+pytest
 qwen
+safetensors
+toplevel
+typer
+venv
+venvs
 voxcpm
 yesid
-lufs
-ebur
+pythonioencoding
+pythonpath
