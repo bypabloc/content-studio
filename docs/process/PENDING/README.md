@@ -20,4 +20,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [002-cspell-excepciones-temporales](002-cspell-excepciones-temporales.md) | Exclusiones de cspell que quedan a propósito: `cli/` (004), `grabar/` (007) y textos en español de D-1 | La 004 y la 007 | Agente |
 | [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |
 | [003-bajar-baselines](003-bajar-baselines.md) | Vaciar los baselines de tamaño, espejo y cobertura, y los overrides de mypy, a medida que se tocan los archivos | En cada spec que toque un módulo de la lista; `cli/` (004) y `grabar/` (007) | Agente |
-| [sleep-guard-codex-antigravity](sleep-guard-codex-antigravity.md) | El bloqueo de `sleep` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
+| [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |

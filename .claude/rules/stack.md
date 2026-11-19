@@ -24,7 +24,7 @@ paths:
 
 ## 2. Equipo
 
-* RTX 4060 Laptop de 8 GB, Windows 11 con WSL2. La misma carpeta del repo se usa desde Windows (`D:\…`) y desde WSL (`/mnt/d/…`): los venvs de los motores son del sistema donde se crearon.
+* RTX 4060 Laptop de 8 GB, Windows 11. Todo se corre y se prueba desde Windows (`D:\…`); WSL no se usa (`command-output.md`). La CI corre en Linux.
 * Un modelo a la vez en la GPU (`turno-gpu.md`). Si la VRAM desborda a la RAM compartida, todo va ~4× más lento.
 * En Windows, `python3` es el stub de la Store: los hooks y scripts usan `uv run --no-project python` o `python`.
 

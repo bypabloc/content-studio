@@ -1,4 +1,4 @@
-"""sleep_guard.py ejecutado de verdad, como lo llaman Claude Code y Codex: JSON por stdin, exit 2 bloquea."""
+"""shell_guard.py ejecutado de verdad, como lo llaman Claude Code y Codex: JSON por stdin, exit 2 bloquea."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-HOOK = Path(__file__).resolve().parents[1] / 'sleep_guard.py'
+HOOK = Path(__file__).resolve().parents[1] / 'shell_guard.py'
 
 
 def run(tool_input: dict) -> subprocess.CompletedProcess:
@@ -31,6 +31,21 @@ def test_blocks_only_a_foreground_sleep(tool_input, code):
     result = run(tool_input)
     assert result.returncode == code
     assert ('run_in_background' in result.stderr) == (code == 2)
+
+
+@pytest.mark.parametrize(
+    ('tool_input', 'code'),
+    [
+        # el caso del lote 001-017: reproducir la CI de Linux en WSL, también en segundo plano
+        ({'command': "wsl -e bash -lc 'cd /mnt/d/x && uv run pytest -q'", 'run_in_background': True}, 2),
+        ({'command': 'MSYS_NO_PATHCONV=1 wsl -d Ubuntu-24.04 -- bash /mnt/d/x/repro.sh'}, 2),
+        ({'command': 'gh run view 123 --log-failed'}, 0),
+    ],
+)
+def test_blocks_wsl_even_in_the_background(tool_input, code):
+    result = run(tool_input)
+    assert result.returncode == code
+    assert ('WSL' in result.stderr) == (code == 2)
 
 
 def test_bad_input_does_not_block():
