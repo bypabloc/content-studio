@@ -17,7 +17,7 @@ git worktree add ../content-studio-worktrees/<nombre> -b <prefijo>/<nombre> orig
 python -m devtools worktree prepare <nombre>     # desde el checkout principal
 ```
 
-`git worktree add` solo trae lo versionado: no hay venvs (`server/data/narration/.venv-*`, `server/data/music/.venv-*`), repos de motores (`server/data/narration/engines/`), modelos (`server/data/music/models/`), voces construidas (`server/data/narration/voices/<voz>/`), `node_modules/` (los diccionarios de cspell que usa `spelling`) ni audios de referencia (`server/data/narration/reference/*.wav`). Pesan GB y no se mueven (`codigo-python.md`), así que `prepare` **enlaza** las carpetas al principal (symlink en POSIX, junction en Windows) y copia los audios que faltan, sin pisar nada, y crea `tmp/`. Así el worktree corre motores igual que el principal. Después, `uv sync` en el worktree para el venv de desarrollo.
+`git worktree add` trae solo lo versionado. `prepare` **enlaza** al principal venvs, motores, modelos, voces y audios (`server/data/`, que pesan GB), copia los audios que faltan y crea `tmp/`. Corre `bun install` (no enlaza `node_modules`: `bun` escribiría en el principal) y el target de Cargo va a `<principal>/tmp/cargo-target` (si ya existe, no se toca). Luego `uv sync`.
 
 `.claude/settings.json` declara `../content-studio-worktrees` en `permissions.additionalDirectories`: una sesión del principal lee y edita ahí sin pedir permiso.
 
@@ -30,4 +30,4 @@ git fetch origin dev
 python -m devtools worktree close <nombre>
 ```
 
-Exige su HEAD en `origin/dev` y el árbol limpio (exit 1 si no). En orden: quita los enlaces de `prepare` (para que `git worktree remove` no entre en los venvs del principal), `git worktree remove` y `prune` (en Windows, si git ya lo desregistró pero un proceso con cwd ahí retiene la carpeta vacía, avisa y sigue) y borra la rama local y la remota. No des el trabajo por cerrado mientras `git worktree list` lo muestre.
+Exige su HEAD en `origin/dev` y el árbol limpio (exit 1 si no). Quita los enlaces de `prepare` (para que `git worktree remove` no entre en los venvs del principal), hace `git worktree remove` y `prune` (en Windows, si la carpeta sigue retenida, avisa y sigue) y borra la rama local y la remota. No des el trabajo por cerrado mientras `git worktree list` lo muestre.

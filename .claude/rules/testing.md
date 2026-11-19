@@ -6,7 +6,7 @@ paths:
 
 # Testing: tipos, ubicación y ciclo TDD
 
-Runner único de gates: `python -m devtools test-runner --type=all` (lint, spelling, validators, unit, typecheck y tdd; spec 003), lo mismo que la CI en 3.10 y 3.12. Por debajo corre `uv run pytest` (con `--doctest-modules`; sin GPU). `uv run pytest -m local` suma los que necesitan los venvs de los motores de este equipo. Ciclo y comandos: skill `tdd-workflow`.
+Runner único de gates: `python -m devtools test-runner --type=all` (calidad, las etapas del client sin e2e y `budget`), igual que la CI. `e2e` va aparte (`--type=e2e`, job `client`). Por debajo corre `uv run pytest` (con `--doctest-modules`; sin GPU). `uv run pytest -m local` suma los que necesitan los venvs de los motores de este equipo. Ciclo y comandos: skill `tdd-workflow`.
 
 Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 
@@ -22,10 +22,13 @@ Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 | CLI `studio` | `server/tests/unit/src/content_studio/cli/` | Argparse: subcomandos, flags de narración y música, `serve` y `jobs` | Sí |
 | Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores registrados (`ENGINES`) | Sí |
 | Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `.agents/hooks/tests/`, `devtools/tests/unit/` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
+| Client unitario | `client/tests/unit/src/<ruta>/<módulo>.test.ts(x)`, espejo de `client/src/` (vitest + Testing Library) | Funciones, hooks y componentes; 80 % de cobertura por archivo (`client-unit`) | Sí |
+| e2e | `tests/e2e/<flujo>/happy-*.e2e.ts` y `neg-*.e2e.ts` (Playwright, Chromium, API simulada desde `tests/e2e/_api/`) | La app construida: flujos, axe y capturas (`e2e`) | Sí, en el job `client`; no en `all` |
 | Local | `server/tests/integration/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
 | tdd efímero | `server/tests/tdd/test_<pieza>.py` o `devtools/tests/tdd/` | Razonar una pieza antes de su test permanente | **Nunca**: `guard-tdd` (pre-push y CI) falla si existe |
 
 * Un test unitario va en su ruta espejo: `server/tests/unit/src/content_studio/<ruta>/test_<módulo>.py` o `devtools/tests/unit/<ruta>/test_<módulo>.py`. Lo que cruza módulos va a `server/tests/integration/`. La etapa `unit` falla si falta el espejo de un módulo (salvo lo que lista `tests/validators/mirror.baseline.json`) y exige 80 % de cobertura por archivo del changeset.
+* Un test del client va en `client/tests/unit/src/<ruta>/<módulo>.test.ts(x)` y corre con `bun run --cwd client test`.
 * Si un cambio de comportamiento es a propósito, las fixtures se regeneran con `uv run python server/tests/integration/fixtures/generate.py` en un commit aparte.
 
 ## 2. Qué mockear
@@ -40,4 +43,4 @@ Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 2. **GREEN**: lo mínimo para el verde, con `uv run pytest <archivo>::<test>`.
 3. **REFACTOR** con la red en verde; cerrar con `uv run ruff check && uv run ruff format --check && uv run pytest`.
 * Un fix de bug empieza con su test de regresión en `server/tests/integration/test_bugs.py`, rojo con el código actual.
-* Un test flaky es un fallo. Nada de `sleep` ni timeouts fijos: espera la señal real.
+* Un test flaky es un fallo. Nada de `sleep` ni timeouts fijos: espera la señal real. En e2e, la señal es algo de la UI (un anuncio, un diálogo, una respuesta de la API); si la librería registra un listener en un `setTimeout` tras una acción, se espera un turno del event loop y se comenta por qué.
