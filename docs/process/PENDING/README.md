@@ -19,3 +19,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [001-duracion-de-audio](001-duracion-de-audio.md) | La duración de música y narración no coincide con la pedida (igual en `dev`) | Antes de publicar el lote | Usuario y agente |
 | [002-cspell-excepciones-temporales](002-cspell-excepciones-temporales.md) | Exclusiones de cspell que quedan a propósito: `cli/` (004), `grabar/` (007) y textos en español de D-1 | La 004 y la 007 | Agente |
 | [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |
+| [sleep-guard-codex-antigravity](sleep-guard-codex-antigravity.md) | El bloqueo de `sleep` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
