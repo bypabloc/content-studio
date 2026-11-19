@@ -11,30 +11,38 @@ export interface SelectOption {
 
 /**
  * Un selector que recuerda la última elección (en settings, con la clave `settingKey`). Sin elección guardada, o si la
- * guardada ya no existe, vale la recomendada, marcada con ★ (AC-3).
+ * guardada ya no existe, vale la recomendada, marcada con ★ (AC-3). Con `beforeChange`, la elección solo se aplica
+ * si esa función responde que sí (la licencia de un motor, AC-7); si no, el selector sigue en la opción anterior.
  */
 export function RecommendedSelect({
   settingKey,
   label,
   options,
   onChange,
+  beforeChange,
 }: {
   settingKey: string;
   label: string;
   options: readonly SelectOption[];
   onChange?: (value: string) => void;
+  beforeChange?: (value: string) => Promise<boolean>;
 }) {
   const recommended = options.find((option) => option.recommended)?.value ?? options[0]?.value ?? '';
   const [stored, setStored] = useSetting<string>(settingKey, recommended);
   const value = options.some((option) => option.value === stored) ? stored : recommended;
+  const choose = (next: string) => {
+    setStored(next);
+    onChange?.(next);
+  };
 
   return (
     <select
       aria-label={label}
       value={value}
       onChange={(event) => {
-        setStored(event.target.value);
-        onChange?.(event.target.value);
+        const next = event.target.value;
+        if (beforeChange) void beforeChange(next).then((allowed) => allowed && choose(next));
+        else choose(next);
       }}
       className="rounded-md border border-input bg-transparent px-2 py-1.5 text-sm"
     >

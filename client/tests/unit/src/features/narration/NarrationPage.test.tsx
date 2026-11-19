@@ -1,0 +1,111 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NarrationPage } from '@/features/narration/NarrationPage';
+import { t } from '@/shared/i18n/t';
+
+const { api } = vi.hoisted(() => ({ api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), del: vi.fn() } }));
+vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
+
+// El importador: el test guarda el callback que la pantalla le pasa, y lo llama con rutas a mano (AC-9).
+const { importer } = vi.hoisted(() => ({ importer: { onImport: (_paths: string[]) => {} } }));
+vi.mock('@/features/narration/useScriptImport', () => ({
+  useScriptImport: (onImport: (paths: string[]) => void) => {
+    importer.onImport = onImport;
+    return { pick: () => Promise.resolve() };
+  },
+}));
+
+const CATALOG = {
+  engines: [
+    { id: 'voxcpm2', license: 'Apache-2.0', commercial: true, installed: true, recommended: true, note: '', batch: false },
+  ],
+  styles: [{ id: 'expert', recommended: true }],
+  voices: [{ id: 'yesid', language: 'es' }],
+};
+const CLEAN_LINT = { issues: [], words: 3, seconds: 2, guide: 'formato-guion.md' };
+
+beforeEach(() => {
+  api.get.mockImplementation(async (path: string) =>
+    path === '/catalog/narration' ? CATALOG : { key: path.replace('/settings/', ''), value: null },
+  );
+  api.put.mockImplementation(async (path: string, body: { value: unknown }) => ({ key: path, value: body.value }));
+  api.post.mockImplementation(async (path: string) => (path === '/jobs' ? { id: 1 } : CLEAN_LINT));
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+function renderPage() {
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NarrationPage />
+    </QueryClientProvider>,
+  );
+  return screen.findByRole('textbox', { name: t('narration.editor.label') }) as Promise<HTMLTextAreaElement>;
+}
+
+function jobsPosted(): unknown[] {
+  return api.post.mock.calls.filter(([path]) => path === '/jobs').map(([, body]) => body);
+}
+
+describe('NarrationPage', () => {
+  it('AC-8: Ctrl+Enter encola la narración con el texto y las opciones elegidas', async () => {
+    const textarea = await renderPage();
+    fireEvent.change(textarea, { target: { value: 'Hola, mundo.' } });
+
+    fireEvent.keyDown(window, { key: 'Enter', ctrlKey: true });
+
+    await waitFor(() =>
+      expect(jobsPosted()).toEqual([
+        {
+          kind: 'narration',
+          params: expect.objectContaining({
+            text: 'Hola, mundo.',
+            model: 'voxcpm2',
+            style: 'expert',
+            voice: 'yesid',
+            language: 'es',
+            master: 'voice',
+            lufs: -16,
+          }),
+        },
+      ]),
+    );
+  });
+
+  it('sin texto, Ctrl+Enter no encola nada', async () => {
+    await renderPage();
+
+    fireEvent.keyDown(window, { key: 'Enter', ctrlKey: true });
+
+    expect(jobsPosted()).toEqual([]);
+  });
+
+  it('AC-9: cada guion importado se encola como un trabajo propio', async () => {
+    await renderPage();
+
+    importer.onImport(['C:/g/a.txt', 'C:/g/b.json']);
+
+    await waitFor(() =>
+      expect(jobsPosted()).toEqual([
+        { kind: 'narration', params: expect.objectContaining({ file: ['C:/g/a.txt'] }) },
+        { kind: 'narration', params: expect.objectContaining({ file: ['C:/g/b.json'] }) },
+      ]),
+    );
+  });
+
+  it('con avisos del linter, el botón lo dice y aun así deja generar', async () => {
+    api.post.mockImplementation(async (path: string) =>
+      path === '/jobs' ? { id: 1 } : { ...CLEAN_LINT, issues: [{}, {}] },
+    );
+    const textarea = await renderPage();
+    fireEvent.change(textarea, { target: { value: 'Hola; mundo.' } });
+
+    expect(await screen.findByText(t('narration.generate.warnings', { count: 2 }))).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: t('narration.generate') }));
+    await waitFor(() => expect(jobsPosted()).toHaveLength(1));
+  });
+});
