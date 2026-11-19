@@ -21,7 +21,7 @@
 
 ## 3. Revisión del usuario
 
-Las rutas de los Reels de cada encuadre, las normalizaciones (A/B con y sin mejorar voz) y la unión con crossfade van en el reporte. La cadena de «mejorar voz» es un gusto: si el usuario la quiere más suave o más fuerte, se ajusta en esta spec. Si hay que elegir entre varias cadenas, es un `blocked — taste`, con las rutas de cada opción.
+Las rutas de los Reels de cada encuadre, las normalizaciones (A/B con y sin mejorar voz) y la unión con crossfade van en el reporte. La cadena de «mejorar voz» es un gusto: si el usuario la quiere más suave o más fuerte, se ajusta en esta spec. Si hay que elegir entre varias cadenas, el agente elige con el «debe sonar» de `01`, lo registra en `docs/process/WARNING/` con las rutas de cada opción y sigue.
 
 ## 4. Cierre
 

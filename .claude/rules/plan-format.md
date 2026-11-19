@@ -38,7 +38,7 @@ docs/specs/<NN>-<slug>/
 
 * **AC** en BDD (`Given/When/Then`) o EARS (`WHEN … THEN …`), `AC-1`…, cada uno verificable con una prueba (pytest, doctest o una medición de la salida real: duración, volumen, espectrograma).
 * **Ciclo TDD**: RED (test en `server/tests/test_<área>.py` o doctest, con el AC en el nombre o el docstring; falla por el motivo esperado), GREEN (mínimo, con su Verify), REFACTOR. Un fix empieza con un test de regresión en `server/tests/test_bugs.py`.
-* Si la spec toca la salida de audio: «debe sonar / no debe sonar» en `01` (duración, volumen LUFS, sin voz en la música, sin cortes) y la escucha la decide el usuario (`blocked — taste` solo si hay que elegir entre opciones).
+* Si la spec toca la salida de audio: «debe sonar / no debe sonar» en `01` (duración, volumen LUFS, sin voz en la música, sin cortes) y la escucha la hace el usuario al final: si hay que elegir entre opciones, el agente elige con ese criterio, lo registra en `docs/process/WARNING/` y sigue.
 
 ## 4. Por grupo de commit y verificación final
 

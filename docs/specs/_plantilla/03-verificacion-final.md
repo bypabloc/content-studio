@@ -18,7 +18,7 @@ Una sola vez, con todos los commits hechos y antes del push (`plan-format.md` §
 
 ## 2. Escucha
 
-Las rutas de `out/` van en el reporte y en el PR para que el usuario escuche. Si la spec debía elegir entre opciones sonoras, eso es `blocked — taste` hasta que el usuario elija; lo demás no espera la escucha.
+Las rutas de `out/` van en el reporte y en el PR para que el usuario escuche. Si la spec debía elegir entre opciones sonoras, el agente elige con el «debe sonar» de `01`, lo registra en `docs/process/WARNING/` y sigue; nada espera la escucha.
 
 ## 3. Cierre
 

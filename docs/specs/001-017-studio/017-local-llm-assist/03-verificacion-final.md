@@ -14,7 +14,7 @@
 
 1. Desde Motores, instala «Asistente (llama.cpp)» y los dos modelos (unos 11 GB en total). Verifica cada uno y anota la VRAM pico (`nvidia-smi` muestreado) con 8192 de contexto. Si alguno no entra en 8 GB con ese contexto, baja a 4096, anótalo y ajusta `llm/models.py`.
 2. `python -m devtools llm-eval` (en segundo plano, con el log en `logs/llm-eval-spec-017.log`). El informe en `tmp/llm-eval/<fecha>/report.md` tiene, por modelo y por tarea, el porcentaje de chequeos que pasan, la latencia, los tok/s y la VRAM.
-3. **Revisión humana**: el informe incluye 10 traducciones por modelo lado a lado para que el usuario las puntúe de 1 a 5. Esto es un `blocked — taste` solo si los chequeos automáticos empatan (diferencia < 5 puntos). Si no, el ★ va al que más pasa y la puntuación humana se pide sin bloquear.
+3. **Revisión humana**: el informe incluye 10 traducciones por modelo lado a lado para que el usuario las puntúe de 1 a 5. Si los chequeos automáticos empatan (diferencia < 5 puntos), el ★ va al de licencia más permisiva y luego al más liviano, con la decisión en `docs/process/WARNING/`; si no, al que más pasa. La puntuación humana se pide sin bloquear.
 4. Fija `recommended` en `llm/models.py` con el resultado (commit 9) y escribe WARNING `017-recomendado.md` con las cifras.
 
 ## 3. Corridas reales con el ★ (AC-11)
