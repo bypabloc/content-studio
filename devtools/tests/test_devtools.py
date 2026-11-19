@@ -27,18 +27,18 @@ def test_missing_and_links_not_touch_the_destination(tmp_path):
     (main / 'server/data/narration/.venv-qwen/bin').mkdir(parents=True)
     (main / 'server/data/narration/.venv-qwen/bin/python').write_text('x')
     (main / 'server/data/music/models/ace').mkdir(parents=True)
-    (main / 'server/data/narration/voz').mkdir(parents=True)
-    (main / 'server/data/narration/voz/clara.wav').write_bytes(b'RIFF')
-    (main / 'server/data/narration/voces/yesid').mkdir(parents=True)
-    (wt / 'server/data/narration/voz').mkdir(parents=True)
+    (main / 'server/data/narration/reference').mkdir(parents=True)
+    (main / 'server/data/narration/reference/clara.wav').write_bytes(b'RIFF')
+    (main / 'server/data/narration/voices/yesid').mkdir(parents=True)
+    (wt / 'server/data/narration/reference').mkdir(parents=True)
     folders, audios = worktree.missing(main, wt)
     names = sorted(p.as_posix() for p in folders)
     assert names == [
         'server/data/music/models',
         'server/data/narration/.venv-qwen',
-        'server/data/narration/voces/yesid',
+        'server/data/narration/voices/yesid',
     ]
-    assert [a.as_posix() for a in audios] == ['server/data/narration/voz/clara.wav']
+    assert [a.as_posix() for a in audios] == ['server/data/narration/reference/clara.wav']
     for rel in folders:
         worktree.link(main / rel, wt / rel)
     assert (wt / 'server/data/narration/.venv-qwen/bin/python').read_text() == 'x'

@@ -19,10 +19,10 @@ from pathlib import Path
 LINKS = (
     'server/data/narration/.venv*',
     'server/data/music/.venv*',
-    'server/data/narration/motores',
+    'server/data/narration/engines',
     'server/data/music/models',
 )
-VOZ, VOCES = 'server/data/narration/voz', 'server/data/narration/voces'
+VOZ, VOCES = 'server/data/narration/reference', 'server/data/narration/voices'
 AUDIOS = ('*.wav', '*.m4a', '*.mp3', '*.flac')
 
 
