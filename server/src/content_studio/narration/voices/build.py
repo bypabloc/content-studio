@@ -98,7 +98,7 @@ def build(name: str, sheet: dict, force: bool) -> bool:
     (folder / 'neutral.txt').write_text(sheet['text'], encoding='utf-8')
 
     # Con una base nueva, lo aprobado antes (contra la base vieja) ya no vale.
-    res = {} if new_base or not previous.exists() else json.loads(previous.read_text(encoding='utf-8'))['estilos']
+    res = {} if new_base or not previous.exists() else json.loads(previous.read_text(encoding='utf-8'))['styles']
     # Se regenera lo que falta o no aprobó; lo aprobado se conserva.
     pending = [
         e for e in STYLES if e != 'neutral' and not ((folder / f'{e}.wav').exists() and res.get(e, {}).get('ok'))
@@ -116,9 +116,8 @@ def build(name: str, sheet: dict, force: bool) -> bool:
     def save():
         """aprobacion.json tras cada ronda, de forma atómica: un corte no deja un JSON a medias."""
         ok = all(res.get(e, {}).get('ok') for e in STYLES)
-        criteria = dict(sim_min=SIM_MIN, wer_max=WER_MAX, duracion=DURATION)
-        # cspell:ignore estilos duracion aprobada licencia criterios (claves en disco, dato del usuario)
-        data = dict(voz=name, aprobada=ok, licencia_motor=m.license, criterios=criteria, estilos=res)
+        criteria = dict(sim_min=SIM_MIN, wer_max=WER_MAX, duration=DURATION)
+        data = dict(voice=name, approved=ok, license_engine=m.license, criteria=criteria, styles=res)
         tmp = previous.with_suffix('.tmp')
         tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
         tmp.replace(previous)

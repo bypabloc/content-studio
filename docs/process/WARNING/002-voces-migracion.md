@@ -9,3 +9,4 @@
 - **Qué la cierra**: la opción elegida y `narration tts --voice <voz>` con una voz aprobada en los 12 estilos.
 - **Quién decide**: el usuario.
 - **Bloquea**: el merge a `dev`. Sin voces aprobadas, `narration tts --voice` no tiene voces que usar.
+- **Resultado**: el usuario eligió la opción (a). Respaldo previo en `tmp/respaldo-voces-002/` (290 MB, copia idéntica verificada con `diff -rq`). Se renombraron 300 archivos de estilo (`.wav` y `.txt`) y se reescribieron las 15 aprobaciones con claves en inglés. Todo se verificó contra el respaldo: los bytes de cada archivo renombrado y los valores `ok`, `sim` y `approved`. Quedan aprobadas en los 12 estilos: andrea, colombia-m, hannah, karen-savage, mpinedag, peru-f, vctk-p345, venezuela-f y yesid. Las otras 6 siguen rechazadas en algún estilo: es el resultado real de la evaluación, no un problema de formato.

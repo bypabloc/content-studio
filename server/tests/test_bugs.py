@@ -94,8 +94,8 @@ def test_reference_folder_is_reference():
     assert paths.TAKES == paths.REFERENCE / 'takes'
 
 
-def test_approval_reads_the_keys_on_disk(tmp_path, monkeypatch):
-    """aprobacion.json es dato del usuario y sigue con las claves en español (move-data no las reescribe, AC-4)."""
+def test_approval_reads_the_english_keys(tmp_path, monkeypatch):
+    """aprobacion.json usa claves en inglés desde la migración (WARNING 002-voces-migracion)."""
     import json
 
     from content_studio.narration.voices import catalog
@@ -104,7 +104,7 @@ def test_approval_reads_the_keys_on_disk(tmp_path, monkeypatch):
     (voices / 'ana').mkdir(parents=True)
     (voices / 'ana' / 'neutral.wav').write_bytes(b'RIFF')
     (voices / 'ana' / 'aprobacion.json').write_text(
-        json.dumps({'voz': 'ana', 'aprobada': True, 'estilos': {'neutral': {'ok': True}}}), encoding='utf-8'
+        json.dumps({'voice': 'ana', 'approved': True, 'styles': {'neutral': {'ok': True}}}), encoding='utf-8'
     )
     (voices / 'catalog.json').write_text(json.dumps({'ana': {'license': 'CC0'}}), encoding='utf-8')
     monkeypatch.setattr(catalog, 'VOICES', voices)
