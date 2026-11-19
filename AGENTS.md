@@ -47,6 +47,7 @@ src/content_studio/
 ├── rutas.py                  RAIZ, OUT, LOGS, NARRATION, MUSIC, VOZ, VOCES…
 ├── comun/                    proceso (relanzar en un venv), ffmpeg, archivos
 ├── cli/                      Typer: app, menu, flujo (asistente), widgets, args; comandos/ con Comando y REGISTRO
+├── devtools/                 flujo de agentes: worktree, turno-gpu, contexto-agentes, reglas (python -m content_studio.devtools)
 ├── narration/                parser (liviano), tts (main), estilos, bloques, pipeline, audio, guion, metadatos, referencia
 │   ├── motores/              EspecMotor + MotorTTS (Factory Method) y registro.py con MOTORES
 │   ├── texto/ evaluacion/    segmentos y traducción por motor; comparar y revisar (whisper)
@@ -60,7 +61,27 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 
 - **Agregar un motor TTS o de música**: un archivo en `motores/` con su subclase de `MotorTTS` o `MotorMusica`, una entrada `EspecMotor`/`EspecMusica` en `motores/registro.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `tests/test_venvs.py` se agrega la librería que importa (`LIBRERIAS`).
 - **Agregar un comando del CLI**: una subclase de `Comando` en `cli/comandos/` (clave, módulo, parser liviano con `construir_parser()`) y una línea en `REGISTRO` (`cli/comandos/__init__.py`).
-- **Máximo 300 líneas por `.py`** (lo comprueba `tests/test_estructura.py`) y Python 3.10 como mínimo. Detalle en [.claude/rules/codigo-python.md](.claude/rules/codigo-python.md).
+- **Máximo 300 líneas por `.py`** (lo comprueba `tests/test_estructura.py`) y Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
+
+## Forma de trabajo y dónde buscar
+
+`AGENTS.md` y `.agents/` (reglas, skills y el hook de handoff) son las instrucciones compartidas de todos los agentes (Claude Code, Codex, Antigravity). `.claude/` tiene las mismas reglas y skills con el frontmatter de Claude Code (las sincroniza `python -m content_studio.devtools reglas --sincronizar`), más su configuración propia: hooks, agentes `code-explorer`, `researcher` e `image-reader` (Haiku), comandos y el mod `handoff-compact`. Lo de `.claude/` no vincula a otros agentes.
+
+| Necesidad | Fuente |
+| :--- | :--- |
+| Código, capas, 300 líneas, cómo agregar un motor o comando | [codigo-python](.agents/rules/codigo-python.md), [stack](.agents/rules/stack.md) |
+| Git, ramas, PR, hooks locales | [git-workflow](.agents/rules/git-workflow.md) |
+| Diseñar una spec (plantillas en [docs/specs/_plantilla/](docs/specs/_plantilla/README.md)) | [plan-format](.agents/rules/plan-format.md); skills `crear-spec`, `execute-spec`, `run-specs` |
+| Estado del proyecto, roadmap, decisiones y pendientes | [docs/process/](docs/process/README.md), [project-progress](.agents/rules/project-progress.md) |
+| Tests y TDD | [testing](.agents/rules/testing.md); skills `tdd-workflow`, `testing` |
+| Verificar antes de decir "listo" (duración, volumen, espectrograma) | [verify-before-claiming-done](.agents/rules/verify-before-claiming-done.md) |
+| Dónde va la salida de cada comando | [command-output](.agents/rules/command-output.md) |
+| Sesiones largas: handoff en disco y seguir hasta terminar | [session-handoff](.agents/rules/session-handoff.md) |
+| Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [turno-gpu](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
+| Buscar código | [graphify](.agents/rules/graphify.md); skills `graphify-query`, `graphify-ops` |
+| devtools del flujo de agentes | [devtools](.agents/rules/devtools.md) |
+| Idioma del código, del CLI y de la narración | [textos-e-idioma](.agents/rules/textos-e-idioma.md) |
+| Cambiar reglas, skills o hooks de agentes | [agent-config-testing](.agents/rules/agent-config-testing.md) |
 
 ## Pruebas
 
@@ -73,7 +94,7 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 ## Reglas
 
 1. **Salidas** en `out/narration/` y `out/music/`, o donde indiquen `--salida` (narration) y `--carpeta` (music). **Logs** en `logs/<herramienta>-<descripción>.log`. Las dos carpetas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) se lanzan en segundo plano, con la salida en `logs/`.
-2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento.
+2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento. Entre sesiones, con `turno-gpu run` ([turno-gpu](.agents/rules/turno-gpu.md)).
 3. **La música es siempre instrumental**: nada de voz ni de letra.
 4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). El gusto lo decide el usuario: entrégale las rutas.
 5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial. OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `src/content_studio/narration/motores/registro.py`. Clona solo voces con permiso de su dueño.
@@ -82,4 +103,4 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 
 ## Requisitos
 
-`ffmpeg`, `uv` y GPU NVIDIA. La instalación de cada herramienta está en su README.
+`ffmpeg`, `uv` y GPU NVIDIA. La instalación de cada herramienta está en su README. Para los agentes, una vez por clon: `git config core.hooksPath .git-hooks` y `uv tool install graphifyy && graphify update .` (skill `graphify-ops`).
