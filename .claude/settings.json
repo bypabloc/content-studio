@@ -74,6 +74,15 @@
         ]
       },
       {
+        "matcher": "^(Write|Edit|NotebookEdit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/main_write_guard.py\""
+          }
+        ]
+      },
+      {
         "matcher": "^Read$",
         "hooks": [
           {
