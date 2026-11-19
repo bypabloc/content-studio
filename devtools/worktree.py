@@ -16,7 +16,13 @@ import sys
 from pathlib import Path
 
 # Carpetas ignoradas que se enlazan (globs desde la raíz) y audios que se copian.
-ENLACES = ('narration/.venv*', 'music/.venv*', '.venv-*', 'narration/motores', 'music/models', 'models')
+ENLACES = (
+    'server/data/narration/.venv*',
+    'server/data/music/.venv*',
+    'server/data/narration/motores',
+    'server/data/music/models',
+)
+VOZ, VOCES = 'server/data/narration/voz', 'server/data/narration/voces'
 AUDIOS = ('*.wav', '*.m4a', '*.mp3', '*.flac')
 
 
@@ -65,10 +71,10 @@ def enlazar(origen: Path, destino: Path) -> None:
 def faltantes(main: Path, wt: Path) -> tuple[list[Path], list[Path]]:
     """Carpetas por enlazar y audios por copiar: las rutas relativas que existen en `main` y no en `wt`."""
     carpetas = [p.relative_to(main) for g in ENLACES for p in sorted(main.glob(g)) if p.is_dir()]
-    voces = main / 'narration/voces'
+    voces = main / VOCES
     if voces.is_dir():
         carpetas += [p.relative_to(main) for p in sorted(voces.iterdir()) if p.is_dir()]
-    audios = [p.relative_to(main) for g in AUDIOS for p in sorted((main / 'narration/voz').rglob(g))]
+    audios = [p.relative_to(main) for g in AUDIOS for p in sorted((main / VOZ).rglob(g))]
     falta = lambda rel: not (wt / rel).exists() and not (wt / rel).is_symlink()  # noqa: E731
     return [c for c in carpetas if falta(c)], [a for a in audios if falta(a)]
 
@@ -99,7 +105,7 @@ def es_enlace(p: Path) -> bool:
 def quitar_enlaces(root: Path) -> int:
     """Quita los enlaces de `prepare` antes de borrar el worktree: `git worktree remove` no debe entrar en ellos y
     borrar los venvs o modelos del principal. Quitar un enlace (unlink o rmdir de la junction) no toca su destino."""
-    enlaces = [p for g in (*ENLACES, 'narration/voces/*') for p in root.glob(g) if es_enlace(p)]
+    enlaces = [p for g in (*ENLACES, f'{VOCES}/*') for p in root.glob(g) if es_enlace(p)]
     for p in enlaces:
         p.unlink() if p.is_symlink() else os.rmdir(p)
     return len(enlaces)
