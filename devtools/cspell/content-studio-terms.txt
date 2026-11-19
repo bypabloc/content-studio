@@ -45,6 +45,8 @@ ebur
 electropop
 endofprompt
 esac
+executescript
+fastapi
 ffprobe
 fingerpicked
 fingerstyle
@@ -59,9 +61,12 @@ heartmula
 higgs
 highpass
 htdemucs
+httpx
 huggingface
 indextts
 keyscale
+killpg
+lastrowid
 lofi
 loudnorm
 lufs
@@ -94,12 +99,14 @@ silenceremove
 subprocess
 supersaw
 synthwave
+taskkill
 testpaths
 timesignature
 timespec
 tobytes
 toplevel
 typer
+uvicorn
 vaporwave
 venv
 venvs

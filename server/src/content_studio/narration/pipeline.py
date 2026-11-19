@@ -9,6 +9,7 @@ import time
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
+from content_studio.common import progress
 from content_studio.narration.audio import trim, write
 from content_studio.narration.blocks import prepare_blocks
 from content_studio.narration.engines.base import TTSEngine
@@ -121,7 +122,9 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
         g['audios'] = [None] * len(g['secs'])
     g['seeds'].append(seed)
     t0 = time.perf_counter()
-    for group in batches(list(indices), tam, lambda i: (g['pb'][i]['ref'], g['pb'][i]['p']['temperature'])):
+    idx = list(indices)
+    done = 0
+    for group in batches(idx, tam, lambda i: (g['pb'][i]['ref'], g['pb'][i]['p']['temperature'])):
         fix(seed)  # la semilla se fija antes de cada bloque o pasada (§4)
         audios, g['sr'] = engine.generate([g['pb'][i] for i in group], g['language'])
         for i, a_ in zip(group, audios, strict=False):
@@ -130,6 +133,8 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
             if not len(g['audios'][i]) and NO_VOICE not in g['pb'][i]['notices']:
                 print(f'Notice: paragraph {i + 1}: {NO_VOICE}')
                 g['pb'][i]['notices'].append(NO_VOICE)
+        done += len(group)
+        progress.emit(done / len(idx), f'block {done}/{len(idx)}')
     g['time_s'] += time.perf_counter() - t0
     write(g)
 

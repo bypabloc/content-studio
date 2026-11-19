@@ -21,5 +21,12 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [003-hooks-sin-unit](003-hooks-sin-unit.md) | pre-commit y pre-push sin `unit` (recursión con los tests de hooks) | `main` |
 | [003-mypy-overrides](003-mypy-overrides.md) | mypy con `ignore_errors` por módulo heredado | `main` |
 | [003-cobertura-ci](003-cobertura-ci.md) | Cobertura y espejo medidos en Windows; la CI de Linux aún no corrió | el merge a `dev` |
+| [004-candado-gpu](004-candado-gpu.md) | El candado de GPU vive en el server y devtools lo importa | `main` |
+| [004-cancelar-procesos](004-cancelar-procesos.md) | Cancelar termina el árbol del proceso: taskkill en Windows, grupo en POSIX | `main` (prueba en WSL) |
+| [004-recomendados-narracion-musica](004-recomendados-narracion-musica.md) | La narración recomienda VoxCPM2, no Qwen 0.6B | `main` (narración real, T9) |
+| [004-cli-salida-y-token](004-cli-salida-y-token.md) | `studio` rechaza `--output` y `--folder`; `serve` imprime el token que genera | `main` |
+| [004-duracion-musica](004-duracion-musica.md) | La música sale en 12 s y no en 15: el recorte de silencio del motor (PENDING 001) | `main` (decisión del usuario) |
+| [004-recuperacion-procesos](004-recuperacion-procesos.md) | Al arrancar, el server interrumpe solo los trabajos cuyo proceso murió | `main` (prueba en WSL) |
+| [004-cobertura-linux-gpu-lock](004-cobertura-linux-gpu-lock.md) | `gpu_lock.py` queda bajo el 80 % solo en Linux y entra al baseline de cobertura | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

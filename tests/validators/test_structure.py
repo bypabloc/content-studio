@@ -18,7 +18,6 @@ HOOKS = [ROOT / '.claude/hooks', ROOT / '.agents/hooks']
 
 def files() -> list[Path]:
     sources = [
-        ROOT / 'cli.py',
         *(ROOT / 'server/src').rglob('*.py'),
         *(ROOT / 'server/tests').rglob('*.py'),
         *(ROOT / 'devtools').rglob('*.py'),
@@ -45,16 +44,16 @@ def test_syntax_310(path):
 
 
 def test_code_only_in_src():
-    """narration/ y music/ son carpetas de datos; en la raíz solo queda el shim cli.py."""
+    """narration/ y music/ son carpetas de datos; el código vive solo en server/src (la raíz no tiene .py)."""
     loose = [*ROOT.glob('*.py'), *ROOT.glob('narration/*.py'), *ROOT.glob('music/*.py')]
-    assert [name(p) for p in loose] == ['cli.py']
+    assert [name(p) for p in loose] == []
 
 
 def test_ac2_product_in_server():
-    """AC-2: el producto vive en server/src/content_studio; en la raíz, cli.py es el único .py."""
+    """AC-2: el producto vive en server/src/content_studio; en la raíz no queda ningún .py."""
     assert not (ROOT / 'src').exists()
     assert (ROOT / 'server/src/content_studio/paths.py').is_file()
-    assert [name(p) for p in ROOT.glob('*.py')] == ['cli.py']
+    assert [name(p) for p in ROOT.glob('*.py')] == []
     assert not [p for d in ('narration', 'music') for p in (ROOT / 'server/data' / d).glob('*.py')]
 
 
@@ -88,8 +87,6 @@ def test_ac7_without_old_paths():
     assert failures == []
 
 
-def test_dependencies_cli_equal_a_pyproject():
-    deps = r'dependencies = (\[.*?\])'
-    header = re.search(deps, (ROOT / 'cli.py').read_text(encoding='utf-8'))[1]
-    project = re.search(deps, (ROOT / 'server/pyproject.toml').read_text(encoding='utf-8'))[1]
-    assert ast.literal_eval(header) == ast.literal_eval(project)
+def test_no_py_at_root():
+    """AC-9: la raíz no tiene .py: el CLI es `studio` (server/src/content_studio/cli/main.py)."""
+    assert list(ROOT.glob('*.py')) == []

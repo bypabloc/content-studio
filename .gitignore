@@ -3,6 +3,7 @@
 .venv-*
 out/
 logs/
+var/
 models
 __pycache__/
 .vscode/

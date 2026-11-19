@@ -1,10 +1,10 @@
 r"""Graba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.
 
 Uso:
-    python cli.py narration grabar --list                # dispositivos de audio disponibles
-    python cli.py narration grabar                         # elige dispositivo y estilos en el menú
-    python cli.py narration grabar --device RDPSource --style neutral amistosa
-    python cli.py narration grabar --device 2 --all # el kit completo, en el orden de la guía
+    uv run --group legacy python -m content_studio.narration.grabar.main --list   # dispositivos de audio
+    uv run --group legacy python -m content_studio.narration.grabar.main          # elige dispositivo y estilos
+    uv run --group legacy python -m content_studio.narration.grabar.main --device RDPSource --style neutral friendly
+    uv run --group legacy python -m content_studio.narration.grabar.main --device 2 --all   # el kit completo
 
 Mientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.
 Cada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).
@@ -51,7 +51,8 @@ def choose_source(items: list[tuple[str, str, bool]], requested: str | None) -> 
         return items[int(requested) - 1][0]
     if any(name == requested for name, _, _ in items):
         return requested
-    sys.exit(f'No hay un dispositivo "{requested}". Ver: python cli.py narration grabar --list')
+    listing = 'uv run --group legacy python -m content_studio.narration.grabar.main --list'
+    sys.exit(f'No hay un dispositivo "{requested}". Ver: {listing}')
 
 
 def choose_styles() -> list[str]:
@@ -151,7 +152,7 @@ def grabar_style(source: str, style: str, overwrite: bool, i: int, total: int) -
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Flags del script. cli.py lo usa para mostrar la ayuda."""
+    """Flags del script. grabar se corre directo: `studio` no lo usa."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--list', action='store_true', help='muestra los dispositivos de audio disponibles y sale')
     ap.add_argument('--device', help='nombre de la fuente (p. ej. RDPSource) o su número en --list')

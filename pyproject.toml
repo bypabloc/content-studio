@@ -40,8 +40,7 @@ convention = "google"
 "tests/**" = ["ANN", "D"]
 "devtools/tests/**" = ["ANN", "D"]
 ".claude/hooks/tests/**" = ["ANN", "D"]
-# Los hooks y el shim no están en el alcance de D1 (solo server/src y devtools).
-"cli.py" = ["D"]
+# Los hooks no están en el alcance de D1 (solo server/src y devtools).
 ".claude/**" = ["D"]
 ".agents/**" = ["D"]
 ".agents/hooks/tests/**" = ["ANN"]
@@ -64,10 +63,6 @@ exclude = ["^devtools/tests/"]
 module = [
     "content_studio.common.process",
     "content_studio.common.ffmpeg",
-    "content_studio.cli.args",
-    "content_studio.cli.app",
-    "content_studio.cli.help_text",
-    "content_studio.cli.widgets",
     "content_studio.narration.script",
     "content_studio.narration.reference",
     "content_studio.narration.engines.base",

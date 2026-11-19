@@ -62,7 +62,7 @@ LIGHT = [
 
 def test_registry_equal_al_old():
 
-    assert list(ENGINES) == list(OLD)  # el orden es el del menú; el primero es el recomendado
+    assert list(ENGINES) == list(OLD)  # el orden es el de los selectores; el primero es el recomendado
 
     for name, fields in OLD.items():
         e = ENGINES[name]

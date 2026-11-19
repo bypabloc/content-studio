@@ -1,7 +1,7 @@
-"""python -m content_studio: el mismo CLI que python cli.py, con su relanzamiento por uv si faltan las dependencias."""
+"""python -m content_studio: lo mismo que `uv run studio`."""
 
-import runpy
+import sys
 
-from content_studio import paths
+from content_studio.cli.main import main
 
-runpy.run_path(str(paths.ROOT / 'cli.py'), run_name='__main__')
+sys.exit(main())

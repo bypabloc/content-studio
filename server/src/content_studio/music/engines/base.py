@@ -21,8 +21,9 @@ class MusicSpec:
     venv: str  # relativo a server/data/music/
     module: str  # se importa recién en crear(), ya dentro del venv
     kind: str
-    desc: str  # para los menús del CLI
+    desc: str  # texto de los selectores (la API lo expone)
     evaluates: bool = False  # su venv trae demucs: admite --evaluate
+    recommended: bool = False  # la opción que la app marca con ★ (exactamente una por selector)
 
     def path_venv(self) -> Path:
         """Carpeta del venv del motor, en server/data/music/."""

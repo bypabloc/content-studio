@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from content_studio import paths
+from content_studio.common import progress
 from content_studio.music.engines.base import Jobs, MusicEngine
 from content_studio.music.evaluation import trim_silence
 
@@ -51,7 +52,8 @@ class AceStep(MusicEngine):
             )
 
         config = GenerationConfig(batch_size=1, use_random_seed=True, audio_format='wav')
-        for style, output in jobs:
+        for n, (style, output) in enumerate(jobs, 1):
+            progress.emit((n - 1) / len(jobs), f'track {n}/{len(jobs)}')
             params = GenerationParams(
                 caption=style['caption'],
                 lyrics='[Instrumental]',

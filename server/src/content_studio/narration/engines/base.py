@@ -36,7 +36,8 @@ class EngineSpec:
     code: str | None = None
     weights: float | None = None  # GiB de los pesos: con lote, el tamaño de la pasada sale de la VRAM libre
     batch: bool = False  # genera varias frases por pasada
-    note: str = ''  # ranking para el menú del CLI
+    note: str = ''  # ranking para los selectores (la API lo expone)
+    recommended: bool = False  # la opción que la app marca con ★ (exactamente una por selector)
 
     def path_venv(self) -> Path:
         """Carpeta del venv del motor, en server/data/narration/."""

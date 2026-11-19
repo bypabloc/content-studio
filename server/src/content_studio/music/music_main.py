@@ -9,7 +9,7 @@ import re
 import sys
 import unicodedata
 
-from content_studio.common import process
+from content_studio.common import process, progress
 from content_studio.music.engines.base import Jobs
 from content_studio.music.evaluation import free_gpu, with_voice
 from content_studio.music.parser import MODELS, STYLES, build_parser
@@ -74,7 +74,9 @@ def main() -> None:
             output.unlink(missing_ok=True)
         engine.generate(items, a)
 
+    progress.emit(0, 'start')
     generate(jobs)
+    progress.emit(1, 'done')
     if not a.evaluate:
         missing = [s.name for _, s in jobs if not s.exists()]
         if missing:

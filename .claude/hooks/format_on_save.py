@@ -1,6 +1,6 @@
 """PostToolUse (Edit|Write): ruff format + ruff check --fix sobre el .py editado.
 
-Solo server/src/, server/tests/, devtools/, tests/ y cli.py (lo que lintea CI). Nunca bloquea; si falta uv, lo avisa.
+Solo server/src/, server/tests/, devtools/ y tests/ (lo que lintea CI). Nunca bloquea; si falta uv, lo avisa.
 """
 
 from __future__ import annotations

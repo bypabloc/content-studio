@@ -1,9 +1,9 @@
 """Música instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.
 
 Uso:
-    python cli.py music --model acestep --style lofi-chill --duration 60
-    python cli.py music --model acestep --duration 30 --style corporate future-bass
-    python cli.py music --model acestep --duration 30 --key "E Minor" --bpm 105 \
+    studio music --model acestep --style lofi-chill --duration 60
+    studio music --model acestep --duration 30 --style corporate future-bass
+    studio music --model acestep --duration 30 --key "E Minor" --bpm 105 \
         --style "synthwave, retro 80s, driving arpeggios"
 
 --style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa
@@ -30,7 +30,7 @@ __all__ = ['STYLES', 'MODELS', 'build_parser']  # el CLI también lee los catál
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
+    """Flags del script. `studio` los usa para la ayuda y para validar antes de encolar."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--model', choices=MODELS, required=True, help='acestep (recommended) or heartmula (slow)')
     ap.add_argument(

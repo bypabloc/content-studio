@@ -20,7 +20,7 @@ EXCEPTION_PREFIXES = (
     'server/tests/fixtures/', '.venv', '~/.claude', '/tmp/',
 )  # fmt: skip
 EXCEPTION_SUFFIXES = ('.log', '.json', '.lock', '.png', '.md', '.txt', '.wav', '.toml', '.yml')
-CODE_PREFIXES = ('server/src/', 'server/tests/', 'devtools/', 'tests/', 'cli.py')
+CODE_PREFIXES = ('server/src/', 'server/tests/', 'devtools/', 'tests/')
 SUGGESTION = (
     'Tip (graphify.md): to locate code, see who uses it or what breaks a change, '
     '`graphify query|explain|affected` answers with fewer tokens than grep or a blind read. '

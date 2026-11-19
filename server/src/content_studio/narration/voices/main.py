@@ -1,9 +1,9 @@
 r"""Catálogo de voces libres para narrar sin grabarse: construye y aprueba cada voz.
 
 Uso:
-    python cli.py narration voces --list                 # catálogo, licencia y estado de cada voz
-    python cli.py narration voces --build yesid        # descarga, genera los 12 estilos y los aprueba
-    python cli.py narration voces --build all --force
+    uv run studio narration voices --list                # catálogo, licencia y estado de cada voz
+    uv run studio narration voices --build yesid         # descarga, genera los 12 estilos y los aprueba
+    uv run studio narration voices --build all --force
 
 Cada voz del catálogo (server/data/narration/voices/catalog.json) parte de un clip real
 de 8-12 s (o de varios clips cortos
@@ -33,7 +33,7 @@ from content_studio.narration.voices.catalog import catalog, mention, state
 def build_parser() -> argparse.ArgumentParser:
     """Parser de `python -m content_studio.narration.voices.main`."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    g = ap.add_mutually_exclusive_group()  # sin flags (p. ej. desde el menú de cli.py) equivale a --list
+    g = ap.add_mutually_exclusive_group()  # sin flags equivale a --list
     g.add_argument('--list', action='store_true', help='shows the catalog and the status of each voice (default)')
     g.add_argument('--build', nargs='+', metavar='REFERENCE', help='voices to build and approve, or "all"')
     ap.add_argument('--force', action='store_true', help='regenerate everything even if it exists')

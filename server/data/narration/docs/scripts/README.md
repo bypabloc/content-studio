@@ -67,7 +67,7 @@ El texto que dices tiene que coincidir **palabra por palabra** con `server/data/
 
 ## Cómo grabar cada clip
 
-Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `python cli.py narration grabar --device <fuente> --style <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
+Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `uv run --group legacy python -m content_studio.narration.grabar.main --device <fuente> --style <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
 
 
 1. Lee la sección **Actitud** del guion y repasa la versión marcada en voz alta una vez.
@@ -87,7 +87,7 @@ ffmpeg -i server/data/narration/reference/bruto-friendly.wav -af loudnorm=I=-18:
   -ac 1 -ar 48000 -c:a pcm_s24le server/data/narration/reference/friendly.wav
 ```
 
-Con `linear=true`, `loudnorm` solo se mantiene lineal si el pico real queda a 15 dB o menos sobre la loudness. La voz sin comprimir suele estar entre 21 y 25 dB, y alejarse del micrófono no cambia esa distancia. En ese caso `loudnorm` pasa a modo dinámico. `python cli.py narration grabar` lo resuelve solo: aplica la ganancia, pasa un limitador rápido (`alimiter`) que recorta únicamente las plosivas y termina con una ganancia lineal acotada por el pico.
+Con `linear=true`, `loudnorm` solo se mantiene lineal si el pico real queda a 15 dB o menos sobre la loudness. La voz sin comprimir suele estar entre 21 y 25 dB, y alejarse del micrófono no cambia esa distancia. En ese caso `loudnorm` pasa a modo dinámico. el comando de grabación lo resuelve solo: aplica la ganancia, pasa un limitador rápido (`alimiter`) que recorta únicamente las plosivas y termina con una ganancia lineal acotada por el pico.
 
 ## Verificar cada clip
 
@@ -117,11 +117,11 @@ ffmpeg -hide_banner -nostats -i "$f" -af silencedetect=n=-45dB:d=0.25 -f null - 
 ## Probar la referencia
 
 ```bash
-python cli.py narration tts --model qwen-0.6b --style friendly \
+uv run studio narration tts --model qwen-0.6b --style friendly \
   --text "Hola, ¿cómo estás? Hoy te muestro cómo editar un video en menos de un minuto."
 ```
 
-Compara la salida (`out/narration/qwen-0.6b-friendly.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno (spec eliminada al implementarse; ver historial de git).
+Compara la salida (`out/narration/<AAAA-MM-DD>-<id>-<slug>/qwen-0.6b-friendly.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno (spec eliminada al implementarse; ver historial de git).
 
 ## Checklist final
 

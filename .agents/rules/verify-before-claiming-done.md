@@ -13,17 +13,18 @@ description: Nunca reportar "listo" sin correr el código real y medir la salida
 | :--- | :--- |
 | Cualquier `.py` | `uv run ruff check && uv run ruff format --check && uv run pytest` |
 | Un motor o su registro | `uv run pytest -m local` y una corrida real corta con `gpu-turn run` |
-| Narración o música | La corrida real (con `gpu-turn run`) y la medición de §2 de cada salida |
-| CLI o asistente | `python cli.py <comando> --help`, un caso real y uno de error; sin TTY (`| cat`) no debe preguntar nada |
+| Narración o música | La corrida real con `uv run studio narration tts` o `music` (toman el candado solos; `turno-gpu.md`) y la medición de §2 de cada salida |
+| CLI studio | `uv run studio <comando> --help`, un caso real y uno de error; sin TTY (`| cat`) no debe preguntar nada |
+| API o cola | `uv run pytest server/tests/unit/src/content_studio/api server/tests/unit/src/content_studio/jobs`, y un trabajo real con `uv run studio narration tts` o `music`; studio toma el candado solo, así que no lo envuelvas en `gpu-turn run` (`turno-gpu.md`) |
 | devtools | `python -m devtools <comando> --help`, un caso real y uno de error |
 | Hooks o configuración de agentes | `uv run pytest .claude/hooks/tests/test_hooks.py .agents/hooks` y la validación headless (`agent-config-testing.md`) |
 
 ## 2. Medir el audio
 
 ```bash
-ffprobe -v error -show_entries format=duration -of csv=p=0 out/music/<archivo>.wav            # duración
-ffmpeg -i out/music/<archivo>.wav -af ebur128 -f null - 2>&1 | tail -12                       # LUFS integrado y pico
-ffmpeg -y -i out/music/<archivo>.wav -lavfi showspectrumpic=s=800x300 tmp/verificar/spec.png  # espectrograma
+ffprobe -v error -show_entries format=duration -of csv=p=0 out/music/<AAAA-MM-DD>-<id>-<slug>/<archivo>.wav            # duración
+ffmpeg -i out/music/<AAAA-MM-DD>-<id>-<slug>/<archivo>.wav -af ebur128 -f null - 2>&1 | tail -12                       # LUFS integrado y pico
+ffmpeg -y -i out/music/<AAAA-MM-DD>-<id>-<slug>/<archivo>.wav -lavfi showspectrumpic=s=800x300 tmp/verificar/spec.png  # espectrograma
 ```
 
 * La duración coincide con la pedida; el volumen está en el rango del README (sin clipping); el espectrograma no muestra cortes, silencios inesperados ni, en música, formantes de voz.

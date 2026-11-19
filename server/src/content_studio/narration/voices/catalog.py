@@ -43,7 +43,7 @@ def mention(sheet: dict) -> str | None:
 
 
 def state(name: str, styles: Collection[str]) -> str:
-    """Texto corto para menús: aprobada, reprobada (cuántos estilos) o sin construir.
+    """Texto corto para listados y selectores: aprobada, reprobada (cuántos estilos) o sin construir.
 
     >>> state('no-existe', ['neutral'])
     'not built'

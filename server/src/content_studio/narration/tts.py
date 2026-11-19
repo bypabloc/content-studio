@@ -9,7 +9,7 @@ from __future__ import annotations
 import random
 
 from content_studio import paths
-from content_studio.common import process
+from content_studio.common import process, progress
 from content_studio.narration.metadata import notices_voice, save_metadata
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices, build_parser
 from content_studio.narration.pipeline import batch_auto, evaluate, narrate
@@ -39,6 +39,7 @@ def main() -> None:
 
     import torch
 
+    progress.emit(0, 'loading model')
     engine = e.create()
     batch = a.batch or (batch_auto(torch.cuda.mem_get_info()[0] / 2**30, e.weights) if e.batch else 1)
     seed = a.seed if a.seed is not None else random.randrange(2**31)

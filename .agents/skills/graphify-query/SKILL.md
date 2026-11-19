@@ -1,7 +1,7 @@
 ---
 name: graphify-query
 description: >
-  Busca y explora el código de content-studio (server/src/, tests/, cli.py) con el grafo de graphify (query, explain, path,
+  Busca y explora el código de content-studio (server/src/, tests/) con el grafo de graphify (query, explain, path,
   affected) en vez de grep. SIEMPRE invocar ANTES de Grep, Glob o una lectura exploratoria para ubicar o entender
   código, y NUNCA citar un archivo:línea de memoria. .agents/rules/graphify.md es la fuente. Usar cuando el usuario
   diga "busca", "dónde está", "quién llama", "qué rompe si cambio", "cómo funciona", "relación entre", "graphify",
@@ -12,13 +12,13 @@ argument-hint: "<pregunta> | path A B | explain X | affected X"
 
 # Graphify query
 
-Consulta el grafo (AST de los `.py` de `server/src/`, `tests/` y `cli.py`) en vez de grepear. Regla: `.agents/rules/graphify.md`.
+Consulta el grafo (AST de los `.py` de `server/src/` y `tests/`) en vez de grepear. Regla: `.agents/rules/graphify.md`.
 
 ## Flujo
 
 1. Verifica que exista `graphify-out/graph.json`; si no, skill `graphify-ops`.
 2. Elige el comando de la tabla y ejecútalo.
-3. Si el resultado no sirve, reformula con el vocabulario del código, en español (`use_venv`, `EngineSpec`, `TTSEngine`, `REGISTRY`, `relaunch`).
+3. Si el resultado no sirve, reformula con el vocabulario del código, en español (`use_venv`, `EngineSpec`, `TTSEngine`, `SERVICES`, `relaunch`).
 4. Abre con Read el `archivo:línea` citado solo para confirmar o editar. Cita siempre el `src=`/`loc=` del grafo.
 
 | Pregunta | Comando |
@@ -32,7 +32,7 @@ Consulta el grafo (AST de los `.py` de `server/src/`, `tests/` y `cli.py`) en ve
 
 ```bash
 graphify query "cómo se relanza un comando en el venv de su motor" --budget 400
-graphify explain "usar_venv()"
+graphify explain "use_venv()"
 graphify affected "EngineSpec" --depth 2
 ```
 

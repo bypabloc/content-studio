@@ -1,1 +1,1 @@
-"""CLI de content-studio: Typer, Rich y questionary sobre los parsers de cada comando (ver comandos/)."""
+"""CLI `studio` de content-studio (spec 004, D-6): argparse sobre los servicios; el punto de entrada es main.py."""

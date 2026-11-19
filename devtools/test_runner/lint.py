@@ -10,9 +10,17 @@ from .. import paths
 ORDERS = (['check'], ['format', '--check'])
 
 
+def _arg(path: Path) -> str:
+    """Ruta relativa a la raíz con barras normales: así ruff aplica los per-file-ignores en Windows."""
+    try:
+        return path.relative_to(paths.ROOT).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def run(files: list[Path]) -> dict:
     """Un dict `{"stage", "status", "detail"}`; `pass` sin `.py` que revisar."""
-    py = [str(f) for f in files if f.suffix == '.py']
+    py = [_arg(f) for f in files if f.suffix == '.py']
     problems = []
     for order in ORDERS if py else []:
         done = subprocess.run(

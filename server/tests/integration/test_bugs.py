@@ -67,7 +67,8 @@ def test_help_en_cp1252():
     import subprocess
 
     env = {**os.environ, 'PYTHONIOENCODING': 'cp1252', 'PYTHONPATH': str(ROOT / 'server' / 'src')}
-    for args in (['-m', 'content_studio.music.music_main', '--help'], ['cli.py', 'music', '--help']):
+    studio = ['-m', 'content_studio.cli.main', 'music', '--help']
+    for args in (['-m', 'content_studio.music.music_main', '--help'], studio):
         r = subprocess.run([sys.executable, *args], cwd=ROOT, env=env, capture_output=True)
         assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')
 

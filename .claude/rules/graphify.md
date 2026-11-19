@@ -1,6 +1,6 @@
 # Graphify: buscar código con el grafo — SIEMPRE ACTIVA
 
-`graphify-out/` indexa el código con AST (símbolos, imports, llamadas y comunidades de `server/src/`, `tests/` y `cli.py`). Una consulta cuesta una fracción de un grep más lectura y responde quién llama, qué rompe un cambio y por dónde pasa el flujo. Está **gitignoreado**: cada equipo lo genera con `graphify update .` (sin LLM, segundos) y los hooks lo mantienen fresco. Instalación: skill `graphify-ops`.
+`graphify-out/` indexa el código con AST (símbolos, imports, llamadas y comunidades de `server/src/` y `tests/`). Una consulta cuesta una fracción de un grep más lectura y responde quién llama, qué rompe un cambio y por dónde pasa el flujo. Está **gitignoreado**: cada equipo lo genera con `graphify update .` (sin LLM, segundos) y los hooks lo mantienen fresco. Instalación: skill `graphify-ops`.
 
 ## 1. Orden de búsqueda
 
