@@ -8,7 +8,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | :--- | :--- | :--- | :--- | :--- |
 | [001-017-studio](001-017-studio/README.md) (lote) | refactor · feature | Large | una por spec | las 17 redactadas, PEN |
 | ↳ [001-server-devtools](001-017-studio/001-server-devtools/README.md) | refactor | Large | `refactor/001-server-devtools` | PEN |
-| ↳ [002-english-cspell](001-017-studio/002-english-cspell/README.md) | refactor | Large | `refactor/002-english-cspell` | PEN |
 | ↳ [003-test-runner](001-017-studio/003-test-runner/README.md) | chore | Large | `chore/003-test-runner` | PEN |
 | ↳ [004-server-api](001-017-studio/004-server-api/README.md) | feature | Large | `feature/004-server-api` | PEN |
 | ↳ [005-client-base](001-017-studio/005-client-base/README.md) | feature | Large | `feature/005-client-base` | PEN |
