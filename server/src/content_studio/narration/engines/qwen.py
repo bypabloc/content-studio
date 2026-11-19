@@ -12,6 +12,7 @@ LANGUAGE = {'es': 'Spanish', 'en': 'English'}
 
 @lru_cache
 def load(repo: str) -> Any:
+    """Carga Qwen3-TTS desde Hugging Face, en GPU."""
     import torch
     from qwen_tts import Qwen3TTSModel
 
@@ -20,6 +21,7 @@ def load(repo: str) -> Any:
 
 @lru_cache
 def prompt(model: Any, ref: str, text_ref: str | None) -> Any:
+    """Prompt de clonación de una voz; sin transcripción usa solo el timbre."""
     return model.create_voice_clone_prompt(ref_audio=ref, ref_text=text_ref, x_vector_only_mode=text_ref is None)
 
 
@@ -27,7 +29,10 @@ CACHES = (load, prompt)
 
 
 class Qwen(TTSEngine):
+    """Motor Qwen3-TTS (narración)."""
+
     def generate(self, blocks: list[dict], language: str) -> tuple[list, int]:
+        """Genera el audio de los bloques con Qwen3-TTS."""
         model = load(self.spec.repo)
         b = blocks[0]  # pipeline.lotes() agrupa bloques con la misma referencia y temperatura
         p = prompt(model, str(b['ref']), b['text_ref'])

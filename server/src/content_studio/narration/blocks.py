@@ -14,6 +14,7 @@ from content_studio.narration.text.translate import translate
 
 
 def resolve_ref(ref: Path, style: str) -> tuple[Path, str | None]:
+    """Ruta de la referencia y su transcripción para un estilo; sale si el audio no existe."""
     wav = ref / f'{style}.wav' if ref.is_dir() else ref
     if not wav.exists():
         sys.exit(f'The reference does not exist: {wav}')
@@ -25,14 +26,17 @@ class References:
     """Las referencias de cada estilo, resueltas y revisadas una sola vez: refs(estilo) -> (wav, transcripción)."""
 
     def __init__(self, engine: TTSEngine, ref: Path) -> None:
+        """Carga las referencias de un motor; `ref` puede ser una carpeta o un audio."""
         self.engine, self.ref = engine, ref
         self.folder = ref if ref.is_dir() else ref.parent
         self.views: dict[str, tuple[Path, str | None]] = {}
 
     def has(self, style: str) -> bool:
+        """True si la carpeta de referencia tiene el audio de `style`."""
         return self.ref.is_dir() and (self.ref / f'{style}.wav').exists()
 
     def __call__(self, style: str) -> tuple[Path, str | None]:
+        """Devuelve la referencia (audio, transcripción) de `style`; la prepara la primera vez."""
         if style not in self.views:
             import soundfile as sf
 

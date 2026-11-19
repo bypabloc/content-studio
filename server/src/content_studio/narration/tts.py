@@ -17,6 +17,7 @@ from content_studio.narration.script import plan, scripts, warn_overwrite
 
 
 def main() -> None:
+    """Entrada de `python -m content_studio.narration.tts`."""
     ap = build_parser()
     a = ap.parse_args()
     if a.retries and not a.evaluate:

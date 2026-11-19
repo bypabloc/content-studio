@@ -15,4 +15,11 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 - **Pendiente**: ficha de `../PENDING/` si deja trabajo para después.
 ```
 
-Sin fichas abiertas: las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
+| Ficha | Qué | Antes de |
+| :--- | :--- | :--- |
+| [003-baselines](003-baselines.md) | Baselines de tamaño, espejo y cobertura: deuda registrada, no reglas nuevas | `main` |
+| [003-hooks-sin-unit](003-hooks-sin-unit.md) | pre-commit y pre-push sin `unit` (recursión con los tests de hooks) | `main` |
+| [003-mypy-overrides](003-mypy-overrides.md) | mypy con `ignore_errors` por módulo heredado | `main` |
+| [003-cobertura-ci](003-cobertura-ci.md) | Cobertura y espejo medidos en Windows; la CI de Linux aún no corrió | el merge a `dev` |
+
+Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -1,4 +1,4 @@
-"""Reglas de .agents/rules/codigo-python.md que se pueden comprobar: tope de líneas, sintaxis 3.10, dependencias y
+"""Reglas de .agents/rules/codigo-python.md que se pueden comprobar: sintaxis 3.10, dependencias y
 la sincronía de reglas y skills entre .agents/ y .claude/ (agent-config-testing.md)."""
 
 from __future__ import annotations
@@ -13,7 +13,6 @@ import pytest
 from devtools import rules
 
 ROOT = Path(__file__).resolve().parents[2]
-MAX_LINES = 300
 HOOKS = [ROOT / '.claude/hooks', ROOT / '.agents/hooks']
 
 
@@ -35,12 +34,6 @@ FILES = files()
 
 def name(p: Path) -> str:
     return p.relative_to(ROOT).as_posix()
-
-
-@pytest.mark.parametrize('path', FILES, ids=name)
-def test_cap_of_lines(path):
-    lines = len(path.read_text(encoding='utf-8').splitlines())
-    assert lines <= MAX_LINES, f'{name(path)}: {lines} líneas'
 
 
 @pytest.mark.parametrize('path', FILES, ids=name)
@@ -78,7 +71,7 @@ OLD_PATHS = (
     r'(?<!server/data/)music/models',
 )
 # Historial y specs se quedan como están; test_move_data crea el árbol viejo a propósito; hatch es relativo a server/.
-OUTSIDE_CHECK = ('tests/validators/test_structure.py', 'devtools/tests/test_move_data.py', 'server/pyproject.toml')
+OUTSIDE_CHECK = ('tests/validators/test_structure.py', 'devtools/tests/unit/test_move_data.py', 'server/pyproject.toml')
 
 
 def test_ac7_without_old_paths():

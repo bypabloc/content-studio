@@ -59,9 +59,9 @@ server/src/content_studio/
 
 Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y typer/rich/questionary en `cli/` y `grabar/`), así `--help` y el asistente funcionan sin los venvs. torch, numpy y las librerías de cada motor se importan dentro de las funciones, ya en el venv del motor.
 
-- **Agregar un motor TTS o de música**: un archivo en `engines/` con su subclase de `TTSEngine` o `MusicEngine`, una entrada `EngineSpec`/`MusicSpec` en `engines/registry.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `server/tests/test_venvs.py` se agrega la librería que importa (`LIBRARIES`).
+- **Agregar un motor TTS o de música**: un archivo en `engines/` con su subclase de `TTSEngine` o `MusicEngine`, una entrada `EngineSpec`/`MusicSpec` en `engines/registry.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `server/tests/integration/test_venvs.py` se agrega la librería que importa (`LIBRARIES`).
 - **Agregar un comando del CLI**: una subclase de `Comando` en `cli/commands/` (clave, módulo, parser liviano con `construir_parser()`) y una línea en `REGISTRY` (`cli/commands/__init__.py`).
-- **Máximo 300 líneas por `.py`** (lo comprueba `tests/validators/test_structure.py`) y Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
+- **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
 ## Forma de trabajo y dónde buscar
 
@@ -69,7 +69,7 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 
 | Necesidad | Fuente |
 | :--- | :--- |
-| Código, capas, 300 líneas, cómo agregar un motor o comando | [codigo-python](.agents/rules/codigo-python.md), [stack](.agents/rules/stack.md) |
+| Código, capas, tamaño, cómo agregar un motor o comando | [codigo-python](.agents/rules/codigo-python.md), [stack](.agents/rules/stack.md) |
 | Git, ramas, PR, hooks locales | [git-workflow](.agents/rules/git-workflow.md) |
 | Diseñar una spec (plantillas en [docs/specs/_plantilla/](docs/specs/_plantilla/README.md)) | [plan-format](.agents/rules/plan-format.md); skills `crear-spec`, `execute-spec`, `run-specs` |
 | Estado del proyecto, roadmap, decisiones y pendientes | [docs/process/](docs/process/README.md), [project-progress](.agents/rules/project-progress.md) |
@@ -86,8 +86,8 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 ## Pruebas
 
 ```bash
-uv run ruff check && uv run ruff format --check
-uv run pytest            # doctests, caracterización, estructura, CLI y bugs (sin GPU; lo mismo corre en CI)
+python -m devtools test-runner --type=all   # lo que corre CI (sin GPU)
+uv run pytest            # doctests y bugs (sin GPU)
 uv run pytest -m local   # además, cada venv de motor importa su librería (solo en este equipo)
 ```
 

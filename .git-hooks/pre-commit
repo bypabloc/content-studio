@@ -4,9 +4,10 @@
 #
 # 1. Rama de trabajo con prefijo válido: nunca commits en main ni dev.
 # 2. Nada de salidas, modelos, venvs ni audio en el staging (el repo es público: las voces no se suben).
-# 3. spelling (cspell): identificadores en inglés en lo staged (spec 002).
-# 4. Si hay .py, pyproject.toml, uv.lock o fixtures staged: ruff check, ruff format --check y pytest.
-# 5. Si hay instrucciones de agentes staged: agent-context y rules (devtools).
+# 3. test-runner sobre lo staged (spec 003, D-6): lint (ruff), spelling (cspell) y validators (tamaño). `unit` (pytest
+#    completo con cobertura) va en pre-push y en la CI: los tests del espejo ejecutan este hook, y dentro del pre-commit
+#    se recursaría.
+# 4. Si hay instrucciones de agentes staged: agent-context y rules (devtools).
 #
 # Activación: git config core.hooksPath .git-hooks. Si falla, NO uses --no-verify: corrige.
 
@@ -32,17 +33,8 @@ if [ -n "$FORBIDDEN" ]; then
   exit 1
 fi
 
-echo "[pre-commit] spelling"
-PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools spelling --staged >/dev/null
-
-if grep -Eq '\.py$|^pyproject\.toml$|^server/pyproject\.toml$|^uv\.lock$|^server/tests/fixtures/' <<<"$STAGED"; then
-  echo "[pre-commit] ruff + pytest"
-  uv run ruff check
-  uv run ruff format --check
-  uv run pytest -q
-else
-  echo "[pre-commit] No Python code staged: ruff and pytest skipped"
-fi
+echo "[pre-commit] test-runner: lint, spelling, validators (staged)"
+PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=lint,spelling,validators --git-mode=staged
 
 # Agent instructions: size of what each agent loads and .agents/ <-> .claude/ sync (agent-config-testing.md).
 if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then

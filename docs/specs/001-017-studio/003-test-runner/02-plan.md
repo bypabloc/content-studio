@@ -72,14 +72,14 @@ Antes del ciclo 1: `uv run pytest -q --co | tail -1` en `origin/dev`, anotado en
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Esqueleto y lint | AC-8 | — | `uv run pytest devtools/tests -q` | [ ] |
-| T2 | Validador de tamaño | AC-1, AC-2 | T1 | ídem | [ ] |
-| T3 | Tests al espejo | AC-9 | — | `uv run pytest -q --co \| tail -1` | [ ] |
-| T4 | Auditoría del espejo | AC-3 | T1, T3 | ídem | [ ] |
-| T5 | Cobertura | AC-4 | T4 | ídem | [ ] |
-| T6 | Docstrings y typecheck | AC-5, AC-6 | T1 | `test-runner --type=lint,typecheck` | [ ] |
-| T7 | tdd y guard-tdd | AC-7 | T1 | ídem | [ ] |
-| T8 | Hooks, CI y reglas | AC-8 | T2–T7 | `test-runner --type=all` | [ ] |
+| T1 | Esqueleto y lint | AC-8 | — | `uv run pytest devtools/tests -q` | [x] |
+| T2 | Validador de tamaño | AC-1, AC-2 | T1 | ídem | [x] |
+| T3 | Tests al espejo | AC-9 | — | `uv run pytest -q --co \| tail -1` | [x] |
+| T4 | Auditoría del espejo | AC-3 | T1, T3 | ídem | [x] |
+| T5 | Cobertura | AC-4 | T4 | ídem | [x] |
+| T6 | Docstrings y typecheck | AC-5, AC-6 | T1 | `test-runner --type=lint,typecheck` | [x] |
+| T7 | tdd y guard-tdd | AC-7 | T1 | ídem | [x] |
+| T8 | Hooks, CI y reglas | AC-8 | T2–T7 | `test-runner --type=all` | [x] |
 
 ## 4. Commits
 

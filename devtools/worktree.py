@@ -81,6 +81,7 @@ def missing(main: Path, wt: Path) -> tuple[list[Path], list[Path]]:
 
 
 def prepare(main: Path, name: str) -> int:
+    """Enlaza venvs, motores, modelos y voces del principal en el worktree `name`."""
     wt = search(main, name)
     if not wt:
         print(f'there is no worktree named {name} (git worktree list)', file=sys.stderr)
@@ -113,6 +114,7 @@ def remove_links(root: Path) -> int:
 
 
 def close(main: Path, name: str) -> int:
+    """Cierra el worktree `name` fusionado en origin/dev y borra sus enlaces y ramas."""
     wt = search(main, name)
     if not wt:
         print(f'there is no worktree named {name} (git worktree list)', file=sys.stderr)
@@ -151,6 +153,7 @@ def close(main: Path, name: str) -> int:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools worktree`: prepare o close."""
     args = [a for a in argv if not a.startswith('--')]
     if len(args) != 2 or args[0] not in ('prepare', 'close') or '-h' in argv or '--help' in argv:
         print('usage: worktree prepare <name> | worktree close <name>', file=sys.stderr)

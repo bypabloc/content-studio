@@ -17,6 +17,7 @@ from content_studio.cli.widgets import ACCENT, console
 
 
 def show_help(cmd: Command) -> None:
+    """Imprime la ayuda del comando, con su resumen y sus flags."""
     mod = cmd.load()
     ap = mod.build_parser()
     # SUMMARY: resumen en inglés del parser (la ayuda de la CLI). Sin él, el primer párrafo del docstring.

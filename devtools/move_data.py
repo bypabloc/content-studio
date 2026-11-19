@@ -94,6 +94,7 @@ def _remove_empty(folder: Path, cap: Path) -> None:
 
 
 def apply_names(root: Path, changes: list[tuple[str, str]]) -> list[str]:
+    """Renombra los archivos de datos a su nombre en inglés; no pisa los que ya existen."""
     data = root.joinpath(*NARRATION)
     for rel, new_path in changes:
         source, destination = data / rel, data / new_path
@@ -159,6 +160,7 @@ def rewrite(root: Path) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools move-data`: sin --apply solo imprime el plan."""
     if any(a in ('-h', '--help') for a in argv):
         sys.stderr.write(USO)
         return 0

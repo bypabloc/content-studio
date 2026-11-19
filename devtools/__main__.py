@@ -19,15 +19,18 @@ COMMANDS = {
         'moves narration/ and music/ to server/data/ (without --apply, only prints the plan)',
     ),
     'spelling': ('devtools.spelling', '[--staged] [file ...]: cspell over the tracked or staged files'),
+    'test-runner': ('devtools.test_runner.main', '--type=<stages> [--git-mode=...] [--files=...]: quality gates'),
 }
 
 
 def help() -> str:
+    """Texto de ayuda con los comandos disponibles."""
     rows = '\n'.join(f'  {n:<17} {d}' for n, (_, d) in COMMANDS.items())
     return f'usage: python -m devtools <command> [args]\n\ncommands:\n{rows}\n'
 
 
 def main(argv: list[str]) -> int:
+    """Despacha `argv` al comando de devtools y devuelve su exit code."""
     if not argv or argv[0] in ('-h', '--help'):
         sys.stderr.write(help())
         return 0

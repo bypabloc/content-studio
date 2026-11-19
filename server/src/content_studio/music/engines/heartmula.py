@@ -15,6 +15,7 @@ HEART_CKPT = paths.MUSIC / 'models' / 'heartmula-ckpt'
 
 
 def download() -> None:
+    """Descarga los pesos de HeartMuLa desde Hugging Face."""
     from huggingface_hub import snapshot_download
 
     for repo, sub in [
@@ -26,7 +27,10 @@ def download() -> None:
 
 
 class HeartMuLa(MusicEngine):
+    """Motor HeartMuLa (música)."""
+
     def generate(self, jobs: Jobs, a: argparse.Namespace) -> None:
+        """Genera las pistas con HeartMuLa."""
         import soundfile as sf
         import torch
         import torchaudio

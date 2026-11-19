@@ -163,6 +163,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def show_devices(items: list[tuple[str, str, bool]]) -> None:
+    """Tabla de dispositivos de audio para elegir con --device."""
     t = Table(title='Dispositivos de audio', title_style=f'bold {ACCENT}', header_style='bold', border_style='grey35')
     t.add_column('#', justify='right', style='dim')
     t.add_column('Nombre (--device)', style='bold cyan')
@@ -174,6 +175,7 @@ def show_devices(items: list[tuple[str, str, bool]]) -> None:
 
 
 def main() -> None:
+    """Entrada de `python -m content_studio.narration.grabar.main`."""
     a = build_parser().parse_args()
     items = sources()
     if not items:

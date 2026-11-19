@@ -69,6 +69,7 @@ def measure(root: Path) -> tuple[dict, list[str]]:
 
 
 def main(argv: list[str]) -> int:
+    """Entrada de `python -m devtools agent-context`: exit 1 si algo pasa su límite."""
     if argv:
         print('usage: agent-context (no arguments)', file=sys.stderr)
         return 0 if argv[0] in ('-h', '--help') else 2

@@ -24,6 +24,7 @@ from content_studio.common.process import env_src, join, relaunch
 
 
 def summary(ap: argparse.ArgumentParser, values: dict, cmd: Command) -> Panel:
+    """Resumen editable de los valores del asistente, con el comando equivalente."""
     t = Table(box=None, padding=(0, 2), show_header=False)
     t.add_column(style='bold cyan', no_wrap=True)
     t.add_column(ratio=1)
@@ -98,6 +99,7 @@ def _editar(ap: argparse.ArgumentParser, values: dict, cat: dict) -> None:
 
 
 def assistant(cmd: Command, args: list[str], force: bool = False) -> None:
+    """Asistente de un comando: completa los flags que faltan y ejecuta; sin TTY no pregunta."""
     mod = cmd.load()
     ap = mod.build_parser()
     if not force and validate(mod, args) is None:
@@ -133,6 +135,7 @@ def assistant(cmd: Command, args: list[str], force: bool = False) -> None:
 
 
 def lanzar(cmd: Command, args: list[str]) -> None:
+    """Ejecuta el comando en su venv, en un proceso hijo."""
     if sys.stdout.isatty():
         console.rule(f'[bold {ACCENT}]{cmd.icon}  {cmd.key}[/] [dim]{join(args)}[/]', align='left', style=ACCENT)
     # -m: el hijo se relanza solo en su venv y ve src/ por PYTHONPATH
@@ -140,11 +143,13 @@ def lanzar(cmd: Command, args: list[str]) -> None:
 
 
 def cancel() -> None:
+    """Cancela el asistente (exit 130)."""
     console.print('[dim]✕ Cancelado.[/]')
     raise typer.Exit(130)
 
 
 def execute(cmd: Command, args: list[str]) -> None:
+    """Ejecuta un comando: su ayuda con -h, o el asistente si hace falta."""
     if '-h' in args or '--help' in args:
         return show_help(cmd)
     if cmd.assistant and sys.stdin.isatty() and sys.stdout.isatty():

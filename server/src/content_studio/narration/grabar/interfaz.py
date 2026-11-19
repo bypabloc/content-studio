@@ -102,6 +102,7 @@ def bar_time(seg: float, lo: float, hi: float, width: int = 40) -> Text:
 
 
 def view_recording(style: str, n: int, text: str, seg: float, levels: list[float]) -> Panel:
+    """Panel de la toma en curso: nivel, duración y línea de tiempo del estilo."""
     lo, hi = DURATION[style]
     current = levels[-1] if levels else FLOOR_MEDIDOR
     maximum = max(levels[-60:], default=FLOOR_MEDIDOR)
@@ -130,6 +131,7 @@ def view_recording(style: str, n: int, text: str, seg: float, levels: list[float
 
 
 def sheet_take(n: int, m: dict, style: str, levels: list[float]) -> Panel:
+    """Panel con la ficha de una toma ya grabada: pico, duración y nivel."""
     lo, hi = DURATION[style]
     level = level_take(m['peak'])
     dur_ok = lo <= m['duration'] <= hi

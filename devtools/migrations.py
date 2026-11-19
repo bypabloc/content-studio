@@ -42,6 +42,7 @@ FILES = {'voices/catalogo.json': 'voices/catalog.json'}
 
 
 def new(rel: str) -> str:
+    """Ruta nueva de un archivo renombrado a inglés, según FOLDERS."""
     for old, new in FOLDERS:
         if rel == old or rel.startswith(old + '/'):
             rel = new + rel[len(old) :]

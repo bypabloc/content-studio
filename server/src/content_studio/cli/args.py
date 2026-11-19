@@ -10,6 +10,8 @@ from content_studio.common.process import join
 
 
 class ErrorArgs(Exception):
+    """Error de los argumentos: flag inválido o valor que falta."""
+
     pass
 
 
@@ -18,6 +20,7 @@ def _error(msg: str):
 
 
 def flags(ap: argparse.ArgumentParser) -> list[argparse.Action]:
+    """Acciones del parser que son flags (con `--`), sin la ayuda."""
     return [a for a in ap._actions if a.option_strings and not isinstance(a, argparse._HelpAction)]
 
 
@@ -31,10 +34,12 @@ def empty(v: object) -> bool:
 
 
 def required(acc: argparse.Action, ap: argparse.ArgumentParser) -> bool:
+    """True si el flag es obligatorio, directa o por un grupo mutuamente excluyente."""
     return acc.required or any(g.required and acc in g._group_actions for g in ap._mutually_exclusive_groups)
 
 
 def es_booleano(acc: argparse.Action) -> bool:
+    """True si el flag es un interruptor (store_true)."""
     return isinstance(acc, argparse._StoreTrueAction)
 
 
@@ -85,6 +90,7 @@ def leer(ap: argparse.ArgumentParser, args: list[str]) -> tuple[dict, list[str]]
 
 
 def a_argv(ap: argparse.ArgumentParser, values: dict) -> list[str]:
+    """Convierte los valores del asistente de nuevo en una lista de argumentos."""
     argv = []
     for acc in flags(ap):
         if acc.dest not in values or empty(values[acc.dest]):

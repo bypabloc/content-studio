@@ -45,6 +45,7 @@ def resolve_style(
 
 
 def main() -> None:
+    """Entrada de `python -m content_studio.music.music_main`."""
     process.console_utf8()  # cp1252 (Windows, a una tubería) no tiene ≤ ni –: que no reviente el --help
     ap = build_parser()
     a = ap.parse_args()

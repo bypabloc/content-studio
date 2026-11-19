@@ -31,6 +31,7 @@ from content_studio.narration.voices.catalog import catalog, mention, state
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Parser de `python -m content_studio.narration.voices.main`."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     g = ap.add_mutually_exclusive_group()  # sin flags (p. ej. desde el menú de cli.py) equivale a --list
     g.add_argument('--list', action='store_true', help='shows the catalog and the status of each voice (default)')
@@ -40,6 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    """Entrada del catálogo de voces: lista o construye."""
     a = build_parser().parse_args()
     cat = catalog()
     if not a.build:

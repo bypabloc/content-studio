@@ -39,21 +39,27 @@ class EngineSpec:
     note: str = ''  # ranking para el menú del CLI
 
     def path_venv(self) -> Path:
+        """Carpeta del venv del motor, en server/data/narration/."""
         return paths.NARRATION / self.venv
 
     def installed(self) -> bool:
+        """True si el venv del motor existe."""
         return self.path_venv().exists()
 
     def create(self) -> TTSEngine:
+        """Crea el motor, importando su módulo dentro del venv."""
         return getattr(import_module(self.module), self.kind)(self)
 
 
 class TTSEngine(ABC):
+    """Motor TTS: clona una voz y genera el audio de cada bloque."""
+
     params: dict = {}  # parámetros fijos del motor, los medidos en la investigación (van al .json)
     intensity = True  # controla la intensidad de la emoción
     suggest_evaluate = False  # sin --evaluate, se sugiere
 
     def __init__(self, spec: EngineSpec) -> None:
+        """Guarda la especificación del motor."""
         self.spec = spec
 
     def mode(self, text_ref: str | None) -> str:
@@ -75,4 +81,5 @@ class TTSEngine(ABC):
 
 
 def mark(name: str, intensity: float) -> dict:
+    """Marca de emoción de un bloque: su nombre e intensidad."""
     return {'name': name, 'intensity': intensity}

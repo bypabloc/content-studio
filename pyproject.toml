@@ -1,9 +1,16 @@
+# cspell:ignore mypy pydocstyle grabar interfaz toma dispositivos
 # Raíz del uv workspace: el paquete vive en server/ (server/pyproject.toml). Aquí van las herramientas compartidas.
 [tool.uv.workspace]
 members = ["server"]
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff", "numpy"]
+dev = [
+    "pytest>=8",
+    "ruff",
+    "numpy",
+    "pytest-cov>=7.1.0",
+    "mypy>=2.4.1",
+]
 
 [tool.ruff]
 target-version = "py310"
@@ -20,15 +27,23 @@ exclude = ["*.md"]
 
 [tool.ruff.lint]
 # ANN001/ANN201: type hints en las firmas (regla codigo-python.md); los tests quedan fuera.
-select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201"]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201", "D1"]
+
+[tool.ruff.lint.pydocstyle]
+# Docstrings obligatorios en server/src y devtools (spec 003, D-4): estilo Google, en español.
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 # Captions del catálogo: cadenas largas que ruff format no parte.
 "server/src/content_studio/music/styles.py" = ["E501"]
-"server/tests/**" = ["ANN"]
-"tests/**" = ["ANN"]
-"devtools/tests/**" = ["ANN"]
-".claude/hooks/tests/**" = ["ANN"]
+"server/tests/**" = ["ANN", "D"]
+"tests/**" = ["ANN", "D"]
+"devtools/tests/**" = ["ANN", "D"]
+".claude/hooks/tests/**" = ["ANN", "D"]
+# Los hooks y el shim no están en el alcance de D1 (solo server/src y devtools).
+"cli.py" = ["D"]
+".claude/**" = ["D"]
+".agents/**" = ["D"]
 ".agents/hooks/tests/**" = ["ANN"]
 
 [tool.pytest.ini_options]
@@ -37,3 +52,44 @@ testpaths = ["server/src", "server/tests", "devtools", "tests", ".claude/hooks/t
 # importlib: los conftest.py y test_*.py de cada carpeta tienen nombres repetidos y no son paquetes.
 addopts = "--doctest-modules --import-mode=importlib -m 'not local'"
 markers = ["local: needs this machine's engine venvs (does not run in CI)"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+exclude = ["^devtools/tests/"]
+
+# Deuda de tipos heredada (spec 003, D-4): cada módulo sale de esta lista al corregir sus errores. Ver PENDING/003-bajar-baselines.md.
+[[tool.mypy.overrides]]
+module = [
+    "content_studio.common.process",
+    "content_studio.common.ffmpeg",
+    "content_studio.cli.args",
+    "content_studio.cli.app",
+    "content_studio.cli.help_text",
+    "content_studio.cli.widgets",
+    "content_studio.narration.script",
+    "content_studio.narration.reference",
+    "content_studio.narration.engines.base",
+    "content_studio.narration.engines.voxcpm",
+    "content_studio.narration.engines.registry",
+    "content_studio.narration.engines.indextts",
+    "content_studio.narration.engines.cosyvoice",
+    "content_studio.narration.engines.chatterbox",
+    "content_studio.narration.pipeline",
+    "content_studio.narration.tts",
+    "content_studio.narration.voices.build",
+    "content_studio.narration.voices.sources",
+    "content_studio.narration.grabar.interfaz",
+    "content_studio.narration.grabar.toma",
+    "content_studio.narration.grabar.main",
+    "content_studio.narration.text.translate",
+    "devtools.agent_context",
+    "devtools.move_data",
+]
+ignore_errors = true
+
+# APIs solo de Windows (winreg, windll, CreateJunction): mypy en Linux (CI) no las ve. Solo se ignora attr-defined.
+[[tool.mypy.overrides]]
+module = ["devtools.worktree", "devtools.gpu_turn", "content_studio.narration.grabar.dispositivos"]
+disable_error_code = ["attr-defined"]

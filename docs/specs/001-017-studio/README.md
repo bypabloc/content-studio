@@ -10,7 +10,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | :--- | :--- | :--- | :--- | :--- |
 | [001](001-server-devtools/README.md) | Python a `server/` (uv workspace), datos a `server/data/` y `devtools/` en la raíz | refactor | — | PEN |
 | [002](002-english-cspell/README.md) | Código y datos en inglés + cspell de klinikae (spelling en pre-commit y CI) | refactor | 001 | PEN |
-| [003](003-test-runner/README.md) | test-runner en devtools, tests espejo, tamaño, cobertura, docstrings y typecheck | chore | 002 | PEN |
+| [003](003-test-runner/README.md) | test-runner en devtools, tests espejo, tamaño, cobertura, docstrings y typecheck | chore | 002 | DON |
 | [004](004-server-api/README.md) | Server FastAPI + SQLite (jobs, settings) + cola con turno-gpu + SSE + CLI headless; se borra `cli.py` | feature | 003 | PEN |
 | [005](005-client-base/README.md) | Client: Tauri 2, shadcn, catálogo `es.json`, tema light/dark/system, sidebar + cola, selector con estrella, budget, vitest, e2e base | feature | 004 | PEN |
 | [006](006-narration-section/README.md) | Sección Narración | feature | 005 | PEN |
