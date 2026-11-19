@@ -1,4 +1,4 @@
-"""Los venvs de los motores de este equipo (marcador `local`, no corre en CI): proceso.usar_venv relanza en cada
+"""Los venvs de los motores de este equipo (marcador `local`, no corre en CI): process.use_venv relanza en cada
 
 uno, el hijo ve src/ por PYTHONPATH e importa numpy y soundfile. Corre con: uv run pytest -m local"""
 
@@ -43,8 +43,8 @@ def test_relaunches_in_the_venv(venv, tmp_path):
     )
 
     launch = (
-        f'import sys; from pathlib import Path; from content_studio.common import proceso; '
-        f'proceso.usar_venv(Path(r"{destination}"), "su README", script=r"{probe}")'
+        f'import sys; from pathlib import Path; from content_studio.common import process;'
+        f'process.use_venv(Path(r"{destination}"), "su README", script=r"{probe}")'
     )
 
     env = {**os.environ, 'PYTHONPATH': str(paths.SRC)}
@@ -56,13 +56,13 @@ def test_relaunches_in_the_venv(venv, tmp_path):
     prefix, module, args = r.stdout.split(' ', 2)
 
     assert os.path.samefile(prefix, destination) and os.path.samefile(
-        module, paths.SRC / 'content_studio/comun/proceso.py'
+        module, paths.SRC / 'content_studio/common/process.py'
     )
 
     assert args.strip() == "['arg 1']"
 
 
-# La librería de cada motor, importada en su venv tras crear() (lo que el factory method carga ya dentro del venv).
+# La librería de cada motor, importada en su venv tras create() (lo que el factory method carga ya dentro del venv).
 
 LIBRARIES = {
     'qwen-0.6b': 'qwen_tts',
@@ -104,9 +104,9 @@ def test_imports_the_engine(name):
 
     probe = (
         f'import sys, importlib; sys.path[:0] = {paths_code!r}\n'
-        f'from content_studio.music.engines.registry import MODELOS\n'
-        f'from content_studio.narration.engines.registry import MOTORES\n'
-        f'm = {{**MOTORES, **MODELOS}}[{name!r}].crear()\n'
+        f'from content_studio.music.engines.registry import MODELS\n'
+        f'from content_studio.narration.engines.registry import ENGINES\n'
+        f'm = {{**ENGINES, **MODELS}}[{name!r}].create()\n'
         f'importlib.import_module({LIBRARIES[name]!r})\n'
         f'print(type(m).__name__)\n'
     )
