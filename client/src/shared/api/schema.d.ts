@@ -252,6 +252,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/narration/lint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lint
+         * @description Incidencias con línea, columna y largo, cada una con el texto de su regla; también palabras y segundos.
+         */
+        post: operations["lint_narration_lint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -374,6 +394,19 @@ export interface components {
         QueueState: {
             /** Paused */
             paused: boolean;
+        };
+        /**
+         * ScriptIn
+         * @description El guion tal como lo escribe el usuario, y el estilo para estimar su duración.
+         */
+        ScriptIn: {
+            /** Text */
+            text: string;
+            /**
+             * Style
+             * @default expert
+             */
+            style: string;
         };
         /**
          * SettingOut
@@ -799,6 +832,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["QueueOrder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lint_narration_lint_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScriptIn"];
             };
         };
         responses: {

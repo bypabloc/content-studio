@@ -43,6 +43,9 @@ overrides:
   # Textos de error de la API en español (spec 004, D-5): catálogo de datos, como los de server/data.
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
+  # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
+  - filename: 'server/src/content_studio/narration/script_lint.py'
+    language: en,es
   # Cliente (spec 005, D-1): el catálogo y los comentarios van en español; los identificadores, en inglés.
   - filename: 'client/**'
     language: en,es

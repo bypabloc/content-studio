@@ -13,5 +13,13 @@
   "missing_text": "Falta el texto o el archivo del guion.",
   "style_needs_key_bpm": "{style} no es un preset: define la tonalidad (key) y el bpm.",
   "invalid_duration": "La duración debe estar entre 0 y {max} segundos.",
-  "invalid_prefix": "Solo se restablecen las elecciones de los selectores; {prefix} no lo es."
+  "invalid_prefix": "Solo se restablecen las elecciones de los selectores; {prefix} no lo es.",
+  "lint.rule_1": "Quita «{text}»: es una etiqueta que el modelo lee en voz alta.",
+  "lint.rule_2": "«{text}» va en mayúsculas para dar énfasis, y eso no cambia nada: usa minúsculas.",
+  "lint.rule_3": "La oración no termina en punto, signo de pregunta ni de exclamación.",
+  "lint.rule_6": "«{text}» no va aquí: usa un punto. Los dos puntos solo van antes de una enumeración.",
+  "lint.rule_10": "Falta «{sign}»: las preguntas van entre ¿ y ?, y las exclamaciones, entre ¡ y !.",
+  "lint.rule_11": "La oración tiene {count} palabras y el máximo es {max}: divídela.",
+  "lint.rule_13": "Escribe «{text}» en letras, como «veinticuatro horas».",
+  "lint.rule_19": "«{text}» deforma la voz: usa una construcción impersonal, como «queda registrado»."
 }
