@@ -45,6 +45,7 @@ ebur
 electropop
 endofprompt
 esac
+executescript
 ffprobe
 fingerpicked
 fingerstyle
@@ -62,6 +63,7 @@ htdemucs
 huggingface
 indextts
 keyscale
+lastrowid
 lofi
 loudnorm
 lufs
