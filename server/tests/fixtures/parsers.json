@@ -50,7 +50,7 @@
         "dest": "ref",
         "action": "_StoreAction",
         "choices": null,
-        "default": "server/data/narration/voice",
+        "default": "server/data/narration/reference",
         "required": false,
         "nargs": null,
         "const": null,

@@ -84,3 +84,11 @@ def test_recording_kit_covers_the_tts_styles():
     from content_studio.narration.styles import STYLES
 
     assert set(STYLES) <= set(DURATION)
+
+
+def test_reference_folder_is_reference():
+    """paths.REFERENCE apuntaba a narration/voice; la carpeta migrada es reference/."""
+    from content_studio import paths
+
+    assert paths.REFERENCE == paths.NARRATION / 'reference'
+    assert paths.TAKES == paths.REFERENCE / 'takes'
