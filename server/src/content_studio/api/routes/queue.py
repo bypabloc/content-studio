@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from content_studio.api.deps import get_conn
+from content_studio.api.schemas import QueueState
 from content_studio.jobs import queue
 
 router = APIRouter()
@@ -25,13 +26,13 @@ def _announce(request: Request, data: dict) -> None:
     request.app.state.broker.publish({'type': 'queue', 'data': data})
 
 
-@router.get('/queue')
+@router.get('/queue', response_model=QueueState)
 def queue_state(conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Si la cola está pausada."""
     return {'paused': queue.paused(conn)}
 
 
-@router.post('/queue/pause')
+@router.post('/queue/pause', response_model=QueueState)
 def pause(request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Pausa la cola: el worker no toma trabajos nuevos."""
     queue.pause(conn)
@@ -39,7 +40,7 @@ def pause(request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn
     return {'paused': True}
 
 
-@router.post('/queue/resume')
+@router.post('/queue/resume', response_model=QueueState)
 def resume(request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Reanuda la cola."""
     queue.resume(conn)

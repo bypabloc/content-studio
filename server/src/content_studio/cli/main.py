@@ -44,6 +44,7 @@ def build_parser() -> argparse.ArgumentParser:
     listing.add_argument('--kind')
     job_cmds.add_parser('cancel', help='cancel a queued or running job').add_argument('id', type=int)
     job_cmds.add_parser('retry', help='new job with the same parameters').add_argument('id', type=int)
+    sub.add_parser('openapi', help='print the API schema (OpenAPI JSON); no server and no database')
     return ap
 
 
@@ -77,6 +78,15 @@ def _jobs(args: argparse.Namespace) -> int:
         return 0
 
 
+def _openapi() -> int:
+    """El schema OpenAPI para generar los tipos del client; sin base ni puerto (la app usa una base en memoria)."""
+    from content_studio.api.app import create_app  # fastapi solo aquí, como en `serve`
+
+    # ASCII a propósito: una redirección en Windows escribe cp1252 y el JSON debe leerse igual en cualquier sistema.
+    print(json.dumps(create_app(Path(':memory:'), 'openapi').openapi(), indent=2))
+    return 0
+
+
 def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'serve':
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
@@ -86,6 +96,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _voices(args.rest)
     if args.command == 'music':
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
+    if args.command == 'openapi':
+        return _openapi()
     return _jobs(args)
 
 

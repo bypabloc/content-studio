@@ -28,5 +28,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [004-duracion-musica](004-duracion-musica.md) | La música sale en 12 s y no en 15: el recorte de silencio del motor (PENDING 001) | `main` (decisión del usuario) |
 | [004-recuperacion-procesos](004-recuperacion-procesos.md) | Al arrancar, el server interrumpe solo los trabajos cuyo proceso murió | `main` (prueba en WSL) |
 | [004-cobertura-linux-gpu-lock](004-cobertura-linux-gpu-lock.md) | `gpu_lock.py` queda bajo el 80 % solo en Linux y entra al baseline de cobertura | `main` |
+| [005-tanstack-query](005-tanstack-query.md) | Dependencia nueva: TanStack Query guarda los datos del server, y SSE los actualiza | el merge a `dev` |
+| [005-typescript-5](005-typescript-5.md) | TypeScript 5.9.3, no 7: `openapi-typescript` necesita su API JavaScript | el merge a `dev` |
+| [005-cobertura-client](005-cobertura-client.md) | Cobertura del client al 80 % por archivo, sin shadcn ni `main.tsx` | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

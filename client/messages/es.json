@@ -1,4 +1,5 @@
 {
+  "api.unknown_error": "Error de la API",
   "app.name": "Content Studio",
   "app.version": "Versión {version}"
 }
