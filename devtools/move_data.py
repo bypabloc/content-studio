@@ -1,10 +1,11 @@
-"""`move-data [--apply] [--root <ruta>]`: mueve narration/ y music/ del checkout a server/data/ (spec 001, D-2).
+"""`move-data [--apply] [--root <ruta>]`: mueve narration/ y music/ a server/data/ y renombra los datos de narración a
+inglés (spec 001, D-2, y spec 002, D-4).
 
 Corre después del `git pull` que trae el merge: lo versionado ya lo reubicó git, así que aquí se mueve lo que no está en
 git (venvs, motores, modelos, voces) y se fusiona en las carpetas que ya existen. `os.replace` es un rename dentro del
 mismo disco: no copia los GB. Después reescribe el prefijo de las rutas absolutas en los `.pth` y `direct_url.json` de
 las instalaciones editables, así que ningún venv se recrea. Sin `--apply` solo imprime el plan. Nunca sobrescribe: si un
-archivo de origen ya existe en el destino, sale con 1 sin mover nada.
+destino ya existe, sale con 1 sin mover nada. Los renombres del paso 2 están en `migraciones.py`.
 """
 
 from __future__ import annotations
@@ -14,10 +15,12 @@ import os
 import sys
 from pathlib import Path
 
+from devtools.migraciones import nuevo
 from devtools.worktree import principal
 
 CARPETAS = ('narration', 'music')
 DESTINO = ('server', 'data')
+NARRACION = (*DESTINO, 'narration')
 USO = 'uso: python -m devtools move-data [--apply] [--root <ruta>]\n'
 
 
@@ -49,6 +52,58 @@ def plan(root: Path) -> list[dict[str, object]]:
     return out
 
 
+def _relativos(carpeta: Path) -> set[str]:
+    """Archivos de `carpeta` con rutas relativas y `/`. No entra en `motores/`: esa carpeta se renombra entera."""
+    rels = set()
+    for actual, subcarpetas, archivos in os.walk(carpeta):
+        origen = Path(actual)
+        subcarpetas[:] = [s for s in subcarpetas if origen != carpeta or s != 'motores']
+        rels.update((origen / a).relative_to(carpeta).as_posix() for a in archivos)
+    return rels
+
+
+def plan_nombres(root: Path) -> tuple[list[tuple[str, str]], list[str]]:
+    """Paso 2 sobre lo que deja el paso 1: (ruta actual, ruta nueva) de cada cambio, y los choques. Se calcula antes de
+    mover nada, así que un choque sale con 1 sin tocar el disco."""
+    datos = root.joinpath(*NARRACION)
+    rels = _relativos(root / 'narration') | _relativos(datos)
+    cambios, choques, ocupados = [], [], {}
+    for rel in sorted(rels):
+        nueva = nuevo(rel)
+        if nueva == rel:
+            continue
+        if nueva in rels or nueva in ocupados:
+            choques.append(f'{nueva} (de {rel})')
+        else:
+            ocupados[nueva] = rel
+            cambios.append((rel, nueva))
+    if (root / 'narration' / 'motores').exists() or (datos / 'motores').exists():
+        if (datos / 'engines').exists():
+            choques.append('engines (de motores)')
+        else:
+            cambios.append(('motores', 'engines'))
+    return cambios, choques
+
+
+def _quitar_vacios(carpeta: Path, tope: Path) -> None:
+    """Borra las carpetas que un movimiento dejó vacías, subiendo hasta `tope`. Las que tienen contenido no se tocan."""
+    while carpeta != tope and carpeta.is_dir() and not any(carpeta.iterdir()):
+        carpeta.rmdir()
+        carpeta = carpeta.parent
+
+
+def aplicar_nombres(root: Path, cambios: list[tuple[str, str]]) -> list[str]:
+    datos = root.joinpath(*NARRACION)
+    for rel, nueva in cambios:
+        origen, destino = datos / rel, datos / nueva
+        if destino.exists():
+            raise FileExistsError(str(destino))
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        os.replace(origen, destino)
+        _quitar_vacios(origen.parent, datos)
+    return [f'{rel} -> {nueva}' for rel, nueva in cambios]
+
+
 def _fusionar(origen: Path, destino: Path) -> None:
     """Pasa lo de `origen` a `destino` sin sobrescribir: lo que no existe se renombra; las carpetas comunes se unen."""
     destino.mkdir(parents=True, exist_ok=True)
@@ -68,10 +123,12 @@ def _formas(ruta: Path) -> list[str]:
 
 
 def _pares(root: Path) -> list[tuple[bytes, bytes]]:
+    """Prefijos viejos y nuevos: el paso 1 (carpetas del checkout) y el paso 2 (motores, ya en server/data)."""
+    cambios = [(root / n, root.joinpath(*DESTINO, n)) for n in CARPETAS]
+    cambios.append((root.joinpath(*NARRACION, 'motores'), root.joinpath(*NARRACION, 'engines')))
     pares = []
-    for nombre in CARPETAS:
-        viejo, nuevo = root / nombre, root.joinpath(*DESTINO, nombre)
-        pares += [(a.encode(), b.encode()) for a, b in zip(_formas(viejo), _formas(nuevo), strict=True)]
+    for viejo, nuevo_ in cambios:
+        pares += [(a.encode(), b.encode()) for a, b in zip(_formas(viejo), _formas(nuevo_), strict=True)]
     return pares
 
 
@@ -85,17 +142,17 @@ def _instalaciones(data: Path):
 
 
 def reescribir(root: Path) -> list[str]:
-    """Cambia el prefijo `<raíz>/narration|music` por `<raíz>/server/data/...` en las instalaciones editables.
-    Idempotente: el texto nuevo no contiene el viejo."""
+    """Cambia el prefijo `<raíz>/narration|music` por `<raíz>/server/data/...` (y `motores` por `engines`) en las
+    instalaciones editables. Idempotente: el texto nuevo no contiene el viejo."""
     cambiados = []
     pares = _pares(root)
     for archivo in _instalaciones(root.joinpath(*DESTINO)):
         viejo = archivo.read_bytes()
-        nuevo = viejo
+        nuevo_ = viejo
         for a, b in pares:
-            nuevo = nuevo.replace(a, b)
-        if nuevo != viejo:
-            archivo.write_bytes(nuevo)
+            nuevo_ = nuevo_.replace(a, b)
+        if nuevo_ != viejo:
+            archivo.write_bytes(nuevo_)
             cambiados.append(str(archivo))
     return cambiados
 
@@ -119,14 +176,18 @@ def main(argv: list[str]) -> int:
         return 2
     root = raiz or principal(Path.cwd())
     movimientos = plan(root)
-    if any(m['accion'] == 'colision' for m in movimientos):
+    cambios, choques = plan_nombres(root)
+    nombres = [f'{rel} -> {nueva}' for rel, nueva in cambios]
+    if any(m['accion'] == 'colision' for m in movimientos) or choques:
         for m in movimientos:
             for choque in m['choques']:
                 sys.stderr.write(f'ya existe en el destino, no se mueve nada: {choque}\n')
-        print(json.dumps({'plan': movimientos, 'aplicado': False}))
+        for choque in choques:
+            sys.stderr.write(f'ya existe en el destino, no se mueve nada: {choque}\n')
+        print(json.dumps({'plan': movimientos, 'nombres': nombres, 'aplicado': False}))
         return 1
     if not aplicar:
-        print(json.dumps({'plan': movimientos, 'aplicado': False}))
+        print(json.dumps({'plan': movimientos, 'nombres': nombres, 'aplicado': False}))
         return 0
     movidos = []
     for m in movimientos:
@@ -142,10 +203,19 @@ def main(argv: list[str]) -> int:
             sys.stderr.write(f'no se pudo mover {m["de"]}: {e}. Cierra lo que lo use y vuelve a correr move-data\n')
             return 1
         movidos.append(m['a'])
+    try:
+        renombrados = aplicar_nombres(root, cambios)
+    except OSError as e:
+        sys.stderr.write(f'no se pudo renombrar: {e}. Cierra lo que lo use y vuelve a correr move-data\n')
+        return 1
     reescritos = reescribir(root)
-    if not movidos:
+    if not movidos and not renombrados:
         sys.stderr.write('ya migrado: nada que mover\n')
     for ruta in reescritos:
         sys.stderr.write(f'ruta reescrita: {ruta}\n')
-    print(json.dumps({'plan': movimientos, 'movido': movidos, 'reescrito': reescritos, 'aplicado': True}))
+    print(
+        json.dumps(
+            {'plan': movimientos, 'movido': movidos, 'nombres': renombrados, 'reescrito': reescritos, 'aplicado': True}
+        )
+    )
     return 0
