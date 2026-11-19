@@ -507,7 +507,7 @@
         "nargs": null,
         "const": null,
         "type": null,
-        "help": "acestep (recomendado) o heartmula (lento)",
+        "help": "acestep (recommended) or heartmula (slow)",
         "metavar": null
       },
       {
@@ -524,7 +524,7 @@
         "nargs": "+",
         "const": null,
         "type": null,
-        "help": "uno o más de los 126 presets (server/data/music/ESTILOS.md) o texto libre entre comillas",
+        "help": "one or more of the 126 presets (server/data/music/ESTILOS.md), or free text in quotes",
         "metavar": null
       },
       {
@@ -539,7 +539,7 @@
         "nargs": null,
         "const": null,
         "type": "float",
-        "help": "segundos antes del recorte (ACE ≤600, HeartMuLa ≤240)",
+        "help": "seconds before trimming (ACE ≤600, HeartMuLa ≤240)",
         "metavar": null
       },
       {
@@ -554,7 +554,7 @@
         "nargs": null,
         "const": null,
         "type": null,
-        "help": "tonalidad, ej. \"C Major\", \"A Minor\" (obligatoria con texto libre)",
+        "help": "key, e.g. \"C Major\", \"A Minor\" (required with free text)",
         "metavar": null
       },
       {
@@ -569,7 +569,7 @@
         "nargs": null,
         "const": null,
         "type": "int",
-        "help": "tempo 30–300 (obligatorio con texto libre)",
+        "help": "tempo 30–300 (required with free text)",
         "metavar": null
       },
       {
@@ -589,7 +589,7 @@
         "nargs": null,
         "const": null,
         "type": null,
-        "help": "2/4, 3/4, 4/4 o 6/8 (por defecto 4/4)",
+        "help": "2/4, 3/4, 4/4 or 6/8 (default 4/4)",
         "metavar": null
       },
       {
@@ -604,7 +604,7 @@
         "nargs": 0,
         "const": true,
         "type": null,
-        "help": "ACE-Step sin el planificador LM 0.6B: ~3x más rápido",
+        "help": "ACE-Step without the LM 0.6B planner: ~3x faster",
         "metavar": null
       },
       {
@@ -619,7 +619,7 @@
         "nargs": null,
         "const": null,
         "type": "Path",
-        "help": "por defecto out/music/",
+        "help": "default out/music/",
         "metavar": null
       },
       {
@@ -634,7 +634,7 @@
         "nargs": null,
         "const": null,
         "type": "int",
-        "help": "pistas por estilo (<modelo>-<estilo>-v1.wav ...); la melodía cambia en cada una",
+        "help": "tracks per style (<model>-<style>-v1.wav ...); the melody changes in each one",
         "metavar": null
       },
       {
@@ -649,7 +649,7 @@
         "nargs": 0,
         "const": true,
         "type": null,
-        "help": "al final mide con demucs cuánta voz hay en cada pista y marca las que cantan (se quiere solo música)",
+        "help": "at the end, measures with demucs how much voice each track has and flags the ones that sing (only music is wanted)",
         "metavar": null
       },
       {
@@ -664,11 +664,11 @@
         "nargs": null,
         "const": null,
         "type": "int",
-        "help": "con --evaluate: rondas en las que se regeneran solo las pistas con voz",
+        "help": "with --evaluate: rounds in which only tracks with voice are regenerated",
         "metavar": null
       }
     ],
     "excluyentes": [],
-    "help": "usage: generar.py [-h] --model {acestep,heartmula} [--style STYLE [STYLE ...]] [--duration DURATION] [--key KEY]\n                  [--bpm BPM] [--time-signature {2,3,4,6}] [--no-lm] [--folder FOLDER] [--variants VARIANTS]\n                  [--evaluate] [--retries RETRIES]\n\nMúsica instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.\n\nUso:\n    python cli.py music --model acestep --style lofi-chill --duration 60\n    python cli.py music --model acestep --duration 30 --style corporate future-bass\n    python cli.py music --model acestep --duration 30 --key \"E Minor\" --bpm 105         --style \"synthwave, retro 80s, driving arpeggios\"\n\n--style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa\ntal cual como descripción. Cada preset define tonalidad, BPM y compás; el texto\nlibre los exige con --key y --bpm. Estos flags también pisan los del preset.\nEl modelo se carga una vez y sale un .wav por estilo en --folder (out/music/\npor defecto), con el silencio final ya recortado. Siempre instrumental. Los\npesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en\nsu propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {acestep,heartmula}\n                        acestep (recomendado) o heartmula (lento)\n  --style STYLE [STYLE ...]\n                        uno o más de los 126 presets (server/data/music/ESTILOS.md) o texto libre entre comillas\n  --duration DURATION   segundos antes del recorte (ACE ≤600, HeartMuLa ≤240)\n  --key KEY             tonalidad, ej. \"C Major\", \"A Minor\" (obligatoria con texto libre)\n  --bpm BPM             tempo 30–300 (obligatorio con texto libre)\n  --time-signature {2,3,4,6}\n                        2/4, 3/4, 4/4 o 6/8 (por defecto 4/4)\n  --no-lm               ACE-Step sin el planificador LM 0.6B: ~3x más rápido\n  --folder FOLDER       por defecto out/music/\n  --variants VARIANTS   pistas por estilo (<modelo>-<estilo>-v1.wav ...); la melodía cambia en cada una\n  --evaluate            al final mide con demucs cuánta voz hay en cada pista y marca las que cantan (se quiere solo\n                        música)\n  --retries RETRIES     con --evaluate: rondas en las que se regeneran solo las pistas con voz\n"
+    "help": "usage: generar.py [-h] --model {acestep,heartmula} [--style STYLE [STYLE ...]] [--duration DURATION] [--key KEY]\n                  [--bpm BPM] [--time-signature {2,3,4,6}] [--no-lm] [--folder FOLDER] [--variants VARIANTS]\n                  [--evaluate] [--retries RETRIES]\n\nMúsica instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.\n\nUso:\n    python cli.py music --model acestep --style lofi-chill --duration 60\n    python cli.py music --model acestep --duration 30 --style corporate future-bass\n    python cli.py music --model acestep --duration 30 --key \"E Minor\" --bpm 105         --style \"synthwave, retro 80s, driving arpeggios\"\n\n--style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa\ntal cual como descripción. Cada preset define tonalidad, BPM y compás; el texto\nlibre los exige con --key y --bpm. Estos flags también pisan los del preset.\nEl modelo se carga una vez y sale un .wav por estilo en --folder (out/music/\npor defecto), con el silencio final ya recortado. Siempre instrumental. Los\npesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en\nsu propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {acestep,heartmula}\n                        acestep (recommended) or heartmula (slow)\n  --style STYLE [STYLE ...]\n                        one or more of the 126 presets (server/data/music/ESTILOS.md), or free text in quotes\n  --duration DURATION   seconds before trimming (ACE ≤600, HeartMuLa ≤240)\n  --key KEY             key, e.g. \"C Major\", \"A Minor\" (required with free text)\n  --bpm BPM             tempo 30–300 (required with free text)\n  --time-signature {2,3,4,6}\n                        2/4, 3/4, 4/4 or 6/8 (default 4/4)\n  --no-lm               ACE-Step without the LM 0.6B planner: ~3x faster\n  --folder FOLDER       default out/music/\n  --variants VARIANTS   tracks per style (<model>-<style>-v1.wav ...); the melody changes in each one\n  --evaluate            at the end, measures with demucs how much voice each track has and flags the ones that sing\n                        (only music is wanted)\n  --retries RETRIES     with --evaluate: rounds in which only tracks with voice are regenerated\n"
   }
 }

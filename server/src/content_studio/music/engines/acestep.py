@@ -61,8 +61,8 @@ class AceStep(MusicEngine):
             )
             r = generate_music(dit, llm, params, config, save_dir=str(output.parent))
             if not r.success:
-                print(f'ACE-Step falló en {output.name}: {r.error}')
+                print(f'ACE-Step failed on {output.name}: {r.error}')
                 continue
             Path(r.audios[0]['path']).replace(output)
             remaining = trim_silence(output)
-            print(f'{output} ({remaining:.1f} s tras recortar el silencio; {style["key"]}, {style["bpm"]} BPM)')
+            print(f'{output} ({remaining:.1f} s after trimming silence; {style["key"]}, {style["bpm"]} BPM)')

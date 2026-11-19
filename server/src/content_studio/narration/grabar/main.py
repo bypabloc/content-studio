@@ -143,9 +143,9 @@ def grabar_style(source: str, style: str, overwrite: bool, i: int, total: int) -
             for meets, detail in checks:
                 t.add_row(Text('✓' if meets else '✗', style='green' if meets else 'red'), detail)
             todo = all(c for c, _ in checks)
-            titulo = f'[bold]{"✓" if todo else "⚠"} {final.relative_to(ROOT).as_posix()}[/]'
+            title = f'[bold]{"✓" if todo else "⚠"} {final.relative_to(ROOT).as_posix()}[/]'
             border = 'green' if todo else 'yellow'
-            console.print(Panel(t, title=titulo, title_align='left', border_style=border, padding=(0, 2)))
+            console.print(Panel(t, title=title, title_align='left', border_style=border, padding=(0, 2)))
             return 'items' if todo else 'lista con observaciones'
         n += 1
 

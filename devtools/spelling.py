@@ -21,7 +21,7 @@ LISTA = rutas.RAIZ / 'tmp' / 'spelling' / 'archivos.txt'
 
 
 def git(*args: str, cwd: Path) -> str:
-    return subprocess.run(['git', *args], cwd=cwd, capture_output=True, text=True, check=True).stdout
+    return subprocess.run(['git', *args], cwd=cwd, capture_output=True, encoding='utf-8', check=True).stdout
 
 
 def archivos_versionados() -> list[Path]:
@@ -50,7 +50,8 @@ def revisar(archivos: list[Path]) -> list[str]:
     LISTA.write_text('\n'.join(str(a) for a in archivos) + '\n', encoding='utf-8')
     orden = ['bunx', 'cspell', 'lint', '--no-progress', '--config', str(CONFIG), '--file-list', str(LISTA)]
     orden += ['--reporter', '@cspell/cspell-json-reporter']
-    salida = subprocess.run(orden, cwd=rutas.RAIZ, capture_output=True, text=True, check=False)
+    # UTF-8 explícito: en Windows el valor por defecto es cp1252 y el JSON de cspell trae nombres con tildes.
+    salida = subprocess.run(orden, cwd=rutas.RAIZ, capture_output=True, encoding='utf-8', errors='replace', check=False)
     try:
         informe = json.loads(salida.stdout)
     except json.JSONDecodeError as error:

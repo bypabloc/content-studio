@@ -34,7 +34,7 @@ def batch_auto(free_gib: float, weights_gib: float) -> int:
     return max(1, min(BATCH_MAX, 1 + int(extra // GIB_POR_PHRASE)))
 
 
-def batches(indices: list[int], tam: int, clave: Callable[[int], object]) -> list[list[int]]:
+def batches(indices: list[int], tam: int, key: Callable[[int], object]) -> list[list[int]]:
     """Trozos de hasta `tam` índices consecutivos con la misma clave. Así Qwen agrupa por referencia.
 
     >>> batches([0, 1, 2, 3, 4], 2, lambda i: i // 3)
@@ -44,7 +44,7 @@ def batches(indices: list[int], tam: int, clave: Callable[[int], object]) -> lis
     """
     out: list[list[int]] = []
     for i in indices:
-        if out and len(out[-1]) < tam and clave(out[-1][0]) == clave(i):
+        if out and len(out[-1]) < tam and key(out[-1][0]) == key(i):
             out[-1].append(i)
         else:
             out.append([i])

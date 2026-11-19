@@ -33,7 +33,7 @@ STYLE = questionary.Style(
 SEPARATOR = '  ' + '─' * 30
 
 
-def titulo(value: str, desc: str, width: int = 16, flat: bool = False) -> str | list[tuple[str, str]]:
+def title(value: str, desc: str, width: int = 16, flat: bool = False) -> str | list[tuple[str, str]]:
     """Valor y descripción en columnas. `plano`: texto sin estilos, que es lo único que el filtro de
     búsqueda de questionary sabe filtrar (con tuplas de estilo falla)."""
     if flat:
@@ -57,7 +57,7 @@ def _items(acc: argparse.Action, msg: str, pista: str, options: list, current: A
             instruction=f'{acc.option_strings[0]}{"  · escribe para filtrar" if search else ""}'
             '  · espacio marca · enter confirma',
             choices=[
-                Choice(titulo(v, d, width, bool(search)), value=v, disabled=dis, checked=v in marked)
+                Choice(title(v, d, width, bool(search)), value=v, disabled=dis, checked=v in marked)
                 for v, d, dis in options
             ],
         ).unsafe_ask()
@@ -75,7 +75,7 @@ def _items(acc: argparse.Action, msg: str, pista: str, options: list, current: A
         instruction=pista,
         **search,
         default=current if current in valid else (valid[0] if valid else None),
-        choices=[*[Choice(titulo(v, d, width, bool(search)), value=v, disabled=dis) for v, d, dis in options], *extra],
+        choices=[*[Choice(title(v, d, width, bool(search)), value=v, disabled=dis) for v, d, dis in options], *extra],
     ).unsafe_ask()
 
 

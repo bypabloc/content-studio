@@ -9,13 +9,13 @@ from content_studio.cli.commands.base import Command, Option
 
 
 class Tts(Command):
-    clave = 'narration tts'
+    key = 'narration tts'
     module = 'content_studio.narration.tts'
     parser = 'content_studio.narration.parser'
-    icono = '🎙'
-    titulo = 'Narrar un texto o guion'
-    desc = 'Voz clonada en español neutro · 7 motores'
-    help = '🎙  Narrar un texto o guion (content_studio.narration.tts). Sin flags abre el asistente.'
+    icon = '🎙'
+    title = 'Narrate a text or script'
+    desc = 'Cloned voice, neutral Spanish · 7 engines'
+    help = '🎙  Narrate a text or script (content_studio.narration.tts). Without flags, opens the assistant.'
     assistant = True
 
     def catalog(self, mod: ModuleType) -> dict[str, list[Option]]:
@@ -24,49 +24,50 @@ class Tts(Command):
         models = []
         for name, m in mod.ENGINES.items():
             parts = [m.note] if m.note else []
-            parts += [m.license, 'uso comercial' if m.commercial else 'NO comercial']
+            parts += [m.license, 'commercial use' if m.commercial else 'NOT commercial']
             if m.weights is not None:
                 parts.append(f'{m.weights:.1f} GB')
-            models.append(Option(name, ' · '.join(parts), None if m.installed() else 'no instalado'))
-        recorded = '● referencia grabada'
+            models.append(Option(name, ' · '.join(parts), None if m.installed() else 'not installed'))
+        recorded = '● recorded reference'
         styles = [
-            Option(e, recorded if (paths.REFERENCE / f'{e}.wav').exists() else '○ sin grabar: indica --ref')
+            Option(e, recorded if (paths.REFERENCE / f'{e}.wav').exists() else '○ not recorded: pass --ref')
             for e in mod.STYLES
         ]
         voices = []
         for n, f in cv.catalog().items():
             est = cv.state(n, mod.STYLES)
-            mention = ' · pide mención' if cv.mention(f) else ''
+            mention = ' · requires credit' if cv.mention(f) else ''
             reason = None if est == 'approved' else f'{est}: python cli.py narration voces --build {n}'
             voices.append(Option(n, f'{f["language"]} · {f["license"]}{mention} · {f["description"]}', reason))
         return {'model': models, 'style': styles, 'voice': voices}
 
 
 class Record(Command):
-    clave = 'narration grabar'
+    # cspell:ignore grabar: nombre del paquete narration/grabar/, que traduce la 007 (D-3)
+    key = 'narration grabar'
     module = parser = 'content_studio.narration.grabar.main'
-    icono = '🎤'
-    titulo = 'Grabar voces de referencia'
-    desc = 'Graba, mide y normaliza server/data/narration/reference/<estilo>.wav'
-    help = '🎤  Grabar las voces de referencia (content_studio.narration.grabar).'
+    icon = '🎤'
+    title = 'Record reference voices'
+    desc = 'Records, measures and normalizes server/data/narration/reference/<style>.wav'
+    help = '🎤  Record the reference voices (content_studio.narration.grabar).'
 
     def state(self) -> list[str]:
         txt = list(paths.REFERENCE.glob('*.txt'))
         recorded = sum((paths.REFERENCE / f'{t.stem}.wav').exists() for t in txt)
-        return [f'voces de referencia [{"green" if recorded else "yellow"}]{recorded}/{len(txt)}[/]']
+        return [f'reference voices [{"green" if recorded else "yellow"}]{recorded}/{len(txt)}[/]']
 
 
 class Voices(Command):
-    clave = 'narration voces'
+    key = 'narration voces'
     module = parser = 'content_studio.narration.voices.main'
-    icono = '🗣'
-    titulo = 'Voces libres del catálogo'
-    desc = 'Construye y aprueba voces CC0 o de dominio público'
-    help = '🗣  Construir y aprobar las voces libres del catálogo (content_studio.narration.voices).'
+    icon = '🗣'
+    title = 'Free voices from the catalog'
+    desc = 'Builds and approves CC0 or public-domain voices'
+    help = '🗣  Build and approve the free voices in the catalog (content_studio.narration.voices).'
 
     def state(self) -> list[str]:
         from content_studio.narration.styles import STYLES
         from content_studio.narration.voices.catalog import approved_voices, catalog
 
         free = len(approved_voices(STYLES))
-        return [f'voces libres [{"green" if free else "yellow"}]{free}/{len(catalog())}[/]']
+        return [f'free voices [{"green" if free else "yellow"}]{free}/{len(catalog())}[/]']

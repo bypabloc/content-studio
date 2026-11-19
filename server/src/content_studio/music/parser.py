@@ -24,40 +24,43 @@ from content_studio import paths
 from content_studio.music.engines.registry import MODELS
 from content_studio.music.styles import STYLES
 
+SUMMARY = 'Local instrumental music with ACE-Step 1.5 or HeartMuLa 3B, for an 8 GB GPU.'
+
 __all__ = ['STYLES', 'MODELS', 'build_parser']  # el CLI también lee los catálogos de aquí
 
 
 def build_parser() -> argparse.ArgumentParser:
     """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--model', choices=MODELS, required=True, help='acestep (recomendado) o heartmula (lento)')
+    ap.add_argument('--model', choices=MODELS, required=True, help='acestep (recommended) or heartmula (slow)')
     ap.add_argument(
         '--style',
         nargs='+',
         default=['lofi-chill'],
-        help=f'uno o más de los {len(STYLES)} presets (server/data/music/ESTILOS.md) o texto libre entre comillas',
+        help=f'one or more of the {len(STYLES)} presets (server/data/music/ESTILOS.md), or free text in quotes',
     )
-    ap.add_argument('--duration', type=float, default=60, help='segundos antes del recorte (ACE ≤600, HeartMuLa ≤240)')
-    ap.add_argument('--key', help='tonalidad, ej. "C Major", "A Minor" (obligatoria con texto libre)')
-    ap.add_argument('--bpm', type=int, help='tempo 30–300 (obligatorio con texto libre)')
-    ap.add_argument('--time-signature', choices=['2', '3', '4', '6'], help='2/4, 3/4, 4/4 o 6/8 (por defecto 4/4)')
-    ap.add_argument('--no-lm', action='store_true', help='ACE-Step sin el planificador LM 0.6B: ~3x más rápido')
-    ap.add_argument('--folder', type=Path, default=paths.OUT / 'music', help='por defecto out/music/')
+    ap.add_argument('--duration', type=float, default=60, help='seconds before trimming (ACE ≤600, HeartMuLa ≤240)')
+    ap.add_argument('--key', help='key, e.g. "C Major", "A Minor" (required with free text)')
+    ap.add_argument('--bpm', type=int, help='tempo 30–300 (required with free text)')
+    ap.add_argument('--time-signature', choices=['2', '3', '4', '6'], help='2/4, 3/4, 4/4 or 6/8 (default 4/4)')
+    ap.add_argument('--no-lm', action='store_true', help='ACE-Step without the LM 0.6B planner: ~3x faster')
+    ap.add_argument('--folder', type=Path, default=paths.OUT / 'music', help='default out/music/')
     ap.add_argument(
         '--variants',
         type=int,
         default=1,
-        help='pistas por estilo (<modelo>-<estilo>-v1.wav ...); la melodía cambia en cada una',
+        help='tracks per style (<model>-<style>-v1.wav ...); the melody changes in each one',
     )
     ap.add_argument(
         '--evaluate',
         action='store_true',
-        help='al final mide con demucs cuánta voz hay en cada pista y marca las que cantan (se quiere solo música)',
+        help='at the end, measures with demucs how much voice each track has and flags the ones that sing '
+        '(only music is wanted)',
     )
     ap.add_argument(
         '--retries',
         type=int,
         default=0,
-        help='con --evaluate: rondas en las que se regeneran solo las pistas con voz',
+        help='with --evaluate: rounds in which only tracks with voice are regenerated',
     )
     return ap

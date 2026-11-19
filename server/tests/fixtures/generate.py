@@ -103,14 +103,14 @@ def parsers(commands: dict[str, tuple[str, types.ModuleType]]) -> dict:
     out = {}
     # format_help depende del ancho de la terminal y de sys.argv[0], que pone el `usage: generar.py`
     with mock.patch.dict(os.environ, COLUMNS='120'), mock.patch.object(sys, 'argv', ['generar.py']):
-        for clave, (script, mod) in commands.items():
+        for key, (script, mod) in commands.items():
             with contextlib.ExitStack() as stack:
                 if hasattr(mod, 'approved_voices'):
                     stack.enter_context(
                         mock.patch.object(mod, 'approved_voices', lambda _e: dict.fromkeys(APPROVED_VOICES, {}))
                     )
                 ap = mod.build_parser()
-            out[clave] = {
+            out[key] = {
                 'script': script,
                 'docstring': mod.__doc__,
                 'description': ap.description,

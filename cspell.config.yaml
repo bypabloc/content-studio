@@ -46,8 +46,14 @@ ignorePaths:
   - server/data/narration/voices/catalog.json
   # La config no se revisa a sí misma: lista rutas en español de carpetas que aún no se traducen.
   - cspell.config.yaml
-  - server/src/content_studio/cli/**
-  - server/src/content_studio/music/**
+  # cli/ salvo commands/ (ciclo 5): la UI en español la retira la 004 (D-3).
+  - server/src/content_studio/cli/app.py
+  - server/src/content_studio/cli/args.py
+  - server/src/content_studio/cli/flow.py
+  - server/src/content_studio/cli/help_text.py
+  - server/src/content_studio/cli/menu.py
+  - server/src/content_studio/cli/widgets.py
+  - server/src/content_studio/cli/__init__.py
   - server/src/content_studio/narration/grabar/**
   - devtools/**
   - server/tests/**

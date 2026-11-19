@@ -7,7 +7,7 @@ from content_studio.music.engines.base import MusicSpec
 _M = 'content_studio.music.engines.'
 MODELS: dict[str, MusicSpec] = {
     'acestep': MusicSpec(
-        'acestep', '.venv-acestep', _M + 'acestep', 'AceStep', 'recomendado · ~30 s por pista', evaluates=True
+        'acestep', '.venv-acestep', _M + 'acestep', 'AceStep', 'recommended · ~30 s per track', evaluates=True
     ),
-    'heartmula': MusicSpec('heartmula', '.venv-heartmula', _M + 'heartmula', 'HeartMuLa', 'lento · ~5 min por pista'),
+    'heartmula': MusicSpec('heartmula', '.venv-heartmula', _M + 'heartmula', 'HeartMuLa', 'slow · ~5 min per track'),
 }

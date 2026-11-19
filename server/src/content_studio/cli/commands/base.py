@@ -19,11 +19,11 @@ class Option(NamedTuple):
 class Command(ABC):
     """Un comando del CLI. Cada subclase fija sus textos y, si los tiene, sus catálogos y su estado."""
 
-    clave: str  # 'narration tts': la 1.ª palabra es el grupo de Typer (sin grupo si es una sola)
+    key: str  # 'narration tts': la 1.ª palabra es el grupo de Typer (sin grupo si es una sola)
     module: str  # el que se lanza con -m
     parser: str  # el módulo liviano con construir_parser()
-    icono: str
-    titulo: str
+    icon: str
+    title: str
     desc: str
     help: str  # la línea del comando en --help
     assistant: bool = False  # pregunta los flags que faltan en una terminal

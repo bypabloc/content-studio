@@ -6,7 +6,7 @@ from prompt_toolkit.input import create_pipe_input
 from prompt_toolkit.output import DummyOutput
 
 from content_studio.cli import flow, menu
-from content_studio.cli.commands import por_clave
+from content_studio.cli.commands import por_key
 
 ENTER, BELOW = '\r', '\x1b[B'
 
@@ -18,7 +18,7 @@ class Launched(Exception):
 @pytest.fixture
 def correr(monkeypatch):
     def capture(cmd, args):
-        raise Launched(cmd.clave, args)
+        raise Launched(cmd.key, args)
 
     monkeypatch.setattr(flow, 'lanzar', capture)
     monkeypatch.setattr(menu, 'lanzar', capture)
@@ -35,8 +35,8 @@ def correr(monkeypatch):
 
 def test_assistant_pide_la_source_y_conserva_el_cero(correr):
     # Grupo excluyente → --text (1.º) → "hola" → Ejecutar
-    clave, argv = correr(ENTER + 'hola' + ENTER + ENTER, flow.assistant, por_clave('narration tts'), ['--seed', '0'])
-    assert (clave, argv) == ('narration tts', ['--text', 'hola', '--seed', '0'])
+    key, argv = correr(ENTER + 'hola' + ENTER + ENTER, flow.assistant, por_key('narration tts'), ['--seed', '0'])
+    assert (key, argv) == ('narration tts', ['--text', 'hola', '--seed', '0'])
 
 
 def test_menu_lleva_al_assistant_de_music(correr, monkeypatch):

@@ -40,7 +40,7 @@ def _step(cmd: Command):
 def register(destination: typer.Typer, commands: list[Command]) -> None:
     groups: dict[str, typer.Typer] = {}
     for cmd in commands:
-        *group, name = cmd.clave.split()
+        *group, name = cmd.key.split()
         parent = destination
         if group:
             if group[0] not in groups:

@@ -15,7 +15,7 @@ VOICE_MAX_DB = -25  # criterio: voz relativa a la mezcla. Medido: instrumentales
 
 def trim_silence(path: Path) -> float:
     """Quita la cola final por debajo de SILENCIO_DB, en el lugar. Devuelve los segundos que quedan."""
-    tmp = path.with_suffix('.recorte.wav')
+    tmp = path.with_suffix('.trimmed.wav')
     audio_filter = f'areverse,silenceremove=start_periods=1:start_threshold={SILENCE_DB}dB,areverse'
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', path, '-af', audio_filter, tmp], check=True)
     tmp.replace(path)
@@ -63,16 +63,16 @@ def with_voice(outputs: list[Path]) -> list[Path]:
     Una pista que no existe (la generación falló) también se devuelve, para reintentarla."""
     from demucs.pretrained import get_model
 
-    print(f'Evaluando {len(outputs)} pista(s) con demucs (umbral {VOICE_MAX_DB} dB)...', flush=True)
+    print(f'Evaluating {len(outputs)} track(s) with demucs (threshold {VOICE_MAX_DB} dB)...', flush=True)
     model = get_model('htdemucs').eval()
     bad = []
     for s in outputs:
         if not s.exists():
-            print(f'  FALTA {s.name}: no se generó')
+            print(f'  MISSING {s.name}: not generated')
             bad.append(s)
             continue
         db = voice_relative_db(model, s)
         con = db > VOICE_MAX_DB
-        print(f'  {"VOZ " if con else "ok  "} {s.name}: voz {db:.1f} dB respecto de la mezcla')
+        print(f'  {"VOICE" if con else "ok   "} {s.name}: voice {db:.1f} dB relative to the mix')
         bad += [s] if con else []
     return bad

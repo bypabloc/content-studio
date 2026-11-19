@@ -41,6 +41,7 @@ class HeartMuLa(MusicEngine):
         # lazy_load: carga HeartMuLa, la descarga y recién ahí carga el codec (pico ~6 GB).
         pipe = HeartMuLaGenPipeline.from_pretrained(
             str(HEART_CKPT),
+            # cspell:ignore mula: nombre del componente de HeartMuLa en su API, no una palabra del código
             device={'mula': torch.device('cuda'), 'codec': torch.device('cuda')},
             dtype={'mula': torch.bfloat16, 'codec': torch.float32},
             version='3B',
@@ -59,4 +60,4 @@ class HeartMuLa(MusicEngine):
                     cfg_scale=1.5,
                 )
             remaining = trim_silence(output)
-            print(f'{output} ({remaining:.1f} s tras recortar el silencio)')
+            print(f'{output} ({remaining:.1f} s after trimming silence)')

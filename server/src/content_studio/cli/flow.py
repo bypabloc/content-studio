@@ -19,7 +19,7 @@ from content_studio import paths
 from content_studio.cli.args import a_argv, empty, flags, leer, validate
 from content_studio.cli.commands import Command
 from content_studio.cli.help_text import show_help
-from content_studio.cli.widgets import ACCENT, SEPARATOR, STYLE, ask, console, titulo
+from content_studio.cli.widgets import ACCENT, SEPARATOR, STYLE, ask, console, title
 from content_studio.common.process import env_src, join, relaunch
 
 
@@ -43,10 +43,10 @@ def summary(ap: argparse.ArgumentParser, values: dict, cmd: Command) -> Panel:
             Text(acc.option_strings[0], style='bold cyan' if given else 'dim'),
             Text(v, style='green') if given else Text.assemble((v, 'dim'), ('  por defecto', 'dim italic')),
         )
-    command = join(['python', 'cli.py', *cmd.clave.split(), *a_argv(ap, values)])
+    command = join(['python', 'cli.py', *cmd.key.split(), *a_argv(ap, values)])
     return Panel(
         Group(t, Text(''), Text('$ ' + command, style='dim')),
-        title=f'{cmd.icono}  [bold]{cmd.clave}[/]',
+        title=f'{cmd.icon}  [bold]{cmd.key}[/]',
         title_align='left',
         border_style=ACCENT,
         padding=(1, 2),
@@ -64,7 +64,7 @@ def _obligatorios(ap: argparse.ArgumentParser, values: dict, cat: dict) -> None:
                 '¿De dónde sale el contenido?',
                 style=STYLE,
                 instruction='(↑↓ · enter)',
-                choices=[Choice(titulo(a.option_strings[0], a.help or ''), value=a) for a in group._group_actions],
+                choices=[Choice(title(a.option_strings[0], a.help or ''), value=a) for a in group._group_actions],
             ).unsafe_ask()
         elif not acc.required or values.get(acc.dest) is not None:
             continue
@@ -80,7 +80,7 @@ def _editar(ap: argparse.ArgumentParser, values: dict, cat: dict) -> None:
             state = acc.help or ''
         else:
             state = '✓ ' + (' '.join(map(str, v)) if isinstance(v, list) else 'sí' if v is True else str(v))
-        options.append(Choice(titulo(acc.option_strings[0], state[:90]), value=acc))
+        options.append(Choice(title(acc.option_strings[0], state[:90]), value=acc))
     acc = questionary.select(
         '¿Qué opción?',
         choices=[*options, Separator(SEPARATOR), Choice('↩  Volver', None)],
@@ -106,7 +106,7 @@ def assistant(cmd: Command, args: list[str], force: bool = False) -> None:
     for notice in notices:
         console.print(f'[yellow]⚠ {notice}[/]')
     cat = cmd.catalog(mod)
-    console.print(f'\n{cmd.icono}  [bold]{cmd.titulo}[/]  [dim]{cmd.desc}[/]\n')
+    console.print(f'\n{cmd.icon}  [bold]{cmd.title}[/]  [dim]{cmd.desc}[/]\n')
     _obligatorios(ap, values, cat)
     while True:  # resumen editable hasta ejecutar, redibujado en su lugar
         console.clear()
@@ -134,7 +134,7 @@ def assistant(cmd: Command, args: list[str], force: bool = False) -> None:
 
 def lanzar(cmd: Command, args: list[str]) -> None:
     if sys.stdout.isatty():
-        console.rule(f'[bold {ACCENT}]{cmd.icono}  {cmd.clave}[/] [dim]{join(args)}[/]', align='left', style=ACCENT)
+        console.rule(f'[bold {ACCENT}]{cmd.icon}  {cmd.key}[/] [dim]{join(args)}[/]', align='left', style=ACCENT)
     # -m: el hijo se relanza solo en su venv y ve src/ por PYTHONPATH
     relaunch([sys.executable, '-m', cmd.module, *args], env_src())
 

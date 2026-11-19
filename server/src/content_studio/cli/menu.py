@@ -40,7 +40,7 @@ def menu() -> None:
             '¿Qué quieres hacer?',
             style=STYLE,
             instruction='(↑↓ · enter · Ctrl+C sale)',
-            choices=[Choice([('', f'{c.icono}  {c.titulo:<28}'), ('class:desc', c.desc)], value=c) for c in REGISTRY],
+            choices=[Choice([('', f'{c.icon}  {c.title:<28}'), ('class:desc', c.desc)], value=c) for c in REGISTRY],
         ).unsafe_ask()
         if cmd.assistant:
             assistant(cmd, [], force=True)

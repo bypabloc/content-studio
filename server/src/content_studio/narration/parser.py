@@ -30,6 +30,8 @@ from content_studio.narration.engines.registry import ENGINES
 from content_studio.narration.styles import STYLES
 from content_studio.narration.voices.catalog import approved_voices
 
+SUMMARY = 'Local TTS with voice cloning: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 and CosyVoice 3.'
+
 __all__ = ['STYLES', 'ENGINES', 'approved_voices', 'build_parser']  # el CLI lee los catálogos de aquí
 
 

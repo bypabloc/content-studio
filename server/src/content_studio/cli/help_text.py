@@ -19,7 +19,8 @@ from content_studio.cli.widgets import ACCENT, console
 def show_help(cmd: Command) -> None:
     mod = cmd.load()
     ap = mod.build_parser()
-    summary = (mod.__doc__ or '').strip().split('\n\n')[0]
+    # SUMMARY: resumen en inglés del parser (la ayuda de la CLI). Sin él, el primer párrafo del docstring.
+    summary = getattr(mod, 'SUMMARY', None) or (mod.__doc__ or '').strip().split('\n\n')[0]
     t = Table(box=None, padding=(0, 2), show_header=True, header_style=f'bold {ACCENT}')
     t.add_column('Flag', style='bold cyan', no_wrap=True)
     t.add_column('Values', style='green', max_width=28)
@@ -43,12 +44,12 @@ def show_help(cmd: Command) -> None:
         t.add_row(', '.join(acc.option_strings) + mark, values, '' if empty(default) else str(default), acc.help or '')
     pie = Text.from_markup(
         '[red]*[/] obligatorio · si falta, el asistente lo pregunta · '
-        f'[bold]python cli.py {cmd.clave}[/] sin flags abre el asistente'
+        f'[bold]python cli.py {cmd.key}[/] sin flags abre el asistente'
     )
     console.print(
         Panel(
             Group(Text(summary, style='italic'), Text(''), t, Text(''), pie),
-            title=f'{cmd.icono}  [bold]{cmd.clave}[/] — {cmd.titulo}',
+            title=f'{cmd.icon}  [bold]{cmd.key}[/] — {cmd.title}',
             title_align='left',
             border_style=ACCENT,
             padding=(1, 2),

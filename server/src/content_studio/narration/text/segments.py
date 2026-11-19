@@ -52,8 +52,8 @@ def _value(rest: str, names: dict[str, str]) -> str:
 
 
 def _mark(m: re.Match) -> str:
-    bar, clave, sep, rest = m.groups()
-    canonical = ALIAS_KEYS.get(clave.lower(), clave.lower())
+    bar, key, sep, rest = m.groups()
+    canonical = ALIAS_KEYS.get(key.lower(), key.lower())
     if canonical == 'style':
         rest = _value(rest, ALIAS_STYLES)
     elif canonical == 'emotion':

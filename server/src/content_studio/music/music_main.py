@@ -50,19 +50,19 @@ def main() -> None:
     a = ap.parse_args()
     spec = MODELS[a.model]
     if a.retries and not a.evaluate:
-        ap.error('--retries necesita --evaluate')
+        ap.error('--retries needs --evaluate')
     if a.evaluate and not spec.evaluates:
-        ap.error('--evaluate solo está en el venv de acestep (ahí está demucs)')
+        ap.error('--evaluate only works in the acestep venv (demucs lives there)')
     if a.variants < 1:
-        ap.error('--variants debe ser 1 o más')
+        ap.error('--variants must be 1 or more')
 
     # Validar antes de relanzar en el venv y cargar el modelo.
     jobs = []
     for value in a.style:
         name, style = resolve_style(value, a.key, a.bpm, a.time_signature)
         for i in range(1, a.variants + 1):
-            sufijo = f'-v{i}' if a.variants > 1 else ''
-            jobs.append((style, (a.folder / f'{a.model}-{name}{sufijo}.wav').resolve()))
+            suffix = f'-v{i}' if a.variants > 1 else ''
+            jobs.append((style, (a.folder / f'{a.model}-{name}{suffix}.wav').resolve()))
 
     process.use_venv(spec.path_venv(), 'server/data/music/README.md', module='content_studio.music.music_main')
     a.folder.mkdir(parents=True, exist_ok=True)
@@ -77,7 +77,7 @@ def main() -> None:
     if not a.evaluate:
         missing = [s.name for _, s in jobs if not s.exists()]
         if missing:
-            sys.exit(f'No se generaron: {", ".join(missing)}')
+            sys.exit(f'Not generated: {", ".join(missing)}')
         return
 
     free_gpu()
@@ -85,13 +85,13 @@ def main() -> None:
     for _ in range(a.retries):
         if not pending:
             break
-        print(f'Regenerando {len(pending)} pista(s) con voz...', flush=True)
+        print(f'Regenerating {len(pending)} track(s) with voice...', flush=True)
         generate([t for t in jobs if t[1] in pending])
         free_gpu()
         pending = with_voice(pending)
-    print(f'{len(jobs) - len(pending)}/{len(jobs)} pistas sin voz')
+    print(f'{len(jobs) - len(pending)}/{len(jobs)} tracks without voice')
     if pending:
-        sys.exit(f'Con voz tras los reintentos: {", ".join(p.name for p in pending)}')
+        sys.exit(f'Still with voice after retries: {", ".join(p.name for p in pending)}')
 
 
 if __name__ == '__main__':
