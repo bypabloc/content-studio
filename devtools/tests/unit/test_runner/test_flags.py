@@ -15,8 +15,14 @@ def test_type_list_splits_on_commas():
     assert parse(['--type=lint,validators'], KNOWN).types == ['lint', 'validators']
 
 
-def test_without_type_runs_every_known_stage():
-    assert parse([], KNOWN).types == KNOWN
+def test_without_type_runs_the_all_group():
+    assert parse([], KNOWN, groups={'all': KNOWN}).types == KNOWN
+
+
+def test_all_expands_to_its_group_and_guard_is_not_in_it():
+    options = parse(['--type=all'], [*KNOWN, 'guard'], groups={'all': KNOWN})
+
+    assert options.types == KNOWN
 
 
 def test_files_and_git_mode_are_read():

@@ -55,6 +55,8 @@ def run(files: list[Path], root: Path = paths.ROOT) -> dict:
     config, baseline = load(root, CONFIG), load(root, BASELINE)
     problems, notes = [], []
     for path in files:
+        if not path.is_relative_to(root):
+            continue
         rel = path.relative_to(root).as_posix()
         cat = category(rel, config)
         if cat is None or not path.is_file():

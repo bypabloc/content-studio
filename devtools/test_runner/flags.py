@@ -1,4 +1,4 @@
-"""Flags de `test-runner`: `--type`, `--git-mode` y `--files` (spec 003, D-1)."""
+"""Flags de `test-runner`: `--type`, `--git-mode`, `--files` y `--write-baseline` (spec 003, D-1)."""
 
 from __future__ import annotations
 
@@ -18,13 +18,17 @@ class Options:
     write_baseline: bool = False
 
 
-def parse(argv: list[str], known: list[str]) -> Options:
-    """Lanza ValueError con el motivo si un argumento no sirve (el runner sale con 2)."""
-    types, git_mode, files, write_baseline = list(known), 'all', None, False
+def parse(argv: list[str], known: list[str], groups: dict[str, list[str]] | None = None) -> Options:
+    """Lanza ValueError con el motivo si un argumento no sirve (el runner sale con 2).
+
+    `groups` nombra conjuntos de etapas (`all`): `--type=all` se expande y, sin `--type`, corre el grupo `all`.
+    """
+    groups = groups or {}
+    types, git_mode, files, write_baseline = list(groups.get('all', known)), 'all', None, False
     for arg in argv:
         name, _, value = arg.partition('=')
         if name == '--type':
-            types = value.split(',')
+            types = [t for raw in value.split(',') for t in groups.get(raw, [raw])]
         elif name == '--git-mode':
             git_mode = value
         elif name == '--files':

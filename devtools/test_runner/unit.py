@@ -149,7 +149,8 @@ def run(files: list[Path], root: Path = paths.ROOT) -> dict:
     code, report = coverage_report(root)
     if code:
         problems.append(f'pytest failed (exit {code}): see {PYTEST_LOG}')
-    scope = [rel for rel in (p.relative_to(root).as_posix() for p in files) if in_scope(rel)]
+    scope = [p.relative_to(root).as_posix() for p in files if p.is_relative_to(root)]
+    scope = [rel for rel in scope if in_scope(rel)]
     problems += check_coverage(report, scope, load(root, COVERAGE_BASELINE) or [])
     return {'stage': 'unit', 'status': 'fail' if problems else 'pass', 'detail': '\n'.join(problems + notes)}
 
