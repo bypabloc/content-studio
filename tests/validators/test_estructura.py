@@ -14,7 +14,7 @@ from devtools import reglas
 
 RAIZ = Path(__file__).resolve().parents[2]
 MAX_LINEAS = 300
-HOOKS = [RAIZ / '.agents/hooks', RAIZ / '.claude/hooks']
+HOOKS = [RAIZ / '.claude/hooks']
 
 
 def archivos() -> list[Path]:
@@ -24,7 +24,6 @@ def archivos() -> list[Path]:
         *(RAIZ / 'server/tests').rglob('*.py'),
         *(RAIZ / 'devtools').rglob('*.py'),
         *(RAIZ / 'tests').rglob('*.py'),
-        *(RAIZ / '.agents/hooks/tests').rglob('*.py'),
         *(RAIZ / '.claude/hooks/tests').rglob('*.py'),
     ]
     return sorted(fuentes + [p for h in HOOKS for p in h.glob('*.py')])

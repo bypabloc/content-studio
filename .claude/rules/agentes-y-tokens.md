@@ -18,7 +18,7 @@ Menos tokens es más precisión. El gasto inútil sale de ciclos de prueba y err
 
 ## 3. Sesiones largas
 
-* Con trabajo de más de un turno, **handoff en disco** desde el inicio (`session-handoff.md`): el disco sobrevive a la compactación, el resumen no.
+* Con trabajo de más de un turno, **handoff en disco** desde el inicio (plugin `session-handoff`, configurado en `.claude/session-handoff.json`): el disco sobrevive a la compactación, el resumen no.
 * Una spec o un lote se ejecutan con `run-specs` o `execute-spec` hasta el merge, sin parar por avisos de tokens. Entre una spec y la siguiente de un lote, `/compact`.
 * Reporte periódico con `CronCreate` (cada 10 min) solo mientras corre una spec; se borra al terminar.
 

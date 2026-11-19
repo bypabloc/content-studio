@@ -35,16 +35,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "^AskUserQuestion$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
-            "timeout": 10
-          }
-        ]
-      },
-      {
         "matcher": "^Bash$",
         "hooks": [
           {
@@ -110,11 +100,6 @@
           {
             "type": "command",
             "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/format_on_save.py\""
-          },
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
-            "timeout": 10
           }
         ]
       }
@@ -125,11 +110,6 @@
           {
             "type": "command",
             "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify_state.py\""
-          },
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
-            "timeout": 10
           }
         ]
       }
@@ -156,42 +136,12 @@
             "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\" compact"
           }
         ]
-      },
-      {
-        "matcher": "startup|resume|clear|compact|fork",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "manual|auto",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/session_handoff.py\"",
-            "timeout": 10
-          }
-        ]
       }
     ]
   },
   "enabledPlugins": {
-    "handoff-compact@content-studio": true,
+    "session-handoff@bypabloc": true,
     "synapse@bypabloc": true
-  },
-  "extraKnownMarketplaces": {
-    "content-studio": {
-      "source": {
-        "source": "directory",
-        "path": "./.claude/mods"
-      }
-    }
   },
   "autoCompactEnabled": true
 }
