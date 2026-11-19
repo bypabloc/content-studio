@@ -17,8 +17,8 @@ Runner único de gates: `python -m devtools test-runner --type=all` (lint, spell
 | Tamaño, espejo, cobertura, docstrings y tipos | `test-runner` (`devtools/tests/unit/test_runner/`) | Límites de `file-size.json`, espejo sin huérfanos, 80 % por archivo, D1 y mypy | Sí |
 | Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: sintaxis 3.10, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
 | Bugs | `server/tests/integration/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
-| CLI y asistente | `server/tests/integration/test_cli.py`, `server/tests/unit/src/content_studio/cli/test_flow.py` | Typer, flags y el asistente sin TTY | Sí |
-| Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores y comandos registrados | Sí |
+| CLI `studio` | `server/tests/unit/src/content_studio/cli/` | Argparse: subcomandos, flags de narración y música, `serve` y `jobs` | Sí |
+| Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores registrados (`ENGINES`) | Sí |
 | Hooks y devtools | `.claude/hooks/tests/test_hooks.py`, `.agents/hooks/tests/`, `devtools/tests/unit/` | Hooks de agentes y devtools, ejecutados de verdad | Sí |
 | Local | `server/tests/integration/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
 | tdd efímero | `server/tests/tdd/test_<pieza>.py` o `devtools/tests/tdd/` | Razonar una pieza antes de su test permanente | **Nunca**: `guard-tdd` (pre-push y CI) falla si existe |

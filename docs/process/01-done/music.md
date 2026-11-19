@@ -1,6 +1,6 @@
 ---
 modulo: music
-actualizada: 2026-11-18
+actualizada: 2026-11-19
 ---
 
 # Música
@@ -11,15 +11,16 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 
 ## Qué hace hoy
 
-- `python cli.py music --model <m> --style <e…> --duration <s>`: una pista por estilo en `out/music/`.
+- `uv run studio music --model <m> --style <e…> --duration <s>`: una pista por estilo, cada una en `out/music/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`. El comando encola el trabajo y lo corre en su proceso; `studio serve` corre los de la cola.
 - 126 estilos con tonalidad, BPM y compás definidos; el texto libre exige `--key` y `--bpm`.
 - Motores: ACE-Step 1.5 (recomendado, ~30 s por pista) y HeartMuLa (~5 min por pista), cada uno en su venv.
 
 ## Dónde vive
 
-- Código: `server/src/content_studio/music/` (estilos en `styles.py`, motores en `engines/` con `registry.py`).
+- Código: `server/src/content_studio/music/` (estilos en `styles.py`, motores en `engines/` con `registry.py`). El trabajo que encola `studio` está en `server/src/content_studio/services/music.py`.
 - Datos: `server/data/music/` (README, investigación, venvs, modelos). Uso y rendimiento: [server/data/music/README.md](../../../server/data/music/README.md).
 
 ## Historial
 
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
+- 2026-11-19: CLI `studio` (004): `python cli.py music` pasa a `uv run studio music`; la salida va a `out/music/<fecha>-<id>-<slug>/`.

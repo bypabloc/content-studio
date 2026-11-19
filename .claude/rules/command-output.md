@@ -2,8 +2,8 @@
 
 > En klinikae, los agentes redirigían cada corrida a mano (`> tmp/gate-g1.log`) y la raíz de `tmp/` acumulaba decenas de `.log` sueltos sin decir a qué pertenecían.
 
-* **Audio generado**: `out/narration/` y `out/music/`, o donde indiquen `--output` (narration) y `--folder` (music). No se limpian.
-* **Logs de corridas**: `logs/<herramienta>-<descripción>.log` (`logs/music-heartmula-lofi.log`), en kebab-case. Nunca en la raíz de `tmp/` ni de `out/`.
+* **Audio generado**: `out/narration/` y `out/music/`. Cada trabajo de `studio` sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/`, con su `params.json`; `studio` no acepta `--output` (narration) ni `--folder` (music). No se limpian.
+* **Logs de corridas**: `logs/<herramienta>-<descripción>.log` (`logs/music-heartmula-lofi.log`), en kebab-case; el log de un trabajo de `studio` es `logs/jobs/<id>.log`. Nunca en la raíz de `tmp/` ni de `out/`.
 * **Temporales de un comando o verificación**: `tmp/<comando>/<tema>.<ext>` (`tmp/verificar/spec.png`, `tmp/config-tests/<tema>.json`, `tmp/gpu-turn/`). Nunca `tmp/<algo>.log` suelto.
 * **Corridas largas** (HeartMuLa ~5 min por pista, un lote de voces): en segundo plano (`run_in_background`), con la salida en `logs/`; el harness avisa al terminar.
 * **Esperar sin `sleep`**: nunca `sleep`, `Start-Sleep` ni un bucle `until …; do sleep …` en primer plano, ni sondear un archivo. Lo bloquea `.agents/hooks/sleep_guard.py`, conectado en `.claude/settings.json`, `.codex/hooks.json` y `.agents/hooks.json` (Antigravity; sin probar en Codex ni Antigravity, ver `docs/process/PENDING/`). Según lo que esperas:

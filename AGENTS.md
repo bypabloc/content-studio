@@ -11,43 +11,34 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herrami
 
 ## Atajos
 
-Todo se lanza desde `cli.py`, hecho con [Typer](https://typer.tiangolo.com), [Rich](https://rich.readthedocs.io) y [questionary](https://questionary.readthedocs.io): `python cli.py <herramienta> <comando> [flags]`.
+Todo se lanza desde `studio`, el CLI headless (argparse): `uv run studio <comando> [flags]`. No hay menú ni asistente: ningún comando pregunta nada, con o sin TTY.
 
-- **Sin argumentos** abre un menú con flechas que muestra la VRAM libre y cuántas voces de referencia hay grabadas.
-- **Si falta un flag obligatorio o uno es inválido**, el asistente lo pide: listas con descripción (licencia, VRAM y si está instalado cada motor), casillas con filtro para los 126 estilos de música, rutas con Tab y números validados. Después muestra un resumen editable, con los valores por defecto en gris y el comando equivalente, para ejecutar, cambiar o agregar cualquier flag.
-- **Con todos los flags**, se ejecuta directo. **Sin TTY** (agentes, scripts, `| cat`), no pregunta nada y se comporta como el script.
+`narration tts` y `music` encolan el trabajo en `var/content-studio.db` y lo corren en su proceso; `serve` corre los que quedan en la cola. Cada trabajo sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`, y su log en `logs/jobs/<id>.log`. `studio` no acepta `--output` ni `--folder`; `--db RUTA` va antes del subcomando.
 
 ```bash
-python cli.py                            # menú
-python cli.py narration tts              # asistente
-python cli.py narration tts --help       # ayuda en tabla: flags, valores, defecto y obligatorios
-
-# Narración (sin grabaciones propias todavía: una voz libre del catálogo con consentimiento)
-python cli.py narration tts --model qwen-0.6b --style expert \
-  --voice yesid --text "..."                                       # → out/narration/
-
-# Grabar las voces de referencia
-python cli.py narration grabar --list
-
-# Voces libres (CC0 o dominio público), aprobadas en los 12 estilos: construir y narrar con una
-python cli.py narration voices --build all
-python cli.py narration tts --model cosyvoice3 --voice yesid --text "..."
-
-# Música (presets con tonalidad/BPM/compás definidos; texto libre exige --key y --bpm)
-python cli.py music --model acestep --style lofi-chill corporate --duration 30   # → out/music/
+uv run studio --help                         # subcomandos; cada uno tiene --help con sus flags
+uv run studio narration tts --model qwen-0.6b --style expert --voice yesid --text "..."   # → out/narration/
+uv run studio narration voices --build all   # voces libres aprobadas en los 12 estilos
+uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
+uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
+uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
+uv run --group legacy python -m content_studio.narration.grabar.main   # grabar voces (legacy: rich y questionary)
 ```
 
-`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Cada comando, a su vez, se relanza solo en el venv de su motor. También se puede llamar un módulo directo: `PYTHONPATH=server/src python -m content_studio.narration.tts ...` (o `content_studio.music.music_main`, `content_studio.narration.voices.main`), y `uv run content-studio` es lo mismo que `python cli.py`. `grabar` necesita rich y questionary: directo, con `uv run python -m content_studio.narration.grabar.main`.
+`studio` es el script de `server/pyproject.toml`. Los motores se relanzan solos en el venv de cada uno (`common/process.py`); los módulos directos siguen con `PYTHONPATH=server/src python -m content_studio.narration.tts ...`.
 
 ## Arquitectura
 
 ```
-cli.py                        shim: relanza con uv si faltan typer/rich/questionary y llama a content_studio.cli.app
 server/src/content_studio/
 ├── paths.py                  ROOT, OUT, LOGS, NARRATION, MUSIC, REFERENCE, VOICES…
+├── messages.py               textos de error de la API (messages/es.json)
 ├── common/                   process (relaunch en un venv, use_venv), ffmpeg, files
-├── cli/                      Typer: app, menu, flow (asistente), widgets, args, help_text; commands/ con Comando y REGISTRY
-├── devtools/                 flujo de agentes: worktree, gpu-turn, agent-context, rules (python -m devtools)
+├── cli/                      argparse de `studio`: main (subcomandos), submit (encola), serve (API y worker)
+├── services/                 un servicio por tipo de trabajo (narration, music); registry.py con SERVICES
+├── jobs/                     cola y worker: queue, runner, worker
+├── api/                      FastAPI y uvicorn: app, events (SSE), routes/, token Bearer
+├── db/                       SQLite (stdlib) en WAL con migraciones SQL: connection, schema, jobs, settings
 ├── narration/                parser (liviano), tts (main), styles, blocks, pipeline, audio, script, metadata, reference
 │   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES
 │   ├── text/ evaluation/     segments y translate por motor; compare y review (whisper)
@@ -57,19 +48,19 @@ server/src/content_studio/
     └── engines/              MusicSpec + MusicEngine y registry.py con MODELS
 ```
 
-Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y typer/rich/questionary en `cli/` y `grabar/`), así `--help` y el asistente funcionan sin los venvs. torch, numpy y las librerías de cada motor se importan dentro de las funciones, ya en el venv del motor.
+Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib (rich y questionary solo en `grabar/`, legacy); torch, numpy y los motores se importan dentro de las funciones, así `--help` no necesita sus venvs.
 
-- **Agregar un motor TTS o de música**: un archivo en `engines/` con su subclase de `TTSEngine` o `MusicEngine`, una entrada `EngineSpec`/`MusicSpec` en `engines/registry.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `server/tests/integration/test_venvs.py` se agrega la librería que importa (`LIBRARIES`).
-- **Agregar un comando del CLI**: una subclase de `Comando` en `cli/commands/` (clave, módulo, parser liviano con `construir_parser()`) y una línea en `REGISTRY` (`cli/commands/__init__.py`).
+- **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py` (venv, módulo, clase, licencia) y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
+- **Agregar un servicio** (un tipo de trabajo): un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES`. La API y `studio` lo usan solos.
 - **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
 ## Forma de trabajo y dónde buscar
 
-`AGENTS.md` y `.agents/` (reglas y skills) son las instrucciones compartidas de todos los agentes (Claude Code, Codex, Antigravity). `.claude/` tiene las mismas reglas y skills con el frontmatter de Claude Code (las sincroniza `python -m devtools rules --sync`), más su configuración propia: hooks, agentes `code-explorer`, `researcher` e `image-reader` (Haiku), comandos y el plugin `session-handoff`. Lo de `.claude/` no vincula a otros agentes.
+`AGENTS.md` y `.agents/` son las instrucciones compartidas de todos los agentes (Claude Code, Codex, Antigravity). `.claude/` tiene las mismas reglas y skills con el frontmatter de Claude Code (`python -m devtools rules --sync`), más sus hooks, agentes, comandos y el plugin `session-handoff`; no vincula a otros agentes.
 
 | Necesidad | Fuente |
 | :--- | :--- |
-| Código, capas, tamaño, cómo agregar un motor o comando | [codigo-python](.agents/rules/codigo-python.md), [stack](.agents/rules/stack.md) |
+| Código, capas, tamaño, cómo agregar un motor o un servicio | [codigo-python](.agents/rules/codigo-python.md), [stack](.agents/rules/stack.md) |
 | Git, ramas, PR, hooks locales | [git-workflow](.agents/rules/git-workflow.md) |
 | Diseñar una spec (plantillas en [docs/specs/_plantilla/](docs/specs/_plantilla/README.md)) | [plan-format](.agents/rules/plan-format.md); skills `crear-spec`, `execute-spec`, `run-specs` |
 | Estado del proyecto, roadmap, decisiones y pendientes | [docs/process/](docs/process/README.md), [project-progress](.agents/rules/project-progress.md) |
@@ -79,7 +70,7 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 | Sesiones largas y seguir hasta terminar | Plugin [session-handoff](https://github.com/bypabloc/claude-plugin-session-handoff) (solo Claude Code), configurado en `.claude/session-handoff.json` |
 | Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [gpu-turn](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
 | Buscar código | [graphify](.agents/rules/graphify.md); skills `graphify-query`, `graphify-ops` |
-| devtools del flujo de agentes | [devtools](.agents/rules/devtools.md) |
+| devtools del flujo de agentes (`devtools/`, en la raíz) | [devtools](.agents/rules/devtools.md) |
 | Idioma del código, del CLI y de la narración | [textos-e-idioma](.agents/rules/textos-e-idioma.md) |
 | Cambiar reglas, skills o hooks de agentes | [agent-config-testing](.agents/rules/agent-config-testing.md) |
 
@@ -93,11 +84,12 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 
 ## Reglas
 
-1. **Salidas** en `out/narration/` y `out/music/`, o donde indiquen `--output` (narration) y `--folder` (music). **Logs** en `logs/<herramienta>-<descripción>.log`. Las dos carpetas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) se lanzan en segundo plano, con la salida en `logs/`.
-2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento. Entre sesiones, con `gpu-turn run` ([gpu-turn](.agents/rules/turno-gpu.md)).
+1. **Salidas** en `out/` (cada trabajo en su carpeta `<AAAA-MM-DD>-<id>-<slug>/`, con `params.json`) y **logs** en `logs/`. Ambas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) van en segundo plano, con la salida en `logs/`.
+2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Entre sesiones, con `gpu-turn run` ([turno-gpu](.agents/rules/turno-gpu.md)); `studio` y el worker toman el candado solos.
 3. **La música es siempre instrumental**: nada de voz ni de letra.
 4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). El gusto lo decide el usuario: entrégale las rutas.
-5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial. OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
+5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial.
+   OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.
 7. Los archivos se crean y editan con las herramientas de edición del agente. Bash se usa solo para ejecutar los scripts y ffmpeg. Muestra los resultados con rutas clicables a `out/`.
 

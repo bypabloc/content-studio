@@ -17,7 +17,10 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
 | [001-duracion-de-audio](001-duracion-de-audio.md) | La duración de música y narración no coincide con la pedida (igual en `dev`) | Antes de publicar el lote | Usuario y agente |
-| [002-cspell-excepciones-temporales](002-cspell-excepciones-temporales.md) | Exclusiones de cspell que quedan a propósito: `cli/` (004), `grabar/` (007) y textos en español de D-1 | La 004 y la 007 | Agente |
+| [002-cspell-excepciones-temporales](002-cspell-excepciones-temporales.md) | Exclusiones de cspell que quedan a propósito: `grabar/` (007) y textos en español de D-1 | La 007 | Agente |
 | [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |
-| [003-bajar-baselines](003-bajar-baselines.md) | Vaciar los baselines de tamaño, espejo y cobertura, y los overrides de mypy, a medida que se tocan los archivos | En cada spec que toque un módulo de la lista; `cli/` (004) y `grabar/` (007) | Agente |
+| [003-bajar-baselines](003-bajar-baselines.md) | Vaciar los baselines de tamaño, espejo y cobertura, y los overrides de mypy, a medida que se tocan los archivos | En cada spec que toque un módulo de la lista; `grabar/` (007) | Agente |
+| [004-db-antes-del-subcomando](004-db-antes-del-subcomando.md) | `studio --db` solo se acepta antes del subcomando | La 007 o la 008 | Agente |
+| [004-eventos-cli-sin-sse](004-eventos-cli-sin-sse.md) | Los cambios de la CLI sobre trabajos que el server no corre no salen por SSE | Antes de la 005 | Agente |
+| [004-httpx-deprecado](004-httpx-deprecado.md) | `starlette.testclient` avisa que httpx 0.28 está deprecado | Cuando starlette soporte httpx nuevo | Agente |
 | [sleep-guard-codex-antigravity](sleep-guard-codex-antigravity.md) | El bloqueo de `sleep` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |

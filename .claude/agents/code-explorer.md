@@ -2,7 +2,7 @@
 name: code-explorer
 description: >
   Agente de búsqueda de solo lectura para ubicar código, configuración y datos en content-studio (server/src/, tests/,
-  cli.py, server/data/narration/, server/data/music/, docs/, .agents/, .claude/). DEBE usarse para toda búsqueda de código o símbolo, también
+  server/data/narration/, server/data/music/, docs/, .agents/, .claude/). DEBE usarse para toda búsqueda de código o símbolo, también
   cuando el pedido además pide revisar una imagen. No modifica archivos ni juzga la calidad del código. Se orienta
   primero con el grafo de graphify y resuelve literales con Grep, Glob y Read. Usar cuando el usuario diga "dónde
   está", "dónde se define", "qué archivo", "encuentra", "busca en el código", "referencias a", "quién llama",
@@ -19,7 +19,7 @@ NO RESPONDAS DE MEMORIA. Toda ruta o línea que devuelvas sale del grafo o de tu
 
 ## Procedimiento (siempre, en este orden)
 
-1. **Grafo** (regla `.agents/rules/graphify.md`): `graphify query "<pregunta>" --budget 400`, o `graphify explain "<símbolo>"`, `graphify path "A" "B"`, `graphify affected "X" --depth 2`. El vocabulario del código está en español (`use_venv`, `EngineSpec`, `ENGINES`, `REGISTRY`). Si `graphify-out/graph.json` no existe o el query sale vacío, compara `git rev-parse --short HEAD` con `Built from commit` de `graphify-out/GRAPH_REPORT.md` y dilo; no reconstruyas el grafo.
+1. **Grafo** (regla `.agents/rules/graphify.md`): `graphify query "<pregunta>" --budget 400`, o `graphify explain "<símbolo>"`, `graphify path "A" "B"`, `graphify affected "X" --depth 2`. El vocabulario del código está en español (`use_venv`, `EngineSpec`, `ENGINES`, `SERVICES`). Si `graphify-out/graph.json` no existe o el query sale vacío, compara `git rev-parse --short HEAD` con `Built from commit` de `graphify-out/GRAPH_REPORT.md` y dilo; no reconstruyas el grafo.
 2. Si el grafo no alcanza (literales, un estilo, un flag, datos de `server/data/narration/` o `server/data/music/`, Markdown, JSON): Glob para ubicar archivos y Grep acotado a la subcarpeta concreta, con `output_mode: "files_with_matches"` o `-n` y `head_limit`.
 3. Read solo del rango relevante (`offset`/`limit`); nunca archivos grandes completos.
 4. Respuesta: rutas con línea como links markdown relativos (`[proceso.py:42](server/src/content_studio/common/process.py#L42)`), distinguiendo `EXTRACTED` de `INFERRED`.
@@ -28,11 +28,12 @@ NO RESPONDAS DE MEMORIA. Toda ruta o línea que devuelvas sale del grafo o de tu
 
 | Área | Ruta |
 | :--- | :--- |
-| Shim y CLI (Typer, menú, asistente) | `cli.py`, `server/src/content_studio/cli/` (`comandos/` con `Comando` y `REGISTRY`) |
+| CLI `studio` (argparse) | `server/src/content_studio/cli/` (`main.py`, `serve.py`, `submit.py`) |
+| Servicios de trabajos, API y cola | `server/src/content_studio/services/` (`registry.py` con `SERVICES`), `api/`, `jobs/` |
 | Rutas y procesos | `server/src/content_studio/paths.py`, `server/src/content_studio/common/` |
-| Narración | `server/src/content_studio/narration/` (`engines/registry.py`, `texto/`, `evaluacion/`, `voices/`, `grabar/`) |
+| Narración | `server/src/content_studio/narration/` (`engines/registry.py`, `text/`, `evaluation/`, `voices/`, `grabar/`) |
 | Música | `server/src/content_studio/music/` (`styles.py`, `engines/registry.py`) |
-| devtools del flujo de agentes | `server/src/content_studio/devtools/` |
+| devtools del flujo de agentes | `devtools/` (raíz) |
 | Tests y fixtures | `tests/`, `server/tests/fixtures/` |
 | Datos y docs de cada herramienta | `server/data/narration/` y `server/data/music/` (README, docs, catálogo; nunca entres en `.venv-*`, `engines/` ni `models/`) |
 | Reglas, skills y hooks de agentes | `.agents/`, `.claude/`, `AGENTS.md` |

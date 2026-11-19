@@ -6,37 +6,34 @@ La investigación de los modelos (cuáles se eligieron y cuáles se descartaron,
 
 ## Uso
 
-Desde la raíz del repo, con cualquier Python: el script se relanza solo en el venv que corresponde.
+Desde la raíz del repo: `uv run studio music ...`. `studio music` valida los flags, encola el trabajo y lo corre en su proceso; los trabajos encolados por la API los corre el worker de `studio serve`.
 
 ```bash
 # Un preset (tonalidad, BPM y compás ya definidos)
-python cli.py music --model acestep --style lofi-chill --duration 60
+uv run studio music --model acestep --style lofi-chill --duration 60
 
 # Varios presets para escucharlos y comparar (el modelo se carga una sola vez)
-python cli.py music --model acestep --duration 30 \
+uv run studio music --model acestep --duration 30 \
   --style lofi-chill corporate future-bass deep-house ambient
 
 # Texto libre: exige --key y --bpm (--time-signature es opcional, 4/4 por defecto)
-python cli.py music --model acestep --duration 30 --key "E Minor" --bpm 105 \
+uv run studio music --model acestep --duration 30 --key "E Minor" --bpm 105 \
   --style "synthwave, retro 80s, driving arpeggios"
 
 # Un preset con otra tonalidad o tempo (los flags pisan los valores del preset)
-python cli.py music --model acestep --style lofi-jazz --key "G Major" --bpm 90
+uv run studio music --model acestep --style lofi-jazz --key "G Major" --bpm 90
 
 # Sin el planificador LM: ~3x más rápido (ver "Qué hace --no-lm")
-python cli.py music --model acestep --style ambient --no-lm
-
-# Otra carpeta de salida
-python cli.py music --model acestep --style corporate --folder out/mi-proyecto
+uv run studio music --model acestep --style ambient --no-lm
 
 # HeartMuLa (lento; ignora --key, --bpm y --time-signature)
-python cli.py music --model heartmula --style lofi-rain --duration 30
+uv run studio music --model heartmula --style lofi-rain --duration 30
 ```
 
-**Salida**: `out/music/<modelo>-<estilo>.wav` (en la raíz del repo; 48 kHz, estéreo) con el **silencio final ya recortado**. Cambia la carpeta con `--folder`. Al terminar imprime cuántos segundos quedaron, la tonalidad y el BPM:
+**Salida**: cada pista sale en `out/music/<AAAA-MM-DD>-<id>-<slug>/`, junto con `params.json`; el archivo es `<modelo>-<estilo>.wav` (48 kHz, estéreo) con el **silencio final ya recortado**. El log del trabajo, `logs/jobs/<id>.log`, muestra al terminar cuántos segundos quedaron, la tonalidad y el BPM:
 
 ```
-out/music/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 BPM)
+out/music/<AAAA-MM-DD>-<id>-lofi-jazz/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 BPM)
 ```
 
 | Flag | Valor | Por defecto |
@@ -48,12 +45,11 @@ out/music/acestep-lofi-jazz.wav (22.5 s tras recortar el silencio; D Minor, 85 B
 | `--bpm` | tempo, de 30 a 300 | el del preset (obligatorio con texto libre) |
 | `--time-signature` | `2`, `3`, `4` o `6` (2/4, 3/4, 4/4, 6/8) | el del preset, o `4` |
 | `--no-lm` | solo ACE-Step | apagado |
-| `--folder` | carpeta de salida | `out/music/` |
 | `--variants` | pistas por estilo; con más de 1 los archivos son `<modelo>-<estilo>-v1.wav`, `-v2.wav`… (la melodía cambia en cada una) | 1 |
 | `--evaluate` | solo ACE-Step: al final mide con demucs cuánta voz hay en cada pista (ver "Evaluar que no haya voz") | apagado |
 | `--retries` | con `--evaluate`: rondas que regeneran solo las pistas con voz | 0 |
 
-Si usas texto libre sin `--key` y `--bpm`, el script se detiene antes de cargar el modelo y muestra el mensaje: `"bossa nova" no es un preset: define --key y --bpm`. `--key`, `--bpm` y `--time-signature` se aplican a **todos** los estilos de esa corrida.
+Si usas texto libre sin `--key` y `--bpm`, `studio` lo rechaza al validar, antes de encolar y sin cargar el modelo, con el mensaje: `bossa nova no es un preset: define la tonalidad (key) y el bpm.` `--key`, `--bpm` y `--time-signature` se aplican a **todos** los estilos de esa corrida.
 
 ### Estilos predefinidos
 
@@ -101,8 +97,8 @@ Para agregar un preset, suma una entrada a `NUEVOS` en [styles.py](../../src/con
 ACE-Step recibe `[Instrumental]`, pero a veces se le cuela una voz. `--evaluate` separa cada pista con **demucs** (`htdemucs`), mide el nivel del stem de voz respecto de la mezcla y marca como `VOZ` las que superan `VOZ_MAX_DB = -25` dB. Con `--retries N` regenera solo esas pistas (semilla nueva) hasta N rondas; si alguna sigue con voz, el script termina con error y las nombra.
 
 ```bash
-python cli.py music --model acestep --duration 30 --variants 4 --evaluate --retries 2 \
-  --folder out/music-variantes --style lofi-chill corporate ambient
+uv run studio music --model acestep --duration 30 --variants 4 --evaluate --retries 2 \
+  --style lofi-chill corporate ambient
 ```
 
 ```
@@ -185,7 +181,7 @@ Flujo recomendado:
 4. **Mezcla bajo la voz** con ducking: la música baja sola cuando hay narración. El comando está probado con una narración de Qwen y una pista de ACE-Step, y da una mezcla de −20 dB de media con picos de −4 dB:
 
    ```bash
-   ffmpeg -y -i out/narration/narracion.wav -i out/music/acestep-lofi-chill.wav -filter_complex \
+   ffmpeg -y -i out/narration/narracion.wav -i out/music/<AAAA-MM-DD>-<id>-lofi-chill/acestep-lofi-chill.wav -filter_complex \
      "[0:a]aformat=sample_rates=48000:channel_layouts=stereo,asplit[v][sc];\
       [1:a]volume=0.25[m];[m][sc]sidechaincompress=threshold=0.05:ratio=8:attack=20:release=400[duck];\
       [v][duck]amix=inputs=2:duration=first:normalize=0[out]" \
@@ -205,10 +201,10 @@ Tips para el prompt (texto libre de `--style`):
 
 Detalles operativos:
 
-- **El nombre de salida se sobrescribe**: `<modelo>-<estilo>.wav` no lleva fecha. Para guardar variantes, usa `--folder out/<proyecto>` o renombra el archivo antes de regenerarlo.
+- **Cada trabajo tiene su carpeta**: `out/music/<AAAA-MM-DD>-<id>-<slug>/` lleva fecha e id, así que una corrida nueva no pisa las anteriores. Las variantes y los estilos de una misma corrida caen en esa carpeta.
 - **Primera corrida**: descarga ~11 GB (ACE-Step) o ~21 GB (HeartMuLa). Si se corta, vuelve a correrla.
-- **Logs**: las corridas largas se lanzan en segundo plano y su salida se guarda en `logs/` de la raíz (por ejemplo, `logs/music-<fecha>.log`). HeartMuLa tarda ~5 min por pista.
-- **Un modelo a la vez en la GPU**: no generes música mientras corre `narration tts`, porque los dos juntos no caben en 8 GB y el desborde a la RAM compartida hace todo ~4× más lento. Antes de lanzar, revisa la VRAM libre con `nvidia-smi --query-gpu=memory.free --format=csv`: ACE-Step necesita ~6,5 GB. Otros procesos, como el daemon `laya` de Synapse, pueden estar ocupando varios GB.
+- **Logs**: la salida de cada trabajo va a `logs/jobs/<id>.log`, en la raíz. Las corridas largas se lanzan en segundo plano y se siguen desde ese log. HeartMuLa tarda ~5 min por pista.
+- **Un modelo a la vez en la GPU**: el candado `server/src/content_studio/gpu_lock.py` lo comparten el worker de `studio serve` y `python -m devtools gpu-turn`. No generes música mientras corre `studio narration tts`, porque los dos juntos no caben en 8 GB y el desborde a la RAM compartida hace todo ~4× más lento. Antes de lanzar, revisa la VRAM libre con `nvidia-smi --query-gpu=memory.free --format=csv`: ACE-Step necesita ~6,5 GB. Otros procesos, como el daemon `laya` de Synapse, pueden estar ocupando varios GB.
 - El LM `acestep-5Hz-lm-1.7B` también está descargado en `checkpoints/`, pero no se usa: es el perfil de 8–16 GB y necesita vLLM.
 
 ## Instalación (desde cero)
@@ -262,14 +258,14 @@ server/data/music/
 └── .venv-heartmula/   # gitignoreado
 ```
 
-El código está en `server/src/content_studio/music/` (parser, musica, estilos, evaluacion y `engines/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
+El código está en `server/src/content_studio/music/` (parser, music_main, styles, evaluation y `engines/`), y el servicio de la cola en `server/src/content_studio/services/music.py`. Se lanza con `uv run studio music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.music_main ...`. Las salidas van a `out/music/` y los logs a `logs/jobs/`, ambos en la raíz del repo y gitignoreados.
 
 ## Cómo verificar un resultado
 
 ```bash
-ffprobe -v error -show_entries format=duration -of csv=p=0 out/music/acestep-lofi-chill.wav   # duración
-ffmpeg -i out/music/acestep-lofi-chill.wav -af volumedetect -f null - 2>&1 | grep volume       # volumen
-ffmpeg -y -i out/music/acestep-lofi-chill.wav -lavfi showspectrumpic=s=800x300 out/spec.png    # espectrograma
+ffprobe -v error -show_entries format=duration -of csv=p=0 out/music/<AAAA-MM-DD>-<id>-lofi-chill/acestep-lofi-chill.wav   # duración
+ffmpeg -i out/music/<AAAA-MM-DD>-<id>-lofi-chill/acestep-lofi-chill.wav -af volumedetect -f null - 2>&1 | grep volume       # volumen
+ffmpeg -y -i out/music/<AAAA-MM-DD>-<id>-lofi-chill/acestep-lofi-chill.wav -lavfi showspectrumpic=s=800x300 out/spec.png    # espectrograma
 ```
 
 El volumen medio sale entre −15 y −21 dB, con picos de −1 dB, porque ACE-Step lo normaliza. Para usarlo bajo la narración hay que bajarlo en la mezcla.

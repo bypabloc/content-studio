@@ -280,14 +280,14 @@ Para generar varios guiones de una vez, cada uno puede ir en un `.json`:
 |---|---|
 | `texto` | Lista de párrafos, con las mismas reglas de este documento. Entre párrafos hay una pausa como la de una línea en blanco (0.6 s). También acepta un solo string. Un párrafo puede ser un objeto `{"texto": "…", "estilo": "dramatica", "emocion": "triste 0.4"}`, que equivale a anteponer esas marcas |
 | `estilo` | Uno de los estilos de la [README §4](../README.md#4-estilos). Elige la grabación de referencia del guion. `--style` en la línea de comandos lo reemplaza |
-| `id` | Nombre del archivo de salida: `<id>-<modelo>.wav`. Si falta, se usa el nombre del `.json` |
+| `id` | Nombre del archivo de salida dentro de la carpeta del trabajo: `<id>-<modelo>.wav`. Si falta, se usa el nombre del `.json` |
 | otros (`titulo`, `idioma`…) | `narration tts` los ignora |
 
 Las marcas de actitud de la notación de grabación (`[curiosa]`, `[animada]`) no sirven aquí: el modelo las lee en voz alta. El tono sale del `estilo`.
 
 ```bash
 # Varios guiones en una corrida: el modelo se carga una sola vez
-python cli.py narration tts --model qwen-0.6b --file guiones/*.json --output out/narration/organic
+uv run studio narration tts --model qwen-0.6b --file guiones/*.json
 ```
 
 Medido con 3 guiones (unos 30 s de audio cada uno): el primero tardó 28.8 s con la carga del modelo incluida, y los siguientes 21.9 s y 18.7 s.
