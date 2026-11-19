@@ -1,14 +1,26 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { ApiProvider } from '@/shared/api/context';
 import type { Connection } from '@/shared/api/client';
 import { t } from '@/shared/i18n/t';
+import { Providers } from './Providers';
+import { Shell } from './Shell';
 
 export const APP_VERSION = '0.1.0';
 
 type Status = { kind: 'starting' } | { kind: 'ready'; connection: Connection } | { kind: 'failed'; code: string };
 
-/** Pantalla de la app: arranca el server (Tauri lo levanta) y muestra el motivo si no arranca, con Reintentar (AC-10). */
+/** La app entera: los proveedores, y dentro la conexión con el server (Tauri lo levanta). */
 export function App() {
+  return (
+    <Providers>
+      <Connected />
+    </Providers>
+  );
+}
+
+/** Muestra el motivo si el server no arranca, con Reintentar (AC-10); con el server arriba, la app. */
+function Connected() {
   const [status, setStatus] = useState<Status>({ kind: 'starting' });
 
   const connect = useCallback(() => {
@@ -26,8 +38,12 @@ export function App() {
     connect();
   };
 
-  if (status.kind === 'starting') {
-    return <Screen>{t('server.starting')}</Screen>;
+  if (status.kind === 'ready') {
+    return (
+      <ApiProvider connection={status.connection}>
+        <Shell version={APP_VERSION} />
+      </ApiProvider>
+    );
   }
   if (status.kind === 'failed') {
     return (
@@ -44,12 +60,7 @@ export function App() {
       </Screen>
     );
   }
-  return (
-    <Screen>
-      <h1 className="text-2xl font-semibold">{t('app.name')}</h1>
-      <p className="text-sm text-muted-foreground">{t('app.version', { version: APP_VERSION })}</p>
-    </Screen>
-  );
+  return <Screen>{t('server.starting')}</Screen>;
 }
 
 function Screen({ children }: { children: ReactNode }) {
@@ -58,7 +69,7 @@ function Screen({ children }: { children: ReactNode }) {
   );
 }
 
-/** El motivo del código que devuelve `get_connection` (server/errores de arranque de src-tauri). */
+/** El motivo del código que devuelve `get_connection` (los errores de arranque de src-tauri). */
 function reason(code: string): string {
   switch (code) {
     case 'server_spawn_failed':

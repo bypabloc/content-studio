@@ -2,10 +2,21 @@
   "api.unknown_error": "Error de la API",
   "app.name": "Content Studio",
   "app.version": "Versión {version}",
+  "nav.group.settings": "Ajustes",
+  "nav.label": "Secciones",
+  "nav.settings": "Ajustes",
+  "palette.empty": "Sin resultados",
+  "palette.placeholder": "Buscar sección…",
+  "palette.title": "Ir a una sección",
   "server.error.title": "Content Studio no pudo arrancar",
   "server.exited": "El motor se cerró al arrancar.",
   "server.retry": "Reintentar",
   "server.spawn_failed": "No se encontró uv. Instala uv y vuelve a intentarlo.",
   "server.starting": "Arrancando el motor…",
-  "server.timeout": "El motor tardó demasiado en arrancar."
+  "server.timeout": "El motor tardó demasiado en arrancar.",
+  "shell.empty": "Esta sección todavía no está lista.",
+  "theme.change": "Cambiar tema",
+  "theme.dark": "Oscuro",
+  "theme.light": "Claro",
+  "theme.system": "Sistema"
 }
