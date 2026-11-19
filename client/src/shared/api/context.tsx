@@ -6,6 +6,11 @@ import { createApi, type Api, type Connection } from './client';
 import { connectEvents } from './events';
 import type { components } from './schema';
 
+type SettingOut = components['schemas']['SettingOut'];
+
+// Los avisos se leen de la caché al terminar un trabajo: se piden al conectar, para que el ajuste guardado valga.
+const ALERT_KEYS = ['notify.system', 'notify.sound'] as const;
+
 const ApiContext = createContext<Api | null>(null);
 
 /** Un ajuste de avisos; si nunca se guardó, está activo. */
@@ -20,6 +25,15 @@ function alertOn(queryClient: QueryClient, key: string): boolean {
 export function ApiProvider({ connection, children }: { connection: Connection; children: ReactNode }) {
   const api = useMemo(() => createApi(connection), [connection]);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    for (const key of ALERT_KEYS) {
+      void queryClient.prefetchQuery({
+        queryKey: ['settings', key],
+        queryFn: () => api.get<SettingOut>(`/settings/${key}`),
+      });
+    }
+  }, [api, queryClient]);
 
   useEffect(
     () =>

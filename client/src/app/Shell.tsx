@@ -1,5 +1,6 @@
 import { Toaster } from 'sonner';
 import { QueuePanel } from '@/features/queue/QueuePanel';
+import { SettingsPage } from '@/features/settings/SettingsPage';
 import { t } from '@/shared/i18n/t';
 import { useTheme } from '@/shared/theme/useTheme';
 import { CommandPalette } from './CommandPalette';
@@ -29,7 +30,7 @@ export function Shell({ version }: { version: string }) {
       </aside>
       <main className="flex flex-1 flex-col gap-2 p-6">
         {section ? <h2 className="text-xl font-semibold">{section.label}</h2> : null}
-        <p className="text-sm text-muted-foreground">{t('shell.empty')}</p>
+        {section?.id === 'settings' ? <SettingsPage /> : <p className="text-sm text-muted-foreground">{t('shell.empty')}</p>}
       </main>
       <CommandPalette />
       <Toaster />

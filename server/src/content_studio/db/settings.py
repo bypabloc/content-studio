@@ -26,3 +26,8 @@ def set_value(conn: sqlite3.Connection, key: str, value: object) -> None:
 def all_values(conn: sqlite3.Connection) -> dict[str, object]:
     """Todas las preferencias como diccionario."""
     return {row[0]: json.loads(row[1]) for row in conn.execute('SELECT key, value FROM settings')}
+
+
+def delete_prefix(conn: sqlite3.Connection, prefix: str) -> int:
+    """Borra las claves que empiezan por `prefix`, tal cual (sin comodines). Devuelve cuántas."""
+    return conn.execute('DELETE FROM settings WHERE substr(key, 1, ?) = ?', (len(prefix), prefix)).rowcount
