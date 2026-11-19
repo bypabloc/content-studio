@@ -97,7 +97,7 @@ export interface paths {
         };
         /**
          * List Jobs
-         * @description Trabajos filtrados por tipo y/o estado, en orden de la cola.
+         * @description Trabajos filtrados por tipo, estado y/o grupo de tomas, en orden de la cola.
          */
         get: operations["list_jobs_jobs_get"];
         put?: never;
@@ -166,6 +166,26 @@ export interface paths {
          * @description Crea un trabajo nuevo con los mismos parámetros. 409 si el original todavía no terminó.
          */
         post: operations["retry_job_jobs__job_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/star": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Star Job
+         * @description Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe.
+         */
+        post: operations["star_job_jobs__job_id__star_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -406,6 +426,13 @@ export interface components {
             finished_at?: string | null;
             /** Owner Pid */
             owner_pid?: number | null;
+            /**
+             * Starred
+             * @default false
+             */
+            starred: boolean;
+            /** Group Key */
+            group_key?: string | null;
         };
         /**
          * NewJob
@@ -647,6 +674,7 @@ export interface operations {
             query?: {
                 kind?: string | null;
                 status?: string | null;
+                group_key?: string | null;
             };
             header?: never;
             path?: never;
@@ -784,6 +812,37 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    star_job_jobs__job_id__star_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

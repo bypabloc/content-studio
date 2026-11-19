@@ -103,7 +103,7 @@ def narrate(
             print(f'Notice: paragraph {i + 1}: {a}')
 
     g = dict(
-        output=output, secs=secs, pb=pb, style=style, p=STYLES[style], language=language, seed=seed,
+        output=output, ref=ref, secs=secs, pb=pb, style=style, p=STYLES[style], language=language, seed=seed,
         seeds=[], seed_block=[None] * len(secs), audios=[], sr=0, blocks=[], time_s=0.0,
         master=master, lufs=lufs, master_info=None,
     )  # fmt: skip
@@ -118,26 +118,24 @@ def narrate(
     return g
 
 
-def write_blocks(g: dict, out_dir: Path) -> None:
-    """Guarda cada bloque de voz, antes de sus pausas y de la velocidad del estilo, como out_dir/blocks/<i>.wav
-    en float de 32 bits: regenerar un bloque no vuelve a cuantizar los demás."""
+def write_blocks(g: dict, out_dir: Path, indices: Iterable[int]) -> None:
+    """Guarda los bloques `indices` (antes de sus pausas y de la velocidad del estilo) como out_dir/blocks/<i>.wav,
+    en float de 32 bits. Solo se escriben los que cambiaron: los demás ya están en disco y no se recodifican."""
     import soundfile as sf
 
     (out_dir / 'blocks').mkdir(parents=True, exist_ok=True)
-    for i, audio in enumerate(g['audios']):
-        if audio is not None:
-            sf.write(out_dir / 'blocks' / f'{i}.wav', audio, g['sr'], subtype='FLOAT')
+    for i in indices:
+        if g['audios'][i] is not None:
+            sf.write(out_dir / 'blocks' / f'{i}.wav', g['audios'][i], g['sr'], subtype='FLOAT')
 
 
 def write_script(g: dict, out_dir: Path) -> None:
-    """script.json: lo necesario para regenerar un bloque sin el guion en memoria (D-2): segmentos, referencia y
-    semilla de cada bloque, estilo, idioma, master y LUFS."""
+    """script.json: lo necesario para rehacer la toma sin el guion en memoria (D-2). Los bloques se reconstruyen con
+    `prepare_blocks` a partir de los segmentos y la referencia, así que no se guarda el estado del motor."""
     data = dict(
-        language=g['language'], style=g['style'], master=g['master'], lufs=g['lufs'], segments=g['secs'],
-        blocks=[
-            dict(ref=str(pb['ref']), text_ref=pb['text_ref'], seed=seed)
-            for pb, seed in zip(g['pb'], g['seed_block'], strict=True)
-        ],
+        wav=g['output'].name, ref=str(g['ref']), style=g['style'], language=g['language'], master=g['master'],
+        lufs=g['lufs'], seed=g['seed'], seeds=g['seeds'], segments=g['secs'],
+        blocks=[dict(ref=str(pb['ref']), seed=seed) for pb, seed in zip(g['pb'], g['seed_block'], strict=True)],
     )  # fmt: skip
     (out_dir / 'script.json').write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
 
@@ -166,8 +164,9 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
         done += len(group)
         progress.emit(done / len(idx), f'block {done}/{len(idx)}')
     g['time_s'] += time.perf_counter() - t0
-    write_blocks(g, g['output'].parent)  # la carpeta del trabajo: blocks/, script.json y el .wav
-    write_script(g, g['output'].parent)
+    out = g['output'].parent  # la carpeta del trabajo: blocks/, script.json y el .wav
+    write_blocks(g, out, idx)
+    write_script(g, out)
     write(g)
 
 

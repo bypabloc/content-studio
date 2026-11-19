@@ -51,9 +51,10 @@ def list_jobs(
     conn: Annotated[sqlite3.Connection, Depends(get_conn)],
     kind: str | None = None,
     status: str | None = None,
+    group_key: str | None = None,
 ) -> list[dict]:
-    """Trabajos filtrados por tipo y/o estado, en orden de la cola."""
-    return store.list_jobs(conn, kind=kind, status=status)
+    """Trabajos filtrados por tipo, estado y/o grupo de tomas, en orden de la cola."""
+    return store.list_jobs(conn, kind=kind, status=status, group_key=group_key)
 
 
 @router.get('/jobs/{job_id}', response_model=Job)
@@ -79,3 +80,11 @@ def retry_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)
     except ValueError as error:
         raise ApiError(409, 'job_pending', job_id=job_id) from error
     return _found(conn, new_id)
+
+
+@router.post('/jobs/{job_id}/star', response_model=Job)
+def star_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+    """Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe."""
+    _found(conn, job_id)
+    store.star(conn, job_id)
+    return _found(conn, job_id)

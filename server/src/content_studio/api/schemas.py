@@ -26,6 +26,8 @@ class Job(BaseModel):
     started_at: str | None = None
     finished_at: str | None = None
     owner_pid: int | None = None
+    starred: bool = False  # la toma elegida de su grupo (spec 006, D-4)
+    group_key: str | None = None  # las tomas de un mismo texto comparten la clave
 
 
 class QueueState(BaseModel):

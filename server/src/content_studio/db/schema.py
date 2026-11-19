@@ -29,6 +29,12 @@ MIGRATIONS = [
     """
     ALTER TABLE jobs ADD COLUMN owner_pid INTEGER;
     """,
+    # Spec 006 (D-4): tomas de un mismo texto, con su clave de grupo y la elegida. Es la 3: la 2 es owner_pid.
+    """
+    ALTER TABLE jobs ADD COLUMN starred INTEGER NOT NULL DEFAULT 0;
+    ALTER TABLE jobs ADD COLUMN group_key TEXT;
+    CREATE INDEX jobs_group_key ON jobs (group_key);
+    """,
 ]
 
 

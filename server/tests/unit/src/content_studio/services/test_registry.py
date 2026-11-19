@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from content_studio.services import music, narration
+from content_studio.services import music, narration, narration_regenerate
 from content_studio.services.registry import SERVICES
 
 
 def test_every_kind_exposes_validate_and_build_command():
-    assert {'narration': narration, 'music': music} == SERVICES
+    assert {'narration': narration, 'music': music, 'narration.regenerate': narration_regenerate} == SERVICES
     for service in SERVICES.values():
         assert callable(service.validate)
         assert callable(service.build_command)

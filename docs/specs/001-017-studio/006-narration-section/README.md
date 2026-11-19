@@ -29,7 +29,7 @@ Narrar desde el estudio. El guion se escribe en un editor que avisa en vivo de l
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
 | 1 | Server: linter del guion, información y picos del audio, y bloques persistidos | IMP |
-| 2 | Server: trabajo `narration.regenerate` y tomas | PEN |
+| 2 | Server: trabajo `narration.regenerate` y tomas | IMP |
 | 3 | Client: editor, opciones y generar | PEN |
 | 4 | Client: reproductor con onda, evaluación, regenerar y comparar | PEN |
 
@@ -42,5 +42,5 @@ Narrar desde el estudio. El guion se escribe en un editor que avisa en vivo de l
 
 ## WARNING y PENDING
 
-* WARNING: `006-wavesurfer.md` (dependencia nueva), `006-bloques-en-disco.md` (lo que ocupa), `006-soundfile-dev.md` y `006-narration-sin-torch.md`.
+* WARNING: `006-wavesurfer.md` (dependencia nueva), `006-bloques-en-disco.md` (lo que ocupa), `006-soundfile-dev.md`, `006-narration-sin-torch.md`, `006-migracion-3.md`, `006-regenerar-sin-estado.md` y `006-tomas-y-grupo.md`.
 * PENDING: `006-cli-carpeta-compartida.md`.

@@ -28,12 +28,15 @@ class InvalidJob(ValueError):
 
 
 def enqueue(conn: sqlite3.Connection, kind: str, params: dict, services: Mapping[str, Any] = SERVICES) -> int:
-    """Valida con el servicio del tipo y encola el trabajo en su recurso (gpu o cpu)."""
+    """Valida con el servicio del tipo y encola el trabajo en su recurso (gpu o cpu). Antes de validar, el servicio
+    puede completar los parámetros y dar el grupo de tomas (`prepare`)."""
     service = services[kind]
+    prepare = getattr(service, 'prepare', None)
+    params, group = prepare(conn, params) if prepare else (params, None)
     errors = service.validate(params)
     if errors:
         raise InvalidJob(errors)
-    return jobs.insert(conn, kind, service.RESOURCE, params)
+    return jobs.insert(conn, kind, service.RESOURCE, params, group_key=group)
 
 
 def cancel(conn: sqlite3.Connection, job_id: int) -> bool:
@@ -50,7 +53,7 @@ def retry(conn: sqlite3.Connection, job_id: int) -> int:
     job = jobs.get(conn, job_id)
     if job is None or job['status'] in ('queued', 'running'):
         raise ValueError(f'job {job_id} is not finished')
-    return jobs.insert(conn, job['kind'], job['resource'], job['params'])
+    return jobs.insert(conn, job['kind'], job['resource'], job['params'], group_key=job['group_key'])
 
 
 def claim(conn: sqlite3.Connection, job_id: int) -> bool:

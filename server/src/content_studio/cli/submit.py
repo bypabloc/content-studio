@@ -73,6 +73,14 @@ def narration_params(args: argparse.Namespace) -> dict[str, Any]:
     return _params(args, NARRATION_FLAGS)
 
 
+def regenerate_params(args: argparse.Namespace) -> dict[str, Any]:
+    """Parámetros de `narration.regenerate` a partir de `studio narration regenerate <job> <index>`."""
+    params: dict[str, Any] = {'source_job': args.job, 'index': args.index}
+    if args.seed is not None:
+        params['seed'] = args.seed
+    return params
+
+
 def music_params(args: argparse.Namespace) -> dict[str, Any]:
     """Parámetros del servicio de música a partir de los flags de `studio music`."""
     if args.folder != paths.OUT / 'music':

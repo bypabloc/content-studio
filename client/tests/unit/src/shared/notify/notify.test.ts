@@ -11,6 +11,7 @@ const done: Job = {
   params: {},
   progress: 1,
   created_at: '2026-11-19T10:00:00Z',
+  starred: false,
   output_dir: 'out/music/2026-11-19-7-lofi',
 };
 

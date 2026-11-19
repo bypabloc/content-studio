@@ -54,6 +54,9 @@ def build_parser() -> argparse.ArgumentParser:
     source = ap.add_mutually_exclusive_group(required=True)
     source.add_argument('--text', help='text to narrate, in quotes')
     source.add_argument('--file', type=Path, nargs='+', help='one or more .txt or .json files; the model loads once')
+    # Internos (los usa narration.regenerate): rehacen el bloque --only de la toma de --from-script.
+    source.add_argument('--from-script', type=Path, help=argparse.SUPPRESS)
+    ap.add_argument('--only', type=int, help=argparse.SUPPRESS)
     ap.add_argument(
         '--output',
         type=Path,

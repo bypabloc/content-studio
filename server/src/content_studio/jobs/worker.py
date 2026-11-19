@@ -226,7 +226,8 @@ class Worker:
         """out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/ con el params.json del trabajo (spec 004, D-3)."""
         text = str(job['params'].get('text') or job['params'].get('style') or job['kind'])
         slug = re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')[:40] or 'run'
-        out_dir = self.out_root / job['kind'] / f'{datetime.now():%Y-%m-%d}-{job["id"]}-{slug}'
+        folder = job['kind'].split('.')[0]  # narration.regenerate sale en out/narration/, junto a sus tomas
+        out_dir = self.out_root / folder / f'{datetime.now():%Y-%m-%d}-{job["id"]}-{slug}'
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / 'params.json').write_text(json.dumps(job['params'], ensure_ascii=False, indent=2), encoding='utf-8')
         return out_dir
