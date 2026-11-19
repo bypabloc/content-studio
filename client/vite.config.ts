@@ -10,6 +10,7 @@ export default defineConfig({
   server: { port: 1420, strictPort: true },
   test: {
     environment: 'jsdom',
+    setupFiles: ['tests/unit/setup.ts'],
     include: ['tests/unit/src/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
