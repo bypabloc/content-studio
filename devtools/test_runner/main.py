@@ -22,6 +22,7 @@ STAGES = {
     'guard-tdd': guard_tdd.run,
 }
 GROUPS = {'all': ['lint', 'spelling', 'validators', 'unit', 'typecheck', 'tdd']}
+FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}
 
 
 def main(argv: list[str]) -> int:
@@ -31,7 +32,8 @@ def main(argv: list[str]) -> int:
     except ValueError as error:
         print(f'test-runner: {error}', file=sys.stderr)
         return 2
-    picked = changeset.files(options.git_mode, options.files)
+    # Solo las etapas que miran archivos piden el changeset: `changed` y `unmerged` necesitan origin/dev.
+    picked = changeset.files(options.git_mode, options.files) if FILE_STAGES & set(options.types) else []
     if options.write_baseline:
         print(
             json.dumps(

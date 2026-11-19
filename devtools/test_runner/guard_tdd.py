@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .. import paths
-
 TDD_DIRS = ['server/tests/tdd', 'devtools/tests/tdd']
 
 
@@ -18,9 +16,9 @@ def leftovers(root: Path) -> list[str]:
     return sorted(p.relative_to(root).as_posix() for d in TDD_DIRS for p in (root / d).rglob('test_*.py'))
 
 
-def run(files: list[Path], root: Path = paths.ROOT) -> dict:
-    """`files` no cambia el resultado: basta que exista un test efímero."""
-    found = leftovers(root)
+def run(files: list[Path], root: Path | None = None) -> dict:
+    """`files` no cambia el resultado: basta que exista un test efímero en el repo del directorio actual (o `root`)."""
+    found = leftovers(Path.cwd() if root is None else root)
     return {
         'stage': 'guard-tdd',
         'status': 'fail' if found else 'pass',

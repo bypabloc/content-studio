@@ -25,7 +25,7 @@ Fuente: `.agents/rules/devtools.md`. Desde la raíz del checkout (o con `uv run 
 
 ## Reglas
 
-- Comandos nuevos: un módulo con `main(argv) -> int`, una línea en `COMANDOS`, test en `devtools/tests/test_devtools.py`.
+- Comandos nuevos: un módulo con `main(argv) -> int`, una línea en `COMMANDS` de `devtools/__main__.py`, test en `devtools/tests/unit/test_<módulo>.py`. Etapas del test-runner: una línea en `STAGES` de `devtools/test_runner/main.py`.
 - Exit 0/1/2; stdout JSON parseable, stderr humano; salidas en `tmp/<comando>/`.
 - `worktree close` solo desde el checkout principal y con la rama ya fusionada en `origin/dev`.
 - Las reglas y skills se editan en `.agents/` y se sincronizan; nunca solo la copia de `.claude/`.

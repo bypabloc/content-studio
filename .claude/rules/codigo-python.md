@@ -8,7 +8,7 @@
 
 ## Reglas
 
-- **Máximo 300 líneas por `.py`.** Si un archivo se acerca, se divide por responsabilidad, no por tamaño. Lo comprueba `tests/validators/test_structure.py` (también en los hooks), sin excepciones; también falla si aparece un `.py` suelto en la raíz, `server/data/narration/` o `server/data/music/`.
+- **Tamaño por categoría** (`tests/validators/file-size.json`): fuente 300 líneas, tests 800. Si un archivo se acerca, se divide por responsabilidad. La etapa `validators` lo exige sin excepciones; el baseline solo puede bajar. `test_structure.py` vigila que no haya `.py` sueltos en la raíz ni en `server/data/`.
 - **Python 3.10 como mínimo** (el venv de CosyVoice es 3.10), con `from __future__ import annotations` para escribir `X | None`. Nada de `tomllib`, `Self`, `ExceptionGroup`, `datetime.UTC` ni `match` con sintaxis nueva. CI corre en 3.10 y 3.12.
 - **Dos capas.** En el nivel superior de un módulo solo va stdlib, salvo en `cli/` y `grabar/` (typer, rich, questionary). torch, numpy, soundfile y las librerías de cada motor se importan dentro de funciones, así `--help`, los parsers y el catálogo funcionan sin el venv del motor.
 - **Factory Method solo con dos o más productos**: motores TTS, motores de música y comandos del CLI. Lo que tiene un solo producto (referencia, catálogo de voces, fuentes, grabar) es una función o un módulo. SOLID y KISS: nada de interfaces, configuración ni autodescubrimiento que hoy no se usen.
@@ -16,16 +16,16 @@
 
 ## Cómo agregar
 
-- **Un motor TTS o de música**: un archivo en `engines/`, una línea en `engines/registry.py`, su venv y la librería en `LIBRARIES` de `server/tests/test_venvs.py`.
+- **Un motor TTS o de música**: un archivo en `engines/`, una línea en `engines/registry.py`, su venv y la librería en `LIBRARIES` de `server/tests/integration/test_venvs.py`.
 - **Un comando del CLI**: una clase `Comando` y una línea en `REGISTRY`.
-- **Un comando de devtools**: un módulo con `main(argv)` y una línea en `COMANDOS` (`devtools.md`).
+- **Un comando de devtools**: un módulo con `main(argv)` y una línea en `COMMANDS` (`devtools.md`).
 - Algo de más de dos archivos: primero su spec (`plan-format.md`).
 
 ## Antes de cada commit
 
 ```bash
 uv run ruff check && uv run ruff format --check
-uv run pytest            # doctests, caracterización, estructura, hooks y bugs; -m local corre los de los venvs
+python -m devtools test-runner --type=all   # todas las etapas de calidad (spec 003); `uv run pytest -m local` suma los venvs
 ```
 
-Si un cambio de comportamiento es a propósito, se regeneran las fixtures con `uv run python server/tests/fixtures/generar.py` en un commit aparte.
+Si un cambio de comportamiento es a propósito, se regeneran las fixtures con `uv run python server/tests/integration/fixtures/generate.py` en un commit aparte.

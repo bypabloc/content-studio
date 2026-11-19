@@ -29,5 +29,6 @@ python -m devtools <comando> [args]
 * Exit codes: `0` éxito, `1` validación fallida u ocupado, `2` argumento inválido o error.
 * **stdout** = resultado parseable (JSON en una línea); **stderr** = log humano. Un comando usa otro importando su función, nunca por subprocess.
 * Salidas en `tmp/<comando>/`; rutas desde la raíz del checkout (`paths.ROOT`) o del principal (`worktree.principal`), nunca desde el CWD.
-* Tests en `devtools/tests/test_devtools.py`; máximo 300 líneas por archivo.
+* Tests unitarios en `devtools/tests/unit/test_<módulo>.py` (espejo de `devtools/<ruta>/<módulo>.py`); máximo 800 líneas por archivo de test.
+* `test-runner` (spec 003): `python -m devtools test-runner --type=<etapas> [--git-mode=...] [--files=...]`. `all` = lint, spelling, validators, unit, typecheck y tdd; cada etapa es una línea en `STAGES` de `devtools/test_runner/main.py`.
 * Nada de scripts sueltos fuera de `server/src/` (lo comprueba `tests/validators/test_structure.py`).

@@ -119,10 +119,10 @@ def test_prepare_commit_msg_removes_attribution_and_pre_push_protects_main(repo,
     assert subprocess.run([*push, 'docs/a:sinprefijo'], cwd=repo, capture_output=True).returncode == 1
     assert subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True).returncode == 0
 
-    (repo / 'tests/tdd').mkdir(parents=True)
-    (repo / 'tests/tdd/test_x.py').write_text('')
-    subprocess.run(['git', 'add', 'tests'], cwd=repo, check=True)
+    (repo / 'server/tests/tdd').mkdir(parents=True)
+    (repo / 'server/tests/tdd/test_x.py').write_text('')
+    subprocess.run(['git', 'add', 'server'], cwd=repo, check=True)
     # Sin los hooks del repo: el pre-commit correría ruff y pytest de content-studio en este repo vacío.
     subprocess.run([*GIT[:5], 'commit', '-qm', 'test: tdd'], cwd=repo, check=True)
     tdd = subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, text=True)
-    assert tdd.returncode == 1 and 'tests/tdd/test_x.py' in tdd.stderr
+    assert tdd.returncode == 1 and 'server/tests/tdd/test_x.py' in tdd.stderr

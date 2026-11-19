@@ -1,8 +1,8 @@
 # cspell:ignore calidad
 name: calidad
 
-# ruff, pytest (doctests, caracterización, estructura y bugs) y spelling (cspell) en 3.10, el mínimo por el venv de
-# CosyVoice, y 3.12. Sin GPU: los tests marcados `local` (venvs de los motores) no corren aquí.
+# test-runner --type=all (lint, spelling, validators, unit con cobertura y espejo, typecheck y tdd) y guard-tdd, en 3.10,
+# el mínimo por el venv de CosyVoice, y 3.12 (spec 003, D-6). Sin GPU: los tests `local` no corren aquí.
 # Es check requerido de dev (ruleset): el job se llama calidad, como exige el ruleset (ver DECISIONS ciclo 8).
 on:
   pull_request:
@@ -28,7 +28,5 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: uv sync --group dev --python ${{ matrix.python }}
       - run: bun install --frozen-lockfile
-      - run: uv run ruff check
-      - run: uv run ruff format --check
-      - run: uv run pytest
-      - run: uv run python -m devtools spelling
+      - run: uv run python -m devtools test-runner --type=all
+      - run: uv run python -m devtools test-runner --type=guard-tdd

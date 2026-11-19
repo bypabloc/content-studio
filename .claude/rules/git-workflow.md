@@ -63,16 +63,16 @@ Un cambio chico de una sola sesión puede hacerse en una rama del checkout princ
 - **Workflow [.github/workflows/origen-pr.yml](../../.github/workflows/origen-pr.yml)**: es el check `origen-permitido`. Valida la rama de origen según el destino y rechaza los PRs de forks. **Si cambias los prefijos, cambia la lista `PREFIJOS_DEV` en el workflow, `PREFIJOS` en `.git-hooks/pre-commit` y `pre-push`, y la tabla de esta regla.**
 - **Workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml)**: tras cada push a `main`, abre el PR `main → dev` en auto-merge (el repo tiene activado *Allow auto-merge*).
 - **Git hooks locales [.git-hooks/](../../.git-hooks/)** (se activan una vez por clon: `git config core.hooksPath .git-hooks`; el hook `SessionStart` avisa si faltan):
-  - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, ruff + pytest si hay Python staged, y `agent-context` + `reglas` si hay instrucciones de agentes staged.
+  - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, `test-runner` (lint, spelling, validators) sobre lo staged, y `agent-context` + `reglas` si hay instrucciones de agentes staged.
   - `prepare-commit-msg`: borra las líneas de atribución de IA.
-  - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo, y falla si quedan tests tdd efímeros (`tests/tdd/`).
+  - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo, y `guard-tdd` (tests efímeros en `*/tests/tdd/`) y `typecheck` sobre lo que sube.
   - Si un hook falla, se corrige la causa (skill `fix-hooks`): **nunca** `--no-verify`. La lista de prefijos está también en estos hooks.
 
 ## Commits y PRs
 
 - Conventional Commits en español: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `ci:`, `perf:`, `style:`. El tipo coincide con el prefijo de la rama.
 - **Sin atribución de IA** en commits, PRs ni comentarios (nada de `Co-Authored-By: Claude`, "Generated with…", etc.).
-- Antes de confirmar cambios: correr `uv run ruff check`, `uv run ruff format --check` y `uv run pytest` (doctests incluidos; lo mismo que el workflow `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
+- Antes de confirmar cambios: correr `python -m devtools test-runner --type=all` (lo mismo que `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
 - El cuerpo del PR enlaza las fichas de `docs/process/WARNING/` y `PENDING/` que dejó el cambio, o dice que no dejó ninguna.
 - Commit, push y merge solo cuando el usuario lo pida, o cuando lo pide una spec en ejecución (`execute-spec`).
 - **Todo merge va a `dev`**, con el cierre de la spec (`worktree close`). **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
