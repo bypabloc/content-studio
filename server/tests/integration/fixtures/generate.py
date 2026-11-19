@@ -1,6 +1,6 @@
 """Caracterización: vuelca parsers.json y bloques.json, que fijan el comportamiento antes del refactor a src/.
 
-Uso: uv run python tests/fixtures/generar.py [CARPETA]   (por defecto, junto a este archivo)
+Uso: uv run python server/tests/integration/fixtures/generate.py [CARPETA]   (por defecto, junto a este archivo)
 
 Las fixtures se generaron con el código viejo de dev 31f9c20 y tests/test_caracterizacion.py compara contra ellas
 con estas mismas funciones. La fuente es `actual()`: los 4 parsers por clave de comando y un objeto con
@@ -27,7 +27,7 @@ from pathlib import Path
 from unittest import mock
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[2]  # server/tests/fixtures → raíz del repo
+ROOT = HERE.parents[3]  # server/tests/integration/fixtures → raíz del repo
 MODELS = ['voxcpm2', 'cosyvoice3', 'qwen-1.7b', 'qwen-0.6b', 'chatterbox', 'omnivoice', 'indextts']
 # Las choices de --voice salen de server/data/narration/voices/<voz>/aprobacion.json, que está
 # gitignoreado: se fijan las 9 voces

@@ -70,7 +70,7 @@ OLD_PATHS = (
     r'(?<!server/data/)music/models',
 )
 # Historial y specs se quedan como están; test_move_data crea el árbol viejo a propósito; hatch es relativo a server/.
-OUTSIDE_CHECK = ('tests/validators/test_structure.py', 'devtools/tests/test_move_data.py', 'server/pyproject.toml')
+OUTSIDE_CHECK = ('tests/validators/test_structure.py', 'devtools/tests/unit/test_move_data.py', 'server/pyproject.toml')
 
 
 def test_ac7_without_old_paths():

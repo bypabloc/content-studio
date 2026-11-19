@@ -10,7 +10,7 @@ from content_studio.cli.commands import REGISTRY, por_key
 from content_studio.common.process import join, split
 from content_studio.narration.parser import build_parser
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 ENV = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
 
 
