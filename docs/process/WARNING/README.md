@@ -15,8 +15,4 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 - **Pendiente**: ficha de `../PENDING/` si deja trabajo para después.
 ```
 
-| Ficha | Qué | Cuándo |
-| :--- | :--- | :--- |
-| [001-move-data](001-move-data.md) | `move-data` mueve `narration/` y `music/` a `server/data/` (datos del usuario) y reescribe sus `.pth` | Antes de pasar a `main`: correr `move-data --apply` en el principal, después del `git pull` |
-| [002-mapeo-de-nombres](002-mapeo-de-nombres.md) | Mapa de nombres de español a inglés (módulos, datos, valores de salida) y desvíos del plan en el ciclo 4 | Antes de pasar a `main`: revisar el mapa y correr `move-data --apply` (T9) |
-| [002-move-data-aplicar](002-move-data-aplicar.md) | `move-data --apply` de la 002 renombra voces, grabaciones y motores del usuario (28,3 GiB de `motores/`) | Después del merge a `dev`, con confirmación del usuario (T9) |
+Sin fichas abiertas: las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
