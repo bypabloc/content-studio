@@ -15,16 +15,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Carpetas ignoradas que se enlazan (globs desde la raíz) y audios que se copian.
+# Carpetas ignoradas que se enlazan (globs desde la raíz) y audios que se copian. node_modules no se enlaza: `bun
+# install` en el worktree lo crea propio, porque un enlace lo escribiría en el principal.
 LINKS = (
     'server/data/narration/.venv*',
     'server/data/music/.venv*',
     'server/data/narration/engines',
     'server/data/music/models',
-    'node_modules',  # diccionarios de cspell: sin ellos `spelling` (y el pre-commit) falla en el worktree
 )
 VOZ, VOCES = 'server/data/narration/reference', 'server/data/narration/voices'
 AUDIOS = ('*.wav', '*.m4a', '*.mp3', '*.flac')
+# El target de Cargo se comparte entre worktrees (D-10): enlazado a <principal>/tmp/cargo-target, sin exportar
+# CARGO_TARGET_DIR (que `prepare` no puede dejar en el entorno de otras sesiones).
+CARGO_TARGET = 'client/src-tauri/target'
 
 
 def _git(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -80,8 +83,27 @@ def missing(main: Path, wt: Path) -> tuple[list[Path], list[Path]]:
     return [c for c in folders if absent(c)], [a for a in audios if absent(a)]
 
 
+def _cargo_target(main: Path, root: Path) -> bool:
+    """Enlaza el target de Cargo del worktree al compartido del principal; un target que ya existe no se toca."""
+    target = root / CARGO_TARGET
+    if not (root / 'client/src-tauri').is_dir() or target.exists() or target.is_symlink():
+        return False
+    shared = main / 'tmp/cargo-target'
+    shared.mkdir(parents=True, exist_ok=True)
+    link(shared, target)
+    return True
+
+
+def _bun_install(root: Path) -> int:
+    """`bun install --frozen-lockfile` en el worktree (crea su node_modules). Sin bun en el PATH devuelve 127."""
+    try:
+        return subprocess.run(['bun', 'install', '--frozen-lockfile'], cwd=root, stdout=subprocess.DEVNULL).returncode
+    except FileNotFoundError:
+        return 127
+
+
 def prepare(main: Path, name: str) -> int:
-    """Enlaza venvs, motores, modelos y voces del principal en el worktree `name`."""
+    """Enlaza venvs, motores, modelos y voces del principal en el worktree `name`, e instala sus dependencias."""
     wt = search(main, name)
     if not wt:
         print(f'there is no worktree named {name} (git worktree list)', file=sys.stderr)
@@ -94,8 +116,15 @@ def prepare(main: Path, name: str) -> int:
         (root / rel).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(main / rel, root / rel)
     (root / 'tmp').mkdir(exist_ok=True)
+    cargo = _cargo_target(main, root)
+    # Un node_modules enlazado al principal (de versiones anteriores) lo escribiría bun: se quita antes de instalar.
+    if os.path.lexists(root / 'node_modules') and is_link(root / 'node_modules'):
+        _unlink(root / 'node_modules')
+    if (root / 'package.json').is_file() and (code := _bun_install(root)):
+        print(f'bun install failed in {root} (exit {code}): fix it and run worktree prepare again', file=sys.stderr)
+        return 1
     print(f'{root} ready: {len(folders)} folder(s) linked, {len(audios)} audio file(s) copied', file=sys.stderr)
-    print(json.dumps({'prepared': name, 'linked': len(folders), 'copied': len(audios)}))
+    print(json.dumps({'prepared': name, 'linked': len(folders), 'copied': len(audios), 'cargo_target': cargo}))
     return 0
 
 
@@ -104,12 +133,17 @@ def is_link(p: Path) -> bool:
     return p.is_symlink() or getattr(os.lstat(p), 'st_reparse_tag', 0) == 0xA0000003
 
 
+def _unlink(p: Path) -> None:
+    """Quita un enlace sin tocar su destino: unlink para un symlink, rmdir para la junction de Windows."""
+    p.unlink() if p.is_symlink() else os.rmdir(p)
+
+
 def remove_links(root: Path) -> int:
     """Quita los enlaces de `prepare` antes de borrar el worktree: `git worktree remove` no debe entrar en ellos y
     borrar los venvs o modelos del principal. Quitar un enlace (unlink o rmdir de la junction) no toca su destino."""
-    links = [p for g in (*LINKS, f'{VOCES}/*') for p in root.glob(g) if is_link(p)]
+    links = [p for g in (*LINKS, 'node_modules', f'{VOCES}/*', CARGO_TARGET) for p in root.glob(g) if is_link(p)]
     for p in links:
-        p.unlink() if p.is_symlink() else os.rmdir(p)
+        _unlink(p)
     return len(links)
 
 

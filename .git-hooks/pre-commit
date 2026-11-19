@@ -36,6 +36,12 @@ fi
 echo "[pre-commit] test-runner: lint, spelling, validators (staged)"
 PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=lint,spelling,validators --git-mode=staged
 
+# Gates del client cuando hay cambios en client/ (spec 005, D-9). budget y e2e corren en la CI (calidad.yml).
+if grep -q '^client/' <<<"$STAGED"; then
+  echo "[pre-commit] test-runner: client-lint, client-typecheck, client-unit"
+  PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=client-lint,client-typecheck,client-unit
+fi
+
 # Agent instructions: size of what each agent loads and .agents/ <-> .claude/ sync (agent-config-testing.md).
 if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then
   echo "[pre-commit] agent-context + rules"

@@ -65,3 +65,17 @@ def test_run_fails_when_the_build_fails(monkeypatch, tmp_path):
 
     assert result['status'] == 'fail'
     assert 'vite: error' in result['detail']
+
+
+def test_run_fails_when_the_build_left_no_js(monkeypatch, tmp_path):
+    """Sin JS en dist/assets el presupuesto no puede pasar con 0 kB: falla cerrado."""
+    monkeypatch.setattr(
+        subprocess, 'run', lambda *a, **k: type('Done', (), {'returncode': 0, 'stdout': '', 'stderr': ''})()
+    )
+    _dist_with(tmp_path, {'app.css': b'x' * 1000})
+    _budget(tmp_path, 250)
+
+    result = budget.run([], root=tmp_path)
+
+    assert result['status'] == 'fail'
+    assert 'no JS' in result['detail']

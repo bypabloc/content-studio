@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: {
     command: `bun run --cwd ../../client build && bun run --cwd ../../client preview -- --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    // Sin reutilizar: un servidor ajeno en el puerto probaría otro build, no el de este worktree.
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

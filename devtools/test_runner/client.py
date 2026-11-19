@@ -9,10 +9,14 @@ import subprocess
 from pathlib import Path
 
 from .. import paths
+from . import client_mirror
 
 
 def _run(stage: str, command: list[str], cwd: Path) -> dict:
-    done = subprocess.run(command, cwd=cwd, capture_output=True, encoding='utf-8', errors='replace')
+    try:
+        done = subprocess.run(command, cwd=cwd, capture_output=True, encoding='utf-8', errors='replace')
+    except FileNotFoundError:
+        return {'stage': stage, 'status': 'fail', 'detail': f'{command[0]} is not in PATH: install it and run again'}
     ok = done.returncode == 0
     return {
         'stage': stage,
@@ -30,13 +34,30 @@ def lint(files: list[Path], root: Path = paths.ROOT) -> dict:
     return _script('client-lint', 'lint', root)
 
 
+# Tipos de la API generados desde `studio openapi` (D-3): la etapa los regenera y falla si el archivo cambió.
+SCHEMA = 'client/src/shared/api/schema.d.ts'
+
+
 def typecheck(files: list[Path], root: Path = paths.ROOT) -> dict:
-    """`tsc --noEmit` sobre client/tsconfig.json."""
+    """Regenera schema.d.ts y falla si cambió; luego `tsc --noEmit` sobre client/tsconfig.json."""
+    generated = _script('client-typecheck', 'gen:api', root)
+    if generated['status'] == 'fail':
+        return generated
+    drift = _run('client-typecheck', ['git', 'diff', '--quiet', '--', SCHEMA], root)
+    if drift['status'] == 'fail':
+        return {
+            'stage': 'client-typecheck',
+            'status': 'fail',
+            'detail': f'{SCHEMA} is out of date with `studio openapi`: commit the regenerated file (gen:api).',
+        }
     return _script('client-typecheck', 'typecheck', root)
 
 
 def unit(files: list[Path], root: Path = paths.ROOT) -> dict:
-    """Vitest con cobertura por archivo (el umbral vive en client/vite.config.ts)."""
+    """Auditoría del espejo y luego vitest con cobertura por archivo (el umbral vive en client/vite.config.ts)."""
+    issues = client_mirror.problems(root)
+    if issues:
+        return {'stage': 'client-unit', 'status': 'fail', 'detail': '\n'.join(issues)}
     return _script('client-unit', 'test', root)
 
 

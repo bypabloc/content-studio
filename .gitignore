@@ -13,6 +13,7 @@ server/data/narration/reference/prueba/
 server/data/narration/reference/**/*.wav
 server/data/narration/reference/**/*.m4a
 server/data/narration/reference/**/*.mp3
+server/data/narration/reference/**/*.flac
 # Voces libres construidas por `cli.py narration voces`: se regeneran desde catalog.json (el único que se versiona).
 server/data/narration/voices/*
 !server/data/narration/voices/catalog.json
@@ -39,5 +40,5 @@ node_modules/
 # spec 005: client
 client/dist/
 client/coverage/
-client/src-tauri/target/
+client/src-tauri/target
 client/src-tauri/gen/

@@ -1,0 +1,12 @@
+{
+  "untested": [
+    "client/src/app/Shell.tsx",
+    "client/src/app/nav.ts",
+    "client/src/app/routes.ts",
+    "client/src/features/queue/JobRow.tsx",
+    "client/src/features/queue/useQueue.ts",
+    "client/src/shared/api/errors.ts",
+    "client/src/shared/hooks/useSetting.ts",
+    "client/src/shared/theme/useTheme.ts"
+  ]
+}

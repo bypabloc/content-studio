@@ -34,6 +34,8 @@ def run(files: list[Path], root: Path = paths.ROOT) -> dict:
     if build.returncode:
         return {'stage': 'budget', 'status': 'fail', 'detail': (build.stdout + build.stderr).strip()}
     report = measure(root / 'client' / 'dist')
+    if not report['files']:
+        return {'stage': 'budget', 'status': 'fail', 'detail': 'no JS in client/dist/assets: the build left no bundle'}
     limit = json.loads((root / 'client' / 'budget.json').read_text(encoding='utf-8'))['initialJsGzipKb']
     report['limit_kb'] = limit
     out = root / 'tmp' / 'budget' / 'report.json'

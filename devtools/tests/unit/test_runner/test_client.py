@@ -20,7 +20,6 @@ class _Done:
     ('run', 'script', 'stage'),
     [
         (client.lint, 'lint', 'client-lint'),
-        (client.typecheck, 'typecheck', 'client-typecheck'),
         (client.unit, 'test', 'client-unit'),
     ],
 )
@@ -49,8 +48,46 @@ def test_tauri_check_runs_cargo_check_on_the_tauri_crate(monkeypatch, tmp_path):
     assert result == {'stage': 'tauri-check', 'status': 'pass', 'detail': ''}
 
 
-def test_failing_script_fails_the_stage_and_keeps_its_output(monkeypatch, tmp_path):
-    monkeypatch.setattr(subprocess, 'run', lambda *a, **k: _Done(1, stdout='error TS2322', stderr=''))
+def test_typecheck_regenerates_the_schema_then_runs_tsc(monkeypatch, tmp_path):
+    calls = []
+
+    def fake(command, **kwargs):
+        calls.append((command, kwargs['cwd']))
+        return _Done(0)
+
+    monkeypatch.setattr(subprocess, 'run', fake)
+
+    result = client.typecheck([], root=tmp_path)
+
+    assert calls == [
+        (['bun', 'run', 'gen:api'], tmp_path / 'client'),
+        (['git', 'diff', '--quiet', '--', client.SCHEMA], tmp_path),
+        (['bun', 'run', 'typecheck'], tmp_path / 'client'),
+    ]
+    assert result == {'stage': 'client-typecheck', 'status': 'pass', 'detail': ''}
+
+
+def test_typecheck_fails_when_the_schema_no_longer_matches_openapi(monkeypatch, tmp_path):
+    calls = []
+
+    def fake(command, **kwargs):
+        calls.append(command)
+        return _Done(1 if command[:2] == ['git', 'diff'] else 0)
+
+    monkeypatch.setattr(subprocess, 'run', fake)
+
+    result = client.typecheck([], root=tmp_path)
+
+    assert result['status'] == 'fail'
+    assert 'schema.d.ts' in result['detail']
+    assert ['bun', 'run', 'typecheck'] not in calls
+
+
+def test_failing_tsc_fails_the_stage_and_keeps_its_output(monkeypatch, tmp_path):
+    def fake(command, **kwargs):
+        return _Done(1, stdout='error TS2322', stderr='') if 'typecheck' in command else _Done(0)
+
+    monkeypatch.setattr(subprocess, 'run', fake)
 
     result = client.typecheck([], root=tmp_path)
 
@@ -66,3 +103,15 @@ def test_e2e_runs_the_playwright_workspace(monkeypatch, tmp_path):
 
     assert calls == [(['bun', 'run', 'test'], tmp_path / 'tests' / 'e2e')]
     assert result == {'stage': 'e2e', 'status': 'pass', 'detail': ''}
+
+
+def test_a_missing_tool_fails_the_stage_and_names_it(monkeypatch, tmp_path):
+    def missing(*args, **kwargs):
+        raise FileNotFoundError('bun')
+
+    monkeypatch.setattr(subprocess, 'run', missing)
+
+    result = client.lint([], root=tmp_path)
+
+    assert result['status'] == 'fail'
+    assert 'bun is not in PATH' in result['detail']

@@ -47,7 +47,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run --cwd tests/e2e playwright install --with-deps chromium
-      - run: uv run --no-project python -m devtools test-runner --type=client-lint,client-typecheck,client-unit,budget,e2e
+      - run: uv run --no-project python -m devtools test-runner --type=e2e
       - name: upload the e2e report on failure
         if: failure()
         uses: actions/upload-artifact@v4

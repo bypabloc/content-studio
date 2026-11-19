@@ -12,7 +12,7 @@ test('cancelar la confirmación de Restablecer no borra nada (AC-4)', async ({ p
   const dialog = page.waitForEvent('dialog');
   await page.getByRole('button', { name: 'Restablecer elecciones' }).click();
   await dialog;
-  await page.evaluate(() => new Promise((done) => setTimeout(done))); // la página vuelve de confirm() antes de mirar
+  await page.waitForLoadState('networkidle'); // si el DELETE saliera, la petición llegaría al mock antes de que quede quieta la red
 
   expect(calls.some((call) => call.method === 'DELETE')).toBe(false);
 });
