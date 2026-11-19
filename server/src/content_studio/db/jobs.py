@@ -21,9 +21,7 @@ EDITABLE = {
 }
 
 
-def _decode(row: sqlite3.Row | None) -> dict | None:
-    if row is None:
-        return None
+def _decode(row: sqlite3.Row) -> dict:
     job = dict(row)
     job['params'] = json.loads(job['params'])
     return job
@@ -36,21 +34,23 @@ def insert(conn: sqlite3.Connection, kind: str, resource: str, params: dict) -> 
         'INSERT INTO jobs (kind, resource, status, position, params, created_at) VALUES (?, ?, ?, ?, ?, ?)',
         (kind, resource, 'queued', position, json.dumps(params), utc_now()),
     )
-    return cursor.lastrowid
+    job_id = cursor.lastrowid
+    assert job_id is not None  # un INSERT siempre deja el id de la fila
+    return job_id
 
 
 def get(conn: sqlite3.Connection, job_id: int) -> dict | None:
     """Devuelve un trabajo con `params` decodificado, o None si no existe."""
-    return _decode(conn.execute('SELECT * FROM jobs WHERE id = ?', (job_id,)).fetchone())
+    row = conn.execute('SELECT * FROM jobs WHERE id = ?', (job_id,)).fetchone()
+    return None if row is None else _decode(row)
 
 
 def next_queued(conn: sqlite3.Connection, resource: str) -> dict | None:
     """El primer trabajo `queued` de ese recurso, por posición."""
-    return _decode(
-        conn.execute(
-            "SELECT * FROM jobs WHERE status = 'queued' AND resource = ? ORDER BY position LIMIT 1", (resource,)
-        ).fetchone()
-    )
+    row = conn.execute(
+        "SELECT * FROM jobs WHERE status = 'queued' AND resource = ? ORDER BY position LIMIT 1", (resource,)
+    ).fetchone()
+    return None if row is None else _decode(row)
 
 
 def update(conn: sqlite3.Connection, job_id: int, **fields: object) -> None:

@@ -8,6 +8,7 @@ import argparse
 import importlib.util
 
 from content_studio import paths
+from content_studio.common import progress
 from content_studio.music.engines.base import Jobs, MusicEngine
 from content_studio.music.evaluation import trim_silence
 
@@ -53,7 +54,8 @@ class HeartMuLa(MusicEngine):
         )
         # Con un solo [Instrumental] corta a ~12 s; una sección cada ~20 s lo estira hasta el tope.
         sections = ['[Intro]'] + ['[Instrumental]'] * max(1, int(a.duration // 20)) + ['[Outro]']
-        for style, output in jobs:
+        for n, (style, output) in enumerate(jobs, 1):
+            progress.emit((n - 1) / len(jobs), f'track {n}/{len(jobs)}')
             with torch.no_grad():
                 pipe(
                     {'lyrics': '\n\n'.join(sections), 'tags': style['tags'] + ',instrumental'},
