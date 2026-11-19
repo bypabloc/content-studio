@@ -1,4 +1,5 @@
-"""Descarga de la base cruda de cada voz del catálogo, con caché en narration/voces/.fuentes. Solo stdlib + ffmpeg."""
+"""Descarga de la base cruda de cada voz del catálogo, con caché en
+server/data/narration/voces/.fuentes. Solo stdlib + ffmpeg."""
 
 from __future__ import annotations
 
@@ -51,7 +52,8 @@ class ZipRemoto(io.RawIOBase):
 
 
 def bajar(url: str, miembro: str | None = None) -> Path:
-    """Archivo de la fuente en la caché narration/voces/.fuentes: la URL entera o, con `miembro`, ese archivo de
+    """Archivo de la fuente en la caché server/data/narration/voces/.fuentes:
+    la URL entera o, con `miembro`, ese archivo de
     un zip."""
     cache = VOCES / '.fuentes' / (miembro or url.rsplit('/', 1)[-1].replace('%28', '(').replace('%29', ')'))
     if not cache.exists():

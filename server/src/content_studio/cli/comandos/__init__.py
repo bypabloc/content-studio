@@ -9,7 +9,7 @@ from content_studio.cli.comandos.narration import Grabar, Tts, Voces
 __all__ = ['GRUPOS', 'REGISTRO', 'Comando', 'Opcion', 'por_clave']
 
 REGISTRO: list[Comando] = [Tts(), Grabar(), Voces(), Musica()]  # el orden del menú
-GRUPOS = {'narration': 'Narración TTS clonando una voz (narration/README.md).'}
+GRUPOS = {'narration': 'Narración TTS clonando una voz (server/data/narration/README.md).'}
 
 
 def por_clave(clave: str) -> Comando:

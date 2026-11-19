@@ -16,7 +16,7 @@ Fuente: `.agents/rules/plan-format.md`. Plantillas: `docs/specs/_plantilla/`. Í
 
 ## 1. Explore (sin escribir)
 
-1. Lee las reglas del área (`codigo-python.md`, `stack.md`, `testing.md`) y el README de la herramienta (`narration/README.md`, `music/README.md`).
+1. Lee las reglas del área (`codigo-python.md`, `stack.md`, `testing.md`) y el README de la herramienta (`server/data/narration/README.md`, `server/data/music/README.md`).
 2. Ubica el código con graphify (`graphify query|explain|affected`) o `code-explorer`; mide el alcance real (cuántos archivos toca: decide la escala).
 3. Revisa `docs/process/02-next/` (¿ya está pensada?), `WARNING/` y `PENDING/` (¿algo lo condiciona?) y las specs abiertas del índice (¿dependencias?).
 

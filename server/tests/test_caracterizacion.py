@@ -1,4 +1,5 @@
-"""El código (src/ y lo que queda en narration/) se comporta igual que las fixtures de tests/fixtures/."""
+"""El código (server/src/ y lo que queda en server/data/narration/) se comporta igual que las
+fixtures de server/tests/fixtures/."""
 
 from __future__ import annotations
 

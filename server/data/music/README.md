@@ -1,4 +1,4 @@
-# music/ — música instrumental local (GPU 8 GB)
+# server/data/music/ — música instrumental local (GPU 8 GB)
 
 Genera música de fondo **instrumental** para los videos, en local y sin costo: lofi, corporate, ambient o cualquier estilo descrito en texto libre. Hay dos modelos: **ACE-Step 1.5** (el recomendado) y **HeartMuLa 3B**.
 
@@ -73,7 +73,7 @@ Las tonalidades son las que la guía oficial de ACE-Step considera estables: C, 
 
 ### Catálogo ampliado: 117 presets más
 
-Definidos en [estilos.py](../src/content_studio/music/estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
+Definidos en [estilos.py](../../src/content_studio/music/estilos.py); la tabla completa con descripción, tono y BPM está en [ESTILOS.md](ESTILOS.md). Pensados como fondo para tutoriales, publicidad, demos y videos. Cada uno se generó a 30 s con ACE-Step y pasó `--evaluar` (ver más abajo). Se usan igual que los otros: `--estilo <nombre>`.
 
 | Grupo | Presets |
 |:--|:--|
@@ -94,7 +94,7 @@ Presets limítrofes en voz (entre −25 y −32 dB, pasaron por poco): `demo-pro
 
 Bajo una narración, los que mejor acompañan son los de tutoriales y explicativos, `corporate-minimal`, `deep-house` y `ambient`.
 
-Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](../src/content_studio/music/estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
+Para agregar un preset, suma una entrada a `NUEVOS` en [estilos.py](../../src/content_studio/music/estilos.py): `nombre: (caption en inglés, tono, bpm[, compás])`. El script agrega `no vocals` al caption y deriva los tags de HeartMuLa. Pruébalo con `--evaluar` antes de confiar en él.
 
 ## Evaluar que no haya voz (`--evaluar`)
 
@@ -213,7 +213,7 @@ Detalles operativos:
 
 ## Instalación (desde cero)
 
-Requisitos: `uv`, `git`, `ffmpeg` y una GPU NVIDIA. Los modelos y los venvs quedan dentro de `music/`; `models/` y `.venv-*` están gitignoreados.
+Requisitos: `uv`, `git`, `ffmpeg` y una GPU NVIDIA. Los modelos y los venvs quedan dentro de `server/data/music/`; `models/` y `.venv-*` están gitignoreados.
 
 ```bash
 cd music
@@ -248,12 +248,12 @@ VIRTUAL_ENV=.venv-heartmula uv pip install torch==2.10.0 torchaudio==2.10.0 torc
 VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib
 ```
 
-Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si mueves `music/`, borra los `.venv-*` y vuelve a crearlos con los comandos de arriba (con la caché de uv tarda poco).
+Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si mueves `server/data/music/`, borra los `.venv-*` y vuelve a crearlos con los comandos de arriba (con la caché de uv tarda poco).
 
 ## Estructura
 
 ```
-music/
+server/data/music/
 ├── README.md          # este archivo
 ├── INVESTIGACION.md   # modelos evaluados, descartes y fuentes
 ├── ESTILOS.md         # catálogo de presets
@@ -262,7 +262,7 @@ music/
 └── .venv-heartmula/   # gitignoreado
 ```
 
-El código está en `src/content_studio/music/` (parser, musica, estilos, evaluacion y `motores/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
+El código está en `server/src/content_studio/music/` (parser, musica, estilos, evaluacion y `motores/`) y se lanza con `python cli.py music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.musica ...`. Las salidas van a `out/music/` y los logs a `logs/`, ambos en la raíz del repo y gitignoreados.
 
 ## Cómo verificar un resultado
 

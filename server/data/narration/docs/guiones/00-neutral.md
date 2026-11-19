@@ -1,4 +1,4 @@
-# 0 · Neutral → `narration/voz/neutral.wav` y `narration/voz/neutral-fin.wav`
+# 0 · Neutral → `server/data/narration/voz/neutral.wav` y `server/data/narration/voz/neutral-fin.wav`
 
 **Intención**: tu voz natural, sin estilo; ritmo medio. Es el **ancla de timbre** de todo el kit.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~150 ppm) · **Tono**: el de tu voz en reposo · **Orden en la sesión**: 1.º (`neutral.wav`) y último (`neutral-fin.wav`, mismo texto)

@@ -10,16 +10,16 @@ Ordenados por dependencia (utilidades → parser y registro → motor o comando 
 
 #### Ciclo 1: <pieza> [AC-1]
 
-- **RED**: `tests/test_<área>.py::test_ac1_<caso>` (o un doctest en `<módulo>`): WHEN <acción> THEN <resultado> [AC-1]. Falla por <motivo esperado>.
-- **GREEN**: <implementación mínima>. Verify: `uv run pytest tests/test_<área>.py::test_ac1_<caso> -q`.
+- **RED**: `server/tests/test_<área>.py::test_ac1_<caso>` (o un doctest en `<módulo>`): WHEN <acción> THEN <resultado> [AC-1]. Falla por <motivo esperado>.
+- **GREEN**: <implementación mínima>. Verify: `uv run pytest server/tests/test_<área>.py::test_ac1_<caso> -q`.
 - **REFACTOR**: <mejora con la red en verde> · ninguno.
 
 ## 2. Archivos
 
 | Acción | Archivo | Verify |
 | :--- | :--- | :--- |
-| Crear | `src/content_studio/<…>.py` | `uv run pytest tests/test_<área>.py -q` |
-| Modificar | `src/content_studio/<…>/registro.py` | `uv run pytest tests/test_registro.py -q` |
+| Crear | `server/src/content_studio/<…>.py` | `uv run pytest server/tests/test_<área>.py -q` |
+| Modificar | `server/src/content_studio/<…>/registro.py` | `uv run pytest server/tests/test_registro.py -q` |
 
 Cada `.py` queda en 300 líneas o menos (`codigo-python.md`).
 

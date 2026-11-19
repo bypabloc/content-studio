@@ -1,4 +1,4 @@
-# 9 · Íntima → `narration/voz/intima.wav` (y variante `susurro.wav`)
+# 9 · Íntima → `server/data/narration/voz/intima.wav` (y variante `susurro.wav`)
 
 **Intención**: cercana y en voz baja, como un secreto; ritmo lento.
 **Duración objetivo**: 9–11 s · **Ritmo**: lento (~125 ppm) · **Tono**: medio-grave, volumen bajo · **Orden en la sesión**: 10.º
@@ -34,7 +34,7 @@ La otra persona está a medio metro y no quieres que nadie más escuche. Baja el
 
 ## Variante susurro
 
-Opcional, solo para efectos puntuales. Mismo texto, **susurrado de verdad** (sin voz), en `narration/voz/susurro.wav`, 7–9 s. Antes de usarla, compárala con `intima.wav` en el motor elegido: lo habitual es que el clon de un susurro suene con ruido y poco parecido a ti.
+Opcional, solo para efectos puntuales. Mismo texto, **susurrado de verdad** (sin voz), en `server/data/narration/voz/susurro.wav`, 7–9 s. Antes de usarla, compárala con `intima.wav` en el motor elegido: lo habitual es que el clon de un susurro suene con ruido y poco parecido a ti.
 
 ## Texto exacto (debe coincidir con `voz/intima.txt` y `voz/susurro.txt`)
 

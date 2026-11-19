@@ -4,11 +4,11 @@
 
 ## Qué pide turno
 
-Todo lo que carga un modelo: `narration tts`, `narration voces --construir`, la evaluación con whisper (`narration/evaluacion/`), `music` y `uv run pytest -m local` si importa torch en la GPU. No piden turno: ruff, `uv run pytest` (sin GPU), `--help`, el asistente y ffmpeg.
+Todo lo que carga un modelo: `narration tts`, `narration voces --construir`, la evaluación con whisper (`server/data/narration/evaluacion/`), `music` y `uv run pytest -m local` si importa torch en la GPU. No piden turno: ruff, `uv run pytest` (sin GPU), `--help`, el asistente y ffmpeg.
 
 ## Protocolo
 
-* **Siempre con el candado**: `python -m content_studio.devtools turno-gpu run --trabajo=<trabajo> -- <comando>` (desde cualquier worktree: el candado vive en `tmp/turno-gpu/` del checkout principal). Toma el turno al empezar y lo suelta al terminar, también con Ctrl+C o un error. Exit 1 si está ocupada.
+* **Siempre con el candado**: `python -m devtools turno-gpu run --trabajo=<trabajo> -- <comando>` (desde cualquier worktree: el candado vive en `tmp/turno-gpu/` del checkout principal). Toma el turno al empezar y lo suelta al terminar, también con Ctrl+C o un error. Exit 1 si está ocupada.
 * **Antes**: `turno-gpu status` (exit 0 libre, 1 ocupada; dice quién la tiene, la VRAM en uso y las sesiones abiertas del proyecto) y `ListAgents` para el nombre exacto de cada sesión.
 * **Libre y sin otras sesiones**: corre, sin mensajes. **Libre con otras sesiones**: `SendMessage` a cada una con «ocupo la gpu: <trabajo> — <qué corre>» y corre.
 * **Ocupada por otra sesión**: `SendMessage` a esa sesión pidiéndole que avise con «gpu libre»; `CronCreate` cada 10 min con «`turno-gpu status`; si está libre, toma el turno y sigue con la corrida» (solo mientras esperas). Mientras tanto sigue con lo que no usa GPU; si no queda nada, `Phase: external-wait`.

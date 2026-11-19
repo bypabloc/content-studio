@@ -1,7 +1,7 @@
 ---
 name: graphify-query
 description: >
-  Busca y explora el código de content-studio (src/, tests/, cli.py) con el grafo de graphify (query, explain, path,
+  Busca y explora el código de content-studio (server/src/, tests/, cli.py) con el grafo de graphify (query, explain, path,
   affected) en vez de grep. SIEMPRE invocar ANTES de Grep, Glob o una lectura exploratoria para ubicar o entender
   código, y NUNCA citar un archivo:línea de memoria. .agents/rules/graphify.md es la fuente. Usar cuando el usuario
   diga "busca", "dónde está", "quién llama", "qué rompe si cambio", "cómo funciona", "relación entre", "graphify",
@@ -12,7 +12,7 @@ argument-hint: "<pregunta> | path A B | explain X | affected X"
 
 # Graphify query
 
-Consulta el grafo (AST de los `.py` de `src/`, `tests/` y `cli.py`) en vez de grepear. Regla: `.agents/rules/graphify.md`.
+Consulta el grafo (AST de los `.py` de `server/src/`, `tests/` y `cli.py`) en vez de grepear. Regla: `.agents/rules/graphify.md`.
 
 ## Flujo
 
@@ -39,6 +39,6 @@ graphify affected "EspecMotor" --depth 2
 ## Reglas
 
 * Un query vacío no prueba inexistencia: compara `git rev-parse --short HEAD` con `Built from commit` de `GRAPH_REPORT.md`.
-* NUNCA leas `graphify-out/graph.json` con Read. NUNCA uses el grafo para datos (`narration/`, `music/`, `docs/`, `.md`, `.json`): ahí Grep es lo correcto.
+* NUNCA leas `graphify-out/graph.json` con Read. NUNCA uses el grafo para datos (`server/data/narration/`, `server/data/music/`, `docs/`, `.md`, `.json`): ahí Grep es lo correcto.
 * Distingue lo verificado (`EXTRACTED` + archivo abierto) de lo inferido (`INFERRED`).
 * Al delegar exploración a un subagente, incluye en su prompt la orden de usar graphify primero.

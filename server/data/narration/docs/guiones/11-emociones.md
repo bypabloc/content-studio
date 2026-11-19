@@ -1,4 +1,4 @@
-# 11 · Clips de emoción (opcional) → `narration/voz/emociones/<emocion>.wav`
+# 11 · Clips de emoción (opcional) → `server/data/narration/voz/emociones/<emocion>.wav`
 
 **Intención**: clips cortos con una emoción marcada, para que **IndexTTS 2.5** la copie sobre el timbre de `neutral.wav` (`emo_audio_prompt`).
 **Duración objetivo**: 5–8 s cada uno · **Orden en la sesión**: después de `neutral-en.wav` y antes de `neutral-fin.wav`

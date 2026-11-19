@@ -1,4 +1,4 @@
-# 5 · Estable → `narration/voz/estable.wav`
+# 5 · Estable → `server/data/narration/voz/estable.wav`
 
 **Intención**: parejo y profesional, sin énfasis exagerados; ritmo ágil.
 **Duración objetivo**: 10–11 s · **Ritmo**: ágil (~160 ppm) · **Tono**: medio, **sin subidas** · **Orden en la sesión**: 5.º

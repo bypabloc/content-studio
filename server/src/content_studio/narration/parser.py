@@ -1,14 +1,14 @@
 r"""TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.
 
-Uso (ver narration/README.md):
+Uso (ver server/data/narration/README.md):
     python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
         --texto "Hola, bienvenidos al canal."
-    python cli.py narration tts --modelo chatterbox --ref narration/voz/clara.wav \
+    python cli.py narration tts --modelo chatterbox --ref server/data/narration/voz/clara.wav \
         --estilo clara --archivo guion.txt --salida out/narration/guion.wav
     python cli.py narration tts --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/lote
     python cli.py narration tts --modelo omnivoice --archivo guion.txt --semilla 7 --evaluar
 
---ref acepta un .wav o una carpeta con <estilo>.wav (por defecto narration/voz). --voz usa una voz libre
+--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/voz). --voz usa una voz libre
 del catálogo (python cli.py narration voces), solo si está aprobada en todos los estilos.
 La transcripción va al lado con el mismo nombre y extensión .txt.
 Cada motor corre en su propio venv (ver motores/registro.py). Cada toma deja un .json con sus metadatos.
@@ -16,7 +16,7 @@ Cada motor corre en su propio venv (ver motores/registro.py). Cada toma deja un 
 Pausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.
 Estilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],
 [respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).
-Otras marcas ([breath], <break>, **) se leen en voz alta. Ver narration/docs/formato-guion.md.
+Otras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.
 Un .json trae "texto" (lista de párrafos), "estilo" e "id" (nombre de la salida).
 """
 
@@ -37,7 +37,10 @@ def construir_parser() -> argparse.ArgumentParser:
     """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument(
-        '--modelo', choices=MOTORES, default='voxcpm2', help='motor TTS (por defecto voxcpm2; ver narration/README.md)'
+        '--modelo',
+        choices=MOTORES,
+        default='voxcpm2',
+        help='motor TTS (por defecto voxcpm2; ver server/data/narration/README.md)',
     )
     ap.add_argument('--ref', type=Path, default=rutas.VOZ, help='carpeta de referencias o un .wav concreto')
     ap.add_argument(

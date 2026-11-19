@@ -1,4 +1,4 @@
-# 2 · Suave → `narration/voz/suave.wav`
+# 2 · Suave → `server/data/narration/voz/suave.wav`
 
 **Intención**: sereno y cálido; ritmo medio, frases limpias.
 **Duración objetivo**: 10–11 s · **Ritmo**: medio (~140 ppm) · **Tono**: medio-grave, más bajo que tu voz de reposo · **Orden en la sesión**: 6.º

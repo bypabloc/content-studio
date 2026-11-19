@@ -37,7 +37,7 @@ INSTRUCCION = {
     'susurro': 'Please say it whispering.',
     'neutral-en': None,
 }
-# Textos del kit para las voces en inglés (las voces en español usan narration/voz/<estilo>.txt).
+# Textos del kit para las voces en inglés (las voces en español usan server/data/narration/voz/<estilo>.txt).
 TEXTO_EN = {
     'amistosa': "Hi, how are you? We've got news that makes us really happy: now you can create your videos in "
     'minutes, right from your phone, with no hassle. Try it today.',

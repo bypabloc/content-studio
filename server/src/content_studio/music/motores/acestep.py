@@ -1,4 +1,6 @@
-"""ACE-Step 1.5 (MIT): DiT 2B turbo + planificador LM 0.6B, con offload para 8 GB. Corre en music/.venv-acestep."""
+"""ACE-Step 1.5 (MIT): DiT 2B turbo + planificador LM 0.6B, con offload para 8 GB.
+
+Corre en server/data/music/.venv-acestep."""
 
 from __future__ import annotations
 

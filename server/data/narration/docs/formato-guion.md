@@ -4,7 +4,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 
 > **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `experta`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` solo se midieron las pausas largas (ver abajo); los signos y las etiquetas no.
 >
-> **Motores nuevos (OmniVoice, VoxCPM2, IndexTTS 2.5, CosyVoice 3):** se midieron el 15 de noviembre de 2026 y algunos **sí** aceptan etiquetas, instrucciones de emoción o respiraciones. Lo que cambia por motor está en la [sección de motores nuevos](#motores-nuevos-qué-cambia) y en detalle en [docs/research/voicestudio-narracion/08](../../docs/research/voicestudio-narracion/08-guion-y-pronunciacion.md). Las reglas obligatorias siguen valiendo para todos los motores.
+> **Motores nuevos (OmniVoice, VoxCPM2, IndexTTS 2.5, CosyVoice 3):** se midieron el 15 de noviembre de 2026 y algunos **sí** aceptan etiquetas, instrucciones de emoción o respiraciones. Lo que cambia por motor está en la [sección de motores nuevos](#motores-nuevos-qué-cambia) y en detalle en [docs/research/voicestudio-narracion/08](../../../../docs/research/voicestudio-narracion/08-guion-y-pronunciacion.md). Las reglas obligatorias siguen valiendo para todos los motores.
 
 ## Resumen
 
@@ -190,7 +190,7 @@ Con **Qwen y Chatterbox** no se pueden indicar en el texto. El modelo copia la m
 
 ## Motores nuevos: qué cambia
 
-Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([pruebas](../../docs/research/voicestudio-narracion/13-pruebas-en-gpu.md)). `narration tts` traduce cada marca al motor que elijas ([tabla de traducción](#traducción-por-motor)). Esta tabla muestra lo que cada motor hace con lo que escribes:
+Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([pruebas](../../../../docs/research/voicestudio-narracion/13-pruebas-en-gpu.md)). `narration tts` traduce cada marca al motor que elijas ([tabla de traducción](#traducción-por-motor)). Esta tabla muestra lo que cada motor hace con lo que escribes:
 
 | Escrito | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 |
 |---|---|---|---|---|
@@ -204,11 +204,11 @@ Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([prueba
 | Números en dígitos | Bien | Bien | **Mal** | Bien |
 | Siglas sin deletrear | **Mal** | Bien | Bien | Bien |
 
-`[pausa N]` y la línea en blanco siguen siendo de `narration tts` y funcionan igual con todos. La emoción no va en el texto: `narration tts` la convierte en referencia, parámetros, vector o instrucción según el motor ([estilo y emoción](#estilo-y-emoción-por-párrafo); más detalle en [docs/research/voicestudio-narracion/10](../../docs/research/voicestudio-narracion/10-emociones-y-direccion.md)).
+`[pausa N]` y la línea en blanco siguen siendo de `narration tts` y funcionan igual con todos. La emoción no va en el texto: `narration tts` la convierte en referencia, parámetros, vector o instrucción según el motor ([estilo y emoción](#estilo-y-emoción-por-párrafo); más detalle en [docs/research/voicestudio-narracion/10](../../../../docs/research/voicestudio-narracion/10-emociones-y-direccion.md)).
 
 ### Traducción por motor
 
-Lo que `narration tts` envía al motor (`TRADUCCION` en [texto/traducir.py](../../src/content_studio/narration/texto/traducir.py)). Cada marca que se quita, y cada reemplazo que cambia la lectura, deja un aviso en la consola y en el `.json` del bloque:
+Lo que `narration tts` envía al motor (`TRADUCCION` en [texto/traducir.py](../../../src/content_studio/narration/texto/traducir.py)). Cada marca que se quita, y cada reemplazo que cambia la lectura, deja un aviso en la consola y en el `.json` del bloque:
 
 | Marca | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 | Qwen y Chatterbox |
 | :--- | :--- | :--- | :--- | :--- | :--- |

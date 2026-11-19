@@ -10,7 +10,7 @@ import sys
 from content_studio import rutas
 from content_studio.narration.motores.registro import MOTORES
 
-# Literales del MOTORES de narration/tts.py en dev 1fe463c, sin tocar.
+# Literales del MOTORES de narration/tts.py en dev 1fe463c (antes de la 001), sin tocar.
 VIEJO = {
     'voxcpm2': dict(venv='.venv-voxcpm', repo='openbmb/VoxCPM2', licencia='Apache-2.0', comercial=True,
                     txt='opcional', ref_max_s=30, nota='★ recomendado'),

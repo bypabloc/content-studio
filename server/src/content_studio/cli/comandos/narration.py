@@ -47,7 +47,7 @@ class Grabar(Comando):
     modulo = parser = 'content_studio.narration.grabar.main'
     icono = '🎤'
     titulo = 'Grabar voces de referencia'
-    desc = 'Graba, mide y normaliza narration/voz/<estilo>.wav'
+    desc = 'Graba, mide y normaliza server/data/narration/voz/<estilo>.wav'
     ayuda = '🎤  Grabar las voces de referencia (content_studio.narration.grabar).'
 
     def estado(self) -> list[str]:

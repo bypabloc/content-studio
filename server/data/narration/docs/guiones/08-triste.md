@@ -1,4 +1,4 @@
-# 8 · Triste → `narration/voz/triste.wav`
+# 8 · Triste → `server/data/narration/voz/triste.wav`
 
 **Intención**: emotivo y reflexivo; ritmo lento, voz baja pero con cuerpo.
 **Duración objetivo**: 10–12 s · **Ritmo**: lento (~120 ppm) · **Tono**: grave · **Orden en la sesión**: 9.º

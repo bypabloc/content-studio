@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import re
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -67,6 +68,31 @@ def test_ac2_producto_en_server():
 def test_reglas_y_skills_sincronizadas():
     """Cada regla y skill de .claude/ tiene el cuerpo de su fuente en .agents/ (devtools reglas --sincronizar)."""
     assert reglas.diferencias(RAIZ) == []
+
+
+RUTAS_VIEJAS = (
+    r'(?<![\w/.-])src/content_studio',
+    r'PYTHONPATH=src\b',
+    r'content_studio\.devtools',
+    r'(?<!server/data/)narration/\.venv',
+    r'(?<!server/data/)music/models',
+)
+# Historial y specs se quedan como están; test_move_data crea el árbol viejo a propósito; hatch es relativo a server/.
+FUERA_DEL_CHEQUEO = ('tests/validators/test_estructura.py', 'devtools/tests/test_move_data.py', 'server/pyproject.toml')
+
+
+def test_ac7_sin_rutas_viejas():
+    """AC-7: lo versionado (sin historial ni specs) no nombra src/, content_studio.devtools
+    ni los datos fuera de server/data/."""
+    versionados = subprocess.run(['git', 'ls-files'], cwd=RAIZ, capture_output=True, text=True, check=True).stdout
+    fallos = []
+    for ruta in versionados.split():
+        historial = ruta.startswith(('docs/research/', 'docs/specs/')) and not ruta.startswith('docs/specs/_plantilla/')
+        if historial or ruta in FUERA_DEL_CHEQUEO or not (RAIZ / ruta).is_file():
+            continue
+        texto = (RAIZ / ruta).read_text(encoding='utf-8', errors='ignore')
+        fallos += [f'{ruta}: {p}' for p in RUTAS_VIEJAS if re.search(p, texto)]
+    assert fallos == []
 
 
 def test_dependencias_cli_iguales_a_pyproject():

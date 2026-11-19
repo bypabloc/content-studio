@@ -5,13 +5,13 @@ description: devtools del flujo de agentes (worktree, turno-gpu, contexto-agente
 
 # Devtools: flujo de trabajo de los agentes — SIEMPRE ACTIVA
 
-`src/content_studio/devtools/` reúne las herramientas del flujo de trabajo (no del producto): worktrees, turno de la GPU y tamaño de las instrucciones. Python con solo stdlib, igual que el resto de `src/` (`codigo-python.md`). Lint y tests no pasan por aquí: son `uv run ruff` y `uv run pytest` (`testing.md`).
+`server/src/content_studio/devtools/` reúne las herramientas del flujo de trabajo (no del producto): worktrees, turno de la GPU y tamaño de las instrucciones. Python con solo stdlib, igual que el resto de `server/src/` (`codigo-python.md`). Lint y tests no pasan por aquí: son `uv run ruff` y `uv run pytest` (`testing.md`).
 
 ## 1. Invocación
 
 ```bash
-python -m content_studio.devtools --help           # desde la raíz; o uv run python -m ..., o PYTHONPATH=src python -m ...
-python -m content_studio.devtools <comando> [args]
+python -m devtools --help           # desde la raíz; o uv run python -m ..., o PYTHONPATH=server/src python -m ...
+python -m devtools <comando> [args]
 ```
 
 | Comando | Qué hace |
@@ -25,9 +25,9 @@ python -m content_studio.devtools <comando> [args]
 
 ## 2. Estándar de un comando
 
-* Un módulo `src/content_studio/devtools/<comando>.py` con `main(argv: list[str]) -> int` y una línea en `COMANDOS` de `__main__.py` (se importa solo al pedirlo).
+* Un módulo `server/src/content_studio/devtools/<comando>.py` con `main(argv: list[str]) -> int` y una línea en `COMANDOS` de `__main__.py` (se importa solo al pedirlo).
 * Exit codes: `0` éxito, `1` validación fallida u ocupado, `2` argumento inválido o error.
 * **stdout** = resultado parseable (JSON en una línea); **stderr** = log humano. Un comando usa otro importando su función, nunca por subprocess.
 * Salidas en `tmp/<comando>/`; rutas desde la raíz del checkout (`rutas.RAIZ`) o del principal (`worktree.principal`), nunca desde el CWD.
-* Tests en `tests/test_devtools.py`; máximo 300 líneas por archivo.
-* Nada de scripts sueltos fuera de `src/` (lo comprueba `tests/test_estructura.py`).
+* Tests en `devtools/tests/test_devtools.py`; máximo 300 líneas por archivo.
+* Nada de scripts sueltos fuera de `server/src/` (lo comprueba `tests/validators/test_estructura.py`).

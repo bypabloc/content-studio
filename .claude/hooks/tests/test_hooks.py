@@ -33,9 +33,10 @@ def test_format_on_save_solo_lo_que_lintea_ci():
     sys.path.insert(0, str(RAIZ / '.claude' / 'hooks'))
     from format_on_save import relativa
 
-    assert relativa(str(RAIZ / 'src' / 'a.py')) == 'src/a.py'
+    assert relativa(str(RAIZ / 'server' / 'src' / 'a.py')) == 'server/src/a.py'
     assert relativa('cli.py') == 'cli.py'
-    assert relativa('narration/README.md') is None
+    assert relativa('devtools/worktree.py') == 'devtools/worktree.py'
+    assert relativa('server/data/narration/README.md') is None
     assert relativa(str(RAIZ.parent / 'otro' / 'a.py')) is None
 
 
@@ -79,9 +80,9 @@ def test_graphify_guard_sugiere_en_codigo_y_calla_en_datos():
     sys.path.insert(0, str(RAIZ / '.claude' / 'hooks'))
     from graphify_guard import should_suggest
 
-    assert should_suggest('search', {'command': 'grep -rn usar_venv src/content_studio'}, str(RAIZ))
-    assert not should_suggest('search', {'command': 'grep -n qwen narration/README.md'}, str(RAIZ))
-    assert should_suggest('read', {'file_path': str(RAIZ / 'src/content_studio/rutas.py')}, str(RAIZ))
+    assert should_suggest('search', {'command': 'grep -rn usar_venv server/src/content_studio'}, str(RAIZ))
+    assert not should_suggest('search', {'command': 'grep -n qwen server/data/narration/README.md'}, str(RAIZ))
+    assert should_suggest('read', {'file_path': str(RAIZ / 'server/src/content_studio/rutas.py')}, str(RAIZ))
     assert not should_suggest('read', {'file_path': 'docs/specs/README.md'}, str(RAIZ))
 
 

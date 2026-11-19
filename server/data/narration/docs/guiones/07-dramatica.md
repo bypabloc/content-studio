@@ -1,4 +1,4 @@
-# 7 · Dramática → `narration/voz/dramatica.wav`
+# 7 · Dramática → `server/data/narration/voz/dramatica.wav`
 
 **Intención**: storytelling con tensión; ritmo lento y pausas que generan suspenso.
 **Duración objetivo**: 10–12 s · **Ritmo**: lento (~130 ppm) · **Tono**: medio-grave · **Orden en la sesión**: 8.º

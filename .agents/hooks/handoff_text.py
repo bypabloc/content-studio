@@ -60,7 +60,7 @@ PHASE_TEXT = {
     'verification': 'Fase verification: corre la batería de 03-verificacion-final.md de la spec. Si algo falla, vuelve '
     'a implementation; nunca saltes un paso.',
     'integration': 'Fase integration: merge de origin/dev, push, PR a dev, checks en verde, merge y '
-    '`python -m content_studio.devtools worktree close`.',
+    '`python -m devtools worktree close`.',
     'external-wait': 'Fase external-wait: antes que nada, revisa lo pendiente (gh pr checks, el turno de la GPU, el '
     'merge de otro). Si se resolvió, pasa a la fase siguiente. No rehagas trabajo terminado.',
     'closing': 'Fase closing: borra el cron de reporte, cierra el worktree, borra la carpeta del handoff y sus '
@@ -77,7 +77,7 @@ SOURCE_TEXT = {
 }
 GPU = (
     'Turno de la GPU (uno por equipo, regla turno-gpu.md): todo comando que carga un modelo (narration tts, voces '
-    '--construir, music, evaluación con whisper) va con `python -m content_studio.devtools turno-gpu run '
+    '--construir, music, evaluación con whisper) va con `python -m devtools turno-gpu run '
     '--trabajo <t> -- <comando>`. Antes, `turno-gpu status` y ListAgents. Ocupada: SendMessage a su sesión pidiendo '
     '«gpu libre», CronCreate de 10 min para reintentar y sigue con lo que no usa GPU. Al terminar, «gpu libre» a las '
     'sesiones abiertas y CronDelete. El estado del turno va en PROGRESS.md.'
@@ -89,7 +89,7 @@ BLOCKED = (
     'preguntar. Solo mientras siga en pie, muéstrale el motivo al usuario y pregunta qué falta.'
 )
 DONE = (
-    'Status es done: solo queda el cierre. Confirma el merge en origin/dev, corre `python -m content_studio.devtools '
+    'Status es done: solo queda el cierre. Confirma el merge en origin/dev, corre `python -m devtools '
     'worktree close <nombre>` desde el checkout principal, borra {folder}/ y sus vínculos de .sessions/ y el cron.'
 )
 HEADER = '[session-handoff] Trabajo {work} · handoff en {folder}/ · rama {branch}'

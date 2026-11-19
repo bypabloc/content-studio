@@ -1,6 +1,6 @@
 """main() de music: valida en el python del usuario, se relanza en el venv del motor y genera las pistas.
 
-Directo: PYTHONPATH=src python -m content_studio.music.musica --modelo acestep --estilo lofi-chill
+Directo: PYTHONPATH=server/src python -m content_studio.music.musica --modelo acestep --estilo lofi-chill
 """
 
 from __future__ import annotations
@@ -64,7 +64,7 @@ def main() -> None:
             sufijo = f'-v{i}' if a.variantes > 1 else ''
             trabajos.append((estilo, (a.carpeta / f'{a.modelo}-{nombre}{sufijo}.wav').resolve()))
 
-    proceso.usar_venv(espec.ruta_venv(), 'music/README.md', modulo='content_studio.music.musica')
+    proceso.usar_venv(espec.ruta_venv(), 'server/data/music/README.md', modulo='content_studio.music.musica')
     a.carpeta.mkdir(parents=True, exist_ok=True)
     motor = espec.crear()
 

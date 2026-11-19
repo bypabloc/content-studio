@@ -26,7 +26,7 @@ Eres el agente de investigación de content-studio. Una sola responsabilidad: re
 | Área | Restricción |
 | :--- | :--- |
 | Equipo | RTX 4060 Laptop de **8 GB de VRAM**, Windows 11 + WSL2; un modelo a la vez |
-| Narración | Español neutro latinoamericano, clonación con permiso; motores actuales en `src/content_studio/narration/motores/registro.py` |
+| Narración | Español neutro latinoamericano, clonación con permiso; motores actuales en `server/src/content_studio/narration/motores/registro.py` |
 | Música | Siempre instrumental; ACE-Step 1.5 y HeartMuLa |
 | Código | Python ≥ 3.10, uv, un venv por motor, ffmpeg |
 | Uso | Comercial (videos): la licencia del modelo **y** de sus pesos importa; "academic purposes" o NC no sirven sin aviso |

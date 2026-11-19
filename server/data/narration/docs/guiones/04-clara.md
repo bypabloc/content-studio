@@ -1,4 +1,4 @@
-# 4 · Clara → `narration/voz/clara.wav`
+# 4 · Clara → `server/data/narration/voz/clara.wav`
 
 **Intención**: preciso y sereno; articulación nítida, ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~140 ppm) · **Tono**: medio, estable · **Orden en la sesión**: 4.º

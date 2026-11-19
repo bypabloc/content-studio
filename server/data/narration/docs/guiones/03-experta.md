@@ -1,4 +1,4 @@
-# 3 · Experta → `narration/voz/experta.wav`
+# 3 · Experta → `server/data/narration/voz/experta.wav`
 
 **Intención**: claro y seguro, como quien le explica algo a un colega; ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~150 ppm) · **Tono**: medio, tu voz natural · **Orden en la sesión**: 3.º

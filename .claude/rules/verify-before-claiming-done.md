@@ -10,8 +10,8 @@
 | Un motor o su registro | `uv run pytest -m local` y una corrida real corta con `turno-gpu run` |
 | Narración o música | La corrida real (con `turno-gpu run`) y la medición de §2 de cada salida |
 | CLI o asistente | `python cli.py <comando> --help`, un caso real y uno de error; sin TTY (`| cat`) no debe preguntar nada |
-| devtools | `python -m content_studio.devtools <comando> --help`, un caso real y uno de error |
-| Hooks o configuración de agentes | `uv run pytest tests/test_hooks.py tests/test_handoff.py` y la validación headless (`agent-config-testing.md`) |
+| devtools | `python -m devtools <comando> --help`, un caso real y uno de error |
+| Hooks o configuración de agentes | `uv run pytest .claude/hooks/tests/test_hooks.py .agents/hooks/tests/test_handoff.py` y la validación headless (`agent-config-testing.md`) |
 
 ## 2. Medir el audio
 
@@ -27,4 +27,4 @@ ffmpeg -y -i out/music/<archivo>.wav -lavfi showspectrumpic=s=800x300 tmp/verifi
 
 ## 3. Transparencia
 
-Si algo no se pudo correr (falta un venv, la GPU está ocupada por otra sesión, no hay credenciales), dilo explícitamente: *"Pasaron ruff y pytest; la corrida real con Qwen queda pendiente porque falta `narration/.venv-qwen`."* Nunca asumas que funciona porque no hay errores de sintaxis.
+Si algo no se pudo correr (falta un venv, la GPU está ocupada por otra sesión, no hay credenciales), dilo explícitamente: *"Pasaron ruff y pytest; la corrida real con Qwen queda pendiente porque falta `server/data/narration/.venv-qwen`."* Nunca asumas que funciona porque no hay errores de sintaxis.

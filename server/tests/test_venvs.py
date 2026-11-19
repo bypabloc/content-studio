@@ -13,14 +13,14 @@ from content_studio import rutas
 from content_studio.comun.proceso import python_de
 
 VENVS = [
-    'narration/.venv-qwen',
-    'narration/.venv-chatterbox',
-    'narration/.venv-omnivoice',
-    'narration/.venv-voxcpm',
-    'narration/motores/CosyVoice/.venv',
-    'narration/motores/index-tts/.venv',
-    'music/.venv-acestep',
-    'music/.venv-heartmula',
+    'server/data/narration/.venv-qwen',
+    'server/data/narration/.venv-chatterbox',
+    'server/data/narration/.venv-omnivoice',
+    'server/data/narration/.venv-voxcpm',
+    'server/data/narration/motores/CosyVoice/.venv',
+    'server/data/narration/motores/index-tts/.venv',
+    'server/data/music/.venv-acestep',
+    'server/data/music/.venv-heartmula',
 ]
 
 

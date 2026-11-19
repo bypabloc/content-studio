@@ -17,4 +17,4 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Cuándo |
 | :--- | :--- | :--- |
-| _(ninguna abierta)_ | | |
+| [001-move-data](001-move-data.md) | `move-data` mueve `narration/` y `music/` a `server/data/` (datos del usuario) y reescribe sus `.pth` | Antes de pasar a `main`: correr `move-data --apply` en el principal, después del `git pull` |

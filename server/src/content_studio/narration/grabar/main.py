@@ -1,4 +1,4 @@
-r"""Graba las voces de referencia (narration/voz/<estilo>.wav) desde un dispositivo de audio del equipo.
+r"""Graba las voces de referencia (server/data/narration/voz/<estilo>.wav) desde un dispositivo de audio del equipo.
 
 Uso:
     python cli.py narration grabar --listar                # dispositivos de audio disponibles
@@ -7,8 +7,9 @@ Uso:
     python cli.py narration grabar --dispositivo 2 --todos # el kit completo, en el orden de la guía
 
 Mientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.
-Cada toma se guarda en narration/voz/tomas/ (gitignoreado). Al aceptar una, se recortan los bordes a 0.4 s,
-se normaliza a -18 LUFS (limitando solo los picos) y queda en narration/voz/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
+Cada toma se guarda en server/data/narration/voz/tomas/ (gitignoreado). Al aceptar una, se recortan los bordes a 0.4 s,
+se normaliza a -18 LUFS (limitando solo los picos) y queda en
+server/data/narration/voz/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
 Después se verifica con los criterios de docs/guiones/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).
 """
 
@@ -84,7 +85,8 @@ def grabar_estilo(fuente: str, estilo: str, sobrescribir: bool, i: int, total: i
     texto = (VOZ / f'{estilo}.txt').read_text(encoding='utf-8').strip()
     ficha_estilo = Panel(
         Group(Text(texto, style='bold'), Text(''),
-              Text.from_markup(f'[dim]Duración {lo}–{hi} s · actitud en narration/docs/guiones/{GUION[estilo]}\n'
+              Text.from_markup(f'[dim]Duración {lo}–{hi} s · actitud en '
+                               f'server/data/narration/docs/guiones/{GUION[estilo]}\n'
                                'Graba 3 tomas seguidas y quédate con la más natural, no con la más actuada.[/]')),
         title=f'[bold {ACENTO}]{estilo}[/] [dim]· {i}/{total} · {fuente}[/]', title_align='left',
         border_style=ACENTO, padding=(1, 2))  # fmt: skip
@@ -187,7 +189,7 @@ def main() -> None:
     resultados = []
     try:
         bienvenida = Text.from_markup(
-            f'[bold {ACENTO}]🎤  Grabar voces de referencia[/]\n[dim]Se guardan en narration/voz/. '
+            f'[bold {ACENTO}]🎤  Grabar voces de referencia[/]\n[dim]Se guardan en server/data/narration/voz/. '
             'Usa audífonos y un cuarto en silencio.[/]'
         )
         console.print(Panel(bienvenida, border_style=ACENTO, padding=(0, 2), expand=False))
@@ -197,7 +199,7 @@ def main() -> None:
         for i, estilo in enumerate(estilos, 1):
             resultados.append((estilo, grabar_estilo(fuente, estilo, a.sobrescribir or interactivo, i, len(estilos))))
     except (KeyboardInterrupt, EOFError):
-        console.print('\n[dim]Cancelado. Las tomas grabadas siguen en narration/voz/tomas/.[/]')
+        console.print('\n[dim]Cancelado. Las tomas grabadas siguen en server/data/narration/voz/tomas/.[/]')
     if resultados:
         color = {'lista': 'green', 'lista con observaciones': 'yellow'}
         t = Table(title='Resumen', title_style=f'bold {ACENTO}', border_style='grey35', header_style='bold')

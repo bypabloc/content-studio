@@ -5,7 +5,7 @@ description: Buscar código con el grafo de graphify (query, explain, path, affe
 
 # Graphify: buscar código con el grafo — SIEMPRE ACTIVA
 
-`graphify-out/` indexa el código con AST (símbolos, imports, llamadas y comunidades de `src/`, `tests/` y `cli.py`). Una consulta cuesta una fracción de un grep más lectura y responde quién llama, qué rompe un cambio y por dónde pasa el flujo. Está **gitignoreado**: cada equipo lo genera con `graphify update .` (sin LLM, segundos) y los hooks lo mantienen fresco. Instalación: skill `graphify-ops`.
+`graphify-out/` indexa el código con AST (símbolos, imports, llamadas y comunidades de `server/src/`, `tests/` y `cli.py`). Una consulta cuesta una fracción de un grep más lectura y responde quién llama, qué rompe un cambio y por dónde pasa el flujo. Está **gitignoreado**: cada equipo lo genera con `graphify update .` (sin LLM, segundos) y los hooks lo mantienen fresco. Instalación: skill `graphify-ops`.
 
 ## 1. Orden de búsqueda
 
@@ -20,7 +20,7 @@ Los nombres del código están en español (`relanzar`, `usar_venv`, `EspecMotor
 
 | Caso | Por qué |
 | :--- | :--- |
-| `narration/`, `music/` (datos: READMEs, catálogo, guiones), `docs/`, `tests/fixtures/`, `.md`, `.json`, `.toml`, logs, `tmp/`, `out/` | El grafo no los indexa o no aportan nodos |
+| `server/data/narration/`, `server/data/music/` (datos: READMEs, catálogo, guiones), `docs/`, `server/tests/fixtures/`, `.md`, `.json`, `.toml`, logs, `tmp/`, `out/` | El grafo no los indexa o no aportan nodos |
 | Literal exacto (un estilo, un flag, un mensaje) después de orientarse | El grafo indexa símbolos, no cada string |
 | Grafo ausente o desactualizado | Fallback permitido; avisa que hay que correr `graphify update .` |
 

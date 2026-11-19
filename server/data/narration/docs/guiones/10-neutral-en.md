@@ -1,4 +1,4 @@
-# 10 · Neutral en inglés → `narration/voz/neutral-en.wav`
+# 10 · Neutral en inglés → `server/data/narration/voz/neutral-en.wav`
 
 **Intención**: tu voz natural hablando inglés; ritmo medio.
 **Duración objetivo**: 10–12 s · **Ritmo**: medio (~150 ppm) · **Tono**: el de tu voz en reposo · **Orden en la sesión**: 11.º

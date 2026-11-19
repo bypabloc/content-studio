@@ -16,7 +16,7 @@ Trabajos = list[tuple[dict, Path]]  # (estilo resuelto, ruta del .wav de salida)
 @dataclass(frozen=True)
 class EspecMusica:
     nombre: str
-    venv: str  # relativo a music/
+    venv: str  # relativo a server/data/music/
     modulo: str  # se importa recién en crear(), ya dentro del venv
     clase: str
     desc: str  # para los menús del CLI

@@ -14,7 +14,8 @@ from pathlib import Path
 RAIZ = Path(os.environ.get('CLAUDE_PROJECT_DIR', Path(__file__).resolve().parents[2]))
 
 REGLAS = """[Reglas críticas de content-studio reinyectadas]
-- Código en src/content_studio/; narration/ y music/ son datos (no mover venvs ni modelos).
+- Código en server/src/content_studio/; server/data/narration/ y server/data/music/ son datos
+  (no mover venvs ni modelos).
 - Máximo 300 líneas por .py, Python 3.10.
 - Dos capas: stdlib arriba; torch/numpy/motores dentro de funciones. Factory Method solo con 2+ productos.
 - Un modelo a la vez en la GPU (8 GB). La música es siempre instrumental.
@@ -22,7 +23,7 @@ REGLAS = """[Reglas críticas de content-studio reinyectadas]
 - Antes de commit: uv run ruff check && uv run ruff format --check && uv run pytest.
 - Ramas feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release/<kebab> desde dev; nunca push a main/dev.
 - Conventional Commits en español, sin atribución de IA. Commit, push y merge solo cuando el usuario lo pida.
-- GPU: todo lo que carga un modelo va con `python -m content_studio.devtools turno-gpu run --trabajo=<t> -- <cmd>`.
+- GPU: todo lo que carga un modelo va con `python -m devtools turno-gpu run --trabajo=<t> -- <cmd>`.
 - Trabajo largo: handoff en tmp/handoff/<trabajo>/ (session-handoff.md); worktrees en ../content-studio-worktrees/.
 - Specs en docs/specs/ con las plantillas de docs/specs/_plantilla/ (plan-format.md); estado en docs/process/."""
 

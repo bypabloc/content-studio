@@ -36,7 +36,8 @@ def avisos_voz(nombre: str, ficha: dict) -> None:
 
 
 def voz_de_referencia(ref: Path) -> dict | None:
-    """Ficha del catálogo de la voz a la que pertenece una referencia (narration/voces/<voz>/<estilo>.wav), o None."""
+    """Ficha del catálogo de la voz a la que pertenece una referencia
+    (server/data/narration/voces/<voz>/<estilo>.wav), o None."""
     ref = Path(ref).resolve()
     if ref.parent.parent != rutas.VOCES.resolve():
         return None

@@ -1,4 +1,6 @@
-"""HeartMuLa 3B (Apache 2.0): solo recibe tags, sin tonalidad, BPM ni compás. Corre en music/.venv-heartmula."""
+"""HeartMuLa 3B (Apache 2.0): solo recibe tags, sin tonalidad, BPM ni compás.
+
+Corre en server/data/music/.venv-heartmula."""
 
 from __future__ import annotations
 

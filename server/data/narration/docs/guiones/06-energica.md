@@ -1,4 +1,4 @@
-# 6 · Enérgica → `narration/voz/energica.wav`
+# 6 · Enérgica → `server/data/narration/voz/energica.wav`
 
 **Intención**: publicidad con energía; ritmo rápido y urgente sin gritar.
 **Duración objetivo**: 8–10 s · **Ritmo**: rápido (~175 ppm) · **Tono**: medio-alto, con brillo · **Orden en la sesión**: 7.º

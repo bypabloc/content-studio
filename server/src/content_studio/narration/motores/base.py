@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class EspecMotor:
-    """Un registro por --modelo. venv, repo y codigo son rutas relativas a narration/ o ids de Hugging Face.
+    """Un registro por --modelo. venv, repo y codigo son rutas relativas a server/data/narration/ o ids de Hugging Face.
     txt: 'obligatorio' (no clona sin la transcripción), 'opcional' (clona peor sin ella) o None (no la usa)."""
 
     nombre: str

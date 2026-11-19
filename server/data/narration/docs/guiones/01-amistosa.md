@@ -1,4 +1,4 @@
-# 1 · Amistosa → `narration/voz/amistosa.wav`
+# 1 · Amistosa → `server/data/narration/voz/amistosa.wav`
 
 **Intención**: cercano y tranquilo; ritmo ágil, como una conversación.
 **Duración objetivo**: 9–11 s · **Ritmo**: ágil (~165 ppm) · **Tono**: medio, algo más alto que tu voz de reposo · **Orden en la sesión**: 2.º

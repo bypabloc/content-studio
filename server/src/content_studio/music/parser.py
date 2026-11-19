@@ -11,8 +11,8 @@ tal cual como descripción. Cada preset define tonalidad, BPM y compás; el text
 libre los exige con --tono y --bpm. Estos flags también pisan los del preset.
 El modelo se carga una vez y sale un .wav por estilo en --carpeta (out/music/
 por defecto), con el silencio final ya recortado. Siempre instrumental. Los
-pesos se descargan solos la primera vez a music/models/. Cada modelo corre en
-su propio venv: music/.venv-acestep / music/.venv-heartmula (ver music/README.md).
+pesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en
+su propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def construir_parser() -> argparse.ArgumentParser:
         '--estilo',
         nargs='+',
         default=['lofi-chill'],
-        help=f'uno o más de los {len(ESTILOS)} presets (music/ESTILOS.md) o texto libre entre comillas',
+        help=f'uno o más de los {len(ESTILOS)} presets (server/data/music/ESTILOS.md) o texto libre entre comillas',
     )
     ap.add_argument('--duracion', type=float, default=60, help='segundos antes del recorte (ACE ≤600, HeartMuLa ≤240)')
     ap.add_argument('--tono', help='tonalidad, ej. "C Major", "A Minor" (obligatoria con texto libre)')

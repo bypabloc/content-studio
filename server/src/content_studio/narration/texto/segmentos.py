@@ -1,5 +1,5 @@
 """Corte del guion en bloques: oraciones de hasta MAX_CHARS, pausas, [estilo:] y [emocion:] (§5.1).
-Ver narration/docs/formato-guion.md."""
+Ver server/data/narration/docs/formato-guion.md."""
 
 from __future__ import annotations
 

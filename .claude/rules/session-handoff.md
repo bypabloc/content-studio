@@ -26,7 +26,7 @@ Breves (idealmente < 60 líneas); la spec se enlaza, no se copia. Nunca secretos
 * `.agents/hooks/session_handoff.py` arma el mensaje: Claude Code por `SessionStart` y `PreCompact`, Antigravity por `PreInvocation` (`.agents/hooks.json`), Codex por su `SessionStart` de usuario.
 * Lo inyectado manda sobre el resumen: contrástalo con `git status` y `git log` y sigue desde el `Next step`.
 * En Claude Code, el mod `handoff-compact` (`.claude/mods/`) compacta sin resumen cuando la sesión tiene trabajo vinculado y muestra Status, Phase y ETA sobre el prompt. Umbral de compactación: 60 %.
-* Bitácora en `tmp/handoff/.log/events.jsonl`. Tests: `uv run pytest tests/test_handoff.py`.
+* Bitácora en `tmp/handoff/.log/events.jsonl`. Tests: `uv run pytest .agents/hooks/tests/test_handoff.py`.
 
 ## 4. Seguir hasta terminar
 

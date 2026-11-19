@@ -5,7 +5,8 @@ Uso:
     python cli.py narration voces --construir yesid        # descarga, genera los 12 estilos y los aprueba
     python cli.py narration voces --construir todas --forzar
 
-Cada voz del catálogo (narration/voces/catalogo.json) parte de un clip real de 8-12 s (o de varios clips cortos
+Cada voz del catálogo (server/data/narration/voces/catalogo.json) parte de un clip real
+de 8-12 s (o de varios clips cortos
 del mismo hablante, unidos) con licencia de uso comercial: CC0 o dominio público, o una que pide MENCIÓN
 (CC BY, CC BY-SA, Jenny). Mención = atribución: al publicar algo hecho con esa voz hay que dar crédito a su
 autor, con el texto `atribucion` del catálogo (mencion(); docs/research/voces-libres-clonacion/12).
@@ -13,7 +14,7 @@ Ese clip, normalizado, es el estilo `neutral`. El resto de ESTILOS se genera con
 (la misma voz leyendo el texto del kit de grabación, dirigido con una instrucción en inglés) y cada clip se
 aprueba si conserva la voz (similitud de hablante con la base), se entiende (WER con whisper) y cumple los
 criterios de referencia de docs/guiones/README.md. Una voz entra en `narration tts --voz` solo si aprueba TODOS los
-estilos. Resultado: narration/voces/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).
+estilos. Resultado: server/data/narration/voces/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).
 Investigación y mediciones: docs/research/voces-libres-clonacion/.
 """
 
@@ -53,7 +54,9 @@ def main() -> None:
         sys.exit(f'Voz desconocida: {", ".join(desconocidas)}. Opciones: {", ".join(cat)}')
     # se relanza en el venv de CosyVoice
     proceso.usar_venv(
-        MOTORES['cosyvoice3'].ruta_venv(), 'narration/README.md', modulo='content_studio.narration.voces.main'
+        MOTORES['cosyvoice3'].ruta_venv(),
+        'server/data/narration/README.md',
+        modulo='content_studio.narration.voces.main',
     )
     print(
         f'Aviso: los estilos se generan con CosyVoice 3 ({MOTORES["cosyvoice3"].licencia}). '

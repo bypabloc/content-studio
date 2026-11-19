@@ -1,1 +1,1 @@
-"""Voces libres del catálogo (narration/voces/catalogo.json)."""
+"""Voces libres del catálogo (server/data/narration/voces/catalogo.json)."""

@@ -89,7 +89,10 @@ def narrar(
         if b['emocion'] and not 0 <= b['emocion'][1] <= 1:
             sys.exit(f'La intensidad de la emoción en el párrafo {i + 1} tiene que estar entre 0 y 1.')
     if raras := etiquetas(texto):
-        print(f'Aviso: el modelo va a leer en voz alta {", ".join(raras)}. Ver narration/docs/formato-guion.md.')
+        print(
+            f'Aviso: el modelo va a leer en voz alta {", ".join(raras)}. '
+            f'Ver server/data/narration/docs/formato-guion.md.'
+        )
     pb = preparar_bloques(motor, segs, ref)
     for i, p_ in enumerate(pb):
         for a in p_['avisos']:

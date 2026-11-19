@@ -1,9 +1,9 @@
-# narration/ — Narración TTS local con clonación de voz
+# server/data/narration/ — Narración TTS local con clonación de voz
 
 Genera narración en **español neutro latinoamericano** (o en inglés con `--idioma en`) clonando una voz de referencia, 100 % local en una **RTX 4060 Laptop (8 GB VRAM)**. Sin APIs ni costo por uso. Siete motores, en orden de preferencia: **VoxCPM2** (recomendado), **CosyVoice 3** (segunda opción), Qwen3-TTS (1.7B y 0.6B), Chatterbox V3, OmniVoice e IndexTTS 2.5.
 
 ```
-narration/
+server/data/narration/
 ├── README.md            este documento
 ├── voces/               catalogo.json (versionado) + <voz>/<estilo>.wav construidos (gitignoreado)
 ├── docs/
@@ -19,7 +19,7 @@ narration/
 └── .venv-voxcpm/        venv de VoxCPM2          (gitignoreado)
 ```
 
-El código está en `src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../AGENTS.md#arquitectura)) y se lanza con `python cli.py narration tts|voces|grabar`. Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
+El código está en `server/src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../../../AGENTS.md#arquitectura)) y se lanza con `python cli.py narration tts|voces|grabar`. Salidas en `out/narration/` de la raíz (gitignoreado), o donde indique `--salida`. Cada toma deja un `.wav` y un `.json` con sus metadatos. Logs de corridas largas en `logs/`.
 
 **Todavía no hay referencias grabadas** en `voz/<estilo>.wav`: hasta que las grabes (ver [docs/guiones/](docs/guiones/README.md)), usa una **voz libre del catálogo** con `--voz` ([§5.1](#51-voces-libres-del-catálogo---voz)) por ejemplo `--voz yesid`, que tiene el consentimiento de su dueño.
 
@@ -59,7 +59,7 @@ Filtro aplicado: modelos abiertos que **soportan español** (o inglés), que **c
 
 Los gestos y las emociones de cada motor se traducen por motor (`texto/traducir.py`); la tabla completa está en [docs/formato-guion.md](docs/formato-guion.md#traducción-por-motor).
 
-**Descartados** (ver la investigación completa en [docs/research/voicestudio-narracion/](../docs/research/voicestudio-narracion/README.md)): Voxtral TTS (≥10 GB), Higgs Audio v3 (no comercial y lento en 8 GB), F5-TTS, XTTS v2 y Fish S1-mini (licencias no comerciales), Kokoro (acento inglés, no clona), Dia, Orpheus y Breeze TTS 2 (sin español).
+**Descartados** (ver la investigación completa en [docs/research/voicestudio-narracion/](../../../docs/research/voicestudio-narracion/README.md)): Voxtral TTS (≥10 GB), Higgs Audio v3 (no comercial y lento en 8 GB), F5-TTS, XTTS v2 y Fish S1-mini (licencias no comerciales), Kokoro (acento inglés, no clona), Dia, Orpheus y Breeze TTS 2 (sin español).
 
 **Orden de preferencia en este proyecto**: 1) `voxcpm2` (motor estrella), 2) `cosyvoice3`, 3) `qwen-1.7b`, 4) `qwen-0.6b`, 5) `chatterbox`, y al final los no comerciales `omnivoice` e `indextts`. Es el orden en que aparecen en el menú de `cli.py`. Ver [§7](#7-problemas-conocidos).
 
@@ -67,31 +67,31 @@ Los gestos y las emociones de cada motor se traducen por motor (`texto/traducir.
 
 ## 2. Instalación
 
-Cada motor necesita su propio venv porque fijan versiones de `transformers` y de `torch` incompatibles entre sí. Qwen, Chatterbox, OmniVoice y VoxCPM2 viven en `narration/.venv-*`; IndexTTS 2.5 y CosyVoice 3 son repos clonados en `narration/motores/`, cada uno con su `.venv`. Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
+Cada motor necesita su propio venv porque fijan versiones de `transformers` y de `torch` incompatibles entre sí. Qwen, Chatterbox, OmniVoice y VoxCPM2 viven en `server/data/narration/.venv-*`; IndexTTS 2.5 y CosyVoice 3 son repos clonados en `server/data/narration/motores/`, cada uno con su `.venv`. Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
 
 ```bash
 # Qwen3-TTS y Chatterbox V3. torch 2.15 da segfault en esta WSL: fijar 2.14.1 (Chatterbox fija el suyo)
-uv venv -p 3.12 narration/.venv-qwen
-VIRTUAL_ENV=narration/.venv-qwen uv pip install qwen-tts soundfile "torch==2.14.1" "torchaudio==2.11.1"
+uv venv -p 3.12 server/data/narration/.venv-qwen
+VIRTUAL_ENV=server/data/narration/.venv-qwen uv pip install qwen-tts soundfile "torch==2.14.1" "torchaudio==2.11.1"
 
-uv venv -p 3.12 narration/.venv-chatterbox
-VIRTUAL_ENV=narration/.venv-chatterbox uv pip install soundfile \
+uv venv -p 3.12 server/data/narration/.venv-chatterbox
+VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install soundfile \
   "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
 
 # OmniVoice y VoxCPM2 (pip). torch 2.15 da segfault en esta WSL: fijar 2.14.1
-uv venv -p 3.12 narration/.venv-omnivoice
-VIRTUAL_ENV=narration/.venv-omnivoice uv pip install omnivoice soundfile "torch==2.14.1" "torchaudio==2.11.1"
-uv venv -p 3.12 narration/.venv-voxcpm
-VIRTUAL_ENV=narration/.venv-voxcpm uv pip install voxcpm soundfile "torch==2.14.1" "torchaudio==2.11.1"
+uv venv -p 3.12 server/data/narration/.venv-omnivoice
+VIRTUAL_ENV=server/data/narration/.venv-omnivoice uv pip install omnivoice soundfile "torch==2.14.1" "torchaudio==2.11.1"
+uv venv -p 3.12 server/data/narration/.venv-voxcpm
+VIRTUAL_ENV=server/data/narration/.venv-voxcpm uv pip install voxcpm soundfile "torch==2.14.1" "torchaudio==2.11.1"
 
 # IndexTTS 2.5 (repo)
-git clone --depth 1 https://github.com/index-tts/index-tts narration/motores/index-tts
-(cd narration/motores/index-tts && uv sync --python 3.11 --extra webui \
+git clone --depth 1 https://github.com/index-tts/index-tts server/data/narration/motores/index-tts
+(cd server/data/narration/motores/index-tts && uv sync --python 3.11 --extra webui \
   && uv tool run --from 'huggingface_hub[cli]' hf download IndexTeam/IndexTTS-2.5 --local-dir=checkpoints)
 
 # CosyVoice 3 (repo): quitar deps de TRT/deepspeed/whisper fijado/gradio; setuptools<80; sin wetext
-git clone --depth 1 --recursive https://github.com/FunAudioLLM/CosyVoice narration/motores/CosyVoice
-cd narration/motores/CosyVoice && uv venv -p 3.10 .venv
+git clone --depth 1 --recursive https://github.com/FunAudioLLM/CosyVoice server/data/narration/motores/CosyVoice
+cd server/data/narration/motores/CosyVoice && uv venv -p 3.10 .venv
 grep -v -i -E '^(torch|torchaudio|deepspeed|tensorrt|onnxruntime-gpu|--extra-index-url|openai-whisper|gradio)' requirements.txt > req-social-videos.txt
 VIRTUAL_ENV=.venv uv pip install "torch==2.14.1" "torchaudio==2.11.1" -r req-social-videos.txt onnxruntime openai-whisper huggingface_hub "setuptools<80"
 VIRTUAL_ENV=.venv uv pip uninstall wetext
@@ -99,15 +99,15 @@ VIRTUAL_ENV=.venv uv pip uninstall wetext
 cd ../../..
 
 # Cada venv necesita numpy y soundfile (los importa content_studio.narration)
-narration/motores/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
+server/data/narration/motores/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
 ```
 
 **En Windows**, torch con CUDA no viene de PyPI. Qwen se instala con `--torch-backend=cu128`. Chatterbox fija `torch==2.6.0`, que solo existe para cu126, así que va primero:
 
 ```bash
-VIRTUAL_ENV=narration/.venv-qwen uv pip install --torch-backend=cu128 qwen-tts soundfile
-VIRTUAL_ENV=narration/.venv-chatterbox uv pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
-VIRTUAL_ENV=narration/.venv-chatterbox uv pip install soundfile "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
+VIRTUAL_ENV=server/data/narration/.venv-qwen uv pip install --torch-backend=cu128 qwen-tts soundfile
+VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
+VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install soundfile "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
 ```
 
 Los pesos de Qwen, Chatterbox, OmniVoice y VoxCPM2 se bajan solos a `~/.cache/huggingface` la primera vez (Qwen 1.7B ≈ 4 GB, 0.6B ≈ 2 GB). IndexTTS y CosyVoice guardan sus pesos dentro de su repo (`checkpoints/` y `pretrained_models/`). También se necesita `ffmpeg` en el PATH, y `whisper` para `--evaluar`.
@@ -121,7 +121,7 @@ Si mueves un repo de `motores/`, recrea su `.venv`: un venv movido deja de funci
 El script se re-ejecuta solo con el venv que corresponde, así que se puede lanzar con cualquier `python`:
 
 ```bash
-# Texto directo, referencia por defecto (narration/voz/<estilo>.wav)
+# Texto directo, referencia por defecto (server/data/narration/voz/<estilo>.wav)
 python cli.py narration tts --modelo qwen-0.6b --estilo amistosa \
   --texto "Hola, bienvenidos al canal. Hoy te muestro cómo editar un video en un minuto."
 
@@ -138,7 +138,7 @@ python cli.py narration tts --modelo qwen-0.6b --voz yesid \
   --texto "Hola, esto es una prueba."
 
 # Estilo y emoción por párrafo, semilla fija y evaluación (ver formato-guion.md)
-python cli.py narration tts --modelo omnivoice --ref narration/voz --archivo guion.txt --semilla 7 --evaluar
+python cli.py narration tts --modelo omnivoice --ref server/data/narration/voz --archivo guion.txt --semilla 7 --evaluar
 
 # En inglés: el estilo por defecto es neutral-en (voz/neutral-en.wav)
 python cli.py narration tts --modelo chatterbox --idioma en --archivo guion-en.txt
@@ -159,8 +159,8 @@ out/narration/qwen-0.6b-experta.wav (47.7 s, qwen-0.6b, experta, lote 3) | gener
 | Flag | Valores | Por defecto | Qué hace |
 |---|---|---|---|
 | `--modelo` | `voxcpm2` (recomendado), `cosyvoice3`, `qwen-1.7b`, `qwen-0.6b`, `chatterbox`, `omnivoice`, `indextts` | `voxcpm2` | Motor a usar ([§1](#1-modelos-elegidos)) |
-| `--ref` | `.wav` o carpeta | `narration/voz` | Con una carpeta usa `<estilo>.wav`; la transcripción va en el `.txt` homónimo. Un `[estilo:]` sin su `.wav` detiene el script antes de generar |
-| `--voz` | voces aprobadas del catálogo | — | Usa `narration/voces/<voz>/` en lugar de `--ref`. Solo acepta voces aprobadas en **todos** los estilos; el idioma de la voz tiene que coincidir con `--idioma` ([§5.1](#51-voces-libres-del-catálogo---voz)) |
+| `--ref` | `.wav` o carpeta | `server/data/narration/voz` | Con una carpeta usa `<estilo>.wav`; la transcripción va en el `.txt` homónimo. Un `[estilo:]` sin su `.wav` detiene el script antes de generar |
+| `--voz` | voces aprobadas del catálogo | — | Usa `server/data/narration/voces/<voz>/` en lugar de `--ref`. Solo acepta voces aprobadas en **todos** los estilos; el idioma de la voz tiene que coincidir con `--idioma` ([§5.1](#51-voces-libres-del-catálogo---voz)) |
 | `--estilo` | `amistosa`, `suave`, `experta`, `clara`, `estable`, `neutral`, `energica`, `dramatica`, `triste`, `intima`, `susurro`, `neutral-en` | el `estilo` del JSON, o `experta` (`neutral-en` con `--idioma en`) | Referencia y parámetros del estilo. Un `[estilo:]` dentro del texto lo cambia desde ese punto |
 | `--texto` | texto | uno de los dos | Lo que se narra |
 | `--archivo` | uno o varios `.txt` o `.json` | uno de los dos | Guiones a narrar. Con varios, el modelo se carga una sola vez. Formato JSON en [docs/formato-guion.md](docs/formato-guion.md#guiones-en-json) |
@@ -223,7 +223,7 @@ Necesita el comando `whisper` en el PATH (`pip install openai-whisper`). Los pá
 ### Cómo funciona
 
 1. El texto se corta en cada línea en blanco, en cada `[pausa N]`, en cada `[estilo:]` y en cada `[emocion:]`. Cada tramo se divide en bloques de hasta ~300 letras, cortando en el final de cada oración.
-2. Cada bloque recibe lo que su motor entiende: referencia, estilo, emoción y gestos traducidos (`TRADUCCION` en [src/content_studio/narration/texto/traducir.py](../src/content_studio/narration/texto/traducir.py)). Lo que un motor no soporta se quita y el script avisa.
+2. Cada bloque recibe lo que su motor entiende: referencia, estilo, emoción y gestos traducidos (`TRADUCCION` en [server/src/content_studio/narration/texto/traducir.py](../../src/content_studio/narration/texto/traducir.py)). Lo que un motor no soporta se quita y el script avisa.
 3. **Qwen** genera varios bloques a la vez (el *lote*), agrupando los de la misma referencia. El lote automático mide la VRAM libre y calcula cuántos entran (~1.15 GiB el primero y ~1.3 GiB cada uno extra, con un máximo de 4). Los demás motores generan de a un bloque.
 4. Recorta el silencio que el modelo deja en los bordes de cada bloque (~0.5 s por lado) y une los bloques con silencio: 0.25 s entre bloques, 0.6 s en una línea en blanco y N s en `[pausa N]`. Cada bloque va a la velocidad de su estilo, con `ffmpeg atempo`, que no altera el tono.
 5. Con `--master voz`, masteriza: pasa-altos de 70 Hz y loudness lineal de dos pasadas hacia `--lufs`, verificado después con `ebur128`. Si el pico real no deja llegar al objetivo con ganancia lineal, la toma queda como normalización dinámica: se avisa y `master.tipo` lo registra.
@@ -236,7 +236,7 @@ Texto plano, con tildes y con los números en letras. **Las etiquetas como `[pau
 
 ## 4. Estilos
 
-A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([estilos.py](../src/content_studio/narration/estilos.py), `ESTILOS`).
+A diferencia de la API TTS de Gemini, ninguno de estos modelos entiende una instrucción de estilo en texto. **El estilo sale sobre todo de la referencia grabada en ese tono**; los parámetros solo lo ajustan ([estilos.py](../../src/content_studio/narration/estilos.py), `ESTILOS`).
 
 | Estilo | Intención | Velocidad | temperature | exaggeration* | cfg_weight* |
 |---|---|---|---|---|---|
@@ -274,11 +274,11 @@ python cli.py narration grabar --dispositivo RDPSource --todos # el kit completo
 
 Las tomas de prueba quedan en `voz/tomas/` (gitignoreado). El comando usa ffmpeg, ffprobe y ffplay (para escuchar), más rich y questionary (los instala `uv` según la cabecera del script). Necesita una terminal interactiva. En Linux y WSL graba desde PulseAudio o PipeWire (en WSL, el micrófono de Windows llega como `RDPSource`). En Windows graba con DirectShow y lista los micrófonos activos desde el registro, con el mismo nombre que usa DirectShow (por ejemplo, `--dispositivo "Micrófono (HyperX QuadCast 2)"` o su número en `--listar`). No usa `ffmpeg -list_devices`, porque ffmpeg se cae al enumerar algunas cámaras virtuales. No cubre los clips de emoción ni la verificación con whisper de la guía.
 
-Cada grabación va en `narration/voz/<estilo>.wav` y debe decir exactamente lo de `narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
+Cada grabación va en `server/data/narration/voz/<estilo>.wav` y debe decir exactamente lo de `server/data/narration/voz/<estilo>.txt`. Los `.wav` no se versionan (`.gitignore`). Por qué 8–12 s y qué copia cada motor de la referencia: [docs/research/voicestudio-narracion/11](../../../docs/research/voicestudio-narracion/11-audio-de-referencia.md).
 
 ### 5.1 Voces libres del catálogo (`--voz`)
 
-Para narrar sin grabarse, `narration voces` arma voces a partir de fuentes con licencia de uso comercial: **CC0 o dominio público** (lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar) y licencias que **piden mención** (ver abajo). El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md).
+Para narrar sin grabarse, `narration voces` arma voces a partir de fuentes con licencia de uso comercial: **CC0 o dominio público** (lectores de LibriVox y donaciones de voz de Kyutai, estas últimas con consentimiento explícito para clonar) y licencias que **piden mención** (ver abajo). El catálogo y su procedencia (URL, tramo, transcripción, licencia y consentimiento) están en [voces/catalogo.json](voces/catalogo.json). Por qué estas fuentes, qué se descartó y cómo se midió: [docs/research/voces-libres-clonacion/](../../../docs/research/voces-libres-clonacion/README.md).
 
 ```bash
 python cli.py narration voces --listar                    # catálogo, licencia y estado de cada voz
@@ -296,9 +296,9 @@ Cómo se construye una voz (corre en el venv de CosyVoice 3):
 3. Aprueba cada clip con estos criterios: similitud de hablante con la base ≥ 0.93 (WavLM-SV), WER ≤ 0.15 (whisper `large-v3-turbo`), 5–15 s, −20 a −16 LUFS, pico real ≤ −3 dBTP y sin pausas internas de 1 s o más. Si un clip no aprueba, lo regenera con otra semilla, hasta 3 rondas.
 4. Escribe `voces/<voz>/aprobacion.json`. **Una voz entra en `--voz` solo si aprueba los 12 estilos.** El menú de `cli.py` muestra las demás deshabilitadas, con el motivo.
 
-**Voces que piden mención.** Además de las CC0 o de dominio público, el catálogo tiene voces con licencias que exigen **mención**: CC BY (VCTK, Alba MacKenna), CC BY-SA (OpenSLR: Colombia, Perú y Venezuela) y Jenny (Dioco). "Mención" quiere decir **atribución**: puedes usar la voz, incluso con fines comerciales, si al publicar das crédito a su autor (quién es, de dónde sale, con qué licencia y que la usaste como referencia para una voz sintética). El texto exacto está en `atribucion` del catálogo. `narration tts --voz` lo imprime como "MENCIÓN OBLIGATORIA" y lo guarda en el `.json` de la toma (`voces[].mencion`). Pégalo en la descripción del video. Las BY-SA muestran además un aviso de "compartir igual". Detalle en [docs/research/voces-libres-clonacion/12](../docs/research/voces-libres-clonacion/12-voces-con-mencion.md).
+**Voces que piden mención.** Además de las CC0 o de dominio público, el catálogo tiene voces con licencias que exigen **mención**: CC BY (VCTK, Alba MacKenna), CC BY-SA (OpenSLR: Colombia, Perú y Venezuela) y Jenny (Dioco). "Mención" quiere decir **atribución**: puedes usar la voz, incluso con fines comerciales, si al publicar das crédito a su autor (quién es, de dónde sale, con qué licencia y que la usaste como referencia para una voz sintética). El texto exacto está en `atribucion` del catálogo. `narration tts --voz` lo imprime como "MENCIÓN OBLIGATORIA" y lo guarda en el `.json` de la toma (`voces[].mencion`). Pégalo en la descripción del video. Las BY-SA muestran además un aviso de "compartir igual". Detalle en [docs/research/voces-libres-clonacion/12](../../../docs/research/voces-libres-clonacion/12-voces-con-mencion.md).
 
-El acento y si cada estilo "suena" a lo que dice **no se miden**: escucha `voces/<voz>/*.wav` antes de usar una voz en un video. Las voces de LibriVox no tienen consentimiento para clonar. Para uso comercial, mira [docs/research/voces-libres-clonacion/02](../docs/research/voces-libres-clonacion/02-derechos-copyright-y-voz.md).
+El acento y si cada estilo "suena" a lo que dice **no se miden**: escucha `voces/<voz>/*.wav` antes de usar una voz en un video. Las voces de LibriVox no tienen consentimiento para clonar. Para uso comercial, mira [docs/research/voces-libres-clonacion/02](../../../docs/research/voces-libres-clonacion/02-derechos-copyright-y-voz.md).
 
 ---
 
@@ -367,5 +367,5 @@ Los seis picos de VRAM quedan por debajo de 6.5 GiB. Las seis tomas de `c_tutori
 - [Qwen3-TTS (GitHub)](https://github.com/QwenLM/Qwen3-TTS) · [acento inglés en español #230](https://github.com/QwenLM/Qwen3-TTS/discussions/230) · [voces en español #300](https://github.com/QwenLM/Qwen3-TTS/discussions/300) · [review 2026](https://aitoolanalysis.com/qwen3-tts-review/)
 - [Chatterbox (GitHub)](https://github.com/resemble-ai/chatterbox) · [review 2026](https://oakgen.ai/blog/chatterbox-tts-open-source-review) · [docs Clore](https://docs.clore.ai/guides/audio-and-voice/chatterbox-tts)
 - Comparativas: [BentoML](https://www.bentoml.com/blog/exploring-the-world-of-open-source-text-to-speech-models) · [Pinggy](https://pinggy.io/blog/best_open_source_self_hosted_text_to_speech_models/) · [LocalAIMaster](https://localaimaster.com/blog/best-local-tts-models)
-- Voces libres para clonar (fuentes CC0 y de dominio público, derechos, pruebas y catálogo): [docs/research/voces-libres-clonacion/](../docs/research/voces-libres-clonacion/README.md)
-- Investigación de los motores de noviembre y especificación de la implementación: [docs/research/voicestudio-narracion/](../docs/research/voicestudio-narracion/README.md) · [docs/specs/narracion-motores-voicestudio.md](../docs/specs/narracion-motores-voicestudio.md) (desviaciones en su §15)
+- Voces libres para clonar (fuentes CC0 y de dominio público, derechos, pruebas y catálogo): [docs/research/voces-libres-clonacion/](../../../docs/research/voces-libres-clonacion/README.md)
+- Investigación de los motores de noviembre y especificación de la implementación: [docs/research/voicestudio-narracion/](../../../docs/research/voicestudio-narracion/README.md) · [docs/specs/narracion-motores-voicestudio.md](../../../docs/specs/narracion-motores-voicestudio.md) (desviaciones en su §15)

@@ -1,6 +1,6 @@
 """main() de narration tts: valida en el python del usuario, se relanza en el venv del motor y narra cada guion.
 
-Directo: PYTHONPATH=src python -m content_studio.narration.tts --modelo voxcpm2 --voz karen-savage --texto "..."
+Directo: PYTHONPATH=server/src python -m content_studio.narration.tts --modelo voxcpm2 --voz karen-savage --texto "..."
 Flags y formato del guion: content_studio/narration/parser.py.
 """
 
@@ -31,7 +31,7 @@ def main() -> None:
 
     e = MOTORES[a.modelo]
     # Desde aquí corre en el venv del motor: los avisos se imprimen una sola vez.
-    proceso.usar_venv(e.ruta_venv(), 'narration/README.md', modulo='content_studio.narration.tts')
+    proceso.usar_venv(e.ruta_venv(), 'server/data/narration/README.md', modulo='content_studio.narration.tts')
     if a.voz:
         avisos_voz(a.voz, aprobadas(ESTILOS)[a.voz])
     avisar_sobrescritura(trabajos)
