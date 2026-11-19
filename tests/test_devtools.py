@@ -50,7 +50,8 @@ def test_prepare_y_close_en_un_repo_real(tmp_path, monkeypatch):
     remoto = tmp_path / 'remoto.git'
     subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remoto)], check=True)
     subprocess.run(['git', 'clone', '-q', str(remoto), str(main)], check=True, capture_output=True)
-    (main / '.gitignore').write_text('music/models/\ntmp/\n')
+    # Sin `/` final, como el .gitignore del repo: en POSIX el enlace es un symlink, no una carpeta para git.
+    (main / '.gitignore').write_text('models\ntmp/\n')
     (main / 'music/models/ace').mkdir(parents=True)
     subprocess.run([*GIT, 'add', '.'], cwd=main, check=True)
     subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=main, check=True)
