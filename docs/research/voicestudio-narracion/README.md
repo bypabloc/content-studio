@@ -23,7 +23,7 @@
 | 13 | [Pruebas en GPU](13-pruebas-en-gpu.md) | Banco de pruebas, resultados por caso, etiquetas, emoción, velocidad, **audios para escuchar** |
 | 14 | [Replicación de VoiceStudio](14-replicacion-de-voicestudio.md) | El flujo de `/generate` replicado y comparado contra la app real en Docker |
 | 15 | [Aplicación a social-videos](15-aplicacion-social-videos.md) | Propuesta para `tts.py`: motores, parámetros, filtrado de marcas, piezas a reimplementar |
-| — | **[Spec de implementación](../../specs/narracion-motores-voicestudio.md)** | Todo lo que necesita `tts.py`: motores, gramática de estilo y emoción, traducción por motor, semilla, metadatos, masterización, pruebas y fases |
+| — | **Spec de implementación** (eliminada al implementarse; ver historial de git) | Todo lo que necesita `tts.py`: motores, gramática de estilo y emoción, traducción por motor, semilla, metadatos, masterización, pruebas y fases |
 | — | **[Guiones de grabación](../../../narration/docs/guiones/README.md)** | Qué grabar y qué decir: kit de 12 clips + 6 de emoción |
 | — | [Herramientas de VoiceStudio](herramientas/README.md) | **16 herramientas, una por archivo**: clonación, diseño, audiolibros, lotes, doblaje, aislamiento, diarización, transcripción, dictado, API y CLI, MCP, integraciones, marca de agua, modelos y hardware, fine-tuning, instalación |
 
@@ -86,14 +86,14 @@ Respuestas del usuario del 2026-11-15:
 
 | # | Pregunta | Decisión | Dónde quedó |
 | :--- | :--- | :--- | :--- |
-| 1 | ¿Qué motores implementar? | **Los cuatro**, comerciales y no comerciales: es software personal | [Spec](../../specs/narracion-motores-voicestudio.md) §3 |
-| 2 | ¿Monetización? | **Videos personales**: la licencia se informa, no bloquea | Spec §3 |
+| 1 | ¿Qué motores implementar? | **Los cuatro**, comerciales y no comerciales: es software personal | Spec eliminada (historial de git) §3 |
+| 2 | ¿Monetización? | **Videos personales**: la licencia se informa, no bloquea | Spec eliminada §3 |
 | 3 | ¿Grabar el kit? | **Sí**, con guiones y textos exactos | [narration/docs/guiones/](../../../narration/docs/guiones/README.md): 12 clips + 6 de emoción |
 | 4 | ¿Masterización? | **La más precisa**: loudness lineal a −16 LUFS, pico real ≤ −1.5 dBTP, sin compresión | Spec §7 |
 | 5 | ¿Emoción por párrafo y traducción de marcas? | **Sí** | Spec §5 y §6 |
 | 6 | ¿Corregir las guías? | **Sí** | `guiones/` (8–12 s, entonación de listas, kit nuevo), [formato-guion.md](../../../narration/docs/formato-guion.md) (motores nuevos), `.gitignore` (`narration/voz/**/*.wav`) |
 | 7 | ¿Qué conservar en disco? | **Eliminar lo innecesario** | Borrados: imagen Docker (17.8 GB), pesos sin uso de CosyVoice (4.3 GB), clon de VoiceStudio. Conservados: los 4 motores con sus pesos, el banco de pruebas y los audios para escuchar |
-| — | ¿Implementar ya? | **No**: spec detallada en el PR | [docs/specs/narracion-motores-voicestudio.md](../../specs/narracion-motores-voicestudio.md) |
+| — | ¿Implementar ya? | **No**: spec detallada en el PR | spec eliminada al implementarse (historial de git) |
 
 ---
 
