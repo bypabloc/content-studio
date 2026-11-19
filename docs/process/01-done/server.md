@@ -14,6 +14,7 @@ Genera narración y música sin abrir la interfaz: una API local y una cola de t
 - API en `127.0.0.1` con token Bearer: catálogo, ajustes, trabajos, archivos y progreso por SSE (`/events`).
 - Cola en SQLite (`var/content-studio.db`) con un worker que toma la GPU con el candado de `gpu_lock.py`. Permite encolar, cancelar, reintentar, reordenar y pausar.
 - Cancelar termina el proceso del trabajo y sus hijos (`taskkill /T /F` en Windows; SIGTERM al grupo y SIGKILL a los 5 s en POSIX).
+- Al arrancar, el server interrumpe solo los trabajos cuyo proceso murió (`owner_pid`); lo que la CLI tiene en curso sigue.
 - CLI: `studio serve`, `narration tts`, `narration voices`, `music` y `jobs list|cancel|retry`. Sin menú ni asistente.
 - Salida: `out/<herramienta>/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`; log en `logs/jobs/<id>.log`.
 
