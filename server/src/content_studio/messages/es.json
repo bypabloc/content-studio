@@ -21,5 +21,6 @@
   "lint.rule_10": "Falta «{sign}»: las preguntas van entre ¿ y ?, y las exclamaciones, entre ¡ y !.",
   "lint.rule_11": "La oración tiene {count} palabras y el máximo es {max}: divídela.",
   "lint.rule_13": "Escribe «{text}» en letras, como «veinticuatro horas».",
-  "lint.rule_19": "«{text}» deforma la voz: usa una construcción impersonal, como «queda registrado»."
+  "lint.rule_19": "«{text}» deforma la voz: usa una construcción impersonal, como «queda registrado».",
+  "unreadable_media": "No se pudo leer el archivo como audio."
 }

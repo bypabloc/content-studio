@@ -6,7 +6,6 @@
     "devtools/migrations.py",
     "devtools/paths.py",
     "server/src/content_studio/__main__.py",
-    "server/src/content_studio/common/ffmpeg.py",
     "server/src/content_studio/common/files.py",
     "server/src/content_studio/common/process.py",
     "server/src/content_studio/music/evaluation.py",
