@@ -51,7 +51,8 @@ def choose_source(items: list[tuple[str, str, bool]], requested: str | None) -> 
         return items[int(requested) - 1][0]
     if any(name == requested for name, _, _ in items):
         return requested
-    sys.exit(f'No hay un dispositivo "{requested}". Ver: python cli.py narration grabar --list')
+    listing = 'uv run --group legacy python -m content_studio.narration.grabar.main --list'
+    sys.exit(f'No hay un dispositivo "{requested}". Ver: {listing}')
 
 
 def choose_styles() -> list[str]:
@@ -151,7 +152,7 @@ def grabar_style(source: str, style: str, overwrite: bool, i: int, total: int) -
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Flags del script. cli.py lo usa para mostrar la ayuda."""
+    """Flags del script. grabar se corre directo: `studio` no lo usa."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--list', action='store_true', help='muestra los dispositivos de audio disponibles y sale')
     ap.add_argument('--device', help='nombre de la fuente (p. ej. RDPSource) o su número en --list')

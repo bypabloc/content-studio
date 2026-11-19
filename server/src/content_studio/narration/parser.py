@@ -36,7 +36,7 @@ __all__ = ['STYLES', 'ENGINES', 'approved_voices', 'build_parser']  # el CLI lee
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Flags del script. cli.py lo usa para preguntar los que faltan y mostrar la ayuda."""
+    """Flags del script. `studio narration tts` los usa para validar y mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument(
         '--model',
@@ -48,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument(
         '--voice',
         choices=list(approved_voices(STYLES)),
-        help='free voice from the catalog, approved in every style (cli.py narration voices); replaces --ref',
+        help='free voice from the catalog, approved in every style (uv run studio narration voices); replaces --ref',
     )
     ap.add_argument('--style', choices=STYLES, help='default: the "style" in the JSON, or expert')
     source = ap.add_mutually_exclusive_group(required=True)
