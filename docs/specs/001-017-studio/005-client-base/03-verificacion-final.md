@@ -13,7 +13,7 @@
 ## 2. App real
 
 1. `bun run --cwd client tauri dev` (en segundo plano, con el log en `logs/client-spec-005.log`). La ventana «Content Studio» abre sin consola extra (AC-1).
-2. Desde la UI, encola dos trabajos de música de 15 s con `studio` en otra terminal (todavía no hay sección Música), con el turno: `python -m devtools gpu-turn run --task=005-client-base -- uv run studio music --model acestep --style lofi-chill --duration 15`. Comprueba en la cola el progreso en vivo, el toast, la notificación de Windows con la ventana minimizada y el sonido.
+2. Desde la UI, encola dos trabajos de música de 15 s con `studio` en otra terminal (todavía no hay sección Música), `studio` toma el turno de la GPU solo (sin `gpu-turn run`, que lo tomaría dos veces): `uv run studio music --model acestep --style lofi-chill --duration 15`. Comprueba en la cola el progreso en vivo, el toast, la notificación de Windows con la ventana minimizada y el sonido.
 3. Cambia el tema a oscuro, claro y sistema. Cambia el tema de Windows con la app en `system` (AC-2). Cierra y reabre la app: no hay parpadeo.
 4. Cierra la ventana y corre `tasklist | findstr /i "studio uvicorn python"`: no queda ningún proceso del server (AC-1).
 5. Con `uv` renombrado de forma temporal en el PATH de la sesión de prueba (sin tocar el sistema: `PATH` sin la carpeta de uv), la app muestra el error y el botón Reintentar (AC-10).

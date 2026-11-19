@@ -5,4 +5,4 @@
 - **Descartadas**: el arrastre nativo de HTML5 (sin teclado); escribir el arrastre a mano con pointer events (más código y más casos que probar).
 - **Cómo revertir**: reemplazar `QueuePanel` por botones de subir y bajar que llamen a `queue.reorder` con el mismo orden.
 - **Cómo comprobarla**: `cd client && bun run test` (`QueuePanel.test.tsx` dispara el fin del arrastre; `order.test.ts` prueba el orden).
-- **Antes de**: el merge a `dev`. El arrastre con el ratón real lo prueba el e2e de la verificación final (T8/T9).
+- **Antes de**: el merge a `dev`. El arrastre con el ratón no lo prueba ningún test (el e2e cubre el teclado); queda en `PENDING/005-arrastre-raton`.

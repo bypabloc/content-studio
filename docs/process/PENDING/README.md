@@ -23,4 +23,13 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [004-db-antes-del-subcomando](004-db-antes-del-subcomando.md) | `studio --db` solo se acepta antes del subcomando | La 007 o la 008 | Agente |
 | [004-eventos-cli-sin-sse](004-eventos-cli-sin-sse.md) | Los cambios de la CLI sobre trabajos que el server no corre no salen por SSE | Antes de la 005 | Agente |
 | [004-httpx-deprecado](004-httpx-deprecado.md) | `starlette.testclient` avisa que httpx 0.28 está deprecado | Cuando starlette soporte httpx nuevo | Agente |
+| [005-node-modules-del-principal](005-node-modules-del-principal.md) | El node_modules del principal recibió dependencias del worktree 005 (regenerable) | Después del lote | Usuario |
+| [005-grafo-client](005-grafo-client.md) | graphify no indexa client/src (D-10 lo pedía) | Después de la 005 | Agente |
+| [005-arrastre-raton](005-arrastre-raton.md) | El arrastre con el ratón de la cola no tiene prueba automática | Después del merge a dev | Agente |
+| [005-avisos-sonner-ingles](005-avisos-sonner-ingles.md) | Sonner pone en inglés su región de avisos, y el anuncio de reordenar sin destino no borra el anterior | Después de la 005 | Agente |
+| [005-tema-sin-parpadeo](005-tema-sin-parpadeo.md) | AC-2 (sin parpadeo al reabrir) no tiene prueba automática: se mira en la app | T9 y antes de main | Usuario |
+| [005-avisos-foco](005-avisos-foco.md) | El cableado de los avisos (sin foco y con ajuste) no tiene prueba | Después de la 005 | Agente |
+| [005-worktree-enlaces-rotos](005-worktree-enlaces-rotos.md) | `worktree` no limpia enlaces rotos y `close` falla si la carpeta se borró a mano | Después de la 005 | Agente |
+| [005-stop-durante-arranque](005-stop-durante-arranque.md) | Cerrar la ventana mientras el server arranca puede esperar hasta 30 s | Después de la 005 | Agente |
+| [005-desvios-d1-d8](005-desvios-d1-d8.md) | Desvíos de shadcn, plugin-dialog, CSP, Geist y theme-init frente a D-1, D-2, D-4 y D-8 | Antes de la 015 y según cada sección | Agente |
 | [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |

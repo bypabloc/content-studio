@@ -34,5 +34,15 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [005-sonner](005-sonner.md) | Dependencia nueva: sonner para los toasts de los trabajos terminados | el merge a `dev` |
 | [005-dnd-kit](005-dnd-kit.md) | Dependencia nueva: @dnd-kit para reordenar la cola con teclado y ratón | el merge a `dev` |
 | [005-plugins-tauri-js](005-plugins-tauri-js.md) | Plugins JS de opener y notification de Tauri para abrir la carpeta y avisar en Windows | el merge a `dev` |
+| [005-select-prefix](005-select-prefix.md) | Las elecciones de los selectores van bajo `select.` y Restablecer solo borra ese prefijo | el merge a `dev` |
+| [005-all-sin-e2e](005-all-sin-e2e.md) | `all` incluye budget y deja e2e fuera (Chromium): se aparta de D-9 | el merge a `dev` |
+| [005-worktree-prepare](005-worktree-prepare.md) | `prepare` instala con bun y enlaza el target de Cargo; ya no enlaza node_modules | el merge a `dev` |
+| [005-teclado-cola](005-teclado-cola.md) | Reordenar con teclado: sensor con coordenadas de fila y anuncios en es.json | el merge a `dev` |
+| [005-ci-windows-rust](005-ci-windows-rust.md) | El job `tauri` de CI compila Tauri en Windows y corre también `cargo test` | el merge a `dev` |
+| [005-espejo-client-baseline](005-espejo-client-baseline.md) | La auditoría del espejo de client arranca con 8 módulos en el baseline (D-9) | el merge a `dev` |
+| [005-jsx-literales](005-jsx-literales.md) | AC-8 se comprueba con `react/jsx-no-literals` de oxlint, como error | el merge a `dev` |
+| [005-cors-tauri](005-cors-tauri.md) | La API acepta solo los orígenes de la ventana de Tauri (CORS): sin esto la app no carga datos | el merge a `dev` |
+| [005-opener-abrir-carpeta](005-opener-abrir-carpeta.md) | «Abrir carpeta» de los avisos usa `opener:allow-open-path` sin alcance | antes de main (alcance con la 015) |
+| [005-desvios-de-diseno](005-desvios-de-diseno.md) | Desvíos de D-1 (sin shadcn), D-2 (CSP amplia), D-4 (theme-init y Geist) y D-8 (confirm nativo) | el merge a `dev` no depende de ellos |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

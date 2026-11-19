@@ -1,0 +1,8 @@
+# 005: `worktree prepare` instala con bun y enlaza el target de Cargo; ya no enlaza node_modules
+
+- **Contexto**: `prepare` enlazaba el `node_modules` del principal (junction en Windows). Con ese enlace, `bun install` en el worktree escribe en el principal: en la verificación de T8 se encontró un junction así en `005-client-base`, y el store `node_modules/.bun` del principal tiene 295 entradas de las dependencias del worktree. D-10 pedía `CARGO_TARGET_DIR` compartido, pero una variable de entorno no la puede dejar `prepare` en el entorno de otras sesiones.
+- **Elegida**: `prepare` corre `bun install --frozen-lockfile` en el worktree (si hay `package.json`) y enlaza `client/src-tauri/target` a `<principal>/tmp/cargo-target` (junction en Windows, symlink en POSIX). El efecto es el de `CARGO_TARGET_DIR`. `close` quita ese enlace antes de borrar el worktree, y el principal queda intacto.
+- **Descartadas**: exportar `CARGO_TARGET_DIR` (no llega a otras sesiones ni a la CI); un `.cargo/config.toml` dentro del worktree (un archivo de más que `git status` mostraría).
+- **Cómo revertir**: quitar `_cargo_target` y `_bun_install` de `devtools/worktree.py` y volver a enlazar `node_modules` en `LINKS`, solo si `bun install` deja de escribir en el principal.
+- **Cómo comprobarla**: `uv run pytest devtools/tests/unit/test_worktree.py` (incluye `test_prepare_installs_with_bun_and_shares_the_cargo_target`).
+- **Worktrees ya preparados antes de este cambio**: si tienen `node_modules` enlazado al principal, quita ese enlace con `cmd /c rmdir <ruta>` (sin `/S`) y corre `bun install --frozen-lockfile` dentro del worktree.
