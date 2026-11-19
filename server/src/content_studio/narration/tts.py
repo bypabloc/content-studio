@@ -1,6 +1,6 @@
 """main() de narration tts: valida en el python del usuario, se relanza en el venv del motor y narra cada guion.
 
-Directo: PYTHONPATH=server/src python -m content_studio.narration.tts --modelo voxcpm2 --voz karen-savage --texto "..."
+Directo: PYTHONPATH=server/src python -m content_studio.narration.tts --model voxcpm2 --voice karen-savage --text "..."
 Flags y formato del guion: content_studio/narration/parser.py.
 """
 
@@ -8,59 +8,59 @@ from __future__ import annotations
 
 import random
 
-from content_studio import rutas
-from content_studio.comun import proceso
-from content_studio.narration.guion import avisar_sobrescritura, guiones, planificar
-from content_studio.narration.metadatos import avisos_voz, guardar_metadatos
-from content_studio.narration.parser import ESTILOS, MOTORES, aprobadas, construir_parser
-from content_studio.narration.pipeline import evaluar, lote_auto, narrar
+from content_studio import paths
+from content_studio.common import process
+from content_studio.narration.metadata import notices_voice, save_metadata
+from content_studio.narration.parser import ENGINES, STYLES, approved_voices, build_parser
+from content_studio.narration.pipeline import batch_auto, evaluate, narrate
+from content_studio.narration.script import plan, scripts, warn_overwrite
 
 
 def main() -> None:
-    ap = construir_parser()
+    ap = build_parser()
     a = ap.parse_args()
-    if a.reintentos and not a.evaluar:
-        ap.error('--reintentos necesita --evaluar')
-    if a.voz:
-        ficha = aprobadas(ESTILOS)[a.voz]
-        if ficha['idioma'] != a.idioma:
-            ap.error(f'la voz {a.voz} es en "{ficha["idioma"]}": usa --idioma {ficha["idioma"]}')
-        a.ref = rutas.VOCES / a.voz
+    if a.retries and not a.evaluate:
+        ap.error('--retries needs --evaluate')
+    if a.voice:
+        sheet = approved_voices(STYLES)[a.voice]
+        if sheet['language'] != a.language:
+            ap.error(f'la voz {a.voice} es en "{sheet["language"]}": usa --language {sheet["language"]}')
+        a.ref = paths.VOICES / a.voice
 
-    trabajos = planificar(a, guiones(a))  # valida estilos y rutas antes de relanzar y de cargar el modelo
+    jobs = plan(a, scripts(a))  # valida estilos y rutas antes de relanzar y de cargar el modelo
 
-    e = MOTORES[a.modelo]
+    e = ENGINES[a.model]
     # Desde aquí corre en el venv del motor: los avisos se imprimen una sola vez.
-    proceso.usar_venv(e.ruta_venv(), 'server/data/narration/README.md', modulo='content_studio.narration.tts')
-    if a.voz:
-        avisos_voz(a.voz, aprobadas(ESTILOS)[a.voz])
-    avisar_sobrescritura(trabajos)
+    process.use_venv(e.path_venv(), 'server/data/narration/README.md', module='content_studio.narration.tts')
+    if a.voice:
+        notices_voice(a.voice, approved_voices(STYLES)[a.voice])
+    warn_overwrite(jobs)
 
     import torch
 
-    motor = e.crear()
-    lote = a.lote or (lote_auto(torch.cuda.mem_get_info()[0] / 2**30, e.pesos) if e.lote else 1)
-    semilla = a.semilla if a.semilla is not None else random.randrange(2**31)
-    print(f'Semilla: {semilla}')
-    if not e.comercial:
-        print(f'Aviso: {a.modelo} tiene licencia no comercial ({e.licencia}). Solo uso personal.')
-    elif 'academic' in e.licencia:
+    engine = e.create()
+    batch = a.batch or (batch_auto(torch.cuda.mem_get_info()[0] / 2**30, e.weights) if e.batch else 1)
+    seed = a.seed if a.seed is not None else random.randrange(2**31)
+    print(f'Seed: {seed}')
+    if not e.commercial:
+        print(f'Notice: {a.model} has a non-commercial license ({e.license}). Personal use only.')
+    elif 'academic' in e.license:
         print(
-            f'Aviso: {a.modelo} es Apache-2.0, pero su model card dice "for academic purposes only" (sin aclarar). '
+            f'Notice: {a.model} is Apache-2.0, but its model card says "for academic purposes only" (unclear). '
             'Ver docs/research/voicestudio-narracion/07.'
         )
 
-    resultados = [
-        narrar(motor, texto, estilo, a.ref, salida, lote, semilla, idioma=a.idioma, master=a.master, lufs=a.lufs)
-        for texto, estilo, salida in trabajos
+    results = [
+        narrate(engine, text, style, a.ref, output, batch, seed, language=a.language, master=a.master, lufs=a.lufs)
+        for text, style, output in jobs
     ]
 
-    if a.evaluar:
-        evaluar(motor, resultados, lote, semilla, a.reintentos, a.idioma)
-    elif motor.sugerir_evaluar:
-        print(f'Sugerencia: usa --evaluar con {a.modelo}')
-    for g in resultados:
-        guardar_metadatos(motor, g)
+    if a.evaluate:
+        evaluate(engine, results, batch, seed, a.retries, a.language)
+    elif engine.suggest_evaluate:
+        print(f'Tip: use --evaluate with {a.model}')
+    for g in results:
+        save_metadata(engine, g)
 
 
 if __name__ == '__main__':

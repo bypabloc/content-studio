@@ -11,49 +11,49 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parents[3]  # .claude/hooks/tests/ → raíz del repo
-GIT = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', f'core.hooksPath={RAIZ / ".git-hooks"}']
+ROOT = Path(__file__).resolve().parents[3]  # .claude/hooks/tests/ → raíz del repo
+GIT = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', f'core.hooksPath={ROOT / ".git-hooks"}']
 
 
-def hook(nombre: str, payload: dict, *args: str) -> subprocess.CompletedProcess:
-    ruta = RAIZ / '.claude' / 'hooks' / nombre
-    return subprocess.run([sys.executable, str(ruta), *args], input=json.dumps(payload), capture_output=True, text=True)
+def hook(name: str, payload: dict, *args: str) -> subprocess.CompletedProcess:
+    path = ROOT / '.claude' / 'hooks' / name
+    return subprocess.run([sys.executable, str(path), *args], input=json.dumps(payload), capture_output=True, text=True)
 
 
 @pytest.mark.parametrize(
-    ('ruta', 'agente', 'codigo'),
+    ('path', 'agent', 'code'),
     [('out/spec.png', None, 2), ('out/spec.PNG', 'image-reader', 0), ('src/a.py', None, 0)],
 )
-def test_image_read_guard(ruta, agente, codigo):
-    payload = {'tool_input': {'file_path': ruta}, **({'agent_type': agente} if agente else {})}
-    assert hook('image_read_guard.py', payload).returncode == codigo
+def test_image_read_guard(path, agent, code):
+    payload = {'tool_input': {'file_path': path}, **({'agent_type': agent} if agent else {})}
+    assert hook('image_read_guard.py', payload).returncode == code
 
 
-def test_format_on_save_solo_lo_que_lintea_ci():
-    sys.path.insert(0, str(RAIZ / '.claude' / 'hooks'))
-    from format_on_save import relativa
+def test_format_on_save_only_it_that_lints_ci():
+    sys.path.insert(0, str(ROOT / '.claude' / 'hooks'))
+    from format_on_save import relative
 
-    assert relativa(str(RAIZ / 'server' / 'src' / 'a.py')) == 'server/src/a.py'
-    assert relativa('cli.py') == 'cli.py'
-    assert relativa('devtools/worktree.py') == 'devtools/worktree.py'
-    assert relativa('server/data/narration/README.md') is None
-    assert relativa(str(RAIZ.parent / 'otro' / 'a.py')) is None
+    assert relative(str(ROOT / 'server' / 'src' / 'a.py')) == 'server/src/a.py'
+    assert relative('cli.py') == 'cli.py'
+    assert relative('devtools/worktree.py') == 'devtools/worktree.py'
+    assert relative('server/data/narration/README.md') is None
+    assert relative(str(ROOT.parent / 'otro' / 'a.py')) is None
 
 
-def test_session_start_compact_reinyecta_reglas():
+def test_session_start_compact_injects_rules_again():
     assert 'Un modelo a la vez' in hook('session_start.py', {}, 'compact').stdout
 
 
 @pytest.mark.parametrize(
-    'modulo', ['graphify_guard', 'image_read_guard', 'safe_compound', 'verify_state', 'worktree_guard']
+    'module', ['graphify_guard', 'image_read_guard', 'safe_compound', 'verify_state', 'worktree_guard']
 )
-def test_doctests_de_los_hooks(modulo):
-    sys.path.insert(0, str(RAIZ / '.claude' / 'hooks'))
-    assert doctest.testmod(importlib.import_module(modulo)).failed == 0
+def test_doctests_of_the_hooks(module):
+    sys.path.insert(0, str(ROOT / '.claude' / 'hooks'))
+    assert doctest.testmod(importlib.import_module(module)).failed == 0
 
 
 @pytest.mark.parametrize(
-    ('comando', 'codigo'),
+    ('command', 'code'),
     [
         ('git worktree add .worktrees/x -b feature/x origin/dev', 2),
         ('git status && git worktree add tmp/x', 2),
@@ -61,14 +61,14 @@ def test_doctests_de_los_hooks(modulo):
         ('git worktree list', 0),
     ],
 )
-def test_worktree_guard_bloquea_dentro_del_repo(comando, codigo):
-    assert hook('worktree_guard.py', {'tool_input': {'command': comando}, 'cwd': str(RAIZ)}).returncode == codigo
+def test_worktree_guard_blocks_inside_the_repo(command, code):
+    assert hook('worktree_guard.py', {'tool_input': {'command': command}, 'cwd': str(ROOT)}).returncode == code
 
 
-def test_safe_compound_aprueba_solo_lo_permitido():
-    def decision(comando: str) -> str:
-        salida = hook('safe_compound.py', {'tool_input': {'command': comando}}).stdout
-        return json.loads(salida)['hookSpecificOutput']['permissionDecision'] if salida else ''
+def test_safe_compound_approves_only_what_it_allows():
+    def decision(command: str) -> str:
+        output = hook('safe_compound.py', {'tool_input': {'command': command}}).stdout
+        return json.loads(output)['hookSpecificOutput']['permissionDecision'] if output else ''
 
     assert decision('uv run pytest -q > tmp/u.log 2>&1 && git log --oneline -1') == 'allow'
     assert decision('git status && rm -rf out') == ''
@@ -76,14 +76,14 @@ def test_safe_compound_aprueba_solo_lo_permitido():
     assert decision('git status') == ''  # simple: lo resuelve el harness
 
 
-def test_graphify_guard_sugiere_en_codigo_y_calla_en_datos():
-    sys.path.insert(0, str(RAIZ / '.claude' / 'hooks'))
+def test_graphify_guard_suggests_in_code_and_stays_silent_in_data():
+    sys.path.insert(0, str(ROOT / '.claude' / 'hooks'))
     from graphify_guard import should_suggest
 
-    assert should_suggest('search', {'command': 'grep -rn usar_venv server/src/content_studio'}, str(RAIZ))
-    assert not should_suggest('search', {'command': 'grep -n qwen server/data/narration/README.md'}, str(RAIZ))
-    assert should_suggest('read', {'file_path': str(RAIZ / 'server/src/content_studio/rutas.py')}, str(RAIZ))
-    assert not should_suggest('read', {'file_path': 'docs/specs/README.md'}, str(RAIZ))
+    assert should_suggest('search', {'command': 'grep -rn usar_venv server/src/content_studio'}, str(ROOT))
+    assert not should_suggest('search', {'command': 'grep -n qwen server/data/narration/README.md'}, str(ROOT))
+    assert should_suggest('read', {'file_path': str(ROOT / 'server/src/content_studio/rutas.py')}, str(ROOT))
+    assert not should_suggest('read', {'file_path': 'docs/specs/README.md'}, str(ROOT))
 
 
 @pytest.fixture
@@ -94,11 +94,11 @@ def repo(tmp_path):
     return tmp_path
 
 
-def commit(repo: Path, mensaje: str) -> subprocess.CompletedProcess:
-    return subprocess.run([*GIT, 'commit', '-q', '-m', mensaje], cwd=repo, capture_output=True, text=True)
+def commit(repo: Path, message: str) -> subprocess.CompletedProcess:
+    return subprocess.run([*GIT, 'commit', '-q', '-m', message], cwd=repo, capture_output=True, text=True)
 
 
-def test_pre_commit_rechaza_main_y_audio(repo):
+def test_pre_commit_rejects_main_and_audio(repo):
     assert commit(repo, 'docs: a').returncode == 1
     subprocess.run(['git', 'switch', '-q', '-c', 'feature/voz'], cwd=repo, check=True)
     (repo / 'voz.wav').write_bytes(b'RIFF')
@@ -106,15 +106,15 @@ def test_pre_commit_rechaza_main_y_audio(repo):
     assert 'voz.wav' in commit(repo, 'feat: voz').stderr
 
 
-def test_prepare_commit_msg_quita_atribucion_y_pre_push_protege_main(repo, tmp_path_factory):
+def test_prepare_commit_msg_removes_attribution_and_pre_push_protects_main(repo, tmp_path_factory):
     subprocess.run(['git', 'switch', '-q', '-c', 'docs/a'], cwd=repo, check=True)
     assert commit(repo, 'docs: a\n\nCo-Authored-By: Claude <noreply@anthropic.com>').returncode == 0
     log = subprocess.run(['git', 'log', '-1', '--format=%B'], cwd=repo, capture_output=True, text=True).stdout
     assert log.strip() == 'docs: a'
 
-    remoto = tmp_path_factory.mktemp('remoto')
-    subprocess.run(['git', 'init', '-q', '--bare', str(remoto)], check=True)
-    push = [*GIT, 'push', '-q', str(remoto)]
+    remote = tmp_path_factory.mktemp('remote')
+    subprocess.run(['git', 'init', '-q', '--bare', str(remote)], check=True)
+    push = [*GIT, 'push', '-q', str(remote)]
     assert subprocess.run([*push, 'docs/a:main'], cwd=repo, capture_output=True).returncode == 1
     assert subprocess.run([*push, 'docs/a:sinprefijo'], cwd=repo, capture_output=True).returncode == 1
     assert subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True).returncode == 0

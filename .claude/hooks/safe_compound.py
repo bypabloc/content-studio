@@ -46,7 +46,7 @@ def _dq_end(s: str, i: int) -> int:
             i = _quote_end(s, i + 1, '`') + 1
         else:
             i += 1
-    raise ValueError('comilla doble sin cerrar')
+    raise ValueError('unclosed double quote')
 
 
 def _paren_end(s: str, i: int) -> int:
@@ -76,7 +76,7 @@ def _paren_end(s: str, i: int) -> int:
                 return i
             depth -= 1
         i += 1
-    raise ValueError('sustitución sin cerrar')
+    raise ValueError('unclosed substitution')
 
 
 def _extract(s: str) -> tuple[str, list[str]]:
@@ -99,7 +99,7 @@ def _extract(s: str) -> tuple[str, list[str]]:
             out.append(c)
             i += 1
         elif s.startswith('$((', i):
-            raise ValueError('aritmética no soportada')
+            raise ValueError('arithmetic not supported')
         elif s.startswith('$(', i) or c == '`':
             j = _paren_end(s, i + 2) if c == '$' else _quote_end(s, i + 1, '`')
             inners.append(s[i + 2 : j] if c == '$' else s[i + 1 : j])
@@ -109,7 +109,7 @@ def _extract(s: str) -> tuple[str, list[str]]:
             out.append(c)
             i += 1
     if in_dq:
-        raise ValueError('comilla doble sin cerrar')
+        raise ValueError('unclosed double quote')
     return ''.join(out), inners
 
 

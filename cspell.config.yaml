@@ -1,0 +1,83 @@
+# cspell de content-studio, adaptado de klinikae (spec 002, D-1). El código y los datos van en inglés. Lo que queda en
+# español (docstrings, comentarios, docs y catálogos) no se revisa o se revisa con en,es. Diccionario propio:
+# devtools/cspell/content-studio-terms.txt. Nunca agregar palabras en español ahí.
+version: '0.2'
+import:
+  - '@cspell/dict-es-es/cspell-ext.json'
+language: en
+caseSensitive: false
+minWordLength: 4
+dictionaries:
+  - content-studio-terms
+dictionaryDefinitions:
+  - name: content-studio-terms
+    path: ./devtools/cspell/content-studio-terms.txt
+    addWords: true
+patterns:
+  - name: python-docstring
+    pattern: '/"""[\s\S]*?"""/g'
+  - name: hash-comment
+    pattern: '/#.*$/gm'
+  - name: string-literal
+    pattern: '/"[^"\n]*"|''[^'']*''/g'
+ignoreRegExpList:
+  - python-docstring
+  - hash-comment
+  # Rutas del repo en español (docs, datos, devtools): son nombres de archivo, no palabras.
+  - '(?:server|docs|devtools)/[\w/.-]+'
+overrides:
+  # Los strings de los tests pueden estar en español (son datos de prueba, no identificadores).
+  - filename: '**/tests/**'
+    ignoreRegExpList:
+      - string-literal
+  # Textos para leer en voz alta y catálogos de datos: español permitido.
+  - filename: 'server/data/narration/docs/scripts/**'
+    language: en,es
+  - filename: 'server/data/**/*.json'
+    language: en,es
+  # Alias del guion: nombres en español a propósito (narration/script_aliases.json, spec 002 D-5). Las formas sin
+  # tilde no están en el diccionario es-es, así que van por palabra.
+  - filename: 'server/src/content_studio/narration/script_aliases.json'
+    language: en,es
+    words: [emocion, enfasis, energica, dramatica]
+ignorePaths:
+  # Temporal (D-3): la UI en español de cli/ la retira la 004 y grabar/ la 007.
+  # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
+  - server/data/narration/voices/catalog.json
+  # Prosa en español para el agente: configuración del plugin session-handoff (D-1, como handoff_text).
+  - .claude/session-handoff.json
+  # La config no se revisa a sí misma: lista rutas en español de carpetas que aún no se traducen.
+  - cspell.config.yaml
+  # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).
+  - server/tests/fixtures/*.json
+  - server/tests/fixtures/*.txt
+  # cli/ salvo commands/ (ciclo 5): la UI en español la retira la 004 (D-3).
+  - server/src/content_studio/cli/app.py
+  - server/src/content_studio/cli/args.py
+  - server/src/content_studio/cli/flow.py
+  - server/src/content_studio/cli/help_text.py
+  - server/src/content_studio/cli/menu.py
+  - server/src/content_studio/cli/widgets.py
+  - server/src/content_studio/cli/__init__.py
+  - server/src/content_studio/narration/grabar/**
+  - cli.py
+  # Dependencias, salidas, grafo y datos que no son código: no se revisan.
+  - node_modules/**
+  - graphify-out/**
+  - tmp/**
+  - out/**
+  - logs/**
+  - docs/**
+  - '**/*.md'
+  - bun.lock
+  - uv.lock
+  - '**/*.lock'
+  - server/data/**/*.wav
+  - server/data/**/*.m4a
+  - server/data/**/*.mp3
+  - server/data/**/*.txt
+  - server/data/**/engines/**
+  - server/data/**/models/**
+  - server/data/**/.venv*/**
+  - server/data/**/voces/*/**
+  - server/data/**/voices/*/**

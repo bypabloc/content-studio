@@ -1,8 +1,8 @@
 # Formato del guion para `narration tts`
 
-Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar pausas, entonación y pronunciación.
+Cómo escribir el texto que se pasa con `--text` o `--file` para controlar pausas, entonación y pronunciación.
 
-> **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `experta`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` solo se midieron las pausas largas (ver abajo); los signos y las etiquetas no.
+> **Alcance:** medido el 4 de octubre de 2026 con **Qwen3-TTS 0.6B Base** y una referencia en estilo `expert`. Con `qwen-1.7b` el comportamiento debería ser parecido. Con `chatterbox` solo se midieron las pausas largas (ver abajo); los signos y las etiquetas no.
 >
 > **Motores nuevos (OmniVoice, VoxCPM2, IndexTTS 2.5, CosyVoice 3):** se midieron el 15 de noviembre de 2026 y algunos **sí** aceptan etiquetas, instrucciones de emoción o respiraciones. Lo que cambia por motor está en la [sección de motores nuevos](#motores-nuevos-qué-cambia) y en detalle en [docs/research/voicestudio-narracion/08](../../../../docs/research/voicestudio-narracion/08-guion-y-pronunciacion.md). Las reglas obligatorias siguen valiendo para todos los motores.
 
@@ -18,7 +18,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 
 ## Reglas obligatorias
 
-**Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. Antes de generar, `narration tts` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion. Después de generar, `--evaluar` detecta las palabras que el modelo dijo mal y los silencios fuera de lugar (regla 24).
+**Todo guion tiene que cumplir todas estas reglas.** No son sugerencias: salen de las pruebas que se detallan en las secciones de abajo. Las cifras que no salen de una medición (el máximo de `…` y el largo de las oraciones) se marcan como *criterio*. Un guion que no las cumpla se corrige antes de generar el audio. Antes de generar, `narration tts` solo avisa de las etiquetas (regla 1); el resto lo revisa quien escribe el guion. Después de generar, `--evaluate` detecta las palabras que el modelo dijo mal y los silencios fuera de lugar (regla 24).
 
 **Marcas** ([Por qué no hay marcas](#por-qué-no-hay-marcas-qwen-base))
 
@@ -62,10 +62,10 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 21. Si un párrafo tiene dos oraciones, separa las oraciones con `[pausa 0.6]`: entre oraciones del mismo bloque, el modelo a veces deja silencios de 1.4 s. La marca va dentro de la misma línea, así que no corre la numeración de `visuales`.
 22. La última palabra de un párrafo es la más frágil: en el 40–60 % de las generaciones cambia su vocal final ("cuenta" → "cuento", "parto" → "parte"). Si es una palabra que importa, no la dejes al final: agrega algo después ("cada segundo cuenta **mucho**", de 0/3 a 3/3) o reordena ("…, **inventario y pacientes nuevos**", no "…, pacientes nuevos e inventario", que falló en tres tandas seguidas).
 
-**Proceso** ([Guiones en JSON](#guiones-en-json) y `--evaluar` en el [README](../README.md#evaluar-las-salidas---evaluar))
+**Proceso** ([Guiones en JSON](#guiones-en-json) y `--evaluate` en el [README](../README.md#evaluar-las-salidas---evaluate))
 
 23. En un JSON con `visuales`, no cambies la cantidad de elementos de `texto`: cada `linea` de `visuales` apunta a uno. Para cortar dentro de una línea, usa `[pausa N]`.
-24. Todo guion se genera con `--evaluar --reintentos 4`, y se lee el informe. Si un párrafo falla en **todas** las rondas, el problema es la escritura: corrígelo con las reglas 17 a 22 y vuelve a generar ese guion. Si falla solo a veces, es azar del muestreo y lo resuelven los reintentos.
+24. Todo guion se genera con `--evaluate --retries 4`, y se lee el informe. Si un párrafo falla en **todas** las rondas, el problema es la escritura: corrígelo con las reglas 17 a 22 y vuelve a generar ese guion. Si falla solo a veces, es azar del muestreo y lo resuelven los reintentos.
 25. Escucha lo que el evaluador no oye: la entonación, la pronunciación de la marca y los párrafos con aviso de ritmo.
 
 ### Ejemplo que cumple todas las reglas
@@ -83,7 +83,7 @@ Cómo escribir el texto que se pasa con `--texto` o `--archivo` para controlar p
 
 ## Palabras que el modelo pierde
 
-Medido con `--evaluar` y experimentos de 3 a 5 generaciones por variante (las variantes se transcribieron con whisper `medium`):
+Medido con `--evaluate` y experimentos de 3 a 5 generaciones por variante (las variantes se transcribieron con whisper `medium`):
 
 | Escritura | Bien | Escritura que la evita | Bien |
 |---|---|---|---|
@@ -98,7 +98,7 @@ Medido con `--evaluar` y experimentos de 3 a 5 generaciones por variante (las va
 | "…cada segundo cuenta." (final del párrafo) | 0/3 | "…cada segundo cuenta mucho." | 3/3 |
 | "…pacientes nuevos e inventario." | falló 3 tandas | "…inventario y pacientes nuevos." | bien en la tanda siguiente |
 
-**Lo que no se arregla escribiendo.** La última palabra de un párrafo a veces cambia de vocal ("parto" → "parte", en el 40–60 % de las generaciones), y "gestacional" se oye a veces "estacional". Probé con temperaturas 0.5, 0.6 y 0.8 y no mejoró de forma consistente. Es azar del muestreo, así que la solución es regenerar ese párrafo: `--evaluar --reintentos 4` lo hace solo. Con los 22 guiones de prueba, ya corregidos con estas reglas, las rondas regeneraron 40 → 15 → 8 → 5 párrafos.
+**Lo que no se arregla escribiendo.** La última palabra de un párrafo a veces cambia de vocal ("parto" → "parte", en el 40–60 % de las generaciones), y "gestacional" se oye a veces "estacional". Probé con temperaturas 0.5, 0.6 y 0.8 y no mejoró de forma consistente. Es azar del muestreo, así que la solución es regenerar ese párrafo: `--evaluate --retries 4` lo hace solo. Con los 22 guiones de prueba, ya corregidos con estas reglas, las rondas regeneraron 40 → 15 → 8 → 5 párrafos.
 
 **Lo que no es un error del audio.** Cuando una "s" final se junta con otra inicial, se oye una sola "s" y la frase es ambigua para cualquiera: whisper oyó "eres tú quien **decides** si" en 5 de 5 generaciones de "eres tú quien **decide** si". "Tú decides si incluir" salió bien en 4 de 5, así que se puede dejar. Las listas ("medicina general, odontología, pediatría…") se leen más lento a propósito, unas 2 palabras/s contra 3.3 de mediana; por eso el ritmo es solo un aviso.
 
@@ -121,7 +121,7 @@ Las etiquetas que circulan en guías de internet (`[gasp]`, `[sighing]`, `[whisp
 
 `narration tts` muestra un aviso antes de generar si el texto tiene `[…]`, `<…>`, `**` o `(pausa)`. La única excepción es `[pausa N]` (ver más abajo).
 
-Tampoco uses la notación de [guiones/](guiones/README.md) (`/`, `//`, `↗`, `[sonrisa]`). Sirve solo para grabar las referencias.
+Tampoco uses la notación de [scripts/](scripts/README.md) (`/`, `//`, `↗`, `[sonrisa]`). Sirve solo para grabar las referencias.
 
 ## Pausas
 
@@ -156,7 +156,7 @@ La diferencia, unos 0.3 s, es la caída natural de la voz más un margen de 0.08
 
 - Si entre dos párrafos hay una `[pausa N]`, manda la marca y la línea en blanco no suma. Varias marcas seguidas se suman.
 - Una `[pausa N]` al final del texto deja ese silencio al final del audio. Al principio del texto no tiene efecto.
-- El silencio se acelera junto con el audio en los estilos con velocidad distinta de 1 (`amistosa` y `estable`, ×1.05; `clara`, ×0.97).
+- El silencio se acelera junto con el audio en los estilos con velocidad distinta de 1 (`friendly` y `steady`, ×1.05; `clear`, ×0.97).
 - Cada corte termina un bloque. Antes de una pausa, cierra la idea con `.`, `?` o `!` para que la entonación baje bien.
 
 ## Entonación
@@ -186,7 +186,7 @@ La diferencia, unos 0.3 s, es la caída natural de la voz más un margen de 0.08
 
 ## Respiros y énfasis
 
-Con **Qwen y Chatterbox** no se pueden indicar en el texto. El modelo copia la manera de hablar de la referencia (ritmo, respiraciones, intensidad), así que para obtener otro resultado hay que cambiar la grabación. Ver [guiones/](guiones/README.md). Con los motores nuevos, ver la sección siguiente.
+Con **Qwen y Chatterbox** no se pueden indicar en el texto. El modelo copia la manera de hablar de la referencia (ritmo, respiraciones, intensidad), así que para obtener otro resultado hay que cambiar la grabación. Ver [scripts/](scripts/README.md). Con los motores nuevos, ver la sección siguiente.
 
 ## Motores nuevos: qué cambia
 
@@ -208,7 +208,7 @@ Medido el 15 de noviembre de 2026 con 15 frases × 2 semillas por motor ([prueba
 
 ### Traducción por motor
 
-Lo que `narration tts` envía al motor (`TRADUCCION` en [texto/traducir.py](../../../src/content_studio/narration/texto/traducir.py)). Cada marca que se quita, y cada reemplazo que cambia la lectura, deja un aviso en la consola y en el `.json` del bloque:
+Lo que `narration tts` envía al motor (`TRADUCCION` en [texto/traducir.py](../../../src/content_studio/narration/text/traducir.py)). Cada marca que se quita, y cada reemplazo que cambia la lectura, deja un aviso en la consola y en el `.json` del bloque:
 
 | Marca | OmniVoice | VoxCPM2 | IndexTTS 2.5 | CosyVoice 3 | Qwen y Chatterbox |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -227,16 +227,16 @@ Un guion puede cambiar de estilo (la referencia de voz) y de emoción en cualqui
 
 | Marca | Qué hace |
 | :--- | :--- |
-| `[estilo: dramatica]` | Desde ese punto usa `voz/dramatica.wav` (con su `.txt`) hasta el próximo `[estilo:]`. Si la referencia no existe, el script se detiene antes de generar |
+| `[estilo: dramatica]` | Desde ese punto usa `reference/dramatic.wav` (con su `.txt`) hasta el próximo `[estilo:]`. Si la referencia no existe, el script se detiene antes de generar |
 | `[emocion: triste]` o `[emocion: triste 0.4]` | Emoción desde ese punto hasta el próximo `[emocion:]`. La intensidad va de 0 a 1 (por defecto 0.6). `[emocion:]` vacío la quita |
 
-Emociones: `alegre`, `triste`, `enojado`, `miedo`, `sorpresa`, `calma`, `urgente` y `susurro`. Cada motor la aplica a su manera:
+Emociones: `happy`, `sad`, `angry`, `fear`, `surprise`, `calm`, `urgent` y `whisper`. Cada motor la aplica a su manera:
 
-- **Qwen y OmniVoice**: cambian la referencia por la del estilo que la representa: `alegre` y `urgente` usan `energica`; `triste`, `triste`; `miedo`, `dramatica`; `sorpresa`, `amistosa`; `calma`, `suave`; `susurro`, `intima`. `enojado` no tiene referencia: se genera con el estilo del párrafo y avisa.
-- **Chatterbox**: ajusta `exaggeration` y `cfg_weight` según la intensidad. `susurro` no tiene valores y avisa.
-- **IndexTTS 2.5**: vector de emoción, o el clip `voz/emociones/<emoción>.wav` si existe. `susurro` no tiene vector y avisa.
+- **Qwen y OmniVoice**: cambian la referencia por la del estilo que la representa: `happy` y `urgent` usan `energetic`; `sad`, `sad`; `fear`, `dramatic`; `surprise`, `friendly`; `calm`, `soft`; `whisper`, `intimate`. `angry` no tiene referencia: se genera con el estilo del párrafo y avisa.
+- **Chatterbox**: ajusta `exaggeration` y `cfg_weight` según la intensidad. `whisper` no tiene valores y avisa.
+- **IndexTTS 2.5**: vector de emoción, o el clip `reference/emotions/<emoción>.wav` si existe. `whisper` no tiene vector y avisa.
 - **VoxCPM2**: escribe la instrucción en inglés delante del texto, en modo controlable (sin la transcripción de la referencia, que se leería). La intensidad no se controla: avisa si pides otra distinta de 0.6.
-- **CosyVoice 3**: usa la instrucción (`instruct2`). `susurro` no la sigue y avisa.
+- **CosyVoice 3**: usa la instrucción (`instruct2`). `whisper` no la sigue y avisa.
 
 Dos reglas:
 
@@ -279,7 +279,7 @@ Para generar varios guiones de una vez, cada uno puede ir en un `.json`:
 | Campo | Uso |
 |---|---|
 | `texto` | Lista de párrafos, con las mismas reglas de este documento. Entre párrafos hay una pausa como la de una línea en blanco (0.6 s). También acepta un solo string. Un párrafo puede ser un objeto `{"texto": "…", "estilo": "dramatica", "emocion": "triste 0.4"}`, que equivale a anteponer esas marcas |
-| `estilo` | Uno de los estilos de la [README §4](../README.md#4-estilos). Elige la grabación de referencia del guion. `--estilo` en la línea de comandos lo reemplaza |
+| `estilo` | Uno de los estilos de la [README §4](../README.md#4-estilos). Elige la grabación de referencia del guion. `--style` en la línea de comandos lo reemplaza |
 | `id` | Nombre del archivo de salida: `<id>-<modelo>.wav`. Si falta, se usa el nombre del `.json` |
 | otros (`titulo`, `idioma`…) | `narration tts` los ignora |
 
@@ -287,7 +287,7 @@ Las marcas de actitud de la notación de grabación (`[curiosa]`, `[animada]`) n
 
 ```bash
 # Varios guiones en una corrida: el modelo se carga una sola vez
-python cli.py narration tts --modelo qwen-0.6b --archivo guiones/*.json --salida out/narration/organic
+python cli.py narration tts --model qwen-0.6b --file guiones/*.json --output out/narration/organic
 ```
 
 Medido con 3 guiones (unos 30 s de audio cada uno): el primero tardó 28.8 s con la carga del modelo incluida, y los siguientes 21.9 s y 18.7 s.

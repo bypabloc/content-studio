@@ -43,7 +43,7 @@ docs/specs/<NN>-<slug>/
 ## 4. Por grupo de commit y verificación final
 
 * Por grupo: el Verify de sus tareas, `uv run ruff check`, `uv run ruff format --check` y `uv run pytest`. Nada que cargue un modelo por grupo.
-* **Verificación final**, una vez, con todos los commits hechos y antes del push: lo anterior, `uv run pytest -m local` si toca un motor, la corrida real con `turno-gpu run` de lo que cambió, y duración, volumen y espectrograma de las salidas (`verify-before-claiming-done.md`; las imágenes las abre `image-reader`).
+* **Verificación final**, una vez, con todos los commits hechos y antes del push: lo anterior, `uv run pytest -m local` si toca un motor, la corrida real con `gpu-turn run` de lo que cambió, y duración, volumen y espectrograma de las salidas (`verify-before-claiming-done.md`; las imágenes las abre `image-reader`).
 * Lo que bloquea el pase a `main` va a `docs/process/WARNING/`; lo que no, a `docs/process/PENDING/` (`project-progress.md`). Nada importante puede quedar solo en la carpeta de la spec: se borra al cerrar.
 * Un solo push y un solo PR a `dev`, creado solo si no existe; merge con merge commit y cierre del worktree.
 * **Cierre**: el último commit de una spec suelta actualiza `docs/process/01-done/` si es funcional, hace `git rm -r` de su carpeta y quita su fila del índice.

@@ -20,7 +20,7 @@ Red → Green → Refactor con `uv run pytest`. Regla: `.agents/rules/testing.md
 2. **RED**: escribe el test con el AC en el nombre o el docstring (`test_ac2_...`) y córrelo: `uv run pytest server/tests/test_<área>.py::<test> -q`. Tiene que fallar por el motivo esperado (no por un import o el setup).
 3. **GREEN**: lo mínimo para el verde, mismo comando. Nada de lo que ningún AC pide (`plan-format.md` §0).
 4. **REFACTOR** con la red en verde; cierra con `uv run ruff check && uv run ruff format --check && uv run pytest`.
-5. Si el cambio toca un motor o la salida de audio, el verde de pytest no basta: corrida real con `turno-gpu run` y medición (`verify-before-claiming-done.md`).
+5. Si el cambio toca un motor o la salida de audio, el verde de pytest no basta: corrida real con `gpu-turn run` y medición (`verify-before-claiming-done.md`).
 
 ## Reglas
 

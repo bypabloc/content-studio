@@ -20,41 +20,41 @@ jobs:
       GH_TOKEN: ${{ secrets.SYNC_TOKEN }}
       REPO: ${{ github.repository }}
     steps:
-      - name: Abrir PR main → dev (si dev está atrasada)
+      - name: Open PR main → dev (if dev is behind)
         run: |
-          atraso=$(gh api "repos/$REPO/compare/dev...main" --jq .ahead_by)
-          if [ "$atraso" = "0" ]; then
-            echo "dev ya contiene main; nada que sincronizar."
+          behind=$(gh api "repos/$REPO/compare/dev...main" --jq .ahead_by)
+          if [ "$behind" = "0" ]; then
+            echo "dev already contains main; nothing to sync."
             exit 0
           fi
           pr=$(gh pr list -R "$REPO" --base dev --head main --state open --json number --jq '.[0].number')
           if [ -z "$pr" ]; then
             pr=$(gh pr create -R "$REPO" --base dev --head main \
-              --title "chore: sincronizar dev con main" \
-              --body "PR automático (sync-dev): trae a dev los $atraso commit(s) de main que le faltan, por ejemplo un hotfix \`fix/*\`. Se mergea solo cuando pasan los checks; si hay conflicto, queda abierto para resolverlo a mano." \
+              --title "chore: sync dev with main" \
+              --body "Automatic PR (sync-dev): brings to dev the $behind commit(s) of main it is missing, for example a hotfix \`fix/*\`. It is merged automatically when the checks pass; if there is a conflict, it stays open to resolve by hand." \
               | grep -o '[0-9]*$')
           fi
           gh pr merge "$pr" -R "$REPO" --merge --auto
-          echo "PR #$pr en auto-merge."
+          echo "PR #$pr set to auto-merge."
 
           # GitHub calcula mergeable de forma asíncrona: esperar hasta ~1 min a que deje de ser UNKNOWN.
           for _ in $(seq 1 12); do
-            estado=$(gh pr view "$pr" -R "$REPO" --json mergeable --jq .mergeable)
-            [ "$estado" != "UNKNOWN" ] && break
+            state=$(gh pr view "$pr" -R "$REPO" --json mergeable --jq .mergeable)
+            [ "$state" != "UNKNOWN" ] && break
             sleep 5
           done
-          if [ "$estado" = "CONFLICTING" ]; then
-            gh pr comment "$pr" -R "$REPO" --body "**Conflicto entre main y dev**: este PR no se va a mergear solo. Para resolverlo:
+          if [ "$state" = "CONFLICTING" ]; then
+            gh pr comment "$pr" -R "$REPO" --body "**Conflict between main and dev**: this PR will not merge by itself. To resolve it:
 
           \`\`\`bash
           git switch dev && git pull
           git switch -c fix/resolver-sync-main-dev
-          git merge origin/main        # resolver los conflictos y hacer commit
+          git merge origin/main        # resolve the conflicts and commit
           git push -u origin fix/resolver-sync-main-dev
           gh pr create --base dev
           \`\`\`
 
-          Cuando ese PR entre a dev, este se cierra solo. Ver \`.claude/rules/git-workflow.md\`."
-            echo "::error::PR #$pr (main → dev) tiene conflictos: hay que resolverlos a mano."
+          When that PR is merged into dev, this one closes by itself. See \`.claude/rules/git-workflow.md\`."
+            echo "::error::PR #$pr (main → dev) has conflicts: they must be resolved by hand."
             exit 1
           fi

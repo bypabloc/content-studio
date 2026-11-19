@@ -7,8 +7,8 @@
 
     python cli.py                                   # menú interactivo
     python cli.py narration tts                     # asistente: pregunta lo que falte
-    python cli.py narration tts --modelo qwen-0.6b --texto "..."   # completo: se ejecuta directo
-    python cli.py music --modelo acestep --estilo lofi-chill
+    python cli.py narration tts --model qwen-0.6b --text "..."   # completo: se ejecuta directo
+    python cli.py music --model acestep --style lofi-chill
 
 Si este python no tiene las dependencias, el CLI se relanza con `uv run --script` (las lee del bloque de arriba).
 """
@@ -18,14 +18,14 @@ from pathlib import Path
 
 if (_SRC := str(Path(__file__).resolve().parent / 'server' / 'src')) not in sys.path:
     sys.path.insert(0, _SRC)
-from content_studio.comun.proceso import relanzar  # noqa: E402  (solo stdlib)
+from content_studio.common.process import relaunch  # noqa: E402  (solo stdlib)
 
 try:
     for _dep in ('typer', 'rich', 'questionary'):
         __import__(_dep)
 except ImportError:
     try:
-        relanzar(['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
+        relaunch(['uv', 'run', '--quiet', '--script', __file__, *sys.argv[1:]])
     except FileNotFoundError:
         sys.exit('Falta uv (o instala typer, rich y questionary en este python). Ver "Requisitos" en AGENTS.md.')
 

@@ -57,7 +57,7 @@ def main() -> None:
         stderr=subprocess.DEVNULL,
         **detached,
     )
-    print('[graphify] grafo desactualizado: rebuild en segundo plano')
+    print('[graphify] graph is outdated: rebuilding in the background')
 
 
 if __name__ == '__main__':

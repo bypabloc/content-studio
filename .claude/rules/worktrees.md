@@ -17,7 +17,7 @@ git worktree add ../content-studio-worktrees/<nombre> -b <prefijo>/<nombre> orig
 python -m devtools worktree prepare <nombre>     # desde el checkout principal
 ```
 
-`git worktree add` solo trae lo versionado: no hay venvs (`server/data/narration/.venv-*`, `server/data/music/.venv-*`), repos de motores (`server/data/narration/motores/`), modelos (`server/data/music/models/`), voces construidas (`server/data/narration/voces/<voz>/`) ni audios de referencia (`server/data/narration/voz/*.wav`). Pesan GB y no se mueven (`codigo-python.md`), así que `prepare` **enlaza** las carpetas al principal (symlink en POSIX, junction en Windows) y copia los audios que faltan, sin pisar nada, y crea `tmp/`. Así el worktree corre motores igual que el principal. Después, `uv sync` en el worktree para el venv de desarrollo.
+`git worktree add` solo trae lo versionado: no hay venvs (`server/data/narration/.venv-*`, `server/data/music/.venv-*`), repos de motores (`server/data/narration/engines/`), modelos (`server/data/music/models/`), voces construidas (`server/data/narration/voices/<voz>/`) ni audios de referencia (`server/data/narration/reference/*.wav`). Pesan GB y no se mueven (`codigo-python.md`), así que `prepare` **enlaza** las carpetas al principal (symlink en POSIX, junction en Windows) y copia los audios que faltan, sin pisar nada, y crea `tmp/`. Así el worktree corre motores igual que el principal. Después, `uv sync` en el worktree para el venv de desarrollo.
 
 `.claude/settings.json` declara `../content-studio-worktrees` en `permissions.additionalDirectories`: una sesión del principal lee y edita ahí sin pedir permiso.
 

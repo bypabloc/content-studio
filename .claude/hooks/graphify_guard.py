@@ -22,9 +22,9 @@ EXCEPTION_PREFIXES = (
 EXCEPTION_SUFFIXES = ('.log', '.json', '.lock', '.png', '.md', '.txt', '.wav', '.toml', '.yml')
 CODE_PREFIXES = ('server/src/', 'server/tests/', 'devtools/', 'tests/', 'cli.py')
 SUGGESTION = (
-    'Sugerencia (graphify.md): para ubicar código, ver quién lo usa o qué rompe un cambio, '
-    '`graphify query|explain|affected` responde con menos tokens que grep o una lectura a ciegas. '
-    'Si ya te orientaste con el grafo, sigue.'
+    'Tip (graphify.md): to locate code, see who uses it or what breaks a change, '
+    '`graphify query|explain|affected` answers with fewer tokens than grep or a blind read. '
+    'If you already oriented yourself with the graph, carry on.'
 )
 
 
@@ -37,7 +37,7 @@ def _relative(path: str, root: str) -> str:
 def is_exception(path: str) -> bool:
     """True si la ruta es un archivo que el grafo no indexa.
 
-    >>> is_exception('server/data/narration/README.md'), is_exception('server/src/content_studio/rutas.py')
+    >>> is_exception('server/data/narration/README.md'), is_exception('server/src/content_studio/paths.py')
     (True, False)
     """
     return (

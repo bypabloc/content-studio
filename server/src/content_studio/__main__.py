@@ -2,6 +2,6 @@
 
 import runpy
 
-from content_studio import rutas
+from content_studio import paths
 
-runpy.run_path(str(rutas.RAIZ / 'cli.py'), run_name='__main__')
+runpy.run_path(str(paths.ROOT / 'cli.py'), run_name='__main__')

@@ -4,7 +4,7 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herrami
 
 | Carpeta | Qué genera | Código | Documentación |
 | :--- | :--- | :--- | :--- |
-| `server/data/narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `server/src/content_studio/narration/` | [server/data/narration/README.md](server/data/narration/README.md) · [formato del guion](server/data/narration/docs/formato-guion.md) · [grabar voces](server/data/narration/docs/guiones/README.md) |
+| `server/data/narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `server/src/content_studio/narration/` | [server/data/narration/README.md](server/data/narration/README.md) · [formato del guion](server/data/narration/docs/formato-guion.md) · [grabar voces](server/data/narration/docs/scripts/README.md) |
 | `server/data/music/` | Música de fondo instrumental (ACE-Step 1.5, HeartMuLa) | `server/src/content_studio/music/` | [server/data/music/README.md](server/data/music/README.md) · [INVESTIGACION.md](server/data/music/INVESTIGACION.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
@@ -23,49 +23,49 @@ python cli.py narration tts              # asistente
 python cli.py narration tts --help       # ayuda en tabla: flags, valores, defecto y obligatorios
 
 # Narración (sin grabaciones propias todavía: una voz libre del catálogo con consentimiento)
-python cli.py narration tts --modelo qwen-0.6b --estilo experta \
-  --voz yesid --texto "..."                                       # → out/narration/
+python cli.py narration tts --model qwen-0.6b --style expert \
+  --voice yesid --text "..."                                       # → out/narration/
 
 # Grabar las voces de referencia
-python cli.py narration grabar --listar
+python cli.py narration grabar --list
 
 # Voces libres (CC0 o dominio público), aprobadas en los 12 estilos: construir y narrar con una
-python cli.py narration voces --construir todas
-python cli.py narration tts --modelo cosyvoice3 --voz yesid --texto "..."
+python cli.py narration voices --build all
+python cli.py narration tts --model cosyvoice3 --voice yesid --text "..."
 
-# Música (presets con tonalidad/BPM/compás definidos; texto libre exige --tono y --bpm)
-python cli.py music --modelo acestep --estilo lofi-chill corporate --duracion 30   # → out/music/
+# Música (presets con tonalidad/BPM/compás definidos; texto libre exige --key y --bpm)
+python cli.py music --model acestep --style lofi-chill corporate --duration 30   # → out/music/
 ```
 
-`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Cada comando, a su vez, se relanza solo en el venv de su motor. También se puede llamar un módulo directo: `PYTHONPATH=server/src python -m content_studio.narration.tts ...` (o `content_studio.music.musica`, `content_studio.narration.voces.main`), y `uv run content-studio` es lo mismo que `python cli.py`. `grabar` necesita rich y questionary: directo, con `uv run python -m content_studio.narration.grabar.main`.
+`cli.py` funciona con cualquier `python`: si no tiene las dependencias, se relanza con `uv run --script` (están en su cabecera PEP 723). Cada comando, a su vez, se relanza solo en el venv de su motor. También se puede llamar un módulo directo: `PYTHONPATH=server/src python -m content_studio.narration.tts ...` (o `content_studio.music.music_main`, `content_studio.narration.voices.main`), y `uv run content-studio` es lo mismo que `python cli.py`. `grabar` necesita rich y questionary: directo, con `uv run python -m content_studio.narration.grabar.main`.
 
 ## Arquitectura
 
 ```
 cli.py                        shim: relanza con uv si faltan typer/rich/questionary y llama a content_studio.cli.app
 server/src/content_studio/
-├── rutas.py                  RAIZ, OUT, LOGS, NARRATION, MUSIC, VOZ, VOCES…
-├── comun/                    proceso (relanzar en un venv), ffmpeg, archivos
-├── cli/                      Typer: app, menu, flujo (asistente), widgets, args; comandos/ con Comando y REGISTRO
-├── devtools/                 flujo de agentes: worktree, turno-gpu, contexto-agentes, reglas (python -m devtools)
-├── narration/                parser (liviano), tts (main), estilos, bloques, pipeline, audio, guion, metadatos, referencia
-│   ├── motores/              EspecMotor + MotorTTS (Factory Method) y registro.py con MOTORES
-│   ├── texto/ evaluacion/    segmentos y traducción por motor; comparar y revisar (whisper)
-│   ├── voces/                catálogo de voces libres: catalogo, fuentes, construir, main
+├── paths.py                  ROOT, OUT, LOGS, NARRATION, MUSIC, REFERENCE, VOICES…
+├── common/                   process (relaunch en un venv, use_venv), ffmpeg, files
+├── cli/                      Typer: app, menu, flow (asistente), widgets, args, help_text; commands/ con Comando y REGISTRY
+├── devtools/                 flujo de agentes: worktree, gpu-turn, agent-context, rules (python -m devtools)
+├── narration/                parser (liviano), tts (main), styles, blocks, pipeline, audio, script, metadata, reference
+│   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES
+│   ├── text/ evaluation/     segments y translate por motor; compare y review (whisper)
+│   ├── voices/               catálogo de voces libres: catalog, sources, build, main
 │   └── grabar/               grabar referencias: kit, dispositivos, interfaz, toma, main
-└── music/                    parser (liviano), musica (main), estilos, evaluacion
-    └── motores/              EspecMusica + MotorMusica y registro.py con MODELOS
+└── music/                    parser (liviano), music_main (main), styles, evaluation
+    └── engines/              MusicSpec + MusicEngine y registry.py con MODELS
 ```
 
 Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y typer/rich/questionary en `cli/` y `grabar/`), así `--help` y el asistente funcionan sin los venvs. torch, numpy y las librerías de cada motor se importan dentro de las funciones, ya en el venv del motor.
 
-- **Agregar un motor TTS o de música**: un archivo en `motores/` con su subclase de `MotorTTS` o `MotorMusica`, una entrada `EspecMotor`/`EspecMusica` en `motores/registro.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `server/tests/test_venvs.py` se agrega la librería que importa (`LIBRERIAS`).
-- **Agregar un comando del CLI**: una subclase de `Comando` en `cli/comandos/` (clave, módulo, parser liviano con `construir_parser()`) y una línea en `REGISTRO` (`cli/comandos/__init__.py`).
-- **Máximo 300 líneas por `.py`** (lo comprueba `tests/validators/test_estructura.py`) y Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
+- **Agregar un motor TTS o de música**: un archivo en `engines/` con su subclase de `TTSEngine` o `MusicEngine`, una entrada `EngineSpec`/`MusicSpec` en `engines/registry.py` (venv, módulo, clase, licencia) y su venv. El parser y el asistente lo toman del registro; en `server/tests/test_venvs.py` se agrega la librería que importa (`LIBRARIES`).
+- **Agregar un comando del CLI**: una subclase de `Comando` en `cli/commands/` (clave, módulo, parser liviano con `construir_parser()`) y una línea en `REGISTRY` (`cli/commands/__init__.py`).
+- **Máximo 300 líneas por `.py`** (lo comprueba `tests/validators/test_structure.py`) y Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
 ## Forma de trabajo y dónde buscar
 
-`AGENTS.md` y `.agents/` (reglas y skills) son las instrucciones compartidas de todos los agentes (Claude Code, Codex, Antigravity). `.claude/` tiene las mismas reglas y skills con el frontmatter de Claude Code (las sincroniza `python -m devtools reglas --sincronizar`), más su configuración propia: hooks, agentes `code-explorer`, `researcher` e `image-reader` (Haiku), comandos y el plugin `session-handoff`. Lo de `.claude/` no vincula a otros agentes.
+`AGENTS.md` y `.agents/` (reglas y skills) son las instrucciones compartidas de todos los agentes (Claude Code, Codex, Antigravity). `.claude/` tiene las mismas reglas y skills con el frontmatter de Claude Code (las sincroniza `python -m devtools rules --sync`), más su configuración propia: hooks, agentes `code-explorer`, `researcher` e `image-reader` (Haiku), comandos y el plugin `session-handoff`. Lo de `.claude/` no vincula a otros agentes.
 
 | Necesidad | Fuente |
 | :--- | :--- |
@@ -77,7 +77,7 @@ Dos capas: los `parser.py`, los catálogos y el CLI solo importan stdlib (y type
 | Verificar antes de decir "listo" (duración, volumen, espectrograma) | [verify-before-claiming-done](.agents/rules/verify-before-claiming-done.md) |
 | Dónde va la salida de cada comando | [command-output](.agents/rules/command-output.md) |
 | Sesiones largas: handoff en disco y seguir hasta terminar | Plugin [session-handoff](https://github.com/bypabloc/claude-plugin-session-handoff) (solo Claude Code), configurado en `.claude/session-handoff.json` |
-| Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [turno-gpu](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
+| Varias sesiones: worktrees y turno de la GPU | [worktrees](.agents/rules/worktrees.md), [gpu-turn](.agents/rules/turno-gpu.md), [agentes-y-tokens](.agents/rules/agentes-y-tokens.md) |
 | Buscar código | [graphify](.agents/rules/graphify.md); skills `graphify-query`, `graphify-ops` |
 | devtools del flujo de agentes | [devtools](.agents/rules/devtools.md) |
 | Idioma del código, del CLI y de la narración | [textos-e-idioma](.agents/rules/textos-e-idioma.md) |
@@ -93,11 +93,11 @@ uv run pytest -m local   # además, cada venv de motor importa su librería (sol
 
 ## Reglas
 
-1. **Salidas** en `out/narration/` y `out/music/`, o donde indiquen `--salida` (narration) y `--carpeta` (music). **Logs** en `logs/<herramienta>-<descripción>.log`. Las dos carpetas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) se lanzan en segundo plano, con la salida en `logs/`.
-2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento. Entre sesiones, con `turno-gpu run` ([turno-gpu](.agents/rules/turno-gpu.md)).
+1. **Salidas** en `out/narration/` y `out/music/`, o donde indiquen `--output` (narration) y `--folder` (music). **Logs** en `logs/<herramienta>-<descripción>.log`. Las dos carpetas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) se lanzan en segundo plano, con la salida en `logs/`.
+2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Si la VRAM se desborda a la RAM compartida de WSL, todo va ~4× más lento. Entre sesiones, con `gpu-turn run` ([gpu-turn](.agents/rules/turno-gpu.md)).
 3. **La música es siempre instrumental**: nada de voz ni de letra.
 4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). El gusto lo decide el usuario: entrégale las rutas.
-5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial. OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/motores/registro.py`. Clona solo voces con permiso de su dueño.
+5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial. OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.
 7. Los archivos se crean y editan con las herramientas de edición del agente. Bash se usa solo para ejecutar los scripts y ffmpeg. Muestra los resultados con rutas clicables a `out/`.
 

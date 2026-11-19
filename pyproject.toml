@@ -10,7 +10,7 @@ target-version = "py310"
 line-length = 120
 # Los imports de server/src son de primera parte (content_studio), igual que devtools y tests.
 src = [".", "server/src"]
-extend-exclude = ["server/data/narration/motores", "server/data/music/models", "tmp", "out", "logs"]
+extend-exclude = ["server/data/narration/engines", "server/data/music/models", "tmp", "out", "logs"]
 
 [tool.ruff.format]
 # El código usa comillas simples: sin esto, `ruff format` cambiaría todas las cadenas al activarse.
@@ -24,7 +24,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201"]
 
 [tool.ruff.lint.per-file-ignores]
 # Captions del catálogo: cadenas largas que ruff format no parte.
-"server/src/content_studio/music/estilos.py" = ["E501"]
+"server/src/content_studio/music/styles.py" = ["E501"]
 "server/tests/**" = ["ANN"]
 "tests/**" = ["ANN"]
 "devtools/tests/**" = ["ANN"]
@@ -35,4 +35,4 @@ pythonpath = ["server/src", "."]
 testpaths = ["server/src", "server/tests", "devtools", "tests", ".claude/hooks/tests"]
 # importlib: los conftest.py y test_*.py de cada carpeta tienen nombres repetidos y no son paquetes.
 addopts = "--doctest-modules --import-mode=importlib -m 'not local'"
-markers = ["local: necesita los venvs de los motores de este equipo (no corre en CI)"]
+markers = ["local: needs this machine's engine venvs (does not run in CI)"]

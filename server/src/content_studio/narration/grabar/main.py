@@ -1,16 +1,17 @@
-r"""Graba las voces de referencia (server/data/narration/voz/<estilo>.wav) desde un dispositivo de audio del equipo.
+r"""Graba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.
 
 Uso:
-    python cli.py narration grabar --listar                # dispositivos de audio disponibles
+    python cli.py narration grabar --list                # dispositivos de audio disponibles
     python cli.py narration grabar                         # elige dispositivo y estilos en el menú
-    python cli.py narration grabar --dispositivo RDPSource --estilo neutral amistosa
-    python cli.py narration grabar --dispositivo 2 --todos # el kit completo, en el orden de la guía
+    python cli.py narration grabar --device RDPSource --style neutral amistosa
+    python cli.py narration grabar --device 2 --all # el kit completo, en el orden de la guía
 
 Mientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.
-Cada toma se guarda en server/data/narration/voz/tomas/ (gitignoreado). Al aceptar una, se recortan los bordes a 0.4 s,
+Cada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).
+Al aceptar una, se recortan los bordes a 0.4 s,
 se normaliza a -18 LUFS (limitando solo los picos) y queda en
-server/data/narration/voz/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
-Después se verifica con los criterios de docs/guiones/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).
+server/data/narration/reference/<estilo>.wav (WAV mono, 48 kHz, 24 bits).
+Después se verifica con los criterios de docs/scripts/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).
 """
 
 from __future__ import annotations
@@ -28,185 +29,185 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from content_studio.comun.archivos import siguiente_numero
-from content_studio.narration.grabar.dispositivos import WINDOWS, fuentes
-from content_studio.narration.grabar.interfaz import ACENTO, ESTILO_Q, console, ficha_toma
-from content_studio.narration.grabar.kit import DURACION, GUION, KIT, OPCIONAL, nivel_toma
-from content_studio.narration.grabar.toma import grabar_toma
-from content_studio.narration.referencia import medir, procesar, verificar
-from content_studio.rutas import RAIZ, TOMAS, VOZ
+from content_studio.common.files import next_number
+from content_studio.narration.grabar.dispositivos import WINDOWS, sources
+from content_studio.narration.grabar.interfaz import ACCENT, STYLE_Q, console, sheet_take
+from content_studio.narration.grabar.kit import DURATION, KIT, OPTIONAL, SCRIPT, level_take
+from content_studio.narration.grabar.toma import grabar_take
+from content_studio.narration.reference import measure, process, verify
+from content_studio.paths import REFERENCE, ROOT, TAKES
 
 
-def elegir_fuente(lista: list[tuple[str, str, bool]], pedida: str | None) -> str:
+def choose_source(items: list[tuple[str, str, bool]], requested: str | None) -> str:
     """Nombre de la fuente: la pedida (por nombre o por número) o la que se elige en el menú."""
-    if pedida is None:
-        predet = next((n for n, _, p in lista if p), lista[0][0])
+    if requested is None:
+        predet = next((n for n, _, p in items if p), items[0][0])
         return questionary.select(
-            'Micrófono', style=ESTILO_Q, instruction='(↑↓ · enter)', default=predet,
+            'Micrófono', style=STYLE_Q, instruction='(↑↓ · enter)', default=predet,
             choices=[Choice([('', f'{n:<20}'), ('class:desc', d + ('  · predeterminado' if p else ''))], value=n)
-                     for n, d, p in lista],
+                     for n, d, p in items],
         ).unsafe_ask()  # fmt: skip
-    if pedida.isdigit() and 1 <= int(pedida) <= len(lista):
-        return lista[int(pedida) - 1][0]
-    if any(nombre == pedida for nombre, _, _ in lista):
-        return pedida
-    sys.exit(f'No hay un dispositivo "{pedida}". Ver: python cli.py narration grabar --listar')
+    if requested.isdigit() and 1 <= int(requested) <= len(items):
+        return items[int(requested) - 1][0]
+    if any(name == requested for name, _, _ in items):
+        return requested
+    sys.exit(f'No hay un dispositivo "{requested}". Ver: python cli.py narration grabar --list')
 
 
-def elegir_estilos() -> list[str]:
+def choose_styles() -> list[str]:
     """Casillas con el estado de cada referencia. Vienen marcadas las pendientes del kit."""
 
-    def opcion(n: str, opcional: bool) -> Choice:
-        lo, hi = DURACION[n]
-        hecha = (VOZ / f'{n}.wav').exists()
-        estado = ('● grabada (se reemplaza)' if hecha else '○ pendiente') + ('  · opcional' if opcional else '')
-        texto = [('', f'{n:<13}'), ('class:desc', f'{lo:>2}–{hi} s   {estado}')]
-        return Choice(texto, value=n, checked=not hecha and not opcional)
+    def option(n: str, optional: bool) -> Choice:
+        lo, hi = DURATION[n]
+        done = (REFERENCE / f'{n}.wav').exists()
+        state = ('● grabada (se reemplaza)' if done else '○ pendiente') + ('  · opcional' if optional else '')
+        text = [('', f'{n:<13}'), ('class:desc', f'{lo:>2}–{hi} s   {state}')]
+        return Choice(text, value=n, checked=not done and not optional)
 
-    elegidos = questionary.checkbox(
-        'Referencias a grabar', style=ESTILO_Q, instruction='(espacio marca · a todas · enter confirma)',
-        choices=[*[opcion(n, False) for n, _, _ in KIT], Separator('  ' + '─' * 30),
-                 *[opcion(n, True) for n, _, _ in OPCIONAL]],
+    chosen = questionary.checkbox(
+        'Referencias a grabar', style=STYLE_Q, instruction='(espacio marca · a todas · enter confirma)',
+        choices=[*[option(n, False) for n, _, _ in KIT], Separator('  ' + '─' * 30),
+                 *[option(n, True) for n, _, _ in OPTIONAL]],
         validate=lambda x: bool(x) or 'Marca al menos una',
         erase_when_done=True,  # su respuesta ("done (n selections)") va en inglés: se escribe la propia
     ).unsafe_ask()  # fmt: skip
-    console.print(f'[bold {ACENTO}]?[/] [bold]Referencias a grabar[/] [green]{", ".join(elegidos)}[/]')
-    return elegidos
+    console.print(f'[bold {ACCENT}]?[/] [bold]Referencias a grabar[/] [green]{", ".join(chosen)}[/]')
+    return chosen
 
 
-def grabar_estilo(fuente: str, estilo: str, sobrescribir: bool, i: int, total: int) -> str:
+def grabar_style(source: str, style: str, overwrite: bool, i: int, total: int) -> str:
     """Graba las tomas de un estilo hasta aceptar una, que se procesa y se verifica. Devuelve el resultado."""
-    final = VOZ / f'{estilo}.wav'
-    if final.exists() and not sobrescribir:
-        pregunta = questionary.confirm(f'{estilo} ya está grabada. ¿Reemplazarla?', default=False, style=ESTILO_Q)
-        if not pregunta.unsafe_ask():
+    final = REFERENCE / f'{style}.wav'
+    if final.exists() and not overwrite:
+        question = questionary.confirm(f'{style} ya está grabada. ¿Reemplazarla?', default=False, style=STYLE_Q)
+        if not question.unsafe_ask():
             return 'ya existía'
-    lo, hi = DURACION[estilo]
-    texto = (VOZ / f'{estilo}.txt').read_text(encoding='utf-8').strip()
-    ficha_estilo = Panel(
-        Group(Text(texto, style='bold'), Text(''),
+    lo, hi = DURATION[style]
+    text = (REFERENCE / f'{style}.txt').read_text(encoding='utf-8').strip()
+    sheet_style = Panel(
+        Group(Text(text, style='bold'), Text(''),
               Text.from_markup(f'[dim]Duración {lo}–{hi} s · actitud en '
-                               f'server/data/narration/docs/guiones/{GUION[estilo]}\n'
+                               f'server/data/narration/docs/scripts/{SCRIPT[style]}\n'
                                'Graba 3 tomas seguidas y quédate con la más natural, no con la más actuada.[/]')),
-        title=f'[bold {ACENTO}]{estilo}[/] [dim]· {i}/{total} · {fuente}[/]', title_align='left',
-        border_style=ACENTO, padding=(1, 2))  # fmt: skip
-    TOMAS.mkdir(parents=True, exist_ok=True)
-    n = siguiente_numero(TOMAS, estilo)
-    escuchar = shutil.which('ffplay')
+        title=f'[bold {ACCENT}]{style}[/] [dim]· {i}/{total} · {source}[/]', title_align='left',
+        border_style=ACCENT, padding=(1, 2))  # fmt: skip
+    TAKES.mkdir(parents=True, exist_ok=True)
+    n = next_number(TAKES, style)
+    listen = shutil.which('ffplay')
     previa = None  # ficha de la toma anterior, para compararla con la siguiente
     while True:
         console.clear()  # una pantalla por toma: el panel en vivo necesita el alto completo
-        console.print(ficha_estilo)
+        console.print(sheet_style)
         if previa:
             console.print(previa)
-        toma = TOMAS / f'{estilo}-{n}.wav'
-        opciones = [Choice('●  Grabar', 'grabar'), Choice('↷  Saltar este estilo', 'saltar')]
-        eleccion = questionary.select(f'Toma {n}', style=ESTILO_Q, instruction='(↑↓ · enter)', choices=opciones)
-        if eleccion.unsafe_ask() == 'saltar':
+        take = TAKES / f'{style}-{n}.wav'
+        options = [Choice('●  Grabar', 'grabar'), Choice('↷  Saltar este estilo', 'saltar')]
+        choice = questionary.select(f'Toma {n}', style=STYLE_Q, instruction='(↑↓ · enter)', choices=options)
+        if choice.unsafe_ask() == 'saltar':
             return 'saltada'
-        ok, niveles = grabar_toma(fuente, toma, estilo, n, texto)
+        ok, levels = grabar_take(source, take, style, n, text)
         console.clear()
-        console.print(ficha_estilo)
+        console.print(sheet_style)
         if not ok:
             previa = Text.from_markup(
                 f'[yellow]⚠ Toma {n} sin audio:[/] se paró antes de capturar o el dispositivo no entrega datos.'
             )
-            toma.unlink(missing_ok=True)
+            take.unlink(missing_ok=True)
             n += 1
             continue
-        m = medir(toma)
-        nivel = nivel_toma(m['pico'])
-        previa = ficha_toma(n, m, estilo, niveles)
+        m = measure(take)
+        level = level_take(m['peak'])
+        previa = sheet_take(n, m, style, levels)
         console.print(previa)
         while True:
-            accion = questionary.select('¿Qué hacemos con esta toma?', style=ESTILO_Q, instruction='(↑↓ · enter)',
-                                        default='usar' if nivel == 'ok' else 'otra', choices=[
-                Choice('✓  Usarla como referencia', 'usar', disabled='no se oye nada' if nivel == 'silencio' else None),
-                Choice('▶  Escucharla', 'escuchar', disabled=None if escuchar else 'falta ffplay'),
+            action = questionary.select('¿Qué hacemos con esta toma?', style=STYLE_Q, instruction='(↑↓ · enter)',
+                                        default='use' if level == 'ok' else 'otra', choices=[
+                Choice('✓  Usarla como referencia', 'use', disabled='no se oye nada' if level == 'silence' else None),
+                Choice('▶  Escucharla', 'listen', disabled=None if listen else 'falta ffplay'),
                 Choice('↻  Grabar otra toma', 'otra'),
                 Choice('↷  Saltar este estilo', 'saltar')]).unsafe_ask()  # fmt: skip
-            if accion != 'escuchar':
+            if action != 'listen':
                 break
             with (
                 console.status('Reproduciendo… (Ctrl+C para cortar)', spinner='dots'),
                 contextlib.suppress(KeyboardInterrupt),
             ):
-                subprocess.run([escuchar, '-nodisp', '-autoexit', '-loglevel', 'quiet', str(toma)])
-        if accion == 'saltar':
+                subprocess.run([listen, '-nodisp', '-autoexit', '-loglevel', 'quiet', str(take)])
+        if action == 'saltar':
             return 'saltada'
-        if accion == 'usar':
+        if action == 'use':
             with console.status('Recortando, normalizando y verificando…', spinner='dots'):
-                procesar(toma, final)
-                checks = verificar(final, *DURACION[estilo])
+                process(take, final)
+                checks = verify(final, *DURATION[style])
             t = Table(box=None, padding=(0, 1), show_header=False)
-            for cumple, detalle in checks:
-                t.add_row(Text('✓' if cumple else '✗', style='green' if cumple else 'red'), detalle)
+            for meets, detail in checks:
+                t.add_row(Text('✓' if meets else '✗', style='green' if meets else 'red'), detail)
             todo = all(c for c, _ in checks)
-            titulo = f'[bold]{"✓" if todo else "⚠"} {final.relative_to(RAIZ).as_posix()}[/]'
-            borde = 'green' if todo else 'yellow'
-            console.print(Panel(t, title=titulo, title_align='left', border_style=borde, padding=(0, 2)))
-            return 'lista' if todo else 'lista con observaciones'
+            title = f'[bold]{"✓" if todo else "⚠"} {final.relative_to(ROOT).as_posix()}[/]'
+            border = 'green' if todo else 'yellow'
+            console.print(Panel(t, title=title, title_align='left', border_style=border, padding=(0, 2)))
+            return 'items' if todo else 'lista con observaciones'
         n += 1
 
 
-def construir_parser() -> argparse.ArgumentParser:
+def build_parser() -> argparse.ArgumentParser:
     """Flags del script. cli.py lo usa para mostrar la ayuda."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--listar', action='store_true', help='muestra los dispositivos de audio disponibles y sale')
-    ap.add_argument('--dispositivo', help='nombre de la fuente (p. ej. RDPSource) o su número en --listar')
-    ap.add_argument('--estilo', nargs='+', choices=list(DURACION), metavar='ESTILO',
-                    help='referencias a grabar, p. ej. neutral amistosa (ver docs/guiones/README.md)')  # fmt: skip
-    ap.add_argument('--todos', action='store_true', help='graba el kit completo en el orden de la guía')
-    ap.add_argument('--sobrescribir', action='store_true', help='reemplaza las referencias que ya existen')
+    ap.add_argument('--list', action='store_true', help='muestra los dispositivos de audio disponibles y sale')
+    ap.add_argument('--device', help='nombre de la fuente (p. ej. RDPSource) o su número en --list')
+    ap.add_argument('--style', nargs='+', choices=list(DURATION), metavar='STYLE',
+                    help='referencias a grabar, p. ej. neutral amistosa (ver docs/scripts/README.md)')  # fmt: skip
+    ap.add_argument('--all', action='store_true', help='graba el kit completo en el orden de la guía')
+    ap.add_argument('--overwrite', action='store_true', help='reemplaza las referencias que ya existen')
     return ap
 
 
-def listar(lista: list[tuple[str, str, bool]]) -> None:
-    t = Table(title='Dispositivos de audio', title_style=f'bold {ACENTO}', header_style='bold', border_style='grey35')
+def show_devices(items: list[tuple[str, str, bool]]) -> None:
+    t = Table(title='Dispositivos de audio', title_style=f'bold {ACCENT}', header_style='bold', border_style='grey35')
     t.add_column('#', justify='right', style='dim')
-    t.add_column('Nombre (--dispositivo)', style='bold cyan')
+    t.add_column('Nombre (--device)', style='bold cyan')
     t.add_column('Descripción')
     t.add_column('')
-    for i, (nombre, desc, pred) in enumerate(lista, 1):
-        t.add_row(str(i), nombre, desc, '[green]● predeterminado[/]' if pred else '')
+    for i, (name, desc, pred) in enumerate(items, 1):
+        t.add_row(str(i), name, desc, '[green]● predeterminado[/]' if pred else '')
     console.print(t)
 
 
 def main() -> None:
-    a = construir_parser().parse_args()
-    lista = fuentes()
-    if not lista:
+    a = build_parser().parse_args()
+    items = sources()
+    if not items:
         sys.exit(
             'No hay micrófonos activos en el registro de Windows (MMDevices/Audio/Capture).'
             if WINDOWS
             else 'No hay fuentes de audio de PulseAudio o PipeWire (ffmpeg -sources pulse no devolvió nada).'
         )
-    if a.listar:
-        listar(lista)
+    if a.list:
+        show_devices(items)
         return
     if not sys.stdin.isatty():
         sys.exit('Grabar necesita una terminal interactiva.')
-    resultados = []
+    results = []
     try:
-        bienvenida = Text.from_markup(
-            f'[bold {ACENTO}]🎤  Grabar voces de referencia[/]\n[dim]Se guardan en server/data/narration/voz/. '
+        welcome = Text.from_markup(
+            f'[bold {ACCENT}]🎤  Grabar voces de referencia[/]\n[dim]Se guardan en server/data/narration/reference/. '
             'Usa audífonos y un cuarto en silencio.[/]'
         )
-        console.print(Panel(bienvenida, border_style=ACENTO, padding=(0, 2), expand=False))
-        fuente = elegir_fuente(lista, a.dispositivo)
-        interactivo = not (a.todos or a.estilo)
-        estilos = [n for n, _, _ in KIT] if a.todos else (a.estilo or elegir_estilos())
-        for i, estilo in enumerate(estilos, 1):
-            resultados.append((estilo, grabar_estilo(fuente, estilo, a.sobrescribir or interactivo, i, len(estilos))))
+        console.print(Panel(welcome, border_style=ACCENT, padding=(0, 2), expand=False))
+        source = choose_source(items, a.device)
+        interactive = not (a.all or a.style)
+        styles = [n for n, _, _ in KIT] if a.all else (a.style or choose_styles())
+        for i, style in enumerate(styles, 1):
+            results.append((style, grabar_style(source, style, a.overwrite or interactive, i, len(styles))))
     except (KeyboardInterrupt, EOFError):
-        console.print('\n[dim]Cancelado. Las tomas grabadas siguen en server/data/narration/voz/tomas/.[/]')
-    if resultados:
-        color = {'lista': 'green', 'lista con observaciones': 'yellow'}
-        t = Table(title='Resumen', title_style=f'bold {ACENTO}', border_style='grey35', header_style='bold')
-        t.add_column('Estilo', style='bold')
+        console.print('\n[dim]Cancelado. Las tomas grabadas siguen en server/data/narration/reference/tomas/.[/]')
+    if results:
+        color = {'items': 'green', 'lista con observaciones': 'yellow'}
+        t = Table(title='Summary', title_style=f'bold {ACCENT}', border_style='grey35', header_style='bold')
+        t.add_column('Style', style='bold')
         t.add_column('Resultado')
-        for estilo, r in resultados:
-            t.add_row(estilo, f'[{color.get(r, "dim")}]{r}[/]')
+        for style, r in results:
+            t.add_row(style, f'[{color.get(r, "dim")}]{r}[/]')
         console.print(t)
 
 

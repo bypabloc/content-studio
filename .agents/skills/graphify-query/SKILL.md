@@ -18,7 +18,7 @@ Consulta el grafo (AST de los `.py` de `server/src/`, `tests/` y `cli.py`) en ve
 
 1. Verifica que exista `graphify-out/graph.json`; si no, skill `graphify-ops`.
 2. Elige el comando de la tabla y ejecútalo.
-3. Si el resultado no sirve, reformula con el vocabulario del código, en español (`usar_venv`, `EspecMotor`, `MotorTTS`, `REGISTRO`, `relanzar`).
+3. Si el resultado no sirve, reformula con el vocabulario del código, en español (`use_venv`, `EngineSpec`, `TTSEngine`, `REGISTRY`, `relaunch`).
 4. Abre con Read el `archivo:línea` citado solo para confirmar o editar. Cita siempre el `src=`/`loc=` del grafo.
 
 | Pregunta | Comando |
@@ -33,7 +33,7 @@ Consulta el grafo (AST de los `.py` de `server/src/`, `tests/` y `cli.py`) en ve
 ```bash
 graphify query "cómo se relanza un comando en el venv de su motor" --budget 400
 graphify explain "usar_venv()"
-graphify affected "EspecMotor" --depth 2
+graphify affected "EngineSpec" --depth 2
 ```
 
 ## Reglas
