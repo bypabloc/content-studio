@@ -1,0 +1,7 @@
+# Lote 001-017-studio: renumeración de la 007 en adelante y carpeta con su nombre viejo
+
+- **Contexto**: el 2026-11-19 el usuario sumó la spec de iconos (justo después de la 006) y el Editor (después de la mezcla, antes de la Biblioteca), y pidió reorganizar los números para que sigan el orden de ejecución, sin tocar la 006, que otra sesión estaba ejecutando.
+- **Elegida**: 007 iconos (nueva), 008 voces (era 007), 009 música (008), 010 motores (009), 011 limpiador (010), 012 subtítulos (011), 013 convertir (012), 014 mezcla (013), 015–017 editor (nuevas), 018 biblioteca (014), 019 LLM (017), 020 instalador (015) y 021 verificación integral (016). La carpeta del lote conserva el nombre `001-017-studio` y la 006 no cambia, para que el cierre de la 006 (que borra su carpeta y edita el README del lote) no choque con un renombre de carpeta.
+- **Descartadas**: renumerar también la 006 (rompía su rama y su worktree en ejecución); renombrar la carpeta a `001-021-studio` (conflicto rename/delete con el cierre de la 006); dejar los números viejos con las nuevas como 018–021 (el usuario pidió que el número siga el orden).
+- **Cómo revertir**: revertir el commit `docs: specs 007 (iconos) y 015-017 (editor NLE)…` de la rama `docs/specs-editor-iconos`.
+- **Cómo comprobarla**: `ls docs/specs/001-017-studio/` muestra 006, 007–021 en orden, y `grep -rn "0[01][0-9]-" docs/specs/README.md` coincide con las carpetas. La 021 borra la carpeta del lote y esta ficha.
