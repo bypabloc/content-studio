@@ -15,7 +15,7 @@ set -euo pipefail
 HOOKS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$(git rev-parse --show-toplevel)"
 
-# Misma lista que PREFIJOS_DEV en .github/workflows/origen-pr.yml y .claude/rules/git-workflow.md.
+# Misma lista que DEV_PREFIXES en .github/workflows/origen-pr.yml y .claude/rules/git-workflow.md.
 PREFIXES='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
 BRANCH="$(git branch --show-current 2>/dev/null || true)"
 if ! [[ "$BRANCH" =~ ^($PREFIXES)/[a-z0-9][a-z0-9-]*$ ]]; then

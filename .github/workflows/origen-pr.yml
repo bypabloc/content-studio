@@ -1,8 +1,10 @@
 name: origen-pr
 
 # Restringe la rama de origen de los PR. Check requerido por los rulesets de main y dev.
+# origen-permitido es el nombre del check que exigen los rulesets: no se renombra (cambiarlo obliga a tocar GitHub).
+# cspell:ignore permitido
 #   main ← dev, fix/*
-#   dev  ← main (back-merge de hotfix) y los prefijos de PREFIJOS_DEV
+#   dev  ← main (back-merge de hotfix) y los prefijos de DEV_PREFIXES
 # Debe coincidir con .claude/rules/git-workflow.md.
 on:
   pull_request:
@@ -15,26 +17,26 @@ jobs:
   origen-permitido:
     runs-on: ubuntu-latest
     steps:
-      - name: Verificar rama de origen
+      - name: Verify source branch
         env:
-          ORIGEN: ${{ github.head_ref }}
-          DESTINO: ${{ github.base_ref }}
-          MISMO_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-          PREFIJOS_DEV: feature fix refactor docs test chore ci perf style experiment release
+          SOURCE: ${{ github.head_ref }}
+          TARGET: ${{ github.base_ref }}
+          SAME_REPO: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+          DEV_PREFIXES: feature fix refactor docs test chore ci perf style experiment release
         run: |
-          permitido=false
-          if [ "$MISMO_REPO" = "true" ]; then
-            case "$DESTINO" in
+          allowed=false
+          if [ "$SAME_REPO" = "true" ]; then
+            case "$TARGET" in
               main)
-                { [ "$ORIGEN" = "dev" ] || [[ "$ORIGEN" == fix/* ]]; } && permitido=true ;;
+                { [ "$SOURCE" = "dev" ] || [[ "$SOURCE" == fix/* ]]; } && allowed=true ;;
               dev)
-                [ "$ORIGEN" = "main" ] && permitido=true
-                for p in $PREFIJOS_DEV; do [[ "$ORIGEN" == "$p"/?* ]] && permitido=true; done ;;
+                [ "$SOURCE" = "main" ] && allowed=true
+                for p in $DEV_PREFIXES; do [[ "$SOURCE" == "$p"/?* ]] && allowed=true; done ;;
             esac
           fi
-          if [ "$permitido" = "true" ]; then
-            echo "Origen permitido: $ORIGEN -> $DESTINO"
+          if [ "$allowed" = "true" ]; then
+            echo "Allowed source: $SOURCE -> $TARGET"
           else
-            echo "::error::$DESTINO no acepta PRs desde '$ORIGEN'. Ver .claude/rules/git-workflow.md"
+            echo "::error::$TARGET does not accept PRs from '$SOURCE'. See .claude/rules/git-workflow.md"
             exit 1
           fi

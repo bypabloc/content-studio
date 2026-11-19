@@ -1,9 +1,9 @@
 [project]
 name = "content-studio"
 version = "0.1.0"
-description = "Narración TTS y música de fondo locales para videos, en una GPU de 8 GB."
+description = "Local narration (TTS with voice cloning) and background music for videos, on an 8 GB GPU."
 requires-python = ">=3.10"
-# Las mismas que la cabecera PEP 723 de cli.py (tests/validators/test_estructura.py lo comprueba).
+# Las mismas que la cabecera PEP 723 de cli.py (tests/validators/test_structure.py lo comprueba).
 dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1"]
 
 [project.scripts]
