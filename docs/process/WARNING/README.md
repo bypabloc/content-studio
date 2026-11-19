@@ -50,5 +50,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [006-linter-siglas](006-linter-siglas.md) | La regla 2 usa una lista corta de siglas: el repo no tiene diccionario | el merge a `dev` |
 | [006-linter-cspell](006-linter-cspell.md) | `script_lint.py` se revisa con español además de inglés en cspell, como el alias del guion | el merge a `dev` |
 | [006-media-cache](006-media-cache.md) | La caché de medios va en memoria, no en la tabla `media_cache` de D-3 | el merge a `dev` |
+| [006-soundfile-dev](006-soundfile-dev.md) | `soundfile` entra al grupo `dev` del workspace para probar el pipeline sin GPU | el merge a `dev` |
+| [006-bloques-en-disco](006-bloques-en-disco.md) | Cada toma guarda `blocks/` y `script.json` en su carpeta, en float de 32 bits | el merge a `dev` |
+| [006-narration-sin-torch](006-narration-sin-torch.md) | `narrate()` no importa torch: el pico de VRAM sale de `peak_vram_gib()` y las pruebas la sustituyen | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

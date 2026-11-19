@@ -71,9 +71,9 @@ Tests en las rutas espejo (server y client), con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Linter | AC-1 | — | `unit` | [ ] |
-| T2 | Media info y picos | AC-4 | — | `unit` | [ ] |
-| T3 | Bloques en disco | AC-2 | — | `unit` | [ ] |
+| T1 | Linter | AC-1 | — | `unit` | [x] |
+| T2 | Media info y picos | AC-4 | — | `unit` | [x] |
+| T3 | Bloques en disco | AC-2 | — | `unit` | [x] |
 | T4 | Regenerar y tomas | AC-3, AC-5 | T3 | `unit` | [ ] |
 | T5 | Editor | AC-6, AC-9 | T1 | `client-unit` | [ ] |
 | T6 | Opciones y generar | AC-7, AC-8 | T5 | `client-unit` | [ ] |

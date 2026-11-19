@@ -23,7 +23,6 @@
     "server/src/content_studio/narration/grabar/toma.py",
     "server/src/content_studio/narration/metadata.py",
     "server/src/content_studio/narration/parser.py",
-    "server/src/content_studio/narration/pipeline.py",
     "server/src/content_studio/narration/reference.py",
     "server/src/content_studio/narration/script.py",
     "server/src/content_studio/narration/styles.py",

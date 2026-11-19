@@ -97,6 +97,7 @@ samplerate
 sidechain
 silencedetect
 silenceremove
+soundfile
 subprocess
 supersaw
 synthwave
