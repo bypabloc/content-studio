@@ -8,7 +8,7 @@ description: >
 
 # execute-spec — content-studio
 
-La ventana principal implementa la spec de principio a fin y conserva el contexto entre tareas. Reglas: `plan-format.md`, `git-workflow.md`, `worktrees.md`, `session-handoff.md`, `turno-gpu.md`.
+La ventana principal implementa la spec de principio a fin y conserva el contexto entre tareas. Reglas: `plan-format.md`, `git-workflow.md`, `worktrees.md`, `turno-gpu.md` y el plugin `session-handoff`.
 
 ## 1. Preparación
 
@@ -23,7 +23,7 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 1. TDD (skill `tdd-workflow`): test en rojo, implementación mínima, refactor. Solo los archivos del grupo. Marca las tareas como hechas en el README de la spec.
 2. Verify de cada tarea y `uv run ruff check && uv run ruff format --check && uv run pytest`. Nada que cargue un modelo por grupo.
 3. Si falla, diagnostica y repite solo lo afectado; no avances con el grupo en rojo.
-4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials`, `user-stop` o `taste` (`session-handoff.md` §4).
+4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials`, `user-stop` o `taste` (plugin `session-handoff`).
 5. Commit con el mensaje exacto del grupo en `02-plan.md` tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
 6. Anota el hash en `PROGRESS.md` (Done, Current, Remaining, ETA, Next step).
 

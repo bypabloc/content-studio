@@ -1,0 +1,16 @@
+{
+  "blockReasons": {
+    "user-data": "borrar o cambiar voces grabadas, salidas de out/ o modelos descargados del usuario",
+    "cost": "gastar dinero o contratar un servicio pago (GPU en la nube, una API)",
+    "credentials": "falta un acceso que solo tiene el usuario",
+    "user-stop": "el usuario pidió parar",
+    "taste": "elegir entre audios que solo el oído del usuario decide: entrégale las rutas"
+  },
+  "context": [
+    "Turno de la GPU (turno-gpu.md): todo lo que carga un modelo va con `python -m devtools turno-gpu run --trabajo=<t> -- <comando>`; antes, `turno-gpu status` y ListAgents. El estado del turno va en PROGRESS.md."
+  ],
+  "specsDir": "docs/specs",
+  "decisionsDir": "docs/process/WARNING",
+  "pendingDir": "docs/process/PENDING",
+  "closing": "Status es done: confirma el merge a dev y cierra con `python -m devtools worktree close <nombre> --handoff=<trabajo>` desde el checkout principal."
+}

@@ -31,4 +31,4 @@ Cada prompt valida un **hecho discriminante**, algo que el modelo no adivinaría
 
 Aprueba si `is_error == false` y `result` contiene los hechos esperados sin contradecir las reglas. Máximo 4 ejecuciones a la vez; el resumen `N/N PASS` va en el cuerpo del commit.
 
-Los hooks se prueban además con `uv run pytest .claude/hooks/tests/test_hooks.py .agents/hooks/tests/test_handoff.py`, y el mod con `claude plugin test .claude/mods/handoff-compact`. La versión general de esta regla, para cualquier agente, es [agent-config-testing.md](agent-config-testing.md).
+Los hooks se prueban además con `uv run pytest .claude/hooks/tests/test_hooks.py`. La versión general de esta regla, para cualquier agente, es [agent-config-testing.md](agent-config-testing.md).

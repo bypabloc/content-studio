@@ -21,4 +21,4 @@ paths:
 1. Una idea entra como `02-next/NN-<slug>.md` o `03-later/`.
 2. Al decidir implementarla, se redacta su spec en `docs/specs/` (`plan-format.md`) y, en el mismo PR, su tarea sale de `02-next/`.
 3. Al fusionarse una spec funcional, su último commit actualiza la ficha del módulo en `01-done/` («Qué hace hoy», «Dónde vive», Historial y `actualizada`). Una spec técnica no toca `01-done/`.
-4. Toda decisión que el agente toma solo (`session-handoff.md` §4) va a `WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/<NN>-<tema>.md`. Cada ficha se borra al aplicarla o cerrarla, en un PR a `dev`, junto con su fila del README.
+4. Toda decisión que el agente toma solo (plugin `session-handoff`) va a `WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/<NN>-<tema>.md`. Cada ficha se borra al aplicarla o cerrarla, en un PR a `dev`, junto con su fila del README.

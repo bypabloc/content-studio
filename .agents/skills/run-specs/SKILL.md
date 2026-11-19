@@ -19,7 +19,7 @@ argument-hint: "<spec> [<spec> ...]  (número, carpeta o ruta: 12 | 012-musica-c
 
 * **Una spec**: lee todos sus archivos y el código que citan (con graphify) y ejecútala completa con la skill `execute-spec`.
 * **Varias**: lee solo el `README.md` de cada una. Ejecuta la primera completa con `execute-spec`. Está terminada solo cuando su PR está fusionado en `dev` y lo comprobaste (`git fetch origin dev`, merge commit en `origin/dev`, worktree cerrado en `git worktree list`). Recién entonces pasa a la siguiente, desde el `origin/dev` que ya la contiene. Nunca dos specs a la vez. Entre una y otra, `/compact`.
-* Si una spec queda `blocked` (solo `user-data`, `cost`, `credentials`, `user-stop` o `taste`, `session-handoff.md` §4), deja el estado en el reporte y pregunta; no sigas con la siguiente. Fuera de eso no te detengas: los avisos de tokens no son un límite.
+* Si una spec queda `blocked` (solo `user-data`, `cost`, `credentials`, `user-stop` o `taste`, plugin `session-handoff`), deja el estado en el reporte y pregunta; no sigas con la siguiente. Fuera de eso no te detengas: los avisos de tokens no son un límite.
 
 ## 3. Reporte cada 10 minutos
 
