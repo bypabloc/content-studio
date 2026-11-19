@@ -10,6 +10,7 @@ from typing import Any
 
 from fastapi import Depends, FastAPI, Request
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from content_studio import paths
@@ -20,6 +21,10 @@ from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
 from content_studio.messages import t
 from content_studio.services.registry import SERVICES
+
+# La ventana de Tauri pide a la API desde su propio origen: http://tauri.localhost en Windows (tauri://localhost en
+# macOS y Linux), y el dev server de Vite en 1420.
+TAURI_ORIGINS = ['tauri://localhost', 'http://tauri.localhost', 'https://tauri.localhost', 'http://localhost:1420']
 
 
 def _token_guard(allow_query: bool) -> Callable[[Request], None]:
@@ -61,6 +66,12 @@ def create_app(
     with closing(connection.connect(db_path)) as conn:
         schema.migrate(conn)
     app = FastAPI(title='content-studio', version='0.1.0')
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=TAURI_ORIGINS,
+        allow_methods=['*'],
+        allow_headers=['authorization', 'content-type'],
+    )
     app.state.db_path = db_path
     app.state.token = token
     app.state.services = services
