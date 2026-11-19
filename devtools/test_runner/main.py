@@ -9,10 +9,17 @@ from __future__ import annotations
 import json
 import sys
 
-from . import changeset, lint, typecheck, unit, validators
+from . import changeset, guard_tdd, lint, tdd, typecheck, unit, validators
 from .flags import parse
 
-STAGES = {'lint': lint.run, 'validators': validators.run, 'unit': unit.run, 'typecheck': typecheck.run}
+STAGES = {
+    'lint': lint.run,
+    'validators': validators.run,
+    'unit': unit.run,
+    'typecheck': typecheck.run,
+    'tdd': tdd.run,
+    'guard-tdd': guard_tdd.run,
+}
 
 
 def main(argv: list[str]) -> int:
