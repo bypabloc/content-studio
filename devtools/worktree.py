@@ -21,6 +21,7 @@ LINKS = (
     'server/data/music/.venv*',
     'server/data/narration/engines',
     'server/data/music/models',
+    'node_modules',  # diccionarios de cspell: sin ellos `spelling` (y el pre-commit) falla en el worktree
 )
 VOZ, VOCES = 'server/data/narration/reference', 'server/data/narration/voices'
 AUDIOS = ('*.wav', '*.m4a', '*.mp3', '*.flac')
@@ -141,6 +142,13 @@ def close(main: Path, name: str, job: str) -> int:
         steps.append(('branch', '-D', wt['branch']))
     for step in steps:
         r = _git(main, *step)
+        if r.returncode != 0 and step[1] == 'remove' and not search(main, name):
+            # Windows: git ya vació y desregistró el worktree, pero un proceso con cwd ahí retiene la carpeta.
+            try:
+                root.rmdir()
+            except OSError:
+                print(f'{root} is unregistered but still on disk (held by a process): delete it later', file=sys.stderr)
+            continue
         if r.returncode != 0:
             print(f'git {" ".join(step)} failed: {r.stderr.strip()}', file=sys.stderr)
             return 1
