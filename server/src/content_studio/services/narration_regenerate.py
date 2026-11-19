@@ -13,15 +13,17 @@ from content_studio.narration.engines.registry import ENGINES
 
 RESOURCE = 'gpu'  # la cola lo corre con el candado de la GPU: un modelo a la vez
 SOURCES = ('narration', 'narration.regenerate')  # trabajos de los que se puede rehacer un bloque
+SHOWN = ('voice', 'style')  # lo que la tarjeta de Comparar muestra de cada toma y el trabajo no tiene por sí solo
 
 
 def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, str | None]:
-    """Resuelve `source_job` (un trabajo de narración ya terminado): su carpeta, su motor y su grupo de tomas.
-    Si no sirve, devuelve los parámetros sin resolver y `validate` lo rechaza."""
+    """Resuelve `source_job` (un trabajo de narración ya terminado): su carpeta, su motor, su grupo de tomas y la voz y
+    el estilo que muestra Comparar. Si no sirve, devuelve los parámetros sin resolver y `validate` lo rechaza."""
     source = jobs.get(conn, params['source_job']) if isinstance(params.get('source_job'), int) else None
     if source is None or source['status'] != 'done' or source['kind'] not in SOURCES:
         return params, None
-    resolved = {**params, 'source': source['output_dir'], 'model': source['params']['model']}
+    shown = {key: source['params'][key] for key in SHOWN if key in source['params']}
+    resolved = {**params, **shown, 'source': source['output_dir'], 'model': source['params']['model']}
     return resolved, source['group_key']
 
 

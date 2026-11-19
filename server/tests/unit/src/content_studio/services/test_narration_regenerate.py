@@ -64,6 +64,15 @@ def test_prepare_takes_folder_model_and_group_from_the_source_job(out, db):
     assert (params['source'], params['model'], group) == (str(folder), MODEL, 'narration:abc123def456')
 
 
+def test_prepare_keeps_the_voice_and_style_of_the_source_for_the_card(out, db):
+    folder = take(out)
+    source = finished(db, folder, {'model': MODEL, 'style': 'expert', 'voice': 'karen-savage', 'text': 'Hola.'})
+
+    params, _ = regenerate.prepare(db, {'source_job': source, 'index': 1})
+
+    assert (params['voice'], params['style']) == ('karen-savage', 'expert')
+
+
 def test_a_source_job_that_is_not_done_is_rejected(out, db):
     queued = jobs.insert(db, 'narration', 'gpu', {'model': MODEL, 'style': 'expert', 'text': 'Hola.'})
 
