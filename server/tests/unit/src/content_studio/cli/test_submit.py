@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -80,6 +81,8 @@ def test_show_progress_prints_one_line_per_job_event(capsys):
 
 def test_run_queues_the_job_runs_it_here_and_prints_the_result(db, monkeypatch, capsys, tmp_path):
     monkeypatch.setattr(submit, 'Worker', _DoneWorker)
+    # El servicio real exige el venv del motor (no existe en la CI): aquí se prueba el flujo, no la validación.
+    monkeypatch.setitem(submit.SERVICES, 'music', SimpleNamespace(RESOURCE='gpu', validate=lambda params: []))
 
     code = submit.run('music', {'model': 'acestep', 'style': ['lofi-chill'], 'duration': 15.0}, db, tmp_path)
 
