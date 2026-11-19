@@ -33,8 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     narration = sub.add_parser('narration', help='narration and voices')
     narration_cmds = narration.add_subparsers(dest='action', required=True, metavar='action')
     narration_cmds.add_parser('tts', parents=[narration_flags()], add_help=False, help='narrate a script (runs here)')
-    voices = narration_cmds.add_parser('voices', add_help=False, help='free voices: list and build (--build)')
-    voices.add_argument('rest', nargs=argparse.REMAINDER)
+    narration_cmds.add_parser('voices', add_help=False, help='free voices: list and build (--build)')
 
     sub.add_parser('music', parents=[music_flags()], add_help=False, help='instrumental music (runs here)')
 
@@ -94,7 +93,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Entrada de `studio`. 0 bien; 1 si el trabajo falló o no existe; 2 si el uso no es válido."""
     process.console_utf8()  # cp1252 (Windows, a una tubería) no tiene ≤ de los --help: que no reviente
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args, extra = parser.parse_known_args(argv)  # `narration voices` pasa a su herramienta lo que no es de studio
+    if args.command == 'narration' and args.action == 'voices':
+        args.rest = extra
+    elif extra:
+        parser.error(f'unrecognized arguments: {" ".join(extra)}')
     try:
         return _dispatch(args)
     except submit.UsageError as error:
