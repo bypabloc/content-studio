@@ -15,6 +15,9 @@ narration/voces/*
 # Repos de motores que no son paquetes pip (código, venv y pesos). Ver narration/README.md §2.
 narration/motores/
 tmp/
+# Grafo local de graphify (cada equipo lo genera con `graphify update .`) y worktrees que crea Claude Code.
+graphify-out/
+.claude/worktrees/
 .venv/
 .pytest_cache/
 .ruff_cache/
