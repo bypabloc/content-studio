@@ -1,8 +1,10 @@
 """`move-data [--apply] [--root <ruta>]`: mueve narration/ y music/ del checkout a server/data/ (spec 001, D-2).
 
-`os.replace` es un rename dentro del mismo disco: no copia los GB de venvs, motores y modelos. Después reescribe el
-prefijo de las rutas absolutas en los `.pth` y `direct_url.json` de las instalaciones editables, así que ningún venv
-se recrea. Sin `--apply` solo imprime el plan. Nunca sobrescribe: si un destino tiene archivos, sale con 1.
+Corre después del `git pull` que trae el merge: lo versionado ya lo reubicó git, así que aquí se mueve lo que no está en
+git (venvs, motores, modelos, voces) y se fusiona en las carpetas que ya existen. `os.replace` es un rename dentro del
+mismo disco: no copia los GB. Después reescribe el prefijo de las rutas absolutas en los `.pth` y `direct_url.json` de
+las instalaciones editables, así que ningún venv se recrea. Sin `--apply` solo imprime el plan. Nunca sobrescribe: si un
+archivo de origen ya existe en el destino, sale con 1 sin mover nada.
 """
 
 from __future__ import annotations
@@ -19,23 +21,44 @@ DESTINO = ('server', 'data')
 USO = 'uso: python -m devtools move-data [--apply] [--root <ruta>]\n'
 
 
-def _ocupado(destino: Path) -> bool:
+def _colisiones(origen: Path, destino: Path) -> list[str]:
+    """Archivos de `origen` que ya existen en `destino` (en las carpetas comunes, recursivo)."""
     if not destino.exists():
-        return False
-    return not destino.is_dir() or any(destino.iterdir())
+        return []
+    if not (origen.is_dir() and destino.is_dir()):
+        return [str(destino)]
+    out = []
+    for hijo in origen.iterdir():
+        out += _colisiones(hijo, destino / hijo.name)
+    return out
 
 
-def plan(root: Path) -> list[dict[str, str]]:
-    """Por carpeta: `mover`, `ya migrado` (solo está en el destino), `ocupado` (el destino tiene archivos) o `nada`."""
+def plan(root: Path) -> list[dict[str, object]]:
+    """Por carpeta: `mover`, `fusionar` (el destino ya existe y no choca), `colision`, `ya migrado` o `nada`."""
     out = []
     for nombre in CARPETAS:
         origen, destino = root / nombre, root.joinpath(*DESTINO, nombre)
-        if origen.exists():
-            accion = 'ocupado' if _ocupado(destino) else 'mover'
+        choques = _colisiones(origen, destino) if origen.exists() else []
+        if choques:
+            accion = 'colision'
+        elif origen.exists():
+            accion = 'fusionar' if destino.exists() else 'mover'
         else:
             accion = 'ya migrado' if destino.exists() else 'nada'
-        out.append({'de': str(origen), 'a': str(destino), 'accion': accion})
+        out.append({'de': str(origen), 'a': str(destino), 'accion': accion, 'choques': choques})
     return out
+
+
+def _fusionar(origen: Path, destino: Path) -> None:
+    """Pasa lo de `origen` a `destino` sin sobrescribir: lo que no existe se renombra; las carpetas comunes se unen."""
+    destino.mkdir(parents=True, exist_ok=True)
+    for hijo in origen.iterdir():
+        otro = destino / hijo.name
+        if hijo.is_dir() and otro.is_dir():
+            _fusionar(hijo, otro)
+        else:
+            os.replace(hijo, otro)
+    origen.rmdir()
 
 
 def _formas(ruta: Path) -> list[str]:
@@ -96,10 +119,10 @@ def main(argv: list[str]) -> int:
         return 2
     root = raiz or principal(Path.cwd())
     movimientos = plan(root)
-    if any(m['accion'] == 'ocupado' for m in movimientos):
+    if any(m['accion'] == 'colision' for m in movimientos):
         for m in movimientos:
-            if m['accion'] == 'ocupado':
-                sys.stderr.write(f'{m["a"]} ya tiene archivos: no se mueve {m["de"]}\n')
+            for choque in m['choques']:
+                sys.stderr.write(f'ya existe en el destino, no se mueve nada: {choque}\n')
         print(json.dumps({'plan': movimientos, 'aplicado': False}))
         return 1
     if not aplicar:
@@ -107,17 +130,18 @@ def main(argv: list[str]) -> int:
         return 0
     movidos = []
     for m in movimientos:
-        if m['accion'] == 'mover':
-            destino = Path(m['a'])
-            destino.parent.mkdir(parents=True, exist_ok=True)
-            if destino.exists():
-                destino.rmdir()  # vacío (se comprobó en plan): os.replace en Windows no reemplaza un directorio
-            try:
+        if m['accion'] not in ('mover', 'fusionar'):
+            continue
+        try:
+            if m['accion'] == 'mover':
+                Path(m['a']).parent.mkdir(parents=True, exist_ok=True)
                 os.replace(m['de'], m['a'])
-            except OSError as e:
-                sys.stderr.write(f'no se pudo mover {m["de"]}: {e}. Cierra lo que lo use y vuelve a correr move-data\n')
-                return 1
-            movidos.append(m['a'])
+            else:
+                _fusionar(Path(m['de']), Path(m['a']))
+        except OSError as e:
+            sys.stderr.write(f'no se pudo mover {m["de"]}: {e}. Cierra lo que lo use y vuelve a correr move-data\n')
+            return 1
+        movidos.append(m['a'])
     reescritos = reescribir(root)
     if not movidos:
         sys.stderr.write('ya migrado: nada que mover\n')

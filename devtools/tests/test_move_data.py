@@ -48,9 +48,21 @@ def test_segunda_corrida_dice_ya_migrado(tmp_path, capsys):
     assert 'ya migrado' in capsys.readouterr().err
 
 
-def test_destino_ocupado_sale_1_sin_mover_nada(tmp_path):
+def test_colision_sale_1_sin_mover_nada(tmp_path):
     _arbol(tmp_path)
-    (tmp_path / 'server/data/narration').mkdir(parents=True)
-    (tmp_path / 'server/data/narration/otra.txt').write_text('x')
+    (tmp_path / 'server/data/narration/voz').mkdir(parents=True)
+    (tmp_path / 'server/data/narration/voz/clara.wav').write_bytes(b'otro')
     assert main(['--apply', '--root', str(tmp_path)]) == 1
     assert (tmp_path / 'narration/voz/clara.wav').is_file() and (tmp_path / 'music/models/heartlib').is_dir()
+    assert (tmp_path / 'server/data/narration/voz/clara.wav').read_bytes() == b'otro'
+
+
+def test_fusiona_en_un_destino_que_ya_tiene_versionado(tmp_path):
+    """Tras el pull, server/data/narration/ ya tiene lo versionado: lo no versionado entra sin sobrescribir."""
+    _arbol(tmp_path)
+    (tmp_path / 'server/data/narration/docs').mkdir(parents=True)
+    (tmp_path / 'server/data/narration/README.md').write_text('versionado')
+    assert main(['--apply', '--root', str(tmp_path)]) == 0
+    assert (tmp_path / 'server/data/narration/voz/clara.wav').is_file()
+    assert (tmp_path / 'server/data/narration/README.md').read_text() == 'versionado'
+    assert not (tmp_path / 'narration').exists()
