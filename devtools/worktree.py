@@ -95,9 +95,10 @@ def _cargo_target(main: Path, root: Path) -> bool:
 
 
 def _bun_install(root: Path) -> int:
-    """`bun install --frozen-lockfile` en el worktree (crea su node_modules). Sin bun en el PATH devuelve 127."""
+    """`bun install` en el worktree con enlazador hoisted (node_modules propio). Sin bun en el PATH devuelve 127."""
     try:
-        return subprocess.run(['bun', 'install', '--frozen-lockfile'], cwd=root, stdout=subprocess.DEVNULL).returncode
+        command = ['bun', 'install', '--frozen-lockfile', '--linker', 'hoisted']
+        return subprocess.run(command, cwd=root, stdout=subprocess.DEVNULL).returncode
     except FileNotFoundError:
         return 127
 

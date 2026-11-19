@@ -44,5 +44,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [005-cors-tauri](005-cors-tauri.md) | La API acepta solo los orígenes de la ventana de Tauri (CORS): sin esto la app no carga datos | el merge a `dev` |
 | [005-opener-abrir-carpeta](005-opener-abrir-carpeta.md) | «Abrir carpeta» de los avisos usa `opener:allow-open-path` sin alcance | antes de main (alcance con la 015) |
 | [005-desvios-de-diseno](005-desvios-de-diseno.md) | Desvíos de D-1 (sin shadcn), D-2 (CSP amplia), D-4 (theme-init y Geist) y D-8 (confirm nativo) | el merge a `dev` no depende de ellos |
+| [006-bun-hoisted-worktree](006-bun-hoisted-worktree.md) | El worktree instala con el enlazador hoisted: el límite de rutas de Windows rompe el enlazador por defecto | el merge a `dev` de la 006 |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
