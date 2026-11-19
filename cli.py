@@ -3,7 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1"]
 # ///
-"""Punto de entrada único: python cli.py [<herramienta> <comando> [flags]]. El CLI vive en src/content_studio/cli.
+"""Punto de entrada único: python cli.py [<herramienta> <comando> [flags]]. El CLI vive en server/src/content_studio.
 
     python cli.py                                   # menú interactivo
     python cli.py narration tts                     # asistente: pregunta lo que falte
@@ -16,7 +16,7 @@ Si este python no tiene las dependencias, el CLI se relanza con `uv run --script
 import sys
 from pathlib import Path
 
-if (_SRC := str(Path(__file__).resolve().parent / 'src')) not in sys.path:
+if (_SRC := str(Path(__file__).resolve().parent / 'server' / 'src')) not in sys.path:
     sys.path.insert(0, _SRC)
 from content_studio.comun.proceso import relanzar  # noqa: E402  (solo stdlib)
 

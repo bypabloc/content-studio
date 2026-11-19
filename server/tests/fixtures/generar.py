@@ -27,7 +27,7 @@ from pathlib import Path
 from unittest import mock
 
 AQUI = Path(__file__).resolve().parent
-RAIZ = AQUI.parents[1]
+RAIZ = AQUI.parents[2]  # server/tests/fixtures → raíz del repo
 MODELOS = ['voxcpm2', 'cosyvoice3', 'qwen-1.7b', 'qwen-0.6b', 'chatterbox', 'omnivoice', 'indextts']
 # Las choices de --voz salen de narration/voces/<voz>/aprobacion.json, que está gitignoreado: se fijan las 9 voces
 # aprobadas en el equipo donde se generó la base, para que el resultado sea el mismo en CI.

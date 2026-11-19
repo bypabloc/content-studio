@@ -1,10 +1,22 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.12'",
     "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
+]
+
+[manifest]
+members = [
+    "content-studio",
+]
+
+[manifest.dependency-groups]
+dev = [
+    { name = "numpy" },
+    { name = "pytest", specifier = ">=8" },
+    { name = "ruff" },
 ]
 
 [[package]]
@@ -37,20 +49,11 @@ wheels = [
 [[package]]
 name = "content-studio"
 version = "0.1.0"
-source = { editable = "." }
+source = { editable = "server" }
 dependencies = [
     { name = "questionary" },
     { name = "rich" },
     { name = "typer" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
-    { name = "numpy", version = "2.5.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
-    { name = "pytest" },
-    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -58,13 +61,6 @@ requires-dist = [
     { name = "questionary", specifier = ">=2.1" },
     { name = "rich", specifier = ">=14" },
     { name = "typer", specifier = ">=0.29" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "numpy" },
-    { name = "pytest", specifier = ">=8" },
-    { name = "ruff" },
 ]
 
 [[package]]

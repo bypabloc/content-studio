@@ -11,13 +11,19 @@ import pytest
 
 from devtools import reglas
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 MAX_LINEAS = 300
 HOOKS = [RAIZ / '.agents/hooks', RAIZ / '.claude/hooks']
 
 
 def archivos() -> list[Path]:
-    fuentes = [RAIZ / 'cli.py', *(RAIZ / 'src').rglob('*.py'), *(RAIZ / 'tests').rglob('*.py')]
+    fuentes = [
+        RAIZ / 'cli.py',
+        *(RAIZ / 'server/src').rglob('*.py'),
+        *(RAIZ / 'server/tests').rglob('*.py'),
+        *(RAIZ / 'devtools').rglob('*.py'),
+        *(RAIZ / 'tests').rglob('*.py'),
+    ]
     return sorted(fuentes + [p for h in HOOKS for p in h.glob('*.py')])
 
 
@@ -48,6 +54,13 @@ def test_codigo_solo_en_src():
     assert [nombre(p) for p in sueltos] == ['cli.py']
 
 
+def test_ac2_producto_en_server():
+    """AC-2: el producto vive en server/src/content_studio; en la raíz, cli.py es el único .py."""
+    assert not (RAIZ / 'src').exists()
+    assert (RAIZ / 'server/src/content_studio/rutas.py').is_file()
+    assert [nombre(p) for p in RAIZ.glob('*.py')] == ['cli.py']
+
+
 def test_reglas_y_skills_sincronizadas():
     """Cada regla y skill de .claude/ tiene el cuerpo de su fuente en .agents/ (devtools reglas --sincronizar)."""
     assert reglas.diferencias(RAIZ) == []
@@ -56,5 +69,5 @@ def test_reglas_y_skills_sincronizadas():
 def test_dependencias_cli_iguales_a_pyproject():
     deps = r'dependencies = (\[.*?\])'
     cabecera = re.search(deps, (RAIZ / 'cli.py').read_text(encoding='utf-8'))[1]
-    proyecto = re.search(deps, (RAIZ / 'pyproject.toml').read_text(encoding='utf-8'))[1]
+    proyecto = re.search(deps, (RAIZ / 'server/pyproject.toml').read_text(encoding='utf-8'))[1]
     assert ast.literal_eval(cabecera) == ast.literal_eval(proyecto)

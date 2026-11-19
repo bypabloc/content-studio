@@ -10,7 +10,7 @@ from content_studio.cli.comandos import REGISTRO, por_clave
 from content_studio.comun.proceso import partir, unir
 from content_studio.narration.parser import construir_parser
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 ENV = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
 
 

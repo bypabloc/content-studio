@@ -1,28 +1,15 @@
-[project]
-name = "content-studio"
-version = "0.1.0"
-description = "Narración TTS y música de fondo locales para videos, en una GPU de 8 GB."
-readme = "AGENTS.md"
-requires-python = ">=3.10"
-# Las mismas que la cabecera PEP 723 de cli.py (tests/test_estructura.py lo comprueba).
-dependencies = ["typer>=0.29", "rich>=14", "questionary>=2.1"]
+# Raíz del uv workspace: el paquete vive en server/ (server/pyproject.toml). Aquí van las herramientas compartidas.
+[tool.uv.workspace]
+members = ["server"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff", "numpy"]
 
-[project.scripts]
-content-studio = "content_studio.cli.app:main"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/content_studio"]
-
 [tool.ruff]
 target-version = "py310"
 line-length = 120
+# Los imports de server/src son de primera parte (content_studio), igual que devtools y tests.
+src = [".", "server/src"]
 extend-exclude = ["narration/motores", "music/models", "tmp", "out", "logs"]
 
 [tool.ruff.format]
@@ -37,12 +24,13 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201"]
 
 [tool.ruff.lint.per-file-ignores]
 # Captions del catálogo: cadenas largas que ruff format no parte.
-"src/content_studio/music/estilos.py" = ["E501"]
+"server/src/content_studio/music/estilos.py" = ["E501"]
+"server/tests/**" = ["ANN"]
 "tests/**" = ["ANN"]
 "devtools/tests/**" = ["ANN"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "."]
-testpaths = ["src", "tests", "devtools"]
+pythonpath = ["server/src", "."]
+testpaths = ["server/src", "server/tests", "devtools", "tests"]
 addopts = "--doctest-modules -m 'not local'"
 markers = ["local: necesita los venvs de los motores de este equipo (no corre en CI)"]

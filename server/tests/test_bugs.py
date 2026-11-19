@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(RAIZ / 'narration'), str(RAIZ / 'music')]
 
 
@@ -66,7 +66,7 @@ def test_help_en_cp1252():
     import os
     import subprocess
 
-    env = {**os.environ, 'PYTHONIOENCODING': 'cp1252', 'PYTHONPATH': str(RAIZ / 'src')}
+    env = {**os.environ, 'PYTHONIOENCODING': 'cp1252', 'PYTHONPATH': str(RAIZ / 'server' / 'src')}
     for args in (['-m', 'content_studio.music.musica', '--help'], ['cli.py', 'music', '--help']):
         r = subprocess.run([sys.executable, *args], cwd=RAIZ, env=env, capture_output=True)
         assert r.returncode == 0, r.stderr.decode('cp1252', 'replace')

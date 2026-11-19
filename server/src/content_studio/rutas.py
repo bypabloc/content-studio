@@ -6,8 +6,9 @@ True
 
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[2]  # src/content_studio/rutas.py → raíz del repo (solo desde el checkout)
-SRC = RAIZ / 'src'
+# server/src/content_studio/rutas.py → raíz del repo (solo desde el checkout)
+RAIZ = Path(__file__).resolve().parents[3]
+SRC = RAIZ / 'server' / 'src'
 OUT = RAIZ / 'out'
 LOGS = RAIZ / 'logs'
 NARRATION = RAIZ / 'narration'
