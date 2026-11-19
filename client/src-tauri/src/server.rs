@@ -39,7 +39,8 @@ pub fn wait_for_ready(
     let (sender, receiver) = mpsc::channel();
     thread::spawn(move || {
         let mut sent = false;
-        for line in lines.lines().map_while(Result::ok) {
+        // Una línea que no es UTF-8 se salta: cortar aquí dejaría el pipe sin leer, y el server fallaría al escribir.
+        for line in lines.lines().filter_map(Result::ok) {
             if !sent {
                 if let Some(port) = parse_ready(&line) {
                     sent = true;
@@ -114,6 +115,8 @@ pub mod job {
             info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
             unsafe {
                 let job = CreateJobObjectW(None, None)?;
+                // Desde aquí, el Drop cierra el handle si un `?` de abajo sale antes del Ok.
+                let owned = Self(job);
                 let size = std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32;
                 SetInformationJobObject(
                     job,
@@ -122,7 +125,7 @@ pub mod job {
                     size,
                 )?;
                 AssignProcessToJobObject(job, HANDLE(child.as_raw_handle()))?;
-                Ok(Self(job))
+                Ok(owned)
             }
         }
     }
@@ -240,7 +243,8 @@ mod tests {
         job::resume(&child).expect("el proceso se reanuda dentro del Job");
         let ping = poll_until(|| child_named(child.id(), "ping.exe")).expect("cmd debe lanzar su ping");
         drop(job);
-        child.wait().expect("cmd termina al cerrar el Job");
+        // Sondeo acotado: si el Job no mata a cmd, la prueba falla en 10 s en vez de esperar los 300 de ping.
+        poll_until(|| child.try_wait().ok().flatten()).expect("cmd termina al cerrar el Job");
         assert!(!is_alive(ping), "el ping (nieto) debe morir con el Job");
     }
 
@@ -273,13 +277,15 @@ mod tests {
             .and_then(|(pid, _)| pid.parse().ok())
     }
 
+    /// Si el proceso `pid` sigue vivo. Un fallo de PowerShell corta la prueba: no puede contar como "muerto".
     #[cfg(windows)]
     fn is_alive(pid: u32) -> bool {
         let script = format!("if (Get-Process -Id {pid} -ErrorAction SilentlyContinue) {{ 'vivo' }}");
-        std::process::Command::new("powershell")
+        let out = std::process::Command::new("powershell")
             .args(["-NoProfile", "-Command", &script])
             .output()
-            .map(|out| String::from_utf8_lossy(&out.stdout).contains("vivo"))
-            .unwrap_or(false)
+            .expect("PowerShell debe arrancar para consultar el proceso");
+        assert!(out.status.success(), "PowerShell falló: {}", String::from_utf8_lossy(&out.stderr));
+        String::from_utf8_lossy(&out.stdout).contains("vivo")
     }
 }
