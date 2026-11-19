@@ -41,7 +41,7 @@ overrides:
     language: en,es
     words: [emocion, enfasis, energica, dramatica]
 ignorePaths:
-  # Temporal: cada spec de la serie saca una carpeta de esta lista al traducirla (ciclos 2 a 6 de la 002).
+  # Temporal (D-3): la UI en español de cli/ la retira la 004 y grabar/ la 007.
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
   # Prosa en español para el agente: configuración del plugin session-handoff (D-1, como handoff_text).
@@ -51,8 +51,6 @@ ignorePaths:
   # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).
   - server/tests/fixtures/*.json
   - server/tests/fixtures/*.txt
-  # Texto que el hook inyecta al agente: prosa en español (D-1 ignora .agents/**); el código sí se revisa.
-  - .agents/hooks/handoff_text.py
   # cli/ salvo commands/ (ciclo 5): la UI en español la retira la 004 (D-3).
   - server/src/content_studio/cli/app.py
   - server/src/content_studio/cli/args.py
@@ -70,10 +68,6 @@ ignorePaths:
   - out/**
   - logs/**
   - docs/**
-  - .claude/rules/**
-  - .claude/skills/**
-  - .agents/rules/**
-  - .agents/skills/**
   - '**/*.md'
   - bun.lock
   - uv.lock
