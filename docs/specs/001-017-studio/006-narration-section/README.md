@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Large (unos 20 archivos entre server y client) |
 | Rama | `feature/006-narration-section` desde `origin/dev`, en `../content-studio-worktrees/006-narration-section/` |
-| Depende de | [005](../005-client-base/README.md) (fusionada en `origin/dev`) |
+| Depende de | 005 (fusionada en `origin/dev`; su carpeta se borró al cerrarla) |
 | Origen | Pedido del usuario (lote [001-017-studio](../README.md)) |
 
 ## Objetivo

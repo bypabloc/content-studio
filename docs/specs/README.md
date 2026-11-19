@@ -8,7 +8,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | :--- | :--- | :--- | :--- | :--- |
 | [001-017-studio](001-017-studio/README.md) (lote) | refactor · feature | Large | una por spec | las 17 redactadas, PEN |
 | ↳ [003-test-runner](001-017-studio/003-test-runner/README.md) | chore | Large | `chore/003-test-runner` | PEN |
-| ↳ [005-client-base](001-017-studio/005-client-base/README.md) | feature | Large | `feature/005-client-base` | PEN |
 | ↳ [006-narration-section](001-017-studio/006-narration-section/README.md) | feature | Large | `feature/006-narration-section` | PEN |
 | ↳ [007-voices-recording](001-017-studio/007-voices-recording/README.md) | feature | Large | `feature/007-voices-recording` | PEN |
 | ↳ [008-music-section](001-017-studio/008-music-section/README.md) | feature | Large | `feature/008-music-section` | PEN |
