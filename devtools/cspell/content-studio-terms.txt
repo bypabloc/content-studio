@@ -119,3 +119,9 @@ worktrees
 yesid
 geist
 tailwindcss
+tauri
+serde
+getrandom
+recv
+jobobject
+contentstudio

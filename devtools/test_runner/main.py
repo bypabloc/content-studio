@@ -23,6 +23,7 @@ STAGES = {
     'client-lint': client.lint,
     'client-typecheck': client.typecheck,
     'client-unit': client.unit,
+    'tauri-check': client.tauri_check,
 }
 GROUPS = {
     'all': [

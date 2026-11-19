@@ -39,6 +39,16 @@ def test_stage_runs_the_client_script_with_bun(monkeypatch, tmp_path, run, scrip
     assert result == {'stage': stage, 'status': 'pass', 'detail': ''}
 
 
+def test_tauri_check_runs_cargo_check_on_the_tauri_crate(monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.setattr(subprocess, 'run', lambda command, **kwargs: calls.append(command) or _Done(0))
+
+    result = client.tauri_check([], root=tmp_path)
+
+    assert calls == [['cargo', 'check', '--manifest-path', str(tmp_path / 'client' / 'src-tauri' / 'Cargo.toml')]]
+    assert result == {'stage': 'tauri-check', 'status': 'pass', 'detail': ''}
+
+
 def test_failing_script_fails_the_stage_and_keeps_its_output(monkeypatch, tmp_path):
     monkeypatch.setattr(subprocess, 'run', lambda *a, **k: _Done(1, stdout='error TS2322', stderr=''))
 

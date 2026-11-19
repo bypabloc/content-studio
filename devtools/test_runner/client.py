@@ -11,20 +11,18 @@ from pathlib import Path
 from .. import paths
 
 
-def _script(stage: str, script: str, root: Path) -> dict:
-    done = subprocess.run(
-        ['bun', 'run', script],
-        cwd=root / 'client',
-        capture_output=True,
-        encoding='utf-8',
-        errors='replace',
-    )
+def _run(stage: str, command: list[str], cwd: Path) -> dict:
+    done = subprocess.run(command, cwd=cwd, capture_output=True, encoding='utf-8', errors='replace')
     ok = done.returncode == 0
     return {
         'stage': stage,
         'status': 'pass' if ok else 'fail',
         'detail': '' if ok else (done.stdout + done.stderr).strip(),
     }
+
+
+def _script(stage: str, script: str, root: Path) -> dict:
+    return _run(stage, ['bun', 'run', script], root / 'client')
 
 
 def lint(files: list[Path], root: Path = paths.ROOT) -> dict:
@@ -40,3 +38,9 @@ def typecheck(files: list[Path], root: Path = paths.ROOT) -> dict:
 def unit(files: list[Path], root: Path = paths.ROOT) -> dict:
     """Vitest con cobertura por archivo (el umbral vive en client/vite.config.ts)."""
     return _script('client-unit', 'test', root)
+
+
+def tauri_check(files: list[Path], root: Path = paths.ROOT) -> dict:
+    """`cargo check` del crate de Tauri: compila el Rust sin armar el instalador (D-9)."""
+    manifest = root / 'client' / 'src-tauri' / 'Cargo.toml'
+    return _run('tauri-check', ['cargo', 'check', '--manifest-path', str(manifest)], root)

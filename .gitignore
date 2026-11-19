@@ -39,3 +39,5 @@ node_modules/
 # spec 005: client
 client/dist/
 client/coverage/
+client/src-tauri/target/
+client/src-tauri/gen/

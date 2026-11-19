@@ -1,5 +1,11 @@
 {
   "api.unknown_error": "Error de la API",
   "app.name": "Content Studio",
-  "app.version": "Versión {version}"
+  "app.version": "Versión {version}",
+  "server.error.title": "Content Studio no pudo arrancar",
+  "server.exited": "El motor se cerró al arrancar.",
+  "server.retry": "Reintentar",
+  "server.spawn_failed": "No se encontró uv. Instala uv y vuelve a intentarlo.",
+  "server.starting": "Arrancando el motor…",
+  "server.timeout": "El motor tardó demasiado en arrancar."
 }
