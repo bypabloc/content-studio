@@ -1,8 +1,9 @@
-name: quality
+# cspell:ignore calidad
+name: calidad
 
 # ruff, pytest (doctests, caracterización, estructura y bugs) y spelling (cspell) en 3.10, el mínimo por el venv de
 # CosyVoice, y 3.12. Sin GPU: los tests marcados `local` (venvs de los motores) no corren aquí.
-# Todavía no es check requerido de los rulesets: se agrega cuando ya haya corrido en main y dev (si no, bloquea sync-dev).
+# Es check requerido de dev (ruleset): el job se llama calidad, como exige el ruleset (ver DECISIONS ciclo 8).
 on:
   pull_request:
     branches: [main, dev]
@@ -13,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  quality:
+  calidad:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
