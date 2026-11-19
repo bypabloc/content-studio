@@ -19,6 +19,7 @@ COMMANDS = {
         'moves narration/ and music/ to server/data/ (without --apply, only prints the plan)',
     ),
     'spelling': ('devtools.spelling', '[--staged] [file ...]: cspell over the tracked or staged files'),
+    'test-runner': ('devtools.test_runner.main', '--type=<stages> [--git-mode=...] [--files=...]: quality gates'),
 }
 
 
