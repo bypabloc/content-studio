@@ -121,7 +121,7 @@ python cli.py narration tts --model qwen-0.6b --style friendly \
   --text "Hola, ¿cómo estás? Hoy te muestro cómo editar un video en menos de un minuto."
 ```
 
-Compara la salida (`out/narration/qwen-0.6b-friendly.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno ([spec](../../../../../docs/specs/narracion-motores-voicestudio.md)).
+Compara la salida (`out/narration/qwen-0.6b-friendly.wav`) con tu grabación. Si se oye un acento que no es el tuyo, revisa los puntos 1 a 8. Si el ritmo no se parece, vuelve a grabar respetando las pausas. Cuando estén los motores nuevos, repite la prueba con cada uno (spec eliminada al implementarse; ver historial de git).
 
 ## Checklist final
 

@@ -1,6 +1,6 @@
 # Aplicación a social-videos
 
-> Investigación del 2026-11-15. Cómo llevar lo investigado a `narration/tts.py`: qué motores sumar, con qué parámetros, qué piezas de VoiceStudio reimplementar y qué riesgos quedan. Es la **propuesta inicial**; la versión decidida y detallada es la [spec](../../specs/narracion-motores-voicestudio.md). Índice en [README.md](README.md).
+> Investigación del 2026-11-15. Cómo llevar lo investigado a `narration/tts.py`: qué motores sumar, con qué parámetros, qué piezas de VoiceStudio reimplementar y qué riesgos quedan. Es la **propuesta inicial**; la versión decidida y detallada es la spec (eliminada al implementarse; ver historial de git). Índice en [README.md](README.md).
 
 ---
 
