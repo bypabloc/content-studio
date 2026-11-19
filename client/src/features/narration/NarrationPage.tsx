@@ -38,8 +38,13 @@ export function NarrationPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
   });
 
+  // Sin catálogo no hay motor ni estilo que mandar: Generar e importar esperan a que llegue (no encolan un trabajo vacío).
+  const ready = choice.model !== '' && choice.style !== '';
   const generate = () => {
-    if (text.trim()) enqueue.mutate(narrationParams(choice, { text }));
+    if (ready && text.trim()) enqueue.mutate(narrationParams(choice, { text }));
+  };
+  const importFiles = (paths: string[]) => {
+    if (ready) paths.forEach((file) => enqueue.mutate(narrationParams(choice, { file: [file] })));
   };
   useShortcut('mod+enter', (event) => {
     event.preventDefault();
@@ -53,7 +58,7 @@ export function NarrationPage() {
           value={text}
           narrationStyle={choice.style}
           onChange={setText}
-          onImport={(paths) => paths.forEach((file) => enqueue.mutate(narrationParams(choice, { file: [file] })))}
+          onImport={importFiles}
         />
         {take && <NarrationResult job={take} />}
       </div>
@@ -63,7 +68,7 @@ export function NarrationPage() {
           <button
             type="button"
             onClick={generate}
-            disabled={!text.trim()}
+            disabled={!text.trim() || !ready}
             title={t('narration.generate.shortcut')}
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
           >

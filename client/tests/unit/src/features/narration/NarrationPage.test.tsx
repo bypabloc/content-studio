@@ -45,13 +45,15 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function renderPage() {
+// Espera a que llegue el catálogo: sin motor ni estilo, Generar e importar no encolan nada.
+async function renderPage(): Promise<HTMLTextAreaElement> {
   render(
     <QueryClientProvider client={new QueryClient()}>
       <NarrationPage />
     </QueryClientProvider>,
   );
-  return screen.findByRole('textbox', { name: t('narration.editor.label') }) as Promise<HTMLTextAreaElement>;
+  await screen.findByRole('option', { name: '★ voxcpm2' });
+  return screen.getByRole('textbox', { name: t('narration.editor.label') }) as HTMLTextAreaElement;
 }
 
 function jobsPosted(): unknown[] {
@@ -81,6 +83,21 @@ describe('NarrationPage', () => {
         },
       ]),
     );
+  });
+
+  it('mientras llega el catálogo, Generar no encola un trabajo sin motor ni estilo', async () => {
+    api.get.mockImplementation(async (path: string) => (path === '/catalog/narration' ? new Promise(() => {}) : null));
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <NarrationPage />
+      </QueryClientProvider>,
+    );
+    const textarea = (await screen.findByRole('textbox', { name: t('narration.editor.label') })) as HTMLTextAreaElement;
+    fireEvent.change(textarea, { target: { value: 'Hola, mundo.' } });
+
+    fireEvent.keyDown(window, { key: 'Enter', ctrlKey: true });
+
+    expect(jobsPosted()).toEqual([]);
   });
 
   it('sin texto, Ctrl+Enter no encola nada', async () => {

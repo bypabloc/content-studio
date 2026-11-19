@@ -154,6 +154,16 @@ Semilla: 7
 out/narration/<AAAA-MM-DD>-<id>-<slug>/qwen-0.6b-expert.wav (47.7 s, qwen-0.6b, experta, lote 3) | generación 44.6 s, 1.07x tiempo real | pico VRAM 5.70 GiB
 ```
 
+### Desde la app (sección Narración)
+
+La app (`bun run --cwd client tauri dev`) tiene la misma narración con interfaz:
+
+- **Guion**: el editor avisa en vivo de lo que no cumple la regla de [formato-guion.md](docs/formato-guion.md#reglas-obligatorias). Los avisos no bloquean: «Generar» encola igual. Se importan `.txt` y `.json` con «Importar» o soltándolos sobre la ventana; cada archivo es un trabajo.
+- **Opciones**: motor, voz, estilo e idioma, cada uno con ★ en lo recomendado y recordado. Un motor no comercial pide aceptar su licencia la primera vez (queda guardada por motor). «Avanzado» tiene la masterización, los LUFS, la semilla, el lote (solo los motores que lo admiten), la evaluación con whisper y los reintentos.
+- **Generar**: el botón o Ctrl+Enter encola el trabajo.
+- **Resultado**: la última toma, con su reproductor (onda), su LUFS y su pico. Con evaluación, cada párrafo muestra lo que whisper oyó distinto (cambios, faltas y sobras) y los silencios y ritmos que avisa el motor. «Regenerar» encola un bloque nuevo sobre esa toma; la toma nueva comparte el texto.
+- **Comparar**: las tomas del mismo texto, en columnas. «Elegir» marca una con ★. Al reproducir una, las demás se pausan. Espacio reproduce o pausa, salvo al escribir.
+
 ### Flags
 
 | Flag | Valores | Por defecto | Qué hace |
