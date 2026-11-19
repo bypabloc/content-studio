@@ -6,6 +6,7 @@
   "server/src/content_studio/__main__.py",
   "server/src/content_studio/common/ffmpeg.py",
   "server/src/content_studio/common/process.py",
+  "server/src/content_studio/gpu_lock.py",
   "server/src/content_studio/music/evaluation.py",
   "server/src/content_studio/music/music_main.py",
   "server/src/content_studio/narration/audio.py",
