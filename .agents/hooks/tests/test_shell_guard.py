@@ -59,3 +59,14 @@ def test_antigravity_gets_a_json_deny_on_stdout():
     event['toolCall']['args']['CommandLine'] = 'git status'
     result = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(event), capture_output=True, text=True)
     assert result.stdout == ''
+
+
+@pytest.mark.parametrize('command', ['sleep 60', 'wsl -l -v'])
+def test_the_message_says_what_why_and_instead(command):
+    stderr = run({'command': command}).stderr
+    assert all(part in stderr for part in ('Blocked by', 'Why:', 'Instead:'))
+
+
+def test_a_variable_named_like_the_command_is_not_blocked():
+    """Regresión: `wsl=0` en un script de Python bloqueaba la revisión del lote."""
+    assert run({'command': "python - <<'EOF'\nout=[]; wsl=0; rem=0\nEOF"}).returncode == 0

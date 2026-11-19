@@ -10,7 +10,7 @@ content-studio no tiene catálogo i18n: sería una abstracción sin segundo uso 
 | Qué | Idioma y forma |
 | :--- | :--- |
 | Identificadores, módulos, funciones, clases y carpetas de código | Inglés: `relaunch`, `use_venv`, `EngineSpec`, `gpu_turn`, `reference/`, `voices/`. Lo que el usuario ya tiene en disco (`aprobacion.json`, el paquete `grabar/`) se mantiene hasta su spec (ver `docs/process/PENDING/`) |
-| Mensajes de devtools, hooks, CI y logs | Inglés, cortos y accionables: qué falló y qué hacer (`Missing server/data/narration/engines/.venv-qwen. See the install in server/data/narration/README.md.`) |
+| Mensajes de devtools, hooks, CI y logs | Inglés, cortos y accionables: qué falló, por qué y qué hacer; un hook que bloquea, con `Blocked by <hook>: … Why: … Instead: …`, comprobado por un test (`Missing server/data/narration/engines/.venv-qwen. See the install in server/data/narration/README.md.`) |
 | Ayuda de los subcomandos, flags y errores del CLI | Inglés, con los flags en inglés (`--model`, `--style`). `studio` (`uv run studio`) va en inglés, sin menú ni asistente. Los textos visibles de la API (errores) están en español en `server/src/content_studio/messages/es.json`. `grabar/` (legacy) sigue en español hasta la 007 |
 | Docstrings, comentarios, README, docs, reglas y specs | Español neutro; los comandos, flags y rutas tal cual |
 | Commits y PRs | Conventional Commits en español (`git-workflow.md`) |
