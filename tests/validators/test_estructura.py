@@ -23,6 +23,8 @@ def archivos() -> list[Path]:
         *(RAIZ / 'server/tests').rglob('*.py'),
         *(RAIZ / 'devtools').rglob('*.py'),
         *(RAIZ / 'tests').rglob('*.py'),
+        *(RAIZ / '.agents/hooks/tests').rglob('*.py'),
+        *(RAIZ / '.claude/hooks/tests').rglob('*.py'),
     ]
     return sorted(fuentes + [p for h in HOOKS for p in h.glob('*.py')])
 

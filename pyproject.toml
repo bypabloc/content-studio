@@ -28,9 +28,12 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "ANN001", "ANN201"]
 "server/tests/**" = ["ANN"]
 "tests/**" = ["ANN"]
 "devtools/tests/**" = ["ANN"]
+".agents/hooks/tests/**" = ["ANN"]
+".claude/hooks/tests/**" = ["ANN"]
 
 [tool.pytest.ini_options]
 pythonpath = ["server/src", "."]
-testpaths = ["server/src", "server/tests", "devtools", "tests"]
-addopts = "--doctest-modules -m 'not local'"
+testpaths = ["server/src", "server/tests", "devtools", "tests", ".agents/hooks/tests", ".claude/hooks/tests"]
+# importlib: los conftest.py y test_*.py de cada carpeta tienen nombres repetidos y no son paquetes.
+addopts = "--doctest-modules --import-mode=importlib -m 'not local'"
 markers = ["local: necesita los venvs de los motores de este equipo (no corre en CI)"]

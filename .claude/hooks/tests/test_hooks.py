@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[3]  # .claude/hooks/tests/ → raíz del repo
 GIT = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t', '-c', f'core.hooksPath={RAIZ / ".git-hooks"}']
 
 

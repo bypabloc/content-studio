@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[3]  # .agents/hooks/tests/ → raíz del repo
 HOOKS = RAIZ / '.agents' / 'hooks'
 sys.path.insert(0, str(HOOKS))
 
