@@ -74,6 +74,43 @@ def test_prepare_and_close_in_a_repo_real(tmp_path, monkeypatch):
     assert worktree.close(main.resolve(), 'tema', 'tema') == 2
 
 
+def test_missing_links_node_modules_so_spelling_works_in_a_worktree(tmp_path):
+    main, wt = tmp_path / 'main', tmp_path / 'wt'
+    (main / 'node_modules/@cspell').mkdir(parents=True)
+    wt.mkdir()
+    assert [p.as_posix() for p in worktree.missing(main, wt)[0]] == ['node_modules']
+
+
+def test_close_finishes_when_windows_cannot_delete_the_held_folder(tmp_path, monkeypatch):
+    """Regresión: en Windows, `git worktree remove` vacía y desregistra el worktree pero falla al borrar la carpeta
+    que otro proceso tiene como cwd («Permission denied»); `close` cortaba ahí y dejaba las ramas y el handoff."""
+    main = tmp_path / 'repo'
+    remote = tmp_path / 'remote.git'
+    subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
+    subprocess.run(['git', 'clone', '-q', str(remote), str(main)], check=True, capture_output=True)
+    (main / 'a.txt').write_text('a')
+    subprocess.run([*GIT, 'add', '.'], cwd=main, check=True)
+    subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=main, check=True)
+    subprocess.run(['git', 'push', '-q', 'origin', 'HEAD:dev'], cwd=main, check=True, capture_output=True)
+    wt = tmp_path / 'repo-worktrees' / 'tema'
+    subprocess.run(['git', 'worktree', 'add', '-q', str(wt), '-b', 'fix/tema'], cwd=main, check=True)
+    subprocess.run(['git', 'fetch', '-q', 'origin'], cwd=main, check=True)
+    real = worktree._git
+
+    def git_held(cwd, *args):
+        r = real(cwd, *args)
+        if args[:2] == ('worktree', 'remove'):
+            wt.mkdir(parents=True, exist_ok=True)  # la carpeta vacía que Windows no deja borrar
+            return subprocess.CompletedProcess(r.args, 1, '', "error: failed to delete '...': Permission denied")
+        return r
+
+    monkeypatch.setattr(worktree, '_git', git_held)
+    monkeypatch.chdir(main)
+    assert worktree.close(main.resolve(), 'tema', 'tema') == 0
+    assert 'fix/tema' not in real(main, 'branch', '--list', 'fix/tema').stdout
+    assert worktree.search(main.resolve(), 'tema') is None
+
+
 def test_gpu_turn_takes_releases_and_clears_orphans(tmp_path):
     assert gpu_turn.take(tmp_path, 't1', ['python', 'cli.py']) is None
     owner = gpu_turn.take(tmp_path, 't2', ['otro'])
