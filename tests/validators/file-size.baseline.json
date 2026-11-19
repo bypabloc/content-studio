@@ -1,0 +1,47 @@
+{
+  ".agents/rules/agent-config-testing.md": {
+    "lines": 15,
+    "bytes": 1894,
+    "lineLength": 527
+  },
+  ".agents/rules/git-workflow.md": {
+    "lines": 83,
+    "bytes": 6530,
+    "lineLength": 907
+  },
+  ".agents/rules/graphify.md": {
+    "lines": 37,
+    "bytes": 2721,
+    "lineLength": 407
+  },
+  ".agents/rules/worktrees.md": {
+    "lines": 38,
+    "bytes": 2945,
+    "lineLength": 721
+  },
+  ".claude/rules/agent-config-testing.md": {
+    "lines": 17,
+    "bytes": 1772,
+    "lineLength": 527
+  },
+  ".claude/rules/git-workflow.md": {
+    "lines": 78,
+    "bytes": 6316,
+    "lineLength": 907
+  },
+  ".claude/rules/graphify.md": {
+    "lines": 32,
+    "bytes": 2573,
+    "lineLength": 407
+  },
+  ".claude/rules/worktrees.md": {
+    "lines": 33,
+    "bytes": 2783,
+    "lineLength": 721
+  },
+  "AGENTS.md": {
+    "lines": 106,
+    "bytes": 10155,
+    "lineLength": 556
+  }
+}
