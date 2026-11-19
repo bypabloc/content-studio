@@ -138,6 +138,16 @@ describe('NarrationPage', () => {
     expect(await screen.findByText('resultado 6')).toBeTruthy();
   });
 
+  it('con un solo aviso, el texto va en singular', async () => {
+    api.post.mockImplementation(async (path: string) =>
+      path === '/jobs' ? { id: 1 } : { ...CLEAN_LINT, issues: [{}] },
+    );
+    const textarea = await renderPage();
+    fireEvent.change(textarea, { target: { value: 'Hola; mundo.' } });
+
+    expect(await screen.findByText(t('narration.generate.warnings_one'))).toBeTruthy();
+  });
+
   it('con avisos del linter, el botón lo dice y aun así deja generar', async () => {
     api.post.mockImplementation(async (path: string) =>
       path === '/jobs' ? { id: 1 } : { ...CLEAN_LINT, issues: [{}, {}] },
@@ -145,7 +155,7 @@ describe('NarrationPage', () => {
     const textarea = await renderPage();
     fireEvent.change(textarea, { target: { value: 'Hola; mundo.' } });
 
-    expect(await screen.findByText(t('narration.generate.warnings', { count: 2 }))).toBeTruthy();
+    expect(await screen.findByText(t('narration.generate.warnings_other', { count: 2 }))).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t('narration.generate') }));
     await waitFor(() => expect(jobsPosted()).toHaveLength(1));
   });

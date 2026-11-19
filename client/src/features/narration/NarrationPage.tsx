@@ -75,7 +75,11 @@ export function NarrationPage() {
             {t('narration.generate')}
           </button>
           {issues > 0 && (
-            <p className="text-sm text-muted-foreground">{t('narration.generate.warnings', { count: issues })}</p>
+            <p className="text-sm text-muted-foreground">
+              {issues === 1
+                ? t('narration.generate.warnings_one')
+                : t('narration.generate.warnings_other', { count: issues })}
+            </p>
           )}
         </div>
       </aside>
