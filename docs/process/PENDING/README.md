@@ -23,4 +23,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [004-db-antes-del-subcomando](004-db-antes-del-subcomando.md) | `studio --db` solo se acepta antes del subcomando | La 007 o la 008 | Agente |
 | [004-eventos-cli-sin-sse](004-eventos-cli-sin-sse.md) | Los cambios de la CLI sobre trabajos que el server no corre no salen por SSE | Antes de la 005 | Agente |
 | [004-httpx-deprecado](004-httpx-deprecado.md) | `starlette.testclient` avisa que httpx 0.28 está deprecado | Cuando starlette soporte httpx nuevo | Agente |
-| [sleep-guard-codex-antigravity](sleep-guard-codex-antigravity.md) | El bloqueo de `sleep` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
+| [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |

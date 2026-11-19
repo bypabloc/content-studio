@@ -1,6 +1,6 @@
 # content-studio
 
-Audio local para videos, en una RTX 4060 Laptop (8 GB) con WSL2. Hay dos herramientas independientes. El código de las dos vive en `server/src/content_studio/`; sus carpetas (`server/data/narration/`, `server/data/music/`) guardan solo datos: docs, voces, catálogo, venvs y modelos.
+Audio local para videos, en una RTX 4060 Laptop (8 GB) con Windows 11 (nada se corre en WSL). Hay dos herramientas independientes. El código de las dos vive en `server/src/content_studio/`; sus carpetas (`server/data/narration/`, `server/data/music/`) guardan solo datos: docs, voces, catálogo, venvs y modelos.
 
 | Carpeta | Qué genera | Código | Documentación |
 | :--- | :--- | :--- | :--- |

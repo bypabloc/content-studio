@@ -8,6 +8,8 @@ paths:
 
 Runner único de gates: `python -m devtools test-runner --type=all` (lint, spelling, validators, unit, typecheck y tdd; spec 003), lo mismo que la CI en 3.10 y 3.12. Por debajo corre `uv run pytest` (con `--doctest-modules`; sin GPU). `uv run pytest -m local` suma los que necesitan los venvs de los motores de este equipo. Ciclo y comandos: skill `tdd-workflow`.
 
+Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
+
 ## 1. Tipos
 
 | Tipo | Dónde | Qué prueba | Corre en CI |
