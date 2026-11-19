@@ -9,10 +9,10 @@ from __future__ import annotations
 import json
 import sys
 
-from . import changeset, lint, validators
+from . import changeset, lint, unit, validators
 from .flags import parse
 
-STAGES = {'lint': lint.run, 'validators': validators.run}
+STAGES = {'lint': lint.run, 'validators': validators.run, 'unit': unit.run}
 
 
 def main(argv: list[str]) -> int:
@@ -23,7 +23,7 @@ def main(argv: list[str]) -> int:
         return 2
     picked = changeset.files(options.git_mode, options.files)
     if options.write_baseline:
-        print(json.dumps({'baseline': validators.write_baseline(picked)}))
+        print(json.dumps({'validators': validators.write_baseline(picked), 'unit': unit.write_baseline()}))
         return 0
     results = [STAGES[name](picked) for name in options.types]
     for result in results:
