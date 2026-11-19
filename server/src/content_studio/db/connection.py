@@ -11,7 +11,8 @@ def connect(path: Path) -> sqlite3.Connection:
     """Abre la base (y su carpeta si falta) en autocommit, con filas por nombre de columna."""
     path.parent.mkdir(parents=True, exist_ok=True)
     # Autocommit: las migraciones abren su propia transacción; el resto escribe de a una sentencia.
-    conn = sqlite3.connect(path, isolation_level=None)
+    # check_same_thread=False: FastAPI abre y cierra la conexión de una petición en hilos distintos (una a la vez).
+    conn = sqlite3.connect(path, isolation_level=None, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute('PRAGMA journal_mode = WAL')
     conn.execute('PRAGMA foreign_keys = ON')
