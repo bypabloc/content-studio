@@ -24,7 +24,7 @@ def alive(pid: int, platform: str) -> bool | None:
     """True/False si el proceso vive; None si es de otro sistema (un candado de WSL visto desde Windows)."""
     if platform != sys.platform:
         return None
-    if os.name == 'nt':
+    if sys.platform == 'win32':  # mypy solo estrecha por sys.platform: os.name deja ctypes.windll sin tipo en Linux
         import ctypes
 
         k32 = ctypes.windll.kernel32
