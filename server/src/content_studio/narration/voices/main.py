@@ -42,6 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     """Entrada del catálogo de voces: lista o construye."""
+    # cp1252 (Windows, a una tubería) no tiene ←: el resultado de un estilo rechazado reventaba antes de guardar la voz.
+    process.console_utf8()
     a = build_parser().parse_args()
     cat = catalog()
     if not a.build:
