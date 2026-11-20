@@ -1,0 +1,6 @@
+{
+  "wav": "voxcpm2-expert.wav",
+  "style": "expert",
+  "language": "es",
+  "segments": [{ "text": "Hola, mundo." }]
+}

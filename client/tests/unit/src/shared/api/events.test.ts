@@ -14,6 +14,7 @@ function job(id: number, patch: Partial<Job> = {}): Job {
     params: {},
     progress: 0,
     created_at: '2026-11-19T10:00:00Z',
+    starred: false,
     ...patch,
   };
 }

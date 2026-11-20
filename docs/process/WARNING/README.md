@@ -45,5 +45,25 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [005-opener-abrir-carpeta](005-opener-abrir-carpeta.md) | «Abrir carpeta» de los avisos usa `opener:allow-open-path` sin alcance | antes de main (alcance con la 022) |
 | [lote-renumeracion-007-021](lote-renumeracion-007-021.md) | Specs renumeradas tres veces de la 007 en adelante (iconos y editor; i18n; componentes); la carpeta del lote conserva `001-017-studio` | la 023 (cierre del lote) |
 | [005-desvios-de-diseno](005-desvios-de-diseno.md) | Desvíos de D-1 (sin shadcn), D-2 (CSP amplia), D-4 (theme-init y Geist) y D-8 (confirm nativo) | el merge a `dev` no depende de ellos |
+| [006-bun-hoisted-worktree](006-bun-hoisted-worktree.md) | El worktree instala con el enlazador hoisted: el límite de rutas de Windows rompe el enlazador por defecto | el merge a `dev` de la 006 |
+| [006-linter-ejemplo-ac1](006-linter-ejemplo-ac1.md) | El ejemplo del AC-1 lleva punto final: sin él, la regla 3 lo marca también | el merge a `dev` |
+| [006-linter-criterios](006-linter-criterios.md) | El linter comprueba la regla 3 por párrafo y la 6 por la coma de la enumeración; reusa las marcas de `segments.py` | el merge a `dev` |
+| [006-linter-siglas](006-linter-siglas.md) | La regla 2 usa una lista corta de siglas: el repo no tiene diccionario | el merge a `dev` |
+| [006-linter-cspell](006-linter-cspell.md) | `script_lint.py` se revisa con español además de inglés en cspell, como el alias del guion | el merge a `dev` |
+| [006-media-cache](006-media-cache.md) | La caché de medios va en memoria, no en la tabla `media_cache` de D-3 | el merge a `dev` |
+| [006-soundfile-dev](006-soundfile-dev.md) | `soundfile` entra al grupo `dev` del workspace para probar el pipeline sin GPU | el merge a `dev` |
+| [006-bloques-en-disco](006-bloques-en-disco.md) | Cada toma guarda `blocks/` y `script.json` en su carpeta, en float de 32 bits | el merge a `dev` |
+| [006-narration-sin-torch](006-narration-sin-torch.md) | `narrate()` no importa torch: el pico de VRAM sale de `peak_vram_gib()` y las pruebas la sustituyen | el merge a `dev` |
+| [006-migracion-3](006-migracion-3.md) | La migración de `starred` y `group_key` es la 3 del código: la 2 ya es `owner_pid` | el merge a `dev` |
+| [006-regenerar-sin-estado](006-regenerar-sin-estado.md) | Regenerar reconstruye los bloques desde `script.json` y copia los que no cambian | el merge a `dev` |
+| [006-tomas-y-grupo](006-tomas-y-grupo.md) | Las tomas de un mismo texto comparten `group_key`, que hereda la regeneración | el merge a `dev` |
+| [006-dialog-js](006-dialog-js.md) | Dependencia nueva: `@tauri-apps/plugin-dialog` (JS) para «Importar» con el diálogo del sistema | el merge a `dev` |
+| [006-editor-capa](006-editor-capa.md) | Los avisos del editor se pintan en una capa detrás del campo, con el texto del server en el tooltip | el merge a `dev` |
+| [006-licencia-y-opciones](006-licencia-y-opciones.md) | La licencia se guarda por motor (`license.accepted.<motor>`) y la elección espera a que se guarde | el merge a `dev` |
+| [006-masterizacion-cspell](006-masterizacion-cspell.md) | «Masterización» es palabra permitida de cspell en `client/messages/es.json` | el merge a `dev` |
+| [006-wavesurfer](006-wavesurfer.md) | Dependencia nueva: `wavesurfer.js` 8.1.0 (exacta) dibuja la onda con los picos del server | el merge a `dev` |
+| [006-tomas-desde-la-carpeta](006-tomas-desde-la-carpeta.md) | El resultado lee `script.json` y el `.json` de la toma de su carpeta; no hay endpoint nuevo | el merge a `dev` |
+| [006-regenerar-sin-evaluacion](006-regenerar-sin-evaluacion.md) | La toma regenerada no se evalúa con whisper: Comparar la muestra como «Sin evaluar» (AC-3 impide reintentar los bloques ajenos) | antes de main |
+| [006-masterizacion-recalcula-ganancia](006-masterizacion-recalcula-ganancia.md) | Regenerar un párrafo recalcula la ganancia de la toma: los bloques ajenos quedan iguales, pero su nivel en el `.wav` final no queda idéntico | antes de main |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

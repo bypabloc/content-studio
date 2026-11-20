@@ -33,6 +33,10 @@ def build_parser() -> argparse.ArgumentParser:
     narration = sub.add_parser('narration', help='narration and voices')
     narration_cmds = narration.add_subparsers(dest='action', required=True, metavar='action')
     narration_cmds.add_parser('tts', parents=[narration_flags()], add_help=False, help='narrate a script (runs here)')
+    regenerate_p = narration_cmds.add_parser('regenerate', help='new take with one paragraph redone (runs here)')
+    regenerate_p.add_argument('job', type=int, help='a finished narration or regeneration job')
+    regenerate_p.add_argument('index', type=int, help='paragraph to redo, 0-based (the first one is 0)')
+    regenerate_p.add_argument('--seed', type=int, help='seed of the new paragraph; default random')
     narration_cmds.add_parser('voices', add_help=False, help='free voices: list and build (--build)')
 
     sub.add_parser('music', parents=[music_flags()], add_help=False, help='instrumental music (runs here)')
@@ -91,7 +95,13 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'serve':
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
     if args.command == 'narration' and args.action == 'tts':
-        return submit.run('narration', submit.narration_params(args), args.db, main_checkout(paths.ROOT))
+        codes = [
+            submit.run('narration', params, args.db, main_checkout(paths.ROOT))
+            for params in submit.split_files(submit.narration_params(args))
+        ]
+        return max(codes)
+    if args.command == 'narration' and args.action == 'regenerate':
+        return submit.run('narration.regenerate', submit.regenerate_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'narration' and args.action == 'voices':
         return _voices(args.rest)
     if args.command == 'music':

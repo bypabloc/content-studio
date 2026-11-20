@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import random
 import shutil
 import sys
@@ -63,6 +64,13 @@ def fix(seed: int) -> None:
     torch.cuda.manual_seed_all(seed)
 
 
+def peak_vram_gib() -> float:
+    """Pico de VRAM reservada por el proceso, en GiB. Solo existe con torch: las pruebas lo sustituyen."""
+    import torch
+
+    return torch.cuda.max_memory_reserved() / 2**30
+
+
 def narrate(
     engine: TTSEngine,
     text: str,
@@ -77,8 +85,6 @@ def narrate(
 ) -> dict:
     """Genera todos los bloques del texto y escribe el .wav. Devuelve lo necesario para evaluar,
     regenerar bloques sueltos y escribir los metadatos."""
-    import torch
-
     secs = segments(text, style)
     if not secs:
         sys.exit('The text is empty.')
@@ -97,7 +103,7 @@ def narrate(
             print(f'Notice: paragraph {i + 1}: {a}')
 
     g = dict(
-        output=output, secs=secs, pb=pb, style=style, p=STYLES[style], language=language, seed=seed,
+        output=output, ref=ref, secs=secs, pb=pb, style=style, p=STYLES[style], language=language, seed=seed,
         seeds=[], seed_block=[None] * len(secs), audios=[], sr=0, blocks=[], time_s=0.0,
         master=master, lufs=lufs, master_info=None,
     )  # fmt: skip
@@ -106,10 +112,32 @@ def narrate(
     print(
         f'{output} ({dur:.1f} s, {engine.spec.name}, {style}, batch {batch}) | '
         f'generation {g["time_s"]:.1f} s, {dur / g["time_s"]:.2f}x real time | '
-        f'peak VRAM {torch.cuda.max_memory_reserved() / 2**30:.2f} GiB',
+        f'peak VRAM {peak_vram_gib():.2f} GiB',
         flush=True,
     )
     return g
+
+
+def write_blocks(g: dict, out_dir: Path, indices: Iterable[int]) -> None:
+    """Guarda los bloques `indices` (antes de sus pausas y de la velocidad del estilo) como out_dir/blocks/<i>.wav,
+    en float de 32 bits. Solo se escriben los que cambiaron: los demás ya están en disco y no se recodifican."""
+    import soundfile as sf
+
+    (out_dir / 'blocks').mkdir(parents=True, exist_ok=True)
+    for i in indices:
+        if g['audios'][i] is not None:
+            sf.write(out_dir / 'blocks' / f'{i}.wav', g['audios'][i], g['sr'], subtype='FLOAT')
+
+
+def write_script(g: dict, out_dir: Path) -> None:
+    """script.json: lo necesario para rehacer la toma sin el guion en memoria (D-2). Los bloques se reconstruyen con
+    `prepare_blocks` a partir de los segmentos y la referencia, así que no se guarda el estado del motor."""
+    data = dict(
+        wav=g['output'].name, ref=str(g['ref']), style=g['style'], language=g['language'], master=g['master'],
+        lufs=g['lufs'], seed=g['seed'], seeds=g['seeds'], segments=g['secs'],
+        blocks=[dict(ref=str(pb['ref']), seed=seed) for pb, seed in zip(g['pb'], g['seed_block'], strict=True)],
+    )  # fmt: skip
+    (out_dir / 'script.json').write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
 
 
 def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, seed: int) -> None:
@@ -136,6 +164,9 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
         done += len(group)
         progress.emit(done / len(idx), f'block {done}/{len(idx)}')
     g['time_s'] += time.perf_counter() - t0
+    out = g['output'].parent  # la carpeta del trabajo: blocks/, script.json y el .wav
+    write_blocks(g, out, idx)
+    write_script(g, out)
     write(g)
 
 

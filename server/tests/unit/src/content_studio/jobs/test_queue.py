@@ -29,6 +29,17 @@ def test_enqueue_takes_the_resource_of_the_service(conn):
     assert jobs.get(conn, job_id)['resource'] == 'cpu'
 
 
+def test_enqueue_stores_the_group_that_the_service_prepares(conn):
+    """AC-3: la toma regenerada hereda el grupo de su origen. El servicio lo da en `prepare` y la cola lo guarda."""
+    service = SimpleNamespace(
+        RESOURCE='gpu', prepare=lambda db, params: (params, 'narration:g1'), validate=lambda params: []
+    )
+
+    job_id = queue.enqueue(conn, 'fake', {'a': 1}, {'fake': service})
+
+    assert jobs.get(conn, job_id)['group_key'] == 'narration:g1'
+
+
 def test_enqueue_rejects_invalid_params_with_their_errors(conn):
     errors = [{'code': 'unknown_style', 'params': {'style': 'x'}}]
 

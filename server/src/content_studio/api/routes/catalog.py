@@ -27,6 +27,7 @@ def catalog(kind: str) -> dict:
                     'installed': spec.installed(),
                     'recommended': spec.recommended,
                     'note': spec.note,
+                    'batch': spec.batch,
                 }
                 for spec in ENGINES.values()
             ],

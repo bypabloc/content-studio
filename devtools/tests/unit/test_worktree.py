@@ -107,6 +107,19 @@ def test_bun_install_returns_127_when_bun_is_not_installed(tmp_path, monkeypatch
     assert worktree._bun_install(tmp_path) == 127
 
 
+def test_bun_install_uses_the_hoisted_linker_so_paths_fit_windows_limits(tmp_path, monkeypatch):
+    """Con el enlazador anidado, Windows sin rutas largas falla al copiar paquetes profundos: usa hoisted."""
+    calls = []
+
+    def fake(command, **kwargs):
+        calls.append((command, kwargs['cwd']))
+        return type('Done', (), {'returncode': 0})()
+
+    monkeypatch.setattr(worktree.subprocess, 'run', fake)
+    assert worktree._bun_install(tmp_path) == 0
+    assert calls == [(['bun', 'install', '--frozen-lockfile', '--linker', 'hoisted'], tmp_path)]
+
+
 def test_prepare_stops_and_says_so_when_bun_install_fails(tmp_path, monkeypatch, capsys):
     main, wt = tmp_path / 'main', tmp_path / 'wt'
     main.mkdir()

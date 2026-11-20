@@ -97,7 +97,7 @@ export interface paths {
         };
         /**
          * List Jobs
-         * @description Trabajos filtrados por tipo y/o estado, en orden de la cola.
+         * @description Trabajos filtrados por tipo, estado y/o grupo de tomas, en orden de la cola.
          */
         get: operations["list_jobs_jobs_get"];
         put?: never;
@@ -166,6 +166,27 @@ export interface paths {
          * @description Crea un trabajo nuevo con los mismos parámetros. 409 si el original todavía no terminó.
          */
         post: operations["retry_job_jobs__job_id__retry_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/star": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Star Job
+         * @description Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe; 409 si no es una
+         *     toma terminada de narración (una en cola o con error no puede quitarle la marca a la buena).
+         */
+        post: operations["star_job_jobs__job_id__star_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -252,6 +273,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/narration/lint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lint
+         * @description Incidencias con línea, columna y largo, cada una con el texto de su regla; también palabras y segundos.
+         */
+        post: operations["lint_narration_lint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -292,6 +333,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/media/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Media Info
+         * @description Duración (s), LUFS integrado y pico real (dBTP) del audio.
+         */
+        get: operations["media_info_media_info_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/peaks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Media Peaks
+         * @description `n` picos del audio, entre 0 y 1, para dibujar la forma de onda.
+         */
+        get: operations["media_peaks_media_peaks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -300,6 +381,28 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * IssueOut
+         * @description Un aviso del linter: la regla de formato-guion.md, su posición (1-based) y su texto ya en español.
+         */
+        IssueOut: {
+            /** Rule */
+            rule: number;
+            /** Code */
+            code: string;
+            /** Line */
+            line: number;
+            /** Col */
+            col: number;
+            /** Length */
+            length: number;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Message */
+            message: string;
         };
         /**
          * Job
@@ -346,6 +449,27 @@ export interface components {
             finished_at?: string | null;
             /** Owner Pid */
             owner_pid?: number | null;
+            /**
+             * Starred
+             * @default false
+             */
+            starred: boolean;
+            /** Group Key */
+            group_key?: string | null;
+        };
+        /**
+         * LintOut
+         * @description Lo que devuelve el lint: los avisos, las palabras, los segundos estimados y la guía de formato.
+         */
+        LintOut: {
+            /** Issues */
+            issues: components["schemas"]["IssueOut"][];
+            /** Words */
+            words: number;
+            /** Seconds */
+            seconds: number;
+            /** Guide */
+            guide: string;
         };
         /**
          * NewJob
@@ -374,6 +498,19 @@ export interface components {
         QueueState: {
             /** Paused */
             paused: boolean;
+        };
+        /**
+         * ScriptIn
+         * @description El guion tal como lo escribe el usuario, y el estilo para estimar su duración.
+         */
+        ScriptIn: {
+            /** Text */
+            text: string;
+            /**
+             * Style
+             * @default expert
+             */
+            style: string;
         };
         /**
          * SettingOut
@@ -574,6 +711,7 @@ export interface operations {
             query?: {
                 kind?: string | null;
                 status?: string | null;
+                group_key?: string | null;
             };
             header?: never;
             path?: never;
@@ -729,6 +867,37 @@ export interface operations {
             };
         };
     };
+    star_job_jobs__job_id__star_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     queue_state_queue_get: {
         parameters: {
             query?: never;
@@ -824,6 +993,39 @@ export interface operations {
             };
         };
     };
+    lint_narration_lint_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScriptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LintOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     events_events_get: {
         parameters: {
             query?: never;
@@ -862,6 +1064,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    media_info_media_info_get: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    media_peaks_media_peaks_get: {
+        parameters: {
+            query: {
+                path: string;
+                n?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

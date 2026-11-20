@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Path, Request
 from pydantic import BaseModel
 
 from content_studio.api.deps import get_conn
@@ -15,6 +15,8 @@ from content_studio.db import jobs as store
 from content_studio.jobs import queue
 
 router = APIRouter()
+JobId = Annotated[int, Path(ge=1, le=2**63 - 1)]  # los ids de SQLite van de 1 a 2^63-1: fuera, 422 y no 500
+TAKE_KINDS = ('narration', 'narration.regenerate')  # las tomas que se pueden elegir con ★
 
 
 class NewJob(BaseModel):
@@ -51,19 +53,20 @@ def list_jobs(
     conn: Annotated[sqlite3.Connection, Depends(get_conn)],
     kind: str | None = None,
     status: str | None = None,
+    group_key: str | None = None,
 ) -> list[dict]:
-    """Trabajos filtrados por tipo y/o estado, en orden de la cola."""
-    return store.list_jobs(conn, kind=kind, status=status)
+    """Trabajos filtrados por tipo, estado y/o grupo de tomas, en orden de la cola."""
+    return store.list_jobs(conn, kind=kind, status=status, group_key=group_key)
 
 
 @router.get('/jobs/{job_id}', response_model=Job)
-def get_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+def get_job(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Un trabajo, o 404 si no existe."""
     return _found(conn, job_id)
 
 
 @router.post('/jobs/{job_id}/cancel')
-def cancel_job(job_id: int, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+def cancel_job(job_id: JobId, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Cancela un trabajo en espera o en curso; con el worker activo también termina su proceso."""
     worker = request.app.state.worker
     changed = worker.cancel(job_id) if worker else queue.cancel(conn, job_id)
@@ -71,7 +74,7 @@ def cancel_job(job_id: int, request: Request, conn: Annotated[sqlite3.Connection
 
 
 @router.post('/jobs/{job_id}/retry', status_code=201, response_model=Job)
-def retry_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+def retry_job(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Crea un trabajo nuevo con los mismos parámetros. 409 si el original todavía no terminó."""
     _found(conn, job_id)
     try:
@@ -79,3 +82,14 @@ def retry_job(job_id: int, conn: Annotated[sqlite3.Connection, Depends(get_conn)
     except ValueError as error:
         raise ApiError(409, 'job_pending', job_id=job_id) from error
     return _found(conn, new_id)
+
+
+@router.post('/jobs/{job_id}/star', response_model=Job)
+def star_job(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+    """Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe; 409 si no es una
+    toma terminada de narración (una en cola o con error no puede quitarle la marca a la buena)."""
+    job = _found(conn, job_id)
+    if job['status'] != 'done' or job['kind'] not in TAKE_KINDS:
+        raise ApiError(409, 'job_not_a_take', job_id=job_id)
+    store.star(conn, job_id)
+    return _found(conn, job_id)

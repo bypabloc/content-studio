@@ -8,6 +8,7 @@ dev = [
     "pytest>=8",
     "ruff",
     "numpy",
+    "soundfile",
     "pytest-cov>=7.1.0",
     "mypy>=2.4.1",
 ]

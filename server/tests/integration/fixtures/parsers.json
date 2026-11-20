@@ -143,6 +143,36 @@
       },
       {
         "option_strings": [
+          "--from-script"
+        ],
+        "dest": "from_script",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "Path",
+        "help": "==SUPPRESS==",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--only"
+        ],
+        "dest": "only",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "==SUPPRESS==",
+        "metavar": null
+      },
+      {
+        "option_strings": [
           "--output"
         ],
         "dest": "output",
@@ -273,7 +303,8 @@
         "required": true,
         "dests": [
           "text",
-          "file"
+          "file",
+          "from_script"
         ]
       }
     ],

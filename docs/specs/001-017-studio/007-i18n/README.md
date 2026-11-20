@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Large (unos 30 archivos: catálogos, `messages.py`, la API, `shared/i18n/` del client, Ajustes, la etapa `i18n` de devtools, el `pre-commit`, cspell y reglas) |
 | Rama | `feature/007-i18n` desde `origin/dev`, en `../content-studio-worktrees/007-i18n/` |
-| Depende de | [006](../006-narration-section/README.md) (fusionada en `origin/dev`) |
+| Depende de | 006 (fusionada en `origin/dev`) |
 | Origen | Pedido del usuario (2026-11-19), lote [001-017-studio](../README.md) |
 
 ## Objetivo

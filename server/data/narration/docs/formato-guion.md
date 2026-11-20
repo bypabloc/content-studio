@@ -81,6 +81,12 @@ Cómo escribir el texto que se pasa con `--text` o `--file` para controlar pausa
 ]
 ```
 
+## Qué revisa el editor
+
+El editor de la app comprueba estas reglas de arriba, sin modelo (`server/src/content_studio/narration/script_lint.py`): la 1 (etiquetas y marcas), la 2 (mayúsculas de énfasis), la 3 (oración sin signo final), la 6, la 10, la 11, la 13 y la 19. Y estima la duración con la velocidad media de habla.
+
+Las demás reglas piden criterio o un modelo (la pronunciación, el ritmo o el largo real del audio): el editor no las marca. Se revisan al escuchar la toma o con la evaluación de whisper (`--evaluate`).
+
 ## Palabras que el modelo pierde
 
 Medido con `--evaluate` y experimentos de 3 a 5 generaciones por variante (las variantes se transcribieron con whisper `medium`):

@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Large (unos 18 archivos entre server y client) |
 | Rama | `feature/011-music-section` desde `origin/dev`, en `../content-studio-worktrees/011-music-section/` |
-| Depende de | 005 y [006](../006-narration-section/README.md) (Player y CompareTakes), fusionadas en `origin/dev` |
+| Depende de | 005 y 006 (Player y CompareTakes), fusionadas en `origin/dev` |
 | Origen | Pedido del usuario (lote [001-017-studio](../README.md)) |
 
 ## Objetivo

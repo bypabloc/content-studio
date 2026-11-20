@@ -33,6 +33,7 @@ cosyvoice
 creationflags
 cspell
 cumbia
+dbfs
 delenv
 demucs
 denoiser
@@ -97,6 +98,7 @@ samplerate
 sidechain
 silencedetect
 silenceremove
+soundfile
 subprocess
 supersaw
 synthwave
@@ -115,6 +117,7 @@ venvs
 voicestudio
 volumedetect
 voxcpm
+wavesurfer
 wavlm
 wavs
 worktrees

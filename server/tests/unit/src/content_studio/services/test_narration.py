@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import sys
 
 import pytest
@@ -46,6 +47,7 @@ def test_valid_params_have_no_errors(installed):
         ({**VALID, 'model': 'nope'}, 'unknown_engine'),
         ({**VALID, 'style': 'nope'}, 'unknown_style'),
         ({'model': 'qwen-0.6b', 'style': 'expert'}, 'missing_text'),
+        ({'model': 'qwen-0.6b', 'style': 'expert', 'file': ['a.txt', 'b.txt']}, 'one_script_per_job'),
     ],
 )
 def test_invalid_params_report_a_code(installed, params, code):
@@ -56,3 +58,26 @@ def test_engine_not_installed_is_reported(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, 'NARRATION', tmp_path)  # sin venv
 
     assert [error['code'] for error in narration.validate(VALID)] == ['engine_not_installed']
+
+
+def test_group_key_is_narration_and_twelve_hex_digits():
+    assert re.fullmatch(r'narration:[0-9a-f]{12}', narration.group_key({'text': 'Hola.'}))
+
+
+def test_group_key_ignores_the_spacing_of_the_text():
+    assert narration.group_key({'text': 'Hola  mundo.'}) == narration.group_key({'text': ' Hola mundo.\n'})
+
+
+def test_group_key_differs_for_other_text():
+    assert narration.group_key({'text': 'Hola.'}) != narration.group_key({'text': 'Chao.'})
+
+
+def test_a_single_file_groups_with_the_same_text(tmp_path):
+    script = tmp_path / 'guion.txt'
+    script.write_text('Hola.\n', encoding='utf-8')
+
+    assert narration.group_key({'file': [str(script)]}) == narration.group_key({'text': 'Hola.'})
+
+
+def test_a_job_over_several_files_has_no_group(tmp_path):
+    assert narration.group_key({'file': [str(tmp_path / 'a.txt'), str(tmp_path / 'b.txt')]}) is None

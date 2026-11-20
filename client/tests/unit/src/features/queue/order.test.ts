@@ -12,6 +12,7 @@ function job(id: number, status: Job['status']): Job {
     params: {},
     progress: 0,
     created_at: '2026-11-19T10:00:00Z',
+    starred: false,
   };
 }
 

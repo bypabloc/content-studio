@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from contextlib import closing
+
+from content_studio.db import connection, jobs
+
 
 def test_ac7_an_unknown_engine_is_422_with_code_and_message(api):
     body = {'kind': 'narration', 'params': {'model': 'nope', 'style': 'expert', 'text': 'Hola.'}}
@@ -44,3 +48,45 @@ def test_cancel_and_retry_follow_the_queue_rules(api):
     assert retry_pending.status_code == 409
     assert retry_pending.json()['code'] == 'job_pending'
     assert cancelled.json() == {'cancelled': True}
+
+
+def test_a_job_id_beyond_sqlite_is_422_not_500(api):
+    assert api.client.get('/jobs/99999999999999999999', headers=api.headers).status_code == 422
+
+
+def test_star_refuses_a_job_that_is_not_a_finished_take(api):
+    """Solo una toma terminada de narración se puede elegir: un trabajo en cola o de otro tipo, no."""
+    job_id = api.client.post('/jobs', json={'kind': 'fake', 'params': {'x': 1}}, headers=api.headers).json()['id']
+
+    response = api.client.post(f'/jobs/{job_id}/star', headers=api.headers)
+
+    assert response.status_code == 409
+    assert response.json()['code'] == 'job_not_a_take'
+
+
+def test_ac5_star_is_unique_per_group(api):
+    """AC-5: marcar una toma la deja como la única elegida de su grupo; las de otro grupo no cambian."""
+    with closing(connection.connect(api.tmp / 'base.db')) as conn:
+        first, second, other = (
+            jobs.insert(conn, 'narration', 'gpu', {}, group_key=group)
+            for group in ('narration:g1', 'narration:g1', 'narration:g2')
+        )
+        for job_id in (first, second, other):
+            jobs.update(conn, job_id, status='done')
+    for job_id in (first, other, second):
+        api.client.post(f'/jobs/{job_id}/star', headers=api.headers)
+
+    group = api.client.get('/jobs', params={'group_key': 'narration:g1'}, headers=api.headers).json()
+
+    assert [(job['id'], job['starred']) for job in group] == [(first, False), (second, True)]
+    assert api.client.get(f'/jobs/{other}', headers=api.headers).json()['starred'] is True
+
+
+def test_a_retry_keeps_the_group_of_the_take(api):
+    with closing(connection.connect(api.tmp / 'base.db')) as conn:
+        job_id = jobs.insert(conn, 'fake', 'gpu', {}, group_key='narration:g1')
+        jobs.update(conn, job_id, status='done')
+
+    new = api.client.post(f'/jobs/{job_id}/retry', headers=api.headers).json()
+
+    assert new['group_key'] == 'narration:g1'

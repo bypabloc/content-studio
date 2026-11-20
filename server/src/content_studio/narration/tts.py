@@ -6,6 +6,7 @@ Flags y formato del guion: content_studio/narration/parser.py.
 
 from __future__ import annotations
 
+import argparse
 import random
 
 from content_studio import paths
@@ -14,6 +15,18 @@ from content_studio.narration.metadata import notices_voice, save_metadata
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices, build_parser
 from content_studio.narration.pipeline import batch_auto, evaluate, narrate
 from content_studio.narration.script import plan, scripts, warn_overwrite
+from content_studio.narration.takes import regenerate_take
+
+
+def regenerate_main(a: argparse.Namespace) -> None:
+    """`--from-script`: rehace el bloque --only de la toma y la escribe como toma nueva en --output."""
+    e = ENGINES[a.model]
+    process.use_venv(e.path_venv(), 'server/data/narration/README.md', module='content_studio.narration.tts')
+    progress.emit(0, 'loading model')
+    engine = e.create()
+    seed = a.seed if a.seed is not None else random.randrange(2**31)
+    print(f'Seed: {seed}')
+    save_metadata(engine, regenerate_take(engine, a.from_script, a.only, seed, a.output))
 
 
 def main() -> None:
@@ -22,6 +35,10 @@ def main() -> None:
     a = ap.parse_args()
     if a.retries and not a.evaluate:
         ap.error('--retries needs --evaluate')
+    if a.from_script:
+        if a.output is None or a.only is None:
+            ap.error('--from-script needs --only and --output (the job folder)')
+        return regenerate_main(a)
     if a.voice:
         sheet = approved_voices(STYLES)[a.voice]
         if sheet['language'] != a.language:
