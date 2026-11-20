@@ -128,5 +128,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-construir-sobre-voces-del-usuario](010-construir-sobre-voces-del-usuario.md) | El AC-7 real construiría sobre voces del usuario (junctions al principal): se pide decisión | antes de `main` |
 | [010-revision-visual-capturas](010-revision-visual-capturas.md) | Revisión visual de las capturas: 14 notas; la alineación se corrigió y el resto queda en PENDING | antes de `main` |
 | [010-consola-cp1252-en-build](010-consola-cp1252-en-build.md) | La entrada de voces pone la consola en errors=replace: un ← reventaba en Windows (cp1252) | antes de `main` |
+| [010-captura-pcm](010-captura-pcm.md) | Captura PCM sin procesado para las tomas (AC-3): 48 kHz, mono, 24 bits; el server convierte si hace falta | antes de `main` |
+| [010-permiso-microfono-webview2](010-permiso-microfono-webview2.md) | El permiso del micrófono en WebView2 no se ha probado con un micrófono real | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

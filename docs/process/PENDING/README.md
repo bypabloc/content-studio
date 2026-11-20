@@ -48,3 +48,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
 | [010-grabar-con-microfono-real](010-grabar-con-microfono-real.md) | La grabación con un micrófono real (permiso, medidor, prueba de sala, 48 kHz) no se ha probado en la app | Antes de publicar la 010 (T9) | Usuario |
 | [010-contraste-tema-oscuro](010-contraste-tema-oscuro.md) | Contraste del tema oscuro en Mis voces y el catálogo: medir y decidir (tokens del design system) | Después de publicar la 010 | Agente |
+| [010-whisper-a-faster-whisper](010-whisper-a-faster-whisper.md) | El chequeo y la evaluación de tomas usan openai-whisper; la 013 pasa a faster-whisper | En la 013 | Agente |
