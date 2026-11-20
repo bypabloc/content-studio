@@ -36,4 +36,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [006-cli-carpeta-compartida](006-cli-carpeta-compartida.md) | Con `--output archivo.wav`, dos tomas en una misma carpeta comparten `blocks/` y `script.json` | Después de publicar, o antes si la 010 o la 011 usan la CLI en lote | Agente |
 | [006-evaluar-toma-regenerada](006-evaluar-toma-regenerada.md) | Evaluar con whisper solo el párrafo regenerado, sin reintentar los bloques ajenos | Antes de elegir una toma por su evaluación | Agente |
 | [006-referencia-en-disco](006-referencia-en-disco.md) | Regenerar relee el audio de referencia del disco en cada petición (sin caché) | Después de cerrar la 006 | Agente |
+| [007-errores-validacion](007-errores-validacion.md) | Los 422 de validación de FastAPI salen en inglés y fuera del catálogo | Después de la 007, con la primera pantalla que los muestre | Agente |
 | [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |

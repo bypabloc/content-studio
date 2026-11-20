@@ -31,6 +31,24 @@ def test_t_falls_back_to_spanish_for_a_locale_without_catalog():
     assert messages.t('error.unknown_engine', 'fr', model='x') == messages.t('error.unknown_engine', 'es', model='x')
 
 
+def test_negotiate_picks_the_best_supported_language():
+    assert messages.negotiate('pt-BR,pt;q=0.9') == 'pt'
+    assert messages.negotiate('en;q=0.1, pt;q=0.5') == 'pt'
+    assert messages.negotiate('en-US') == 'en'
+    assert messages.negotiate('fr;q=0.9, en;q=0.5') == 'en'
+
+
+def test_negotiate_falls_back_to_spanish_without_a_supported_language():
+    assert messages.negotiate('fr-FR') == 'es'
+    assert messages.negotiate('') == 'es'
+    assert messages.negotiate(None) == 'es'
+    assert messages.negotiate('pt;q=abc, ;;;') == 'es'
+
+
+def test_negotiate_skips_a_language_refused_with_q_zero():
+    assert messages.negotiate('pt;q=0, en;q=0.2') == 'en'
+
+
 def test_ac3_every_registry_id_has_a_label():
     """Cada estilo, motor y modelo de los registros tiene su `label.*` en el catálogo (spec 007, AC-3 y D-7)."""
     keys = [

@@ -284,7 +284,7 @@ export interface paths {
         put?: never;
         /**
          * Lint
-         * @description Incidencias con línea, columna y largo, cada una con el texto de su regla; también palabras y segundos.
+         * @description Incidencias con línea, columna y largo, cada una con su texto en el idioma pedido; y palabras y segundos.
          */
         post: operations["lint_narration_lint_post"];
         delete?: never;

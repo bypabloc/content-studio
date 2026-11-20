@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+from content_studio import messages
+
+
+def test_ac2_the_lint_messages_follow_the_accepted_language(api):
+    headers = {**api.headers, 'Accept-Language': 'pt'}
+
+    issues = api.client.post('/narration/lint', json={'text': 'Hola mundo'}, headers=headers).json()['issues']
+
+    assert issues
+    first = issues[0]
+    assert first['message'] == messages.t(f'lint.rule_{first["rule"]}', 'pt', **first['params'])
+
 
 def test_ac1_lint_endpoint_returns_the_issues_with_their_message(api):
     body = api.client.post(

@@ -65,5 +65,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [006-tomas-desde-la-carpeta](006-tomas-desde-la-carpeta.md) | El resultado lee `script.json` y el `.json` de la toma de su carpeta; no hay endpoint nuevo | el merge a `dev` |
 | [006-regenerar-sin-evaluacion](006-regenerar-sin-evaluacion.md) | La toma regenerada no se evalúa con whisper: Comparar la muestra como «Sin evaluar» (AC-3 impide reintentar los bloques ajenos) | antes de main |
 | [006-masterizacion-recalcula-ganancia](006-masterizacion-recalcula-ganancia.md) | Regenerar un párrafo recalcula la ganancia de la toma: los bloques ajenos quedan iguales, pero su nivel en el `.wav` final no queda idéntico | antes de main |
+| [007-job-id-entero](007-job-id-entero.md) | El id de trabajo en la ruta es entero: `/jobs/nope` da 422 de FastAPI y las pruebas usan `/jobs/999` | el merge a `dev` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
