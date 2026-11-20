@@ -28,3 +28,11 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
 - 2026-11-19: CLI `studio` (004): `python cli.py music` pasa a `uv run studio music`; la salida va a `out/music/<fecha>-<id>-<slug>/`.
 - 2026-11-20: spec 011 (música completa): duración exacta, categorías, reintentos, muestras de 10 s, sección Música y comparación de pistas.
+
+## Verificación (2026-11-20)
+
+- Corrida real (ACE-Step, `lofi-chill` y `corporate-minimal`, 2 variantes, 30 s, `--evaluate --retries 1`): 4 pistas de 30,000 s, sin aviso `music_short`, volumen de −13,6 a −14,7 LUFS y pico real de −1,0 dBFS. Sin silencios de 0,3 s o más.
+- Espectrograma (revisión visual y `astats`): en `corporate-minimal` v2 la energía por encima de 6 kHz cae unos 25 dB desde ~19,5 s. Queda como pendiente de escucha en `docs/process/PENDING/011-caida-agudos-corporate.md`.
+- Pruebas: servidor 830 en verde; client con sus 8 etapas en verde; e2e 27/27 en desktop-chromium (cuatro de Música).
+- Muestras de los 126 presets: pendientes (`docs/process/PENDING/011-generar-muestras.md`).
+
