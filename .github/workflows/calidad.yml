@@ -28,6 +28,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: uv sync --group dev --python ${{ matrix.python }}
       - run: bun install --frozen-lockfile
+      # Las pruebas de tomas, importación y chequeo llaman a ffmpeg y ffprobe (spec 010): el runner no los trae.
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: uv run python -m devtools test-runner --type=all
       - run: uv run python -m devtools test-runner --type=guard-tdd
       - name: log de pytest si falla
