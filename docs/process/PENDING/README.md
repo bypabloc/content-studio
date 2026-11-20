@@ -47,3 +47,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [008-uitext-className](008-uitext-className.md) | `UIText` acepta `className` y 15 usos de features/app ajustan peso y tamaño: decidir si lo conserva | Después de la 009 | Agente |
 | [008-underscore-row](008-underscore-row.md) | `_row` en UIRowTable y UIRepeatGroup da avisos de no-underscore-dangle (no bloquean) | Al tocar esos organismos o antes de la 022 | Agente |
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
+| [010-legacy-en-worktree](010-legacy-en-worktree.md) | En un worktree nuevo, pytest no importa `grabar/` hasta `uv sync --all-packages --all-groups` | Con la T8 (se borra `grabar/`) | Agente |

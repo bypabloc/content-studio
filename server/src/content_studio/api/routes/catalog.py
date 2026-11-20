@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from content_studio.api.errors import ApiError
 from content_studio.music.engines.registry import MODELS
 from content_studio.music.styles import STYLES as MUSIC_STYLES
+from content_studio.narration import profiles
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices
 
 router = APIRouter()
@@ -33,6 +34,7 @@ def catalog(kind: str) -> dict:
             ],
             'styles': [{'id': name, 'recommended': name == DEFAULT_STYLE[kind]} for name in STYLES],
             'voices': [{'id': name, 'language': sheet['language']} for name, sheet in approved_voices(STYLES).items()],
+            'profiles': profiles.list_profiles(),
         }
     if kind == 'music':
         return {

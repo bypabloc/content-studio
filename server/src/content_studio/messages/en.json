@@ -37,6 +37,7 @@
   "error.unauthorized": "The session token is missing or is not valid.",
   "error.unknown_engine": "The engine {model} does not exist.",
   "error.unknown_kind": "The job type {kind} does not exist.",
+  "error.unknown_profile": "The profile {profile} does not exist.",
   "error.unknown_style": "The style {style} does not exist.",
   "error.unknown_voice": "The voice {voice} is not in the catalog or is not approved in every style.",
   "error.unreadable_media": "The file could not be read as audio.",

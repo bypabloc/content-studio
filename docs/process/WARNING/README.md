@@ -96,5 +96,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [009-iconos-sustitutos](009-iconos-sustitutos.md) | `stop` y `keyframe` usan `Square` y `Diamond`: lucide 1.58 no tiene `Stop` ni icono de fotograma clave | antes de dev |
 | [009-iconos-cola-tema](009-iconos-cola-tema.md) | `chevron-up` fuera de D-2 para plegar la cola; iconos de estado; el tema pasa a `UIIconButton` con `theme.change` | antes de dev |
 | [009-iconos-narracion-ajustes](009-iconos-narracion-ajustes.md) | Iconos de Narración y Ajustes; la barra colapsable envuelve su trigger en `UITooltip` (shadcn no se edita) | antes de dev |
+| [010-perfiles-y-paso-3](010-perfiles-y-paso-3.md) | Perfiles en `reference/<perfil>/`: el paso 3 usa el mapa de renombres del paso 2; los `.txt` versionados se mueven con `git mv` | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

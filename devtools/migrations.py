@@ -1,4 +1,4 @@
-"""Renombres de los datos de narración a inglés (spec 002, D-4): lo que aplica el paso 2 de `move-data`.
+"""Renombres de los datos de narración (spec 002, D-4: paso 2 de `move-data`) y el perfil default (spec 010: paso 3).
 
 `nuevo(rel)` dice cómo se llama ahora una ruta de `server/data/narration/` (relativa, con `/`). Es idempotente: una ruta
 ya renombrada no cambia, así que una segunda corrida no hace nada. Las emociones no tienen archivos: su tabla va en la
@@ -8,6 +8,8 @@ ficha de WARNING y el código las renombra a mano.
 ('reference/expert.wav', 'reference/takes/toma1.wav', 'voices/catalog.json')
 >>> new('reference/expert.wav'), new('docs/guiones/guion.txt'), new('motores/index-tts/a.pth')
 ('reference/expert.wav', 'docs/scripts/guion.txt', 'engines/index-tts/a.pth')
+>>> profile_path('reference/expert.wav'), profile_path('reference/takes/expert/2.wav')
+('reference/default/expert.wav', 'reference/default/takes/expert/2.wav')
 """
 
 from __future__ import annotations
@@ -52,4 +54,18 @@ def new(rel: str) -> str:
     stem, _, ext = name.rpartition('.')
     if folder == 'reference' and ext in ('wav', 'txt') and stem in STYLES:
         return f'{folder}/{STYLES[stem]}.{ext}'
+    return rel
+
+
+# cspell:ignore perfil
+# Paso 3 (spec 010, D-1): referencias sueltas, tomas, emociones y pruebas van al perfil default.
+PROFILE = 'reference/default'
+PROFILE_FOLDERS = ('reference/takes/', 'reference/emotions/', 'reference/test/')
+
+
+def profile_path(rel: str) -> str:
+    """Ruta dentro del perfil default (paso 3). Idempotente: lo que ya está en reference/default/ no cambia."""
+    top_file = rel.startswith('reference/') and rel.count('/') == 1 and rel.rpartition('.')[2] in ('wav', 'txt')
+    if top_file or rel.startswith(PROFILE_FOLDERS):
+        return PROFILE + rel[len('reference') :]
     return rel

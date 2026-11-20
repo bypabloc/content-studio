@@ -8,11 +8,12 @@ import json
 import shutil
 from pathlib import Path
 
+from content_studio.narration import profiles
 from content_studio.narration.engines.registry import ENGINES, free_todo
 from content_studio.narration.reference import process, verify
 from content_studio.narration.styles import STYLES
 from content_studio.narration.voices.sources import download
-from content_studio.paths import REFERENCE, VOICES
+from content_studio.paths import VOICES
 
 # Criterios de aprobación de cada clip generado, calibrados en docs/research/voces-libres-clonacion/10.
 SIM_MIN = 0.93  # coseno WavLM-SV con la base: instruct2 dio 0.96-0.99; voces ajenas del banco, 0.75-0.95
@@ -63,12 +64,10 @@ TEXT_EN = {
 
 
 def text_style(style: str, language: str) -> str:
-    """Texto de prueba de un estilo en el idioma indicado."""
-    if style == 'neutral-en':
-        return (REFERENCE / 'neutral-en.txt').read_text(encoding='utf-8').strip()
-    if language == 'en':
+    """Texto de prueba de un estilo en el idioma indicado; el de las referencias sale del perfil default."""
+    if style != 'neutral-en' and language == 'en':
         return TEXT_EN[style]
-    return (REFERENCE / f'{style}.txt').read_text(encoding='utf-8').strip()
+    return profiles.reference_for(profiles.DEFAULT, style, '.txt').read_text(encoding='utf-8').strip()
 
 
 def build(name: str, sheet: dict, force: bool) -> bool:

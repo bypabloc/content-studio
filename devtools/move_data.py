@@ -5,7 +5,7 @@ Corre después del `git pull` que trae el merge: lo versionado ya lo reubicó gi
 git (venvs, motores, modelos, voces) y se fusiona en las carpetas que ya existen. `os.replace` es un rename dentro del
 mismo disco: no copia los GB. Después reescribe el prefijo de las rutas absolutas en los `.pth` y `direct_url.json` de
 las instalaciones editables, así que ningún venv se recrea. Sin `--apply` solo imprime el plan. Nunca sobrescribe: si un
-destino ya existe, sale con 1 sin mover nada. Los renombres del paso 2 están en `migraciones.py`.
+destino ya existe, sale con 1 sin mover nada. Los renombres de los pasos 2 y 3 están en `migrations.py`.
 """
 
 from __future__ import annotations
@@ -13,9 +13,10 @@ from __future__ import annotations
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
-from devtools.migrations import new
+from devtools.migrations import new, profile_path
 from devtools.worktree import main_checkout
 
 FOLDERS = ('narration', 'music')
@@ -64,13 +65,13 @@ def _relative_paths(folder: Path) -> set[str]:
 
 
 def plan_names(root: Path) -> tuple[list[tuple[str, str]], list[str]]:
-    """Paso 2 sobre lo que deja el paso 1: (ruta actual, ruta nueva) de cada cambio, y los choques. Se calcula antes de
-    mover nada, así que un choque sale con 1 sin tocar el disco."""
+    """Pasos 2 y 3 sobre lo que deja el paso 1: (ruta actual, ruta nueva) de cada cambio, y los choques.
+    Se calcula antes de mover nada, así que un choque sale con 1 sin tocar el disco."""
     data = root.joinpath(*NARRATION)
     existing = _relative_paths(root / 'narration') | _relative_paths(data)
     changes, clashes, busy = [], [], {}
     for rel in sorted(existing):
-        new_path = new(rel)
+        new_path = profile_path(new(rel))
         if new_path == rel:
             continue
         if new_path in existing or new_path in busy:
@@ -104,6 +105,17 @@ def apply_names(root: Path, changes: list[tuple[str, str]]) -> list[str]:
         os.replace(source, destination)
         _remove_empty(source.parent, data)
     return [f'{rel} -> {new_path}' for rel, new_path in changes]
+
+
+def ensure_default_profile(root: Path) -> list[str]:
+    """Paso 3: el perfil default se llama «Mi voz». Si su carpeta ya existe y no tiene profile.json, lo crea."""
+    folder = root.joinpath(*NARRATION, 'reference', 'default')
+    target = folder / 'profile.json'
+    if not folder.is_dir() or target.exists():
+        return []
+    data = {'name': 'Mi voz', 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds')}
+    target.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
+    return [str(target)]
 
 
 def _merge(source: Path, destination: Path) -> None:
@@ -207,7 +219,7 @@ def main(argv: list[str]) -> int:
             return 1
         moved.append(m['to'])
     try:
-        renamed = apply_names(root, changes)
+        renamed = apply_names(root, changes) + ensure_default_profile(root)
     except OSError as e:
         sys.stderr.write(f'could not rename: {e}. Close whatever uses it and run move-data again\n')
         return 1

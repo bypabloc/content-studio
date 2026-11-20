@@ -22,7 +22,7 @@ NARRATION_FLAGS = (
     'voice',
     'text',
     'file',
-    'ref',
+    'profile',
     'language',
     'master',
     'lufs',

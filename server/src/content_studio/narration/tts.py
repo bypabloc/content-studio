@@ -11,6 +11,7 @@ import random
 
 from content_studio import paths
 from content_studio.common import process, progress
+from content_studio.narration import profiles
 from content_studio.narration.metadata import notices_voice, save_metadata
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices, build_parser
 from content_studio.narration.pipeline import batch_auto, evaluate, narrate
@@ -43,7 +44,11 @@ def main() -> None:
         sheet = approved_voices(STYLES)[a.voice]
         if sheet['language'] != a.language:
             ap.error(f'la voz {a.voice} es en "{sheet["language"]}": usa --language {sheet["language"]}')
-        a.ref = paths.VOICES / a.voice
+        ref = paths.VOICES / a.voice
+    elif profiles.exists(a.profile):
+        ref = profiles.folder(a.profile)
+    else:
+        ap.error(f'the profile {a.profile} does not exist in server/data/narration/reference/')
 
     jobs = plan(a, scripts(a))  # valida estilos y rutas antes de relanzar y de cargar el modelo
 
@@ -70,7 +75,7 @@ def main() -> None:
         )
 
     results = [
-        narrate(engine, text, style, a.ref, output, batch, seed, language=a.language, master=a.master, lufs=a.lufs)
+        narrate(engine, text, style, ref, output, batch, seed, language=a.language, master=a.master, lufs=a.lufs)
         for text, style, output in jobs
     ]
 

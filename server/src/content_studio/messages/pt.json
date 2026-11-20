@@ -37,6 +37,7 @@
   "error.unauthorized": "Falta o token da sessão ou ele não é válido.",
   "error.unknown_engine": "O motor {model} não existe.",
   "error.unknown_kind": "O tipo de trabalho {kind} não existe.",
+  "error.unknown_profile": "O perfil {profile} não existe.",
   "error.unknown_style": "O estilo {style} não existe.",
   "error.unknown_voice": "A voz {voice} não está no catálogo ou não está aprovada em todos os estilos.",
   "error.unreadable_media": "Não foi possível ler o arquivo como áudio.",
