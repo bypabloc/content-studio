@@ -46,6 +46,7 @@ doctest
 doctests
 downtempo
 ebur
+einops
 electropop
 endofprompt
 esac
@@ -72,6 +73,7 @@ huggingface
 indextts
 keyscale
 killpg
+lameenc
 lastrowid
 lofi
 loudnorm
@@ -83,9 +85,13 @@ nounits
 numpy
 omnivoice
 onnx
+onnxruntime
 openbmb
+openunmix
 pipefail
 precompact
+pretrained
+pyarrow
 pycache
 pyproject
 pytest
@@ -99,6 +105,7 @@ retrowave
 rnb
 safetensors
 samplerate
+setuptools
 sidechain
 silencedetect
 silenceremove
@@ -109,10 +116,13 @@ synthwave
 taskkill
 testid
 testpaths
+tensorrt
 timesignature
 timespec
 tobytes
 toplevel
+torchaudio
+torchvision
 typer
 urandom
 uvicorn
@@ -126,6 +136,7 @@ vram
 wavesurfer
 wavlm
 wavs
+wetext
 winget
 worktrees
 yesid

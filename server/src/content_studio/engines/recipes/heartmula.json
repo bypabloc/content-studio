@@ -1,0 +1,19 @@
+{
+  "engine": "heartmula",
+  "family": "music",
+  "size_gb": 12,
+  "vram_gb": 7.2,
+  "cpu": false,
+  "license": "Apache-2.0",
+  "steps": [
+    {"kind": "python", "version": "3.10"},
+    {"kind": "git", "url": "https://github.com/HeartMuLa/heartlib.git", "commit": "cd238827ff91db686d46f2d5eea185d578ce4081", "into": "models/heartlib"},
+    {"kind": "venv", "path": ".venv-heartmula"},
+    {"kind": "pip", "packages": ["torch==2.10.0+cu128", "torchaudio==2.10.0+cu128", "torchvision==0.25.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["huggingface-hub==0.36.2", "soundfile==0.14.0", "pyarrow==25.0.1"], "editable": "models/heartlib"},
+    {"kind": "hf", "repo": "HeartMuLa/HeartMuLaGen", "revision": "6f76e891c10ef8ae50fa6f2fb48fab783f3ce1d7", "into": "models/heartmula-ckpt"},
+    {"kind": "hf", "repo": "HeartMuLa/HeartMuLa-oss-3B-happy-new-year", "revision": "54765694c890ab5de89b366a1b1669a1b6e797fd", "into": "models/heartmula-ckpt/HeartMuLa-oss-3B"},
+    {"kind": "hf", "repo": "HeartMuLa/HeartCodec-oss-20260123", "revision": "e2363f7b92010c82fa9d78bdca1a66b42569a39f", "into": "models/heartmula-ckpt/HeartCodec-oss"},
+    {"kind": "verify", "import": "heartlib"}
+  ]
+}

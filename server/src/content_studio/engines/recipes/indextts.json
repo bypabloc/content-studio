@@ -1,0 +1,17 @@
+{
+  "engine": "indextts",
+  "family": "narration",
+  "size_gb": 14,
+  "vram_gb": 6.1,
+  "cpu": false,
+  "license": "bilibili Model Use License",
+  "steps": [
+    {"kind": "python", "version": "3.11"},
+    {"kind": "git", "url": "https://github.com/index-tts/index-tts.git", "commit": "d9e41aac89fd00b3d71497fddb287b7f24613712", "into": "engines/index-tts"},
+    {"kind": "venv", "path": "engines/index-tts/.venv"},
+    {"kind": "pip", "packages": ["torch==2.8.0+cu128", "torchaudio==2.8.0+cu128", "torchvision==0.23.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["huggingface-hub==0.35.0", "soundfile==0.13.1"], "editable": "engines/index-tts"},
+    {"kind": "hf", "repo": "IndexTeam/IndexTTS-2.5", "revision": "c39ce5ba981572cb187443877ff559dfb246ce63", "into": "engines/index-tts/checkpoints"},
+    {"kind": "verify", "import": "indextts.infer_v2_5"}
+  ]
+}
