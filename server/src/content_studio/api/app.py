@@ -26,6 +26,7 @@ from content_studio.api.routes import (
     queue,
     settings,
     voices,
+    voices_catalog,
     voices_import,
 )
 from content_studio.db import connection, schema
@@ -101,6 +102,7 @@ def create_app(
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
     app.include_router(voices.router, dependencies=header_only)
+    app.include_router(voices_catalog.router, dependencies=header_only)
     app.include_router(voices_import.router, dependencies=header_only)
     # EventSource y <audio> no mandan headers: estas dos rutas también aceptan ?token=.
     query_ok = [Depends(_token_guard(allow_query=True))]

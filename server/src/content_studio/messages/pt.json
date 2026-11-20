@@ -31,6 +31,7 @@
   "error.job_pending": "O trabalho {job_id} não pode ser repetido até terminar.",
   "error.missing_style": "Falta o estilo.",
   "error.missing_text": "Falta o texto ou o arquivo do roteiro.",
+  "error.no_voices": "Escolha pelo menos uma voz do catálogo.",
   "error.not_found": "Não existe.",
   "error.one_script_per_job": "Cada trabalho de narração leva um único roteiro: um trabalho por arquivo.",
   "error.profile_exists": "O perfil {profile} já existe.",

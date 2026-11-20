@@ -31,6 +31,7 @@
   "error.job_pending": "Job {job_id} cannot be repeated until it finishes.",
   "error.missing_style": "The style is missing.",
   "error.missing_text": "The text or the script file is missing.",
+  "error.no_voices": "Pick at least one voice from the catalog.",
   "error.not_found": "It does not exist.",
   "error.one_script_per_job": "Each narration job takes a single script: one job per file.",
   "error.profile_exists": "The profile {profile} already exists.",

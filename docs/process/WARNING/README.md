@@ -102,5 +102,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-import-en-modulo-propio](010-import-en-modulo-propio.md) | La ruta de importar vive en su módulo espejo (`voices_import.py`), no en `voices.py` | antes de dev |
 | [010-i18n-t-en-python](010-i18n-t-en-python.md) | El gate i18n cuenta las claves `t('…')` del server; `voice.check.` deja de ser prefijo dinámico | antes de dev |
 | [010-consentimiento-en-es](010-consentimiento-en-es.md) | El texto del consentimiento se guarda en español, aunque la UI esté en otro idioma | antes de dev |
+| [010-catalogo-sin-muestras](010-catalogo-sin-muestras.md) | El catálogo trae estado y favorita; las muestras llegan en el ciclo 7, junto a su pantalla | antes de dev |
+| [010-progreso-por-estilo](010-progreso-por-estilo.md) | El progreso del build cuenta cada estilo una vez y cada voz ocupa un tramo del trabajo | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

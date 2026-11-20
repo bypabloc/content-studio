@@ -21,3 +21,15 @@ def parse(line: str) -> dict | None:
     except json.JSONDecodeError:
         return None
     return data if isinstance(data, dict) and 'p' in data else None
+
+
+def span_fraction(span: tuple[float, float], done: int, total: int) -> float:
+    """Fracción global (0–1) del trabajo cuando `done` de `total` pasos de su tramo `(inicio, fin)` están hechos.
+
+    >>> span_fraction((0.5, 1.0), 6, 12)
+    0.75
+    >>> span_fraction((0.0, 1.0), 0, 0)
+    0.0
+    """
+    low, high = span
+    return round(low + (high - low) * done / max(total, 1), 4)

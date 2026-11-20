@@ -31,6 +31,7 @@
   "error.job_pending": "No se puede repetir el trabajo {job_id} hasta que termine.",
   "error.missing_style": "Falta el estilo.",
   "error.missing_text": "Falta el texto o el archivo del guion.",
+  "error.no_voices": "Elige al menos una voz del catálogo.",
   "error.not_found": "No existe.",
   "error.one_script_per_job": "Cada trabajo de narración lleva un solo guion: un trabajo por archivo.",
   "error.profile_exists": "Ya existe el perfil {profile}.",

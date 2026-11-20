@@ -54,3 +54,18 @@ def state(name: str, styles: Collection[str]) -> str:
     res = json.loads(ap.read_text(encoding='utf-8'))['styles']
     bad = [e for e in styles if not res.get(e, {}).get('ok')]
     return 'approved' if not bad else f'rejected in {len(bad)}/{len(styles)} styles ({", ".join(bad)})'
+
+
+def status(name: str, styles: Collection[str]) -> dict:
+    """Estado de una voz para la API: `not_built`, `partial` o `approved`, y si cada estilo está aprobado.
+
+    >>> status('no-existe', ['neutral'])['state']
+    'not_built'
+    """
+    ap = VOICES / name / 'aprobacion.json'  # cspell:ignore aprobacion
+    if not ap.exists():
+        return {'state': 'not_built', 'styles': [{'style': e, 'approved': False} for e in styles]}
+    res = json.loads(ap.read_text(encoding='utf-8'))['styles']
+    approved = {e: bool(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists()) for e in styles}
+    state = 'approved' if all(approved.values()) else 'partial'
+    return {'state': state, 'styles': [{'style': e, 'approved': ok} for e, ok in approved.items()]}

@@ -64,7 +64,9 @@ def main() -> None:
         f'Notice: the styles are generated with CosyVoice 3 ({ENGINES["cosyvoice3"].license}). '
         'Ver docs/research/voces-libres-clonacion/02.'
     )
-    results = {n: build(n, cat[n], a.force) for n in names}
+    results = {}
+    for index, n in enumerate(names):  # cada voz ocupa su tramo del progreso del trabajo
+        results[n] = build(n, cat[n], a.force, (index / len(names), (index + 1) / len(names)))
     sys.exit(0 if all(results.values()) else 1)
 
 
