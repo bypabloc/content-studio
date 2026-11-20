@@ -90,6 +90,12 @@ def silences(path: Path | str, noise_db: float = -50.0, minimum: float = 0.1) ->
     return [(start, end) for start, end in spans]
 
 
+def extract_wav(source: Path | str, start: float, end: float, destination: Path | str) -> None:
+    """Extrae el tramo [start, end) de un audio o un video a WAV mono de 48 kHz y 24 bits, sin video."""
+    args = ['-y', '-i', str(source), '-ss', str(start), '-t', str(end - start)]
+    ffmpeg(*args, '-vn', '-ac', '1', '-ar', '48000', '-c:a', 'pcm_s24le', str(destination))
+
+
 def peaks_command(path: Path | str) -> list[str]:
     """ffmpeg que decodifica el audio a mono de 8 kHz, en s16le, hacia la salida estándar."""
     return ['ffmpeg', '-v', 'error', '-i', str(path), '-f', 's16le', '-ac', '1', '-ar', '8000', '-']

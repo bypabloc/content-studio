@@ -14,6 +14,7 @@
   "api.unknown_error": "API error",
   "app.name": "Content Studio",
   "app.version": "Version {version}",
+  "error.consent_required": "To import a span you must confirm the owner's permission for the voice.",
   "error.engine_not_installed": "The engine {model} is not installed: follow its README in server/data/.",
   "error.forbidden_path": "The path is outside out/ and the reference data.",
   "error.http.404": "The route does not exist.",
@@ -24,6 +25,7 @@
   "error.invalid_duration": "The duration must be between 0 and {max} seconds.",
   "error.invalid_prefix": "Only selector choices are reset; {prefix} is not one of them.",
   "error.invalid_profile_name": "The profile name needs letters or digits.",
+  "error.invalid_span": "The span must last between {low} and {high} seconds.",
   "error.job_not_a_take": "Job {job_id} is not a finished narration take.",
   "error.job_not_found": "Job {job_id} does not exist.",
   "error.job_pending": "Job {job_id} cannot be repeated until it finishes.",
@@ -322,5 +324,6 @@
   "voice.check.text": "What whisper hears does not match the script.",
   "voice.check.too_long": "The take lasts longer than the range of the style.",
   "voice.check.too_short": "The take lasts less than the range of the style.",
-  "voice.check.whisper_missing": "The whisper command is not installed: the text was not compared."
+  "voice.check.whisper_missing": "The whisper command is not installed: the text was not compared.",
+  "voice.consent.import": "I have permission from the person whose voice I will import, and the right to use this audio in my narrations."
 }

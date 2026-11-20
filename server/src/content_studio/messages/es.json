@@ -14,6 +14,7 @@
   "api.unknown_error": "Error de la API",
   "app.name": "Content Studio",
   "app.version": "Versión {version}",
+  "error.consent_required": "Para importar un tramo hay que confirmar el permiso del dueño de la voz.",
   "error.engine_not_installed": "El motor {model} no está instalado: sigue su README en server/data/.",
   "error.forbidden_path": "La ruta está fuera de out/ y de los datos de referencia.",
   "error.http.404": "La ruta no existe.",
@@ -24,6 +25,7 @@
   "error.invalid_duration": "La duración debe estar entre 0 y {max} segundos.",
   "error.invalid_prefix": "Solo se restablecen las elecciones de los selectores; {prefix} no lo es.",
   "error.invalid_profile_name": "El nombre del perfil necesita letras o números.",
+  "error.invalid_span": "El tramo debe durar entre {low} y {high} segundos.",
   "error.job_not_a_take": "El trabajo {job_id} no es una toma terminada de narración.",
   "error.job_not_found": "No existe el trabajo {job_id}.",
   "error.job_pending": "No se puede repetir el trabajo {job_id} hasta que termine.",
@@ -322,5 +324,6 @@
   "voice.check.text": "Lo que oye whisper no coincide con el guion.",
   "voice.check.too_long": "La toma dura más que el rango del estilo.",
   "voice.check.too_short": "La toma dura menos que el rango del estilo.",
-  "voice.check.whisper_missing": "No está instalado el comando whisper: el texto no se comparó."
+  "voice.check.whisper_missing": "No está instalado el comando whisper: el texto no se comparó.",
+  "voice.consent.import": "Tengo permiso de la persona cuya voz voy a importar y del derecho a usar este audio en mis narraciones."
 }

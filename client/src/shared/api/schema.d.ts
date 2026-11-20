@@ -409,6 +409,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/voices/profiles/{slug}/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import Span
+         * @description Extrae un tramo de 8 a 12 s de un audio o un video como toma del estilo. Sin permiso del dueño no importa nada;
+         *     el permiso se guarda en el perfil la primera vez. El chequeo se encola como en las tomas grabadas.
+         */
+        post: operations["import_span_voices_profiles__slug__import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -497,6 +518,25 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * ImportIn
+         * @description Un tramo de un audio o un video, con el permiso del dueño (D-4).
+         */
+        ImportIn: {
+            /** Path */
+            path: string;
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /** Style */
+            style: string;
+            /**
+             * Consent
+             * @default false
+             */
+            consent: boolean;
         };
         /**
          * IssueOut
@@ -1413,6 +1453,43 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_span_voices_profiles__slug__import_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

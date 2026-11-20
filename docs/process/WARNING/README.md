@@ -99,5 +99,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-perfiles-y-paso-3](010-perfiles-y-paso-3.md) | Perfiles en `reference/<perfil>/`: el paso 3 usa el mapa de renombres del paso 2; los `.txt` versionados se mueven con `git mv` | antes de dev |
 | [010-kit-tomas-y-nombres](010-kit-tomas-y-nombres.md) | Las tomas de perfil van en `profile_takes.py` (`takes.py` es de la 006); la subida es el WAV crudo, sin multipart; el texto sale de cada guion | antes de dev |
 | [010-chequeo-de-toma](010-chequeo-de-toma.md) | Tolerancias del chequeo (pico, duración, bordes, pausas, ruido y texto); los bordes se miden, no se recortan; sin whisper es aviso, no `retake` | antes de dev |
+| [010-import-en-modulo-propio](010-import-en-modulo-propio.md) | La ruta de importar vive en su módulo espejo (`voices_import.py`), no en `voices.py` | antes de dev |
+| [010-i18n-t-en-python](010-i18n-t-en-python.md) | El gate i18n cuenta las claves `t('…')` del server; `voice.check.` deja de ser prefijo dinámico | antes de dev |
+| [010-consentimiento-en-es](010-consentimiento-en-es.md) | El texto del consentimiento se guarda en español, aunque la UI esté en otro idioma | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

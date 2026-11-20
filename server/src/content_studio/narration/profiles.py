@@ -84,6 +84,14 @@ def create(name: str) -> str:
     return slug
 
 
+def record_consent(profile: str, text: str) -> None:
+    """Guarda el permiso del dueño la primera vez que se importa algo al perfil; las siguientes no lo cambian."""
+    data = _read(profile)
+    if 'consent' not in data:
+        stamp = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        _write(profile, {**data, 'consent': {'accepted_at': stamp, 'text': text}})
+
+
 def rename(profile: str, name: str) -> None:
     """Cambia el nombre visible; la carpeta y las referencias no cambian."""
     _write(profile, {**_read(profile), 'name': name})
