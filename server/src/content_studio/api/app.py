@@ -18,6 +18,7 @@ from content_studio.api import events
 from content_studio.api.errors import ApiError
 from content_studio.api.routes import (
     catalog,
+    diagnostics,
     files,
     health,
     jobs,
@@ -100,6 +101,7 @@ def create_app(
     app.include_router(health.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
+    app.include_router(diagnostics.router, dependencies=header_only)
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)

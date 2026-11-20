@@ -47,10 +47,13 @@ const RETAKE = { verdict: 'retake', reasons: ['edges'], notes: [], messages: [],
 // Las tomas del estilo neutral y su chequeo: el test los cambia antes de grabar.
 let takes: number[] = [];
 let checks: Record<number, unknown> = {};
+// El micrófono que está guardado en ajustes: vacío por defecto (el del sistema).
+let savedMicrophone = '';
 
 beforeEach(() => {
   takes = [];
   checks = {};
+  savedMicrophone = '';
   recorder.start.mockReset().mockResolvedValue(undefined);
   recorder.stop.mockReset().mockResolvedValue(new Uint8Array([1, 2, 3]));
   api.get.mockImplementation(async (path: string) => {
@@ -59,6 +62,7 @@ beforeEach(() => {
     if (path === '/voices/profiles/spec-010/takes/expert') return { style: 'expert', takes: [] };
     const detail = /\/takes\/neutral\/(\d+)$/.exec(path);
     if (detail) return { take: Number(detail[1]), path: `p${detail[1]}`, check: checks[Number(detail[1])] ?? null };
+    if (path === '/settings/select.recording.microphone') return { key: 'select.recording.microphone', value: savedMicrophone };
     if (path.startsWith('/media/peaks')) return { peaks: [0.5] };
     return {};
   });
@@ -90,6 +94,25 @@ describe('RecordWizard (spec 010, D-6)', () => {
     expect(screen.getByText(t('voices.record.step', { n: 1, total: 2 }))).toBeTruthy();
     expect(screen.getByText(t('voices.record.duration', { min: 10, max: 12 }))).toBeTruthy();
     expect(screen.getByText(t('voices.record.ppm', { ppm: 150 }))).toBeTruthy();
+  });
+
+  it('graba con el micrófono que se eligió y se guardó en ajustes', async () => {
+    savedMicrophone = 'mic-1';
+    renderWizard();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.start') }));
+
+    await waitFor(() => expect(recorder.start).toHaveBeenCalledWith('mic-1'));
+  });
+
+  it('mientras el micrófono está abierto dice que está en uso, y al parar deja de decirlo', async () => {
+    renderWizard();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.start') }));
+    expect(await screen.findByText(t('voices.mic.in_use'))).toBeTruthy();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.stop') }));
+    await waitFor(() => expect(screen.queryByText(t('voices.mic.in_use'))).toBeNull());
   });
 
   it('grabar y parar sube la toma como WAV y su veredicto aparece en la lista', async () => {

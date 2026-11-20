@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useKit } from '@/features/voices/useVoices';
 import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIIcon } from '@/shared/components/atoms/UIIcon';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 import { RecordControls } from './RecordControls';
 import { TakeList } from './TakeList';
 import { Teleprompter } from './Teleprompter';
 import { useRecorder } from './capture/useRecorder';
+import { MICROPHONE_SETTING } from './microphones';
+import { useRecordingLog } from './recordingLog';
 import { useRoomTest } from './useRoomTest';
 import { useUploadTake } from './useTakes';
 
@@ -30,7 +34,11 @@ function keepsSpace(target: EventTarget | null): boolean {
 export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => void }): React.JSX.Element | null {
   const kit = useKit();
   const recorder = useRecorder();
-  const room = useRoomTest(recorder);
+  // El micrófono elegido en Ajustes; vacío (o sin elegir) es el predeterminado de Windows.
+  const [microphone] = useSetting(MICROPHONE_SETTING, '');
+  const device = microphone || undefined;
+  const room = useRoomTest(recorder, device);
+  const log = useRecordingLog();
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
   // La fase también va en una referencia: el atajo de teclado la lee sin esperar a que React vuelva a pintar.
@@ -43,6 +51,8 @@ export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => voi
   const upload = useUploadTake(slug, current?.style ?? '');
   const locked = phase === 'starting' || phase === 'uploading' || room.running;
   const busy = phase !== 'idle' || room.running;
+  // El micrófono está abierto desde que empieza a abrirse hasta que para: al subir la toma ya está suelto.
+  const inUse = phase === 'starting' || phase === 'recording' || room.running;
 
   const move = (next: Phase) => {
     phaseRef.current = next;
@@ -53,10 +63,12 @@ export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => voi
     setError(null);
     move('starting');
     try {
-      await recorder.start();
+      await recorder.start(device);
+      log('record.start', { device: device ?? 'default' });
       setElapsed(0);
       move('recording');
-    } catch {
+    } catch (failure) {
+      log('record.start.error', { name: failure instanceof Error ? failure.name : 'unknown' });
       move('idle');
       setError(t('voices.record.error'));
     }
@@ -66,6 +78,7 @@ export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => voi
     move('uploading');
     try {
       const wav = await recorder.stop();
+      log('record.stop', { bytes: wav?.byteLength ?? 0 });
       if (wav) await upload.mutateAsync(wav);
     } catch {
       setError(t('voices.record.upload_error'));
@@ -104,6 +117,14 @@ export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => voi
     return () => clearInterval(clock);
   }, [phase]);
 
+  // Lo que dio la prueba de sala queda en el registro, con el resultado o el fallo.
+  useEffect(() => {
+    if (room.result) log('room.result', { db: room.result.db, noisy: room.result.noisy });
+  }, [room.result, log]);
+  useEffect(() => {
+    if (room.failed) log('room.failed');
+  }, [room.failed, log]);
+
   if (!current) return null;
 
   const next = () => {
@@ -131,6 +152,12 @@ export function RecordWizard({ slug, onDone }: { slug: string; onDone: () => voi
             disabled={locked}
             onToggle={toggle}
           />
+          {inUse ? (
+            <UIStack direction="row" align="center" gap="sm">
+              <UIIcon name="mic" className="size-4 text-destructive" />
+              <UIText variant="caption">{t('voices.mic.in_use')}</UIText>
+            </UIStack>
+          ) : null}
           {error ? <UIText variant="caption">{error}</UIText> : null}
           <UIStack direction="row" align="center" gap="sm">
             <UIButton variant="secondary" disabled={busy} onClick={toggle}>

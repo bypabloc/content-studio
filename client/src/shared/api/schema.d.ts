@@ -88,6 +88,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/diagnostics/recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record Event
+         * @description Agrega una línea JSON al archivo del día, con la hora local.
+         */
+        post: operations["record_event_diagnostics_recording_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs": {
         parameters: {
             query?: never;
@@ -726,6 +746,18 @@ export interface components {
             paused: boolean;
         };
         /**
+         * RecordingEvent
+         * @description Un evento: un nombre como `record.start` y los datos que se quieran anotar.
+         */
+        RecordingEvent: {
+            /** Event */
+            event: string;
+            /** Detail */
+            detail?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
          * ScriptIn
          * @description El guion tal como lo escribe el usuario, y el estilo para estimar su duración.
          */
@@ -920,6 +952,37 @@ export interface operations {
                         [key: string]: unknown;
                     };
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_event_diagnostics_recording_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingEvent"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -65,9 +65,10 @@ describe('useRecorder', () => {
 
     await act(() => result.current.start('mic-1'));
 
+    // El micrófono elegido va como `exact`: si no está, falla en vez de grabar otro sin avisar.
     expect(getUserMedia).toHaveBeenCalledWith({
       audio: {
-        deviceId: 'mic-1',
+        deviceId: { exact: 'mic-1' },
         channelCount: 1,
         sampleRate: 48000,
         echoCancellation: false,

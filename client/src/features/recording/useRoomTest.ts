@@ -7,7 +7,7 @@ export const ROOM_MS = 5000;
 export const NOISE_MAX = -50;
 
 export interface RoomRecorder {
-  start: () => Promise<void>;
+  start: (deviceId?: string) => Promise<void>;
   stop: () => Promise<Uint8Array | null>;
   levels: Levels;
 }
@@ -18,10 +18,10 @@ export interface RoomResult {
 }
 
 /**
- * Graba cinco segundos de silencio con el micrófono del asistente y da el ruido de fondo más alto que llegó. El audio se
- * descarta: la prueba solo mide. Si el micrófono no abre, `failed` lo dice y el temporizador no queda corriendo.
+ * Graba cinco segundos de silencio con el micrófono elegido (o el predeterminado) y da el ruido de fondo más alto que llegó.
+ * El audio se descarta: la prueba solo mide. Si el micrófono no abre, `failed` lo dice y el temporizador no queda corriendo.
  */
-export function useRoomTest(recorder: RoomRecorder) {
+export function useRoomTest(recorder: RoomRecorder, deviceId?: string) {
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RoomResult | null>(null);
   const [failed, setFailed] = useState(false);
@@ -49,7 +49,7 @@ export function useRoomTest(recorder: RoomRecorder) {
       setRunning(false);
       setResult({ db, noisy: db > NOISE_MAX });
     }, ROOM_MS);
-    recorder.start().catch(() => {
+    recorder.start(deviceId).catch(() => {
       clearTimeout(timer.current);
       setRunning(false);
       setFailed(true);

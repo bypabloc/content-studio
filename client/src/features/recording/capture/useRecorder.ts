@@ -53,7 +53,8 @@ export function useRecorder() {
   const start = useCallback(async (deviceId?: string) => {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
-        deviceId,
+        // Con un micrófono elegido, `exact`: si ya no está conectado, falla en vez de grabar otro sin avisar.
+        deviceId: deviceId ? { exact: deviceId } : undefined,
         channelCount: 1,
         sampleRate: RATE,
         echoCancellation: false,

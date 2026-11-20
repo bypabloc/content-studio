@@ -1,4 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { MicrophonePicker } from '@/features/recording/MicrophonePicker';
+import { MICROPHONE_SETTING } from '@/features/recording/microphones';
+import { RECORDING_LOG, useRecordingLog } from '@/features/recording/recordingLog';
 import { useApi } from '@/shared/api/context';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
@@ -14,8 +17,9 @@ import { useTheme } from '@/shared/theme/useTheme';
 import type { ThemeMode } from '@/shared/theme/theme';
 
 /**
- * Ajustes: apariencia (idioma y tema), avisos, restablecer las elecciones de los selectores (con confirmación) y la
- * lista de atajos. El idioma y el tema se guardan en `ui.*`, así que «Restablecer» no los toca.
+ * Ajustes: apariencia (idioma y tema), avisos, micrófono (spec 010, D-2), registro del micrófono (apagado por defecto,
+ * spec 010, D-7), restablecer las elecciones de los selectores (con confirmación) y la lista de atajos. El idioma y el tema
+ * se guardan en `ui.*`, así que «Restablecer» no los toca.
  */
 export function SettingsPage() {
   const api = useApi();
@@ -24,6 +28,9 @@ export function SettingsPage() {
   const [theme, setTheme] = useTheme();
   const [notifySystem, setNotifySystem] = useSetting('notify.system', true);
   const [notifySound, setNotifySound] = useSetting('notify.sound', true);
+  const [microphone, setMicrophone] = useSetting(MICROPHONE_SETTING, '');
+  const [recordingLog, setRecordingLog] = useSetting(RECORDING_LOG, false);
+  const log = useRecordingLog();
 
   const reset = async () => {
     if (!window.confirm(t('settings.reset_confirm'))) return;
@@ -64,6 +71,17 @@ export function SettingsPage() {
         <UIText variant="heading">{t('settings.notifications')}</UIText>
         <UICheckbox label={t('settings.notify_system')} checked={notifySystem} onChange={setNotifySystem} />
         <UICheckbox label={t('settings.notify_sound')} checked={notifySound} onChange={setNotifySound} />
+      </UIStack>
+
+      <UIStack gap="md">
+        <UIText variant="heading">{t('settings.microphone')}</UIText>
+        <MicrophonePicker value={microphone} onChange={setMicrophone} log={log} />
+      </UIStack>
+
+      <UIStack gap="md">
+        <UIText variant="heading">{t('settings.logs')}</UIText>
+        <UICheckbox label={t('settings.log_recording')} checked={recordingLog} onChange={setRecordingLog} />
+        <UIText variant="caption">{t('settings.log_recording_hint')}</UIText>
       </UIStack>
 
       <UIStack gap="md">

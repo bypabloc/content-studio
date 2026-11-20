@@ -66,6 +66,17 @@ describe('useRoomTest (spec 010, D-2)', () => {
     expect(recorder.stop).not.toHaveBeenCalled();
   });
 
+  it('con un micrófono elegido, la prueba de sala abre ese micrófono', () => {
+    const recorder = { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn().mockResolvedValue(null) };
+    const { result } = renderHook(() => useRoomTest({ ...recorder, levels: { peak: -60, rms: -60 } }, 'mic-2'));
+
+    act(() => {
+      result.current.run();
+    });
+
+    expect(recorder.start).toHaveBeenCalledWith('mic-2');
+  });
+
   it('no arranca otra prueba mientras una corre', () => {
     const recorder = { start: vi.fn().mockResolvedValue(undefined), stop: vi.fn().mockResolvedValue(null) };
     const { result } = renderHook(() => useRoomTest({ ...recorder, levels: { peak: -60, rms: -60 } }));
