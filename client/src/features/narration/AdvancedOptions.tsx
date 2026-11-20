@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIField } from '@/shared/components/molecules/UIField';
+import { UISelect } from '@/shared/components/molecules/UISelect';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 
@@ -15,76 +19,50 @@ export function AdvancedOptions({ supportsBatch }: { supportsBatch: boolean }) {
   const numberOrNull = (text: string) => (text === '' ? null : Number(text));
 
   return (
-    <div className="flex flex-col gap-3 text-sm">
-      <label className="flex items-center justify-between gap-3">
-        {t('narration.advanced.master')}
-        <select
-          aria-label={t('narration.advanced.master')}
-          value={master}
-          onChange={(event) => setMaster(event.target.value)}
-          className="rounded-md border border-input bg-transparent px-2 py-1.5"
-        >
-          <option value="voice">{t('narration.master.voice')}</option>
-          <option value="no">{t('narration.master.no')}</option>
-        </select>
-      </label>
-      <label className="flex items-center justify-between gap-3">
-        {t('narration.advanced.lufs')}
-        <input
-          type="number"
-          aria-label={t('narration.advanced.lufs')}
-          value={lufsDraft ?? String(lufs)}
-          onChange={(event) => {
-            setLufsDraft(event.target.value);
-            const next = Number(event.target.value);
-            if (event.target.value !== '' && Number.isFinite(next)) setLufs(next);
-          }}
-          onBlur={() => setLufsDraft(null)}
-          className="w-24 rounded-md border border-input bg-transparent px-2 py-1.5"
-        />
-      </label>
-      <label className="flex items-center justify-between gap-3">
-        {t('narration.advanced.seed')}
-        <input
-          type="number"
-          aria-label={t('narration.advanced.seed')}
-          value={seed ?? ''}
-          onChange={(event) => setSeed(numberOrNull(event.target.value))}
-          className="w-24 rounded-md border border-input bg-transparent px-2 py-1.5"
-        />
-      </label>
+    <UIStack gap="md" className="text-sm">
+      <UISelect
+        label={t('narration.advanced.master')}
+        options={[
+          { value: 'voice', label: t('narration.master.voice') },
+          { value: 'no', label: t('narration.master.no') },
+        ]}
+        value={master}
+        onChange={setMaster}
+      />
+      <UIField
+        type="number"
+        label={t('narration.advanced.lufs')}
+        value={lufsDraft ?? String(lufs)}
+        onChange={(event) => {
+          setLufsDraft(event.target.value);
+          const next = Number(event.target.value);
+          if (event.target.value !== '' && Number.isFinite(next)) setLufs(next);
+        }}
+        onBlur={() => setLufsDraft(null)}
+      />
+      <UIField
+        type="number"
+        label={t('narration.advanced.seed')}
+        value={seed ?? ''}
+        onChange={(event) => setSeed(numberOrNull(event.target.value))}
+      />
       {supportsBatch && (
-        <label className="flex items-center justify-between gap-3">
-          {t('narration.advanced.batch')}
-          <input
-            type="number"
-            aria-label={t('narration.advanced.batch')}
-            value={batch ?? ''}
-            onChange={(event) => setBatch(numberOrNull(event.target.value))}
-            className="w-24 rounded-md border border-input bg-transparent px-2 py-1.5"
-          />
-        </label>
-      )}
-      <label className="flex items-center justify-between gap-3">
-        {t('narration.advanced.evaluate')}
-        <input
-          type="checkbox"
-          checked={evaluate}
-          onChange={(event) => setEvaluate(event.target.checked)}
-        />
-      </label>
-      <label className="flex items-center justify-between gap-3">
-        {t('narration.advanced.retries')}
-        <input
+        <UIField
           type="number"
-          aria-label={t('narration.advanced.retries')}
-          min={0}
-          max={3}
-          value={retries}
-          onChange={(event) => setRetries(Number(event.target.value))}
-          className="w-24 rounded-md border border-input bg-transparent px-2 py-1.5"
+          label={t('narration.advanced.batch')}
+          value={batch ?? ''}
+          onChange={(event) => setBatch(numberOrNull(event.target.value))}
         />
-      </label>
-    </div>
+      )}
+      <UICheckbox label={t('narration.advanced.evaluate')} checked={evaluate} onChange={setEvaluate} />
+      <UIField
+        type="number"
+        label={t('narration.advanced.retries')}
+        min={0}
+        max={3}
+        value={retries}
+        onChange={(event) => setRetries(Number(event.target.value))}
+      />
+    </UIStack>
   );
 }

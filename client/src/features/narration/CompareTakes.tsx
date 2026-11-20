@@ -1,5 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/shared/api/context';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIGrid } from '@/shared/components/atoms/UIGrid';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { type Job, type Take, useTake } from './useTake';
@@ -28,14 +32,14 @@ export function CompareTakes({ groupKey }: { groupKey: string }) {
   const done = (takes.data ?? []).filter((job) => job.status === 'done');
 
   return (
-    <section aria-label={t('narration.compare.title')} className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium">{t('narration.compare.title')}</h3>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <UIStack role="region" aria-label={t('narration.compare.title')} gap="sm">
+      <UIText variant="heading">{t('narration.compare.title')}</UIText>
+      <UIGrid columns={3}>
         {done.map((job) => (
           <TakeColumn key={job.id} job={job} onChoose={() => choose.mutate(job.id)} />
         ))}
-      </div>
-    </section>
+      </UIGrid>
+    </UIStack>
   );
 }
 
@@ -44,41 +48,51 @@ function TakeColumn({ job, onChoose }: { job: Job; onChoose: () => void }) {
   const { wav, take, info, peaks } = useTake(job);
   const params = job.params as { model?: string; voice?: string; style?: string };
   const evaluation = take.data?.evaluation;
+  const fields: [string, string][] = [
+    [t('narration.compare.field.voice'), params.voice ?? ''],
+    [t('narration.compare.field.style'), params.style ?? ''],
+    [t('narration.compare.field.seed'), String(take.data?.seed ?? '')],
+    [t('narration.compare.field.duration'), info.data ? t('narration.compare.seconds', { n: info.data.duration.toFixed(1) }) : ''],
+    [t('narration.compare.field.loudness'), info.data ? `${info.data.lufs.toFixed(1)} LUFS` : ''],
+    [t('narration.compare.field.evaluation'), verdict(evaluation)],
+  ];
 
   return (
-    <article className="flex flex-col gap-2 rounded-md border border-border p-3 text-sm">
-      <header className="flex items-center justify-between gap-2">
-        <h4 className="font-medium">{params.model}</h4>
+    <UIStack role="article" gap="sm" className="rounded-md border border-border p-3 text-sm">
+      <UIStack direction="row" align="center" justify="between" gap="sm">
+        <UIText variant="body" className="font-medium">
+          {params.model ?? ''}
+        </UIText>
         {job.starred ? (
-          <span className="flex items-center gap-1 text-xs font-medium">
-            <span aria-hidden="true">{'★'}</span>
-            <span>{t('narration.compare.chosen')}</span>
-          </span>
+          <UIStack direction="row" align="center" gap="xs">
+            <UIStack aria-hidden="true">
+              <UIText variant="caption" className="font-medium">
+                {'★'}
+              </UIText>
+            </UIStack>
+            <UIText variant="caption" className="font-medium">
+              {t('narration.compare.chosen')}
+            </UIText>
+          </UIStack>
         ) : (
-          <button
-            type="button"
-            onClick={onChoose}
-            className="rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
-          >
+          <UIButton variant="secondary" onClick={onChoose}>
             {t('narration.compare.choose')}
-          </button>
+          </UIButton>
         )}
-      </header>
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
-        <dt className="text-muted-foreground">{t('narration.compare.field.voice')}</dt>
-        <dd>{params.voice ?? ''}</dd>
-        <dt className="text-muted-foreground">{t('narration.compare.field.style')}</dt>
-        <dd>{params.style}</dd>
-        <dt className="text-muted-foreground">{t('narration.compare.field.seed')}</dt>
-        <dd>{take.data?.seed}</dd>
-        <dt className="text-muted-foreground">{t('narration.compare.field.duration')}</dt>
-        <dd>{info.data ? t('narration.compare.seconds', { n: info.data.duration.toFixed(1) }) : ''}</dd>
-        <dt className="text-muted-foreground">{t('narration.compare.field.loudness')}</dt>
-        <dd>{info.data ? `${info.data.lufs.toFixed(1)} LUFS` : ''}</dd>
-        <dt className="text-muted-foreground">{t('narration.compare.field.evaluation')}</dt>
-        <dd>{verdict(evaluation)}</dd>
-      </dl>
+      </UIStack>
+      <UIStack gap="xs">
+        {fields.map(([term, value]) => (
+          <UIStack key={term} direction="row" justify="between" gap="sm">
+            <UIText variant="caption" className="text-xs">
+              {term}
+            </UIText>
+            <UIText variant="body" className="text-xs">
+              {value}
+            </UIText>
+          </UIStack>
+        ))}
+      </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
-    </article>
+    </UIStack>
   );
 }

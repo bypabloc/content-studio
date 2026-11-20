@@ -2,7 +2,7 @@
 
 Cada módulo de client/src tiene su test en la ruta espejo (misma ruta y extensión, con `.test`). Los que ya existían sin
 test están en `tests/validators/client-mirror.baseline.json` y solo pueden bajar: un módulo nuevo sin test falla. Los
-componentes de shadcn (components/ui), main.tsx y los `.d.ts` no se auditan.
+componentes de shadcn (shared/components/shadcn), main.tsx y los `.d.ts` no se auditan.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 CLIENT_SRC = 'client/src/'
 CLIENT_UNIT = 'client/tests/unit/src/'
 BASELINE = 'tests/validators/client-mirror.baseline.json'
-EXEMPT = ('client/src/components/ui/', 'client/src/main.tsx')
+EXEMPT = ('client/src/shared/components/shadcn/', 'client/src/main.tsx')
 
 
 def sources(root: Path) -> list[str]:

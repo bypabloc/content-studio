@@ -38,8 +38,8 @@ PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --ty
 
 # Gates del client cuando hay cambios en client/ (spec 005, D-9). budget y e2e corren en la CI (calidad.yml).
 if grep -q '^client/' <<<"$STAGED"; then
-  echo "[pre-commit] test-runner: client-lint, client-typecheck, client-unit"
-  PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=client-lint,client-typecheck,client-unit
+  echo "[pre-commit] test-runner: client-lint, client-typecheck, client-unit, ui-structure"
+  PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=client-lint,client-typecheck,client-unit,ui-structure
 fi
 
 # Agent instructions: size of what each agent loads and .agents/ <-> .claude/ sync (agent-config-testing.md).

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { useApi } from '@/shared/api/context';
 import { sortedBy, type Job, type QueueState } from '@/shared/api/events';
 import { t } from '@/shared/i18n/t';

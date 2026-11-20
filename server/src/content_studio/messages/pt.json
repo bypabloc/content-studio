@@ -303,8 +303,11 @@
   "settings.shortcuts": "Atalhos",
   "settings.theme": "Tema",
   "shell.empty": "Esta seção ainda não está pronta.",
+  "shell.skip": "Pular para o conteúdo",
+  "shell.toggle": "Mostrar ou ocultar o menu",
   "theme.change": "{mode}: mudar para {next}",
   "theme.dark": "Escuro",
   "theme.light": "Claro",
-  "theme.system": "Sistema"
+  "theme.system": "Sistema",
+  "ui.dialog.close": "Fechar"
 }

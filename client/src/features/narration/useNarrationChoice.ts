@@ -41,7 +41,7 @@ function recommendedId(list: readonly { id: string; recommended?: boolean }[]): 
   return list.find((item) => item.recommended)?.id ?? list[0]?.id ?? '';
 }
 
-/** Lo guardado si sigue en la lista; si no, la recomendada (la misma regla que `RecommendedSelect`). */
+/** Lo guardado si sigue en la lista; si no, la recomendada (la misma regla que `UIRecommendedSelect`). */
 function effective(stored: string, list: readonly { id: string; recommended?: boolean }[]): string {
   return list.some((item) => item.id === stored) ? stored : recommendedId(list);
 }

@@ -56,6 +56,21 @@ function isUrlOrSelector(text: string): boolean {
   return text.includes('://') || /^[/#.[]/.test(text) || /^\([\w-]+:\s*[\w-]+\)$/.test(text);
 }
 
+// Trozos de una lista de clases de Tailwind: minúsculas y sin espacios, con puntos, corchetes o paréntesis.
+const CLASS_TOKEN = /^[a-z0-9\-:[\]\/!.%()_,#*&@'"=+>~^$|\\]+$/;
+// Las marcas que solo tienen las clases: un guion, dos puntos, un corchete, una barra, `!`, `*`, `&` o `@`.
+const CLASS_MARK = /[-:[\]\/!*&@]/;
+
+/**
+ * Lista de clases de Tailwind (`bg-primary hover:bg-primary/80`), no texto. Un literal cuyos trozos son todos
+ * clases y al menos uno tiene una marca de utilidad: `cva` y los objetos de variantes de shadcn lo usan.
+ * Un texto con mayúscula o con tilde no cuenta como clase, y una frase en minúsculas sin marca tampoco.
+ */
+function isClassList(text: string): boolean {
+  const tokens = text.trim().split(/\s+/);
+  return tokens.every((token) => CLASS_TOKEN.test(token)) && tokens.some((token) => CLASS_MARK.test(token));
+}
+
 /** El primer atributo JSX del que cuelga el literal (`className={cond ? 'a' : 'b'}` cuenta como className). */
 function enclosingAttribute(node: ts.Node): ts.JsxAttribute | undefined {
   let current: ts.Node | undefined = node.parent;
@@ -145,7 +160,7 @@ export function findLoose(path: string): Finding[] {
 
   const visit = (node: ts.Node): void => {
     const value = literalText(node);
-    if (value !== undefined && isProse(value) && !isUrlOrSelector(value) && !isExempt(node)) {
+    if (value !== undefined && isProse(value) && !isUrlOrSelector(value) && !isClassList(value) && !isExempt(node)) {
       const line = source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
       // Una plantilla se muestra completa (`Hola ${name}`), no solo su primer trozo.
       const shown = ts.isTemplateExpression(node) ? node.getText(source).slice(1, -1) : value;

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { openApp } from '../support/app';
+import { pickOption } from '../support/select';
 
 test('el tema cambia en vivo y Restablecer borra solo las elecciones de los selectores (AC-2, AC-4)', async ({
   page,
@@ -10,7 +11,7 @@ test('el tema cambia en vivo y Restablecer borra solo las elecciones de los sele
     location.hash = '#/settings';
   });
 
-  await page.getByLabel('Tema', { exact: true }).selectOption('dark');
+  await pickOption(page, 'Tema', 'Oscuro');
   await expect(page.locator('html')).toHaveClass(/dark/);
 
   await page.getByRole('button', { name: 'Restablecer elecciones' }).click();

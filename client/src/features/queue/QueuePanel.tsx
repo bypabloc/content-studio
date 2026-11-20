@@ -1,6 +1,9 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { reorderAccessibility } from './announce';
 import { JobRow } from './JobRow';
@@ -25,21 +28,23 @@ export function QueuePanel() {
   };
 
   return (
-    <section aria-label={t('queue.title')} className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xs font-medium uppercase text-muted-foreground">{t('queue.title')}</h2>
-        <div className="flex gap-2">
-          <button type="button" onClick={queue.togglePause} className="text-xs underline">
+    <UIStack role="region" aria-label={t('queue.title')} gap="sm">
+      <UIStack direction="row" align="center" justify="between" gap="sm" className="flex-wrap">
+        <UIText variant="subtitle" className="text-sm">
+          {t('queue.title')}
+        </UIText>
+        <UIStack direction="row" gap="sm" className="flex-wrap">
+          <UIButton variant="ghost" onClick={queue.togglePause}>
             {queue.paused ? t('queue.resume') : t('queue.pause')}
-          </button>
-          <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="text-xs underline">
+          </UIButton>
+          <UIButton variant="ghost" aria-expanded={open} onClick={() => setOpen(!open)}>
             {open ? t('queue.collapse') : t('queue.expand')}
-          </button>
-        </div>
-      </div>
+          </UIButton>
+        </UIStack>
+      </UIStack>
       {open ? (
         <>
-          {visible.length === 0 ? <p className="text-xs text-muted-foreground">{t('queue.empty')}</p> : null}
+          {visible.length === 0 ? <UIText variant="caption">{t('queue.empty')}</UIText> : null}
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -47,15 +52,15 @@ export function QueuePanel() {
             accessibility={reorderAccessibility(waiting)}
           >
             <SortableContext items={waiting} strategy={verticalListSortingStrategy}>
-              <ul className="flex flex-col gap-1">
+              <UIStack role="list" gap="sm">
                 {visible.map((job) => (
                   <JobRow key={job.id} job={job} onCancel={queue.cancel} onRetry={queue.retry} />
                 ))}
-              </ul>
+              </UIStack>
             </SortableContext>
           </DndContext>
         </>
       ) : null}
-    </section>
+    </UIStack>
   );
 }

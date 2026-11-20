@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import sys
 
-from . import budget, changeset, client, guard_tdd, i18n, lint, spelling, tdd, typecheck, unit, validators
+from . import budget, changeset, client, guard_tdd, i18n, lint, spelling, tdd, typecheck, ui_structure, unit, validators
 from .flags import parse
 
 STAGES = {
@@ -24,6 +24,7 @@ STAGES = {
     'client-lint': client.lint,
     'client-typecheck': client.typecheck,
     'client-unit': client.unit,
+    'ui-structure': ui_structure.run,
     'tauri-check': client.tauri_check,
     'budget': budget.run,
     'e2e': client.e2e,
@@ -40,6 +41,7 @@ GROUPS = {
         'client-lint',
         'client-typecheck',
         'client-unit',
+        'ui-structure',
         'budget',
         'i18n',
     ],

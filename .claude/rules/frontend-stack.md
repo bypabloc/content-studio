@@ -27,9 +27,9 @@ server (`studio serve`) en `client/src-tauri/src/server.rs` y el client le habla
 
 ```
 client/
-├── src/app/                App, Shell, Sidebar, CommandPalette, native.ts y nav.ts (una línea por sección)
+├── src/app/                App, Providers, Shell, native.ts y nav.ts (una línea por sección)
 ├── src/features/<área>/    una carpeta por sección: queue, settings, ...
-├── src/shared/             api (cliente tipado y SSE), i18n (t), theme, hooks, notify, components
+├── src/shared/             api (cliente tipado y SSE), i18n (t), theme, hooks, notify, forms, components (ui-components.md)
 ├── (catálogo)              ../server/src/content_studio/messages/{es,en,pt}.json: todo el texto visible (alias @messages)
 ├── public/theme-init.js    pone la clase dark antes de montar React (la CSP no admite scripts inline)
 ├── src-tauri/              crate de Tauri: lib.rs (get_connection), server.rs (arranca el server), main.rs
@@ -54,6 +54,7 @@ Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Ca
 | Playwright · @axe-core/playwright | 1.65.1 · 4.14.0 |
 | @tauri-apps/api · plugin-opener (JS) | 2.12.5 · 2.7.3 |
 | geist (fuentes) | 1.9.2, declarado sin importar (`WARNING/005-desvios-de-diseno.md`) |
+| Base UI (`@base-ui/react`, raíz) · shadcn (CLI, raíz) | 1.9.0 · 4.22.0 |
 | Tauri (crate) · tauri-build | 2.12.7 · 2.7.6 |
 | Plugins de Tauri (crate) | dialog 2.8.4 · opener 2.7.3 · notification 2.8.1 · window-state 2.5.0 |
 
@@ -63,7 +64,8 @@ Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Ca
 * **Datos**: el server se pide con `shared/api/client.ts` a través de TanStack Query. Los eventos `job` y `queue` de SSE actualizan la caché (`shared/api/events.ts`) sin volver a pedir. Ningún `fetch` suelto en un componente.
 * **Navegación**: por hash (`#/settings`). Las secciones viven en `app/nav.ts`; la barra lateral y la paleta (Ctrl+K) salen de esa lista, así que cada sección nueva agrega su línea ahí.
 * **Texto visible**: todo sale del catálogo único (`@messages/{es,en,pt}.json`) con `t('clave')`, en el idioma activo (`shared/i18n/locale.ts`, con respaldo a español). Una clave que falta se muestra tal cual; la etapa `i18n` falla si una clave falta en un idioma, sobra o no tiene texto (spec 007, D-8).
-* **Cobertura**: 80 % por archivo en `client/src` (sin `main.tsx` ni `components/ui`). Presupuesto del JS inicial: 250 kB gzip (`client/budget.json`).
+* **Cobertura**: 80 % por archivo en `client/src` (sin `main.tsx`, `shared/components/shadcn/` ni los `.d.ts`). Presupuesto del JS inicial: 250 kB gzip (`client/budget.json`).
 * **Tema**: `ui.theme` (light, dark o system) vive en `settings`. `useTheme` pone la clase `dark` en `<html>` y `theme-init.js` la pone antes de montar, con la caché de `localStorage`.
 * **Pruebas**: un test unitario va en `tests/unit/src/<ruta>/<módulo>.test.ts(x)` (`testing.md`). El e2e usa la API simulada de `tests/e2e/support/app.ts`: no arranca el server real.
+* **Componentes**: las pantallas arman su layout con átomos, moléculas y organismos, nunca con etiquetas nativas; la jerarquía y los textos están en `ui-components.md`.
 * **Ventana**: el menú contextual del navegador queda desactivado; solo sale donde la pantalla pone `data-allow-context` (`app/native.ts`, D-8).

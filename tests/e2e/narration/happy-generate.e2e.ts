@@ -9,7 +9,7 @@ test('AC-8: Ctrl+Enter encola la narración con sus opciones y, al terminar, la 
   const { calls } = await openApp(page, { replies: narrationReplies(state) });
   await goToNarration(page);
   // El catálogo llega aparte: Generar no encola hasta tener motor y estilo.
-  await expect(page.getByRole('combobox', { name: 'Motor' })).toHaveValue('voxcpm2');
+  await expect(page.getByRole('combobox', { name: 'Motor' })).toHaveValue(/voxcpm2/);
 
   await page.getByRole('textbox', { name: 'Guion' }).fill('Hola, mundo.');
   await page.keyboard.press('Control+Enter');

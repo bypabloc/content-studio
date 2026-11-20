@@ -1,9 +1,11 @@
+import type { IconName } from '@/shared/components/atoms/UIIcon';
 import { t } from '@/shared/i18n/t';
 
 export interface NavItem {
   id: string;
   group: string;
   label: string;
+  icon: IconName;
 }
 
 /**
@@ -12,7 +14,7 @@ export interface NavItem {
  */
 export function navItems(): NavItem[] {
   return [
-    { id: 'narration', group: t('nav.group.generate'), label: t('nav.narration') },
-    { id: 'settings', group: t('nav.group.settings'), label: t('nav.settings') },
+    { id: 'narration', group: t('nav.group.generate'), label: t('nav.narration'), icon: 'mic' },
+    { id: 'settings', group: t('nav.group.settings'), label: t('nav.settings'), icon: 'settings' },
   ];
 }

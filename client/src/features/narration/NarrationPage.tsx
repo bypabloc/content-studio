@@ -2,6 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
 import { useShortcut } from '@/shared/hooks/useShortcut';
 import { t } from '@/shared/i18n/t';
 import { NarrationOptions } from './NarrationOptions';
@@ -51,38 +54,28 @@ export function NarrationPage() {
     generate();
   });
 
+  // En escritorio, el guion y las opciones van en dos columnas (1fr y 20 rem); en pantallas chicas, una debajo de otra.
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      <div className="flex min-w-0 flex-col gap-6">
-        <ScriptEditor
-          value={text}
-          narrationStyle={choice.style}
-          onChange={setText}
-          onImport={importFiles}
-        />
+    <UIStack gap="lg" className="lg:flex-row lg:items-start">
+      <UIStack gap="lg" className="min-w-0 lg:flex-1">
+        <ScriptEditor value={text} narrationStyle={choice.style} onChange={setText} onImport={importFiles} />
         {take && <NarrationResult job={take} />}
-      </div>
-      <aside className="flex flex-col gap-6">
+      </UIStack>
+      <UIStack role="complementary" gap="lg" className="lg:w-80 lg:shrink-0">
         <NarrationOptions />
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={generate}
-            disabled={!text.trim() || !ready}
-            title={t('narration.generate.shortcut')}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-          >
+        <UIStack gap="sm">
+          <UIButton variant="primary" onClick={generate} disabled={!text.trim() || !ready} title={t('narration.generate.shortcut')}>
             {t('narration.generate')}
-          </button>
+          </UIButton>
           {issues > 0 && (
-            <p className="text-sm text-muted-foreground">
+            <UIText variant="caption">
               {issues === 1
                 ? t('narration.generate.warnings_one')
                 : t('narration.generate.warnings_other', { count: issues })}
-            </p>
+            </UIText>
           )}
-        </div>
-      </aside>
-    </div>
+        </UIStack>
+      </UIStack>
+    </UIStack>
   );
 }

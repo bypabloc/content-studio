@@ -66,6 +66,18 @@ overrides:
   # Los e2e (spec 005, D-6) llevan comentarios en español, como client/: sin el locale es, sus palabras fallan.
   - filename: 'tests/e2e/**'
     language: en,es
+  # Moléculas de klinikae (spec 008, T3): docstrings en español con palabras que el diccionario es-es no trae.
+  - filename: 'client/src/shared/components/molecules/**'
+    language: en,es
+    words: [autoselecciona, paginación, bloq, mayús, autocapitalización, seleccionables, prefirmadas, renderiza, intrusivos, tipados]
+  # Organismos de klinikae (spec 008, T4): comentarios y títulos de prueba en español que el diccionario es-es no trae.
+  - filename: 'client/**/components/organisms/**'
+    language: en,es
+    words: [animables, audiograma, editables, enfocable, milisegundos, montos, renderiza]
+  # Formularios (spec 008, T4): useForm tiene comentarios en español; «recalcula» no está en el diccionario es-es.
+  - filename: 'client/**/shared/forms/**'
+    language: en,es
+    words: [recalcula]
 ignorePaths:
   # Temporal (D-3): la UI en español de grabar/ la retira la 010 (la CLI `studio` ya no la tiene).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
@@ -77,6 +89,8 @@ ignorePaths:
   # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).
   - server/tests/integration/fixtures/*.json
   - server/tests/integration/fixtures/*.txt
+  # Código de proveedor copiado de klinikae (spec 008, D-1): se trae tal cual, con sus comentarios y sus clases.
+  - client/src/shared/components/shadcn/**
   # grabar/ (legacy: rich y questionary, con la UI en español): la 010 la retira.
   - server/src/content_studio/narration/grabar/**
   # Dependencias, salidas, grafo y datos que no son código: no se revisan.

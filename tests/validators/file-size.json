@@ -5,7 +5,8 @@
     "**/*.lock",
     "uv.lock",
     "bun.lock",
-    "client/src/shared/api/schema.d.ts"
+    "client/src/shared/api/schema.d.ts",
+    "client/src/shared/components/shadcn/**"
   ],
   "categories": [
     {

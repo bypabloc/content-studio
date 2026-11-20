@@ -71,5 +71,27 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [007-detector-heuristica](007-detector-heuristica.md) | El detector de textos sueltos usa una heurística, no un análisis de lenguaje | antes de main |
 | [007-descripciones-cli](007-descripciones-cli.md) | Las descripciones de motores y modelos del CLI quedan en inglés | antes de main |
 | [007-cspell-pt](007-cspell-pt.md) | El diccionario de portugués de cspell es una dependencia de desarrollo de la raíz | antes de main |
+| [008-paquete-cn](008-paquete-cn.md) | `cn` se toma del paquete `cn` 0.5.0 de shadcn (MIT), no de un `clsx` + `tailwind-merge` propio | antes de dev |
+| [008-base-ui-shadcn](008-base-ui-shadcn.md) | La base de componentes es `@base-ui/react` con shadcn, con las versiones exactas de klinikae | antes de dev |
+| [008-shadcn-codigo-de-proveedor](008-shadcn-codigo-de-proveedor.md) | Las primitivas de shadcn quedan fuera de tamaño, ortografía, espejo y cobertura: son código de proveedor | antes de dev |
+| [008-clases-tailwind-no-son-texto](008-clases-tailwind-no-son-texto.md) | Una lista de clases de Tailwind no cuenta como texto visible en el detector TS | antes de dev |
+| [008-ui-box](008-ui-box.md) | `UIBox` es el contenedor genérico, y solo lo importan moléculas y organismos | antes de dev |
+| [008-atomos-adaptados](008-atomos-adaptados.md) | Los átomos de klinikae se adaptan: enlace con hash, set de íconos recortado, pruebas sin jest-dom | antes de dev |
+| [008-moleculas-nativas](008-moleculas-nativas.md) | Las moléculas no tienen etiquetas nativas: átomos o roles ARIA | antes de dev |
+| [008-moleculas-adaptadas](008-moleculas-adaptadas.md) | Adaptaciones de moléculas: selector recordado, tema controlado y tests por rol | antes de dev |
+| [008-organismos-adaptados](008-organismos-adaptados.md) | Organismos sin etiquetas nativas: cierre con `UIButton`, título con rol de encabezado y la barra flotante partida | antes de dev |
+| [008-graficas-carga-perezosa](008-graficas-carga-perezosa.md) | Gráficas con `lazy()` y dos átomos nuevos (cruz y hueco) fuera del inventario de D-3 | antes de dev |
+| [008-fechas-intl-es](008-fechas-intl-es.md) | `UIDateRangePicker` formatea en `es` fijo, sin el idioma activo | el cierre de la 008 |
+| [008-workers-vitest](008-workers-vitest.md) | vitest usa 6 workers: con 23, los selectores `lazy()` no llegan a su espera de 5 s en esta máquina | antes de dev |
+| [008-appshell-cola-bajo-secciones](008-appshell-cola-bajo-secciones.md) | La cola va bajo las secciones de la barra, no a la derecha como dice AC-7 (Ronda 5 y «como antes») | antes de dev |
+| [008-e2e-narracion-combobox](008-e2e-narracion-combobox.md) | Los e2e de narración esperan el combobox del motor («★ voxcpm2»), no un select nativo; el e2e no está en `all` | antes de dev |
+| [008-licensedialog-en-narracion](008-licensedialog-en-narracion.md) | `LicenseDialog` pasa a `features/narration` sobre `UIDialog`; el foco inicial ya no cae en «Aceptar» | antes de dev |
+| [008-atomos-nuevos-t6](008-atomos-nuevos-t6.md) | Átomo `UIImage`, `play` y `pause` en `UIIcon`, `role` en vez de `output` y `aside`; el reproductor pasa a 44 px | antes de dev |
+| [008-ui-structure-etapa](008-ui-structure-etapa.md) | La etapa `ui-structure` (AST) bloquea etiquetas nativas fuera de átomos; `fieldset` pasa a `role="group"` y `time` a `UITime` | antes de dev |
+| [008-jerarquia-oxlint](008-jerarquia-oxlint.md) | La jerarquía D-4 se hace cumplir con overrides de oxlint; el inventario de componentes lo guarda un test (`UIToast` exporta `UIToaster`) | antes de dev |
+| [008-excluidos-de-klinikae](008-excluidos-de-klinikae.md) | Los 16 componentes de D-3 que no se copian (clínica, auth, encuestas, usuarios y móvil) | antes de dev |
+| [008-tokens-adaptados](008-tokens-adaptados.md) | El tema se adapta: se suman los colores que usan los componentes, no se reemplaza por el de klinikae | antes de dev |
+| [008-appshell](008-appshell.md) | `UIAppShell` reemplaza al Shell y a la Sidebar: barra colapsable con `Ctrl+B`; `Sidebar.tsx` y `ThemeToggle.tsx` se borran | antes de dev |
+| [008-budget](008-budget.md) | El bundle inicial crece 69,7 kB gzip sobre la 007 (tope de D-9: 90 kB); el límite de `budget` pasa a 228 kB | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

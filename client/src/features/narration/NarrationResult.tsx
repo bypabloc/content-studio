@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIDiffText } from '@/shared/components/atoms/UIDiffText';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { CompareTakes } from './CompareTakes';
@@ -58,71 +62,72 @@ export function NarrationResult({ job }: { job: Job }) {
   const others = notes.filter((note) => note.paragraph === undefined);
 
   return (
-    <section aria-label={t('narration.result.title')} className="flex flex-col gap-4 rounded-md border border-border p-4">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-medium">{t('narration.result.title')}</h2>
+    <UIStack role="region" aria-label={t('narration.result.title')} gap="md" className="rounded-md border border-border p-4">
+      <UIStack direction="row" justify="between" align="center" gap="sm">
+        <UIText variant="subtitle" className="text-sm">
+          {t('narration.result.title')}
+        </UIText>
         {job.group_key && (
-          <button
-            type="button"
-            aria-expanded={comparing}
-            onClick={() => setComparing((open) => !open)}
-            className="rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
-          >
+          <UIButton variant="secondary" aria-expanded={comparing} onClick={() => setComparing((open) => !open)}>
             {t('narration.compare.open')}
-          </button>
+          </UIButton>
         )}
-      </div>
+      </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
       {info.data && (
-        <p className="text-sm text-muted-foreground">
+        <UIText variant="caption">
           {t('narration.result.loudness', {
             lufs: info.data.lufs.toFixed(1),
             peak: info.data.true_peak.toFixed(1),
           })}
-        </p>
+        </UIText>
       )}
-      {take.isSuccess && !evaluated && <p className="text-sm">{t('narration.result.unevaluated')}</p>}
-      <ol className="flex flex-col gap-3">
+      {take.isSuccess && !evaluated && (
+        <UIText variant="body" className="text-sm">
+          {t('narration.result.unevaluated')}
+        </UIText>
+      )}
+      <UIStack role="list" gap="md">
         {script.data.segments.map((segment, index) => (
-          <li key={index} className="flex flex-col gap-1">
-            <div className="flex items-start gap-3">
-              <span className="w-6 shrink-0 text-right text-sm text-muted-foreground">{`${index + 1}.`}</span>
-              <p className="flex-1 text-sm">{segment.text}</p>
-              <button
-                type="button"
-                onClick={() => regenerate.mutate(index)}
-                className="shrink-0 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent"
-              >
+          <UIStack key={index} role="listitem" gap="sm">
+            <UIStack direction="row" align="start" gap="md">
+              <UIText variant="caption" className="w-6 shrink-0 text-right text-sm">
+                {`${index + 1}.`}
+              </UIText>
+              <UIText variant="body" className="flex-1 text-sm">
+                {segment.text}
+              </UIText>
+              <UIButton variant="secondary" className="shrink-0" onClick={() => regenerate.mutate(index)}>
                 {t('narration.result.regenerate')}
-              </button>
-            </div>
+              </UIButton>
+            </UIStack>
             {notes
               .filter((note) => note.paragraph === index + 1)
               .map((note, k) => (
-                <p key={k} className="pl-9 text-sm">
+                <UIText key={k} variant="body" className="pl-9 text-sm">
                   {note.diff ? (
-                    <>
-                      {note.diff.label} <del>{note.diff.expected}</del> <ins>{note.diff.said}</ins>
-                    </>
+                    <UIDiffText label={note.diff.label} expected={note.diff.expected} said={note.diff.said} />
                   ) : (
                     note.text
                   )}
-                </p>
+                </UIText>
               ))}
-          </li>
+          </UIStack>
         ))}
-      </ol>
+      </UIStack>
       {others.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <h3 className="text-xs font-medium text-muted-foreground">{t('narration.result.other')}</h3>
+        <UIStack gap="sm">
+          <UIText variant="heading" className="text-xs text-muted-foreground">
+            {t('narration.result.other')}
+          </UIText>
           {others.map((note, k) => (
-            <p key={k} className="text-sm text-muted-foreground">
+            <UIText key={k} variant="caption">
               {note.text}
-            </p>
+            </UIText>
           ))}
-        </div>
+        </UIStack>
       )}
       {comparing && job.group_key && <CompareTakes groupKey={job.group_key} />}
-    </section>
+    </UIStack>
   );
 }

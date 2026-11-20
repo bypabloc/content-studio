@@ -103,6 +103,7 @@ subprocess
 supersaw
 synthwave
 taskkill
+testid
 testpaths
 timesignature
 timespec
@@ -134,3 +135,6 @@ unstub
 describedby
 labelledby
 executemany
+klinikae
+oklch
+shadcn

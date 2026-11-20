@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -26,6 +27,12 @@ function renderPage(fetchMock: ReturnType<typeof vi.fn>) {
 const requests = (fetchMock: ReturnType<typeof vi.fn>) =>
   fetchMock.mock.calls.map(([url, init]) => `${(init as RequestInit | undefined)?.method ?? 'GET'} ${url}`);
 
+// El selector es un combobox (UISelect sobre Base UI): se abre y se elige la opción por su nombre.
+async function choose(name: string, option: string): Promise<void> {
+  await userEvent.click(await screen.findByRole('combobox', { name }));
+  await userEvent.click(await screen.findByRole('option', { name: option }));
+}
+
 describe('SettingsPage', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -47,7 +54,7 @@ describe('SettingsPage', () => {
   it('el campo de tema guarda la elección en ui.theme', async () => {
     renderPage(fetchMock);
 
-    fireEvent.change(screen.getByLabelText(t('settings.theme')), { target: { value: 'dark' } });
+    await choose(t('settings.theme'), t('theme.dark'));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
@@ -60,10 +67,11 @@ describe('SettingsPage', () => {
   it('el idioma tiene ★ en Sistema y guarda la elección en ui.language (AC-8)', async () => {
     renderPage(fetchMock);
 
-    expect(screen.getByRole('option', { name: `★ ${t('language.system')}` })).toBeTruthy();
+    await userEvent.click(await screen.findByRole('combobox', { name: t('settings.language') }));
+    expect(await screen.findByRole('option', { name: `★ ${t('language.system')}` })).toBeTruthy();
     expect(screen.getByRole('option', { name: 'Português' })).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText(t('settings.language')), { target: { value: 'en' } });
+    await userEvent.click(screen.getByRole('option', { name: t('language.en') }));
 
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(

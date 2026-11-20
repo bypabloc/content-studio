@@ -25,5 +25,5 @@ python -m devtools <comando> [args]
 * **stdout** = resultado parseable (JSON en una línea); **stderr** = log humano. Un comando usa otro importando su función, nunca por subprocess.
 * Salidas en `tmp/<comando>/`; rutas desde la raíz del checkout (`paths.ROOT`) o del principal (`worktree.principal`), nunca desde el CWD.
 * Tests unitarios en `devtools/tests/unit/test_<módulo>.py` (espejo de `devtools/<ruta>/<módulo>.py`); máximo 800 líneas por archivo de test.
-* `test-runner` (specs 003 y 005): `python -m devtools test-runner --type=<etapas> [--git-mode=...] [--files=...]`. `all` = `GROUPS['all']` de `devtools/test_runner/main.py`, sin `e2e` ni `tauri-check` (`WARNING/005-all-sin-e2e`). Cada etapa es una línea en `STAGES`.
+* `test-runner` (specs 003 y 005): `python -m devtools test-runner --type=<etapas> [--git-mode=...] [--files=...]`. `ui-structure` (spec 008) mira `client/src/**/*.tsx` con el AST de TypeScript y no admite excepciones: `all` = `GROUPS['all']` de `devtools/test_runner/main.py`, sin `e2e` ni `tauri-check` (`WARNING/005-all-sin-e2e`). Cada etapa es una línea en `STAGES`.
 * Nada de scripts sueltos fuera de `server/src/` (lo comprueba `tests/validators/test_structure.py`).

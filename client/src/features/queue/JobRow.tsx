@@ -1,5 +1,9 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIProgress } from '@/shared/components/atoms/UIProgress';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
 import type { Job } from '@/shared/api/events';
 import { t } from '@/shared/i18n/t';
 
@@ -16,53 +20,57 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
     disabled: job.status !== 'queued',
   });
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const progress = t('queue.progress', { percent: Math.round(job.progress * 100) });
 
   return (
-    <li
+    <UIStack
       ref={setNodeRef}
+      role="listitem"
       data-job={job.id}
       style={style}
-      className="flex flex-col gap-1 rounded-md border border-border bg-card p-2 text-sm"
+      gap="sm"
+      className="rounded-md border border-border bg-card p-2 text-sm"
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate">{kindLabel(job.kind)}</span>
-        <span className="text-xs text-muted-foreground">{statusLabel(job.status)}</span>
-      </div>
+      <UIStack direction="row" justify="between" gap="sm">
+        <UIText variant="body" className="truncate">
+          {kindLabel(job.kind)}
+        </UIText>
+        <UIText variant="caption">{statusLabel(job.status)}</UIText>
+      </UIStack>
       {job.status === 'running' ? (
-        <>
-          <progress className="w-full" value={job.progress} max={1} />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{t('queue.progress', { percent: Math.round(job.progress * 100) })}</span>
-            <span>{job.stage}</span>
-          </div>
-        </>
+        <UIStack gap="sm">
+          <UIProgress value={job.progress} label={progress} />
+          <UIStack direction="row" justify="between" gap="sm">
+            <UIText variant="caption">{progress}</UIText>
+            <UIText variant="caption">{job.stage}</UIText>
+          </UIStack>
+        </UIStack>
       ) : null}
-      <div className="flex items-center gap-1">
+      <UIStack direction="row" align="center" gap="sm">
         {job.status === 'queued' ? (
-          <button
-            type="button"
+          <UIButton
             ref={setActivatorNodeRef}
+            variant="ghost"
             aria-label={t('queue.drag')}
-            className="cursor-grab rounded px-1 text-muted-foreground"
             {...attributes}
             aria-roledescription={t('queue.drag_role')}
             {...listeners}
           >
             {'⋮⋮'}
-          </button>
+          </UIButton>
         ) : null}
         {job.status === 'queued' || job.status === 'running' ? (
-          <button type="button" onClick={() => onCancel(job.id)} className="ml-auto text-xs underline">
+          <UIButton variant="ghost" className="ml-auto" onClick={() => onCancel(job.id)}>
             {t('queue.cancel')}
-          </button>
+          </UIButton>
         ) : null}
         {job.status === 'error' || job.status === 'cancelled' ? (
-          <button type="button" onClick={() => onRetry(job.id)} className="ml-auto text-xs underline">
+          <UIButton variant="ghost" className="ml-auto" onClick={() => onRetry(job.id)}>
             {t('queue.retry')}
-          </button>
+          </UIButton>
         ) : null}
-      </div>
-    </li>
+      </UIStack>
+    </UIStack>
   );
 }
 
