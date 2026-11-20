@@ -7,7 +7,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | Spec | Tipo | Escala | Rama | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | [001-017-studio](001-017-studio/README.md) (lote 001–021) | refactor · feature | Large | una por spec | las 21 redactadas, PEN |
-| ↳ [003-test-runner](001-017-studio/003-test-runner/README.md) | chore | Large | `chore/003-test-runner` | PEN |
 | ↳ [006-narration-section](001-017-studio/006-narration-section/README.md) | feature | Large | `feature/006-narration-section` | PEN |
 | ↳ [007-icons](001-017-studio/007-icons/README.md) | feature | Medium | `feature/007-icons` | PEN |
 | ↳ [008-voices-recording](001-017-studio/008-voices-recording/README.md) | feature | Large | `feature/008-voices-recording` | PEN |

@@ -22,7 +22,7 @@ RULES = """[Reglas críticas de content-studio reinyectadas]
 - Verificar antes de "listo": correr el script real; revisar duración, volumen y espectrograma (con image-reader).
 - Antes de commit: uv run ruff check && uv run ruff format --check && uv run pytest.
 - Ramas feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release/<kebab> desde dev; nunca push a main/dev.
-- Conventional Commits en español, sin atribución de IA. Commit, push y merge solo cuando el usuario lo pida.
+- Conventional Commits en español, sin atribución de IA. Merge a dev sin preguntar; nunca a main.
 - GPU: todo lo que carga un modelo va con `python -m devtools gpu-turn run --job=<j> -- <cmd>`.
 - Worktrees en ../content-studio-worktrees/.
 - Specs en docs/specs/ con las plantillas de docs/specs/_plantilla/ (plan-format.md); estado en docs/process/."""
