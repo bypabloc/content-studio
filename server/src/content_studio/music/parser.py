@@ -29,10 +29,12 @@ SUMMARY = 'Local instrumental music with ACE-Step 1.5 or HeartMuLa 3B, for an 8 
 __all__ = ['STYLES', 'MODELS', 'build_parser']  # el CLI también lee los catálogos de aquí
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser(model_required: bool = True) -> argparse.ArgumentParser:
     """Flags del script. `studio` los usa para la ayuda y para validar antes de encolar."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--model', choices=MODELS, required=True, help='acestep (recommended) or heartmula (slow)')
+    ap.add_argument(
+        '--model', choices=MODELS, required=model_required, help='acestep (recommended) or heartmula (slow)'
+    )
     ap.add_argument(
         '--style',
         nargs='+',

@@ -22,6 +22,7 @@ LINKS = (
     'server/data/music/.venv*',
     'server/data/narration/engines',
     'server/data/music/models',
+    'server/data/music/samples',
 )
 VOZ, VOCES = 'server/data/narration/reference', 'server/data/narration/voices'
 AUDIOS = ('*.wav', '*.m4a', '*.mp3', '*.flac')
@@ -110,6 +111,7 @@ def prepare(main: Path, name: str) -> int:
         print(f'there is no worktree named {name} (git worktree list)', file=sys.stderr)
         return 2
     root = Path(wt['root'])
+    (main / 'server/data/music/samples').mkdir(parents=True, exist_ok=True)  # se enlaza aunque esté vacía
     folders, audios = missing(main, root)
     for rel in folders:
         link(main / rel, root / rel)

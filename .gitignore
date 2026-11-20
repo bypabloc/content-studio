@@ -44,3 +44,5 @@ client/dist/
 client/coverage/
 client/src-tauri/target
 client/src-tauri/gen/
+# Muestras de 10 s por preset del buscador de Música (spec 011, D-3): se generan con la cola, no se versionan.
+server/data/music/samples/

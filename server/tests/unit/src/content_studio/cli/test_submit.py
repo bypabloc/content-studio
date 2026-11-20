@@ -111,3 +111,8 @@ def test_run_queues_the_job_runs_it_here_and_prints_the_result(db, monkeypatch, 
 def test_run_exits_2_and_says_why_when_the_parameters_are_invalid(db, capsys, tmp_path):
     assert submit.run('music', {'model': 'foo'}, db, tmp_path) == 2
     assert capsys.readouterr().err
+
+
+def test_samples_params_carry_only_the_flags_given():
+    assert submit.samples_params(SimpleNamespace(styles=['lofi-chill'], force=False)) == {'styles': ['lofi-chill']}
+    assert submit.samples_params(SimpleNamespace(styles=None, force=True)) == {'force': True}

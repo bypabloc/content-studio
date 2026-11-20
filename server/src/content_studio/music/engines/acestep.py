@@ -51,7 +51,14 @@ class AceStep(MusicEngine):
                 offload_to_cpu=True,
             )
 
-        config = GenerationConfig(batch_size=1, use_random_seed=True, audio_format='wav')
+        # Con semilla fija (las muestras, spec 011), la misma en cada pista; sin ella, una semilla nueva por pista.
+        seed = getattr(a, 'seed', None)
+        config = GenerationConfig(
+            batch_size=1,
+            use_random_seed=seed is None,
+            seeds=None if seed is None else [seed],
+            audio_format='wav',
+        )
         for n, (style, output) in enumerate(jobs, 1):
             progress.emit((n - 1) / len(jobs), f'track {n}/{len(jobs)}')
             params = GenerationParams(

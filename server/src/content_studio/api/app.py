@@ -95,7 +95,12 @@ def create_app(
     app.state.roots = (
         [Path(root).resolve() for root in roots]
         if roots
-        else [paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()]
+        else [
+            paths.OUT.resolve(),
+            paths.REFERENCE.resolve(),
+            paths.VOICES.resolve(),
+            (paths.MUSIC / 'samples').resolve(),
+        ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]

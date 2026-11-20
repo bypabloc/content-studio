@@ -43,6 +43,7 @@ MUSIC_FLAGS = (
     'evaluate',
     'retries',
 )
+SAMPLES_FLAGS = ('styles', 'force')
 OUTPUT_REFUSED = 'studio writes each job to out/<kind>/<date>-<id>-<slug>/: drop --output.'
 FOLDER_REFUSED = 'studio writes each job to out/music/<date>-<id>-<slug>/: drop --folder.'
 
@@ -91,9 +92,16 @@ def regenerate_params(args: argparse.Namespace) -> dict[str, Any]:
 
 def music_params(args: argparse.Namespace) -> dict[str, Any]:
     """Parámetros del servicio de música a partir de los flags de `studio music`."""
+    if args.model is None:
+        raise UsageError('the following arguments are required: --model')
     if args.folder != paths.OUT / 'music':
         raise UsageError(FOLDER_REFUSED)
     return _params(args, MUSIC_FLAGS)
+
+
+def samples_params(args: argparse.Namespace) -> dict[str, Any]:
+    """Parámetros de `music.samples` a partir de `studio music samples`; sin `styles`, hace todos los presets."""
+    return _params(args, SAMPLES_FLAGS)
 
 
 def _show_progress(event: dict) -> None:

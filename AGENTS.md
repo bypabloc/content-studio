@@ -13,7 +13,7 @@ Audio local para videos, en una RTX 4060 Laptop (8 GB) con Windows 11 (nada se c
 
 Todo se lanza desde `studio`, el CLI headless (argparse): `uv run studio <comando> [flags]`. No hay menú ni asistente: ningún comando pregunta nada, con o sin TTY.
 
-`narration tts` y `music` encolan el trabajo en `var/content-studio.db` y lo corren en su proceso; `serve` corre los que quedan en la cola. Cada trabajo sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`, y su log en `logs/jobs/<id>.log`. `studio` no acepta `--output` ni `--folder`; `--db RUTA` va antes del subcomando.
+`narration tts` y `music` encolan el trabajo en `var/content-studio.db` y lo corren en su proceso; `serve` corre los que quedan en la cola. Cada trabajo sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`, y su log en `logs/jobs/<id>.log`. `studio` no acepta `--output` ni `--folder`; `--db RUTA` va antes o después del subcomando.
 
 ```bash
 uv run studio --help                         # subcomandos; cada uno tiene --help con sus flags
