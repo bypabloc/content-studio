@@ -8,15 +8,24 @@ archivo. Lo usa `devtools/tests/unit/test_runner/test_client_lint_hierarchy.py`.
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import subprocess
 from pathlib import Path
 
 from .. import paths
 
-OXLINT = paths.ROOT / 'node_modules' / '.bin' / ('oxlint.exe' if os.name == 'nt' else 'oxlint')
 RULE = 'eslint(no-restricted-imports)'
+
+
+def _oxlint() -> list[str]:
+    """`bun` y la entrada de oxlint. En la CI no hay `node_modules/.bin` en la raíz: el paquete vive en `client/`."""
+    for entry in (
+        paths.ROOT / 'client' / 'node_modules' / 'oxlint' / 'bin' / 'oxlint',
+        paths.ROOT / 'node_modules' / 'oxlint' / 'bin' / 'oxlint',
+    ):
+        if entry.exists():
+            return ['bun', str(entry)]
+    raise FileNotFoundError('oxlint is not installed: run `bun install --frozen-lockfile` in client/')
 
 
 def restricted_imports(
@@ -34,7 +43,7 @@ def restricted_imports(
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(fixtures / name, target)
     done = subprocess.run(
-        [str(OXLINT), '-c', '.oxlintrc.json', '--format', 'json', *names],
+        [*_oxlint(), '-c', '.oxlintrc.json', '--format', 'json', *names],
         cwd=client,
         capture_output=True,
         encoding='utf-8',
