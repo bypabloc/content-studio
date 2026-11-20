@@ -130,6 +130,22 @@ def test_narration_tts_and_music_go_to_submit(monkeypatch, checkout):
     assert [kind for kind, _ in sent] == ['narration', 'music']
 
 
+def test_music_samples_goes_to_submit_without_a_model(monkeypatch, checkout):
+    sent = []
+    monkeypatch.setattr(submit, 'run', lambda kind, params, db, root: sent.append((kind, params)) or 0)
+
+    assert main(['music', 'samples', '--styles', 'lofi-chill', 'corporate', '--force']) == 0
+    assert sent == [('music.samples', {'styles': ['lofi-chill', 'corporate'], 'force': True})]
+
+
+def test_music_without_a_model_exits_2_and_says_why(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(['music', '--style', 'lofi-chill'])
+
+    assert exit_info.value.code == 2
+    assert '--model' in capsys.readouterr().err
+
+
 def test_output_flag_exits_2_and_says_why(capsys):
     with pytest.raises(SystemExit) as exit_info:
         main(['narration', 'tts', '--model', 'qwen-0.6b', '--style', 'expert', '--text', 'x', '--output', 'y.wav'])
@@ -161,3 +177,8 @@ def test_openapi_job_schema_lists_the_fields_the_client_shows(capsys):
     job = json.loads(capsys.readouterr().out)['components']['schemas']['Job']
 
     assert {'id', 'kind', 'status', 'progress', 'stage', 'error_code', 'params'} <= set(job['properties'])
+
+
+def test_db_is_accepted_after_the_subcommand(db, capsys):
+    assert main(['jobs', 'list', '--db', db]) == 0
+    assert main(['--db', db, 'jobs', 'list']) == 0

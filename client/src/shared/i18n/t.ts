@@ -10,7 +10,7 @@ export function hasMessage(key: string): boolean {
 }
 
 /** Tipos de los ids que tienen etiqueta (`label.<tipo>.<id>` en el catálogo, spec 007, D-7). */
-export type LabelKind = 'narration.style' | 'narration.engine' | 'music.style' | 'music.model';
+export type LabelKind = 'narration.style' | 'narration.engine' | 'music.style' | 'music.model' | 'music.category';
 
 /** Nombre o nota de un estilo, motor o modelo en el idioma activo. Un id sin etiqueta se muestra tal cual. */
 export function label(kind: LabelKind, id: string): string {

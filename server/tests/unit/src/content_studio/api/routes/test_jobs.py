@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from contextlib import closing
 
 from content_studio.db import connection, jobs
@@ -90,3 +91,43 @@ def test_a_retry_keeps_the_group_of_the_take(api):
     new = api.client.post(f'/jobs/{job_id}/retry', headers=api.headers).json()
 
     assert new['group_key'] == 'narration:g1'
+
+
+def _music_job_with_tracks(api, files):
+    """Un trabajo de música terminado, con su `tracks.json` y las pistas nombradas en él."""
+    folder = api.tmp / 'music-job'
+    folder.mkdir()
+    (folder / 'tracks.json').write_text(
+        json.dumps({'tracks': [{'file': name} for name in files], 'chosen': None}), encoding='utf-8'
+    )
+    with closing(connection.connect(api.tmp / 'base.db')) as conn:
+        job_id = jobs.insert(conn, 'music', 'gpu', {})
+        jobs.update(conn, job_id, status='done', output_dir=str(folder))
+    return job_id, folder / 'tracks.json'
+
+
+def test_choose_marks_one_track_of_a_music_job_as_chosen(api):
+    job_id, manifest = _music_job_with_tracks(api, ['a.wav', 'b.wav'])
+
+    response = api.client.post(f'/jobs/{job_id}/choose', json={'file': 'b.wav'}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert json.loads(manifest.read_text(encoding='utf-8'))['chosen'] == 'b.wav'
+
+
+def test_choose_refuses_a_file_that_is_not_a_track(api):
+    job_id, _ = _music_job_with_tracks(api, ['a.wav'])
+
+    response = api.client.post(f'/jobs/{job_id}/choose', json={'file': 'otra.wav'}, headers=api.headers)
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'unknown_track'
+
+
+def test_choose_refuses_a_job_that_is_not_music(api):
+    job_id = api.client.post('/jobs', json={'kind': 'fake', 'params': {}}, headers=api.headers).json()['id']
+
+    response = api.client.post(f'/jobs/{job_id}/choose', json={'file': 'a.wav'}, headers=api.headers)
+
+    assert response.status_code == 409
+    assert response.json()['code'] == 'job_not_music_tracks'

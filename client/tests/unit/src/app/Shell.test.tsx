@@ -107,6 +107,13 @@ describe('Shell [AC-7]', () => {
     expect(window.location.hash).toBe('#/settings')
   })
 
+  it('spec 011 (D-6): WHEN se abre Música THEN la sección muestra la duración y los estilos', async () => {
+    window.location.hash = '#/music'
+    renderShell()
+
+    expect(await screen.findByText(t('music.duration.label'))).toBeTruthy()
+  })
+
   it('spec 010 (D-6): WHEN se abre Mis voces THEN la sección lista los perfiles', async () => {
     window.location.hash = '#/voices'
     renderShell()

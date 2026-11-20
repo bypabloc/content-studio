@@ -1,0 +1,13 @@
+[
+  {
+    "id": 3,
+    "kind": "narration",
+    "status": "done",
+    "params": {
+      "text": "Hola, mundo."
+    },
+    "output_dir": "C:/fake/out/narration/n1",
+    "starred": true,
+    "group_key": null
+  }
+]

@@ -213,6 +213,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/{job_id}/choose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Choose Track
+         * @description Elige una pista de un trabajo de música: queda como `chosen` de su `tracks.json`. 409 si el trabajo no es de
+         *     música o no terminó; 422 si el archivo no es una de sus pistas.
+         */
+        post: operations["choose_track_jobs__job_id__choose_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/queue": {
         parameters: {
             query?: never;
@@ -286,6 +307,26 @@ export interface paths {
          * @description Reordena los trabajos según la lista dada.
          */
         put: operations["reorder_queue_order_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/music/styles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Music Styles
+         * @description Catálogo de estilos para el buscador de la sección Música.
+         */
+        get: operations["music_styles_music_styles_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -600,6 +641,14 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ChooseIn
+         * @description Cuerpo de `POST /jobs/{id}/choose`: el archivo de la pista elegida.
+         */
+        ChooseIn: {
+            /** File */
+            file: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -791,6 +840,36 @@ export interface components {
         SettingValue: {
             /** Value */
             value: unknown;
+        };
+        /**
+         * StyleOut
+         * @description Un preset del catálogo de Música (spec 011, D-2): su categoría, tonalidad, BPM, compás y si tiene muestra.
+         */
+        StyleOut: {
+            /** Key */
+            key: string;
+            /** Category */
+            category: string;
+            /** Musical Key */
+            musical_key: string;
+            /** Bpm */
+            bpm: number;
+            /** Time Signature */
+            time_signature: string;
+            /** Caption */
+            caption: string;
+            /** Has Sample */
+            has_sample: boolean;
+            /** Sample */
+            sample: string | null;
+        };
+        /**
+         * StylesOut
+         * @description Respuesta de `GET /music/styles`: el catálogo completo.
+         */
+        StylesOut: {
+            /** Styles */
+            styles: components["schemas"]["StyleOut"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -1191,6 +1270,43 @@ export interface operations {
             };
         };
     };
+    choose_track_jobs__job_id__choose_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChooseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     queue_state_queue_get: {
         parameters: {
             query?: never;
@@ -1282,6 +1398,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    music_styles_music_styles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StylesOut"];
                 };
             };
         };

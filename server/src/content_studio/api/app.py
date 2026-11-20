@@ -23,6 +23,7 @@ from content_studio.api.routes import (
     health,
     jobs,
     media,
+    music,
     narration,
     queue,
     settings,
@@ -94,7 +95,12 @@ def create_app(
     app.state.roots = (
         [Path(root).resolve() for root in roots]
         if roots
-        else [paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()]
+        else [
+            paths.OUT.resolve(),
+            paths.REFERENCE.resolve(),
+            paths.VOICES.resolve(),
+            (paths.MUSIC / 'samples').resolve(),
+        ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]
@@ -104,6 +110,7 @@ def create_app(
     app.include_router(diagnostics.router, dependencies=header_only)
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
+    app.include_router(music.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
     app.include_router(voices.router, dependencies=header_only)
     app.include_router(voices_catalog.router, dependencies=header_only)

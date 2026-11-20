@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -9,8 +12,7 @@ from content_studio.music.parser import MODELS, STYLES
 
 RESOURCE = 'gpu'  # la cola lo corre con el candado de la GPU: un modelo a la vez
 DEFAULT_DURATION = 60  # el mismo default que el parser
-# shortcut: copia de los límites del help del parser (ACE ≤600, HeartMuLa ≤240), subir a MusicSpec si cambian
-MAX_SECONDS = {'acestep': 600, 'heartmula': 240}
+MAX_SECONDS = {key: spec.max_seconds for key, spec in MODELS.items()}  # el máximo de cada motor vive en su MusicSpec
 # Flags que pasan tal cual del trabajo al CLI del motor.
 FLAGS = {
     'key': '--key',
@@ -19,6 +21,21 @@ FLAGS = {
     'variants': '--variants',
     'retries': '--retries',
 }
+
+
+def group_key(params: dict) -> str:
+    """Clave de las variantes de un mismo pedido (spec 011, D-6): sha1 de los parámetros sin la semilla. Así las
+    pistas de un pedido, con sus estilos y variantes, quedan en un grupo y «Elegir» deja una sola ★ por grupo."""
+    rest = {key: value for key, value in params.items() if key != 'seed'}
+    digest = hashlib.sha1(
+        json.dumps(rest, sort_keys=True, ensure_ascii=False).encode('utf-8'), usedforsecurity=False
+    ).hexdigest()
+    return f'music:{digest[:12]}'
+
+
+def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, str]:
+    """Antes de encolar: los parámetros tal cual y la clave de grupo del pedido (la cola la guarda en el trabajo)."""
+    return params, group_key(params)
 
 
 def validate(params: dict) -> list[dict]:
@@ -35,7 +52,9 @@ def validate(params: dict) -> list[dict]:
         if style not in STYLES and not (params.get('key') and params.get('bpm')):
             errors.append({'code': 'style_needs_key_bpm', 'params': {'style': style}})
     duration = params.get('duration', DEFAULT_DURATION)
-    if model in MAX_SECONDS and not 0 < duration <= MAX_SECONDS[model]:
+    if model in MAX_SECONDS and duration > MAX_SECONDS[model]:
+        errors.append({'code': 'duration_over_max', 'params': {'max': MAX_SECONDS[model]}})
+    elif model in MAX_SECONDS and duration <= 0:
         errors.append({'code': 'invalid_duration', 'params': {'max': MAX_SECONDS[model]}})
     return errors
 

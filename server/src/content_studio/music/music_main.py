@@ -5,14 +5,64 @@ Directo: PYTHONPATH=server/src python -m content_studio.music.music_main --model
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 import unicodedata
+from pathlib import Path
 
 from content_studio.common import process, progress
-from content_studio.music.engines.base import Jobs
+from content_studio.music.duration import TOLERANCE_S, length, write_result
+from content_studio.music.engines.base import Jobs, MusicEngine
 from content_studio.music.evaluation import free_gpu, with_voice
+from content_studio.music.manifest import write_manifest
 from content_studio.music.parser import MODELS, STYLES, build_parser
+
+RETRIES = 2  # una pista que sale más corta que lo pedido se regenera hasta dos veces (spec 011, AC-3)
+
+
+def _generate(engine: MusicEngine, jobs: Jobs, a: argparse.Namespace) -> None:
+    """Escribe las pistas. Si el motor falla, no queda la de una corrida anterior como si fuera nueva."""
+    for _, output in jobs:
+        output.unlink(missing_ok=True)
+    engine.generate(jobs, a)
+
+
+def _seconds(output: Path) -> float:
+    """Duración de la pista; 0 si el motor no la escribió."""
+    return length(output) if output.exists() else 0.0
+
+
+def render(engine: MusicEngine, jobs: Jobs, a: argparse.Namespace) -> None:
+    """Genera las pistas y regenera las que salen más cortas que lo pedido (hasta RETRIES veces).
+
+    Se queda con la más larga y deja su `<pista>.result.json`; si sigue corta, lleva el aviso music_short.
+    """
+    _generate(engine, jobs, a)
+    best = {output: _seconds(output) for _, output in jobs}
+    for attempt in range(1, RETRIES + 1):
+        short = [(style, output) for style, output in jobs if best[output] < a.duration - TOLERANCE_S]
+        if not short:
+            break
+        backups = {}
+        for _, output in short:
+            if output.exists():
+                backups[output] = output.with_suffix('.best.wav')
+                output.replace(backups[output])
+        progress.emit(0, f'retry {attempt}/{RETRIES}')
+        _generate(engine, short, a)
+        for _, output in short:
+            new = _seconds(output)
+            if new >= best[output]:
+                best[output] = new
+                if output in backups:
+                    backups[output].unlink(missing_ok=True)
+            else:
+                output.unlink(missing_ok=True)
+                if output in backups:
+                    backups[output].replace(output)
+    for _, output in jobs:
+        write_result(output, a.duration, best[output])
 
 
 def resolve_style(
@@ -70,17 +120,16 @@ def main() -> None:
     engine = spec.create()
 
     def generate(items: Jobs) -> None:
-        for _, output in items:  # si el motor falla, no queda la pista de una corrida anterior como si fuera nueva
-            output.unlink(missing_ok=True)
-        engine.generate(items, a)
+        _generate(engine, items, a)
 
     progress.emit(0, 'start')
-    generate(jobs)
+    render(engine, jobs, a)
     progress.emit(1, 'done')
     if not a.evaluate:
         missing = [s.name for _, s in jobs if not s.exists()]
         if missing:
             sys.exit(f'Not generated: {", ".join(missing)}')
+        write_manifest(a.folder, a.model, a.duration, jobs, {})
         return
 
     free_gpu()
@@ -93,6 +142,7 @@ def main() -> None:
         free_gpu()
         pending = with_voice(pending)
     print(f'{len(jobs) - len(pending)}/{len(jobs)} tracks without voice')
+    write_manifest(a.folder, a.model, a.duration, jobs, {output: output in pending for _, output in jobs})
     if pending:
         sys.exit(f'Still with voice after retries: {", ".join(p.name for p in pending)}')
 

@@ -37,6 +37,8 @@ graphify-out/
 .venv/
 .pytest_cache/
 .ruff_cache/
+# Datos de cobertura de cada corrida de pytest: sin esto, `worktree close` ve el árbol sucio.
+.coverage
 node_modules/
 
 # spec 005: client
@@ -44,3 +46,6 @@ client/dist/
 client/coverage/
 client/src-tauri/target
 client/src-tauri/gen/
+# Muestras de 10 s por preset del buscador de Música (spec 011, D-3): se generan con la cola, no se versionan.
+# Sin `/` final: el enlace de `prepare` es un symlink en POSIX y con `/` no lo cubre (ver arriba).
+server/data/music/samples

@@ -20,6 +20,13 @@ from content_studio.music.parser import build_parser as music_flags
 from content_studio.narration.parser import build_parser as narration_flags
 
 
+def _db_flag() -> argparse.ArgumentParser:
+    """`--db` también después del subcomando (PENDING 004). Sin default: si no se pasa, vale el de arriba."""
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument('--db', type=Path, default=argparse.SUPPRESS, help='job queue database')
+    return ap
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Subcommands of `studio`. The narration and music flags are the ones of their services, with the same names."""
     ap = argparse.ArgumentParser(prog='studio', description='content-studio without a UI: local API, jobs and CLI.')
@@ -32,22 +39,41 @@ def build_parser() -> argparse.ArgumentParser:
 
     narration = sub.add_parser('narration', help='narration and voices')
     narration_cmds = narration.add_subparsers(dest='action', required=True, metavar='action')
-    narration_cmds.add_parser('tts', parents=[narration_flags()], add_help=False, help='narrate a script (runs here)')
-    regenerate_p = narration_cmds.add_parser('regenerate', help='new take with one paragraph redone (runs here)')
+    narration_cmds.add_parser(
+        'tts', parents=[narration_flags(), _db_flag()], add_help=False, help='narrate a script (runs here)'
+    )
+    regenerate_p = narration_cmds.add_parser(
+        'regenerate', parents=[_db_flag()], help='new take with one paragraph redone (runs here)'
+    )
     regenerate_p.add_argument('job', type=int, help='a finished narration or regeneration job')
     regenerate_p.add_argument('index', type=int, help='paragraph to redo, 0-based (the first one is 0)')
     regenerate_p.add_argument('--seed', type=int, help='seed of the new paragraph; default random')
     narration_cmds.add_parser('voices', add_help=False, help='free voices: list and build (--build)')
 
-    sub.add_parser('music', parents=[music_flags()], add_help=False, help='instrumental music (runs here)')
+    music_p = sub.add_parser(
+        'music',
+        parents=[music_flags(model_required=False), _db_flag()],
+        add_help=False,
+        help='instrumental music (runs here)',
+    )
+    music_cmds = music_p.add_subparsers(dest='music_action', metavar='action')
+    samples_p = music_cmds.add_parser(
+        'samples', parents=[_db_flag()], help='10 s sample of each preset, for the style browser (runs here)'
+    )
+    samples_p.add_argument('--styles', nargs='+', help='presets to sample (default: all)')
+    samples_p.add_argument('--force', action='store_true', help='regenerate the samples that already exist')
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
     job_cmds = jobs_p.add_subparsers(dest='action', required=True, metavar='action')
-    listing = job_cmds.add_parser('list', help='jobs, in queue order')
+    listing = job_cmds.add_parser('list', parents=[_db_flag()], help='jobs, in queue order')
     listing.add_argument('--status')
     listing.add_argument('--kind')
-    job_cmds.add_parser('cancel', help='cancel a queued or running job').add_argument('id', type=int)
-    job_cmds.add_parser('retry', help='new job with the same parameters').add_argument('id', type=int)
+    job_cmds.add_parser('cancel', parents=[_db_flag()], help='cancel a queued or running job').add_argument(
+        'id', type=int
+    )
+    job_cmds.add_parser('retry', parents=[_db_flag()], help='new job with the same parameters').add_argument(
+        'id', type=int
+    )
     sub.add_parser('openapi', help='print the API schema (OpenAPI JSON); no server and no database')
     return ap
 
@@ -104,6 +130,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return submit.run('narration.regenerate', submit.regenerate_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'narration' and args.action == 'voices':
         return _voices(args.rest)
+    if args.command == 'music' and args.music_action == 'samples':
+        return submit.run('music.samples', submit.samples_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'music':
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'openapi':

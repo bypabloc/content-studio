@@ -41,3 +41,28 @@ class SettingOut(BaseModel):
 
     key: str
     value: Any
+
+
+class StyleOut(BaseModel):
+    """Un preset del catálogo de Música (spec 011, D-2): su categoría, tonalidad, BPM, compás y si tiene muestra."""
+
+    key: str
+    category: str
+    musical_key: str
+    bpm: int
+    time_signature: str
+    caption: str
+    has_sample: bool
+    sample: str | None  # ruta de la muestra de 10 s, o null si aún no existe
+
+
+class StylesOut(BaseModel):
+    """Respuesta de `GET /music/styles`: el catálogo completo."""
+
+    styles: list[StyleOut]
+
+
+class ChooseIn(BaseModel):
+    """Cuerpo de `POST /jobs/{id}/choose`: el archivo de la pista elegida."""
+
+    file: str

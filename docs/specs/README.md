@@ -7,7 +7,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | Spec | Tipo | Escala | Rama | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | [001-017-studio](001-017-studio/README.md) (lote 001–023) | refactor · feature | Large | una por spec | las 23 redactadas, PEN |
-| ↳ [011-music-section](001-017-studio/011-music-section/README.md) | feature | Large | `feature/011-music-section` | PEN |
 | ↳ [012-engines-storage](001-017-studio/012-engines-storage/README.md) | feature | Large | `feature/012-engines-storage` | PEN |
 | ↳ [013-whisper-cleaner](001-017-studio/013-whisper-cleaner/README.md) | feature | Large | `feature/013-whisper-cleaner` | PEN |
 | ↳ [014-subtitles](001-017-studio/014-subtitles/README.md) | feature | Large | `feature/014-subtitles` | PEN |

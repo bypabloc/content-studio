@@ -9,8 +9,8 @@ import importlib.util
 
 from content_studio import paths
 from content_studio.common import progress
+from content_studio.music.duration import finish, plan_duration
 from content_studio.music.engines.base import Jobs, MusicEngine
-from content_studio.music.evaluation import trim_silence
 
 HEART_CKPT = paths.MUSIC / 'models' / 'heartmula-ckpt'
 
@@ -59,11 +59,11 @@ class HeartMuLa(MusicEngine):
             with torch.no_grad():
                 pipe(
                     {'lyrics': '\n\n'.join(sections), 'tags': style['tags'] + ',instrumental'},
-                    max_audio_length_ms=int(a.duration * 1000),
+                    max_audio_length_ms=int(plan_duration(a.duration, self.spec.max_seconds) * 1000),
                     save_path=str(output),
                     topk=50,
                     temperature=1.0,
                     cfg_scale=1.5,
                 )
-            remaining = trim_silence(output)
+            remaining = finish(output, a.duration)
             print(f'{output} ({remaining:.1f} s after trimming silence)')

@@ -4,6 +4,8 @@ Catálogo de presets de `uv run studio music`, definido en [styles.py](../../src
 
 Todos van en compás 4/4. Tono y BPM se pueden pisar con `--key` y `--bpm`.
 
+Cada preset tiene una categoría (`lofi`, `ads`, `demo`, `corporate`, `ambient`, `cinematic`, `tutorial`, `documentary`, `acoustic`, `electronic`, `jazz`, `wellness` o `genres`; el mapa está en [categories.py](../../src/content_studio/music/categories.py)). El buscador de la app filtra por ella. No hay filtro de «mood»: se descartó en la 011 porque los 126 textos no dan un criterio que no sea adivinar.
+
 Presets que pasaron por poco en voz (entre −25 y −32 dB): `demo-product`, `heroic`, `suspense-tech`, `ambient-ocean`, `tutorial-tech`, `sci-fi`, `pop-bright`, `demo-saas`. Con ellos conviene `--evaluate --retries 2`.
 
 Descartados por voz y no incluidos: `cinematico-epico` y `documental-historia`.

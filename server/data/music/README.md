@@ -23,6 +23,9 @@ uv run studio music --model acestep --duration 30 --key "E Minor" --bpm 105 \
 # Un preset con otra tonalidad o tempo (los flags pisan los valores del preset)
 uv run studio music --model acestep --style lofi-jazz --key "G Major" --bpm 90
 
+# Muestras de 10 s de cada preset, para el buscador de la app (solo las que faltan; --force las regenera)
+uv run studio music samples --styles lofi-chill corporate --force
+
 # Sin el planificador LM: ~3x más rápido (ver "Qué hace --no-lm")
 uv run studio music --model acestep --style ambient --no-lm
 
@@ -165,17 +168,33 @@ Equipo: RTX 4060 Laptop, 8 GiB, WSL2. Medido el 2026-10-04 en dos rondas indepen
 
 Es normal que el detector de tempo marque el doble del BPM.
 
-## El silencio final se recorta solo
+## Duración exacta
 
-ACE-Step genera exactamente los segundos pedidos, pero suele **terminar la música antes** y rellenar el resto con silencio. Medido por debajo de −50 dB, quedaron 0,8 s de silencio en pistas de 60 s, entre 0 y 5 s en pistas de 30 s y 10–11 s en pistas de 20 s. El script recorta esa cola con ffmpeg (`areverse,silenceremove,areverse`, umbral `SILENCIO_DB = -50`), así que **la pista final puede durar menos que `--duration`**. Por ejemplo, `lofi-jazz` pedido a 30 s quedó en 22,5 s.
+ACE-Step suele terminar la música antes de los segundos pedidos, así que el script recorta el silencio final (`areverse,silenceremove,areverse`, umbral −50 dB) y después decide según lo que queda:
 
-Por eso conviene pedir **30 s o más**, con margen sobre lo que necesitas.
+- Si queda igual o más que `--duration`, corta en esos segundos con un fade de salida de 2 s (si son menos de 6, un tercio de ellos). La pista dura `--duration` con ±10 ms.
+- Si queda menos, regenera la pista con otra semilla, hasta 2 veces (`@@progress` lo muestra como `retry 1/2`). Se queda con la más larga.
+- Si sigue corta, la deja como está y marca el aviso `music_short` con su duración real, que la app muestra junto a la pista.
+
+Cada pista deja su `<pista>.result.json` (lo pedido, la duración real y el aviso) y el trabajo deja `tracks.json` (ver abajo).
+
+## Muestras de 10 s (el buscador)
+
+`studio music samples` genera una muestra de 10 s por preset en `server/data/music/samples/<preset>.wav`, con ACE-Step, sin planificador LM y con una semilla fija: cada muestra sale igual. Es un trabajo de la cola `music.samples` (usa la GPU con su candado). Solo genera las que faltan; `--force` las regenera todas. La app sirve esas muestras con el ▶ de cada estilo.
+
+## Las pistas de un trabajo (`tracks.json`)
+
+Cada trabajo de música deja en su carpeta `tracks.json`, una fila por pista: archivo, estilo, variante, duración pedida y real, aviso `music_short`, voz detectada con demucs (`null` si no se evaluó), LUFS, tonalidad y BPM. La pista elegida en la app queda en `chosen`.
+
+## La sección Música de la app
+
+Motor (ACE-Step recomendado, máximo 600 s; HeartMuLa, 240 s), duración con presets y «Igualar a…» (una narración terminada o un archivo, más una cola de 2 s), estilos con buscador, categoría, modo mayor o menor, rango de BPM y ★ para los favoritos, o «Texto libre» (descripción en inglés, tonalidad, BPM y compás). «Avanzado» tiene variantes (1 a 6), sin LM, evaluar la voz y reintentos. Generar encola un solo trabajo; al terminar, «Comparar» muestra las pistas y «Elegir» deja una sola. «Mandar a Mezclar» llega con la 016.
 
 ## Cómo usarlo en un video (guía para la IA)
 
 Flujo recomendado:
 
-1. **Mide la narración primero** (`ffprobe` sobre el `.wav` de `out/narration/`). Pide la música con `--duration` = narración + 10 s (**mínimo 30**) y revisa los segundos que imprime el script: tienen que cubrir la narración.
+1. **Mide la narración primero** (`ffprobe` sobre el `.wav` de `out/narration/`). Pide la música con `--duration` = narración + 10 s y revisa el aviso `music_short` del trabajo: si aparece, la pista quedó más corta.
 2. **Genera 3–5 presets en una sola corrida** con `--duration 30` (o `--no-lm` para ir más rápido) para que el usuario elija de oído. Después regenera el elegido con la duración final y con el LM activo. La tonalidad y el BPM se mantienen; la melodía cambia en cada corrida.
 3. **No anuncies que suena bien sin escucharlo.** Verifica la duración, el volumen y el espectrograma (ver "Cómo verificar"). El gusto lo decide el usuario: entrégale las rutas.
 4. **Mezcla bajo la voz** con ducking: la música baja sola cuando hay narración. El comando está probado con una narración de Qwen y una pista de ACE-Step, y da una mezcla de −20 dB de media con picos de −4 dB:

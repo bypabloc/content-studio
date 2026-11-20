@@ -18,7 +18,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | [008](008-atomic-components/README.md) | Componentes con Atomic Design: unos 64 componentes de klinikae (`@base-ui/react` + shadcn v4) en `shared/components/{atoms,molecules,organisms}`, `useForm`, tokens, AppShell, y bloqueo de etiquetas HTML nativas fuera de los átomos | refactor · feature | 007 | DON |
 | 009 | Iconos aplicados: criterio de solo icono y los iconos del shell, la cola, Narración y Ajustes, con los `UIIcon`, `UIIconButton` y `UITooltip` de la 008 | feature | 008 | DON |
 | 010 | Voces (catálogo y construir) + Grabar (micrófono en la UI) | feature | 009 | DON |
-| [011](011-music-section/README.md) | Sección Música (duración) | feature | 010 | PEN |
+| 011 | Sección Música (duración exacta, muestras, comparar y elegir) | feature | 010 | DON |
 | [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | PEN |
 | [013](013-whisper-cleaner/README.md) | faster-whisper + Limpiador de silencios (audio y video, revisión en línea de tiempo) | feature | 012 | PEN |
 | [014](014-subtitles/README.md) | Subtítulos: SRT/VTT, editor, quemar, estilo redes (ASS) | feature | 013 | PEN |

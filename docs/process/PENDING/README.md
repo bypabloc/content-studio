@@ -19,7 +19,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [001-duracion-de-audio](001-duracion-de-audio.md) | La duración de música y narración no coincide con la pedida (igual en `dev`) | Antes de publicar el lote | Usuario y agente |
 | [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |
 | [003-bajar-baselines](003-bajar-baselines.md) | Vaciar los baselines de tamaño, espejo y cobertura, y los overrides de mypy, a medida que se tocan los archivos | En cada spec que toque un módulo de la lista | Agente |
-| [004-db-antes-del-subcomando](004-db-antes-del-subcomando.md) | `studio --db` solo se acepta antes del subcomando | La 010 o la 011 | Agente |
 | [004-eventos-cli-sin-sse](004-eventos-cli-sin-sse.md) | Los cambios de la CLI sobre trabajos que el server no corre no salen por SSE | Antes de la 005 | Agente |
 | [004-httpx-deprecado](004-httpx-deprecado.md) | `starlette.testclient` avisa que httpx 0.28 está deprecado | Cuando starlette soporte httpx nuevo | Agente |
 | [005-node-modules-del-principal](005-node-modules-del-principal.md) | El node_modules del principal recibió dependencias del worktree 005 (regenerable) | Después del lote | Usuario |
@@ -49,3 +48,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [010-contraste-tema-oscuro](010-contraste-tema-oscuro.md) | Contraste del tema oscuro en Mis voces y el catálogo: medir y decidir (tokens del design system) | Después de publicar la 010 | Agente |
 | [010-whisper-a-faster-whisper](010-whisper-a-faster-whisper.md) | El chequeo y la evaluación de tomas usan openai-whisper; la 013 pasa a faster-whisper | En la 013 | Agente |
 | [010-construir-voces-reales](010-construir-voces-reales.md) | El build real del catálogo sobre las voces del usuario (AC-7): decidir voces y ejecutar | Cuando el usuario lo pida; no bloquea el merge | Usuario |
+| [011-generar-muestras](011-generar-muestras.md) | Generar las 126 muestras de 10 s del buscador (corrida larga en GPU) | Después del merge a dev | Agente o usuario |
+| [011-escucha-muestras](011-escucha-muestras.md) | Escuchar `lofi-chill`: el espectrograma muestra transitorios; el gusto lo decide el usuario | Antes de generar las 126 | Usuario |
+| [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |

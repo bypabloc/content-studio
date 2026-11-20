@@ -2,6 +2,7 @@
 # de motores, modelos y voces. Nunca agregar palabras en español.
 acestep
 acmr
+afade
 addopts
 aformat
 afrobeat

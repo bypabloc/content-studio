@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
+from pathlib import Path as FsPath
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Path, Request
@@ -10,9 +12,10 @@ from pydantic import BaseModel
 
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
-from content_studio.api.schemas import Job
+from content_studio.api.schemas import ChooseIn, Job
 from content_studio.db import jobs as store
 from content_studio.jobs import queue
+from content_studio.music.manifest import MANIFEST
 
 router = APIRouter()
 JobId = Annotated[int, Path(ge=1, le=2**63 - 1)]  # los ids de SQLite van de 1 a 2^63-1: fuera, 422 y no 500
@@ -93,3 +96,19 @@ def star_job(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn
         raise ApiError(409, 'job_not_a_take', job_id=job_id)
     store.star(conn, job_id)
     return _found(conn, job_id)
+
+
+@router.post('/jobs/{job_id}/choose')
+def choose_track(job_id: JobId, body: ChooseIn, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
+    """Elige una pista de un trabajo de música: queda como `chosen` de su `tracks.json`. 409 si el trabajo no es de
+    música o no terminó; 422 si el archivo no es una de sus pistas."""
+    job = _found(conn, job_id)
+    manifest_path = FsPath(job['output_dir'] or '') / MANIFEST
+    if job['status'] != 'done' or job['kind'] != 'music' or not manifest_path.is_file():
+        raise ApiError(409, 'job_not_music_tracks', job_id=job_id)
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    if body.file not in {track['file'] for track in manifest['tracks']}:
+        raise ApiError(422, 'unknown_track', file=body.file)
+    manifest['chosen'] = body.file
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+    return manifest

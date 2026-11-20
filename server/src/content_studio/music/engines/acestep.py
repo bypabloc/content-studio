@@ -11,8 +11,8 @@ from pathlib import Path
 
 from content_studio import paths
 from content_studio.common import progress
+from content_studio.music.duration import finish, plan_duration
 from content_studio.music.engines.base import Jobs, MusicEngine
-from content_studio.music.evaluation import trim_silence
 
 ACE_REPO = paths.MUSIC / 'models' / 'ACE-Step-1.5'
 
@@ -51,7 +51,14 @@ class AceStep(MusicEngine):
                 offload_to_cpu=True,
             )
 
-        config = GenerationConfig(batch_size=1, use_random_seed=True, audio_format='wav')
+        # Con semilla fija (las muestras, spec 011), la misma en cada pista; sin ella, una semilla nueva por pista.
+        seed = getattr(a, 'seed', None)
+        config = GenerationConfig(
+            batch_size=1,
+            use_random_seed=seed is None,
+            seeds=None if seed is None else [seed],
+            audio_format='wav',
+        )
         for n, (style, output) in enumerate(jobs, 1):
             progress.emit((n - 1) / len(jobs), f'track {n}/{len(jobs)}')
             params = GenerationParams(
@@ -61,7 +68,7 @@ class AceStep(MusicEngine):
                 bpm=style['bpm'],
                 keyscale=style['key'],
                 timesignature=style['time_signature'],
-                duration=a.duration,
+                duration=plan_duration(a.duration, self.spec.max_seconds),
                 thinking=not a.no_lm,
             )
             r = generate_music(dit, llm, params, config, save_dir=str(output.parent))
@@ -69,5 +76,5 @@ class AceStep(MusicEngine):
                 print(f'ACE-Step failed on {output.name}: {r.error}')
                 continue
             Path(r.audios[0]['path']).replace(output)
-            remaining = trim_silence(output)
+            remaining = finish(output, a.duration)
             print(f'{output} ({remaining:.1f} s after trimming silence; {style["key"]}, {style["bpm"]} BPM)')

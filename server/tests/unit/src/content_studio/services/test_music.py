@@ -51,7 +51,7 @@ def test_free_text_style_needs_key_and_bpm(installed):
     ('params', 'code'),
     [
         ({**VALID, 'model': 'nope'}, 'unknown_engine'),
-        ({**VALID, 'duration': 700}, 'invalid_duration'),
+        ({**VALID, 'duration': 700}, 'duration_over_max'),
         ({**VALID, 'duration': 0}, 'invalid_duration'),
     ],
 )
@@ -63,3 +63,23 @@ def test_engine_not_installed_is_reported(tmp_path, monkeypatch):
     monkeypatch.setattr(paths, 'MUSIC', tmp_path)  # sin venv
 
     assert [error['code'] for error in music.validate(VALID)] == ['engine_not_installed']
+
+
+def test_group_key_is_the_same_for_the_variants_of_one_request_and_ignores_the_seed():
+    """AC-8 (D-6): las variantes de un pedido comparten grupo, y la semilla no cuenta para formarlo."""
+    one = {**VALID, 'style': ['lofi-chill', 'corporate'], 'variants': 2, 'seed': 1}
+    other_seed = {**one, 'seed': 2}
+
+    assert music.group_key(one) == music.group_key(other_seed)
+    assert music.group_key(one).startswith('music:')
+
+
+def test_group_key_changes_with_the_request():
+    assert music.group_key({**VALID, 'style': ['lofi-chill']}) != music.group_key({**VALID, 'style': ['corporate']})
+
+
+def test_prepare_gives_the_params_and_their_group_key():
+    params, group = music.prepare(None, VALID)
+
+    assert params == VALID
+    assert group == music.group_key(VALID)

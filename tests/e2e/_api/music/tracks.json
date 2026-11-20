@@ -1,0 +1,53 @@
+{
+  "tracks": [
+    {
+      "file": "acestep-lofi-chill-v1.wav",
+      "style": "lofi-chill",
+      "variant": 1,
+      "requested": 60,
+      "duration": 60.0,
+      "warning": null,
+      "voice": false,
+      "lufs": -16.1,
+      "key": "C Major",
+      "bpm": 80
+    },
+    {
+      "file": "acestep-lofi-chill-v2.wav",
+      "style": "lofi-chill",
+      "variant": 2,
+      "requested": 60,
+      "duration": 60.0,
+      "warning": null,
+      "voice": false,
+      "lufs": -15.9,
+      "key": "C Major",
+      "bpm": 80
+    },
+    {
+      "file": "acestep-corporate-minimal-v1.wav",
+      "style": "corporate-minimal",
+      "variant": 1,
+      "requested": 60,
+      "duration": 58.4,
+      "warning": null,
+      "voice": true,
+      "lufs": -17.2,
+      "key": "G Major",
+      "bpm": 100
+    },
+    {
+      "file": "acestep-corporate-minimal-v2.wav",
+      "style": "corporate-minimal",
+      "variant": 2,
+      "requested": 60,
+      "duration": 60.0,
+      "warning": null,
+      "voice": false,
+      "lufs": -16.8,
+      "key": "G Major",
+      "bpm": 100
+    }
+  ],
+  "chosen": null
+}
