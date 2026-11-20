@@ -812,6 +812,34 @@ export interface components {
             /** Value */
             value: unknown;
         };
+        /**
+         * StyleOut
+         * @description Un preset del catálogo de Música (spec 011, D-2): su categoría, tonalidad, BPM, compás y si tiene muestra.
+         */
+        StyleOut: {
+            /** Key */
+            key: string;
+            /** Category */
+            category: string;
+            /** Musical Key */
+            musical_key: string;
+            /** Bpm */
+            bpm: number;
+            /** Time Signature */
+            time_signature: string;
+            /** Caption */
+            caption: string;
+            /** Has Sample */
+            has_sample: boolean;
+        };
+        /**
+         * StylesOut
+         * @description Respuesta de `GET /music/styles`: el catálogo completo.
+         */
+        StylesOut: {
+            /** Styles */
+            styles: components["schemas"]["StyleOut"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1321,9 +1349,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["StylesOut"];
                 };
             };
         };
