@@ -7,7 +7,7 @@ test('AC-9: soltar dos guiones .json encola dos trabajos, uno por archivo', asyn
   const { calls } = await openApp(page, { replies: narrationReplies(state) });
   await goToNarration(page);
   // Soltar antes de que llegue el catálogo no encola nada (ready = motor y estilo): esperar el motor primero.
-  await expect(page.getByRole('combobox', { name: 'Motor' })).toHaveValue('voxcpm2');
+  await expect(page.getByRole('combobox', { name: 'Motor' })).toHaveValue(/voxcpm2/);
   await expect.poll(() => hasListener(page, 'tauri://drag-drop')).toBe(true);
 
   await emitEvent(page, 'tauri://drag-drop', {

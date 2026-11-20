@@ -45,4 +45,3 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [008-licensedialog-ubicacion](008-licensedialog-ubicacion.md) | `LicenseDialog` sigue en la raíz de `shared/components/`, sin nivel de D-3 | La T6 | Agente |
 | [008-revision-visual-organismos](008-revision-visual-organismos.md) | Las celdas, el asa y el título de los organismos adaptados no se miraron en la app | La T5 y la T6 | Agente y usuario |
 | [008-inventario-d3](008-inventario-d3.md) | La tabla de D-3 no lista `UIFieldFrame`, `UIQrCode` ni los dos átomos de gráfica | La T8 | Agente |
-| [008-uitext-className](008-uitext-className.md) | `UIText` concatena `className` sin fusionar las clases de color | La T5 | Agente |

@@ -1,5 +1,6 @@
 import {
   ListOrdered,
+  Mic,
   PanelLeftClose,
   PanelLeftOpen,
   Bell,
@@ -140,6 +141,7 @@ const ICONS = {
   mail: Mail,
   'map-pin': MapPin,
   monitor: Monitor,
+  mic: Mic,
   'panel-left-close': PanelLeftClose,
   'panel-left-open': PanelLeftOpen,
   moon: Moon,

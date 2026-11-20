@@ -1,3 +1,4 @@
+import { cn } from 'cn'
 import type { ReactNode } from 'react'
 
 const VARIANTS = {
@@ -24,7 +25,7 @@ type Props = { variant?: keyof typeof VARIANTS; children: ReactNode; className?:
 export function UIText({ variant = 'body', children, className = '', id }: Props): React.JSX.Element {
   const { tag: Tag, className: base } = VARIANTS[variant]
   return (
-    <Tag id={id} className={`${base} ${className}`}>
+    <Tag id={id} className={cn(base, className)}>
       {children}
     </Tag>
   )

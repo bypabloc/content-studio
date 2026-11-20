@@ -29,4 +29,12 @@ describe('UIText', () => {
     render(<UIText id="reason">M</UIText>)
     expect(document.getElementById('reason')?.textContent).toBe('M')
   })
+
+  it('WHEN className trae un color THEN reemplaza el de la variante, como en UIButton', () => {
+    render(<UIText className="text-primary">B</UIText>)
+
+    const body = screen.getByText('B')
+    expect(body.className).toContain('text-primary')
+    expect(body.className).not.toContain('text-foreground-secondary')
+  })
 })

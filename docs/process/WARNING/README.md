@@ -83,5 +83,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-graficas-carga-perezosa](008-graficas-carga-perezosa.md) | Gráficas con `lazy()` y dos átomos nuevos (cruz y hueco) fuera del inventario de D-3 | antes de dev |
 | [008-fechas-intl-es](008-fechas-intl-es.md) | `UIDateRangePicker` formatea en `es` fijo, sin el idioma activo | el cierre de la 008 |
 | [008-workers-vitest](008-workers-vitest.md) | vitest usa 6 workers: con 23, los selectores `lazy()` no llegan a su espera de 5 s en esta máquina | antes de dev |
+| [008-appshell-cola-bajo-secciones](008-appshell-cola-bajo-secciones.md) | La cola va bajo las secciones de la barra, no a la derecha como dice AC-7 (Ronda 5 y «como antes») | antes de dev |
+| [008-e2e-narracion-combobox](008-e2e-narracion-combobox.md) | Los e2e de narración esperan el combobox del motor («★ voxcpm2»), no un select nativo; el e2e no está en `all` | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
