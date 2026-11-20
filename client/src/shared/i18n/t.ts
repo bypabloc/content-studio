@@ -9,6 +9,14 @@ export function hasMessage(key: string): boolean {
   return key in CATALOGS.es;
 }
 
+/** Tipos de los ids que tienen etiqueta (`label.<tipo>.<id>` en el catálogo, spec 007, D-7). */
+export type LabelKind = 'narration.style' | 'narration.engine' | 'music.style' | 'music.model';
+
+/** Nombre o nota de un estilo, motor o modelo en el idioma activo. Un id sin etiqueta se muestra tal cual. */
+export function label(kind: LabelKind, id: string): string {
+  return t(`label.${kind}.${id}` as MessageKey);
+}
+
 /**
  * Texto visible en el idioma activo. `{nombre}` se reemplaza por el parámetro. Sin texto en ese idioma, usa español;
  * sin texto en ninguno, devuelve la clave tal cual para que se note en pantalla.

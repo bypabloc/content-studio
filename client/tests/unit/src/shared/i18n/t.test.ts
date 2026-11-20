@@ -1,9 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { t, type MessageKey } from '@/shared/i18n/t';
+import { label, t, type MessageKey } from '@/shared/i18n/t';
 import { setLocale } from '@/shared/i18n/locale';
 
 describe('t', () => {
   beforeEach(() => setLocale('es'));
+
+  it('label() da el nombre de un estilo, motor o modelo en el idioma activo', () => {
+    expect(label('narration.style', 'expert')).toBe('Experto');
+    setLocale('en');
+    expect(label('narration.style', 'expert')).toBe('Expert');
+  });
 
   it('usa el idioma activo', () => {
     setLocale('en');

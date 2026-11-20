@@ -51,7 +51,7 @@ describe('NarrationOptions', () => {
     await renderOptions();
 
     expect(await screen.findByRole('option', { name: '★ voxcpm2' })).toBeTruthy();
-    expect(await screen.findByRole('option', { name: '★ expert' })).toBeTruthy();
+    expect(await screen.findByRole('option', { name: '★ Experto' })).toBeTruthy();
   });
 
   it('AC-7: elegir un motor con licencia no comercial pide aceptarla, y al cancelar vuelve a la opción anterior', async () => {

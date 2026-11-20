@@ -4,7 +4,7 @@ import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { LicenseDialog } from '@/shared/components/LicenseDialog';
 import { RecommendedSelect } from '@/shared/components/RecommendedSelect';
-import { t } from '@/shared/i18n/t';
+import { label, t } from '@/shared/i18n/t';
 import { AdvancedOptions } from './AdvancedOptions';
 import { type CatalogEngine, useNarrationChoice } from './useNarrationChoice';
 
@@ -67,7 +67,7 @@ export function NarrationOptions() {
           label: engine.commercial ? engine.id : `${engine.id} (${t('narration.engine.noncommercial')})`,
           recommended: engine.recommended,
           disabled: !engine.installed,
-          hint: engine.note,
+          hint: label('narration.engine', engine.id),
         }))}
         beforeChange={confirmLicense}
       />
@@ -79,7 +79,11 @@ export function NarrationOptions() {
       <RecommendedSelect
         settingKey="select.narration.style"
         label={t('narration.options.style')}
-        options={choice.styles.map((style) => ({ value: style.id, label: style.id, recommended: style.recommended }))}
+        options={choice.styles.map((style) => ({
+          value: style.id,
+          label: label('narration.style', style.id),
+          recommended: style.recommended,
+        }))}
       />
       <RecommendedSelect
         settingKey="select.narration.language"
