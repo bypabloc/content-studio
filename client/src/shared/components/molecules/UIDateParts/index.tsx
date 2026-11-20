@@ -1,5 +1,7 @@
+import { useId } from 'react'
 import { UIField } from '../UIField'
 import { UIBox } from '../../atoms/UIBox'
+import { UIText } from '../../atoms/UIText'
 
 type Parts = { day: string; month: string; year: string }
 type Props = {
@@ -12,17 +14,20 @@ type Props = {
 const PARTS = ['day', 'month', 'year'] as const
 
 /**
- * Fecha en tres campos numéricos (día, mes y año) dentro de un `fieldset`
- * nombrado por su leyenda. Es controlado y avisa qué parte cambió.
+ * Fecha en tres campos numéricos (día, mes y año) dentro de un grupo nombrado por su título visible. Es controlado y
+ * avisa qué parte cambió. El grupo es un `role="group"` y no un `fieldset`: `aria-labelledby` lo nombra con el título.
  *
  * @author Pablo Contreras
  * @since 2026/11/10
  * @since 2026/11/19
  */
 export function UIDateParts({ label, labels, values, onChange }: Props): React.JSX.Element {
+  const titleId = useId()
   return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="ui-typography-caption font-bold text-foreground-secondary">{label}</legend>
+    <UIBox role="group" aria-labelledby={titleId} className="flex flex-col gap-2">
+      <UIText id={titleId} variant="caption" className="font-bold text-foreground-secondary">
+        {label}
+      </UIText>
       <UIBox className="grid grid-cols-3 gap-2">
         {PARTS.map((part) => (
           <UIField
@@ -34,6 +39,6 @@ export function UIDateParts({ label, labels, values, onChange }: Props): React.J
           />
         ))}
       </UIBox>
-    </fieldset>
+    </UIBox>
   )
 }

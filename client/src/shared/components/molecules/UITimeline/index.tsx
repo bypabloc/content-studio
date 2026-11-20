@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { UIBox } from '../../atoms/UIBox'
+import { UITime } from '../../atoms/UITime'
 
 /** Entrada de `UITimeline`: `dateTime` ISO para `<time>` y `date` ya formateada. */
 export type UITimelineItem = { key: string | number; dateTime: string; date: string; children: ReactNode }
@@ -19,9 +20,9 @@ export function UITimeline({ label, items }: { label: string; items: UITimelineI
       {items.map(({ key, dateTime, date, children }) => (
         <UIBox role="listitem" key={key} className="motion-safe:animate-ui-enter relative flex flex-col gap-2 border-l-2 border-border pb-6 pl-6 last:pb-0">
           <UIBox as="span" aria-hidden="true" className="absolute top-1 -left-[7px] size-3 rounded-full bg-primary ring-4 ring-background" />
-          <time dateTime={dateTime} className="ui-typography-caption font-bold text-foreground-secondary">
+          <UITime dateTime={dateTime} className="ui-typography-caption font-bold text-foreground-secondary">
             {date}
-          </time>
+          </UITime>
           {children}
         </UIBox>
       ))}

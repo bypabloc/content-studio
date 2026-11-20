@@ -87,5 +87,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-e2e-narracion-combobox](008-e2e-narracion-combobox.md) | Los e2e de narración esperan el combobox del motor («★ voxcpm2»), no un select nativo; el e2e no está en `all` | antes de dev |
 | [008-licensedialog-en-narracion](008-licensedialog-en-narracion.md) | `LicenseDialog` pasa a `features/narration` sobre `UIDialog`; el foco inicial ya no cae en «Aceptar» | antes de dev |
 | [008-atomos-nuevos-t6](008-atomos-nuevos-t6.md) | Átomo `UIImage`, `play` y `pause` en `UIIcon`, `role` en vez de `output` y `aside`; el reproductor pasa a 44 px | antes de dev |
+| [008-ui-structure-etapa](008-ui-structure-etapa.md) | La etapa `ui-structure` (AST) bloquea etiquetas nativas fuera de átomos; `fieldset` pasa a `role="group"` y `time` a `UITime` | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

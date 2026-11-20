@@ -8,6 +8,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "typecheck": "tsc --noEmit",
     "loose-texts": "bun scripts/loose-texts.ts",
+    "ui-structure": "bun scripts/ui-structure.ts",
     "lint": "oxlint -c .oxlintrc.json src tests",
     "test": "vitest run --coverage",
     "gen:api": "mkdir -p ../tmp/gen-api && uv run --project .. studio openapi > ../tmp/gen-api/openapi.json && openapi-typescript ../tmp/gen-api/openapi.json -o src/shared/api/schema.d.ts"
