@@ -5,6 +5,6 @@
 - **Curva del fade**: `hsin` (media sinusoide). Medido sobre un tono de 34 s: `lin` baja 16,8 dB en el último medio segundo, y no cumple el AC-2 (-20 dB). `exp` cae a silencio digital al final. `hsin` baja 23,6 dB, y la rampa es suave.
 - **Dónde queda el recorte de silencio**: en `music/evaluation.py`, como hoy. La spec decía «si estaba suelto en `music_main.py`», pero no estaba ahí.
 - **Descartadas**: el loop con crossfade (la spec ya lo descartó) y el «aproximado» de antes.
-- **Pendiente de este grupo**: el reintento cuando la pista sale corta (AC-3) va en el siguiente grupo. Hasta entonces, una pista corta se devuelve tal cual, sin aviso.
+- **Reintentos (AC-3)**: `music_main.render` regenera las pistas que salen más cortas que `TOLERANCE_S` (0,05 s), hasta 2 veces, con un `@@progress retry n/2` por intento. Se queda con la más larga: el intento anterior se guarda en `<pista>.best.wav` mientras se prueba el nuevo y se restaura si el nuevo es más corto. Cada pista deja `<pista>.result.json` con `requested`, `duration` y `warning` (`music_short` si sigue corta). El aviso lo muestra la UI en el grupo 7; por eso su texto (`music.warning.music_short`) va con esa UI, para que no quede una clave sin uso.
 - **Cómo revertir**: quitar `finish` y `plan_duration` de los motores (volver a `trim_silence` y `duration=a.duration`), y `MusicSpec.max_seconds`.
 - **Cómo comprobarla**: `music/test_duration.py` (AC-1, AC-2, el fade de 4 s y `finish`) y los doctests de `duration.py`. En ACE-Step real, AC-9 (verificación final).

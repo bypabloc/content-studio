@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 import subprocess
 from pathlib import Path
@@ -11,6 +12,25 @@ from content_studio.music.evaluation import trim_silence
 FADE_S = 2.0  # el fade de salida de una pista exacta
 MARGIN = 0.25  # lo que se pide de más: el recorte del silencio final se come parte de la pista
 MIN_EXTRA_S = 10  # y al menos esto de más, para las pistas cortas
+TOLERANCE_S = 0.05  # una pista más corta que lo pedido por esto ya es corta (el corte deja ±10 ms)
+
+
+def length(path: Path) -> float:
+    """Duración del archivo en segundos (ffprobe)."""
+    out = subprocess.run(
+        ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', path],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    return float(out)
+
+
+def write_result(output: Path, requested: float, duration: float) -> None:
+    """Deja `<pista>.result.json` con lo pedido, lo que dura y el aviso `music_short` si salió corta."""
+    warning = 'music_short' if duration < requested - TOLERANCE_S else None
+    result = {'requested': requested, 'duration': round(duration, 3), 'warning': warning}
+    output.with_suffix('.result.json').write_text(json.dumps(result), encoding='utf-8')
 
 
 def plan_duration(target: float, engine_max: float) -> int:
