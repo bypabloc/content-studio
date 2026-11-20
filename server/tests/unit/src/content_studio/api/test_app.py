@@ -1,6 +1,50 @@
-"""Token de la API (spec 004, D-5, AC-6): cada ruta exige el Bearer; el `?token=` solo vale en /files y /events."""
+"""Token de la API (spec 004, D-5, AC-6) y errores en el idioma de Accept-Language (spec 007, AC-2 y D-4).
+
+El AC-2 usa `/jobs/nope`, pero `job_id` es entero en la ruta: FastAPI rechaza `nope` con 422 antes de llegar al error de
+dominio (ficha WARNING 007-job-id-entero). Por eso estas pruebas usan un id numérico que no existe.
+"""
 
 from __future__ import annotations
+
+from content_studio import messages
+
+
+def test_ac2_job_not_found_answers_in_the_accepted_language(api):
+    headers = {**api.headers, 'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8'}
+
+    body = api.client.get('/jobs/999', headers=headers).json()
+
+    assert body == {
+        'code': 'job_not_found',
+        'params': {'job_id': 999},
+        'message': messages.t('error.job_not_found', 'pt', job_id=999),
+    }
+    assert body['message'] != messages.t('error.job_not_found', 'es', job_id=999)
+
+
+def test_ac2_english_is_answered_in_english(api):
+    body = api.client.get('/jobs/999', headers={**api.headers, 'Accept-Language': 'en'}).json()
+
+    assert body['message'] == messages.t('error.job_not_found', 'en', job_id=999)
+
+
+def test_ac2_an_unsupported_language_is_answered_in_spanish(api):
+    body = api.client.get('/jobs/999', headers={**api.headers, 'Accept-Language': 'fr-FR'}).json()
+
+    assert body['message'] == messages.t('error.job_not_found', 'es', job_id=999)
+
+
+def test_ac2_without_the_header_the_answer_is_in_spanish(api):
+    body = api.client.get('/jobs/999', headers=api.headers).json()
+
+    assert body['message'] == messages.t('error.job_not_found', 'es', job_id=999)
+
+
+def test_ac2_an_unknown_route_answers_with_its_http_code_and_text(api):
+    response = api.client.get('/ruta/que/no/existe', headers={'Accept-Language': 'en'})
+
+    assert response.status_code == 404
+    assert response.json() == {'code': 'http.404', 'params': {}, 'message': messages.t('error.http.404', 'en')}
 
 
 def test_ac6_every_endpoint_needs_the_bearer_token(api):

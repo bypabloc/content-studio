@@ -111,7 +111,7 @@ def run(kind: str, params: dict[str, Any], db: Path, main: Path) -> int:
             job_id = queue.enqueue(conn, kind, params, SERVICES)
         except queue.InvalidJob as error:
             for item in error.errors:
-                print(t(item['code'], **item['params']), file=sys.stderr)
+                print(t(f'error.{item["code"]}', **item['params']), file=sys.stderr)
             return 2
     status = Worker(db, main, publish=_show_progress).run_now(job_id)
     with closing(connection.connect(db)) as conn:

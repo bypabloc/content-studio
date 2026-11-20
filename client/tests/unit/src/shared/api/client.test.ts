@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApi } from '@/shared/api/client';
 import { ApiError } from '@/shared/api/errors';
+import { setLocale } from '@/shared/i18n/locale';
 
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
 
@@ -9,13 +10,29 @@ function reply(body: unknown, status = 200) {
 }
 
 describe('createApi', () => {
+  beforeEach(() => setLocale('es'));
+
   it('manda el Bearer y la URL completa', async () => {
     const fetcher = reply({ paused: false });
     await createApi(connection, fetcher).get('/queue');
 
     expect(fetcher).toHaveBeenCalledWith(
       'http://127.0.0.1:9000/queue',
-      expect.objectContaining({ method: 'GET', headers: { Authorization: 'Bearer tok' } }),
+      expect.objectContaining({
+        method: 'GET',
+        headers: { Authorization: 'Bearer tok', 'Accept-Language': 'es' },
+      }),
+    );
+  });
+
+  it('manda el idioma activo en Accept-Language (AC-7)', async () => {
+    setLocale('pt');
+    const fetcher = reply({ paused: false });
+    await createApi(connection, fetcher).get('/queue');
+
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://127.0.0.1:9000/queue',
+      expect.objectContaining({ headers: expect.objectContaining({ 'Accept-Language': 'pt' }) }),
     );
   });
 
@@ -28,7 +45,7 @@ describe('createApi', () => {
       expect.objectContaining({
         method: 'PUT',
         body: '{"value":"dark"}',
-        headers: { Authorization: 'Bearer tok', 'Content-Type': 'application/json' },
+        headers: { Authorization: 'Bearer tok', 'Accept-Language': 'es', 'Content-Type': 'application/json' },
       }),
     );
   });
@@ -40,7 +57,7 @@ describe('createApi', () => {
       .catch((caught: unknown) => caught);
 
     expect(error).toBeInstanceOf(ApiError);
-    expect(error).toMatchObject({ status: 404, code: 'job_not_found', message: 'No existe el trabajo 3' });
+    expect(error).toMatchObject({ status: 404, code: 'job_not_found', message: 'No existe el trabajo 3.' });
   });
 
   it('fileUrl da la URL de un archivo con el token en la consulta, para el <audio> y la forma de onda', () => {

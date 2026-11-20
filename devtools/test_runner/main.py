@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import sys
 
-from . import budget, changeset, client, guard_tdd, lint, spelling, tdd, typecheck, unit, validators
+from . import budget, changeset, client, guard_tdd, i18n, lint, spelling, tdd, typecheck, unit, validators
 from .flags import parse
 
 STAGES = {
@@ -27,6 +27,7 @@ STAGES = {
     'tauri-check': client.tauri_check,
     'budget': budget.run,
     'e2e': client.e2e,
+    'i18n': i18n.run,
 }
 GROUPS = {
     'all': [
@@ -40,6 +41,7 @@ GROUPS = {
         'client-typecheck',
         'client-unit',
         'budget',
+        'i18n',
     ],
 }
 FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}

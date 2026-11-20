@@ -1,7 +1,7 @@
 import { useMemo, useState, type KeyboardEvent } from 'react';
 import { useShortcut } from '@/shared/hooks/useShortcut';
 import { t } from '@/shared/i18n/t';
-import { NAV, type NavItem } from './nav';
+import { navItems, type NavItem } from './nav';
 
 /** Sin tildes ni mayúsculas, para que una búsqueda sin acento encuentre la sección. */
 function fold(text: string): string {
@@ -9,7 +9,7 @@ function fold(text: string): string {
 }
 
 /** Ctrl+K abre la paleta: escribir filtra las secciones, las flechas eligen y Enter va a la sección. */
-export function CommandPalette({ items = NAV }: { items?: readonly NavItem[] }) {
+export function CommandPalette({ items = navItems() }: { items?: readonly NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);

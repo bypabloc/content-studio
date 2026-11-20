@@ -1,7 +1,7 @@
 import type { LintIssue } from './useScriptLint';
 
 /** Lo que va detrás del campo: el mismo tipo de letra y de sangría, para que cada palabra caiga en su sitio. */
-export const EDITOR_TEXT = 'p-3 font-sans text-base leading-7 whitespace-pre-wrap break-words';
+export const EDITOR_TEXT = 'p-3 font-sans text-base leading-7 whitespace-pre-wrap break-words'; // i18n-ignore: clases de Tailwind de un className, no texto
 
 /** Un trozo del texto: sin `message` va normal; con `message`, es un aviso del linter. */
 export interface Segment {

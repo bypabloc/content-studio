@@ -1,0 +1,22 @@
+{
+  "dynamicPrefixes": [
+    "error.http.",
+    "lint.rule_",
+    "label.narration.style.",
+    "label.narration.engine.",
+    "label.music.style.",
+    "label.music.model."
+  ],
+  "allowed": ["Bearer "],
+  "python": {
+    "include": [
+      "server/src/content_studio/api",
+      "server/src/content_studio/services",
+      "server/src/content_studio/jobs",
+      "server/src/content_studio/messages.py"
+    ]
+  },
+  "ts": {
+    "exclude": ["client/src/components/ui/"]
+  }
+}

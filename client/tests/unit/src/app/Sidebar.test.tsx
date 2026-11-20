@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Sidebar } from '@/app/Sidebar';
-import { NAV } from '@/app/nav';
+import { navItems } from '@/app/nav';
 
 const items = [
   { id: 'narration', group: 'Generar', label: 'Narración' },
@@ -40,6 +40,6 @@ describe('Sidebar', () => {
   it('sin items dados, el menú sale de nav.ts', () => {
     render(<Sidebar />);
 
-    for (const item of NAV) expect(screen.getByRole('link', { name: item.label })).toBeTruthy();
+    for (const item of navItems()) expect(screen.getByRole('link', { name: item.label })).toBeTruthy();
   });
 });

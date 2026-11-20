@@ -1,0 +1,4 @@
+{
+  "a.greeting": "Hola {name}",
+  "b.farewell": "Adiós"
+}

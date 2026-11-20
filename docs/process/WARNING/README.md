@@ -65,5 +65,11 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [006-tomas-desde-la-carpeta](006-tomas-desde-la-carpeta.md) | El resultado lee `script.json` y el `.json` de la toma de su carpeta; no hay endpoint nuevo | el merge a `dev` |
 | [006-regenerar-sin-evaluacion](006-regenerar-sin-evaluacion.md) | La toma regenerada no se evalúa con whisper: Comparar la muestra como «Sin evaluar» (AC-3 impide reintentar los bloques ajenos) | antes de main |
 | [006-masterizacion-recalcula-ganancia](006-masterizacion-recalcula-ganancia.md) | Regenerar un párrafo recalcula la ganancia de la toma: los bloques ajenos quedan iguales, pero su nivel en el `.wav` final no queda idéntico | antes de main |
+| [007-job-id-entero](007-job-id-entero.md) | El id de trabajo en la ruta es entero: `/jobs/nope` da 422 de FastAPI y las pruebas usan `/jobs/999` | el merge a `dev` |
+| [007-catalogo-en-el-server](007-catalogo-en-el-server.md) | El catálogo de textos vive en el paquete del server y el client lo importa con `@messages` | antes de main |
+| [007-pt-br](007-pt-br.md) | El portugués es pt-BR (Brasil), no pt genérico ni pt-PT | antes de main |
+| [007-detector-heuristica](007-detector-heuristica.md) | El detector de textos sueltos usa una heurística, no un análisis de lenguaje | antes de main |
+| [007-descripciones-cli](007-descripciones-cli.md) | Las descripciones de motores y modelos del CLI quedan en inglés | antes de main |
+| [007-cspell-pt](007-cspell-pt.md) | El diccionario de portugués de cspell es una dependencia de desarrollo de la raíz | antes de main |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

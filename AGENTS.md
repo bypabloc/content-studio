@@ -34,7 +34,7 @@ uv run --group legacy python -m content_studio.narration.grabar.main   # grabar 
 ```
 server/src/content_studio/
 ├── paths.py                  ROOT, OUT, LOGS, NARRATION, MUSIC, REFERENCE, VOICES…
-├── messages.py               textos de error de la API (messages/es.json)
+├── messages.py               catálogo de textos (messages/{es,en,pt}.json) e idioma de Accept-Language
 ├── common/                   process (relaunch en un venv, use_venv), ffmpeg, files
 ├── cli/                      argparse de `studio`: main (subcomandos), submit (encola), serve (API y worker)
 ├── services/                 un servicio por tipo de trabajo (narration, music); registry.py con SERVICES

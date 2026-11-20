@@ -4,6 +4,7 @@
 version: '0.2'
 import:
   - '@cspell/dict-es-es/cspell-ext.json'
+  - '@cspell/dict-pt-br/cspell-ext.json'
 language: en
 caseSensitive: false
 minWordLength: 4
@@ -41,8 +42,19 @@ overrides:
     language: en,es
     words: [emocion, enfasis, energica, dramatica]
   # Textos de error de la API en español (spec 004, D-5): catálogo de datos, como los de server/data.
+  # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: va por palabra también aquí (spec 007, D-1).
+  # Los nombres de idioma («Español», «Português») son iguales en los tres catálogos (spec 007, D-6): por palabra.
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
+    words: [masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português]
+  # Catálogo en inglés (spec 007, D-9): sus nombres de idioma van por palabra.
+  - filename: 'server/src/content_studio/messages/en.json'
+    language: en
+    words: [español, português]
+  # Catálogo en portugués de Brasil (spec 007, D-9): se revisa con su diccionario, como el español.
+  - filename: 'server/src/content_studio/messages/pt.json'
+    language: en,pt-br
+    words: [celtic, christmas, saas, español]
   # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
   - filename: 'server/src/content_studio/narration/script_lint.py'
     language: en,es

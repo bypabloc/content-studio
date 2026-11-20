@@ -30,7 +30,9 @@ describe('SettingsPage', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    // El idioma en caché es español: sin él, «system» en jsdom (en-US) daría inglés.
     localStorage.clear();
+    localStorage.setItem('ui.language', 'es');
     fetchMock = vi.fn(async (_url: string, init?: RequestInit) =>
       init?.method === 'DELETE' ? reply({ deleted: 2 }) : reply({ key: 'x', value: null }),
     );
@@ -51,6 +53,22 @@ describe('SettingsPage', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         'http://127.0.0.1:9000/settings/ui.theme',
         expect.objectContaining({ method: 'PUT', body: '{"value":"dark"}' }),
+      ),
+    );
+  });
+
+  it('el idioma tiene ★ en Sistema y guarda la elección en ui.language (AC-8)', async () => {
+    renderPage(fetchMock);
+
+    expect(screen.getByRole('option', { name: `★ ${t('language.system')}` })).toBeTruthy();
+    expect(screen.getByRole('option', { name: 'Português' })).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText(t('settings.language')), { target: { value: 'en' } });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        'http://127.0.0.1:9000/settings/ui.language',
+        expect.objectContaining({ method: 'PUT', body: '{"value":"en"}' }),
       ),
     );
   });

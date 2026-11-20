@@ -9,11 +9,6 @@
     "bytes": 6530,
     "lineLength": 907
   },
-  ".agents/rules/worktrees.md": {
-    "lines": 38,
-    "bytes": 2945,
-    "lineLength": 721
-  },
   ".claude/rules/agent-config-testing.md": {
     "lines": 17,
     "bytes": 1772,
@@ -23,10 +18,5 @@
     "lines": 78,
     "bytes": 6316,
     "lineLength": 907
-  },
-  ".claude/rules/worktrees.md": {
-    "lines": 33,
-    "bytes": 2783,
-    "lineLength": 721
   }
 }

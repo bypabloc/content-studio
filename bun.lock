@@ -6,6 +6,7 @@
       "name": "content-studio",
       "devDependencies": {
         "@cspell/dict-es-es": "^3.0.9",
+        "@cspell/dict-pt-br": "2.4.4",
         "cspell": "^10.5.2",
       },
     },
@@ -175,6 +176,8 @@
     "@cspell/dict-php": ["@cspell/dict-php@4.1.3", "", {}, "sha512-41oKzl7rLVrrVZA/Gs0ESnP6KliEX7c+IwaaNmOL3PAoHasFDVEmIFeENIzuDdM12UcHT+MlLkAm3Qw/lS/ERA=="],
 
     "@cspell/dict-powershell": ["@cspell/dict-powershell@5.0.17", "", {}, "sha512-khOoIdBgKRk2scnr7888pf70yJ1Tr3RGdnYcAN0MJ2vtaNRKoOTCFc13gXUkNDHwEyhMI1h9oz3KsT180F2amw=="],
+
+    "@cspell/dict-pt-br": ["@cspell/dict-pt-br@2.4.4", "", {}, "sha512-oIwgc7pTQAXBMlqf0rCZb+WtCWxuE+PAzB77uFzyvNqlPTKfLFh3pkfL0czGYQY/mccAYKbBkeq16B0fzDIDKw=="],
 
     "@cspell/dict-public-licenses": ["@cspell/dict-public-licenses@2.0.17", "", {}, "sha512-Asdumgg3oZ4ki//b2a+beiVIsNZA5thim4t4v3lTDLY/6a8VAPmTjzC3Y2t0x7ywC/bzAhi1KW/fg8JlwHDgig=="],
 

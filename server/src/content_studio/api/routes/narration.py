@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
-from content_studio.messages import t
+from content_studio.messages import negotiate, t
 from content_studio.narration import script_lint
 
 router = APIRouter()
@@ -44,11 +44,14 @@ class LintOut(BaseModel):
 
 
 @router.post('/narration/lint', response_model=LintOut)
-def lint(body: ScriptIn) -> dict:
-    """Incidencias con línea, columna y largo, cada una con el texto de su regla; también palabras y segundos."""
+def lint(body: ScriptIn, request: Request) -> dict:
+    """Incidencias con línea, columna y largo, cada una con su texto en el idioma pedido; y palabras y segundos."""
+    locale = negotiate(request.headers.get('accept-language'))
     issues = script_lint.lint(body.text)
     return {
-        'issues': [{**asdict(issue), 'message': t(f'lint.rule_{issue.rule}', **issue.params)} for issue in issues],
+        'issues': [
+            {**asdict(issue), 'message': t(f'lint.rule_{issue.rule}', locale, **issue.params)} for issue in issues
+        ],
         'words': script_lint.words(body.text),
         'seconds': script_lint.estimate_seconds(body.text, body.style),
         'guide': script_lint.GUIDE,

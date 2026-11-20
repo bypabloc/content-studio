@@ -19,7 +19,7 @@ from content_studio.api.errors import ApiError
 from content_studio.api.routes import catalog, files, health, jobs, media, narration, queue, settings
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
-from content_studio.messages import t
+from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
 
 # La ventana de Tauri pide a la API desde su propio origen: http://tauri.localhost en Windows (tauri://localhost en
@@ -47,8 +47,9 @@ async def _http_error(request: Request, exc: Exception) -> JSONResponse:
     if isinstance(exc, ApiError):
         payload: dict[str, Any] = {'code': exc.code, 'params': exc.params, **exc.extra}
     else:
-        payload = {'code': str(exc.detail), 'params': {}}
-    payload['message'] = t(payload['code'], **payload['params'])
+        payload = {'code': f'http.{exc.status_code}', 'params': {}}
+    locale = negotiate(request.headers.get('accept-language'))
+    payload['message'] = t(f'error.{payload["code"]}', locale, **payload['params'])
     return JSONResponse(payload, status_code=exc.status_code)
 
 
