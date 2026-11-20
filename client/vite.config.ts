@@ -15,6 +15,9 @@ export default defineConfig({
   server: { port: 1420, strictPort: true, fs: { allow: [fileURLToPath(new URL('..', import.meta.url))] } },
   test: {
     environment: 'jsdom',
+    // Con un worker por núcleo, jsdom y los `lazy()` de los selectores pasan del margen de espera en equipos cargados:
+    // con 6 workers, molecules y features pasan completos; con 23, falla un test. Ver WARNING 008-workers-vitest.
+    maxWorkers: 6,
     setupFiles: ['tests/unit/setup.ts'],
     include: ['tests/unit/src/**/*.test.{ts,tsx}'],
     coverage: {

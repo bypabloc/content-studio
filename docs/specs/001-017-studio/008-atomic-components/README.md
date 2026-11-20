@@ -52,5 +52,5 @@ Una etiqueta HTML nativa (`div`, `button`, `input`…) fuera de un átomo, o un 
 
 ## WARNING y PENDING
 
-* WARNING: `008-base-ui-shadcn.md` (D-1 y versiones), `008-excluidos-de-klinikae.md` (D-3), `008-ui-box.md` (D-4: el átomo genérico solo para componentes), `008-tokens-adaptados.md` (D-6), `008-appshell.md` (D-7), `008-paquete-cn.md` (D-1) y `008-budget.md` (D-9: el delta real del bundle).
-* PENDING: `008-sincronizar-con-klinikae.md` (cómo traer las mejoras de klinikae a futuro, sin paquete compartido).
+* WARNING: `008-base-ui-shadcn.md` (D-1 y versiones), `008-excluidos-de-klinikae.md` (D-3), `008-ui-box.md` (D-4: el átomo genérico solo para componentes), `008-tokens-adaptados.md` (D-6), `008-appshell.md` (D-7), `008-paquete-cn.md` (D-1) y `008-budget.md` (D-9: el delta real del bundle), `008-organismos-adaptados.md` (T4), `008-graficas-carga-perezosa.md` (T4) y `008-fechas-intl-es.md` (T4).
+* PENDING: `008-sincronizar-con-klinikae.md` (cómo traer las mejoras de klinikae a futuro, sin paquete compartido), `008-licensedialog-ubicacion.md` (T6), `008-revision-visual-organismos.md` (T5 y T6), `008-inventario-d3.md` (T8) y `008-uitext-className.md` (T5).

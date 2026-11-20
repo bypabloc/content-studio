@@ -70,6 +70,14 @@ overrides:
   - filename: 'client/src/shared/components/molecules/**'
     language: en,es
     words: [autoselecciona, paginación, bloq, mayús, autocapitalización, seleccionables, prefirmadas, renderiza, intrusivos, tipados]
+  # Organismos de klinikae (spec 008, T4): comentarios y títulos de prueba en español que el diccionario es-es no trae.
+  - filename: 'client/**/components/organisms/**'
+    language: en,es
+    words: [animables, audiograma, editables, enfocable, milisegundos, montos, renderiza]
+  # Formularios (spec 008, T4): useForm tiene comentarios en español; «recalcula» no está en el diccionario es-es.
+  - filename: 'client/**/shared/forms/**'
+    language: en,es
+    words: [recalcula]
 ignorePaths:
   # Temporal (D-3): la UI en español de grabar/ la retira la 010 (la CLI `studio` ya no la tiene).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).

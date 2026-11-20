@@ -79,5 +79,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-atomos-adaptados](008-atomos-adaptados.md) | Los átomos de klinikae se adaptan: enlace con hash, set de íconos recortado, pruebas sin jest-dom | antes de dev |
 | [008-moleculas-nativas](008-moleculas-nativas.md) | Las moléculas no tienen etiquetas nativas: átomos o roles ARIA | antes de dev |
 | [008-moleculas-adaptadas](008-moleculas-adaptadas.md) | Adaptaciones de moléculas: selector recordado, tema controlado y tests por rol | antes de dev |
+| [008-organismos-adaptados](008-organismos-adaptados.md) | Organismos sin etiquetas nativas: cierre con `UIButton`, título con rol de encabezado y la barra flotante partida | antes de dev |
+| [008-graficas-carga-perezosa](008-graficas-carga-perezosa.md) | Gráficas con `lazy()` y dos átomos nuevos (cruz y hueco) fuera del inventario de D-3 | antes de dev |
+| [008-fechas-intl-es](008-fechas-intl-es.md) | `UIDateRangePicker` formatea en `es` fijo, sin el idioma activo | el cierre de la 008 |
+| [008-workers-vitest](008-workers-vitest.md) | vitest usa 6 workers: con 23, los selectores `lazy()` no llegan a su espera de 5 s en esta máquina | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
