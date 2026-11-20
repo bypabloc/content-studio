@@ -13,7 +13,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | 003 | test-runner en devtools, tests espejo, tamaño, cobertura, docstrings y typecheck | chore | 002 | DON |
 | [004](004-server-api/README.md) | Server FastAPI + SQLite (jobs, settings) + cola con turno-gpu + SSE + CLI headless; se borra `cli.py` | feature | 003 | IMP |
 | [005](005-client-base/README.md) | Client: Tauri 2, shadcn, catálogo `es.json`, tema light/dark/system, sidebar + cola, selector con estrella, budget, vitest, e2e base | feature | 004 | DON |
-| [006](006-narration-section/README.md) | Sección Narración | feature | 005 | PEN |
+| [006](006-narration-section/README.md) | Sección Narración | feature | 005 | DON |
 | [007](007-icons/README.md) | Iconos (lucide-react), `IconButton` con tooltip y criterio de solo icono; sidebar colapsable | feature | 006 | PEN |
 | [008](008-voices-recording/README.md) | Voces (catálogo y construir) + Grabar (micrófono en la UI) | feature | 007 | PEN |
 | [009](009-music-section/README.md) | Sección Música (duración) | feature | 008 | PEN |
