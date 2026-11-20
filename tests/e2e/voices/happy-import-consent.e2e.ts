@@ -12,6 +12,8 @@ test('AC-6: importar un tramo con el permiso del dueño lo manda al server y vue
   await page.getByRole('button', { name: 'Importar', exact: true }).click();
   await page.getByRole('button', { name: 'Elegir archivo' }).click();
   await expect(page.getByText('entrevista.mp4')).toBeVisible();
+  // La onda del origen llega y propone el tramo de 0 a 10 s (spec 010, D-4).
+  await expect(page.getByRole('spinbutton', { name: /Fin/ })).toHaveValue('10');
   await pickOption(page, 'Estilo', 'Neutro');
   await page.getByRole('spinbutton', { name: /Inicio/ }).fill('2');
   await page.getByRole('spinbutton', { name: /Fin/ }).fill('10');

@@ -471,6 +471,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/voices/import/peaks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Import Peaks
+         * @description La duración y `n` picos de un audio o video de origen, para marcar el tramo sobre su onda (D-4). Solo acepta un
+         *     archivo existente con extensión de audio o video; lo que ffmpeg no lee responde 422 `unreadable_media`.
+         */
+        get: operations["import_peaks_voices_import_peaks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -1588,6 +1609,40 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_peaks_voices_import_peaks_get: {
+        parameters: {
+            query: {
+                path: string;
+                n?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

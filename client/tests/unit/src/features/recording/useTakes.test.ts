@@ -2,7 +2,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useChooseTake, useImportSpan, useStyleTakes, useTakeDetail, useUploadTake } from '@/features/recording/useTakes';
+import {
+  useChooseTake,
+  useImportSpan,
+  useSourcePeaks,
+  useStyleTakes,
+  useTakeDetail,
+  useUploadTake,
+} from '@/features/recording/useTakes';
 
 const { api } = vi.hoisted(() => ({ api: { get: vi.fn(), post: vi.fn(), upload: vi.fn() } }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
@@ -80,5 +87,20 @@ describe('useTakes (spec 010, D-3)', () => {
       consent: true,
     });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ['voices'] });
+  });
+
+  it('useSourcePeaks pide la duración y los picos del origen para su onda', async () => {
+    api.get.mockResolvedValue({ duration: 20, peaks: [0.2, 0.6] });
+
+    const { result } = renderHook(() => useSourcePeaks('C:/videos/charla.mp4'), { wrapper: wrapperWith(new QueryClient()) });
+
+    await waitFor(() => expect(result.current.data).toEqual({ duration: 20, peaks: [0.2, 0.6] }));
+    expect(api.get).toHaveBeenCalledWith(`/voices/import/peaks?path=${encodeURIComponent('C:/videos/charla.mp4')}&n=800`);
+  });
+
+  it('useSourcePeaks sin archivo no pide nada', () => {
+    renderHook(() => useSourcePeaks(''), { wrapper: wrapperWith(new QueryClient()) });
+
+    expect(api.get).not.toHaveBeenCalled();
   });
 });

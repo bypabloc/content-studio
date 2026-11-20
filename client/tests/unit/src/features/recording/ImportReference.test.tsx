@@ -12,6 +12,14 @@ const { api } = vi.hoisted(() => ({
 }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open: vi.fn() }));
+// La onda necesita canvas: aquí es un botón que «mueve la región» a 2–12 s, con el tramo actual como texto.
+vi.mock('@/features/recording/SpanPicker', async () => {
+  const { createElement } = await import('react');
+  return {
+    SpanPicker: ({ start, end, onChange }: { start: number; end: number; onChange: (from: number, to: number) => void }) =>
+      createElement('button', { type: 'button', 'data-testid': 'span-picker', onClick: () => onChange(2, 12) }, `${start}-${end}`),
+  };
+});
 
 const KIT = {
   styles: [
@@ -107,5 +115,38 @@ describe('ImportReference (spec 010, D-4)', () => {
     fireEvent.click(submitButton());
 
     expect(await screen.findByText(t('error.consent_required'))).toBeTruthy();
+  });
+});
+
+const SOURCE = { duration: 20, peaks: [0.2, 0.6, 0.4] };
+
+describe('ImportReference: el tramo sobre la onda del origen (spec 010, D-4)', () => {
+  beforeEach(() => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/voices/kit') return KIT;
+      if (path.startsWith('/voices/import/peaks')) return SOURCE;
+      return {};
+    });
+  });
+
+  it('al elegir el archivo pide su onda y propone el tramo de 0 a 10 s', async () => {
+    renderImport();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.import.choose') }));
+
+    expect(await screen.findByTestId('span-picker')).toBeTruthy();
+    expect(api.get).toHaveBeenCalledWith(`/voices/import/peaks?path=${encodeURIComponent('C:/videos/charla.mp4')}&n=800`);
+    expect((screen.getByRole('spinbutton', { name: t('voices.import.start') }) as HTMLInputElement).value).toBe('0');
+    expect((screen.getByRole('spinbutton', { name: t('voices.import.end') }) as HTMLInputElement).value).toBe('10');
+  });
+
+  it('mover la región sobre la onda cambia el inicio y el fin de los campos', async () => {
+    renderImport();
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.import.choose') }));
+
+    fireEvent.click(await screen.findByTestId('span-picker'));
+
+    await waitFor(() => expect((screen.getByRole('spinbutton', { name: t('voices.import.start') }) as HTMLInputElement).value).toBe('2'));
+    expect((screen.getByRole('spinbutton', { name: t('voices.import.end') }) as HTMLInputElement).value).toBe('12');
   });
 });

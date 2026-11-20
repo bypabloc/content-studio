@@ -38,6 +38,7 @@ export function voicesReplies(state: VoicesState): Replies {
     if (method === 'GET' && path === '/voices/profiles/ana') return fixture('profile-ana');
     if (method === 'GET' && path === '/voices/kit') return fixture('kit');
     if (method === 'GET' && path === '/voices/catalog') return fixture('catalog');
+    if (method === 'GET' && path === '/voices/import/peaks') return fixture('import-peaks');
     if (method === 'GET' && path === '/voices/profiles/ana/takes/neutral') return { style: 'neutral', takes: [...state.takes] };
     if (method === 'GET' && path === '/voices/profiles/ana/takes/neutral/1') return fixture('take-1');
     if (method === 'POST' && path === '/voices/profiles/ana/takes/neutral') {

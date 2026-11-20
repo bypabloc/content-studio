@@ -65,6 +65,17 @@ export function useChooseTake(slug: string, style: string) {
 }
 
 /** Importa un tramo de un audio o video como toma del estilo, con el permiso del dueño; el server encola su chequeo. */
+/** La duración y los picos del origen que se va a importar, para marcar el tramo sobre su onda (spec 010, D-4). */
+export function useSourcePeaks(path: string) {
+  const api = useApi();
+  return useQuery({
+    queryKey: [...VOICES, 'import-peaks', path],
+    queryFn: () =>
+      api.get<{ duration: number; peaks: number[] }>(`/voices/import/peaks?path=${encodeURIComponent(path)}&n=800`),
+    enabled: path !== '',
+  });
+}
+
 export function useImportSpan(slug: string) {
   const api = useApi();
   const queryClient = useQueryClient();

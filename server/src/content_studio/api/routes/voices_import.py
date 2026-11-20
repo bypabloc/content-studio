@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
 
 from content_studio import messages
@@ -56,3 +56,20 @@ def import_span(
     params = {'profile': slug, 'style': body.style, 'take': take}
     job = queue.enqueue(conn, 'voice.check', params, request.app.state.services)
     return {'style': body.style, 'take': take, 'job': job}
+
+
+# Lo que deja elegir el diálogo de importar (el mismo filtro que el client en ImportReference.tsx).
+MEDIA = {'.wav', '.mp3', '.flac', '.ogg', '.m4a', '.mp4', '.mov', '.mkv', '.webm'}
+
+
+@router.get('/voices/import/peaks')
+def import_peaks(path: str, n: int = Query(800, ge=1, le=5000)) -> dict:
+    """La duración y `n` picos de un audio o video de origen, para marcar el tramo sobre su onda (D-4). Solo acepta un
+    archivo existente con extensión de audio o video; lo que ffmpeg no lee responde 422 `unreadable_media`."""
+    source = Path(path)
+    if source.suffix.lower() not in MEDIA or not source.is_file():
+        raise ApiError(422, 'unreadable_media')
+    try:
+        return {'duration': ffmpeg.probe_duration(source), 'peaks': ffmpeg.peaks(source, n)}
+    except (subprocess.CalledProcessError, ValueError) as error:
+        raise ApiError(422, 'unreadable_media') from error

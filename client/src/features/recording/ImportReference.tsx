@@ -8,14 +8,17 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { label, t } from '@/shared/i18n/t';
-import { useImportSpan } from './useTakes';
+import { SpanPicker } from './SpanPicker';
+import { MAX_SPAN, MIN_SPAN } from './span';
+import { useImportSpan, useSourcePeaks } from './useTakes';
 
 // cspell:ignore flac mkv webm
 // Lo que deja elegir el diálogo: audio y video comunes. Lo lee ffmpeg en el server; la lista solo filtra.
 const MEDIA_EXTENSIONS = ['wav', 'mp3', 'flac', 'ogg', 'm4a', 'mp4', 'mov', 'mkv', 'webm'];
-// El tramo que se importa: de 8 a 12 segundos (spec 010, D-4 y AC-6). Es el mismo límite que valida el server.
-const MIN_SPAN = 8;
-const MAX_SPAN = 12;
+// El tramo que se propone al elegir el archivo: de 0 a 10 s, o hasta el final si el archivo es más corto.
+const DEFAULT_END = 10;
+// Los segundos del tramo con dos decimales, como los escribe el campo.
+const seconds = (value: number): string => String(Math.round(value * 100) / 100);
 
 /**
  * El formulario de importar una referencia (spec 010, D-4): se elige el archivo con el diálogo del sistema, el estilo, el
@@ -30,15 +33,28 @@ export function ImportReference({ slug, onDone }: { slug: string; onDone: () => 
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [consent, setConsent] = useState(false);
-  const filled = start !== '' && end !== '';
-  const span = Number(end) - Number(start);
+  const peaks = useSourcePeaks(path ?? '');
+  // Sin picos (todavía no llegan, o la respuesta no los trae) no hay onda que dibujar.
+  const source = Array.isArray(peaks.data?.peaks) ? peaks.data : undefined;
+  // El tramo que se ve: lo que el usuario escribió o, si todavía no escribió nada, el que propone la onda (0 a 10 s).
+  const shownStart = start !== '' || !source ? start : '0';
+  const shownEnd = end !== '' || !source ? end : seconds(Math.min(DEFAULT_END, source.duration));
+  const filled = shownStart !== '' && shownEnd !== '';
+  const span = Number(shownEnd) - Number(shownStart);
   const spanOk = filled && span >= MIN_SPAN && span <= MAX_SPAN;
   const ready = path !== null && style !== '' && spanOk && consent;
 
   const pick = async () => {
     try {
       const chosen = await open({ multiple: false, filters: [{ name: t('voices.import.media'), extensions: MEDIA_EXTENSIONS }] });
-      if (typeof chosen === 'string') setPath(chosen);
+      if (typeof chosen === 'string') {
+        // Un archivo distinto empieza con el tramo vacío: el de antes pudo no caber en el nuevo.
+        if (chosen !== path) {
+          setStart('');
+          setEnd('');
+        }
+        setPath(chosen);
+      }
     } catch {
       // Sin la ventana de Tauri no hay diálogo: no se elige nada y el formulario sigue igual.
     }
@@ -46,7 +62,7 @@ export function ImportReference({ slug, onDone }: { slug: string; onDone: () => 
 
   const submit = () => {
     if (!ready || path === null) return;
-    importSpan.mutate({ path, start: Number(start), end: Number(end), style }, { onSuccess: onDone });
+    importSpan.mutate({ path, start: Number(shownStart), end: Number(shownEnd), style }, { onSuccess: onDone });
   };
 
   const name = path === null ? t('voices.import.no_file') : (path.split(/[\\/]/).pop() ?? path);
@@ -65,6 +81,18 @@ export function ImportReference({ slug, onDone }: { slug: string; onDone: () => 
         </UIButton>
         <UIText variant="caption">{name}</UIText>
       </UIStack>
+      {source ? (
+        <SpanPicker
+          peaks={source.peaks}
+          duration={source.duration}
+          start={Number(shownStart) || 0}
+          end={Number(shownEnd) || 0}
+          onChange={(from, to) => {
+            setStart(seconds(from));
+            setEnd(seconds(to));
+          }}
+        />
+      ) : null}
       <UISelect
         label={t('voices.import.style')}
         emptyOption={t('voices.import.style_empty')}
@@ -79,7 +107,7 @@ export function ImportReference({ slug, onDone }: { slug: string; onDone: () => 
           unit="s"
           min={0}
           step={0.1}
-          value={start}
+          value={shownStart}
           onChange={(event) => setStart(event.target.value)}
         />
         <UIField
@@ -88,7 +116,7 @@ export function ImportReference({ slug, onDone }: { slug: string; onDone: () => 
           unit="s"
           min={0}
           step={0.1}
-          value={end}
+          value={shownEnd}
           error={spanError}
           onChange={(event) => setEnd(event.target.value)}
         />
