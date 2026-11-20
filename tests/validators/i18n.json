@@ -5,8 +5,7 @@
     "label.narration.style.",
     "label.narration.engine.",
     "label.music.style.",
-    "label.music.model.",
-    "voice.check."
+    "label.music.model."
   ],
   "allowed": ["Bearer "],
   "python": {
