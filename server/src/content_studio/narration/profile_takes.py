@@ -10,8 +10,10 @@ import io
 import shutil
 import tempfile
 import wave
+from datetime import datetime
 from pathlib import Path
 
+from content_studio import paths
 from content_studio.common import ffmpeg
 from content_studio.narration import profiles, recording_kit
 
@@ -76,3 +78,18 @@ def choose(profile: str, style: str, take: int) -> None:
         shutil.move(str(chosen), str(profiles.takes_dir(profile, style) / f'{number}.wav'))
     shutil.copy2(source, chosen)
     profiles.reference_for(profile, style, '.txt').write_text(recording_kit.plain_text(style), encoding='utf-8')
+
+
+def trash(profile: str, style: str, take: int) -> None:
+    """Mueve la toma y su chequeo a `reference/.trash/<fecha>/<perfil>/takes/<estilo>/`. Nunca borra bytes, igual que
+    borrar un perfil. La referencia elegida no cambia: es una copia de la toma."""
+    folder = profiles.takes_dir(profile, _kit_style(style))
+    wav = folder / f'{take}.wav'
+    if not wav.is_file():
+        raise TakeNotFound(f'{profile}/{style}/{take}')
+    stamp = datetime.now().strftime('%Y-%m-%d-%H%M%S-%f')
+    target = paths.REFERENCE / profiles.TRASH / stamp / profile / 'takes' / style
+    target.mkdir(parents=True)
+    for source in (wav, wav.with_suffix('.check.json')):
+        if source.is_file():
+            shutil.move(str(source), str(target / source.name))

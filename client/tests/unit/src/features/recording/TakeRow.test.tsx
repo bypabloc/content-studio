@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TakeRow } from '@/features/recording/TakeRow';
 import { t } from '@/shared/i18n/t';
@@ -8,6 +8,7 @@ const { api } = vi.hoisted(() => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
+    del: vi.fn(),
     fileUrl: (path: string) => `http://127.0.0.1:9000/files?path=${encodeURIComponent(path)}`,
   },
 }));
@@ -94,5 +95,28 @@ describe('TakeRow (spec 010, D-6)', () => {
     expect(screen.getByText(t('voice.check.whisper_missing'))).toBeTruthy();
     expect(screen.getByText(t('voice.check.resampled'))).toBeTruthy();
     expect(screen.getByText('codigo_nuevo')).toBeTruthy();
+  });
+
+  it('borrar una toma pide confirmación y la manda a la papelera de la API', async () => {
+    api.del.mockResolvedValue(undefined);
+    renderRow(OK);
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.take.delete') }));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(api.del).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole('button', { name: t('voices.delete.confirm') }));
+
+    await waitFor(() => expect(api.del).toHaveBeenCalledWith('/voices/profiles/spec-010/takes/expert/3'));
+  });
+
+  it('cancelar el borrado no toca la toma', async () => {
+    renderRow(OK);
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.take.delete') }));
+    const dialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: t('action.cancel') }));
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+    expect(api.del).not.toHaveBeenCalled();
   });
 });

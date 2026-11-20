@@ -165,3 +165,27 @@ def test_a_missing_take_detail_is_404(api, refs):
 
     missing = api.client.get('/voices/profiles/spec-010/takes/expert/9', headers=api.headers)
     assert missing.status_code == 404 and missing.json()['code'] == 'take_not_found'
+
+
+def test_a_take_goes_to_the_trash_with_its_check_and_the_chosen_reference_stays(api, refs):
+    _create(api)
+    api.client.post('/voices/profiles/spec-010/takes/expert', content=WAV, headers=api.headers)
+    api.client.post('/voices/profiles/spec-010/takes/expert', content=WAV, headers=api.headers)
+    api.client.post('/voices/profiles/spec-010/takes/expert/2/choose', headers=api.headers)
+    (refs / 'spec-010' / 'takes' / 'expert' / '1.check.json').write_text('{"verdict": "ok"}', encoding='utf-8')
+
+    response = api.client.delete('/voices/profiles/spec-010/takes/expert/1', headers=api.headers)
+
+    assert response.status_code == 204
+    assert api.client.get('/voices/profiles/spec-010/takes/expert', headers=api.headers).json()['takes'] == [2]
+    assert (refs / 'spec-010' / 'expert.wav').read_bytes() == WAV
+    trashed = list((refs / '.trash').glob('*/spec-010/takes/expert/1.*'))
+    assert sorted(path.name for path in trashed) == ['1.check.json', '1.wav']
+
+
+def test_deleting_a_take_that_is_not_there_is_404(api, refs):
+    _create(api)
+
+    missing = api.client.delete('/voices/profiles/spec-010/takes/expert/9', headers=api.headers)
+
+    assert missing.status_code == 404 and missing.json()['code'] == 'take_not_found'

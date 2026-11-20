@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UICard } from '@/shared/components/atoms/UICard';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { UIConfirmDialog } from '@/shared/components/organisms/UIConfirmDialog';
 import { t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
-import { type Check, useChooseTake, useTakeDetail } from './useTakes';
+import { type Check, useChooseTake, useDeleteTake, useTakeDetail } from './useTakes';
 
 /** El texto de una razón o una nota del chequeo, en el idioma activo. Las claves van escritas completas para el gate de i18n. */
 function checkText(code: string): string {
@@ -49,6 +51,8 @@ export function TakeRow({ slug, style, take }: { slug: string; style: string; ta
   const api = useApi();
   const detail = useTakeDetail(slug, style, take);
   const choose = useChooseTake(slug, style);
+  const remove = useDeleteTake(slug, style);
+  const [confirming, setConfirming] = useState(false);
   const path = detail.data?.path ?? null;
   const peaks = useMediaPeaks(path ?? '');
   const check = detail.data?.check;
@@ -73,11 +77,28 @@ export function TakeRow({ slug, style, take }: { slug: string; style: string; ta
           <Player src={api.fileUrl(path)} peaks={peaks.data.peaks} />
         </UIStack>
       ) : null}
-      <UIStack direction="row" className="mt-4">
+      <UIStack direction="row" className="mt-4" gap="sm">
         <UIButton variant="secondary" onClick={() => choose.mutate(take)}>
           {t('action.choose')}
         </UIButton>
+        <UIButton variant="ghost" icon="trash-2" onClick={() => setConfirming(true)}>
+          {t('voices.take.delete')}
+        </UIButton>
       </UIStack>
+      <UIConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title={t('voices.take.delete.title', { n: take })}
+        description={t('voices.take.delete.description')}
+        confirmLabel={t('voices.delete.confirm')}
+        cancelLabel={t('action.cancel')}
+        destructive
+        pending={remove.isPending}
+        onConfirm={() => {
+          setConfirming(false);
+          remove.mutate(take);
+        }}
+      />
     </UICard>
   );
 }

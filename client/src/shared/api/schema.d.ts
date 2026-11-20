@@ -444,7 +444,11 @@ export interface paths {
         get: operations["take_detail_voices_profiles__slug__takes__style___take__get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Take
+         * @description Mueve la toma a la papelera del perfil; la referencia elegida no cambia. 404 si no existe.
+         */
+        delete: operations["delete_take_voices_profiles__slug__takes__style___take__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1621,6 +1625,37 @@ export interface operations {
                         [key: string]: unknown;
                     };
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_take_voices_profiles__slug__takes__style___take__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                style: string;
+                take: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

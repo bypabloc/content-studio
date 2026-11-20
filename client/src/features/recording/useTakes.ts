@@ -64,6 +64,16 @@ export function useChooseTake(slug: string, style: string) {
   });
 }
 
+/** Borra una toma: va a la papelera del perfil y la referencia elegida no cambia (`DELETE .../takes/{style}/{n}`). */
+export function useDeleteTake(slug: string, style: string) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (take: number) => api.del(`/voices/profiles/${encodeURIComponent(slug)}/takes/${style}/${take}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: VOICES }),
+  });
+}
+
 /** Importa un tramo de un audio o video como toma del estilo, con el permiso del dueño; el server encola su chequeo. */
 /** La duración y los picos del origen que se va a importar, para marcar el tramo sobre su onda (spec 010, D-4). */
 export function useSourcePeaks(path: string) {

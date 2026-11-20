@@ -140,6 +140,18 @@ def choose_take(slug: str, style: str, take: int) -> dict:
     return {'style': style, 'take': take}
 
 
+@router.delete('/voices/profiles/{slug}/takes/{style}/{take}', status_code=204)
+def delete_take(slug: str, style: str, take: int) -> Response:
+    """Mueve la toma a la papelera del perfil; la referencia elegida no cambia. 404 si no existe."""
+    _profile(slug)
+    _style(style)
+    try:
+        profile_takes.trash(slug, style, take)
+    except profile_takes.TakeNotFound:
+        raise ApiError(404, 'take_not_found', take=take) from None
+    return Response(status_code=204)
+
+
 @router.get('/voices/profiles/{slug}/takes/{style}/{take}')
 def take_detail(slug: str, style: str, take: int) -> dict:
     """Una toma: su ruta para reproducirla y su chequeo (`<n>.check.json`) si el trabajo ya corrió; 404 si no existe."""
