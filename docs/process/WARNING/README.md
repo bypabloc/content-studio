@@ -93,5 +93,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-tokens-adaptados](008-tokens-adaptados.md) | El tema se adapta: se suman los colores que usan los componentes, no se reemplaza por el de klinikae | antes de dev |
 | [008-appshell](008-appshell.md) | `UIAppShell` reemplaza al Shell y a la Sidebar: barra colapsable con `Ctrl+B`; `Sidebar.tsx` y `ThemeToggle.tsx` se borran | antes de dev |
 | [008-budget](008-budget.md) | El bundle inicial crece 69,7 kB gzip sobre la 007 (tope de D-9: 90 kB); el límite de `budget` pasa a 228 kB | antes de dev |
+| [009-iconos-sustitutos](009-iconos-sustitutos.md) | `stop` y `keyframe` usan `Square` y `Diamond`: lucide 1.58 no tiene `Stop` ni icono de fotograma clave | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

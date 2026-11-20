@@ -105,3 +105,49 @@ describe('UIIcon: íconos del shell (spec 008, D-3)', () => {
   });
 });
 
+// Nombres que pide content-studio (spec 009, D-2): un caso por nombre.
+const NEW_NAMES = [
+  'stop',
+  'record',
+  'volume',
+  'mute',
+  'theme-light',
+  'theme-dark',
+  'theme-system',
+  'close',
+  'remove',
+  'retry',
+  'cancel',
+  'open-folder',
+  'star',
+  'drag-handle',
+  'compare',
+  'regenerate',
+  'import-file',
+  'narration',
+  'queue',
+  'music',
+  'voices',
+  'editor',
+  'scissors',
+  'magnet',
+  'layers',
+  'keyframe',
+] as const
+
+describe('UIIcon: íconos de content-studio (spec 009, D-2)', () => {
+  it.each(NEW_NAMES)('WHEN %s is requested THEN it renders a decorative svg (AC-1)', (name) => {
+    expect(ICON_NAMES).toContain(name)
+    const { container } = render(<UIIcon name={name} />)
+
+    expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('WHEN a name is not in the map THEN TypeScript rejects it (AC-1)', () => {
+    // @ts-expect-error `nombre-inventado` no está en el mapa: el tipo IconName lo rechaza.
+    const rejected = <UIIcon name="nombre-inventado" />
+
+    expect(rejected).toBeDefined()
+  })
+})
+

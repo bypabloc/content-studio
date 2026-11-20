@@ -44,7 +44,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Mapa de `UIIcon` | AC-1 | — | `client-unit` | [ ] |
+| T1 | Mapa de `UIIcon` | AC-1 | — | `client-unit` | [x] |
 | T2 | Tema, nav, cola y paleta | AC-2, AC-3 | T1 | `client-unit` | [ ] |
 | T3 | Narración, Ajustes, e2e, axe, budget y regla | AC-3, AC-4, AC-5 | T2 | `e2e`, `budget`, `rules` | [ ] |
 

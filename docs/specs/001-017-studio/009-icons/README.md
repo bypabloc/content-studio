@@ -28,7 +28,7 @@ Que la UI use iconos donde un icono se entiende mejor que una palabra. El ejempl
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Iconos de content-studio en el mapa de `UIIcon` | PEN |
+| 1 | Iconos de content-studio en el mapa de `UIIcon` | DON |
 | 2 | Tema, nav, cola y paleta con iconos | PEN |
 | 3 | Narración (006) y Ajustes, regla de UI y e2e | PEN |
 
