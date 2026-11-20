@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ImportReference } from '@/features/recording/ImportReference';
 import { RecordWizard } from '@/features/recording/RecordWizard';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIGrid } from '@/shared/components/atoms/UIGrid';
@@ -24,13 +25,22 @@ export function MyVoicesPage() {
   const { create, rename, remove } = useProfileMutations();
   const [opened, setOpened] = useState<string | null>(null);
   const [recording, setRecording] = useState<string | null>(null);
+  const [importing, setImporting] = useState<string | null>(null);
   const [dialog, setDialog] = useState<VoiceDialog | null>(null);
   const [draft, setDraft] = useState('');
 
   // El asistente reemplaza la ficha mientras se graba; al terminar (o «Volver») regresa a la ficha del mismo perfil.
   if (recording !== null) return <RecordWizard slug={recording} onDone={() => setRecording(null)} />;
+  if (importing !== null) return <ImportReference slug={importing} onDone={() => setImporting(null)} />;
   if (opened !== null) {
-    return <ProfileDetail slug={opened} onBack={() => setOpened(null)} onRecord={() => setRecording(opened)} />;
+    return (
+      <ProfileDetail
+        slug={opened}
+        onBack={() => setOpened(null)}
+        onRecord={() => setRecording(opened)}
+        onImport={() => setImporting(opened)}
+      />
+    );
   }
 
   const required = (kit.data?.styles ?? []).filter((item) => !item.optional).map((item) => item.style);

@@ -42,7 +42,7 @@ afterEach(() => {
 function renderDetail(onBack: () => void = () => {}): void {
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <ProfileDetail slug="spec-010" onBack={onBack} onRecord={() => {}} />
+      <ProfileDetail slug="spec-010" onBack={onBack} onRecord={() => {}} onImport={() => {}} />
     </QueryClientProvider>,
   );
 }
@@ -77,11 +77,23 @@ describe('ProfileDetail (spec 010, D-6)', () => {
     const onRecord = vi.fn();
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-        <ProfileDetail slug="spec-010" onBack={() => {}} onRecord={onRecord} />
+        <ProfileDetail slug="spec-010" onBack={() => {}} onRecord={onRecord} onImport={() => {}} />
       </QueryClientProvider>,
     );
 
     fireEvent.click(await screen.findByRole('button', { name: t('voices.record.open') }));
     expect(onRecord).toHaveBeenCalledTimes(1);
+  });
+
+  it('Importar abre el formulario de importación del perfil', async () => {
+    const onImport = vi.fn();
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <ProfileDetail slug="spec-010" onBack={() => {}} onRecord={() => {}} onImport={onImport} />
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.import.open') }));
+    expect(onImport).toHaveBeenCalledTimes(1);
   });
 });

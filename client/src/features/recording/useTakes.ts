@@ -63,3 +63,17 @@ export function useChooseTake(slug: string, style: string) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: VOICES }),
   });
 }
+
+/** Importa un tramo de un audio o video como toma del estilo, con el permiso del dueño; el server encola su chequeo. */
+export function useImportSpan(slug: string) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (span: { path: string; start: number; end: number; style: string }) =>
+      api.post<{ style: string; take: number; job: number }>(`/voices/profiles/${encodeURIComponent(slug)}/import`, {
+        ...span,
+        consent: true,
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: VOICES }),
+  });
+}

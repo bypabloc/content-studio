@@ -122,5 +122,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-repetir-es-otra-toma](010-repetir-es-otra-toma.md) | «Repetir» graba otra toma del mismo estilo, igual que «Grabar»; las tomas no se sobrescriben | antes de dev |
 | [010-medir-arranque-en-budget](010-medir-arranque-en-budget.md) | La etapa `budget` mide solo el JS de arranque (entrada y `modulepreload`); el límite sigue en 232 kB | antes de dev |
 | [010-enfasis-atomo](010-enfasis-atomo.md) | El énfasis del guion es el átomo `UIEmphasis`: el `strong` nativo no va fuera de los átomos | antes de dev |
+| [010-importar-tramo-sin-region](010-importar-tramo-sin-region.md) | El tramo a importar se marca con inicio y fin en segundos; la región sobre la onda queda pendiente | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

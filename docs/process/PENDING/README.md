@@ -50,3 +50,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [010-legacy-en-worktree](010-legacy-en-worktree.md) | En un worktree nuevo, pytest no importa `grabar/` hasta `uv sync --all-packages --all-groups` | Con la T8 (se borra `grabar/`) | Agente |
 | [010-e2e-grabar](010-e2e-grabar.md) | Los e2e de Mis voces y del asistente no existen aún ni se han corrido (`e2e` no está en `all`) | Al cerrar la 010 (T8 o T9) | Agente |
 | [010-grabar-con-microfono-real](010-grabar-con-microfono-real.md) | La grabación con un micrófono real (permiso, medidor, prueba de sala, 48 kHz) no se ha probado en la app | Antes de publicar la 010 (T9) | Usuario |
+| [010-region-de-importar](010-region-de-importar.md) | Marcar el tramo a importar sobre la onda (región de wavesurfer); hoy se escribe en segundos | Antes de publicar la 010 (T9) | Agente |

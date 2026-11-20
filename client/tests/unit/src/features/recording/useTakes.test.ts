@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useChooseTake, useStyleTakes, useTakeDetail, useUploadTake } from '@/features/recording/useTakes';
+import { useChooseTake, useImportSpan, useStyleTakes, useTakeDetail, useUploadTake } from '@/features/recording/useTakes';
 
 const { api } = vi.hoisted(() => ({ api: { get: vi.fn(), post: vi.fn(), upload: vi.fn() } }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
@@ -60,5 +60,25 @@ describe('useTakes (spec 010, D-3)', () => {
     });
 
     expect(api.post).toHaveBeenCalledWith('/voices/profiles/spec-010/takes/expert/2/choose');
+  });
+
+  it('useImportSpan manda el tramo con el permiso del dueño y refresca las tomas', async () => {
+    api.post.mockResolvedValue({ style: 'expert', take: 1, job: 5 });
+    const client = new QueryClient();
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useImportSpan('spec-010'), { wrapper: wrapperWith(client) });
+
+    await act(async () => {
+      await result.current.mutateAsync({ path: 'C:/videos/charla.mp4', start: 2, end: 12, style: 'expert' });
+    });
+
+    expect(api.post).toHaveBeenCalledWith('/voices/profiles/spec-010/import', {
+      path: 'C:/videos/charla.mp4',
+      start: 2,
+      end: 12,
+      style: 'expert',
+      consent: true,
+    });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['voices'] });
   });
 });
