@@ -104,5 +104,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-consentimiento-en-es](010-consentimiento-en-es.md) | El texto del consentimiento se guarda en español, aunque la UI esté en otro idioma | antes de dev |
 | [010-catalogo-sin-muestras](010-catalogo-sin-muestras.md) | El catálogo trae estado y favorita; las muestras llegan en el ciclo 7, junto a su pantalla | antes de dev |
 | [010-progreso-por-estilo](010-progreso-por-estilo.md) | El progreso del build cuenta cada estilo una vez y cada voz ocupa un tramo del trabajo | antes de dev |
+| [010-vumetro-en-ciclo-7](010-vumetro-en-ciclo-7.md) | El vúmetro (LevelMeter) se hace con su pantalla en el ciclo 7; el hook ya entrega los niveles | antes de dev |
+| [010-worklet-y-permiso](010-worklet-y-permiso.md) | El worklet se carga con `?worker&url`; el permiso del micrófono se decide probado en la app | antes de dev |
+| [010-fixture-wav-compartida](010-fixture-wav-compartida.md) | Fixture de WAV compartida entre client y server, con su generador | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
