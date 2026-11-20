@@ -17,7 +17,7 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 - `uv run studio narration regenerate <job> <index>`: toma nueva con un párrafo rehecho; los demás bloques se copian byte a byte.
 - Evaluación con whisper contra el guion (`--evaluate`): por párrafo, lo que oyó distinto, los silencios y los ritmos.
 - Sección **Narración** de la app: editor con avisos en vivo (las reglas del guion que se comprueban sin modelo), importación de `.txt` y `.json`, opciones con ★ y licencia por motor, Generar con Ctrl+Enter. El resultado tiene onda, LUFS y pico; «Regenerar» rehace un párrafo; «Comparar» pone en columnas las tomas del texto y elige una con ★.
-- `grabar`: kit para grabar las voces de referencia propias. Es legacy, fuera de `studio`: `uv run --group legacy python -m content_studio.narration.grabar.main`.
+- Voces de referencia propias: se graban desde la app, en Mis voces (spec 010). El CLI `grabar`, legacy, se retiró en la 010.
 
 ## Dónde vive
 
@@ -33,5 +33,5 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 ## Historial
 
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
-- 2026-11-19: CLI `studio` (004): `python cli.py narration tts` pasa a `uv run studio narration tts`; la salida va a `out/narration/<fecha>-<id>-<slug>/`. `grabar` sigue en legacy.
+- 2026-11-19: CLI `studio` (004): `python cli.py narration tts` pasa a `uv run studio narration tts`; la salida va a `out/narration/<fecha>-<id>-<slug>/`. `grabar` se retiró en la 010.
 - 2026-11-19: spec 006: la sección Narración, el linter, las tomas en disco con `blocks/`, regenerar un párrafo y comparar tomas.

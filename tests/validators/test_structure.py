@@ -90,3 +90,23 @@ def test_ac7_without_old_paths():
 def test_no_py_at_root():
     """AC-9: la raíz no tiene .py: el CLI es `studio` (server/src/content_studio/cli/main.py)."""
     assert list(ROOT.glob('*.py')) == []
+
+
+def test_ac10_no_legacy_recording():
+    """AC-10: lo versionado (sin docs ni uv.lock, que es generado) no nombra grabar/, questionary ni rich: la
+    grabación es la UI. La palabra «grabar» sola sigue en los textos de la UI."""
+    legacy = re.compile(r'narration[./]grabar|grabar/|questionary|\brich\b')
+    versioned = subprocess.run(['git', 'ls-files'], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    failures = []
+    for path in versioned.split():
+        if (
+            path.endswith('.md')
+            or path.startswith('docs/')
+            or path in ('uv.lock', 'tests/validators/test_structure.py')
+        ):
+            continue
+        if not (ROOT / path).is_file():
+            continue
+        text = (ROOT / path).read_text(encoding='utf-8', errors='ignore')
+        failures += [f'{path}: {m.group(0)}' for m in legacy.finditer(text)]
+    assert failures == []

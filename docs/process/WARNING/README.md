@@ -96,5 +96,42 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [009-iconos-sustitutos](009-iconos-sustitutos.md) | `stop` y `keyframe` usan `Square` y `Diamond`: lucide 1.58 no tiene `Stop` ni icono de fotograma clave | antes de dev |
 | [009-iconos-cola-tema](009-iconos-cola-tema.md) | `chevron-up` fuera de D-2 para plegar la cola; iconos de estado; el tema pasa a `UIIconButton` con `theme.change` | antes de dev |
 | [009-iconos-narracion-ajustes](009-iconos-narracion-ajustes.md) | Iconos de Narración y Ajustes; la barra colapsable envuelve su trigger en `UITooltip` (shadcn no se edita) | antes de dev |
+| [010-perfiles-y-paso-3](010-perfiles-y-paso-3.md) | Perfiles en `reference/<perfil>/`: el paso 3 usa el mapa de renombres del paso 2; los `.txt` versionados se mueven con `git mv` | antes de dev |
+| [010-kit-tomas-y-nombres](010-kit-tomas-y-nombres.md) | Las tomas de perfil van en `profile_takes.py` (`takes.py` es de la 006); la subida es el WAV crudo, sin multipart; el texto sale de cada guion | antes de dev |
+| [010-chequeo-de-toma](010-chequeo-de-toma.md) | Tolerancias del chequeo (pico, duración, bordes, pausas, ruido y texto); los bordes se miden, no se recortan; sin whisper es aviso, no `retake` | antes de dev |
+| [010-import-en-modulo-propio](010-import-en-modulo-propio.md) | La ruta de importar vive en su módulo espejo (`voices_import.py`), no en `voices.py` | antes de dev |
+| [010-i18n-t-en-python](010-i18n-t-en-python.md) | El gate i18n cuenta las claves `t('…')` del server; `voice.check.` deja de ser prefijo dinámico | antes de dev |
+| [010-consentimiento-en-es](010-consentimiento-en-es.md) | El texto del consentimiento se guarda en español, aunque la UI esté en otro idioma | antes de dev |
+| [010-progreso-por-estilo](010-progreso-por-estilo.md) | El progreso del build cuenta cada estilo una vez y cada voz ocupa un tramo del trabajo | antes de dev |
+| [010-vumetro-en-ciclo-7](010-vumetro-en-ciclo-7.md) | El vúmetro (LevelMeter) se hace con su pantalla en el ciclo 7; el hook ya entrega los niveles | antes de dev |
+| [010-worklet-y-permiso](010-worklet-y-permiso.md) | El worklet se carga con `?worker&url`; el permiso del micrófono se decide probado en la app | antes de dev |
+| [010-fixture-wav-compartida](010-fixture-wav-compartida.md) | Fixture de WAV compartida entre client y server, con su generador | antes de dev |
+| [010-progreso-sobre-el-kit](010-progreso-sobre-el-kit.md) | El progreso de un perfil cuenta los 12 estilos obligatorios del kit y se oculta hasta que llega | antes de dev |
+| [010-cliente-patch-upload-y-borrado](010-cliente-patch-upload-y-borrado.md) | El cliente de la API suma PATCH y la subida de un cuerpo crudo; borrar siempre pide la papelera | antes de dev |
+| [010-presupuesto-del-cliente](010-presupuesto-del-cliente.md) | El presupuesto del JS inicial sube de 228 a 232 kB por la pantalla de Mis voces; la importación diferida no baja la cifra con el medidor actual | antes de dev |
+| [010-remuestreo-al-subir](010-remuestreo-al-subir.md) | La toma de un micrófono que no da 48 kHz se convierte a 48 kHz al subirla, y el chequeo lo anota | antes de dev |
+| [010-wav-extensible-en-tomas](010-wav-extensible-en-tomas.md) | ffmpeg escribe las tomas de 24 bits como WAV extensible; las pruebas las leen con soundfile | antes de dev |
+| [010-medidor-como-atomo](010-medidor-como-atomo.md) | El medidor de nivel es el átomo `UILevelMeter`, no un `LevelMeter` de la pantalla (sustituye a 010-vumetro-en-ciclo-7) | antes de dev |
+| [010-grabar-desde-la-ficha](010-grabar-desde-la-ficha.md) | «Grabar» abre el asistente en lugar de la ficha; «Volver a la ficha» se bloquea durante una toma | antes de dev |
+| [010-espacio-y-fase-en-ref](010-espacio-y-fase-en-ref.md) | La barra espaciadora lee la fase desde una referencia, para no repetir la grabación al pulsar rápido | antes de dev |
+| [010-prueba-sala-sin-micro](010-prueba-sala-sin-micro.md) | Si el micrófono no abre, la prueba de sala avisa y cancela su temporizador | antes de dev |
+| [010-negrita-del-guion](010-negrita-del-guion.md) | El teleprompter pinta en negrita el énfasis `**palabra**` del guion | antes de dev |
+| [010-subida-acepta-vista-de-bytes](010-subida-acepta-vista-de-bytes.md) | `upload` del cliente acepta una vista de bytes (TypeScript 5.9 tipa `Uint8Array` con su buffer) | antes de dev |
+| [010-repetir-es-otra-toma](010-repetir-es-otra-toma.md) | «Repetir» graba otra toma del mismo estilo, igual que «Grabar»; las tomas no se sobrescriben | antes de dev |
+| [010-medir-arranque-en-budget](010-medir-arranque-en-budget.md) | La etapa `budget` mide solo el JS de arranque (entrada y `modulepreload`); el límite sigue en 232 kB | antes de dev |
+| [010-enfasis-atomo](010-enfasis-atomo.md) | El énfasis del guion es el átomo `UIEmphasis`: el `strong` nativo no va fuera de los átomos | antes de dev |
+| [010-importar-tramo-sin-region](010-importar-tramo-sin-region.md) | Superada: el tramo se marca sobre la onda del origen ([010-region-sobre-la-onda](010-region-sobre-la-onda.md)) | antes de dev |
+| [010-favorita-primera-y-por-defecto](010-favorita-primera-y-por-defecto.md) | El selector de voz pone la favorita primero y la usa por defecto (AC-9) | antes de dev |
+| [010-ac10-sin-texto-de-ui](010-ac10-sin-texto-de-ui.md) | AC-10 busca rutas y dependencias del grabador, no la palabra «grabar» de la UI | antes de dev |
+| [010-e2e-voces-sinteticas](010-e2e-voces-sinteticas.md) | Las respuestas e2e de Mis voces son sintéticas; el harness deja pasar cuerpos binarios | antes de dev |
+| [010-region-sobre-la-onda](010-region-sobre-la-onda.md) | El tramo de importar se marca sobre la onda del origen (D-4), con endpoint de picos y gate propio | antes de `main` |
+| [010-construir-sobre-voces-del-usuario](010-construir-sobre-voces-del-usuario.md) | El AC-7 real construiría sobre voces del usuario (junctions al principal): se pide decisión | antes de `main` |
+| [010-revision-visual-capturas](010-revision-visual-capturas.md) | Revisión visual de las capturas: 14 notas; la alineación se corrigió y el resto queda en PENDING | antes de `main` |
+| [010-consola-cp1252-en-build](010-consola-cp1252-en-build.md) | La entrada de voces pone la consola en errors=replace: un ← reventaba en Windows (cp1252) | antes de `main` |
+| [010-captura-pcm](010-captura-pcm.md) | Captura PCM sin procesado para las tomas (AC-3): 48 kHz, mono, 24 bits; el server convierte si hace falta | antes de `main` |
+| [010-permiso-microfono-webview2](010-permiso-microfono-webview2.md) | El micrófono entra sin diálogo: `on_permission_request` concede solo el micrófono en WebView2; el usuario lo probó en la app | antes de `main` |
+| [010-borrar-toma](010-borrar-toma.md) | Borrar una toma la manda a la papelera del perfil con su chequeo; la referencia elegida no cambia | antes de `main` |
+| [010-microfono-en-ajustes](010-microfono-en-ajustes.md) | El micrófono se elige en Ajustes (`select.recording.microphone`), con `exact`; la lista sale al pulsar «Ver micrófonos» | antes de `main` |
+| [010-micro-en-uso-y-registro](010-micro-en-uso-y-registro.md) | Indicador «Micrófono en uso» en la grabación y registro en `logs/recording/`, apagado por defecto (`diagnostics.recording_log`) | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

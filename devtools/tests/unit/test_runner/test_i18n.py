@@ -188,6 +188,25 @@ def test_ac3_a_dynamic_prefix_without_keys_is_reported(tmp_path):
     assert any('queue.kind.' in problem for problem in problems)
 
 
+def test_ac3_a_t_call_in_python_is_a_usage_of_its_key(tmp_path):
+    """El server también usa claves con `t('…')` (messages.t): cuentan como uso, igual que las del client."""
+    source = "from content_studio import messages\nTEXT = messages.t('only.python')\n"
+    problems = usage(
+        tmp_path,
+        {'server/src/content_studio/narration/x.py': source},
+        {'only.python': 'Solo en Python'},
+    )
+
+    assert problems == []
+
+
+def test_ac3_a_python_t_call_without_its_text_is_reported(tmp_path):
+    source = "from content_studio import messages\nTEXT = messages.t('sin.texto')\n"
+    problems = usage(tmp_path, {'server/src/content_studio/narration/x.py': source}, {})
+
+    assert any('sin.texto' in problem and 'x.py' in problem for problem in problems)
+
+
 def test_ac3_the_real_repo_has_no_usage_problems():
     assert check_usage() == []
 

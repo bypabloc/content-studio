@@ -49,13 +49,15 @@ export async function openApp(
           Object.defineProperty(window, `_${id}`, { value: callback });
           return id;
         },
-        invoke: async (command: string, args: { event?: string; handler?: number } = {}) => {
+        invoke: async (command: string, args: { event?: string; handler?: number; options?: { multiple?: boolean } } = {}) => {
           if (command === 'get_connection') {
             if (connect === 'spawn_failed') throw 'server_spawn_failed';
             return { baseUrl: 'http://127.0.0.1:9999', token: 'tok' };
           }
           if (command === 'plugin:dialog|open') {
-            return (window as unknown as { __dialogPick?: string[] }).__dialogPick ?? null;
+            const picked = (window as unknown as { __dialogPick?: string[] }).__dialogPick ?? null;
+            // Con `multiple: false` el diálogo de Tauri devuelve una sola ruta, no una lista.
+            return args.options?.multiple === false ? (picked?.[0] ?? null) : picked;
           }
           if (command === 'plugin:event|listen' && args.event !== undefined && args.handler !== undefined) {
             listeners[args.event] = args.handler;
@@ -100,6 +102,15 @@ export function setDialogPick(page: Page, paths: string[]): Promise<void> {
   }, paths);
 }
 
+/** Un cuerpo que no es JSON (la toma subida como WAV) queda en null: la prueba mira el camino, no el contenido. */
+function parseBody(raw: string | null): unknown {
+  try {
+    return raw ? (JSON.parse(raw) as unknown) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Responde la API desde las respuestas grabadas, con un estado mínimo (pausa y ajustes) que cambia con PUT y DELETE. */
 export async function mockApi(page: Page, settings: Record<string, unknown>, replies?: Replies): Promise<Call[]> {
   const calls: Call[] = [];
@@ -110,7 +121,7 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
   await page.route(`${API}/**`, async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    const body = request.postData() ? (JSON.parse(request.postData() as string) as unknown) : null;
+    const body = parseBody(request.postData());
     calls.push({ method: request.method(), path: url.pathname, search: url.search, body });
     const { method, pathname } = { method: request.method(), pathname: url.pathname };
 

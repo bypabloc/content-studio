@@ -67,7 +67,7 @@ El texto que dices tiene que coincidir **palabra por palabra** con `server/data/
 
 ## Cómo grabar cada clip
 
-Con el comando del repo, que aplica la mayoría de estos pasos y verifica el resultado: `uv run --group legacy python -m content_studio.narration.grabar.main --device <fuente> --style <estilo>` (ver [README §5](../../README.md#5-grabar-las-referencias)).
+Con la app (**Mis voces** → el perfil → **Grabar**), que aplica la mayoría de estos pasos y verifica cada toma (ver [README §5](../../README.md#5-grabar-las-referencias)).
 
 
 1. Lee la sección **Actitud** del guion y repasa la versión marcada en voz alta una vez.

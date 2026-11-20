@@ -31,10 +31,23 @@ def test_build_command_runs_the_tts_module_with_the_job_folder_as_output(tmp_pat
     assert cmd[cmd.index('--output') + 1] == str(tmp_path / 'job')
 
 
-def test_ref_and_voice_reach_the_engine_command(tmp_path):
-    cmd = narration.build_command({**VALID, 'ref': 'clara.wav'}, tmp_path / 'job')
+def test_profile_reaches_the_engine_command(tmp_path):
+    cmd = narration.build_command({**VALID, 'profile': 'spec-010'}, tmp_path / 'job')
 
-    assert cmd[cmd.index('--ref') + 1] == 'clara.wav'
+    assert cmd[cmd.index('--profile') + 1] == 'spec-010'
+
+
+def test_unknown_profile_is_an_error(installed):
+    assert narration.validate({**VALID, 'profile': 'no-existe'}) == [
+        {'code': 'unknown_profile', 'params': {'profile': 'no-existe'}}
+    ]
+
+
+def test_an_existing_profile_is_valid(installed, tmp_path, monkeypatch):
+    monkeypatch.setattr(paths, 'REFERENCE', tmp_path)
+    (tmp_path / 'spec-010').mkdir()
+
+    assert narration.validate({**VALID, 'profile': 'spec-010'}) == []
 
 
 def test_valid_params_have_no_errors(installed):

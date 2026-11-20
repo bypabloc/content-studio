@@ -3,7 +3,7 @@ name = "content-studio"
 version = "0.1.0"
 description = "Local narration (TTS with voice cloning) and background music for videos, on an 8 GB GPU."
 requires-python = ">=3.10"
-# La CLI `studio` usa argparse (sin dependencias). rich y questionary son del grupo legacy: solo los usa grabar/ (007).
+# La CLI `studio` usa argparse (sin dependencias).
 dependencies = [
     "fastapi>=0.162.5",
     "uvicorn>=0.54.0",
@@ -20,14 +20,9 @@ build-backend = "hatchling.build"
 packages = ["src/content_studio"]
 
 [tool.uv]
-# legacy entra por defecto: grabar/ importa rich y questionary al cargar (se retira en la 007).
-default-groups = ["dev", "legacy"]
+default-groups = ["dev"]
 
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
-]
-legacy = [
-    "questionary>=2.1.1",
-    "rich>=15.0.0",
 ]

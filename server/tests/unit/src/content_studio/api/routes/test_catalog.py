@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import json
+
+from content_studio import paths
+
 
 def test_ac8_each_narration_selector_has_exactly_one_recommended_option(api):
     body = api.client.get('/catalog/narration', headers=api.headers).json()
@@ -21,3 +25,15 @@ def test_ac8_each_music_selector_has_exactly_one_recommended_option(api):
 
 def test_an_unknown_catalog_is_404(api):
     assert api.client.get('/catalog/nope', headers=api.headers).status_code == 404
+
+
+def test_profiles_are_listed_with_the_styles_each_one_has(api, monkeypatch, tmp_path):
+    refs = tmp_path / 'reference'
+    monkeypatch.setattr(paths, 'REFERENCE', refs)
+    (refs / 'default').mkdir(parents=True)
+    (refs / 'default/expert.wav').write_bytes(b'RIFF')
+    (refs / 'default/profile.json').write_text(json.dumps({'name': 'Mi voz'}), encoding='utf-8')
+
+    body = api.client.get('/catalog/narration', headers=api.headers).json()
+
+    assert body['profiles'] == [{'id': 'default', 'name': 'Mi voz', 'styles': ['expert']}]

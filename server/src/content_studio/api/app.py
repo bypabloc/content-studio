@@ -16,7 +16,20 @@ from starlette.responses import JSONResponse
 from content_studio import paths
 from content_studio.api import events
 from content_studio.api.errors import ApiError
-from content_studio.api.routes import catalog, files, health, jobs, media, narration, queue, settings
+from content_studio.api.routes import (
+    catalog,
+    diagnostics,
+    files,
+    health,
+    jobs,
+    media,
+    narration,
+    queue,
+    settings,
+    voices,
+    voices_catalog,
+    voices_import,
+)
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
 from content_studio.messages import negotiate, t
@@ -62,8 +75,8 @@ def create_app(
     broker: events.Broker | None = None,
 ) -> FastAPI:
     """App con la base migrada y el token. `worker` (si corre) termina los procesos al cancelar un trabajo;
-    `roots` son las carpetas que /files puede servir (por defecto out/ y los datos de referencia); `broker` entrega
-    los eventos de /events (el worker debe publicar en el mismo)."""
+    `roots` son las carpetas que /files puede servir (por defecto out/, las referencias y el catálogo de voces);
+    `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
     with closing(connection.connect(db_path)) as conn:
         schema.migrate(conn)
     app = FastAPI(title='content-studio', version='0.1.0')
@@ -79,16 +92,22 @@ def create_app(
     app.state.worker = worker
     app.state.broker = broker or events.Broker()
     app.state.roots = (
-        [Path(root).resolve() for root in roots] if roots else [paths.OUT.resolve(), paths.REFERENCE.resolve()]
+        [Path(root).resolve() for root in roots]
+        if roots
+        else [paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]
     app.include_router(health.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
+    app.include_router(diagnostics.router, dependencies=header_only)
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
+    app.include_router(voices.router, dependencies=header_only)
+    app.include_router(voices_catalog.router, dependencies=header_only)
+    app.include_router(voices_import.router, dependencies=header_only)
     # EventSource y <audio> no mandan headers: estas dos rutas también aceptan ?token=.
     query_ok = [Depends(_token_guard(allow_query=True))]
     app.include_router(events.router, dependencies=query_ok)

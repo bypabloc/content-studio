@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Collection
 
-from content_studio.paths import VOICES
+from content_studio.paths import VOICES, playable
 
 CATALOG = VOICES / 'catalog.json'
 
@@ -54,3 +54,23 @@ def state(name: str, styles: Collection[str]) -> str:
     res = json.loads(ap.read_text(encoding='utf-8'))['styles']
     bad = [e for e in styles if not res.get(e, {}).get('ok')]
     return 'approved' if not bad else f'rejected in {len(bad)}/{len(styles)} styles ({", ".join(bad)})'
+
+
+def status(name: str, styles: Collection[str]) -> dict:
+    """Estado de una voz para la API: `not_built`, `partial` o `approved`, y si cada estilo está aprobado.
+
+    >>> status('no-existe', ['neutral'])['state']
+    'not_built'
+    """
+    ap = VOICES / name / 'aprobacion.json'  # cspell:ignore aprobacion
+    if not ap.exists():
+        return {'state': 'not_built', 'styles': [_style_card(name, e, False) for e in styles]}
+    res = json.loads(ap.read_text(encoding='utf-8'))['styles']
+    approved = {e: bool(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists()) for e in styles}
+    state = 'approved' if all(approved.values()) else 'partial'
+    return {'state': state, 'styles': [_style_card(name, e, ok) for e, ok in approved.items()]}
+
+
+def _style_card(name: str, style: str, approved: bool) -> dict:
+    """Un estilo de la ficha: si está aprobado y la ruta de su muestra, si existe (la sirve /files)."""
+    return {'style': style, 'approved': approved, 'path': playable(VOICES / name / f'{style}.wav')}

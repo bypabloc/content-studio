@@ -81,10 +81,10 @@ def test_cc_by_voices_have_attribution():
 
 
 def test_recording_kit_covers_the_tts_styles():
-    from content_studio.narration.grabar.kit import DURATION  # cspell:ignore grabar
+    from content_studio.narration.recording_kit import KIT, OPTIONAL
     from content_studio.narration.styles import STYLES
 
-    assert set(STYLES) <= set(DURATION)
+    assert set(STYLES) <= {row[0] for row in KIT + OPTIONAL}
 
 
 def test_reference_folder_is_reference():

@@ -14,6 +14,8 @@ server/data/narration/reference/**/*.wav
 server/data/narration/reference/**/*.m4a
 server/data/narration/reference/**/*.mp3
 server/data/narration/reference/**/*.flac
+# Ficha de cada perfil de voz (nombre y fecha): la escribe la app o move-data, no se versiona (spec 010, T9).
+server/data/narration/reference/**/profile.json
 # Voces libres construidas por `cli.py narration voces`: se regeneran desde catalog.json (el único que se versiona).
 server/data/narration/voices/*
 !server/data/narration/voices/catalog.json

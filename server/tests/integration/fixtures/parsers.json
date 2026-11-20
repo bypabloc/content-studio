@@ -1,8 +1,8 @@
 {
   "narration tts": {
     "script": "content_studio.narration.parser",
-    "docstring": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --ref server/data/narration/reference/clara.wav \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/reference). --voice usa una voz\nlibre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
-    "description": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --ref server/data/narration/reference/clara.wav \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/reference). --voice usa una voz\nlibre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
+    "docstring": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
+    "description": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
     "acciones": [
       {
         "option_strings": [
@@ -45,17 +45,17 @@
       },
       {
         "option_strings": [
-          "--ref"
+          "--profile"
         ],
-        "dest": "ref",
+        "dest": "profile",
         "action": "_StoreAction",
         "choices": null,
-        "default": "server/data/narration/reference",
+        "default": "default",
         "required": false,
         "nargs": null,
         "const": null,
-        "type": "Path",
-        "help": "folder of references or one .wav file",
+        "type": null,
+        "help": "own voice profile: a folder under server/data/narration/reference/ (default: default, \"Mi voz\")",
         "metavar": null
       },
       {
@@ -80,7 +80,7 @@
         "nargs": null,
         "const": null,
         "type": null,
-        "help": "free voice from the catalog, approved in every style (uv run studio narration voices); replaces --ref",
+        "help": "free voice from the catalog, approved in every style (studio narration voices); replaces --profile",
         "metavar": null
       },
       {
@@ -308,121 +308,7 @@
         ]
       }
     ],
-    "help": "usage: generar.py [-h] [--model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}] [--ref REF]\n                  [--voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}]\n                  [--style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}]\n                  (--text TEXT | --file FILE [FILE ...]) [--output OUTPUT] [--batch BATCH] [--seed SEED]\n                  [--master {voice,no}] [--lufs LUFS] [--language {es,en}] [--evaluate] [--retries RETRIES]\n\nTTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --ref server/data/narration/reference/clara.wav \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--ref acepta un .wav o una carpeta con <estilo>.wav (por defecto server/data/narration/reference). --voice usa una voz\nlibre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}\n                        TTS engine (default voxcpm2; see server/data/narration/README.md)\n  --ref REF             folder of references or one .wav file\n  --voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}\n                        free voice from the catalog, approved in every style (uv run studio narration voices);\n                        replaces --ref\n  --style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}\n                        default: the \"style\" in the JSON, or expert\n  --text TEXT           text to narrate, in quotes\n  --file FILE [FILE ...]\n                        one or more .txt or .json files; the model loads once\n  --output OUTPUT       with one script, the .wav; with several, the folder. Default out/narration/\n  --batch BATCH         sentences per pass in Qwen; default based on free VRAM\n  --seed SEED           base seed; default random. It is printed and saved in the .json\n  --master {voice,no}   voice: --lufs loudness with a 70 Hz high-pass, no compression unless the peak requires it; no:\n                        unprocessed\n  --lufs LUFS           target loudness for --master voice (default -16)\n  --language {es,en}    engine and whisper language; with en, the default style is neutral-en\n  --evaluate            at the end transcribes each output with whisper and compares it, paragraph by paragraph, with\n                        the requested text\n  --retries RETRIES     with --evaluate: rounds in which only paragraphs with observations are regenerated\n"
-  },
-  "narration grabar": {
-    "script": "content_studio.narration.grabar.main",
-    "docstring": "Graba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.\n\nUso:\n    uv run --group legacy python -m content_studio.narration.grabar.main --list   # dispositivos de audio\n    uv run --group legacy python -m content_studio.narration.grabar.main          # elige dispositivo y estilos\n    uv run --group legacy python -m content_studio.narration.grabar.main --device RDPSource --style neutral friendly\n    uv run --group legacy python -m content_studio.narration.grabar.main --device 2 --all   # el kit completo\n\nMientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.\nCada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).\nAl aceptar una, se recortan los bordes a 0.4 s,\nse normaliza a -18 LUFS (limitando solo los picos) y queda en\nserver/data/narration/reference/<estilo>.wav (WAV mono, 48 kHz, 24 bits).\nDespués se verifica con los criterios de docs/scripts/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).\n",
-    "description": "Graba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.\n\nUso:\n    uv run --group legacy python -m content_studio.narration.grabar.main --list   # dispositivos de audio\n    uv run --group legacy python -m content_studio.narration.grabar.main          # elige dispositivo y estilos\n    uv run --group legacy python -m content_studio.narration.grabar.main --device RDPSource --style neutral friendly\n    uv run --group legacy python -m content_studio.narration.grabar.main --device 2 --all   # el kit completo\n\nMientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.\nCada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).\nAl aceptar una, se recortan los bordes a 0.4 s,\nse normaliza a -18 LUFS (limitando solo los picos) y queda en\nserver/data/narration/reference/<estilo>.wav (WAV mono, 48 kHz, 24 bits).\nDespués se verifica con los criterios de docs/scripts/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).\n",
-    "acciones": [
-      {
-        "option_strings": [
-          "-h",
-          "--help"
-        ],
-        "dest": "help",
-        "action": "_HelpAction",
-        "choices": null,
-        "default": "==SUPPRESS==",
-        "required": false,
-        "nargs": 0,
-        "const": null,
-        "type": null,
-        "help": "show this help message and exit",
-        "metavar": null
-      },
-      {
-        "option_strings": [
-          "--list"
-        ],
-        "dest": "list",
-        "action": "_StoreTrueAction",
-        "choices": null,
-        "default": false,
-        "required": false,
-        "nargs": 0,
-        "const": true,
-        "type": null,
-        "help": "muestra los dispositivos de audio disponibles y sale",
-        "metavar": null
-      },
-      {
-        "option_strings": [
-          "--device"
-        ],
-        "dest": "device",
-        "action": "_StoreAction",
-        "choices": null,
-        "default": null,
-        "required": false,
-        "nargs": null,
-        "const": null,
-        "type": null,
-        "help": "nombre de la fuente (p. ej. RDPSource) o su número en --list",
-        "metavar": null
-      },
-      {
-        "option_strings": [
-          "--style"
-        ],
-        "dest": "style",
-        "action": "_StoreAction",
-        "choices": [
-          "neutral",
-          "friendly",
-          "expert",
-          "clear",
-          "steady",
-          "soft",
-          "energetic",
-          "dramatic",
-          "sad",
-          "intimate",
-          "neutral-en",
-          "neutral-end",
-          "whisper"
-        ],
-        "default": null,
-        "required": false,
-        "nargs": "+",
-        "const": null,
-        "type": null,
-        "help": "referencias a grabar, p. ej. neutral amistosa (ver docs/scripts/README.md)",
-        "metavar": "STYLE"
-      },
-      {
-        "option_strings": [
-          "--all"
-        ],
-        "dest": "all",
-        "action": "_StoreTrueAction",
-        "choices": null,
-        "default": false,
-        "required": false,
-        "nargs": 0,
-        "const": true,
-        "type": null,
-        "help": "graba el kit completo en el orden de la guía",
-        "metavar": null
-      },
-      {
-        "option_strings": [
-          "--overwrite"
-        ],
-        "dest": "overwrite",
-        "action": "_StoreTrueAction",
-        "choices": null,
-        "default": false,
-        "required": false,
-        "nargs": 0,
-        "const": true,
-        "type": null,
-        "help": "reemplaza las referencias que ya existen",
-        "metavar": null
-      }
-    ],
-    "excluyentes": [],
-    "help": "usage: generar.py [-h] [--list] [--device DEVICE] [--style STYLE [STYLE ...]] [--all] [--overwrite]\n\nGraba las voces de referencia (server/data/narration/reference/<estilo>.wav) desde un dispositivo del equipo.\n\nUso:\n    uv run --group legacy python -m content_studio.narration.grabar.main --list   # dispositivos de audio\n    uv run --group legacy python -m content_studio.narration.grabar.main          # elige dispositivo y estilos\n    uv run --group legacy python -m content_studio.narration.grabar.main --device RDPSource --style neutral friendly\n    uv run --group legacy python -m content_studio.narration.grabar.main --device 2 --all   # el kit completo\n\nMientras graba muestra el texto, el tiempo contra la duración de la guía, el nivel y la forma de onda.\nCada toma se guarda en server/data/narration/reference/takes/ (gitignoreado).\nAl aceptar una, se recortan los bordes a 0.4 s,\nse normaliza a -18 LUFS (limitando solo los picos) y queda en\nserver/data/narration/reference/<estilo>.wav (WAV mono, 48 kHz, 24 bits).\nDespués se verifica con los criterios de docs/scripts/README.md. Usa ffmpeg, ffprobe y ffplay (escuchar).\n\noptions:\n  -h, --help            show this help message and exit\n  --list                muestra los dispositivos de audio disponibles y sale\n  --device DEVICE       nombre de la fuente (p. ej. RDPSource) o su número en --list\n  --style STYLE [STYLE ...]\n                        referencias a grabar, p. ej. neutral amistosa (ver docs/scripts/README.md)\n  --all                 graba el kit completo en el orden de la guía\n  --overwrite           reemplaza las referencias que ya existen\n"
+    "help": "usage: generar.py [-h] [--model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}]\n                  [--profile PROFILE]\n                  [--voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}]\n                  [--style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}]\n                  (--text TEXT | --file FILE [FILE ...]) [--output OUTPUT] [--batch BATCH] [--seed SEED]\n                  [--master {voice,no}] [--lufs LUFS] [--language {es,en}] [--evaluate] [--retries RETRIES]\n\nTTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}\n                        TTS engine (default voxcpm2; see server/data/narration/README.md)\n  --profile PROFILE     own voice profile: a folder under server/data/narration/reference/ (default: default, \"Mi\n                        voz\")\n  --voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}\n                        free voice from the catalog, approved in every style (studio narration voices); replaces\n                        --profile\n  --style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}\n                        default: the \"style\" in the JSON, or expert\n  --text TEXT           text to narrate, in quotes\n  --file FILE [FILE ...]\n                        one or more .txt or .json files; the model loads once\n  --output OUTPUT       with one script, the .wav; with several, the folder. Default out/narration/\n  --batch BATCH         sentences per pass in Qwen; default based on free VRAM\n  --seed SEED           base seed; default random. It is printed and saved in the .json\n  --master {voice,no}   voice: --lufs loudness with a 70 Hz high-pass, no compression unless the peak requires it; no:\n                        unprocessed\n  --lufs LUFS           target loudness for --master voice (default -16)\n  --language {es,en}    engine and whisper language; with en, the default style is neutral-en\n  --evaluate            at the end transcribes each output with whisper and compares it, paragraph by paragraph, with\n                        the requested text\n  --retries RETRIES     with --evaluate: rounds in which only paragraphs with observations are regenerated\n"
   },
   "narration voces": {
     "script": "content_studio.narration.voices.main",

@@ -123,6 +123,18 @@ def _code_of(node: ast.Call | ast.Dict) -> str | None:
     return None
 
 
+def server_keys(src: Path) -> dict[str, list[str]]:
+    """Clave de `t('…')` en el server (messages.t y similares) → sus lugares `archivo:línea`, con ast."""
+    found: dict[str, list[str]] = {}
+    for file in sorted(src.rglob('*.py')):
+        for node in ast.walk(ast.parse(file.read_text(encoding='utf-8'))):
+            if isinstance(node, ast.Call) and _name(node.func) == 't' and node.args:
+                key = _text(node.args[0])
+                if key is not None:
+                    found.setdefault(key, []).append(f'{_show(file)}:{node.lineno}')
+    return found
+
+
 def server_codes(src: Path) -> dict[str, list[str]]:
     """Código de error del server → sus lugares `archivo:línea` (con ast, sin ejecutar nada)."""
     found: dict[str, list[str]] = {}
@@ -150,15 +162,16 @@ def check_usage(
         config = load_config(CONFIG)
     prefixes = config.get('dynamicPrefixes', [])
     used_by_client = client_keys(root / 'client' / 'src')
+    used_by_server = server_keys(root / 'server' / 'src' / 'content_studio')
     codes = server_codes(root / 'server' / 'src' / 'content_studio')
     problems: list[str] = []
-    for key, places in sorted(used_by_client.items()):
+    for key, places in sorted({**used_by_server, **used_by_client}.items()):
         if key not in catalog:
             problems.append(f'{places[0]}: t("{key}") has no text in messages/es.json')
     for code, places in sorted(codes.items()):
         if f'error.{code}' not in catalog:
             problems.append(f'{places[0]}: error code "{code}" has no text "error.{code}" in messages/es.json')
-    used = set(used_by_client) | {f'error.{code}' for code in codes}
+    used = set(used_by_client) | set(used_by_server) | {f'error.{code}' for code in codes}
     for key in sorted(catalog):
         if key not in used and not any(key.startswith(prefix) for prefix in prefixes):
             problems.append(f'messages/es.json: key "{key}" is not used')

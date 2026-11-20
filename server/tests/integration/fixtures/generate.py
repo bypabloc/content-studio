@@ -7,7 +7,7 @@ con estas mismas funciones. La fuente es `actual()`: los 4 parsers por clave de 
 segmentos, etiquetas, preparar_bloques(modelo, segs, ref) y PARAMS_MOTOR (nuevo_tts() lo arma sobre src/).
 Regenerar solo cuando un cambio de comportamiento es a propósito, y en un commit aparte.
 
-Solo stdlib (grabar importa rich y questionary arriba). soundfile se reemplaza por un falso (toda referencia
+Solo stdlib. soundfile se reemplaza por un falso (toda referencia
 dura 12 s: avisa en chatterbox y omnivoice) y la carpeta de referencias es sintética, así el resultado no depende
 de audio gitignoreado ni de la GPU.
 """
@@ -48,7 +48,6 @@ APPROVED_VOICES = [
 # El módulo con construir_parser de cada comando (la clave 'script' de la fixture).
 MODULES = {
     'narration tts': 'content_studio.narration.parser',
-    'narration grabar': 'content_studio.narration.grabar.main',
     'narration voces': 'content_studio.narration.voices.main',
     'music': 'content_studio.music.parser',
 }

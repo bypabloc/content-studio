@@ -6,7 +6,8 @@ dominio (ficha WARNING 007-job-id-entero). Por eso estas pruebas usan un id num√
 
 from __future__ import annotations
 
-from content_studio import messages
+from content_studio import messages, paths
+from content_studio.api.app import create_app
 
 
 def test_ac2_job_not_found_answers_in_the_accepted_language(api):
@@ -85,3 +86,10 @@ def test_another_origin_gets_no_cors_permission(api):
     )
 
     assert 'access-control-allow-origin' not in response.headers
+
+
+def test_the_files_route_serves_out_the_references_and_the_voice_catalog(tmp_path):
+    """/files sirve out/, las referencias y el cat√°logo de voces: las muestras se reproducen desde la UI (D-5)."""
+    app = create_app(tmp_path / 'base.db', 'token')
+
+    assert {paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()} <= set(app.state.roots)

@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use serde::Serialize;
+use tauri::webview::{PermissionKind, PermissionResponse};
 use tauri::{AppHandle, Manager, RunEvent};
 
 use server::ServerError;
@@ -118,6 +119,12 @@ async fn get_connection(app: AppHandle) -> Result<Connection, String> {
 
 pub fn run() {
     tauri::Builder::default()
+        // La app graba con su propio micrófono: WebView2 lo concede sin preguntar. Que se está usando lo muestra el
+        // indicador «Micrófono en uso» de la grabación (spec 010, D-2). Lo demás sigue la decisión por defecto.
+        .on_permission_request(|_, kind| match kind {
+            PermissionKind::Microphone => PermissionResponse::Allow,
+            _ => PermissionResponse::Default,
+        })
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())

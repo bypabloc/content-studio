@@ -1,0 +1,20 @@
+{
+  "styles": [
+    {
+      "style": "neutral",
+      "optional": false,
+      "text": "Hola, esta es mi voz de referencia.",
+      "marked": "Hola, esta es mi voz de referencia.",
+      "duration": { "min": 10, "max": 12 },
+      "ppm": 150
+    },
+    {
+      "style": "friendly",
+      "optional": false,
+      "text": "Qué gusto escucharte.",
+      "marked": "Qué gusto escucharte.",
+      "duration": { "min": 9, "max": 11 },
+      "ppm": 165
+    }
+  ]
+}

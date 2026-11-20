@@ -8,11 +8,13 @@ import json
 import shutil
 from pathlib import Path
 
+from content_studio.common import progress
+from content_studio.narration import profiles
 from content_studio.narration.engines.registry import ENGINES, free_todo
 from content_studio.narration.reference import process, verify
 from content_studio.narration.styles import STYLES
 from content_studio.narration.voices.sources import download
-from content_studio.paths import REFERENCE, VOICES
+from content_studio.paths import VOICES
 
 # Criterios de aprobación de cada clip generado, calibrados en docs/research/voces-libres-clonacion/10.
 SIM_MIN = 0.93  # coseno WavLM-SV con la base: instruct2 dio 0.96-0.99; voces ajenas del banco, 0.75-0.95
@@ -63,16 +65,17 @@ TEXT_EN = {
 
 
 def text_style(style: str, language: str) -> str:
-    """Texto de prueba de un estilo en el idioma indicado."""
-    if style == 'neutral-en':
-        return (REFERENCE / 'neutral-en.txt').read_text(encoding='utf-8').strip()
-    if language == 'en':
+    """Texto de prueba de un estilo en el idioma indicado; el de las referencias sale del perfil default."""
+    if style != 'neutral-en' and language == 'en':
         return TEXT_EN[style]
-    return (REFERENCE / f'{style}.txt').read_text(encoding='utf-8').strip()
+    return profiles.reference_for(profiles.DEFAULT, style, '.txt').read_text(encoding='utf-8').strip()
 
 
-def build(name: str, sheet: dict, force: bool) -> bool:
-    """Construye una voz de referencia, la evalúa y la aprueba; True si pasó."""
+def build(name: str, sheet: dict, force: bool, span: tuple[float, float] = (0.0, 1.0)) -> bool:
+    """Construye una voz de referencia, la evalúa y la aprueba; True si pasó.
+
+    `span` es el tramo del progreso del trabajo que cubre esta voz.
+    """
     import numpy as np
     import soundfile as sf
     import torch
@@ -112,6 +115,8 @@ def build(name: str, sheet: dict, force: bool) -> bool:
         res.pop('neutral-en', None)
     for e in pending:
         res.pop(e, None)
+    total = len(pending)
+    evaluated: set[str] = set()  # cada estilo cuenta una vez en el progreso, aunque una ronda lo repita
 
     m = ENGINES['cosyvoice3']
 
@@ -196,6 +201,8 @@ def build(name: str, sheet: dict, force: bool) -> bool:
                 + (f'  ← {"; ".join(res[e]["checks"])}' if res[e]['checks'] else ''),
                 flush=True,
             )
+            evaluated.add(e)
+            progress.emit(progress.span_fraction(span, len(evaluated), total), f'{name}: {e}')
         save()
     if 'neutral' not in res:  # nada que generar (todo existía): igual se evalúa la base
         res['neutral'] = evaluate('neutral', base)
@@ -203,4 +210,5 @@ def build(name: str, sheet: dict, force: bool) -> bool:
         res['neutral-en'] = res['neutral']
     ok = save()
     print(f'{name}: {"APPROVED" if ok else "REJECTED"} ({sum(r["ok"] for r in res.values())}/{len(res)} styles)')
+    progress.emit(span[1], f'{name}: {"approved" if ok else "rejected"}')
     return ok

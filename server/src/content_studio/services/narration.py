@@ -7,6 +7,7 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from content_studio.narration import profiles
 from content_studio.narration.parser import ENGINES, STYLES, approved_voices
 
 RESOURCE = 'gpu'  # la cola lo corre con el candado de la GPU: un modelo a la vez
@@ -19,7 +20,7 @@ FLAGS = {
     'lufs': '--lufs',
     'batch': '--batch',
     'retries': '--retries',
-    'ref': '--ref',
+    'profile': '--profile',
 }
 
 
@@ -37,6 +38,8 @@ def validate(params: dict) -> list[dict]:
         errors.append({'code': 'unknown_style', 'params': {'style': params.get('style')}})
     if 'voice' in params and params['voice'] not in approved_voices(STYLES):
         errors.append({'code': 'unknown_voice', 'params': {'voice': params['voice']}})
+    if 'profile' in params and not profiles.exists(params['profile']):
+        errors.append({'code': 'unknown_profile', 'params': {'profile': params['profile']}})
     if not params.get('text') and not params.get('file'):
         errors.append({'code': 'missing_text', 'params': {}})
     if len(params.get('file') or []) > 1:  # una carpeta por toma (AC-2): un guion por trabajo

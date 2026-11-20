@@ -22,7 +22,6 @@ uv run studio narration voices --build all   # voces libres aprobadas en los 12 
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
-uv run --group legacy python -m content_studio.narration.grabar.main   # grabar voces (legacy: rich y questionary)
 ```
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).
@@ -44,13 +43,12 @@ server/src/content_studio/
 ├── narration/                parser (liviano), tts (main), styles, blocks, pipeline, audio, script, metadata, reference
 │   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES
 │   ├── text/ evaluation/     segments y translate por motor; compare y review (whisper)
-│   ├── voices/               catálogo de voces libres: catalog, sources, build, main
-│   └── grabar/               grabar referencias: kit, dispositivos, interfaz, toma, main
+│   └── voices/               catálogo de voces libres: catalog, sources, build, main
 └── music/                    parser (liviano), music_main (main), styles, evaluation
     └── engines/              MusicSpec + MusicEngine y registry.py con MODELS
 ```
 
-Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib (rich y questionary solo en `grabar/`, legacy); torch, numpy y los motores se importan dentro de las funciones, así `--help` no necesita sus venvs.
+Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch, numpy y los motores se importan dentro de las funciones, así `--help` no necesita sus venvs.
 
 - **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py` (venv, módulo, clase, licencia) y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
 - **Agregar un servicio** (un tipo de trabajo): un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES`. La API y `studio` lo usan solos.

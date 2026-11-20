@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { VoiceSelect } from '@/features/voices/VoiceSelect';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
@@ -73,11 +74,7 @@ export function NarrationOptions() {
         }))}
         beforeChange={confirmLicense}
       />
-      <UIRecommendedSelect
-        settingKey="select.narration.voice"
-        label={t('narration.options.voice')}
-        options={choice.voices.map((voice) => ({ value: voice.id, label: voice.id }))}
-      />
+      <VoiceSelect settingKey="select.narration.voice" label={t('narration.options.voice')} voices={choice.voices} />
       <UIRecommendedSelect
         settingKey="select.narration.style"
         label={t('narration.options.style')}

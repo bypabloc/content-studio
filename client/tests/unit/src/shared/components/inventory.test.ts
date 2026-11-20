@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 const INVENTORY = {
   atoms: [
     'UIAvatar', 'UIBadge', 'UIBox', 'UIButton', 'UICard', 'UIChartMarker', 'UIChartPlaceholder', 'UICheckbox',
-    'UIDetailText', 'UIDiffText', 'UIFieldError', 'UIFieldFrame', 'UIFixedValue', 'UIForm', 'UIGrid', 'UIHiddenInput',
-    'UIIcon', 'UIImage', 'UILink', 'UIMarkedText', 'UIPage', 'UIProgress', 'UIQrCode', 'UIQrImage', 'UIRouteTransition',
+    'UIDetailText', 'UIDiffText', 'UIEmphasis', 'UIFieldError', 'UIFieldFrame', 'UIFixedValue', 'UIForm', 'UIGrid', 'UIHiddenInput',
+    'UIIcon', 'UIImage', 'UILevelMeter', 'UILink', 'UIMarkedText', 'UIPage', 'UIProgress', 'UIQrCode', 'UIQrImage', 'UIRouteTransition',
     'UISkeleton', 'UIStack', 'UIStatus', 'UIStatusBadge', 'UISwitch', 'UITime', 'UIText', 'UITooltip',
   ],
   molecules: [

@@ -73,4 +73,38 @@ describe('createApi', () => {
 
     expect(error).toMatchObject({ status: 422, code: 'unknown', message: 'Error de la API' });
   });
+
+  it('patch manda el cuerpo como JSON con el método PATCH (renombrar un perfil, spec 010)', async () => {
+    const fetcher = reply({ id: 'spec-010', name: 'Voz' });
+    await createApi(connection, fetcher).patch('/voices/profiles/spec-010', { name: 'Voz' });
+
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://127.0.0.1:9000/voices/profiles/spec-010',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: '{"name":"Voz"}',
+        headers: { Authorization: 'Bearer tok', 'Accept-Language': 'es', 'Content-Type': 'application/json' },
+      }),
+    );
+  });
+
+  it('upload manda el cuerpo tal cual con su tipo de contenido (una toma es un WAV crudo, spec 010)', async () => {
+    const wav = new Uint8Array([82, 73, 70, 70]);
+    const fetcher = reply({ take: 1 }, 201);
+    const data = await createApi(connection, fetcher).upload<{ take: number }>(
+      '/voices/profiles/spec-010/takes/expert',
+      wav,
+      'audio/wav',
+    );
+
+    expect(data).toEqual({ take: 1 });
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://127.0.0.1:9000/voices/profiles/spec-010/takes/expert',
+      expect.objectContaining({
+        method: 'POST',
+        body: wav,
+        headers: { Authorization: 'Bearer tok', 'Accept-Language': 'es', 'Content-Type': 'audio/wav' },
+      }),
+    );
+  });
 });
