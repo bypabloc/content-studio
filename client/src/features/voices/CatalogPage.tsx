@@ -46,7 +46,7 @@ function VoiceCardView({
 }): React.JSX.Element {
   return (
     <UICard>
-      <UIStack gap="sm" className="p-5">
+      <UIStack gap="sm" className="flex-1 p-5">
         <UIStack direction="row" align="center" justify="between" gap="sm">
           <UIText variant="heading">{voice.id}</UIText>
           <UIIconButton
@@ -60,7 +60,12 @@ function VoiceCardView({
         {voice.license ? <UIText variant="caption">{t('voices.catalog.license', { license: voice.license })}</UIText> : null}
         {voice.description ? <UIText variant="body">{voice.description}</UIText> : null}
         {voice.styles.map((style) => (style.approved && style.path ? <Sample key={style.style} path={style.path} /> : null))}
-        <UIButton variant="secondary" aria-label={t('voices.catalog.build_named', { name: voice.id })} onClick={onBuild}>
+        <UIButton
+          variant="secondary"
+          className="mt-auto"
+          aria-label={t('voices.catalog.build_named', { name: voice.id })}
+          onClick={onBuild}
+        >
           {t('voices.catalog.build')}
         </UIButton>
       </UIStack>
