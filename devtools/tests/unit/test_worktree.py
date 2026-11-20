@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 
 from devtools import worktree
+from devtools.paths import ROOT
 
 GIT = ['git', '-c', 'user.name=t', '-c', 'user.email=t@t']
 
@@ -40,8 +42,7 @@ def test_prepare_and_close_in_a_repo_real(tmp_path, monkeypatch):
     remote = tmp_path / 'remote.git'
     subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
     subprocess.run(['git', 'clone', '-q', str(remote), str(main)], check=True, capture_output=True)
-    # Sin `/` final, como el .gitignore del repo: en POSIX el enlace es un symlink, no una carpeta para git.
-    (main / '.gitignore').write_text('models\ntmp/\n')
+    shutil.copy(ROOT / '.gitignore', main / '.gitignore')  # el real: en POSIX sus enlaces son symlinks, no carpetas
     (main / 'server/data/music/models/ace').mkdir(parents=True)
     subprocess.run([*GIT, 'add', '.'], cwd=main, check=True)
     subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=main, check=True)
@@ -71,7 +72,7 @@ def test_prepare_installs_with_bun_and_shares_the_cargo_target(tmp_path, monkeyp
     remote = tmp_path / 'remote.git'
     subprocess.run(['git', 'init', '-q', '--bare', '-b', 'dev', str(remote)], check=True)
     subprocess.run(['git', 'clone', '-q', str(remote), str(main)], check=True, capture_output=True)
-    (main / '.gitignore').write_text('client/src-tauri/target\ntmp/\n')
+    shutil.copy(ROOT / '.gitignore', main / '.gitignore')
     (main / 'package.json').write_text('{}')
     (main / 'client/src-tauri').mkdir(parents=True)
     (main / 'client/src-tauri/Cargo.toml').write_text('')
@@ -204,3 +205,22 @@ def test_prepare_drops_an_old_node_modules_link_before_bun_install(tmp_path, mon
     assert worktree.prepare(main.resolve(), 'tema') == 0
     assert seen == [False]
     assert (main / 'node_modules' / 'keep.txt').is_file()
+
+
+def test_repo_gitignore_hides_every_link_prepare_creates(tmp_path):
+    """En POSIX cada enlace de `prepare` es un symlink, que git no trata como carpeta: el .gitignore del repo tiene que
+    cubrirlo sin `/` final, o `close` ve el árbol sucio (fallo de CI de la 011)."""
+    repo = tmp_path / 'repo'
+    repo.mkdir()
+    subprocess.run(['git', 'init', '-q', str(repo)], check=True)
+    shutil.copy(ROOT / '.gitignore', repo / '.gitignore')
+    subprocess.run([*GIT, 'add', '.gitignore'], cwd=repo, check=True)
+    subprocess.run([*GIT, 'commit', '-qm', 'base'], cwd=repo, check=True)
+    for rel in worktree.LINKS:
+        link_path = repo / rel.replace('*', '-x')
+        link_path.parent.mkdir(parents=True, exist_ok=True)
+        target = tmp_path / 'principal' / link_path.name
+        target.mkdir(parents=True, exist_ok=True)
+        worktree.link(target, link_path)
+    status = subprocess.run(['git', 'status', '--porcelain'], cwd=repo, capture_output=True, text=True, check=True)
+    assert status.stdout == ''
