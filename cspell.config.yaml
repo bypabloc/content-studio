@@ -79,7 +79,6 @@ overrides:
     language: en,es
     words: [recalcula]
 ignorePaths:
-  # Temporal (D-3): la UI en español de grabar/ la retira la 010 (la CLI `studio` ya no la tiene).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
   # Prosa en español para el agente: configuración del plugin session-handoff (D-1).
@@ -91,8 +90,6 @@ ignorePaths:
   - server/tests/integration/fixtures/*.txt
   # Código de proveedor copiado de klinikae (spec 008, D-1): se trae tal cual, con sus comentarios y sus clases.
   - client/src/shared/components/shadcn/**
-  # grabar/ (legacy: rich y questionary, con la UI en español): la 010 la retira.
-  - server/src/content_studio/narration/grabar/**
   # Dependencias, salidas, grafo y datos que no son código: no se revisan.
   - node_modules/**
   - graphify-out/**

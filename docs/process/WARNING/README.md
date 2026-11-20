@@ -122,5 +122,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-enfasis-atomo](010-enfasis-atomo.md) | El énfasis del guion es el átomo `UIEmphasis`: el `strong` nativo no va fuera de los átomos | antes de dev |
 | [010-importar-tramo-sin-region](010-importar-tramo-sin-region.md) | El tramo a importar se marca con inicio y fin en segundos; la región sobre la onda queda pendiente | antes de dev |
 | [010-favorita-primera-y-por-defecto](010-favorita-primera-y-por-defecto.md) | El selector de voz pone la favorita primero y la usa por defecto (AC-9) | antes de dev |
+| [010-ac10-sin-texto-de-ui](010-ac10-sin-texto-de-ui.md) | AC-10 busca rutas y dependencias del grabador, no la palabra «grabar» de la UI | antes de dev |
+| [010-e2e-voces-sinteticas](010-e2e-voces-sinteticas.md) | Las respuestas e2e de Mis voces son sintéticas; el harness deja pasar cuerpos binarios | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

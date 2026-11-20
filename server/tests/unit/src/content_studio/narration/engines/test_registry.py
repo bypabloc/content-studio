@@ -83,7 +83,7 @@ def test_create_each_engine_without_loading_it():
 def test_imports_light_modules():
     """Los módulos de narration se importan en un python sin torch, numpy ni soundfile (los mira el --help)."""
 
-    heavy = ['torch', 'torchaudio', 'numpy', 'soundfile', 'transformers', 'whisper', 'typer', 'rich', 'questionary']
+    heavy = ['torch', 'torchaudio', 'numpy', 'soundfile', 'transformers', 'whisper', 'typer']
 
     code = f'import sys\nfor p in {heavy!r}:\n    sys.modules[p] = None\n' + ''.join(f'import {m}\n' for m in LIGHT)
 

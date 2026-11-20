@@ -1,0 +1,8 @@
+{
+  "id": "ana",
+  "name": "Ana",
+  "styles": [
+    { "style": "neutral", "chosen": false, "takes": 0, "reference": null },
+    { "style": "friendly", "chosen": false, "takes": 0, "reference": null }
+  ]
+}

@@ -4,9 +4,9 @@ Todo texto visible sale de un **catálogo único con tres idiomas** (spec 007, D
 
 | Qué | Idioma y forma |
 | :--- | :--- |
-| Identificadores, módulos, funciones, clases y carpetas de código | Inglés: `relaunch`, `use_venv`, `EngineSpec`, `gpu_turn`, `reference/`, `voices/`. Lo que el usuario ya tiene en disco (`aprobacion.json`, el paquete `grabar/`) se mantiene hasta su spec (ver `docs/process/PENDING/`) |
+| Identificadores, módulos, funciones, clases y carpetas de código | Inglés: `relaunch`, `use_venv`, `EngineSpec`, `gpu_turn`, `reference/`, `voices/`. Lo que el usuario ya tiene en disco (`aprobacion.json`) se mantiene hasta su spec (ver `docs/process/PENDING/`) |
 | Mensajes de devtools, hooks, CI y logs | Inglés, cortos y accionables: qué falló, por qué y qué hacer; un hook que bloquea, con `Blocked by <hook>: … Why: … Instead: …`, comprobado por un test (`Missing server/data/narration/engines/.venv-qwen. See the install in server/data/narration/README.md.`) |
-| Ayuda de los subcomandos, flags y errores del CLI | Inglés, con los flags en inglés (`--model`, `--style`). `studio` (`uv run studio`) va en inglés, sin menú ni asistente. Los errores de la API y de la UI están en el catálogo de tres idiomas (fila siguiente); el CLI muestra los errores de la API en español. `grabar/` (legacy) sigue en español hasta la 010 |
+| Ayuda de los subcomandos, flags y errores del CLI | Inglés, con los flags en inglés (`--model`, `--style`). `studio` (`uv run studio`) va en inglés, sin menú ni asistente. Los errores de la API y de la UI están en el catálogo de tres idiomas (fila siguiente); el CLI muestra los errores de la API en español. |
 | Textos visibles de la UI y errores de la API | El catálogo `messages/{es,en,pt}.json`, con la misma clave en los tres idiomas. El client usa `t('clave', parámetros)` (`shared/i18n/t.ts`) y el idioma activo (`locale.ts`). La API responde en el idioma de `Accept-Language` con `error.<código>` (`messages.py`). Los nombres de idioma son «Español», «English» y «Português» |
 | Docstrings, comentarios, README, docs, reglas y specs | Español neutro; los comandos, flags y rutas tal cual |
 | Commits y PRs | Conventional Commits en español (`git-workflow.md`) |
@@ -16,7 +16,7 @@ Todo texto visible sale de un **catálogo único con tres idiomas** (spec 007, D
 
 * Un texto visible repetido en varios lugares se define una vez en su módulo (p. ej. las descripciones de motores en `registry.py`), no se copia.
 * No mezcles idiomas dentro de un mismo mensaje.
-* Los textos en español (docs, `messages/es.json` y `grabar/` hasta la 010) usan tuteo neutro latinoamericano: nunca voseo ni formas peninsulares.
+* Los textos en español (docs y `messages/es.json`) usan tuteo neutro latinoamericano: nunca voseo ni formas peninsulares.
 * El guion puede escribir sus marcas en español (`[pausa]`, `[estilo: dramatica]`, `[risa]`): el parser las convierte a su forma en inglés con los alias de `narration/script_aliases.json` (D-5).
 
 ## Agregar un texto

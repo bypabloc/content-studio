@@ -133,13 +133,12 @@ def test_mirror_maps_server_and_devtools_both_ways():
     assert source_of('devtools/tests/unit/test_runner/test_main.py') == 'devtools/test_runner/main.py'
 
 
-def test_in_scope_keeps_product_and_devtools_and_skips_engines_recording_and_tests():
+def test_in_scope_keeps_product_and_devtools_and_skips_engines_and_tests():
     assert in_scope('server/src/content_studio/narration/tts.py')
     assert in_scope('server/src/content_studio/cli/main.py')
     assert in_scope('devtools/rules.py')
     for rel in (
         'server/src/content_studio/narration/engines/qwen.py',
-        'server/src/content_studio/narration/grabar/kit.py',
         'devtools/tests/unit/test_rules.py',
         'server/src/content_studio/a/__init__.py',
         'README.md',

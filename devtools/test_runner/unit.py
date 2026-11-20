@@ -24,7 +24,7 @@ COVERAGE_BASELINE = 'tests/validators/coverage.baseline.json'
 COVERAGE_JSON = 'tmp/test-runner/coverage.json'
 PYTEST_LOG = 'tmp/test-runner/pytest.log'
 COVERAGE_MIN = 80
-COVERAGE_OMIT = ['*/engines/*', 'server/src/content_studio/narration/grabar/*']
+COVERAGE_OMIT = ['*/engines/*']
 SERVER_SRC = 'server/src/content_studio/'
 SERVER_UNIT = 'server/tests/unit/src/content_studio/'
 EXEMPT_DEFAULT = ['server/src/content_studio/*/engines/*.py']
@@ -100,7 +100,7 @@ def audit(root: Path) -> tuple[list[str], list[str]]:
 
 
 def in_scope(rel: str) -> bool:
-    """Módulos que miden cobertura: producto y devtools, sin los motores (corren en su venv) ni grabar/."""
+    """Módulos que miden cobertura: producto y devtools, sin los motores (corren en su venv)."""
     return (
         rel.startswith(('server/src/content_studio/', 'devtools/'))
         and rel.endswith('.py')
