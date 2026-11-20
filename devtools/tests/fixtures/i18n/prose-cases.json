@@ -1,0 +1,21 @@
+[
+  {"text": "Cancelar", "prose": true},
+  {"text": "cancel", "prose": false},
+  {"text": "Ctrl+K", "prose": false},
+  {"text": "ApiError", "prose": false},
+  {"text": "año", "prose": true},
+  {"text": "¿Borrar?", "prose": true},
+  {"text": "lofi-chill", "prose": false},
+  {"text": "Abrir carpeta", "prose": true},
+  {"text": "GET", "prose": false},
+  {"text": "queue.title", "prose": false},
+  {"text": "Hola", "prose": true},
+  {"text": "hola", "prose": false},
+  {"text": "   ", "prose": false},
+  {"text": "1.5 s", "prose": false},
+  {"text": "Content Studio", "prose": true},
+  {"text": "Accept-Language", "prose": false},
+  {"text": "Content-Type", "prose": false},
+  {"text": "Ajustes", "prose": true},
+  {"text": "Ctrl+Enter: generar", "prose": true}
+]

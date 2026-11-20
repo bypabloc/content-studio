@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 
 from .. import paths
+from .i18n_loose import check_loose
 
 CATALOG_DIR = paths.ROOT / 'server' / 'src' / 'content_studio' / 'messages'
 CONFIG = paths.ROOT / 'tests' / 'validators' / 'i18n.json'
@@ -177,10 +178,15 @@ def load_config(path: Path = CONFIG) -> dict:
 
 
 def run(files: list[Path], catalog_dir: Path = CATALOG_DIR, root: Path = paths.ROOT) -> dict:
-    """Etapa `i18n`: catálogos parejos y claves en uso. `files` no cambia el resultado: revisa todo."""
+    """Etapa `i18n`: catálogos parejos, claves en uso y textos sueltos. `files` no cambia el resultado: revisa todo."""
     problems = check_catalogs(catalog_dir)
     if not problems:
         catalog = _load_dict(catalog_dir / 'es.json')
         config = load_config(root / 'tests' / 'validators' / 'i18n.json')
         problems = check_usage(root, catalog, config)
+    if not problems:
+        try:
+            problems = [finding.message() for finding in check_loose(root)]
+        except RuntimeError as error:
+            problems = [str(error)]
     return {'stage': 'i18n', 'status': 'fail' if problems else 'pass', 'detail': '\n'.join(problems)}
