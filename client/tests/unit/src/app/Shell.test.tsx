@@ -28,6 +28,8 @@ function server(settings: Record<string, unknown>) {
       return reply({ key, value: settings[key] ?? null })
     }
     if (url.endsWith('/jobs')) return reply([])
+    if (url.includes('/voices/kit')) return reply({ styles: [] })
+    if (url.includes('/voices/profiles')) return reply([])
     return reply({ paused: false })
   })
 }
@@ -103,5 +105,12 @@ describe('Shell [AC-7]', () => {
     fireEvent.keyDown(input, { key: 'Enter' })
 
     expect(window.location.hash).toBe('#/settings')
+  })
+
+  it('spec 010 (D-6): WHEN se abre Mis voces THEN la sección lista los perfiles', async () => {
+    window.location.hash = '#/voices'
+    renderShell()
+
+    expect(await screen.findByText(t('voices.empty'))).toBeTruthy()
   })
 })

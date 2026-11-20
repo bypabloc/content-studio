@@ -107,5 +107,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-vumetro-en-ciclo-7](010-vumetro-en-ciclo-7.md) | El vúmetro (LevelMeter) se hace con su pantalla en el ciclo 7; el hook ya entrega los niveles | antes de dev |
 | [010-worklet-y-permiso](010-worklet-y-permiso.md) | El worklet se carga con `?worker&url`; el permiso del micrófono se decide probado en la app | antes de dev |
 | [010-fixture-wav-compartida](010-fixture-wav-compartida.md) | Fixture de WAV compartida entre client y server, con su generador | antes de dev |
+| [010-catalogo-en-ciclo-7d](010-catalogo-en-ciclo-7d.md) | En el 7b la navegación trae solo «Mis voces»; «Catálogo» entra en el 7d con su pantalla | antes de dev |
+| [010-progreso-sobre-el-kit](010-progreso-sobre-el-kit.md) | El progreso de un perfil cuenta los 12 estilos obligatorios del kit y se oculta hasta que llega | antes de dev |
+| [010-cliente-patch-upload-y-borrado](010-cliente-patch-upload-y-borrado.md) | El cliente de la API suma PATCH y la subida de un cuerpo crudo; borrar siempre pide la papelera | antes de dev |
+| [010-presupuesto-del-cliente](010-presupuesto-del-cliente.md) | El presupuesto del JS inicial sube de 228 a 232 kB por la pantalla de Mis voces; la importación diferida no baja la cifra con el medidor actual | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -8,16 +8,18 @@ export interface Connection {
 
 /** Cliente HTTP de la API local: cada llamada lleva el Bearer, y cualquier respuesta que no es 2xx lanza ApiError. */
 export function createApi(connection: Connection, fetcher: typeof fetch = fetch) {
-  async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-    const json = body !== undefined;
+  /** Con `contentType`, el cuerpo va tal cual con ese tipo (una toma WAV); sin él, va como JSON. */
+  async function request<T>(method: string, path: string, body?: unknown, contentType?: string): Promise<T> {
+    const json = body !== undefined && contentType === undefined;
     const response = await fetcher(`${connection.baseUrl}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${connection.token}`,
         'Accept-Language': getLocale(),
         ...(json ? { 'Content-Type': 'application/json' } : {}),
+        ...(contentType ? { 'Content-Type': contentType } : {}),
       },
-      body: json ? JSON.stringify(body) : undefined,
+      body: json ? JSON.stringify(body) : (body as BodyInit | undefined),
     });
     const data: unknown = await response.json().catch(() => null);
     if (!response.ok) throw new ApiError(response.status, data as Partial<ErrorBody> | null);
@@ -28,7 +30,10 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
     get: <T>(path: string) => request<T>('GET', path),
     post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
     put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
+    patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
     del: <T>(path: string) => request<T>('DELETE', path),
+    /** Sube un cuerpo crudo, como la toma WAV del micrófono: no pasa por JSON. */
+    upload: <T>(path: string, body: BodyInit, contentType: string) => request<T>('POST', path, body, contentType),
     /** URL de un archivo de out/ para el <audio> o la forma de onda: sin cabeceras, el token va en la consulta. */
     fileUrl: (path: string) =>
       `${connection.baseUrl}/files?path=${encodeURIComponent(path)}&token=${encodeURIComponent(connection.token)}`,

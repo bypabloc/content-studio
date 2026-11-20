@@ -49,3 +49,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
 | [010-legacy-en-worktree](010-legacy-en-worktree.md) | En un worktree nuevo, pytest no importa `grabar/` hasta `uv sync --all-packages --all-groups` | Con la T8 (se borra `grabar/`) | Agente |
 | [010-remuestreo-48-khz](010-remuestreo-48-khz.md) | Remuestrear la toma a 48 kHz en el server si el micrófono no da 48 kHz (D-2) | En el ciclo 7, con la subida de tomas | Agente |
+| [010-presupuesto-solo-arranque](010-presupuesto-solo-arranque.md) | La etapa `budget` mide todo el JS, no el de arranque; `frontend-stack.md` dice 250 kB y el límite real es otro | Antes de la 7c si el bundle pasa del límite; en la 016 | Agente |
