@@ -5,4 +5,4 @@
 - **Descartadas**: una capability (no hay permiso de micrófono en Tauri); conceder todos los permisos (solo se concede el micrófono); seguir con el diálogo de WebView2.
 - **Límite**: si Windows tiene apagado el acceso del micrófono para aplicaciones de escritorio (Configuración › Privacidad › Micrófono), WebView2 no puede abrirlo. La app lo muestra con el aviso de `voices.record.error`; esa opción no la cambia la app.
 - **Cómo revertir**: quitar el bloque `.on_permission_request(...)` de `lib.rs`. WebView2 vuelve a preguntar.
-- **Cómo comprobarla**: `cargo check` pasa. Falta la prueba real: abrir la app, grabar sin haber dado permiso antes y confirmar que no sale ningún aviso. PENDING `010-grabar-con-microfono-real`.
+- **Cómo comprobarla**: `cargo check` pasa. Prueba real: el usuario grabó en la app con este cambio y confirmó que todo funciona. No reportó ningún diálogo de permiso.

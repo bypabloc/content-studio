@@ -7,4 +7,4 @@
 - **Descartadas**: un registro siempre encendido (el usuario pidió apagado por defecto); guardar también el audio (no se pidió, y es dato del usuario); crear la carpeta al arrancar.
 - **Límite**: el registro guarda nombres de micrófono, identificadores de dispositivo y niveles de la prueba de sala. Queda en `logs/`, que está gitignoreado.
 - **Cómo revertir**: quitar `useRecordingLog` de `RecordWizard` y de `SettingsPage`, la ruta `api/routes/diagnostics.py` y su línea en `app.py`.
-- **Cómo comprobarla**: `test_diagnostics.py` (3 pruebas), `recordingLog.test.tsx` (apagado no escribe, encendido escribe) y la prueba del indicador en `RecordWizard.test.tsx`. Con el micrófono real, pendiente de la prueba del usuario.
+- **Cómo comprobarla**: `test_diagnostics.py` (3 pruebas), `recordingLog.test.tsx` (apagado no escribe, encendido escribe) y la prueba del indicador en `RecordWizard.test.tsx`. Con el micrófono real, el usuario confirmó el indicador y el registro. `logs/recording/2026-11-20.log` tiene `record.start` y `record.stop` de su toma.

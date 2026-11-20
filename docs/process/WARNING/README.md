@@ -129,7 +129,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-revision-visual-capturas](010-revision-visual-capturas.md) | Revisión visual de las capturas: 14 notas; la alineación se corrigió y el resto queda en PENDING | antes de `main` |
 | [010-consola-cp1252-en-build](010-consola-cp1252-en-build.md) | La entrada de voces pone la consola en errors=replace: un ← reventaba en Windows (cp1252) | antes de `main` |
 | [010-captura-pcm](010-captura-pcm.md) | Captura PCM sin procesado para las tomas (AC-3): 48 kHz, mono, 24 bits; el server convierte si hace falta | antes de `main` |
-| [010-permiso-microfono-webview2](010-permiso-microfono-webview2.md) | El micrófono entra sin diálogo: `on_permission_request` concede solo el micrófono en WebView2; falta probarlo con un micrófono real | antes de `main` |
+| [010-permiso-microfono-webview2](010-permiso-microfono-webview2.md) | El micrófono entra sin diálogo: `on_permission_request` concede solo el micrófono en WebView2; el usuario lo probó en la app | antes de `main` |
 | [010-borrar-toma](010-borrar-toma.md) | Borrar una toma la manda a la papelera del perfil con su chequeo; la referencia elegida no cambia | antes de `main` |
 | [010-microfono-en-ajustes](010-microfono-en-ajustes.md) | El micrófono se elige en Ajustes (`select.recording.microphone`), con `exact`; la lista sale al pulsar «Ver micrófonos» | antes de `main` |
 | [010-micro-en-uso-y-registro](010-micro-en-uso-y-registro.md) | Indicador «Micrófono en uso» en la grabación y registro en `logs/recording/`, apagado por defecto (`diagnostics.recording_log`) | antes de `main` |

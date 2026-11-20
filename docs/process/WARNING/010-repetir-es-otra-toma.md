@@ -5,4 +5,4 @@
 - **Descartadas**: borrar la toma anterior al repetir (pierde una toma que quizá era la mejor); quitar «Repetir» (la spec lo nombra).
 - **Cómo revertir**: quitar el botón «Repetir» de `RecordWizard.tsx`.
 - **Cómo comprobarla**: en la app, con dos tomas del mismo estilo (corrida real, T9).
-- **Pendiente**: [010-grabar-con-microfono-real](../PENDING/010-grabar-con-microfono-real.md).
+- **Pendiente**: ninguno. La grabación con micrófono real la confirmó el usuario.
