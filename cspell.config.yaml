@@ -55,7 +55,7 @@ overrides:
   - filename: 'tests/e2e/**'
     language: en,es
 ignorePaths:
-  # Temporal (D-3): la UI en español de grabar/ la retira la 007 (la CLI `studio` ya no la tiene).
+  # Temporal (D-3): la UI en español de grabar/ la retira la 010 (la CLI `studio` ya no la tiene).
   # Catálogo de voces: nombres propios y textos en español que el diccionario no trae (D-1, catálogos).
   - server/data/narration/voices/catalog.json
   # Prosa en español para el agente: configuración del plugin session-handoff (D-1).
@@ -65,7 +65,7 @@ ignorePaths:
   # Guiones y salidas de prueba en español: son datos del test, no código (D-1, tests).
   - server/tests/integration/fixtures/*.json
   - server/tests/integration/fixtures/*.txt
-  # grabar/ (legacy: rich y questionary, con la UI en español): la 007 la retira.
+  # grabar/ (legacy: rich y questionary, con la UI en español): la 010 la retira.
   - server/src/content_studio/narration/grabar/**
   # Dependencias, salidas, grafo y datos que no son código: no se revisan.
   - node_modules/**
