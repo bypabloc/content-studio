@@ -34,4 +34,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [005-desvios-d1-d8](005-desvios-d1-d8.md) | Desvíos de shadcn, plugin-dialog, CSP, Geist y theme-init frente a D-1, D-2, D-4 y D-8 | Antes de la 015 y según cada sección | Agente |
 | [005-aviso-windows-y-sonido](005-aviso-windows-y-sonido.md) | AC-5: la notificación de Windows y el sonido con la ventana minimizada no se comprobaron en la app real | Al primer uso real o antes de la 015 | Usuario |
 | [006-cli-carpeta-compartida](006-cli-carpeta-compartida.md) | Con `--output archivo.wav`, dos tomas en una misma carpeta comparten `blocks/` y `script.json` | Después de publicar, o antes si la 007 o la 009 usan la CLI en lote | Agente |
+| [006-evaluar-toma-regenerada](006-evaluar-toma-regenerada.md) | Evaluar con whisper solo el párrafo regenerado, sin reintentar los bloques ajenos | Antes de elegir una toma por su evaluación | Agente |
 | [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
