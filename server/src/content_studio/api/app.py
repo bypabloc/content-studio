@@ -47,8 +47,8 @@ async def _http_error(request: Request, exc: Exception) -> JSONResponse:
     if isinstance(exc, ApiError):
         payload: dict[str, Any] = {'code': exc.code, 'params': exc.params, **exc.extra}
     else:
-        payload = {'code': str(exc.detail), 'params': {}}
-    payload['message'] = t(payload['code'], **payload['params'])
+        payload = {'code': f'http.{exc.status_code}', 'params': {}}
+    payload['message'] = t(f'error.{payload["code"]}', **payload['params'])
     return JSONResponse(payload, status_code=exc.status_code)
 
 

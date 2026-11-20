@@ -8,7 +8,7 @@ from starlette.exceptions import HTTPException
 
 
 class ApiError(HTTPException):
-    """Error con código: `code` y `params` llenan el texto de messages/es.json; `extra` se suma al cuerpo."""
+    """Error con código: `code` y `params` llenan el texto de `error.<code>` en messages/; `extra` se suma al cuerpo."""
 
     def __init__(self, status_code: int, code: str, extra: dict[str, Any] | None = None, **params: Any) -> None:
         """Código HTTP, código del error, campos extra del cuerpo y los parámetros de su texto."""

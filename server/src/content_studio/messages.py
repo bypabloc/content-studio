@@ -1,4 +1,4 @@
-"""Textos de error de la API, en español, desde messages/es.json (spec 004, D-5)."""
+"""Textos visibles del server: el catálogo de messages/es.json (spec 004, D-5; spec 007, D-1 y D-2)."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from pathlib import Path
 _TEXTS: dict[str, str] = json.loads((Path(__file__).parent / 'messages' / 'es.json').read_text(encoding='utf-8'))
 
 
-def t(code: str, **params: object) -> str:
-    """Texto del código con sus parámetros; si falta alguno, deja la plantilla tal cual."""
-    template = _TEXTS.get(code, code)
+def t(key: str, **params: object) -> str:
+    """Texto de la clave con sus parámetros. Si falta un parámetro deja la plantilla; si falta la clave, la devuelve."""
+    template = _TEXTS.get(key, key)
     try:
         return template.format(**params)
     except KeyError:

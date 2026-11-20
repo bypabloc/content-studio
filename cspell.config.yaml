@@ -41,8 +41,10 @@ overrides:
     language: en,es
     words: [emocion, enfasis, energica, dramatica]
   # Textos de error de la API en español (spec 004, D-5): catálogo de datos, como los de server/data.
+  # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: va por palabra también aquí (spec 007, D-1).
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
+    words: [masterización]
   # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
   - filename: 'server/src/content_studio/narration/script_lint.py'
     language: en,es

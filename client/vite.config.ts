@@ -6,8 +6,13 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   base: './',
   plugins: [react(), tailwindcss()],
-  resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  server: { port: 1420, strictPort: true },
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@messages': fileURLToPath(new URL('../server/src/content_studio/messages', import.meta.url)),
+    },
+  },
+  server: { port: 1420, strictPort: true, fs: { allow: [fileURLToPath(new URL('..', import.meta.url))] } },
   test: {
     environment: 'jsdom',
     setupFiles: ['tests/unit/setup.ts'],

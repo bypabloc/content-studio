@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import catalog from '../../../../../messages/es.json';
+import catalog from '@messages/es.json';
 
 const SRC = fileURLToPath(new URL('../../../../../src', import.meta.url));
 
@@ -26,7 +26,9 @@ describe('catálogo es.json', () => {
     expect([...used].filter((key) => !(key in catalog))).toEqual([]);
   });
 
-  it('ninguna clave del catálogo sobra', () => {
-    expect(Object.keys(catalog).filter((key) => !used.has(key))).toEqual([]);
+  // Hasta la etapa i18n (ciclo 3), que la reemplaza: las claves del server (`error.*`, `lint.*`) no las usa el client.
+  it('ninguna clave del catálogo del client sobra', () => {
+    const clientKeys = Object.keys(catalog).filter((key) => !/^(error|lint)\./.test(key));
+    expect(clientKeys.filter((key) => !used.has(key))).toEqual([]);
   });
 });
