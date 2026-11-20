@@ -47,4 +47,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [008-underscore-row](008-underscore-row.md) | `_row` en UIRowTable y UIRepeatGroup da avisos de no-underscore-dangle (no bloquean) | Al tocar esos organismos o antes de la 022 | Agente |
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
 | [010-grabar-con-microfono-real](010-grabar-con-microfono-real.md) | La grabación con un micrófono real (permiso, medidor, prueba de sala, 48 kHz) no se ha probado en la app | Antes de publicar la 010 (T9) | Usuario |
-| [010-region-de-importar](010-region-de-importar.md) | Marcar el tramo a importar sobre la onda (región de wavesurfer); hoy se escribe en segundos | Antes de publicar la 010 (T9) | Agente |
+| [010-contraste-tema-oscuro](010-contraste-tema-oscuro.md) | Contraste del tema oscuro en Mis voces y el catálogo: medir y decidir (tokens del design system) | Después de publicar la 010 | Agente |

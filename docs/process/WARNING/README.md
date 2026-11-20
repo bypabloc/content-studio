@@ -120,9 +120,13 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-repetir-es-otra-toma](010-repetir-es-otra-toma.md) | «Repetir» graba otra toma del mismo estilo, igual que «Grabar»; las tomas no se sobrescriben | antes de dev |
 | [010-medir-arranque-en-budget](010-medir-arranque-en-budget.md) | La etapa `budget` mide solo el JS de arranque (entrada y `modulepreload`); el límite sigue en 232 kB | antes de dev |
 | [010-enfasis-atomo](010-enfasis-atomo.md) | El énfasis del guion es el átomo `UIEmphasis`: el `strong` nativo no va fuera de los átomos | antes de dev |
-| [010-importar-tramo-sin-region](010-importar-tramo-sin-region.md) | El tramo a importar se marca con inicio y fin en segundos; la región sobre la onda queda pendiente | antes de dev |
+| [010-importar-tramo-sin-region](010-importar-tramo-sin-region.md) | Superada: el tramo se marca sobre la onda del origen ([010-region-sobre-la-onda](010-region-sobre-la-onda.md)) | antes de dev |
 | [010-favorita-primera-y-por-defecto](010-favorita-primera-y-por-defecto.md) | El selector de voz pone la favorita primero y la usa por defecto (AC-9) | antes de dev |
 | [010-ac10-sin-texto-de-ui](010-ac10-sin-texto-de-ui.md) | AC-10 busca rutas y dependencias del grabador, no la palabra «grabar» de la UI | antes de dev |
 | [010-e2e-voces-sinteticas](010-e2e-voces-sinteticas.md) | Las respuestas e2e de Mis voces son sintéticas; el harness deja pasar cuerpos binarios | antes de dev |
+| [010-region-sobre-la-onda](010-region-sobre-la-onda.md) | El tramo de importar se marca sobre la onda del origen (D-4), con endpoint de picos y gate propio | antes de `main` |
+| [010-construir-sobre-voces-del-usuario](010-construir-sobre-voces-del-usuario.md) | El AC-7 real construiría sobre voces del usuario (junctions al principal): se pide decisión | antes de `main` |
+| [010-revision-visual-capturas](010-revision-visual-capturas.md) | Revisión visual de las capturas: 14 notas; la alineación se corrigió y el resto queda en PENDING | antes de `main` |
+| [010-consola-cp1252-en-build](010-consola-cp1252-en-build.md) | La entrada de voces pone la consola en errors=replace: un ← reventaba en Windows (cp1252) | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
