@@ -88,3 +88,41 @@ export function useProfileMutations() {
     }),
   };
 }
+
+/** Un estilo de una voz del catálogo: si está aprobado y la ruta de su muestra (`null` si aún no hay). */
+export interface VoiceStyleCard {
+  style: string;
+  approved: boolean;
+  path: string | null;
+}
+
+/** Una voz libre del catálogo con su ficha y su estado (`GET /voices/catalog`). */
+export interface VoiceCard {
+  id: string;
+  language: string | null;
+  license: string | null;
+  description: string | null;
+  favorite: boolean;
+  state: 'not_built' | 'partial' | 'approved';
+  styles: VoiceStyleCard[];
+}
+
+/** El catálogo de voces libres: cada voz con su ficha, su estado y sus muestras. */
+export function useVoiceCatalog() {
+  const api = useApi();
+  return useQuery({
+    queryKey: [...VOICES, 'catalog'],
+    queryFn: () => api.get<{ voices: VoiceCard[] }>('/voices/catalog'),
+  });
+}
+
+/** Encola `voice.build` para las voces dadas; con `force`, rehace también las que ya están aprobadas. */
+export function useEnqueueVoiceBuild() {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ voices, force }: { voices: string[]; force: boolean }) =>
+      api.post('/jobs', { kind: 'voice.build', params: { voices, force } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...VOICES, 'catalog'] }),
+  });
+}

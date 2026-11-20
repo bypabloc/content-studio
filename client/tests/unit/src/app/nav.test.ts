@@ -8,14 +8,19 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().map((item) => [item.id, item.icon])).toEqual([
       ['narration', 'narration'],
       ['voices', 'voices'],
+      ['catalog', 'layers'],
       ['settings', 'settings'],
     ])
   })
 
-  it('spec 010 (D-6): Mis voces va en el grupo Voces', () => {
+  it('spec 010 (D-6): Mis voces y Catálogo van en el grupo Voces', () => {
     expect(navItems().find((item) => item.id === 'voices')).toMatchObject({
       group: t('nav.group.voices'),
       label: t('nav.voices'),
+    })
+    expect(navItems().find((item) => item.id === 'catalog')).toMatchObject({
+      group: t('nav.group.voices'),
+      label: t('nav.catalog'),
     })
   })
 })

@@ -1,6 +1,7 @@
 import { NarrationPage } from '@/features/narration/NarrationPage';
 import { QueuePanel } from '@/features/queue/QueuePanel';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { CatalogPage } from '@/features/voices/CatalogPage';
 import { MyVoicesPage } from '@/features/voices/MyVoicesPage';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { nextTheme, UIThemeToggle } from '@/shared/components/molecules/UIThemeToggle';
@@ -49,6 +50,7 @@ export function Shell({ version }: { version: string }) {
         {section ? <UIText variant="subtitle">{section.label}</UIText> : null}
         {section?.id === 'narration' && <NarrationPage />}
         {section?.id === 'voices' && <MyVoicesPage />}
+        {section?.id === 'catalog' && <CatalogPage />}
         {section?.id === 'settings' && <SettingsPage />}
         {!section && <UIText variant="caption">{t('shell.empty')}</UIText>}
       </UIAppShell>
