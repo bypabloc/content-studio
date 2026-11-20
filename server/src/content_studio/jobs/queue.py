@@ -14,6 +14,7 @@ from typing import Any
 from content_studio.db import jobs, settings
 from content_studio.db.connection import utc_now
 from content_studio.services.registry import SERVICES
+from content_studio.services.storage_move import KIND as STORAGE_MOVE
 
 PAUSED = 'queue.paused'
 
@@ -44,6 +45,8 @@ def cancel(conn: sqlite3.Connection, job_id: int) -> bool:
     job = jobs.get(conn, job_id)
     if job is None or job['status'] not in ('queued', 'running'):
         return False
+    if job['kind'] == STORAGE_MOVE and job['status'] == 'running':
+        return False  # No se interrumpe un cambio de raíz mientras confirma sus archivos y preferencias.
     jobs.update(conn, job_id, status='cancelled', finished_at=utc_now())
     return True
 
@@ -59,8 +62,10 @@ def retry(conn: sqlite3.Connection, job_id: int) -> int:
 def claim(conn: sqlite3.Connection, job_id: int) -> bool:
     """Pasa un trabajo `queued` a `running` si nadie lo tomó antes. Solo un actor gana (server o CLI)."""
     cursor = conn.execute(
-        "UPDATE jobs SET status = 'running', started_at = ?, owner_pid = ? WHERE id = ? AND status = 'queued'",
-        (utc_now(), os.getpid(), job_id),
+        "UPDATE jobs SET status = 'running', started_at = ?, owner_pid = ? WHERE id = ? AND status = 'queued' "
+        "AND NOT EXISTS (SELECT 1 FROM jobs AS active WHERE active.status = 'running' "
+        'AND (active.kind = ? OR jobs.kind = ?))',
+        (utc_now(), os.getpid(), job_id, STORAGE_MOVE, STORAGE_MOVE),
     )
     return cursor.rowcount == 1
 

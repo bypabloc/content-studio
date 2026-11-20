@@ -12,7 +12,7 @@ from content_studio.api.paths_guard import allowed_file
 
 def request_with(roots: list) -> SimpleNamespace:
     """Un Request con solo lo que mira `allowed_file`: las carpetas permitidas."""
-    return SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(roots=roots)))
+    return SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(roots=roots, dynamic_outputs=False)))
 
 
 def test_a_file_inside_an_allowed_root_is_returned_resolved(tmp_path):

@@ -88,6 +88,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Storage
+         * @description Expone las raíces activas.
+         */
+        get: operations["storage_storage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move
+         * @description Encola un traslado sin modificar las preferencias por adelantado.
+         */
+        post: operations["move_storage_move_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics/recording": {
         parameters: {
             query?: never;
@@ -842,6 +882,26 @@ export interface components {
             value: unknown;
         };
         /**
+         * StorageMove
+         * @description Raíz que se va a mover y su destino.
+         */
+        StorageMove: {
+            /** Target */
+            target: string;
+            /** To */
+            to: string;
+        };
+        /**
+         * StoragePaths
+         * @description Raíces activas de motores y salidas.
+         */
+        StoragePaths: {
+            /** Engines */
+            engines: string;
+            /** Outputs */
+            outputs: string;
+        };
+        /**
          * StyleOut
          * @description Un preset del catálogo de Música (spec 011, D-2): su categoría, tonalidad, BPM, compás y si tiene muestra.
          */
@@ -1034,6 +1094,59 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    storage_storage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoragePaths"];
+                };
+            };
+        };
+    };
+    move_storage_move_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorageMove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
                 };
             };
             /** @description Validation Error */

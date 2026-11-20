@@ -70,6 +70,22 @@ def test_retry_copies_params_into_a_new_queued_job(conn):
     assert jobs.get(conn, new)['status'] == 'queued'
 
 
+def test_ac7_storage_move_runs_without_other_jobs_and_cannot_be_interrupted(conn):
+    """El traslado espera las escrituras anteriores y conserva el turno hasta que termina."""
+    active = jobs.insert(conn, 'fake', 'gpu', {})
+    move = jobs.insert(conn, 'storage.move', 'cpu', {})
+    following = jobs.insert(conn, 'fake', 'cpu', {})
+
+    assert queue.claim(conn, active)
+    assert not queue.claim(conn, move)
+    jobs.update(conn, active, status='done')
+    assert queue.claim(conn, move)
+    assert not queue.claim(conn, following)
+    assert not queue.cancel(conn, move)
+    jobs.update(conn, move, status='done')
+    assert queue.claim(conn, following)
+
+
 def test_retry_refuses_a_job_that_is_still_pending(conn):
     job_id = jobs.insert(conn, 'fake', 'gpu', {})
 

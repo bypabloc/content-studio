@@ -29,6 +29,7 @@ from content_studio.db import connection, jobs
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
 from content_studio.services.registry import SERVICES
+from content_studio.services.storage_move import KIND as STORAGE_MOVE
 
 WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canceló desde otro proceso
 
@@ -103,7 +104,7 @@ class Worker:
             if changed:
                 self._notify(conn, job_id)
         proc = self._processes.get(job_id)
-        if proc is not None:
+        if changed and proc is not None:
             stop_tree(proc)
         return changed
 
@@ -142,6 +143,8 @@ class Worker:
                         threading.Thread(target=self._run_cpu, args=(cpu_job,), daemon=True).start()
                         continue
                     self._cpu.release()
+                if cpu_job and cpu_job['kind'] == STORAGE_MOVE:
+                    continue  # Deja terminar los trabajos activos antes de abrir otros.
                 gpu_job = jobs.next_queued(conn, 'gpu')
                 if gpu_job and not self._gpu_busy:
                     self._gpu_busy = True
