@@ -11,7 +11,7 @@
 | Tipo | refactor · feature |
 | Escala | Large (unos 64 componentes, 27 primitivas de shadcn, tokens, `useForm`, el shell, las pantallas actuales, una etapa nueva de devtools y reglas) |
 | Rama | `feature/008-atomic-components` desde `origin/dev`, en `../content-studio-worktrees/008-atomic-components/` |
-| Depende de | [007](../007-i18n/README.md) (fusionada en `origin/dev`): los componentes reciben sus textos del catálogo único |
+| Depende de | 007 (fusionada en `origin/dev`): los componentes reciben sus textos del catálogo único |
 | Origen | Pedido del usuario (2026-11-19), lote [001-017-studio](../README.md) |
 
 ## Objetivo
