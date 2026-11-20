@@ -258,6 +258,8 @@
   "music.freeText.timeSignature": "Time signature",
   "music.generate": "Generate",
   "music.media.filter": "Audio or video",
+  "music.mode.free": "Free text",
+  "music.mode.presets": "Styles",
   "music.options.engine": "Engine",
   "music.options.evaluate": "Check for voice",
   "music.options.noLm": "No LM planner",

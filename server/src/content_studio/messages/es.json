@@ -258,6 +258,8 @@
   "music.freeText.timeSignature": "Compás",
   "music.generate": "Generar",
   "music.media.filter": "Audio o video",
+  "music.mode.free": "Texto libre",
+  "music.mode.presets": "Estilos",
   "music.options.engine": "Motor",
   "music.options.evaluate": "Evaluar la voz",
   "music.options.noLm": "Sin planificador LM",

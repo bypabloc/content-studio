@@ -13,6 +13,7 @@ import { Player } from '@/shared/media/Player';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 
 import { DurationField } from './DurationField';
+import { FreeTextStyle, type FreeText, freeTextComplete } from './FreeTextStyle';
 import { MusicCompare } from './MusicCompare';
 import { MusicOptions } from './MusicOptions';
 import { StyleBrowser } from './StyleBrowser';
@@ -54,14 +55,29 @@ export function MusicPage(): React.JSX.Element {
   const [evaluate, setEvaluate] = useState(true);
   const [retries, setRetries] = useState(1);
   const [sampleKey, setSampleKey] = useState<string | null>(null);
+  const [mode, setMode] = useState<'presets' | 'free'>('presets');
+  const [free, setFree] = useState<FreeText>({ caption: '', key: null, bpm: null, timeSignature: '4' });
   const [group, setGroup] = useState<string | null>(null);
 
   const max = ENGINES.find((engine) => engine.id === model)?.max ?? 600;
+  const freeReady = freeTextComplete(free);
+  const ready = mode === 'presets' ? selected.length > 0 : freeReady;
   const generate = useMutation({
     mutationFn: () =>
       api.post<Job>('/jobs', {
         kind: 'music',
-        params: { model, style: selected, duration, variants, no_lm: noLm, evaluate, retries },
+        params: {
+          model,
+          // Un estilo de preset va por su clave; el texto libre, como texto con su tonalidad, BPM y compás (D-5).
+          ...(mode === 'presets'
+            ? { style: selected }
+            : { style: [free.caption.trim()], key: free.key, bpm: free.bpm, time_signature: free.timeSignature }),
+          duration,
+          variants,
+          no_lm: noLm,
+          evaluate,
+          retries,
+        },
       }),
     onSuccess: (job) => {
       setGroup(job.group_key ?? null);
@@ -72,11 +88,11 @@ export function MusicPage(): React.JSX.Element {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.ctrlKey && event.key === 'Enter' && selected.length > 0) mutate();
+      if (event.ctrlKey && event.key === 'Enter' && ready) mutate();
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [mutate, selected]);
+  }, [mutate, ready]);
 
   async function pickMediaDuration(): Promise<number | null> {
     const chosen = await open({
@@ -91,6 +107,7 @@ export function MusicPage(): React.JSX.Element {
   const styles = catalog.data?.styles ?? [];
   const sample = styles.find((style) => style.key === sampleKey)?.sample ?? null;
   const toggle = (list: string[], key: string) => (list.includes(key) ? list.filter((item) => item !== key) : [...list, key]);
+  const stableKeys = [...new Set(styles.map((style) => style.musical_key))].sort();
 
   return (
     <UIStack gap="lg">
@@ -113,14 +130,26 @@ export function MusicPage(): React.JSX.Element {
         onTailChange={setTail}
         pickMediaDuration={pickMediaDuration}
       />
-      <StyleBrowser
-        styles={styles}
-        favorites={favorites}
-        selected={selected}
-        onToggleFavorite={(key) => setFavorites(toggle(favorites, key))}
-        onToggleSelect={(key) => setSelected(toggle(selected, key))}
-        onPlay={setSampleKey}
-      />
+      <UIStack direction="row" gap="sm">
+        <UIButton variant={mode === 'presets' ? 'primary' : 'secondary'} aria-pressed={mode === 'presets'} onClick={() => setMode('presets')}>
+          {t('music.mode.presets')}
+        </UIButton>
+        <UIButton variant={mode === 'free' ? 'primary' : 'secondary'} aria-pressed={mode === 'free'} onClick={() => setMode('free')}>
+          {t('music.mode.free')}
+        </UIButton>
+      </UIStack>
+      {mode === 'presets' ? (
+        <StyleBrowser
+          styles={styles}
+          favorites={favorites}
+          selected={selected}
+          onToggleFavorite={(key) => setFavorites(toggle(favorites, key))}
+          onToggleSelect={(key) => setSelected(toggle(selected, key))}
+          onPlay={setSampleKey}
+        />
+      ) : (
+        <FreeTextStyle value={free} keys={stableKeys} onChange={setFree} />
+      )}
       {sample ? <SamplePlayer path={sample} /> : null}
       <MusicOptions
         variants={variants}
@@ -132,7 +161,7 @@ export function MusicPage(): React.JSX.Element {
         retries={retries}
         onRetries={setRetries}
       />
-      <UIButton disabled={selected.length === 0 || generate.isPending} onClick={() => mutate()}>
+      <UIButton disabled={!ready || generate.isPending} onClick={() => mutate()}>
         {t('music.generate')}
       </UIButton>
       {group ? <MusicCompare groupKey={group} /> : null}

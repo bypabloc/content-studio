@@ -107,6 +107,35 @@ describe('MusicPage (spec 011, D-6, AC-8)', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(expect.stringContaining(encodeURIComponent('out/samples/lofi-chill.wav'))));
   });
 
+  it('WHEN en Texto libre falta el BPM THEN Generar queda deshabilitado; completo, se encola con tonalidad, BPM y compás', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: t('music.mode.free') }));
+    await user.type(screen.getByRole('textbox', { name: t('music.freeText.caption') }), 'warm lofi piano');
+    await user.click(screen.getByRole('button', { name: 'C Major' }));
+    expect((screen.getByRole('button', { name: t('music.generate') }) as HTMLButtonElement).disabled).toBe(true);
+
+    await user.click(screen.getByRole('button', { name: t('music.freeText.tap') }));
+    const bpm = screen.getByRole('spinbutton', { name: t('music.freeText.bpm') });
+    await user.clear(bpm);
+    await user.type(bpm, '90');
+    expect((screen.getByRole('button', { name: t('music.generate') }) as HTMLButtonElement).disabled).toBe(false);
+    await user.click(screen.getByRole('button', { name: t('music.generate') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/jobs', {
+        kind: 'music',
+        params: expect.objectContaining({
+          style: ['warm lofi piano'],
+          key: 'C Major',
+          bpm: 90,
+          time_signature: '4',
+        }),
+      }),
+    );
+  });
+
   it('WHEN se generó THEN la comparación del pedido aparece debajo del botón', async () => {
     const user = userEvent.setup();
     api.post.mockResolvedValueOnce({ id: 5, group_key: 'music:abc', status: 'queued' });
