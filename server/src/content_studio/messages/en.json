@@ -17,6 +17,7 @@
   "app.name": "Content Studio",
   "app.version": "Version {version}",
   "error.consent_required": "To import a span you must confirm the owner's permission for the voice.",
+  "error.duration_over_max": "The duration is over the engine's maximum: {max} seconds.",
   "error.engine_not_installed": "The engine {model} is not installed: follow its README in server/data/.",
   "error.forbidden_path": "The path is outside out/ and the reference data.",
   "error.http.404": "The route does not exist.",

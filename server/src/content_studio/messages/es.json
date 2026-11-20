@@ -17,6 +17,7 @@
   "app.name": "Content Studio",
   "app.version": "Versión {version}",
   "error.consent_required": "Para importar un tramo hay que confirmar el permiso del dueño de la voz.",
+  "error.duration_over_max": "La duración pasa el máximo del motor: {max} segundos.",
   "error.engine_not_installed": "El motor {model} no está instalado: sigue su README en server/data/.",
   "error.forbidden_path": "La ruta está fuera de out/ y de los datos de referencia.",
   "error.http.404": "La ruta no existe.",

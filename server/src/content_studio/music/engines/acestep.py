@@ -11,8 +11,8 @@ from pathlib import Path
 
 from content_studio import paths
 from content_studio.common import progress
+from content_studio.music.duration import finish, plan_duration
 from content_studio.music.engines.base import Jobs, MusicEngine
-from content_studio.music.evaluation import trim_silence
 
 ACE_REPO = paths.MUSIC / 'models' / 'ACE-Step-1.5'
 
@@ -61,7 +61,7 @@ class AceStep(MusicEngine):
                 bpm=style['bpm'],
                 keyscale=style['key'],
                 timesignature=style['time_signature'],
-                duration=a.duration,
+                duration=plan_duration(a.duration, self.spec.max_seconds),
                 thinking=not a.no_lm,
             )
             r = generate_music(dit, llm, params, config, save_dir=str(output.parent))
@@ -69,5 +69,5 @@ class AceStep(MusicEngine):
                 print(f'ACE-Step failed on {output.name}: {r.error}')
                 continue
             Path(r.audios[0]['path']).replace(output)
-            remaining = trim_silence(output)
+            remaining = finish(output, a.duration)
             print(f'{output} ({remaining:.1f} s after trimming silence; {style["key"]}, {style["bpm"]} BPM)')

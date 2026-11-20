@@ -24,6 +24,7 @@ class MusicSpec:
     desc: str  # texto de los selectores (la API lo expone)
     evaluates: bool = False  # su venv trae demucs: admite --evaluate
     recommended: bool = False  # la opción que la app marca con ★ (exactamente una por selector)
+    max_seconds: int = 0  # la duración máxima que acepta el motor (ACE 600 s, HeartMuLa 240 s)
 
     def path_venv(self) -> Path:
         """Carpeta del venv del motor, en server/data/music/."""

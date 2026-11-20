@@ -51,7 +51,7 @@ def test_free_text_style_needs_key_and_bpm(installed):
     ('params', 'code'),
     [
         ({**VALID, 'model': 'nope'}, 'unknown_engine'),
-        ({**VALID, 'duration': 700}, 'invalid_duration'),
+        ({**VALID, 'duration': 700}, 'duration_over_max'),
         ({**VALID, 'duration': 0}, 'invalid_duration'),
     ],
 )
