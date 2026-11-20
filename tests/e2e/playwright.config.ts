@@ -11,7 +11,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  use: { baseURL: `http://127.0.0.1:${PORT}` },
+  // Las pruebas esperan la UI en español: con el idioma del navegador en inglés, «Sistema» abriría en inglés (spec 007).
+  use: { baseURL: `http://127.0.0.1:${PORT}`, locale: 'es-419' },
   projects: [
     {
       name: 'desktop-chromium',
