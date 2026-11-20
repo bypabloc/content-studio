@@ -43,3 +43,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [007-soltar-antes-del-catalogo](007-soltar-antes-del-catalogo.md) | Soltar guiones antes de que cargue el catálogo de motores los descarta sin aviso | En la spec de importación de guiones | Agente |
 | [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
 | [008-revision-visual-organismos](008-revision-visual-organismos.md) | Las celdas, el asa y el título de los organismos adaptados, el reproductor (44 px) y el aviso de licencia no se miraron en la app | La T5 y la T6 | Agente y usuario |
+| [008-sincronizar-con-klinikae](008-sincronizar-con-klinikae.md) | Cómo traer las mejoras de klinikae: copiar a mano, un script de diff o un paquete compartido | Cuando haya que traer un cambio | Usuario |
+| [008-uitext-className](008-uitext-className.md) | `UIText` acepta `className` y 15 usos de features/app ajustan peso y tamaño: decidir si lo conserva | Después de la 009 | Agente |
+| [008-underscore-row](008-underscore-row.md) | `_row` en UIRowTable y UIRepeatGroup da avisos de no-underscore-dangle (no bloquean) | Al tocar esos organismos o antes de la 022 | Agente |

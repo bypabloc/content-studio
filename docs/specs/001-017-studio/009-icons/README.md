@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Medium (unos 8 archivos del client, más la regla de UI) |
 | Rama | `feature/009-icons` desde `origin/dev`, en `../content-studio-worktrees/009-icons/` |
-| Depende de | [008](../008-atomic-components/README.md) (fusionada en `origin/dev`) |
+| Depende de | 008 (fusionada en `origin/dev`) |
 | Origen | Pedido del usuario (2026-11-19), lote [001-017-studio](../README.md) |
 
 ## Objetivo
