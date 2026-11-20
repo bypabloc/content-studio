@@ -29,11 +29,11 @@ export function QueuePanel() {
 
   return (
     <UIStack role="region" aria-label={t('queue.title')} gap="sm">
-      <UIStack direction="row" align="center" justify="between" gap="sm">
+      <UIStack direction="row" align="center" justify="between" gap="sm" className="flex-wrap">
         <UIText variant="subtitle" className="text-sm">
           {t('queue.title')}
         </UIText>
-        <UIStack direction="row" gap="sm">
+        <UIStack direction="row" gap="sm" className="flex-wrap">
           <UIButton variant="ghost" onClick={queue.togglePause}>
             {queue.paused ? t('queue.resume') : t('queue.pause')}
           </UIButton>

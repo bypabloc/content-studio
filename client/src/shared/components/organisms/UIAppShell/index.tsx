@@ -104,7 +104,8 @@ export function UIAppShell({ brand, nav, aside, footer, collapsed, onCollapsedCh
                   </SidebarGroup>
                 ))}
               </UIBox>
-              {aside ? <UIBox className={HIDDEN_WHEN_COLLAPSED}>{aside}</UIBox> : null}
+              {/* Mismo margen que las secciones (SidebarGroup p-2 + SidebarMenuButton px-2): la cola se alinea con su texto. */}
+              {aside ? <UIBox className={`${HIDDEN_WHEN_COLLAPSED} px-4 py-2`}>{aside}</UIBox> : null}
             </SidebarContent>
             {footer ? <SidebarFooter>{footer}</SidebarFooter> : null}
           </Sidebar>
