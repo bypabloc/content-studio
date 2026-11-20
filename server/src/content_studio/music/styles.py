@@ -6,6 +6,12 @@ instrumentos concretos en vez de adjetivos, género + ánimo + uso, sin tempo ni
 Los candidatos que fallan al probarlos se quitan de aquí y quedan anotados en INVESTIGACION.md.
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+
+from content_studio.music.categories import category_of
+
 # Los 9 originales, con sus tags propios para HeartMuLa.
 BASE = {
     'lofi-chill': dict(
@@ -262,3 +268,23 @@ def _entry(caption: str, key: str, bpm: int, time_signature: str = '4') -> dict:
 
 
 STYLES = {**BASE, **{name: _entry(*data) for name, data in NEW.items()}}
+STYLES = {name: {**style, 'category': category_of(name)} for name, style in STYLES.items()}
+
+
+def styles_catalog(samples: Path) -> list[dict]:
+    """Los presets para la UI (spec 011, D-2 y D-3): categoría, tonalidad, BPM, compás, caption y si ya tienen muestra.
+
+    `samples` es la carpeta de las muestras de 10 s (`<estilo>.wav`).
+    """
+    return [
+        {
+            'key': key,
+            'category': style['category'],
+            'musical_key': style['key'],
+            'bpm': style['bpm'],
+            'time_signature': style['time_signature'],
+            'caption': style['caption'],
+            'has_sample': (samples / f'{key}.wav').is_file(),
+        }
+        for key, style in STYLES.items()
+    ]
