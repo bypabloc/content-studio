@@ -1,6 +1,6 @@
 ---
 modulo: narration
-actualizada: 2026-11-19
+actualizada: 2026-11-20
 ---
 
 # Narración
@@ -33,5 +33,6 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 ## Historial
 
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
+- 2026-11-20: spec 010 (voces y grabación): perfiles de voz con tomas y referencia elegida, grabación guiada con prueba de sala y chequeo, importar tramos de audio o video y favoritas en el catálogo (PR #80).
 - 2026-11-19: CLI `studio` (004): `python cli.py narration tts` pasa a `uv run studio narration tts`; la salida va a `out/narration/<fecha>-<id>-<slug>/`. `grabar` se retiró en la 010.
 - 2026-11-19: spec 006: la sección Narración, el linter, las tomas en disco con `blocks/`, regenerar un párrafo y comparar tomas.

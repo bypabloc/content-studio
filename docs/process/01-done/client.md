@@ -34,3 +34,4 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 - 2026-11-19: spec 007 (i18n): catálogo único en tres idiomas, selector de idioma en Ajustes y etapa `i18n`.
 - 2026-11-20: spec 008 (componentes atómicos): 77 componentes de klinikae en átomos, moléculas y organismos; `UIAppShell`, `useForm` y las etapas `ui-structure` y de jerarquía.
 - 2026-11-20: spec 009 (iconos): mapa de `UIIcon` con los nombres de content-studio, iconos de estado en la cola, selector de tema con íconos y el criterio de solo ícono.
+- 2026-11-20: spec 010 (client): «Mis voces», asistente de grabación con indicador «Micrófono en uso», región de la onda al importar, micrófono y registro en Ajustes, y borrar tomas a la papelera (PR #80).
