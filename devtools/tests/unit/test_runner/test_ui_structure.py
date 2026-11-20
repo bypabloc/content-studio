@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from devtools import paths
-from devtools.test_runner.ui_structure import Finding, check_ui_structure, is_exempt
+from devtools.test_runner import ui_structure
+from devtools.test_runner.ui_structure import Finding, _show, check_ui_structure, is_exempt, run
 
 FIXTURES = Path(__file__).resolve().parents[2] / 'fixtures' / 'ui-structure'
 
@@ -64,3 +67,36 @@ def test_ac4_precommit_runs_ui_structure_next_to_the_client_gates():
     client_gate = next(line for line in hook.splitlines() if 'client-lint,client-typecheck,client-unit' in line)
 
     assert 'ui-structure' in client_gate
+
+
+def test_the_stage_passes_on_the_real_client_tree():
+    """La etapa revisa todo client/src: el árbol real no tiene etiquetas nativas fuera de los átomos (AC-2)."""
+    assert run([]) == {'stage': 'ui-structure', 'status': 'pass', 'detail': ''}
+
+
+def test_the_stage_fails_with_a_message_when_bun_is_missing(monkeypatch):
+    def missing_bun(*args, **kwargs):
+        raise FileNotFoundError('bun')
+
+    monkeypatch.setattr(ui_structure.subprocess, 'run', missing_bun)
+
+    result = run([])
+
+    assert result['status'] == 'fail'
+    assert 'bun is not in PATH' in result['detail']
+
+
+def test_a_failing_script_raises_its_own_error(monkeypatch):
+    class Failed:
+        returncode = 2
+        stdout = ''
+        stderr = 'ui-structure: cannot read file'
+
+    monkeypatch.setattr(ui_structure.subprocess, 'run', lambda *args, **kwargs: Failed())
+
+    with pytest.raises(RuntimeError, match='cannot read file'):
+        check_ui_structure([FIXTURES / 'features' / 'flagged-div.tsx'], base=FIXTURES)
+
+
+def test_paths_outside_the_repo_are_shown_as_given(tmp_path):
+    assert _show(tmp_path / 'x.tsx', paths.ROOT) == (tmp_path / 'x.tsx').as_posix()

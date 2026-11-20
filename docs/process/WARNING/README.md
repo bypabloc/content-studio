@@ -88,5 +88,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-licensedialog-en-narracion](008-licensedialog-en-narracion.md) | `LicenseDialog` pasa a `features/narration` sobre `UIDialog`; el foco inicial ya no cae en «Aceptar» | antes de dev |
 | [008-atomos-nuevos-t6](008-atomos-nuevos-t6.md) | Átomo `UIImage`, `play` y `pause` en `UIIcon`, `role` en vez de `output` y `aside`; el reproductor pasa a 44 px | antes de dev |
 | [008-ui-structure-etapa](008-ui-structure-etapa.md) | La etapa `ui-structure` (AST) bloquea etiquetas nativas fuera de átomos; `fieldset` pasa a `role="group"` y `time` a `UITime` | antes de dev |
+| [008-jerarquia-oxlint](008-jerarquia-oxlint.md) | La jerarquía D-4 se hace cumplir con overrides de oxlint; el inventario de componentes lo guarda un test (`UIToast` exporta `UIToaster`) | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
