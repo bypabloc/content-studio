@@ -1,4 +1,8 @@
 import { useId } from 'react';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
+import { UITextarea } from '@/shared/components/molecules/UITextarea';
 import { t } from '@/shared/i18n/t';
 import { EDITOR_TEXT, ScriptHighlight } from './ScriptHighlight';
 import { useScriptImport } from './useScriptImport';
@@ -25,38 +29,39 @@ export function ScriptEditor({
   const issues = lint.data?.issues ?? [];
 
   return (
-    <section className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm font-medium">
+    <UIStack gap="sm">
+      {/* La etiqueta visible va como texto; el campo la lleva oculta, para que sus avisos queden alineados detrás. */}
+      <UIText variant="body" className="text-sm font-medium text-foreground">
         {t('narration.editor.label')}
-      </label>
-      <div className="relative min-h-64 rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring">
+      </UIText>
+      <UIStack className="relative min-h-64">
         <ScriptHighlight text={value} issues={issues} />
-        <textarea
+        <UITextarea
           id={id}
+          label={t('narration.editor.label')}
+          hideLabel
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={t('narration.editor.placeholder')}
           spellCheck={false}
           className={`${EDITOR_TEXT} relative min-h-64 w-full resize-y bg-transparent outline-none`}
         />
-      </div>
-      <footer className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+      </UIStack>
+      <UIStack direction="row" align="center" gap="sm" className="flex-wrap">
         {lint.data && (
-          <span>{t('narration.editor.stats', { words: lint.data.words, seconds: Math.round(lint.data.seconds) })}</span>
+          <UIText variant="caption">
+            {t('narration.editor.stats', { words: lint.data.words, seconds: Math.round(lint.data.seconds) })}
+          </UIText>
         )}
-        <span>
+        <UIText variant="caption">
           {issues.length === 1
             ? t('narration.editor.issues_one')
             : t('narration.editor.issues_other', { count: issues.length })}
-        </span>
-        <button
-          type="button"
-          onClick={() => void pick()}
-          className="ml-auto rounded-md border border-border px-3 py-1.5 text-foreground hover:bg-accent"
-        >
+        </UIText>
+        <UIButton variant="secondary" className="ml-auto" onClick={() => void pick()}>
           {t('narration.import.button')}
-        </button>
-      </footer>
-    </section>
+        </UIButton>
+      </UIStack>
+    </UIStack>
   );
 }

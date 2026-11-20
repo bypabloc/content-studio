@@ -1,5 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/shared/api/context';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
+import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UIText } from '@/shared/components/atoms/UIText';
+import { UISelect } from '@/shared/components/molecules/UISelect';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 import type { LanguagePreference } from '@/shared/i18n/locale';
@@ -25,69 +30,57 @@ export function SettingsPage() {
     await queryClient.invalidateQueries({ queryKey: ['settings'] });
   };
 
+  const shortcuts = [t('settings.shortcut_palette'), t('settings.shortcut_generate'), t('settings.shortcut_play')];
+
   return (
-    <div className="flex max-w-xl flex-col gap-8">
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">{t('settings.appearance')}</h3>
-        <div className="flex items-center justify-between gap-4 text-sm">
-          <span>{t('settings.language')}</span>
-          <select
-            aria-label={t('settings.language')}
-            value={language}
-            onChange={(event) => setLanguage(event.target.value as LanguagePreference)}
-            className="rounded-md border border-input bg-transparent px-2 py-1.5"
-          >
-            <option value="system">{`★ ${t('language.system')}`}</option>
-            <option value="es">{t('language.es')}</option>
-            <option value="en">{t('language.en')}</option>
-            <option value="pt">{t('language.pt')}</option>
-          </select>
-        </div>
-        <div className="flex items-center justify-between gap-4 text-sm">
-          <span>{t('settings.theme')}</span>
-          <select
-            aria-label={t('settings.theme')}
-            value={theme}
-            onChange={(event) => setTheme(event.target.value as ThemeMode)}
-            className="rounded-md border border-input bg-transparent px-2 py-1.5"
-          >
-            <option value="light">{t('theme.light')}</option>
-            <option value="dark">{t('theme.dark')}</option>
-            <option value="system">{t('theme.system')}</option>
-          </select>
-        </div>
-      </section>
+    <UIStack gap="lg" className="max-w-xl">
+      <UIStack gap="md">
+        <UIText variant="heading">{t('settings.appearance')}</UIText>
+        <UISelect
+          label={t('settings.language')}
+          options={[
+            { value: 'system', label: `★ ${t('language.system')}` },
+            { value: 'es', label: t('language.es') },
+            { value: 'en', label: t('language.en') },
+            { value: 'pt', label: t('language.pt') },
+          ]}
+          value={language}
+          onChange={(value) => setLanguage(value as LanguagePreference)}
+        />
+        <UISelect
+          label={t('settings.theme')}
+          options={[
+            { value: 'light', label: t('theme.light') },
+            { value: 'dark', label: t('theme.dark') },
+            { value: 'system', label: t('theme.system') },
+          ]}
+          value={theme}
+          onChange={(value) => setTheme(value as ThemeMode)}
+        />
+      </UIStack>
 
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">{t('settings.notifications')}</h3>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={notifySystem} onChange={(event) => setNotifySystem(event.target.checked)} />
-          {t('settings.notify_system')}
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={notifySound} onChange={(event) => setNotifySound(event.target.checked)} />
-          {t('settings.notify_sound')}
-        </label>
-      </section>
+      <UIStack gap="md">
+        <UIText variant="heading">{t('settings.notifications')}</UIText>
+        <UICheckbox label={t('settings.notify_system')} checked={notifySystem} onChange={setNotifySystem} />
+        <UICheckbox label={t('settings.notify_sound')} checked={notifySound} onChange={setNotifySound} />
+      </UIStack>
 
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">{t('settings.shortcuts')}</h3>
-        <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
-          <li>{t('settings.shortcut_palette')}</li>
-          <li>{t('settings.shortcut_generate')}</li>
-          <li>{t('settings.shortcut_play')}</li>
-        </ul>
-      </section>
+      <UIStack gap="md">
+        <UIText variant="heading">{t('settings.shortcuts')}</UIText>
+        <UIStack role="list" gap="sm">
+          {shortcuts.map((shortcut) => (
+            <UIStack key={shortcut} role="listitem">
+              <UIText variant="body">{shortcut}</UIText>
+            </UIStack>
+          ))}
+        </UIStack>
+      </UIStack>
 
-      <section>
-        <button
-          type="button"
-          onClick={() => void reset()}
-          className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-accent"
-        >
+      <UIStack>
+        <UIButton variant="secondary" className="self-start" onClick={() => void reset()}>
           {t('settings.reset')}
-        </button>
-      </section>
-    </div>
+        </UIButton>
+      </UIStack>
+    </UIStack>
   );
 }

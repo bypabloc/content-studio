@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { UIButton } from '../../atoms/UIButton'
 import { UISkeleton } from '../../atoms/UISkeleton'
 import { UIBox } from '../../atoms/UIBox'
+import { UIImage } from '../../atoms/UIImage'
 
 type Props = {
   src?: string | null
@@ -82,7 +83,7 @@ export function UIRemoteImage({
           <UISkeleton className="size-full" />
         </UIBox>
       ) : null}
-      <img
+      <UIImage
         key={`${src}-${retryCount}`}
         src={src}
         alt={alt}

@@ -1,13 +1,11 @@
+import { UIMarkedText, type MarkedSegment } from '@/shared/components/atoms/UIMarkedText';
 import type { LintIssue } from './useScriptLint';
 
 /** Lo que va detrás del campo: el mismo tipo de letra y de sangría, para que cada palabra caiga en su sitio. */
-export const EDITOR_TEXT = 'p-3 font-sans text-base leading-7 whitespace-pre-wrap break-words'; // i18n-ignore: clases de Tailwind de un className, no texto
+export const EDITOR_TEXT = 'ui-typography-body p-3 font-sans text-base leading-7 whitespace-pre-wrap break-words'; // i18n-ignore: clases de Tailwind de un className, no texto
 
 /** Un trozo del texto: sin `message` va normal; con `message`, es un aviso del linter. */
-export interface Segment {
-  text: string;
-  message?: string;
-}
+export type Segment = MarkedSegment;
 
 /**
  * Parte el texto en trozos según los avisos. Cada aviso trae línea y columna (1-based) y su largo. Un aviso que se
@@ -35,29 +33,13 @@ export function markSegments(text: string, issues: LintIssue[]): Segment[] {
   return segments;
 }
 
-const SPACE = ' ';
-
 /** El texto debajo del campo, con los avisos subrayados. Va en `aria-hidden`: lo que se lee es el campo. */
 export function ScriptHighlight({ text, issues }: { text: string; issues: LintIssue[] }) {
   return (
-    <div
-      aria-hidden="true"
+    <UIMarkedText
+      segments={markSegments(text, issues)}
       className={`${EDITOR_TEXT} pointer-events-none absolute inset-0 overflow-hidden text-transparent`}
-    >
-      {markSegments(text, issues).map((segment, index) =>
-        segment.message === undefined ? (
-          <span key={index}>{segment.text}</span>
-        ) : (
-          <mark
-            key={index}
-            title={segment.message}
-            className="bg-transparent text-transparent underline decoration-destructive decoration-wavy underline-offset-4"
-          >
-            {segment.text}
-          </mark>
-        ),
-      )}
-      {text.endsWith('\n') ? SPACE : null}
-    </div>
+      trailingSpace={text.endsWith('\n')}
+    />
   );
 }

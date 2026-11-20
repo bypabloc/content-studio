@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { openApp } from '../support/app';
+import { pickOption } from '../support/select';
 
 const serious = (violations: { impact?: string | null }[]) =>
   violations.filter((violation) => violation.impact === 'serious' || violation.impact === 'critical');
@@ -12,7 +13,7 @@ test('el idioma cambia la UI en vivo, se guarda y Restablecer no lo cambia (AC-8
     location.hash = '#/settings';
   });
 
-  await page.getByLabel('Idioma', { exact: true }).selectOption('en');
+  await pickOption(page, 'Idioma', 'English');
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Narration' })).toBeVisible();
   await expect
     .poll(() =>
@@ -45,14 +46,17 @@ test('la opción Sistema lleva la ★ y axe no reporta fallos serios en inglés 
   await page.evaluate(() => {
     location.hash = '#/settings';
   });
+  // El ★ va en la opción Sistema del selector de idioma, no en el de tema; las opciones existen con el listado abierto.
+  await page.getByRole('combobox', { name: 'Idioma', exact: true }).click();
   await expect(page.getByRole('option', { name: '★ Sistema', exact: true })).toHaveCount(1);
+  await page.keyboard.press('Escape');
 
   // La etiqueta del selector cambia con el idioma: en inglés es «Language».
-  await page.getByLabel('Idioma', { exact: true }).selectOption('en');
+  await pickOption(page, 'Idioma', 'English');
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Narration' })).toBeVisible();
   expect(serious((await new AxeBuilder({ page }).analyze()).violations)).toEqual([]);
 
-  await page.getByLabel('Language', { exact: true }).selectOption('pt');
+  await pickOption(page, 'Language', 'Português');
   await expect(page.getByRole('navigation').getByRole('link').first()).toBeVisible();
   expect(serious((await new AxeBuilder({ page }).analyze()).violations)).toEqual([]);
 });

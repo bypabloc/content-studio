@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 
-const GAPS = { sm: 'gap-2', md: 'gap-4', lg: 'gap-6', xl: 'gap-10' } as const;
+const GAPS = { xs: 'gap-1', sm: 'gap-2', md: 'gap-4', lg: 'gap-6', xl: 'gap-10' } as const;
 const DIRECTIONS = { column: 'flex-col', row: 'flex-row' } as const;
 const ALIGN = { start: 'items-start', center: 'items-center', end: 'items-end', stretch: 'items-stretch' } as const;
 const JUSTIFY = {

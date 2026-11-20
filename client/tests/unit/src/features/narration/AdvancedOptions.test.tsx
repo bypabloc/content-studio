@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdvancedOptions } from '@/features/narration/AdvancedOptions';
 import { t } from '@/shared/i18n/t';
@@ -66,9 +67,9 @@ describe('AdvancedOptions', () => {
   it('la masterización, los LUFS y la evaluación se guardan como se eligieron', async () => {
     renderAdvanced(false);
 
-    fireEvent.change(screen.getByRole('combobox', { name: t('narration.advanced.master') }), {
-      target: { value: 'no' },
-    });
+    // El selector es un combobox (UISelect sobre Base UI): se abre y se elige la opción por su nombre.
+    await userEvent.click(await screen.findByRole('combobox', { name: t('narration.advanced.master') }));
+    await userEvent.click(await screen.findByRole('option', { name: t('narration.master.no') }));
     fireEvent.change(screen.getByRole('spinbutton', { name: t('narration.advanced.lufs') }), {
       target: { value: '-14' },
     });

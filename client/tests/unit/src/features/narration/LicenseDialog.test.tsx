@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { LicenseDialog } from '@/shared/components/LicenseDialog';
+import { LicenseDialog } from '@/features/narration/LicenseDialog';
 import { t } from '@/shared/i18n/t';
 
 afterEach(cleanup);
@@ -39,6 +39,14 @@ describe('LicenseDialog', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
 
     expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('al abrir, el foco no cae en Aceptar', () => {
+    render(
+      <LicenseDialog engine="omnivoice" license="CC-BY-NC-4.0" commercial={false} onAccept={() => {}} onCancel={() => {}} />,
+    );
+
+    expect(document.activeElement).not.toBe(screen.getByRole('button', { name: t('license.accept') }));
   });
 
   it('otras teclas no cancelan el aviso', () => {

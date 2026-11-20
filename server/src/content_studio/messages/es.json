@@ -308,5 +308,6 @@
   "theme.change": "{mode}: cambiar a {next}",
   "theme.dark": "Oscuro",
   "theme.light": "Claro",
-  "theme.system": "Sistema"
+  "theme.system": "Sistema",
+  "ui.dialog.close": "Cerrar"
 }

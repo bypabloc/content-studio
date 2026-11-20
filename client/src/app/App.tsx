@@ -2,6 +2,9 @@ import { invoke } from '@tauri-apps/api/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ApiProvider } from '@/shared/api/context';
 import type { Connection } from '@/shared/api/client';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIPage } from '@/shared/components/atoms/UIPage';
+import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { useLocale } from '@/shared/i18n/locale';
 import { Providers } from './Providers';
@@ -53,15 +56,11 @@ function Connected() {
   if (status.kind === 'failed') {
     return (
       <Screen>
-        <h1 className="text-2xl font-semibold">{t('server.error.title')}</h1>
-        <p className="text-sm text-muted-foreground">{reason(status.code)}</p>
-        <button
-          type="button"
-          onClick={retry}
-          className="mt-2 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-accent"
-        >
+        <UIText variant="title">{t('server.error.title')}</UIText>
+        <UIText variant="caption">{reason(status.code)}</UIText>
+        <UIButton variant="secondary" className="mt-2" onClick={retry}>
           {t('server.retry')}
-        </button>
+        </UIButton>
       </Screen>
     );
   }
@@ -69,9 +68,7 @@ function Connected() {
 }
 
 function Screen({ children }: { children: ReactNode }) {
-  return (
-    <main className="flex min-h-screen select-none flex-col items-center justify-center gap-2">{children}</main>
-  );
+  return <UIPage className="flex-col gap-2 select-none">{children}</UIPage>;
 }
 
 /** El motivo del código que devuelve `get_connection` (los errores de arranque de src-tauri). */

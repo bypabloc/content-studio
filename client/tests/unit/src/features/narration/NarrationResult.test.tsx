@@ -85,7 +85,7 @@ describe('NarrationResult', () => {
     renderResult();
 
     // El párrafo llega con el guion; la evaluación, con su propio .json: se espera a que se pinte.
-    const paragraph = (await screen.findByText('Adiós.')).closest('li') as HTMLElement;
+    const paragraph = (await screen.findByText('Adiós.')).closest('[role="listitem"]') as HTMLElement;
     expect(await within(paragraph).findByText('adiós', { selector: 'del' })).toBeTruthy();
     expect(within(paragraph).getByText('a dios', { selector: 'ins' })).toBeTruthy();
     expect(screen.getByText(t('narration.result.silence', { seconds: '0.8' }))).toBeTruthy();

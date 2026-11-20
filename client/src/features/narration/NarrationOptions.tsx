@@ -2,10 +2,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
-import { LicenseDialog } from '@/shared/components/LicenseDialog';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
 import { label, t } from '@/shared/i18n/t';
 import { AdvancedOptions } from './AdvancedOptions';
+import { LicenseDialog } from './LicenseDialog';
 import { type CatalogEngine, useNarrationChoice } from './useNarrationChoice';
 
 type SettingOut = components['schemas']['SettingOut'];
@@ -58,7 +60,7 @@ export function NarrationOptions() {
   };
 
   return (
-    <section className="flex flex-col gap-4">
+    <UIStack gap="md">
       <UIRecommendedSelect
         settingKey="select.narration.model"
         label={t('narration.options.engine')}
@@ -93,14 +95,9 @@ export function NarrationOptions() {
           { value: 'en', label: t('narration.language.en') },
         ]}
       />
-      <button
-        type="button"
-        aria-expanded={advanced}
-        onClick={() => setAdvanced((open) => !open)}
-        className="self-start text-sm text-muted-foreground underline underline-offset-4"
-      >
+      <UIButton variant="ghost" aria-expanded={advanced} onClick={() => setAdvanced((open) => !open)} className="self-start">
         {t('narration.advanced.toggle')}
-      </button>
+      </UIButton>
       {advanced && <AdvancedOptions supportsBatch={current?.batch ?? false} />}
       {pending && (
         <LicenseDialog
@@ -111,6 +108,6 @@ export function NarrationOptions() {
           onCancel={cancel}
         />
       )}
-    </section>
+    </UIStack>
   );
 }

@@ -10,6 +10,12 @@ describe('UIStack', () => {
     expect(container.firstElementChild?.className).toContain('gap-6')
   })
 
+  it('admite el espaciado xs (gap-1), el que usan las filas de tomas', () => {
+    const { container } = render(<UIStack gap="xs">a</UIStack>)
+
+    expect(container.firstElementChild?.className).toContain('gap-1')
+  })
+
   it('uses medium spacing by default', () => {
     const { container } = render(<UIStack>a</UIStack>)
 

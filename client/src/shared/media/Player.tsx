@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
+import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIStack } from '@/shared/components/atoms/UIStack';
 import { t } from '@/shared/i18n/t';
 
 // En un campo de texto el espacio es una letra: ahí no reproduce.
@@ -65,16 +67,15 @@ export function Player({ src, peaks }: { src: string; peaks: number[] }) {
   }, []);
 
   return (
-    <div className="flex items-center gap-3" onPointerDown={takeOver} onFocus={takeOver}>
-      <button
-        type="button"
+    <UIStack direction="row" align="center" gap="sm" onPointerDown={takeOver} onFocus={takeOver}>
+      <UIButton
+        variant="primary"
+        icon={playing ? 'pause' : 'play'}
         aria-label={playing ? t('player.pause') : t('player.play')}
         onClick={() => void wave.current?.playPause()}
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"
-      >
-        <span aria-hidden="true">{playing ? '❚❚' : '▶'}</span>
-      </button>
-      <div ref={container} className="min-w-0 flex-1" />
-    </div>
+        className="size-11 shrink-0 rounded-full px-0"
+      />
+      <UIStack ref={container} className="min-w-0 flex-1" />
+    </UIStack>
   );
 }

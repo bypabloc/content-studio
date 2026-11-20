@@ -3,6 +3,7 @@ import { type ComponentProps, type KeyboardEvent, useId, useState } from 'react'
 import { Button } from '../../shadcn/button'
 
 import { UIField } from '../UIField'
+import { UIBox } from '../../atoms/UIBox'
 import { UIIcon } from '../../atoms/UIIcon'
 
 type Props = Omit<ComponentProps<'input'>, 'type'> & {
@@ -64,14 +65,14 @@ export function UIPasswordField({ label, error, revealLabel, capsLockLabel, hide
         </Button>
       }
       hint={
-        <output className="flex items-center gap-1.5 font-bold text-foreground-secondary">
+        <UIBox role="status" className="flex items-center gap-1.5 font-bold text-foreground-secondary">
           {capsLock ? (
             <>
               <UIIcon name="arrow-big-up" className="size-4" />
               {capsLockLabel}
             </>
           ) : null}
-        </output>
+        </UIBox>
       }
     />
   )

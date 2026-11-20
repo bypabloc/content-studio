@@ -1,7 +1,7 @@
 import { getCurrentWebview } from '@tauri-apps/api/webview';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 
 /** Las extensiones que el server sabe leer como guion. */

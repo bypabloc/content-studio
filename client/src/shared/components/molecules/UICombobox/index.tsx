@@ -218,7 +218,7 @@ export function UICombobox<T>({
           </ComboboxContent>
         ) : null}
       </Combobox>
-      {showEmpty ? <output className="ui-typography-body text-muted-foreground">{empty}</output> : null}
+      {showEmpty ? <UIBox role="status" className="ui-typography-body text-muted-foreground">{empty}</UIBox> : null}
     </UIFieldFrame>
   )
 }

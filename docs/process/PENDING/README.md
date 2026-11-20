@@ -42,6 +42,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [007-contraste-oscuro](007-contraste-oscuro.md) | El texto del botón primario en tema oscuro tiene poco contraste en la revisión visual | Después de la 007 | Agente |
 | [007-soltar-antes-del-catalogo](007-soltar-antes-del-catalogo.md) | Soltar guiones antes de que cargue el catálogo de motores los descarta sin aviso | En la spec de importación de guiones | Agente |
 | [shell-guard-codex-antigravity](shell-guard-codex-antigravity.md) | El bloqueo de `sleep` y `wsl` no se probó en Codex ni en Antigravity | Al usar esas herramientas | Usuario |
-| [008-licensedialog-ubicacion](008-licensedialog-ubicacion.md) | `LicenseDialog` sigue en la raíz de `shared/components/`, sin nivel de D-3 | La T6 | Agente |
 | [008-revision-visual-organismos](008-revision-visual-organismos.md) | Las celdas, el asa y el título de los organismos adaptados no se miraron en la app | La T5 y la T6 | Agente y usuario |
 | [008-inventario-d3](008-inventario-d3.md) | La tabla de D-3 no lista `UIFieldFrame`, `UIQrCode` ni los dos átomos de gráfica | La T8 | Agente |

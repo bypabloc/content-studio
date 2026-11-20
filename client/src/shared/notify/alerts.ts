@@ -1,6 +1,6 @@
 import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 import { openPath } from '@tauri-apps/plugin-opener';
-import { toast } from 'sonner';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 import { ding } from './ding';
 import type { Alerts } from './notify';
