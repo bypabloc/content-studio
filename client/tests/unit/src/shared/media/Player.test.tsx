@@ -45,10 +45,37 @@ describe('Player', () => {
   it('Espacio reproduce y pausa', () => {
     render(<Player src="/files?path=a.wav" peaks={[0.1]} />);
 
+    fireEvent.pointerDown(screen.getByRole('button'));
     fireEvent.keyDown(window, { key: ' ' });
     fireEvent.keyDown(window, { key: ' ' });
 
     expect(lastWave().playPause).toHaveBeenCalledTimes(2);
+  });
+
+  it('Espacio controla solo la pista que el usuario tocó, no todas las que hay en pantalla', () => {
+    render(
+      <>
+        <Player src="/files?path=a.wav" peaks={[0.1]} />
+        <Player src="/files?path=b.wav" peaks={[0.2]} />
+      </>,
+    );
+    const [first, second] = vi.mocked(WaveSurfer.create).mock.results.map((result) => result.value) as ReturnType<
+      typeof makeWave
+    >[];
+
+    fireEvent.pointerDown(screen.getAllByRole('button')[1]);
+    fireEvent.keyDown(window, { key: ' ' });
+
+    expect(second.playPause).toHaveBeenCalledTimes(1);
+    expect(first.playPause).not.toHaveBeenCalled();
+  });
+
+  it('Espacio sin ninguna pista tocada no reproduce', () => {
+    render(<Player src="/files?path=a.wav" peaks={[0.1]} />);
+
+    fireEvent.keyDown(window, { key: ' ' });
+
+    expect(lastWave().playPause).not.toHaveBeenCalled();
   });
 
   it('Espacio escrito en un campo de texto no reproduce', () => {

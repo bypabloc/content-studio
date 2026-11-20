@@ -79,6 +79,32 @@ describe('NarrationOptions', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('AC-7: con la licencia ya guardada en el servidor, elegir el motor no vuelve a preguntar', async () => {
+    api.get.mockImplementation(async (path: string) =>
+      path === '/catalog/narration'
+        ? CATALOG
+        : { key: path.replace('/settings/', ''), value: path.endsWith('license.accepted.omnivoice') ? true : null },
+    );
+    const engine = await renderOptions();
+
+    fireEvent.change(engine, { target: { value: 'omnivoice' } });
+
+    await waitFor(() => expect(engine.value).toBe('omnivoice'));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('«LUFS»: al borrar el campo no se guarda un 0, y el número que se escribe queda como valor', async () => {
+    await renderOptions();
+    fireEvent.click(screen.getByRole('button', { name: t('narration.advanced.toggle') }));
+    const lufs = await screen.findByRole('spinbutton', { name: t('narration.advanced.lufs') });
+
+    fireEvent.change(lufs, { target: { value: '' } });
+    fireEvent.change(lufs, { target: { value: '-14' } });
+
+    await waitFor(() => expect(api.put).toHaveBeenLastCalledWith('/settings/narration.lufs', { value: -14 }));
+    expect(api.put).not.toHaveBeenCalledWith('/settings/narration.lufs', { value: 0 });
+  });
+
   it('«Avanzado» muestra la masterización, la semilla y los reintentos', async () => {
     await renderOptions();
 

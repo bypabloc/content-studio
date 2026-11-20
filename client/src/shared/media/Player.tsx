@@ -9,15 +9,20 @@ function isTyping(target: EventTarget | null): boolean {
 
 // Las pistas en pantalla: cuando una empieza a sonar, las demás se pausan (Comparar, AC-10).
 const tracks = new Set<WaveSurfer>();
+// La pista que el usuario tocó por último: Espacio la controla, y ninguna otra (AC-10 también con teclado).
+let active: WaveSurfer | null = null;
 
 /**
  * Un audio con su forma de onda y su botón. La onda usa los picos que calcula el server: wavesurfer.js no decodifica el
- * audio en el WebView. Espacio reproduce o pausa, salvo al escribir (AC-8).
+ * audio en el WebView. Espacio reproduce o pausa la pista tocada por último, salvo al escribir (AC-8).
  */
 export function Player({ src, peaks }: { src: string; peaks: number[] }) {
   const container = useRef<HTMLDivElement>(null);
   const wave = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
+  const takeOver = () => {
+    active = wave.current;
+  };
 
   useEffect(() => {
     if (!container.current) return;
@@ -41,6 +46,7 @@ export function Player({ src, peaks }: { src: string; peaks: number[] }) {
     wave.current = instance;
     return () => {
       tracks.delete(instance);
+      if (active === instance) active = null;
       instance.destroy();
       wave.current = null;
     };
@@ -48,16 +54,18 @@ export function Player({ src, peaks }: { src: string; peaks: number[] }) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== ' ' || isTyping(event.target)) return;
+      // El botón reproduce con su propio clic al pulsar Espacio; en un campo de texto el espacio es una letra.
+      if (event.key !== ' ' || isTyping(event.target) || event.target instanceof HTMLButtonElement) return;
+      if (!wave.current || active !== wave.current) return;
       event.preventDefault();
-      void wave.current?.playPause();
+      void wave.current.playPause();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3" onPointerDown={takeOver} onFocus={takeOver}>
       <button
         type="button"
         aria-label={playing ? t('player.pause') : t('player.play')}

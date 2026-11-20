@@ -49,10 +49,12 @@ describe('ScriptEditor', () => {
     post.mockResolvedValue(ONE_ISSUE);
     const textarea = renderEditor();
 
+    const changed = performance.now();
     fireEvent.change(textarea, { target: { value: 'Hola; mundo' } });
-
-    expect(post).not.toHaveBeenCalled();
     const mark = await screen.findByTitle(RULE_6);
+
+    // El debounce de 300 ms: el lint no sale a 0 ms. Si el retardo baja, esta prueba falla.
+    expect(performance.now() - changed).toBeGreaterThanOrEqual(290);
     expect(mark.textContent).toBe(';');
     expect(post).toHaveBeenCalledWith('/narration/lint', { text: 'Hola; mundo', style: 'expert' });
   });

@@ -183,7 +183,8 @@ export interface paths {
         put?: never;
         /**
          * Star Job
-         * @description Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe.
+         * @description Marca la toma como la elegida de su grupo y desmarca las demás del grupo. 404 si no existe; 409 si no es una
+         *     toma terminada de narración (una en cola o con error no puede quitarle la marca a la buena).
          */
         post: operations["star_job_jobs__job_id__star_post"];
         delete?: never;

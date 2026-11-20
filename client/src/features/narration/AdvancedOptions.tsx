@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 
@@ -5,6 +6,8 @@ import { t } from '@/shared/i18n/t';
 export function AdvancedOptions({ supportsBatch }: { supportsBatch: boolean }) {
   const [master, setMaster] = useSetting<string>('narration.master', 'voice');
   const [lufs, setLufs] = useSetting<number>('narration.lufs', -16);
+  // Mientras se escribe, el texto va aparte: borrar el campo o un signo menos suelto no es un número y no se guarda.
+  const [lufsDraft, setLufsDraft] = useState<string | null>(null);
   const [seed, setSeed] = useSetting<number | null>('narration.seed', null);
   const [batch, setBatch] = useSetting<number | null>('narration.batch', null);
   const [evaluate, setEvaluate] = useSetting<boolean>('narration.evaluate', false);
@@ -30,8 +33,13 @@ export function AdvancedOptions({ supportsBatch }: { supportsBatch: boolean }) {
         <input
           type="number"
           aria-label={t('narration.advanced.lufs')}
-          value={lufs}
-          onChange={(event) => setLufs(Number(event.target.value))}
+          value={lufsDraft ?? String(lufs)}
+          onChange={(event) => {
+            setLufsDraft(event.target.value);
+            const next = Number(event.target.value);
+            if (event.target.value !== '' && Number.isFinite(next)) setLufs(next);
+          }}
+          onBlur={() => setLufsDraft(null)}
           className="w-24 rounded-md border border-input bg-transparent px-2 py-1.5"
         />
       </label>
