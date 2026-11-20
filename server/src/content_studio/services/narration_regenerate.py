@@ -41,7 +41,7 @@ def validate(params: dict) -> list[dict]:
     elif not ENGINES[model].installed():
         errors.append({'code': 'engine_not_installed', 'params': {'model': model}})
     folder = Path(source).resolve()
-    if not folder.is_relative_to(paths.OUT.resolve()):  # solo se leen tomas que el propio studio escribió
+    if not folder.is_relative_to(paths.outputs_dir().resolve()):  # solo se leen tomas que el propio studio escribió
         return [*errors, {'code': 'source_outside_out', 'params': {'source': source}}]
     if not (folder / 'script.json').is_file():
         return [*errors, {'code': 'source_missing', 'params': {'source': source}}]

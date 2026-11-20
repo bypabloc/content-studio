@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Collection
 
-from content_studio.paths import VOICES, playable
+from content_studio.paths import VOICES, playable, voices_dir
 
 CATALOG = VOICES / 'catalog.json'
 
@@ -22,11 +22,11 @@ def approved_voices(styles: Collection[str]) -> dict[str, dict]:
         # cspell:ignore aprobacion
         # aprobacion.json: nombre en disco de las voces construidas (move-data no lo cambia, ver WARNING 002).
         # Claves en inglés desde la migración (WARNING 002-voces-migracion).
-        ap = VOICES / name / 'aprobacion.json'
+        ap = voices_dir() / name / 'aprobacion.json'
         if not ap.exists():
             continue
         res = json.loads(ap.read_text(encoding='utf-8'))['styles']
-        if all(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists() for e in styles):
+        if all(res.get(e, {}).get('ok') and (voices_dir() / name / f'{e}.wav').exists() for e in styles):
             out[name] = sheet
     return out
 
@@ -48,7 +48,7 @@ def state(name: str, styles: Collection[str]) -> str:
     >>> state('no-existe', ['neutral'])
     'not built'
     """
-    ap = VOICES / name / 'aprobacion.json'
+    ap = voices_dir() / name / 'aprobacion.json'
     if not ap.exists():
         return 'not built'
     res = json.loads(ap.read_text(encoding='utf-8'))['styles']
@@ -62,15 +62,15 @@ def status(name: str, styles: Collection[str]) -> dict:
     >>> status('no-existe', ['neutral'])['state']
     'not_built'
     """
-    ap = VOICES / name / 'aprobacion.json'  # cspell:ignore aprobacion
+    ap = voices_dir() / name / 'aprobacion.json'  # cspell:ignore aprobacion
     if not ap.exists():
         return {'state': 'not_built', 'styles': [_style_card(name, e, False) for e in styles]}
     res = json.loads(ap.read_text(encoding='utf-8'))['styles']
-    approved = {e: bool(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists()) for e in styles}
+    approved = {e: bool(res.get(e, {}).get('ok') and (voices_dir() / name / f'{e}.wav').exists()) for e in styles}
     state = 'approved' if all(approved.values()) else 'partial'
     return {'state': state, 'styles': [_style_card(name, e, ok) for e, ok in approved.items()]}
 
 
 def _style_card(name: str, style: str, approved: bool) -> dict:
     """Un estilo de la ficha: si está aprobado y la ruta de su muestra, si existe (la sirve /files)."""
-    return {'style': style, 'approved': approved, 'path': playable(VOICES / name / f'{style}.wav')}
+    return {'style': style, 'approved': approved, 'path': playable(voices_dir() / name / f'{style}.wav')}

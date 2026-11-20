@@ -96,10 +96,10 @@ def create_app(
         [Path(root).resolve() for root in roots]
         if roots
         else [
-            paths.OUT.resolve(),
-            paths.REFERENCE.resolve(),
-            paths.VOICES.resolve(),
-            (paths.MUSIC / 'samples').resolve(),
+            paths.outputs_dir(db_path).resolve(),
+            paths.references_dir().resolve(),
+            paths.voices_dir().resolve(),
+            paths.samples_dir().resolve(),
         ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)

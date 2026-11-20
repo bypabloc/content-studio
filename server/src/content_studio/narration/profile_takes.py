@@ -88,7 +88,7 @@ def trash(profile: str, style: str, take: int) -> None:
     if not wav.is_file():
         raise TakeNotFound(f'{profile}/{style}/{take}')
     stamp = datetime.now().strftime('%Y-%m-%d-%H%M%S-%f')
-    target = paths.REFERENCE / profiles.TRASH / stamp / profile / 'takes' / style
+    target = paths.references_dir() / profiles.TRASH / stamp / profile / 'takes' / style
     target.mkdir(parents=True)
     for source in (wav, wav.with_suffix('.check.json')):
         if source.is_file():

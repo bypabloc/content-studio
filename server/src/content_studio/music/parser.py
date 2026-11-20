@@ -46,7 +46,7 @@ def build_parser(model_required: bool = True) -> argparse.ArgumentParser:
     ap.add_argument('--bpm', type=int, help='tempo 30–300 (required with free text)')
     ap.add_argument('--time-signature', choices=['2', '3', '4', '6'], help='2/4, 3/4, 4/4 or 6/8 (default 4/4)')
     ap.add_argument('--no-lm', action='store_true', help='ACE-Step without the LM 0.6B planner: ~3x faster')
-    ap.add_argument('--folder', type=Path, default=paths.OUT / 'music', help='default out/music/')
+    ap.add_argument('--folder', type=Path, default=paths.outputs_dir() / 'music', help='default out/music/')
     ap.add_argument(
         '--variants',
         type=int,

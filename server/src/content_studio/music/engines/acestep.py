@@ -14,21 +14,20 @@ from content_studio.common import progress
 from content_studio.music.duration import finish, plan_duration
 from content_studio.music.engines.base import Jobs, MusicEngine
 
-ACE_REPO = paths.MUSIC / 'models' / 'ACE-Step-1.5'
-
 
 class AceStep(MusicEngine):
     """Motor ACE-Step 1.5 (música)."""
 
     def generate(self, jobs: Jobs, a: argparse.Namespace) -> None:
         """Genera las pistas con ACE-Step."""
-        os.environ['ACESTEP_PROJECT_ROOT'] = str(ACE_REPO)
+        repo = paths.engine_root('music', self.spec.venv) / 'models' / 'ACE-Step-1.5'
+        os.environ['ACESTEP_PROJECT_ROOT'] = str(repo)
         from acestep.handler import AceStepHandler
         from acestep.inference import GenerationConfig, GenerationParams, generate_music
         from acestep.llm_inference import LLMHandler
         from acestep.model_downloader import ensure_lm_model, ensure_main_model
 
-        ckpt = ACE_REPO / 'checkpoints'
+        ckpt = repo / 'checkpoints'
         for ok, msg in [ensure_main_model(ckpt)] + ([] if a.no_lm else [ensure_lm_model('acestep-5Hz-lm-0.6B', ckpt)]):
             if not ok:
                 sys.exit(msg)
@@ -36,7 +35,7 @@ class AceStep(MusicEngine):
         # Perfil 6-8 GB de la guía oficial: DiT 2B turbo + LM 0.6B (backend pt) con offload.
         dit = AceStepHandler()
         dit.initialize_service(
-            project_root=str(ACE_REPO),
+            project_root=str(repo),
             config_path='acestep-v15-turbo',
             device='cuda',
             offload_to_cpu=True,

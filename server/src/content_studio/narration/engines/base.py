@@ -40,8 +40,8 @@ class EngineSpec:
     recommended: bool = False  # la opción que la app marca con ★ (exactamente una por selector)
 
     def path_venv(self) -> Path:
-        """Carpeta del venv del motor, en server/data/narration/."""
-        return paths.NARRATION / self.venv
+        """Carpeta del venv administrado o externo del motor."""
+        return paths.engine_root('narration', self.venv) / self.venv
 
     def installed(self) -> bool:
         """True si el venv del motor existe."""

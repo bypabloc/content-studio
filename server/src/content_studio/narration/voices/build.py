@@ -14,7 +14,7 @@ from content_studio.narration.engines.registry import ENGINES, free_todo
 from content_studio.narration.reference import process, verify
 from content_studio.narration.styles import STYLES
 from content_studio.narration.voices.sources import download
-from content_studio.paths import VOICES
+from content_studio.paths import voices_dir
 
 # Criterios de aprobación de cada clip generado, calibrados en docs/research/voces-libres-clonacion/10.
 SIM_MIN = 0.93  # coseno WavLM-SV con la base: instruct2 dio 0.96-0.99; voces ajenas del banco, 0.75-0.95
@@ -87,7 +87,7 @@ def build(name: str, sheet: dict, force: bool, span: tuple[float, float] = (0.0,
     from content_studio.narration.evaluation.compare import compare, normalize
     from content_studio.narration.pipeline import fix
 
-    folder = VOICES / name
+    folder = voices_dir() / name
     folder.mkdir(parents=True, exist_ok=True)
     language = sheet['language']
     base = folder / 'neutral.wav'

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from functools import lru_cache
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from content_studio import paths
@@ -17,14 +18,13 @@ SYSTEM = 'You are a helpful assistant.'  # prompt de sistema que CosyVoice 3 esp
 
 
 @lru_cache
-def load(code: str, ckpt: str) -> Any:
+def load(code: Path, checkpoints: Path) -> Any:
     """Carga CosyVoice 3 desde su código y su checkpoint."""
     import soundfile as sf
     import torch
     import torchaudio
 
-    d = paths.NARRATION / code
-    sys.path[:0] = [str(d), str(d / 'third_party' / 'Matcha-TTS')]
+    sys.path[:0] = [str(code), str(code / 'third_party' / 'Matcha-TTS')]
 
     def leer_wav(
         path: str, *_a: object, **_k: object
@@ -35,7 +35,7 @@ def load(code: str, ckpt: str) -> Any:
     torchaudio.load = leer_wav
     from cosyvoice.cli.cosyvoice import AutoModel
 
-    return AutoModel(model_dir=str(paths.NARRATION / ckpt))
+    return AutoModel(model_dir=str(checkpoints))
 
 
 CACHES = (load,)
@@ -61,7 +61,9 @@ class CosyVoice(TTSEngine):
         """Genera el audio de los bloques con CosyVoice."""
         import torch
 
-        model = load(self.spec.code, self.spec.repo)
+        root = paths.engine_root('narration', self.spec.venv)
+        assert self.spec.code is not None
+        model = load(root / self.spec.code, root / self.spec.repo)
         audios = []
         for b in blocks:
             if b['emo']:  # instruct2: la instrucción reemplaza a la transcripción de la referencia

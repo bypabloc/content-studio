@@ -37,7 +37,7 @@ def voices(api, monkeypatch):
     root.mkdir()
     monkeypatch.setattr(paths, 'ROOT', api.tmp)  # las muestras que da la API son relativas a la raíz, como /files
     (root / 'catalog.json').write_text(json.dumps({'ana': SHEET, 'luis': SHEET}), encoding='utf-8')
-    monkeypatch.setattr(voice_catalog, 'VOICES', root)
+    monkeypatch.setattr(paths, 'VOICES', root)
     monkeypatch.setattr(voice_catalog, 'CATALOG', root / 'catalog.json')
     _build(root, 'luis', STYLES)
     return root

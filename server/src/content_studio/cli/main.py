@@ -30,7 +30,7 @@ def _db_flag() -> argparse.ArgumentParser:
 def build_parser() -> argparse.ArgumentParser:
     """Subcommands of `studio`. The narration and music flags are the ones of their services, with the same names."""
     ap = argparse.ArgumentParser(prog='studio', description='content-studio without a UI: local API, jobs and CLI.')
-    ap.add_argument('--db', type=Path, default=paths.DB, help='job queue database (default var/content-studio.db)')
+    ap.add_argument('--db', type=Path, default=paths.db_path(), help='job queue database')
     sub = ap.add_subparsers(dest='command', required=True, metavar='command')
 
     serve_p = sub.add_parser('serve', help='local API on 127.0.0.1 with the job worker')

@@ -42,7 +42,7 @@ def folder(profile: str) -> Path:
     """Carpeta del perfil dentro de reference/; un nombre que no es slug se rechaza."""
     if not _slug_ok(profile):
         raise ValueError(f'not a profile name: {profile!r}')
-    return paths.REFERENCE / profile
+    return paths.references_dir() / profile
 
 
 def exists(profile: str) -> bool:
@@ -138,17 +138,17 @@ def delete(profile: str, confirm: bool = False) -> None:
         return
     if not confirm:
         raise ProfileNotEmpty(profile)
-    target = paths.REFERENCE / TRASH / datetime.now().strftime('%Y-%m-%d-%H%M%S-%f') / profile
+    target = paths.references_dir() / TRASH / datetime.now().strftime('%Y-%m-%d-%H%M%S-%f') / profile
     target.parent.mkdir(parents=True)
     shutil.move(str(where), str(target))
 
 
 def list_profiles() -> list[dict]:
     """Los perfiles con su nombre visible y los estilos que ya tienen: un perfil parcial solo ofrece esos."""
-    if not paths.REFERENCE.is_dir():
+    if not paths.references_dir().is_dir():
         return []
     return [
         {'id': d.name, 'name': name_of(d.name), 'styles': styles(d.name)}
-        for d in sorted(paths.REFERENCE.iterdir())
+        for d in sorted(paths.references_dir().iterdir())
         if d.is_dir() and _slug_ok(d.name)
     ]

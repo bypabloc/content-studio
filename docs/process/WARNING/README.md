@@ -138,5 +138,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [011-muestras](011-muestras.md) | Muestras de 10 s por preset con semilla fija; `studio music samples` y `--model` | `main` |
 | [011-db-despues-del-subcomando](011-db-despues-del-subcomando.md) | `--db` también después del subcomando (cierra PENDING 004) | `main` |
 | [011-comparar-musica](011-comparar-musica.md) | Comparar y elegir pistas con `tracks.json` (sin generalizar CompareTakes) | `main` |
+| [012-rutas-externas](012-rutas-externas.md) | Prioridad de los motores administrados y respaldo a los externos en desarrollo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

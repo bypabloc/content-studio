@@ -22,7 +22,6 @@
     "server/src/content_studio/narration/text/translate.py",
     "server/src/content_studio/narration/tts.py",
     "server/src/content_studio/narration/voices/catalog.py",
-    "server/src/content_studio/narration/voices/sources.py",
-    "server/src/content_studio/paths.py"
+    "server/src/content_studio/narration/voices/sources.py"
   ]
 }

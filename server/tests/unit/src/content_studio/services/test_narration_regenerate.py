@@ -18,7 +18,7 @@ MODEL = 'qwen-0.6b'
 @pytest.fixture
 def out(tmp_path, monkeypatch):
     """Carpeta de salida y motor instalado, para que la validación llegue a la toma."""
-    monkeypatch.setattr(paths, 'OUT', tmp_path / 'out')
+    monkeypatch.setattr(paths, 'outputs_dir', lambda: tmp_path / 'out')
     monkeypatch.setattr(paths, 'NARRATION', tmp_path / 'narration')
     (tmp_path / 'narration' / ENGINES[MODEL].venv).mkdir(parents=True)
     return tmp_path / 'out'
