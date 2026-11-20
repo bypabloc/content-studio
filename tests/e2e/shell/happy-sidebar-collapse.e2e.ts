@@ -11,6 +11,9 @@ test('el botón y Ctrl+B colapsan la barra a íconos, y sigue colapsada al recar
 
   await page.getByRole('button', toggle).click();
   await expect(page.locator(collapsed)).toHaveCount(1);
+  // Con la barra a íconos, cada sección muestra su ícono (spec 009, AC-3).
+  await expect(page.getByRole('link', { name: 'Narración' }).locator('svg.lucide-audio-lines')).toHaveCount(1);
+  await expect(page.getByRole('link', { name: 'Ajustes' }).locator('svg.lucide-settings')).toHaveCount(1);
   await page.getByRole('link', { name: 'Narración' }).hover();
   await expect(page.getByRole('tooltip')).toHaveText('Narración');
 

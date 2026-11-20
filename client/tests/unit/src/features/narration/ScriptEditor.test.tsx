@@ -79,7 +79,7 @@ describe('ScriptEditor', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: t('narration.import.button') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
 
     await waitFor(() => expect(onImport).toHaveBeenCalledWith(['C:/g/a.txt']));
   });

@@ -5,6 +5,7 @@ import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
+import { THEME_ICONS } from '@/shared/components/molecules/UIThemeToggle';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 import type { LanguagePreference } from '@/shared/i18n/locale';
@@ -50,9 +51,9 @@ export function SettingsPage() {
         <UISelect
           label={t('settings.theme')}
           options={[
-            { value: 'light', label: t('theme.light') },
-            { value: 'dark', label: t('theme.dark') },
-            { value: 'system', label: t('theme.system') },
+            { value: 'light', label: t('theme.light'), icon: THEME_ICONS.light },
+            { value: 'dark', label: t('theme.dark'), icon: THEME_ICONS.dark },
+            { value: 'system', label: t('theme.system'), icon: THEME_ICONS.system },
           ]}
           value={theme}
           onChange={(value) => setTheme(value as ThemeMode)}
@@ -77,7 +78,7 @@ export function SettingsPage() {
       </UIStack>
 
       <UIStack>
-        <UIButton variant="secondary" className="self-start" onClick={() => void reset()}>
+        <UIButton variant="secondary" icon="history" className="self-start" onClick={() => void reset()}>
           {t('settings.reset')}
         </UIButton>
       </UIStack>

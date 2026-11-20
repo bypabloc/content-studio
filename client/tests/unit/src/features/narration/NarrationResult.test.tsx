@@ -99,7 +99,7 @@ describe('NarrationResult', () => {
     renderResult();
     await screen.findByText('Adiós.');
 
-    fireEvent.click(screen.getAllByRole('button', { name: t('narration.result.regenerate') })[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: t('action.regenerate') })[1]);
 
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith('/jobs', { kind: 'narration.regenerate', params: { source_job: 7, index: 1 } }),
@@ -118,9 +118,21 @@ describe('NarrationResult', () => {
     renderResult({ ...JOB, group_key: 'narration:abc' } as Job);
     await screen.findByText('Adiós.');
 
-    fireEvent.click(screen.getByRole('button', { name: t('narration.compare.open') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.compare') }));
 
     expect(await screen.findByText('tomas de narration:abc')).toBeTruthy();
+  });
+
+  it('Comparar y Regenerar son solo íconos con su nombre (spec 009, D-4)', async () => {
+    renderResult({ ...JOB, group_key: 'narration:abc' } as Job);
+    await screen.findByText('Adiós.');
+
+    const compare = screen.getByRole('button', { name: t('action.compare') });
+    expect(compare.textContent).toBe('');
+    expect(compare.querySelector('svg.lucide-arrow-left-right')).not.toBeNull();
+    const regenerate = screen.getAllByRole('button', { name: t('action.regenerate') })[0];
+    expect(regenerate.textContent).toBe('');
+    expect(regenerate.querySelector('svg.lucide-refresh-cw')).not.toBeNull();
   });
 
   it('un trabajo sin carpeta de salida no pide nada', () => {

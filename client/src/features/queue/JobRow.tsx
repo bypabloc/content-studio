@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIIcon, type IconName } from '@/shared/components/atoms/UIIcon';
 import { UIProgress } from '@/shared/components/atoms/UIProgress';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import type { Job } from '@/shared/api/events';
 import { t } from '@/shared/i18n/t';
 
@@ -35,7 +36,10 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
         <UIText variant="body" className="truncate">
           {kindLabel(job.kind)}
         </UIText>
-        <UIText variant="caption">{statusLabel(job.status)}</UIText>
+        <UIStack direction="row" align="center" gap="xs">
+          <UIIcon name={statusIcon(job.status)} className={job.status === 'running' ? 'size-4 animate-spin motion-reduce:animate-none' : 'size-4'} />
+          <UIText variant="caption">{statusLabel(job.status)}</UIText>
+        </UIStack>
       </UIStack>
       {job.status === 'running' ? (
         <UIStack gap="sm">
@@ -48,26 +52,20 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
       ) : null}
       <UIStack direction="row" align="center" gap="sm">
         {job.status === 'queued' ? (
-          <UIButton
+          <UIIconButton
             ref={setActivatorNodeRef}
-            variant="ghost"
-            aria-label={t('queue.drag')}
+            icon="drag-handle"
+            label={t('action.drag')}
             {...attributes}
             aria-roledescription={t('queue.drag_role')}
             {...listeners}
-          >
-            {'⋮⋮'}
-          </UIButton>
+          />
         ) : null}
         {job.status === 'queued' || job.status === 'running' ? (
-          <UIButton variant="ghost" className="ml-auto" onClick={() => onCancel(job.id)}>
-            {t('queue.cancel')}
-          </UIButton>
+          <UIIconButton icon="cancel" label={t('action.cancel')} className="ml-auto size-11 px-0" onClick={() => onCancel(job.id)} />
         ) : null}
         {job.status === 'error' || job.status === 'cancelled' ? (
-          <UIButton variant="ghost" className="ml-auto" onClick={() => onRetry(job.id)}>
-            {t('queue.retry')}
-          </UIButton>
+          <UIIconButton icon="retry" label={t('action.retry')} className="ml-auto size-11 px-0" onClick={() => onRetry(job.id)} />
         ) : null}
       </UIStack>
     </UIStack>
@@ -90,5 +88,21 @@ function statusLabel(status: Job['status']): string {
       return t('queue.status.error');
     default:
       return t('queue.status.cancelled');
+  }
+}
+
+/** Ícono del estado: en cola, corriendo (con giro), listo, error o cancelado (spec 009, D-5). */
+function statusIcon(status: Job['status']): IconName {
+  switch (status) {
+    case 'queued':
+      return 'clock';
+    case 'running':
+      return 'loader-circle';
+    case 'error':
+      return 'circle-alert';
+    case 'done':
+      return 'circle-check';
+    default:
+      return 'ban';
   }
 }

@@ -5,6 +5,7 @@ import { useSectionId } from '@/shared/hooks/useSectionId'
 import { UIBox } from '../../atoms/UIBox'
 import { type IconName, UIIcon } from '../../atoms/UIIcon'
 import { UILink } from '../../atoms/UILink'
+import { UITooltip } from '../../atoms/UITooltip'
 import {
   Sidebar,
   SidebarContent,
@@ -77,7 +78,10 @@ export function UIAppShell({ brand, nav, aside, footer, collapsed, onCollapsedCh
             <SidebarHeader>
               <UIBox className="flex items-center justify-between gap-2">
                 <UIBox className={HIDDEN_WHEN_COLLAPSED}>{brand}</UIBox>
-                <SidebarTrigger label={labels.toggle} className="size-11 rounded-xl focus-visible:ui-focus" />
+                {/* Solo ícono con su texto de ayuda (spec 009, D-4): el trigger de shadcn no lo trae, y no se edita shadcn/. */}
+                <UITooltip content={labels.toggle}>
+                  <SidebarTrigger label={labels.toggle} className="size-11 rounded-xl focus-visible:ui-focus" />
+                </UITooltip>
               </UIBox>
             </SidebarHeader>
             <SidebarContent>

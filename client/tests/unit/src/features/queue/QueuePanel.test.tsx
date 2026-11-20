@@ -151,7 +151,7 @@ describe('QueuePanel', () => {
     renderPanel();
     const row = await rowOf(2);
 
-    fireEvent.click(within(row).getByRole('button', { name: t('queue.cancel') }));
+    fireEvent.click(within(row).getByRole('button', { name: t('action.cancel') }));
 
     await waitFor(() => expect(calls(fetchMock)).toContain('POST /jobs/2/cancel'));
   });
@@ -160,7 +160,7 @@ describe('QueuePanel', () => {
     renderPanel();
     const row = await rowOf(3);
 
-    fireEvent.click(within(row).getByRole('button', { name: t('queue.retry') }));
+    fireEvent.click(within(row).getByRole('button', { name: t('action.retry') }));
 
     await waitFor(() => expect(calls(fetchMock)).toContain('POST /jobs/3/retry'));
   });
@@ -206,7 +206,7 @@ describe('QueuePanel', () => {
     renderPanel();
 
     expect(await screen.findByText(t('queue.empty'))).toBeTruthy();
-    fireEvent.click(await screen.findByRole('button', { name: t('queue.resume') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('action.resume') }));
 
     await waitFor(() => expect(calls(fetchMock)).toContain('POST /queue/resume'));
   });
@@ -214,9 +214,9 @@ describe('QueuePanel', () => {
   it('pausar la cola llama al endpoint y el botón pasa a reanudar', async () => {
     renderPanel();
 
-    fireEvent.click(await screen.findByRole('button', { name: t('queue.pause') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('action.pause') }));
 
-    expect(await screen.findByRole('button', { name: t('queue.resume') })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: t('action.resume') })).toBeTruthy();
     expect(calls(fetchMock)).toContain('POST /queue/pause');
   });
 
@@ -224,10 +224,12 @@ describe('QueuePanel', () => {
     renderPanel();
     await rowOf(2);
 
-    fireEvent.click(screen.getByRole('button', { name: t('queue.collapse') }));
+    expect(screen.getByRole('button', { name: t('action.collapse') }).querySelector('svg')?.getAttribute('class')).toContain('lucide-chevron-down');
+    fireEvent.click(screen.getByRole('button', { name: t('action.collapse') }));
     expect(screen.queryByRole('list')).toBeNull();
+    expect(screen.getByRole('button', { name: t('action.expand') }).querySelector('svg')?.getAttribute('class')).toContain('lucide-chevron-up');
 
-    fireEvent.click(screen.getByRole('button', { name: t('queue.expand') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.expand') }));
     expect(await rowOf(2)).toBeTruthy();
   });
 
@@ -237,5 +239,49 @@ describe('QueuePanel', () => {
     renderPanel();
 
     expect(await screen.findByText(t('queue.kind.narration'))).toBeTruthy();
+  });
+
+  it('WHEN a waiting job is shown THEN cancel and drag are icon buttons named by the catalog (spec 009, D-4)', async () => {
+    renderPanel();
+    const row = await rowOf(2);
+
+    for (const [name, icon] of [
+      [t('action.cancel'), 'lucide-circle-x'],
+      [t('action.drag'), 'lucide-grip-vertical'],
+    ] as const) {
+      const button = within(row).getByRole('button', { name });
+      expect(button.textContent).toBe('');
+      expect(button.querySelector('svg')?.getAttribute('class')).toContain(icon);
+    }
+  });
+
+  it('WHEN a job with error is shown THEN retry is an icon button named by the catalog (spec 009, D-4)', async () => {
+    renderPanel();
+    const row = await rowOf(3);
+
+    const button = within(row).getByRole('button', { name: t('action.retry') });
+    expect(button.textContent).toBe('');
+    expect(button.querySelector('svg')?.getAttribute('class')).toContain('lucide-rotate-cw');
+  });
+
+  it('WHEN each job state is shown THEN its status has an icon (spec 009, D-5)', async () => {
+    renderPanel();
+    const running = await rowOf(1);
+    const waiting = await rowOf(2);
+    const failed = await rowOf(3);
+
+    expect(running.querySelector('svg.lucide-loader-circle.animate-spin')).not.toBeNull();
+    expect(waiting.querySelector('svg.lucide-clock')).not.toBeNull();
+    expect(failed.querySelector('svg.lucide-circle-alert')).not.toBeNull();
+  });
+
+  it('WHEN the queue shows its pause and fold buttons THEN they are icon buttons named by the catalog (spec 009, D-4)', async () => {
+    renderPanel();
+    await rowOf(2);
+
+    const pause = screen.getByRole('button', { name: t('action.pause') });
+    expect(pause.textContent).toBe('');
+    expect(pause.querySelector('svg')?.getAttribute('class')).toContain('lucide-pause');
+    expect(screen.getByRole('button', { name: t('action.collapse') }).textContent).toBe('');
   });
 });

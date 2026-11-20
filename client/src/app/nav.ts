@@ -14,7 +14,7 @@ export interface NavItem {
  */
 export function navItems(): NavItem[] {
   return [
-    { id: 'narration', group: t('nav.group.generate'), label: t('nav.narration'), icon: 'mic' },
+    { id: 'narration', group: t('nav.group.generate'), label: t('nav.narration'), icon: 'narration' },
     { id: 'settings', group: t('nav.group.settings'), label: t('nav.settings'), icon: 'settings' },
   ];
 }

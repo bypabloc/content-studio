@@ -20,6 +20,7 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 - Los textos visibles salen del catálogo único con `t()`. La etapa `i18n` bloquea los textos sueltos en el código, y el lint no deja literales en JSX.
 - La UI se arma con componentes en tres niveles (átomos, moléculas y organismos; `features/` y `app/` solo los usan). La etapa `ui-structure` bloquea una etiqueta HTML nativa fuera de un átomo, y oxlint bloquea los imports que saltan la jerarquía (D-4).
 - La barra (`UIAppShell`) muestra las secciones, la cola bajo ellas y el tema y la versión al pie. Se colapsa a iconos con el botón o con `Ctrl+B`, y el estado se recuerda.
+- Iconos: la cola, el tema, la barra, la paleta, Narración y Ajustes usan `UIIcon`. Cada botón de solo ícono (`UIIconButton`, o el trigger de la barra dentro de `UITooltip`) muestra su texto de ayuda, y sus nombres están en `action.*`. El criterio de cuándo va solo con ícono está en `.agents/rules/ui-components.md`.
 
 ## Dónde vive
 
@@ -32,3 +33,4 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 - 2026-11-19: ficha inicial con la spec 005 (client Tauri base: shell, tema, cola, selector y ajustes).
 - 2026-11-19: spec 007 (i18n): catálogo único en tres idiomas, selector de idioma en Ajustes y etapa `i18n`.
 - 2026-11-20: spec 008 (componentes atómicos): 77 componentes de klinikae en átomos, moléculas y organismos; `UIAppShell`, `useForm` y las etapas `ui-structure` y de jerarquía.
+- 2026-11-20: spec 009 (iconos): mapa de `UIIcon` con los nombres de content-studio, iconos de estado en la cola, selector de tema con íconos y el criterio de solo ícono.

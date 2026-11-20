@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
-import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIDiffText } from '@/shared/components/atoms/UIDiffText';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { Player } from '@/shared/media/Player';
 import { CompareTakes } from './CompareTakes';
 import { type Job, useTake } from './useTake';
@@ -68,9 +68,13 @@ export function NarrationResult({ job }: { job: Job }) {
           {t('narration.result.title')}
         </UIText>
         {job.group_key && (
-          <UIButton variant="secondary" aria-expanded={comparing} onClick={() => setComparing((open) => !open)}>
-            {t('narration.compare.open')}
-          </UIButton>
+          <UIIconButton
+            variant="secondary"
+            icon="compare"
+            label={t('action.compare')}
+            aria-expanded={comparing}
+            onClick={() => setComparing((open) => !open)}
+          />
         )}
       </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
@@ -97,9 +101,13 @@ export function NarrationResult({ job }: { job: Job }) {
               <UIText variant="body" className="flex-1 text-sm">
                 {segment.text}
               </UIText>
-              <UIButton variant="secondary" className="shrink-0" onClick={() => regenerate.mutate(index)}>
-                {t('narration.result.regenerate')}
-              </UIButton>
+              <UIIconButton
+                variant="secondary"
+                icon="regenerate"
+                label={t('action.regenerate')}
+                className="shrink-0 size-11 px-0"
+                onClick={() => regenerate.mutate(index)}
+              />
             </UIStack>
             {notes
               .filter((note) => note.paragraph === index + 1)

@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UITextarea } from '@/shared/components/molecules/UITextarea';
@@ -58,9 +58,7 @@ export function ScriptEditor({
             ? t('narration.editor.issues_one')
             : t('narration.editor.issues_other', { count: issues.length })}
         </UIText>
-        <UIButton variant="secondary" className="ml-auto" onClick={() => void pick()}>
-          {t('narration.import.button')}
-        </UIButton>
+        <UIIconButton variant="secondary" icon="import-file" label={t('action.import')} className="ml-auto size-11 px-0" onClick={() => void pick()} />
       </UIStack>
     </UIStack>
   );

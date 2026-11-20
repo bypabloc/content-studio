@@ -94,18 +94,18 @@ describe('Player', () => {
   it('el botón dice Pausar mientras suena y Reproducir al parar', () => {
     render(<Player src="/files?path=a.wav" peaks={[0.1]} />);
 
-    expect(screen.getByRole('button', { name: t('player.play') })).toBeTruthy();
+    expect(screen.getByRole('button', { name: t('action.play') })).toBeTruthy();
     act(() => lastWave().emit('play'));
-    expect(screen.getByRole('button', { name: t('player.pause') })).toBeTruthy();
+    expect(screen.getByRole('button', { name: t('action.pause') })).toBeTruthy();
     act(() => lastWave().emit('pause'));
-    expect(screen.getByRole('button', { name: t('player.play') })).toBeTruthy();
+    expect(screen.getByRole('button', { name: t('action.play') })).toBeTruthy();
   });
 
   it('el botón reproduce o pausa, y al desmontar libera la forma de onda', () => {
     const { unmount } = render(<Player src="/files?path=a.wav" peaks={[0.1]} />);
     const wave = lastWave();
 
-    fireEvent.click(screen.getByRole('button', { name: t('player.play') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.play') }));
     expect(wave.playPause).toHaveBeenCalledTimes(1);
     unmount();
     expect(wave.destroy).toHaveBeenCalledTimes(1);

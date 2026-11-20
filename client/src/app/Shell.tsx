@@ -34,7 +34,7 @@ export function Shell({ version }: { version: string }) {
             <UIThemeToggle
               theme={theme}
               onThemeChange={setTheme}
-              labels={{ ...modes, toggle: t('theme.change', { mode: modes[theme], next: modes[nextTheme(theme)] }) }}
+              labels={{ toggle: t('theme.change', { mode: modes[theme], next: modes[nextTheme(theme)] }) }}
             />
             <UIText variant="caption" className="group-data-[collapsible=icon]:hidden">
               {t('app.version', { version })}

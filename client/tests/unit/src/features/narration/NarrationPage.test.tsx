@@ -86,6 +86,14 @@ describe('NarrationPage', () => {
     );
   });
 
+  it('Generar lleva su ícono de narración y su texto (spec 009, D-5)', async () => {
+    await renderPage();
+
+    const generate = screen.getByRole('button', { name: t('narration.generate') });
+    expect(generate.textContent).toBe(t('narration.generate'));
+    expect(generate.querySelector('svg.lucide-audio-lines')).not.toBeNull();
+  });
+
   it('mientras llega el catálogo, Generar no encola un trabajo sin motor ni estilo', async () => {
     api.get.mockImplementation(async (path: string) => (path === '/catalog/narration' ? new Promise(() => {}) : null));
     render(
