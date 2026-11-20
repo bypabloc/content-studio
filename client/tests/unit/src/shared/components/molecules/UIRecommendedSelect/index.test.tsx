@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ComponentProps, ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiProvider } from '@/shared/api/context';
-import { RecommendedSelect } from '@/shared/components/RecommendedSelect';
+import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
 
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
 const options = [
@@ -17,7 +18,7 @@ function reply(body: unknown) {
 }
 
 // Un cliente de consulta nuevo por render: así un "remontaje" vuelve a pedir la preferencia al server.
-function mount(fetchMock: ReturnType<typeof vi.fn>, props: Partial<ComponentProps<typeof RecommendedSelect>> = {}) {
+function mount(fetchMock: ReturnType<typeof vi.fn>, props: Partial<ComponentProps<typeof UIRecommendedSelect>> = {}) {
   vi.stubGlobal('fetch', fetchMock);
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -25,13 +26,18 @@ function mount(fetchMock: ReturnType<typeof vi.fn>, props: Partial<ComponentProp
       <ApiProvider connection={connection}>{children}</ApiProvider>
     </QueryClientProvider>
   );
-  const result = render(<RecommendedSelect settingKey="select.demo" label="Demo" options={options} {...props} />, {
+  const result = render(<UIRecommendedSelect settingKey="select.demo" label="Demo" options={options} {...props} />, {
     wrapper,
   });
   return { ...result, queryClient };
 }
 
-describe('RecommendedSelect', () => {
+// El selector es un combobox (UISelect sobre Base UI) y su Picker se carga aparte: por eso se espera con findByRole.
+async function combobox(): Promise<HTMLInputElement> {
+  return (await screen.findByRole('combobox', { name: 'Demo' })) as HTMLInputElement;
+}
+
+describe('UIRecommendedSelect', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', undefined);
   });
@@ -44,10 +50,14 @@ describe('RecommendedSelect', () => {
   it('sin elección guardada preselecciona la recomendada, y solo ella lleva la estrella', async () => {
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })));
 
-    const select = screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement;
-    expect(select.value).toBe('b');
-    const starred = [...select.options].filter((option) => option.textContent?.includes('★')).map((o) => o.value);
-    expect(starred).toEqual(['b']);
+    expect((await combobox()).value).toBe('★ Beta');
+    await userEvent.click(await combobox());
+    const starred = screen
+      .getAllByRole('option')
+      .map((option) => option.textContent ?? '')
+      .filter((text) => text.includes('★'));
+    expect(starred).toHaveLength(1);
+    expect(starred[0]).toContain('Beta');
   });
 
   it('al elegir otra la guarda en el server, y al volver a montar la preselecciona', async () => {
@@ -55,7 +65,8 @@ describe('RecommendedSelect', () => {
       reply({ key: 'select.demo', value: init?.method === 'PUT' ? 'c' : null }),
     );
     const first = mount(fetchMock);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Demo' }), { target: { value: 'c' } });
+    await userEvent.click(await combobox());
+    await userEvent.click(screen.getByRole('option', { name: 'Gama' }));
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         'http://127.0.0.1:9000/settings/select.demo',
@@ -66,10 +77,10 @@ describe('RecommendedSelect', () => {
 
     mount(vi.fn(async () => reply({ key: 'select.demo', value: 'c' })));
 
-    await waitFor(() => expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).value).toBe('c'));
+    await waitFor(async () => expect((await combobox()).value).toBe('Gama'));
   });
 
-  it('avisa al cambiar; una opción puede tener pista o estar deshabilitada', () => {
+  it('avisa al cambiar; una opción puede tener pista o estar deshabilitada', async () => {
     const onChange = vi.fn();
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })), {
       onChange,
@@ -79,30 +90,43 @@ describe('RecommendedSelect', () => {
         { value: 'c', label: 'Gama', disabled: true },
       ],
     });
-    const select = screen.getByRole('combobox', { name: 'Demo' });
 
-    fireEvent.change(select, { target: { value: 'a' } });
+    await userEvent.click(await combobox());
 
+    expect(screen.getByText('la rápida')).toBeTruthy();
+    expect(screen.getByRole('option', { name: /Gama/ }).getAttribute('aria-disabled')).toBe('true');
+    await userEvent.click(screen.getByRole('option', { name: /Alfa/ }));
     expect(onChange).toHaveBeenCalledWith('a');
-    expect(screen.getByRole('option', { name: 'Alfa' }).getAttribute('title')).toBe('la rápida');
-    expect((screen.getByRole('option', { name: 'Gama' }) as HTMLOptionElement).disabled).toBe(true);
   });
 
-  it('el nombre del selector se ve como etiqueta asociada, no solo como aria-label', () => {
+  it('con beforeChange que responde que no, la elección no cambia', async () => {
+    const onChange = vi.fn();
+    const beforeChange = vi.fn(async () => false);
+    mount(vi.fn(async () => reply({ key: 'select.demo', value: null })), { onChange, beforeChange });
+
+    await userEvent.click(await combobox());
+    await userEvent.click(screen.getByRole('option', { name: 'Gama' }));
+
+    await waitFor(() => expect(beforeChange).toHaveBeenCalledWith('c'));
+    expect(onChange).not.toHaveBeenCalled();
+    expect((await combobox()).value).toBe('★ Beta');
+  });
+
+  it('el nombre del selector se ve como etiqueta asociada, no solo como aria-label', async () => {
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })));
 
-    const label = screen.getByText('Demo') as HTMLLabelElement;
+    const label = screen.getByText('Demo');
     expect(label.tagName).toBe('LABEL');
-    expect(label.control).toBe(screen.getByRole('combobox', { name: 'Demo' }));
+    expect((label as HTMLLabelElement).control).toBe(await combobox());
   });
 
-  it('sin opciones, el selector queda vacío y no falla', () => {
+  it('sin opciones, el selector queda deshabilitado y no falla', async () => {
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })), { options: [] });
 
-    expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).options).toHaveLength(0);
+    expect((await combobox()).disabled).toBe(true);
   });
 
-  it('sin opción recomendada, vale la primera', () => {
+  it('sin opción recomendada, vale la primera', async () => {
     mount(vi.fn(async () => reply({ key: 'select.demo', value: null })), {
       options: [
         { value: 'x', label: 'X' },
@@ -110,7 +134,7 @@ describe('RecommendedSelect', () => {
       ],
     });
 
-    expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).value).toBe('x');
+    expect((await combobox()).value).toBe('X');
   });
 
   it('si la elección guardada ya no existe, vuelve a la recomendada', async () => {
@@ -120,6 +144,6 @@ describe('RecommendedSelect', () => {
     await waitFor(() =>
       expect(queryClient.getQueryData(['settings', 'select.demo'])).toEqual({ key: 'select.demo', value: 'desaparecida' }),
     );
-    expect((screen.getByRole('combobox', { name: 'Demo' }) as HTMLSelectElement).value).toBe('b');
+    expect((await combobox()).value).toBe('★ Beta');
   });
 });

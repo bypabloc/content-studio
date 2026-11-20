@@ -52,7 +52,8 @@ async function renderPage(): Promise<HTMLTextAreaElement> {
       <NarrationPage />
     </QueryClientProvider>,
   );
-  await screen.findByRole('option', { name: '★ voxcpm2' });
+  // Con un solo motor, el selector lo muestra como valor fijo (AC-5): se espera su texto.
+  await screen.findAllByText('★ voxcpm2');
   return screen.getByRole('textbox', { name: t('narration.editor.label') }) as HTMLTextAreaElement;
 }
 

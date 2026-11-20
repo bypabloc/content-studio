@@ -77,5 +77,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [008-clases-tailwind-no-son-texto](008-clases-tailwind-no-son-texto.md) | Una lista de clases de Tailwind no cuenta como texto visible en el detector TS | antes de dev |
 | [008-ui-box](008-ui-box.md) | `UIBox` es el contenedor genérico, y solo lo importan moléculas y organismos | antes de dev |
 | [008-atomos-adaptados](008-atomos-adaptados.md) | Los átomos de klinikae se adaptan: enlace con hash, set de íconos recortado, pruebas sin jest-dom | antes de dev |
+| [008-moleculas-nativas](008-moleculas-nativas.md) | Las moléculas no tienen etiquetas nativas: átomos o roles ARIA | antes de dev |
+| [008-moleculas-adaptadas](008-moleculas-adaptadas.md) | Adaptaciones de moléculas: selector recordado, tema controlado y tests por rol | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

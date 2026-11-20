@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { LicenseDialog } from '@/shared/components/LicenseDialog';
-import { RecommendedSelect } from '@/shared/components/RecommendedSelect';
+import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
 import { label, t } from '@/shared/i18n/t';
 import { AdvancedOptions } from './AdvancedOptions';
 import { type CatalogEngine, useNarrationChoice } from './useNarrationChoice';
@@ -59,7 +59,7 @@ export function NarrationOptions() {
 
   return (
     <section className="flex flex-col gap-4">
-      <RecommendedSelect
+      <UIRecommendedSelect
         settingKey="select.narration.model"
         label={t('narration.options.engine')}
         options={choice.engines.map((engine) => ({
@@ -71,12 +71,12 @@ export function NarrationOptions() {
         }))}
         beforeChange={confirmLicense}
       />
-      <RecommendedSelect
+      <UIRecommendedSelect
         settingKey="select.narration.voice"
         label={t('narration.options.voice')}
         options={choice.voices.map((voice) => ({ value: voice.id, label: voice.id }))}
       />
-      <RecommendedSelect
+      <UIRecommendedSelect
         settingKey="select.narration.style"
         label={t('narration.options.style')}
         options={choice.styles.map((style) => ({
@@ -85,7 +85,7 @@ export function NarrationOptions() {
           recommended: style.recommended,
         }))}
       />
-      <RecommendedSelect
+      <UIRecommendedSelect
         settingKey="select.narration.language"
         label={t('narration.options.language')}
         options={[

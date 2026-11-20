@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NarrationOptions } from '@/features/narration/NarrationOptions';
 import { t } from '@/shared/i18n/t';
@@ -35,47 +36,55 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// Espera a que llegue el catálogo: sin sus opciones, el selector del motor no tiene nada que elegir.
-async function renderOptions(): Promise<HTMLSelectElement> {
+// Espera a que llegue el catálogo: el selector del motor muestra la recomendada cuando ya tiene opciones.
+async function renderOptions(): Promise<HTMLInputElement> {
   render(
     <QueryClientProvider client={new QueryClient()}>
       <NarrationOptions />
     </QueryClientProvider>,
   );
-  await screen.findByRole('option', { name: '★ voxcpm2' });
-  return screen.getByRole('combobox', { name: t('narration.options.engine') }) as HTMLSelectElement;
+  const engine = (await screen.findByRole('combobox', { name: t('narration.options.engine') })) as HTMLInputElement;
+  await waitFor(() => expect(engine.value).toBe('★ voxcpm2'));
+  return engine;
+}
+
+// El selector es un combobox (UISelect sobre Base UI): se abre y se elige la opción por su nombre.
+async function choose(box: HTMLInputElement, option: string): Promise<void> {
+  await userEvent.click(box);
+  await userEvent.click(await screen.findByRole('option', { name: new RegExp(option) }));
 }
 
 describe('NarrationOptions', () => {
   it('marca con ★ la opción recomendada de cada selector', async () => {
     await renderOptions();
 
-    expect(await screen.findByRole('option', { name: '★ voxcpm2' })).toBeTruthy();
-    expect(await screen.findByRole('option', { name: '★ Experto' })).toBeTruthy();
+    const values = screen.getAllByRole('combobox').map((box) => (box as HTMLInputElement).value);
+    expect(values).toContain('★ voxcpm2');
+    expect(values).toContain('★ Experto');
   });
 
   it('AC-7: elegir un motor con licencia no comercial pide aceptarla, y al cancelar vuelve a la opción anterior', async () => {
     const engine = await renderOptions();
 
-    fireEvent.change(engine, { target: { value: 'omnivoice' } });
+    await choose(engine, 'omnivoice');
 
     expect(await screen.findByRole('dialog', { name: t('license.title', { engine: 'omnivoice' }) })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t('license.cancel') }));
-    await waitFor(() => expect(engine.value).toBe('voxcpm2'));
+    await waitFor(() => expect(engine.value).toBe('★ voxcpm2'));
     expect(api.put).not.toHaveBeenCalled();
   });
 
   it('AC-7: al aceptar, queda guardada la licencia y no vuelve a preguntar', async () => {
     const engine = await renderOptions();
 
-    fireEvent.change(engine, { target: { value: 'omnivoice' } });
+    await choose(engine, 'omnivoice');
     fireEvent.click(await screen.findByRole('button', { name: t('license.accept') }));
 
-    await waitFor(() => expect(engine.value).toBe('omnivoice'));
+    await waitFor(() => expect(engine.value).toBe('omnivoice (no comercial)'));
     expect(api.put).toHaveBeenCalledWith('/settings/narration.license.accepted.omnivoice', { value: true });
-    fireEvent.change(engine, { target: { value: 'voxcpm2' } });
-    fireEvent.change(engine, { target: { value: 'omnivoice' } });
-    await waitFor(() => expect(engine.value).toBe('omnivoice'));
+    await choose(engine, 'voxcpm2');
+    await choose(engine, 'omnivoice');
+    await waitFor(() => expect(engine.value).toBe('omnivoice (no comercial)'));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
@@ -87,9 +96,9 @@ describe('NarrationOptions', () => {
     );
     const engine = await renderOptions();
 
-    fireEvent.change(engine, { target: { value: 'omnivoice' } });
+    await choose(engine, 'omnivoice');
 
-    await waitFor(() => expect(engine.value).toBe('omnivoice'));
+    await waitFor(() => expect(engine.value).toBe('omnivoice (no comercial)'));
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
