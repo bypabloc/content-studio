@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from content_studio import paths
@@ -15,6 +17,7 @@ def refs(api, monkeypatch):
     root = api.tmp / 'reference'
     root.mkdir()
     monkeypatch.setattr(paths, 'REFERENCE', root)
+    monkeypatch.setattr(paths, 'ROOT', api.tmp)  # las rutas que da la API son relativas a la raíz, como /files
     return root
 
 
@@ -87,7 +90,7 @@ def test_the_profile_detail_shows_each_style_with_its_chosen_reference_and_takes
 
     assert body['id'] == 'spec-010' and body['name'] == 'Spec 010'
     expert = next(item for item in body['styles'] if item['style'] == 'expert')
-    assert expert == {'style': 'expert', 'chosen': True, 'takes': 1}
+    assert expert == {'style': 'expert', 'chosen': True, 'takes': 1, 'reference': 'reference/spec-010/expert.wav'}
 
 
 def test_a_missing_profile_or_take_is_404_and_an_unknown_style_is_422(api, refs):
@@ -107,3 +110,32 @@ def test_the_kit_gives_the_styles_in_guide_order_with_duration_ppm_and_text(api)
     assert neutral['duration'] == {'min': 10, 'max': 12} and neutral['ppm'] == 150
     assert neutral['text'].startswith('Hoy quiero contarte')
     assert styles[-1]['style'] == 'whisper' and styles[-1]['optional'] is True
+
+
+def test_a_style_without_a_chosen_take_has_no_reference_path(api, refs):
+    _create(api)
+
+    body = api.client.get('/voices/profiles/spec-010', headers=api.headers).json()
+
+    expert = next(item for item in body['styles'] if item['style'] == 'expert')
+    assert expert['reference'] is None
+
+
+def test_a_take_detail_gives_its_path_and_its_check_once_the_job_ran(api, refs):
+    _create(api)
+    api.client.post('/voices/profiles/spec-010/takes/expert', content=WAV, headers=api.headers)
+
+    before = api.client.get('/voices/profiles/spec-010/takes/expert/1', headers=api.headers).json()
+    assert before == {'take': 1, 'path': 'reference/spec-010/takes/expert/1.wav', 'check': None}
+
+    check = {'verdict': 'ok', 'reasons': [], 'messages': [], 'measures': {'duration': 10.0}}
+    (refs / 'spec-010' / 'takes' / 'expert' / '1.check.json').write_text(json.dumps(check), encoding='utf-8')
+    after = api.client.get('/voices/profiles/spec-010/takes/expert/1', headers=api.headers).json()
+    assert after['check'] == check
+
+
+def test_a_missing_take_detail_is_404(api, refs):
+    _create(api)
+
+    missing = api.client.get('/voices/profiles/spec-010/takes/expert/9', headers=api.headers)
+    assert missing.status_code == 404 and missing.json()['code'] == 'take_not_found'

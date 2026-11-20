@@ -409,6 +409,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/voices/profiles/{slug}/takes/{style}/{take}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Take Detail
+         * @description Una toma: su ruta para reproducirla y su chequeo (`<n>.check.json`) si el trabajo ya corrió; 404 si no existe.
+         */
+        get: operations["take_detail_voices_profiles__slug__takes__style___take__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/voices/catalog": {
         parameters: {
             query?: never;
@@ -1459,6 +1479,41 @@ export interface operations {
         };
     };
     choose_take_voices_profiles__slug__takes__style___take__choose_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                style: string;
+                take: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    take_detail_voices_profiles__slug__takes__style___take__get: {
         parameters: {
             query?: never;
             header?: never;

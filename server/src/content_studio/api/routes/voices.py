@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 
+from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.jobs import queue
@@ -128,3 +130,19 @@ def choose_take(slug: str, style: str, take: int) -> dict:
     except profile_takes.TakeNotFound:
         raise ApiError(404, 'take_not_found', take=take) from None
     return {'style': style, 'take': take}
+
+
+@router.get('/voices/profiles/{slug}/takes/{style}/{take}')
+def take_detail(slug: str, style: str, take: int) -> dict:
+    """Una toma: su ruta para reproducirla y su chequeo (`<n>.check.json`) si el trabajo ya corrió; 404 si no existe."""
+    _profile(slug)
+    _style(style)
+    wav = profiles.takes_dir(slug, style) / f'{take}.wav'
+    if not wav.is_file():
+        raise ApiError(404, 'take_not_found', take=take)
+    check = wav.with_suffix('.check.json')
+    return {
+        'take': take,
+        'path': paths.playable(wav),
+        'check': json.loads(check.read_text(encoding='utf-8')) if check.is_file() else None,
+    }

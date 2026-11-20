@@ -74,8 +74,8 @@ def create_app(
     broker: events.Broker | None = None,
 ) -> FastAPI:
     """App con la base migrada y el token. `worker` (si corre) termina los procesos al cancelar un trabajo;
-    `roots` son las carpetas que /files puede servir (por defecto out/ y los datos de referencia); `broker` entrega
-    los eventos de /events (el worker debe publicar en el mismo)."""
+    `roots` son las carpetas que /files puede servir (por defecto out/, las referencias y el catálogo de voces);
+    `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
     with closing(connection.connect(db_path)) as conn:
         schema.migrate(conn)
     app = FastAPI(title='content-studio', version='0.1.0')
@@ -91,7 +91,9 @@ def create_app(
     app.state.worker = worker
     app.state.broker = broker or events.Broker()
     app.state.roots = (
-        [Path(root).resolve() for root in roots] if roots else [paths.OUT.resolve(), paths.REFERENCE.resolve()]
+        [Path(root).resolve() for root in roots]
+        if roots
+        else [paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]

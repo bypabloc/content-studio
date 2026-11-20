@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Collection
 
-from content_studio.paths import VOICES
+from content_studio.paths import VOICES, playable
 
 CATALOG = VOICES / 'catalog.json'
 
@@ -64,8 +64,13 @@ def status(name: str, styles: Collection[str]) -> dict:
     """
     ap = VOICES / name / 'aprobacion.json'  # cspell:ignore aprobacion
     if not ap.exists():
-        return {'state': 'not_built', 'styles': [{'style': e, 'approved': False} for e in styles]}
+        return {'state': 'not_built', 'styles': [_style_card(name, e, False) for e in styles]}
     res = json.loads(ap.read_text(encoding='utf-8'))['styles']
     approved = {e: bool(res.get(e, {}).get('ok') and (VOICES / name / f'{e}.wav').exists()) for e in styles}
     state = 'approved' if all(approved.values()) else 'partial'
-    return {'state': state, 'styles': [{'style': e, 'approved': ok} for e, ok in approved.items()]}
+    return {'state': state, 'styles': [_style_card(name, e, ok) for e, ok in approved.items()]}
+
+
+def _style_card(name: str, style: str, approved: bool) -> dict:
+    """Un estilo de la ficha: si está aprobado y la ruta de su muestra, si existe (la sirve /files)."""
+    return {'style': style, 'approved': approved, 'path': playable(VOICES / name / f'{style}.wav')}

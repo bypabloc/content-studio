@@ -16,6 +16,7 @@ def refs(tmp_path, monkeypatch):
     root = tmp_path / 'reference'
     root.mkdir()
     monkeypatch.setattr(paths, 'REFERENCE', root)
+    monkeypatch.setattr(paths, 'ROOT', tmp_path)  # las rutas que da la API son relativas a la raíz, como /files
     return root
 
 
@@ -84,8 +85,13 @@ def test_styles_status_says_which_styles_have_a_chosen_reference_and_how_many_ta
 
     status = {item['style']: item for item in profiles.styles_status(slug)}
 
-    assert status['expert'] == {'style': 'expert', 'chosen': True, 'takes': 2}
-    assert status['clear'] == {'style': 'clear', 'chosen': False, 'takes': 0}
+    assert status['expert'] == {
+        'style': 'expert',
+        'chosen': True,
+        'takes': 2,
+        'reference': 'reference/spec-010/expert.wav',
+    }
+    assert status['clear'] == {'style': 'clear', 'chosen': False, 'takes': 0, 'reference': None}
 
 
 def test_a_name_that_is_not_a_slug_is_not_a_profile(refs):

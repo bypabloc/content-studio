@@ -124,6 +124,7 @@ def styles_status(profile: str) -> list[dict]:
             'style': style,
             'chosen': reference_for(profile, style).is_file(),
             'takes': len(take_numbers(profile, style)),
+            'reference': paths.playable(reference_for(profile, style)),
         }
         for style in recording_kit.STYLES
     ]

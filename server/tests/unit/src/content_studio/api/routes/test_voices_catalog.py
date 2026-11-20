@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from content_studio import paths
 from content_studio.narration.styles import STYLES
 from content_studio.narration.voices import catalog as voice_catalog
 
@@ -34,6 +35,7 @@ def voices(api, monkeypatch):
     """Catálogo de dos voces en una carpeta temporal: `ana` sin construir y `luis` aprobada en los 12 estilos."""
     root = api.tmp / 'voices'
     root.mkdir()
+    monkeypatch.setattr(paths, 'ROOT', api.tmp)  # las muestras que da la API son relativas a la raíz, como /files
     (root / 'catalog.json').write_text(json.dumps({'ana': SHEET, 'luis': SHEET}), encoding='utf-8')
     monkeypatch.setattr(voice_catalog, 'VOICES', root)
     monkeypatch.setattr(voice_catalog, 'CATALOG', root / 'catalog.json')
@@ -79,3 +81,10 @@ def test_ac9_the_favorites_come_from_settings_and_are_flagged(api, voices):
 
     assert _card(api, 'luis')['favorite'] is True
     assert _card(api, 'ana')['favorite'] is False
+
+
+def test_ac7_a_built_style_gives_the_path_the_files_route_serves_and_a_missing_one_gives_none(api, voices):
+    expert = next(item for item in _card(api, 'luis')['styles'] if item['style'] == 'expert')
+
+    assert expert['path'] == 'voices/luis/expert.wav'
+    assert all(item['path'] is None for item in _card(api, 'ana')['styles'])
