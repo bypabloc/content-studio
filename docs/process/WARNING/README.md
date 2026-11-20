@@ -98,5 +98,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [009-iconos-narracion-ajustes](009-iconos-narracion-ajustes.md) | Iconos de Narración y Ajustes; la barra colapsable envuelve su trigger en `UITooltip` (shadcn no se edita) | antes de dev |
 | [010-perfiles-y-paso-3](010-perfiles-y-paso-3.md) | Perfiles en `reference/<perfil>/`: el paso 3 usa el mapa de renombres del paso 2; los `.txt` versionados se mueven con `git mv` | antes de dev |
 | [010-kit-tomas-y-nombres](010-kit-tomas-y-nombres.md) | Las tomas de perfil van en `profile_takes.py` (`takes.py` es de la 006); la subida es el WAV crudo, sin multipart; el texto sale de cada guion | antes de dev |
+| [010-chequeo-de-toma](010-chequeo-de-toma.md) | Tolerancias del chequeo (pico, duración, bordes, pausas, ruido y texto); los bordes se miden, no se recortan; sin whisper es aviso, no `retake` | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

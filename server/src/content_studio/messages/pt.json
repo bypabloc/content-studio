@@ -313,5 +313,14 @@
   "theme.dark": "Escuro",
   "theme.light": "Claro",
   "theme.system": "Sistema",
-  "ui.dialog.close": "Fechar"
+  "ui.dialog.close": "Fechar",
+  "voice.check.edges": "As bordas não têm entre 0,2 e 0,6 s de silêncio.",
+  "voice.check.noise": "A sala tem ruído: há mais de −50 dBFS antes de falar.",
+  "voice.check.pause": "Há uma pausa de mais de 1 s no meio da toma.",
+  "voice.check.peak_high": "O pico passa de −5 dB: afaste-se um pouco do microfone.",
+  "voice.check.peak_low": "O pico fica abaixo de −13 dB: aproxime-se um pouco do microfone.",
+  "voice.check.text": "O que o whisper ouve não coincide com o roteiro.",
+  "voice.check.too_long": "A toma dura mais do que a faixa do estilo.",
+  "voice.check.too_short": "A toma dura menos do que a faixa do estilo.",
+  "voice.check.whisper_missing": "O comando whisper não está instalado: o texto não foi comparado."
 }

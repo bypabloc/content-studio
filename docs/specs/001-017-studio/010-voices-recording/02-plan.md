@@ -76,7 +76,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Perfiles y migración | AC-1, AC-2, AC-11 | — | `unit` | [x] |
 | T2 | Kit y tomas | AC-5 | T1 | `unit` | [x] |
-| T3 | Chequeo | AC-4 | T2 | `unit` | [ ] |
+| T3 | Chequeo | AC-4 | T2 | `unit` | [x] |
 | T4 | Importar | AC-6 | T2 | `unit` | [ ] |
 | T5 | Catálogo y construir | AC-7 | — | `unit` | [ ] |
 | T6 | Captura | AC-3 | — | `client-unit` | [ ] |

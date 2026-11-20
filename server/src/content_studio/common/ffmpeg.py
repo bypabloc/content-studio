@@ -10,6 +10,7 @@ from array import array
 from pathlib import Path
 
 # cspell:ignore frombytes byteswap: métodos de array de la stdlib, que el diccionario no trae.
+# cspell:ignore astats: filtro de ffmpeg que mide el nivel RMS de la sala.
 
 
 def ffmpeg(*args: str) -> str:
@@ -54,6 +55,39 @@ def probe_command(path: Path | str) -> list[str]:
 def probe_duration(path: Path | str) -> float:
     """Duración del archivo en segundos."""
     return float(subprocess.run(probe_command(path), capture_output=True, text=True, check=True).stdout)
+
+
+def peak_dbfs(path: Path | str) -> float:
+    """Pico de muestra del audio en dBFS (volumedetect); un silencio da el piso de -120 dBFS."""
+    found = re.search(
+        r'max_volume: (-?inf|-?[\d.]+) dB', ffmpeg('-i', str(path), '-af', 'volumedetect', '-f', 'null', '-')
+    )
+    if found is None:
+        raise ValueError('ffmpeg printed no volume summary')
+    return PEAK_FLOOR_DBFS if found[1].endswith('inf') else float(found[1])
+
+
+def room_tone_dbfs(path: Path | str, seconds: float = 0.3) -> float:
+    """Nivel RMS en dBFS de los primeros `seconds` del audio: el ruido de la sala antes de hablar."""
+    levels = re.findall(
+        r'RMS level dB: (-?inf|-?[\d.]+)',
+        ffmpeg('-t', str(seconds), '-i', str(path), '-af', 'astats', '-f', 'null', '-'),
+    )
+    if not levels:
+        raise ValueError('ffmpeg printed no level summary')
+    return PEAK_FLOOR_DBFS if levels[-1].endswith('inf') else float(levels[-1])
+
+
+def silences(path: Path | str, noise_db: float = -50.0, minimum: float = 0.1) -> list[tuple[float, float | None]]:
+    """Silencios (inicio, fin) según silencedetect; el fin es None si el silencio llega al final del audio."""
+    spans: list[list] = []
+    report = ffmpeg('-i', str(path), '-af', f'silencedetect=noise={noise_db}dB:d={minimum}', '-f', 'null', '-')
+    for line in report.splitlines():
+        if start := re.search(r'silence_start: (-?[\d.]+)', line):
+            spans.append([float(start[1]), None])
+        elif (end := re.search(r'silence_end: (-?[\d.]+)', line)) and spans:
+            spans[-1][1] = float(end[1])
+    return [(start, end) for start, end in spans]
 
 
 def peaks_command(path: Path | str) -> list[str]:

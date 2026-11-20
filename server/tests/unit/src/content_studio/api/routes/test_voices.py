@@ -58,13 +58,24 @@ def test_a_take_is_saved_numbered_listed_and_chosen(api, refs):
     _create(api)
 
     saved = api.client.post('/voices/profiles/spec-010/takes/expert', content=WAV, headers=api.headers)
-    assert saved.status_code == 201 and saved.json() == {'style': 'expert', 'take': 1}
+    assert saved.status_code == 201 and saved.json()['style'] == 'expert' and saved.json()['take'] == 1
 
     chosen = api.client.post('/voices/profiles/spec-010/takes/expert/1/choose', headers=api.headers)
     assert chosen.status_code == 200
     assert (refs / 'spec-010/expert.wav').read_bytes() == WAV
     listed = api.client.get('/voices/profiles/spec-010/takes/expert', headers=api.headers)
     assert listed.json() == {'style': 'expert', 'takes': [1]}
+
+
+def test_a_saved_take_queues_its_check_as_a_voice_check_job(api, refs):
+    _create(api)
+
+    saved = api.client.post('/voices/profiles/spec-010/takes/expert', content=WAV, headers=api.headers).json()
+
+    jobs = api.client.get('/jobs', headers=api.headers).json()
+    queued = [job for job in jobs if job['id'] == saved['job']]
+    assert len(queued) == 1 and queued[0]['kind'] == 'voice.check'
+    assert queued[0]['params'] == {'profile': 'spec-010', 'style': 'expert', 'take': 1}
 
 
 def test_the_profile_detail_shows_each_style_with_its_chosen_reference_and_takes(api, refs):

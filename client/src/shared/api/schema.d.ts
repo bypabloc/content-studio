@@ -380,7 +380,7 @@ export interface paths {
         put?: never;
         /**
          * Add Take
-         * @description Guarda el WAV del cuerpo como la siguiente toma del estilo.
+         * @description Guarda el WAV del cuerpo como la siguiente toma del estilo y encola su chequeo (`voice.check`).
          */
         post: operations["add_take_voices_profiles__slug__takes__style__post"];
         delete?: never;

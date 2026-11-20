@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request, Response
+import sqlite3
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 
+from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
+from content_studio.jobs import queue
 from content_studio.narration import profile_takes, profiles, recording_kit
 
 router = APIRouter()
@@ -93,11 +98,16 @@ def delete_profile(slug: str, confirm: bool = False) -> Response:
 
 
 @router.post('/voices/profiles/{slug}/takes/{style}', status_code=201)
-async def add_take(slug: str, style: str, request: Request) -> dict:
-    """Guarda el WAV del cuerpo como la siguiente toma del estilo."""
+async def add_take(
+    slug: str, style: str, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]
+) -> dict:
+    """Guarda el WAV del cuerpo como la siguiente toma del estilo y encola su chequeo (`voice.check`)."""
     _profile(slug)
     _style(style)
-    return {'style': style, 'take': profile_takes.save_take(slug, style, await request.body())}
+    take = profile_takes.save_take(slug, style, await request.body())
+    params = {'profile': slug, 'style': style, 'take': take}
+    job = queue.enqueue(conn, 'voice.check', params, request.app.state.services)
+    return {'style': style, 'take': take, 'job': job}
 
 
 @router.get('/voices/profiles/{slug}/takes/{style}')
