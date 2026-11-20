@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Large (unos 30 archivos entre server y client) |
 | Rama | `feature/017-editor-core` desde `origin/dev`, en `../content-studio-worktrees/017-editor-core/` |
-| Depende de | [016](../016-mix-ducking/README.md) (fusionada en `origin/dev`); usa la grabación de la [010](../010-voices-recording/README.md) y `media/edit.py` y `normalize.py` de la [015](../015-convert-normalize-trim/README.md) |
+| Depende de | [016](../016-mix-ducking/README.md) (fusionada en `origin/dev`); usa la grabación de la 010 y `media/edit.py` y `normalize.py` de la [015](../015-convert-normalize-trim/README.md) |
 | Origen | Pedido del usuario (2026-11-19), lote [001-017-studio](../README.md). Primera de tres: 017 núcleo y audio, [018](../018-editor-visual/README.md) video e imágenes, [019](../019-editor-effects/README.md) texto, efectos y «Mandar a» |
 
 ## Objetivo
