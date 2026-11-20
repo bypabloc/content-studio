@@ -42,7 +42,7 @@ afterEach(() => {
 function renderDetail(onBack: () => void = () => {}): void {
   render(
     <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-      <ProfileDetail slug="spec-010" onBack={onBack} />
+      <ProfileDetail slug="spec-010" onBack={onBack} onRecord={() => {}} />
     </QueryClientProvider>,
   );
 }
@@ -71,5 +71,17 @@ describe('ProfileDetail (spec 010, D-6)', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: t('voices.back') }));
     expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('Grabar abre el asistente de grabación del perfil', async () => {
+    const onRecord = vi.fn();
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <ProfileDetail slug="spec-010" onBack={() => {}} onRecord={onRecord} />
+      </QueryClientProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.open') }));
+    expect(onRecord).toHaveBeenCalledTimes(1);
   });
 });

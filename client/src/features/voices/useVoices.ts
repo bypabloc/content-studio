@@ -26,10 +26,17 @@ export interface ProfileDetail {
   styles: StyleStatus[];
 }
 
-/** Un estilo del kit (`GET /voices/kit`): los opcionales quedan fuera del progreso (el susurro). */
+/**
+ * Un estilo del kit (`GET /voices/kit`): su guion marcado y el exacto, la duración objetivo, el ritmo (`null` si no tiene)
+ * y si es opcional (el susurro queda fuera del progreso).
+ */
 export interface KitStyle {
   style: string;
   optional: boolean;
+  text: string;
+  marked: string;
+  duration: { min: number; max: number };
+  ppm: number | null;
 }
 
 /** Los estilos de grabación en orden de sesión. No cambian durante la vida de la app: se piden una vez. */

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RecordWizard } from '@/features/recording/RecordWizard';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIGrid } from '@/shared/components/atoms/UIGrid';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -22,10 +23,15 @@ export function MyVoicesPage() {
   const kit = useKit();
   const { create, rename, remove } = useProfileMutations();
   const [opened, setOpened] = useState<string | null>(null);
+  const [recording, setRecording] = useState<string | null>(null);
   const [dialog, setDialog] = useState<VoiceDialog | null>(null);
   const [draft, setDraft] = useState('');
 
-  if (opened !== null) return <ProfileDetail slug={opened} onBack={() => setOpened(null)} />;
+  // El asistente reemplaza la ficha mientras se graba; al terminar (o «Volver») regresa a la ficha del mismo perfil.
+  if (recording !== null) return <RecordWizard slug={recording} onDone={() => setRecording(null)} />;
+  if (opened !== null) {
+    return <ProfileDetail slug={opened} onBack={() => setOpened(null)} onRecord={() => setRecording(opened)} />;
+  }
 
   const required = (kit.data?.styles ?? []).filter((item) => !item.optional).map((item) => item.style);
   const renaming = dialog?.kind === 'rename';

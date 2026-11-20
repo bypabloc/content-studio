@@ -48,4 +48,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [008-underscore-row](008-underscore-row.md) | `_row` en UIRowTable y UIRepeatGroup da avisos de no-underscore-dangle (no bloquean) | Al tocar esos organismos o antes de la 022 | Agente |
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
 | [010-legacy-en-worktree](010-legacy-en-worktree.md) | En un worktree nuevo, pytest no importa `grabar/` hasta `uv sync --all-packages --all-groups` | Con la T8 (se borra `grabar/`) | Agente |
-| [010-presupuesto-solo-arranque](010-presupuesto-solo-arranque.md) | La etapa `budget` mide todo el JS, no el de arranque; `frontend-stack.md` dice 250 kB y el límite real es otro | Antes de la 7c si el bundle pasa del límite; en la 016 | Agente |
+| [010-e2e-grabar](010-e2e-grabar.md) | Los e2e de Mis voces y del asistente no existen aún ni se han corrido (`e2e` no está en `all`) | Al cerrar la 010 (T8 o T9) | Agente |
+| [010-grabar-con-microfono-real](010-grabar-con-microfono-real.md) | La grabación con un micrófono real (permiso, medidor, prueba de sala, 48 kHz) no se ha probado en la app | Antes de publicar la 010 (T9) | Usuario |

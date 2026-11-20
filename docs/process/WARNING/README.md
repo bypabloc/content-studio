@@ -113,5 +113,14 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-presupuesto-del-cliente](010-presupuesto-del-cliente.md) | El presupuesto del JS inicial sube de 228 a 232 kB por la pantalla de Mis voces; la importación diferida no baja la cifra con el medidor actual | antes de dev |
 | [010-remuestreo-al-subir](010-remuestreo-al-subir.md) | La toma de un micrófono que no da 48 kHz se convierte a 48 kHz al subirla, y el chequeo lo anota | antes de dev |
 | [010-wav-extensible-en-tomas](010-wav-extensible-en-tomas.md) | ffmpeg escribe las tomas de 24 bits como WAV extensible; las pruebas las leen con soundfile | antes de dev |
+| [010-medidor-como-atomo](010-medidor-como-atomo.md) | El medidor de nivel es el átomo `UILevelMeter`, no un `LevelMeter` de la pantalla (sustituye a 010-vumetro-en-ciclo-7) | antes de dev |
+| [010-grabar-desde-la-ficha](010-grabar-desde-la-ficha.md) | «Grabar» abre el asistente en lugar de la ficha; «Volver a la ficha» se bloquea durante una toma | antes de dev |
+| [010-espacio-y-fase-en-ref](010-espacio-y-fase-en-ref.md) | La barra espaciadora lee la fase desde una referencia, para no repetir la grabación al pulsar rápido | antes de dev |
+| [010-prueba-sala-sin-micro](010-prueba-sala-sin-micro.md) | Si el micrófono no abre, la prueba de sala avisa y cancela su temporizador | antes de dev |
+| [010-negrita-del-guion](010-negrita-del-guion.md) | El teleprompter pinta en negrita el énfasis `**palabra**` del guion | antes de dev |
+| [010-subida-acepta-vista-de-bytes](010-subida-acepta-vista-de-bytes.md) | `upload` del cliente acepta una vista de bytes (TypeScript 5.9 tipa `Uint8Array` con su buffer) | antes de dev |
+| [010-repetir-es-otra-toma](010-repetir-es-otra-toma.md) | «Repetir» graba otra toma del mismo estilo, igual que «Grabar»; las tomas no se sobrescriben | antes de dev |
+| [010-medir-arranque-en-budget](010-medir-arranque-en-budget.md) | La etapa `budget` mide solo el JS de arranque (entrada y `modulepreload`); el límite sigue en 232 kB | antes de dev |
+| [010-enfasis-atomo](010-enfasis-atomo.md) | El énfasis del guion es el átomo `UIEmphasis`: el `strong` nativo no va fuera de los átomos | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

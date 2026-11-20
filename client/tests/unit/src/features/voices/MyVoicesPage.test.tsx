@@ -16,6 +16,20 @@ const { api } = vi.hoisted(() => ({
 }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 
+// El asistente tiene sus propios tests: aquí solo importa que se abre con el perfil y que terminar vuelve al detalle.
+vi.mock('@/features/recording/RecordWizard', async () => {
+  const { createElement } = await import('react');
+  return {
+    RecordWizard: ({ slug, onDone }: { slug: string; onDone: () => void }) =>
+      createElement(
+        'div',
+        null,
+        createElement('p', null, `asistente ${slug}`),
+        createElement('button', { onClick: onDone }, 'terminar'),
+      ),
+  };
+});
+
 // Los 12 estilos obligatorios del kit (spec 010, D-6) y uno opcional que no entra en el progreso.
 const REQUIRED = ['neutral', 'friendly', 'expert', 'clear', 'steady', 'soft', 'energetic', 'dramatic', 'sad', 'intimate', 'neutral-en', 'neutral-end'];
 const KIT = { styles: [...REQUIRED.map((style) => ({ style, optional: false })), { style: 'whisper', optional: true }] };
@@ -117,5 +131,16 @@ describe('MyVoicesPage (spec 010, D-6)', () => {
     fireEvent.click(await screen.findByRole('button', { name: t('voices.back') }));
 
     expect(await screen.findByRole('button', { name: t('voices.open') })).toBeTruthy();
+  });
+
+  it('Grabar abre el asistente del perfil, y terminar vuelve al detalle', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.open') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.open') }));
+    expect(await screen.findByText('asistente spec-010')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'terminar' }));
+
+    expect(await screen.findByRole('button', { name: t('voices.back') })).toBeTruthy();
   });
 });

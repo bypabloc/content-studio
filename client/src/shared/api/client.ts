@@ -33,7 +33,7 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
     patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
     del: <T>(path: string) => request<T>('DELETE', path),
     /** Sube un cuerpo crudo, como la toma WAV del micrófono: no pasa por JSON. */
-    upload: <T>(path: string, body: BodyInit, contentType: string) => request<T>('POST', path, body, contentType),
+    upload: <T>(path: string, body: BodyInit | ArrayBufferView, contentType: string) => request<T>('POST', path, body, contentType),
     /** URL de un archivo de out/ para el <audio> o la forma de onda: sin cabeceras, el token va en la consulta. */
     fileUrl: (path: string) =>
       `${connection.baseUrl}/files?path=${encodeURIComponent(path)}&token=${encodeURIComponent(connection.token)}`,

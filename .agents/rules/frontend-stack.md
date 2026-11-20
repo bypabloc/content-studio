@@ -63,7 +63,7 @@ Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Ca
 * **Datos**: el server se pide con `shared/api/client.ts` a través de TanStack Query. Los eventos `job` y `queue` de SSE actualizan la caché (`shared/api/events.ts`) sin volver a pedir. Ningún `fetch` suelto en un componente.
 * **Navegación**: por hash (`#/settings`). Las secciones viven en `app/nav.ts`; la barra lateral y la paleta (Ctrl+K) salen de esa lista, así que cada sección nueva agrega su línea ahí.
 * **Texto visible**: todo sale del catálogo único (`@messages/{es,en,pt}.json`) con `t('clave')`, en el idioma activo (`shared/i18n/locale.ts`, con respaldo a español). Una clave que falta se muestra tal cual; la etapa `i18n` falla si una clave falta en un idioma, sobra o no tiene texto (spec 007, D-8).
-* **Cobertura**: 80 % por archivo en `client/src` (sin `main.tsx`, `shared/components/shadcn/` ni los `.d.ts`). Presupuesto del JS inicial: 250 kB gzip (`client/budget.json`).
+* **Cobertura**: 80 % por archivo en `client/src` (sin `main.tsx`, `shared/components/shadcn/` ni los `.d.ts`). Presupuesto del JS inicial: 232 kB gzip (`client/budget.json`).
 * **Tema**: `ui.theme` (light, dark o system) vive en `settings`. `useTheme` pone la clase `dark` en `<html>` y `theme-init.js` la pone antes de montar, con la caché de `localStorage`.
 * **Pruebas**: un test unitario va en `tests/unit/src/<ruta>/<módulo>.test.ts(x)` (`testing.md`). El e2e usa la API simulada de `tests/e2e/support/app.ts`: no arranca el server real.
 * **Componentes**: las pantallas arman su layout con átomos, moléculas y organismos, nunca con etiquetas nativas; la jerarquía y los textos están en `ui-components.md`.
