@@ -1,9 +1,9 @@
 import { t } from '@/shared/i18n/t';
-import { NAV, type NavItem } from './nav';
+import { navItems, type NavItem } from './nav';
 import { useSectionId } from './routes';
 
 /** El menú agrupado: un enlace por sección, y la sección activa según el hash. */
-export function Sidebar({ items = NAV }: { items?: readonly NavItem[] }) {
+export function Sidebar({ items = navItems() }: { items?: readonly NavItem[] }) {
   const active = useSectionId();
   const groups = [...new Set(items.map((item) => item.group))];
 

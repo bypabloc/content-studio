@@ -6,6 +6,12 @@ if (typeof EventSource === 'undefined') {
   } as unknown as typeof EventSource;
 }
 
+// Las pruebas escriben sus expectativas en español: jsdom reporta en-US, así que el idioma «system» daría inglés.
+// La caché `ui.language` fija el español antes de cargar cada módulo; las pruebas de idioma la cambian a su gusto.
+if (typeof localStorage !== 'undefined') {
+  localStorage.setItem('ui.language', 'es');
+}
+
 // jsdom no trae matchMedia; el tema lo usa para seguir `prefers-color-scheme`. Los tests en node no tienen window.
 if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = (query: string) =>

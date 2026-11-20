@@ -1,7 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { t, type MessageKey } from '@/shared/i18n/t';
+import { setLocale } from '@/shared/i18n/locale';
 
 describe('t', () => {
+  beforeEach(() => setLocale('es'));
+
+  it('usa el idioma activo', () => {
+    setLocale('en');
+    expect(t('nav.settings')).toBe('Settings');
+
+    setLocale('pt');
+    expect(t('nav.settings')).toBe('Configurações');
+  });
+
+  it('reemplaza los parámetros también en el idioma activo', () => {
+    setLocale('en');
+
+    expect(t('app.version', { version: '1.2.3' })).toBe('Version 1.2.3');
+  });
+
   it('devuelve el texto del catálogo', () => {
     expect(t('app.name')).toBe('Content Studio');
   });

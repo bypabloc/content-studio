@@ -5,7 +5,7 @@ import { SettingsPage } from '@/features/settings/SettingsPage';
 import { t } from '@/shared/i18n/t';
 import { useTheme } from '@/shared/theme/useTheme';
 import { CommandPalette } from './CommandPalette';
-import { NAV } from './nav';
+import { navItems } from './nav';
 import { useSectionId } from './routes';
 import { Sidebar } from './Sidebar';
 import { ThemeToggle } from './ThemeToggle';
@@ -14,7 +14,7 @@ import { ThemeToggle } from './ThemeToggle';
 export function Shell({ version }: { version: string }) {
   const [theme, setTheme] = useTheme();
   const sectionId = useSectionId();
-  const section = NAV.find((item) => item.id === sectionId);
+  const section = navItems().find((item) => item.id === sectionId);
 
   return (
     <div className="flex min-h-screen select-none">

@@ -1,3 +1,4 @@
+import { getLocale } from '../i18n/locale';
 import { ApiError, type ErrorBody } from './errors';
 
 export interface Connection {
@@ -13,6 +14,7 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
       method,
       headers: {
         Authorization: `Bearer ${connection.token}`,
+        'Accept-Language': getLocale(),
         ...(json ? { 'Content-Type': 'application/json' } : {}),
       },
       body: json ? JSON.stringify(body) : undefined,

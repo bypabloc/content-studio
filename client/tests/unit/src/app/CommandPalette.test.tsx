@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CommandPalette } from '@/app/CommandPalette';
-import { NAV } from '@/app/nav';
+import { navItems } from '@/app/nav';
 import { t } from '@/shared/i18n/t';
 
 afterEach(() => {
@@ -16,7 +16,7 @@ function open() {
 
 describe('CommandPalette', () => {
   it('Ctrl+K la abre y escribir filtra las secciones sin distinguir tildes', () => {
-    render(<CommandPalette items={NAV} />);
+    render(<CommandPalette items={navItems()} />);
     expect(screen.queryByRole('dialog')).toBeNull();
 
     const input = open();
@@ -27,7 +27,7 @@ describe('CommandPalette', () => {
   });
 
   it('una búsqueda sin resultados lo dice', () => {
-    render(<CommandPalette items={NAV} />);
+    render(<CommandPalette items={navItems()} />);
 
     fireEvent.change(open(), { target: { value: 'zzz' } });
 
@@ -35,7 +35,7 @@ describe('CommandPalette', () => {
   });
 
   it('Enter navega a la sección elegida y cierra la paleta', () => {
-    render(<CommandPalette items={NAV} />);
+    render(<CommandPalette items={navItems()} />);
     const input = open();
     fireEvent.change(input, { target: { value: 'ajus' } });
 
@@ -64,7 +64,7 @@ describe('CommandPalette', () => {
   });
 
   it('Escape cierra la paleta sin navegar', () => {
-    render(<CommandPalette items={NAV} />);
+    render(<CommandPalette items={navItems()} />);
     const input = open();
 
     fireEvent.keyDown(input, { key: 'Escape' });
