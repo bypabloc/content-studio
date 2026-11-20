@@ -134,3 +134,6 @@ unstub
 describedby
 labelledby
 executemany
+klinikae
+oklch
+shadcn

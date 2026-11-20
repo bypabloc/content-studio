@@ -20,7 +20,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**'],
-      exclude: ['src/components/ui/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      // shadcn es código de proveedor copiado (spec 008, D-1): se prueba con el smoke test, no archivo por archivo.
+      exclude: ['src/components/ui/**', 'src/shared/components/shadcn/**', 'src/main.tsx', 'src/**/*.d.ts'],
       thresholds: { perFile: true, lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

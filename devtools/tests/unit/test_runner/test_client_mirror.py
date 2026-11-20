@@ -41,7 +41,7 @@ def test_the_baseline_keeps_old_gaps_but_must_shrink(tmp_path):
 
 
 def test_components_ui_main_and_declarations_are_not_audited(tmp_path):
-    _write(tmp_path, 'client/src/components/ui/button.tsx')
+    _write(tmp_path, 'client/src/shared/components/shadcn/button.tsx')
     _write(tmp_path, 'client/src/main.tsx')
     _write(tmp_path, 'client/src/shared/api/schema.d.ts')
 

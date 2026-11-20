@@ -71,5 +71,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [007-detector-heuristica](007-detector-heuristica.md) | El detector de textos sueltos usa una heurística, no un análisis de lenguaje | antes de main |
 | [007-descripciones-cli](007-descripciones-cli.md) | Las descripciones de motores y modelos del CLI quedan en inglés | antes de main |
 | [007-cspell-pt](007-cspell-pt.md) | El diccionario de portugués de cspell es una dependencia de desarrollo de la raíz | antes de main |
+| [008-paquete-cn](008-paquete-cn.md) | `cn` se toma del paquete `cn` 0.5.0 de shadcn (MIT), no de un `clsx` + `tailwind-merge` propio | antes de dev |
+| [008-base-ui-shadcn](008-base-ui-shadcn.md) | La base de componentes es `@base-ui/react` con shadcn, con las versiones exactas de klinikae | antes de dev |
+| [008-shadcn-codigo-de-proveedor](008-shadcn-codigo-de-proveedor.md) | Las primitivas de shadcn quedan fuera de tamaño, ortografía, espejo y cobertura: son código de proveedor | antes de dev |
+| [008-clases-tailwind-no-son-texto](008-clases-tailwind-no-son-texto.md) | Una lista de clases de Tailwind no cuenta como texto visible en el detector TS | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

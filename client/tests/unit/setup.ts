@@ -1,3 +1,14 @@
+import { cleanup, configure } from '@testing-library/react';
+import { afterEach } from 'vitest';
+
+// Menús, diálogos y tooltips de Base UI abren con transiciones: bajo carga (pre-commit, CI de 2 vCPU) el
+// timeout por defecto de 1 s no alcanza (spec 008, portado de klinikae `app-kit/testing/setup`).
+configure({ asyncUtilTimeout: 5000 });
+
+afterEach(() => {
+  cleanup();
+});
+
 // jsdom no trae EventSource: la conexión de eventos se prueba con su propio fake; aquí solo evita el error.
 if (typeof EventSource === 'undefined') {
   globalThis.EventSource = class {
@@ -25,4 +36,19 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       removeEventListener() {},
       dispatchEvent: () => false,
     }) as unknown as MediaQueryList;
+}
+
+// jsdom tampoco trae ResizeObserver ni las APIs de puntero y scroll que usan Base UI y los selectores.
+if (typeof window !== 'undefined') {
+  if (!globalThis.ResizeObserver) {
+    globalThis.ResizeObserver = class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    } as unknown as typeof ResizeObserver;
+  }
+  Element.prototype.hasPointerCapture ??= () => false;
+  Element.prototype.releasePointerCapture ??= () => {};
+  Element.prototype.scrollIntoView ??= () => {};
+  window.PointerEvent ??= class extends MouseEvent {} as typeof PointerEvent;
 }

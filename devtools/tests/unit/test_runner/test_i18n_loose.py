@@ -105,6 +105,23 @@ def test_ac5_leaves_classes_imports_types_keys_and_t_calls_alone():
     assert check_loose_ts([FIXTURES / 'client' / 'allowed.tsx']) == []
 
 
+def test_ac5_class_strings_in_variant_maps_are_not_text(tmp_path):
+    """Las clases de Tailwind de un `cva` o un objeto de variantes no son texto (spec 008, primitivas de shadcn)."""
+    path = write(
+        tmp_path,
+        'Badge.tsx',
+        "const variants = cva('inline-flex gap-1', {\n"
+        "  variants: { variant: { default: 'bg-primary text-primary-foreground hover:bg-primary/80' } },\n"
+        '});\n'
+        "export const label = 'Cerrar sesión';\n"
+        "export const more = 'hover:underline text-sm';\n",
+    )
+
+    findings = check_loose_ts([path])
+
+    assert [(finding.line, finding.text) for finding in findings] == [(4, 'Cerrar sesión')]
+
+
 def test_ac5_an_ignore_marker_in_tsx_needs_a_reason(tmp_path):
     path = write(tmp_path, 'Foo.tsx', "export const x = 'Hola mundo'; // i18n-ignore:\n")
 
