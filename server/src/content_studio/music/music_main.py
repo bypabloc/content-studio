@@ -15,6 +15,7 @@ from content_studio.common import process, progress
 from content_studio.music.duration import TOLERANCE_S, length, write_result
 from content_studio.music.engines.base import Jobs, MusicEngine
 from content_studio.music.evaluation import free_gpu, with_voice
+from content_studio.music.manifest import write_manifest
 from content_studio.music.parser import MODELS, STYLES, build_parser
 
 RETRIES = 2  # una pista que sale más corta que lo pedido se regenera hasta dos veces (spec 011, AC-3)
@@ -128,6 +129,7 @@ def main() -> None:
         missing = [s.name for _, s in jobs if not s.exists()]
         if missing:
             sys.exit(f'Not generated: {", ".join(missing)}')
+        write_manifest(a.folder, a.model, a.duration, jobs, {})
         return
 
     free_gpu()
@@ -140,6 +142,7 @@ def main() -> None:
         free_gpu()
         pending = with_voice(pending)
     print(f'{len(jobs) - len(pending)}/{len(jobs)} tracks without voice')
+    write_manifest(a.folder, a.model, a.duration, jobs, {output: output in pending for _, output in jobs})
     if pending:
         sys.exit(f'Still with voice after retries: {", ".join(p.name for p in pending)}')
 

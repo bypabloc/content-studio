@@ -53,9 +53,16 @@ class StyleOut(BaseModel):
     time_signature: str
     caption: str
     has_sample: bool
+    sample: str | None  # ruta de la muestra de 10 s, o null si aún no existe
 
 
 class StylesOut(BaseModel):
     """Respuesta de `GET /music/styles`: el catálogo completo."""
 
     styles: list[StyleOut]
+
+
+class ChooseIn(BaseModel):
+    """Cuerpo de `POST /jobs/{id}/choose`: el archivo de la pista elegida."""
+
+    file: str

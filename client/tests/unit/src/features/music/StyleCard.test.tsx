@@ -16,8 +16,9 @@ const withSample: StyleOut = {
   time_signature: '4',
   caption: 'lo-fi hip hop',
   has_sample: true,
+  sample: 'out/samples/lofi-chill.wav',
 };
-const withoutSample: StyleOut = { ...withSample, key: 'techno-dark', has_sample: false };
+const withoutSample: StyleOut = { ...withSample, key: 'techno-dark', has_sample: false, sample: null };
 
 function renderCard(style: StyleOut, overrides: Partial<Parameters<typeof StyleCard>[0]> = {}) {
   const handlers = {

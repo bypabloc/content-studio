@@ -1,4 +1,5 @@
 import { NarrationPage } from '@/features/narration/NarrationPage';
+import { MusicPage } from '@/features/music/MusicPage';
 import { QueuePanel } from '@/features/queue/QueuePanel';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { CatalogPage } from '@/features/voices/CatalogPage';
@@ -49,6 +50,7 @@ export function Shell({ version }: { version: string }) {
       >
         {section ? <UIText variant="subtitle">{section.label}</UIText> : null}
         {section?.id === 'narration' && <NarrationPage />}
+        {section?.id === 'music' && <MusicPage />}
         {section?.id === 'voices' && <MyVoicesPage />}
         {section?.id === 'catalog' && <CatalogPage />}
         {section?.id === 'settings' && <SettingsPage />}

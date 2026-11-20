@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -18,6 +21,21 @@ FLAGS = {
     'variants': '--variants',
     'retries': '--retries',
 }
+
+
+def group_key(params: dict) -> str:
+    """Clave de las variantes de un mismo pedido (spec 011, D-6): sha1 de los parámetros sin la semilla. Así las
+    pistas de un pedido, con sus estilos y variantes, quedan en un grupo y «Elegir» deja una sola ★ por grupo."""
+    rest = {key: value for key, value in params.items() if key != 'seed'}
+    digest = hashlib.sha1(
+        json.dumps(rest, sort_keys=True, ensure_ascii=False).encode('utf-8'), usedforsecurity=False
+    ).hexdigest()
+    return f'music:{digest[:12]}'
+
+
+def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, str]:
+    """Antes de encolar: los parámetros tal cual y la clave de grupo del pedido (la cola la guarda en el trabajo)."""
+    return params, group_key(params)
 
 
 def validate(params: dict) -> list[dict]:

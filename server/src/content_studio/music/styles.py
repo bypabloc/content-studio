@@ -274,17 +274,22 @@ STYLES = {name: {**style, 'category': category_of(name)} for name, style in STYL
 def styles_catalog(samples: Path) -> list[dict]:
     """Los presets para la UI (spec 011, D-2 y D-3): categoría, tonalidad, BPM, compás, caption y si ya tienen muestra.
 
-    `samples` es la carpeta de las muestras de 10 s (`<estilo>.wav`).
+    `samples` es la carpeta de las muestras de 10 s (`<estilo>.wav`); `sample` es la ruta de la muestra, o None.
     """
-    return [
-        {
-            'key': key,
-            'category': style['category'],
-            'musical_key': style['key'],
-            'bpm': style['bpm'],
-            'time_signature': style['time_signature'],
-            'caption': style['caption'],
-            'has_sample': (samples / f'{key}.wav').is_file(),
-        }
-        for key, style in STYLES.items()
-    ]
+    catalog = []
+    for key, style in STYLES.items():
+        wav = samples / f'{key}.wav'
+        found = wav.is_file()
+        catalog.append(
+            {
+                'key': key,
+                'category': style['category'],
+                'musical_key': style['key'],
+                'bpm': style['bpm'],
+                'time_signature': style['time_signature'],
+                'caption': style['caption'],
+                'has_sample': found,
+                'sample': str(wav) if found else None,
+            }
+        )
+    return catalog

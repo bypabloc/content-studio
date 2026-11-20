@@ -10,7 +10,7 @@ def test_the_catalog_lists_every_preset_with_its_category_and_its_metadata(tmp_p
 
     assert len(rows) == len(STYLES) == 126
     first = rows[0]
-    assert set(first) == {'key', 'category', 'musical_key', 'bpm', 'time_signature', 'caption', 'has_sample'}
+    assert set(first) == {'key', 'category', 'musical_key', 'bpm', 'time_signature', 'caption', 'has_sample', 'sample'}
     assert first['key'] == 'lofi-chill' and first['musical_key'] == 'C Major' and first['bpm'] == 80
 
 

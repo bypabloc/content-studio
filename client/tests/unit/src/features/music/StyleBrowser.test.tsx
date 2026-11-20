@@ -9,9 +9,9 @@ import { label, t } from '@/shared/i18n/t';
 type StyleOut = components['schemas']['StyleOut'];
 
 const styles: StyleOut[] = [
-  { key: 'lofi-chill', category: 'lofi', musical_key: 'C Major', bpm: 80, time_signature: '4', caption: 'lo-fi hip hop', has_sample: true },
-  { key: 'techno-dark', category: 'electronic', musical_key: 'A Minor', bpm: 130, time_signature: '4', caption: 'dark techno', has_sample: false },
-  { key: 'jazz-soft', category: 'jazz', musical_key: 'D Minor', bpm: 90, time_signature: '4', caption: 'soft jazz piano', has_sample: false },
+  { key: 'lofi-chill', category: 'lofi', musical_key: 'C Major', bpm: 80, time_signature: '4', caption: 'lo-fi hip hop', has_sample: true, sample: 'out/samples/lofi-chill.wav' },
+  { key: 'techno-dark', category: 'electronic', musical_key: 'A Minor', bpm: 130, time_signature: '4', caption: 'dark techno', has_sample: false, sample: null },
+  { key: 'jazz-soft', category: 'jazz', musical_key: 'D Minor', bpm: 90, time_signature: '4', caption: 'soft jazz piano', has_sample: false, sample: null },
 ];
 
 type Props = Parameters<typeof StyleBrowser>[0];
