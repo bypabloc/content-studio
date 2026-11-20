@@ -18,8 +18,10 @@ SHOWN = ('voice', 'style')  # lo que la tarjeta de Comparar muestra de cada toma
 
 def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, str | None]:
     """Resuelve `source_job` (un trabajo de narración ya terminado): su carpeta, su motor, su grupo de tomas y la voz y
-    el estilo que muestra Comparar. Si no sirve, devuelve los parámetros sin resolver y `validate` lo rechaza."""
-    source = jobs.get(conn, params['source_job']) if isinstance(params.get('source_job'), int) else None
+    el estilo que muestra Comparar. `source` y `model` nunca vienen del cliente: si la toma no sirve, se quitan y
+    `validate` responde `source_not_done`."""
+    params = {key: value for key, value in params.items() if key not in ('source', 'model')}
+    source = jobs.get(conn, params['source_job']) if type(params.get('source_job')) is int else None
     if source is None or source['status'] != 'done' or source['kind'] not in SOURCES:
         return params, None
     shown = {key: source['params'][key] for key in SHOWN if key in source['params']}
@@ -34,7 +36,7 @@ def validate(params: dict) -> list[dict]:
         return [{'code': 'source_not_done', 'params': {'job': params.get('source_job')}}]
     errors = []
     model = params.get('model')
-    if model not in ENGINES:
+    if not isinstance(model, str) or model not in ENGINES:
         errors.append({'code': 'unknown_engine', 'params': {'model': model}})
     elif not ENGINES[model].installed():
         errors.append({'code': 'engine_not_installed', 'params': {'model': model}})
@@ -45,7 +47,7 @@ def validate(params: dict) -> list[dict]:
         return [*errors, {'code': 'source_missing', 'params': {'source': source}}]
     blocks = len(json.loads((folder / 'script.json').read_text(encoding='utf-8'))['segments'])
     index = params.get('index')
-    if not isinstance(index, int) or not 0 <= index < blocks:
+    if type(index) is not int or not 0 <= index < blocks:
         errors.append({'code': 'index_out_of_range', 'params': {'index': index, 'blocks': blocks}})
     return errors
 

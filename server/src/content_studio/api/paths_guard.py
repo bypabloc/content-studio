@@ -13,6 +13,8 @@ from content_studio.api.errors import ApiError
 def allowed_file(request: Request, path: str) -> Path:
     """Ruta absoluta de un archivo permitido. Una relativa se cuenta desde la raíz; fuera de las carpetas permitidas
     (también con `..`) da 403, y un archivo que no existe, 404."""
+    if '\x00' in path:  # un byte NUL no es parte de una ruta: resolve() lo rechaza con ValueError
+        raise ApiError(403, 'forbidden_path')
     target = (paths.ROOT / path).resolve()
     if not any(target == root or root in target.parents for root in request.app.state.roots):
         raise ApiError(403, 'forbidden_path')

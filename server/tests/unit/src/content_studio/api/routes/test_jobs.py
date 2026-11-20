@@ -50,11 +50,29 @@ def test_cancel_and_retry_follow_the_queue_rules(api):
     assert cancelled.json() == {'cancelled': True}
 
 
+def test_a_job_id_beyond_sqlite_is_422_not_500(api):
+    assert api.client.get('/jobs/99999999999999999999', headers=api.headers).status_code == 422
+
+
+def test_star_refuses_a_job_that_is_not_a_finished_take(api):
+    """Solo una toma terminada de narración se puede elegir: un trabajo en cola o de otro tipo, no."""
+    job_id = api.client.post('/jobs', json={'kind': 'fake', 'params': {'x': 1}}, headers=api.headers).json()['id']
+
+    response = api.client.post(f'/jobs/{job_id}/star', headers=api.headers)
+
+    assert response.status_code == 409
+    assert response.json()['code'] == 'job_not_a_take'
+
+
 def test_ac5_star_is_unique_per_group(api):
     """AC-5: marcar una toma la deja como la única elegida de su grupo; las de otro grupo no cambian."""
     with closing(connection.connect(api.tmp / 'base.db')) as conn:
-        first, second = (jobs.insert(conn, 'fake', 'gpu', {}, group_key='narration:g1') for _ in range(2))
-        other = jobs.insert(conn, 'fake', 'gpu', {}, group_key='narration:g2')
+        first, second, other = (
+            jobs.insert(conn, 'narration', 'gpu', {}, group_key=group)
+            for group in ('narration:g1', 'narration:g1', 'narration:g2')
+        )
+        for job_id in (first, second, other):
+            jobs.update(conn, job_id, status='done')
     for job_id in (first, other, second):
         api.client.post(f'/jobs/{job_id}/star', headers=api.headers)
 

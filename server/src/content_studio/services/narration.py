@@ -39,6 +39,8 @@ def validate(params: dict) -> list[dict]:
         errors.append({'code': 'unknown_voice', 'params': {'voice': params['voice']}})
     if not params.get('text') and not params.get('file'):
         errors.append({'code': 'missing_text', 'params': {}})
+    if len(params.get('file') or []) > 1:  # una carpeta por toma (AC-2): un guion por trabajo
+        errors.append({'code': 'one_script_per_job', 'params': {}})
     return errors
 
 

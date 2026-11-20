@@ -33,3 +33,17 @@ def test_ac3_regenerating_one_block_copies_the_others_and_keeps_the_original(tmp
     assert [b['seed'] for b in script['blocks']] == [7, 9, 7]
     assert script['seeds'] == [7, 9]
     assert (tmp_path / 'take' / 'fake-expert.wav').exists()
+
+
+def test_the_wav_name_in_script_json_cannot_escape_the_take_folder(tmp_path, fake_engine, narrated):
+    """El nombre del .wav viene de script.json: con `..` no se escribe fuera de la carpeta de la toma."""
+    original = narrated(tmp_path / 'original')
+    script_path = original / 'script.json'
+    data = json.loads(script_path.read_text(encoding='utf-8'))
+    data['wav'] = '../escape.wav'
+    script_path.write_text(json.dumps(data), encoding='utf-8')
+
+    takes.regenerate_take(fake_engine, original, index=1, seed=9, out_dir=tmp_path / 'take')
+
+    assert not (tmp_path / 'escape.wav').exists()
+    assert (tmp_path / 'take' / 'escape.wav').exists()

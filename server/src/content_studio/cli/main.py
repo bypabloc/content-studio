@@ -95,7 +95,11 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'serve':
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
     if args.command == 'narration' and args.action == 'tts':
-        return submit.run('narration', submit.narration_params(args), args.db, main_checkout(paths.ROOT))
+        codes = [
+            submit.run('narration', params, args.db, main_checkout(paths.ROOT))
+            for params in submit.split_files(submit.narration_params(args))
+        ]
+        return max(codes)
     if args.command == 'narration' and args.action == 'regenerate':
         return submit.run('narration.regenerate', submit.regenerate_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'narration' and args.action == 'voices':

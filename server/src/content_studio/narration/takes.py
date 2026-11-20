@@ -28,10 +28,10 @@ def regenerate_take(engine: TTSEngine, source: Path, index: int, seed: int, out_
             shutil.copyfile(source / 'blocks' / f'{i}.wav', out_dir / 'blocks' / f'{i}.wav')
             audios[i], sr = sf.read(source / 'blocks' / f'{i}.wav', dtype='float32')
     g = dict(
-        output=out_dir / data['wav'], ref=ref, secs=secs, pb=pb, style=data['style'], p=STYLES[data['style']],
-        language=data['language'], seed=data['seed'], seeds=list(data['seeds']),
-        seed_block=[b['seed'] for b in data['blocks']], audios=audios, sr=sr, blocks=[], time_s=0.0,
-        master=data['master'], lufs=data['lufs'], master_info=None,
+        output=out_dir / Path(data['wav']).name, ref=ref, secs=secs, pb=pb,
+        style=data['style'], p=STYLES[data['style']], language=data['language'], seed=data['seed'],
+        seeds=list(data['seeds']), seed_block=[b['seed'] for b in data['blocks']], audios=audios, sr=sr, blocks=[],
+        time_s=0.0, master=data['master'], lufs=data['lufs'], master_info=None,
     )  # fmt: skip
     regenerate(engine, g, [index], batch=1, seed=seed)
     return g

@@ -20,3 +20,10 @@ def test_ac1_lint_endpoint_returns_the_issues_with_their_message(api):
 
 def test_ac1_lint_endpoint_needs_the_token(api):
     assert api.client.post('/narration/lint', json={'text': 'Hola.'}).status_code == 401
+
+
+def test_a_script_longer_than_the_limit_is_422(api):
+    """El linter no acepta textos sin tope: sus expresiones tardan más cuanto más largo es el texto."""
+    response = api.client.post('/narration/lint', json={'text': 'a' * 20_001}, headers=api.headers)
+
+    assert response.status_code == 422

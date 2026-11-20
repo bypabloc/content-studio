@@ -119,3 +119,28 @@ def test_build_command_runs_the_tts_module_from_the_take(tmp_path):
     assert cmd[cmd.index('--only') + 1] == '1'
     assert cmd[cmd.index('--seed') + 1] == '5'
     assert cmd[cmd.index('--output') + 1] == str(tmp_path / 'job')
+
+
+def test_a_client_source_or_model_is_never_trusted(out, db):
+    """Sin toma de origen resuelta, la carpeta y el motor que manda el cliente no cuentan: es `source_not_done`."""
+    forged = take(out)  # una carpeta bajo out con script.json: lo que antes pasaba la validación
+
+    params, _ = regenerate.prepare(db, {'source_job': 999, 'index': 1, 'source': str(forged), 'model': MODEL})
+
+    assert codes(params) == ['source_not_done']
+
+
+def test_a_boolean_index_is_not_an_index(out):
+    assert codes({'model': MODEL, 'source': str(take(out)), 'index': True}) == ['index_out_of_range']
+
+
+def test_a_boolean_source_job_is_not_a_job_id(out, db):
+    finished(db, take(out), {'model': MODEL, 'style': 'expert', 'text': 'Hola.'})
+
+    params, group = regenerate.prepare(db, {'source_job': True, 'index': 1})
+
+    assert (codes(params), group) == (['source_not_done'], None)
+
+
+def test_a_model_that_is_not_text_is_an_unknown_engine(out):
+    assert codes({'model': ['voxcpm2'], 'source': str(take(out)), 'index': 0}) == ['unknown_engine']

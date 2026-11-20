@@ -35,7 +35,7 @@ def media_info(path: str, request: Request) -> dict:
         try:
             lufs, true_peak = ffmpeg.loudness(target)
             _info[key] = {'duration': ffmpeg.probe_duration(target), 'lufs': lufs, 'true_peak': true_peak}
-        except subprocess.CalledProcessError as error:
+        except (subprocess.CalledProcessError, ValueError) as error:  # ValueError: ffmpeg no dio el resumen
             raise ApiError(422, 'unreadable_media') from error
     return _info[key]
 

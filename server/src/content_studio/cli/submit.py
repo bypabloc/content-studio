@@ -73,6 +73,14 @@ def narration_params(args: argparse.Namespace) -> dict[str, Any]:
     return _params(args, NARRATION_FLAGS)
 
 
+def split_files(params: dict[str, Any]) -> list[dict[str, Any]]:
+    """Un trabajo por guion: cada `--file` tiene su carpeta con su blocks/ y script.json (como en la app)."""
+    files = params.get('file') or []
+    if len(files) < 2:
+        return [params]
+    return [{**params, 'file': [item]} for item in files]
+
+
 def regenerate_params(args: argparse.Namespace) -> dict[str, Any]:
     """Parámetros de `narration.regenerate` a partir de `studio narration regenerate <job> <index>`."""
     params: dict[str, Any] = {'source_job': args.job, 'index': args.index}

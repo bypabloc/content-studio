@@ -6,18 +6,19 @@ from dataclasses import asdict
 from typing import Any
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from content_studio.messages import t
 from content_studio.narration import script_lint
 
 router = APIRouter()
+LINT_MAX_CHARS = 20_000  # unos 20 minutos de narración: más largo, las expresiones del linter tardan demasiado
 
 
 class ScriptIn(BaseModel):
     """El guion tal como lo escribe el usuario, y el estilo para estimar su duración."""
 
-    text: str
+    text: str = Field(max_length=LINT_MAX_CHARS)
     style: str = 'expert'
 
 

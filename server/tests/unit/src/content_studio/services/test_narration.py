@@ -47,6 +47,7 @@ def test_valid_params_have_no_errors(installed):
         ({**VALID, 'model': 'nope'}, 'unknown_engine'),
         ({**VALID, 'style': 'nope'}, 'unknown_style'),
         ({'model': 'qwen-0.6b', 'style': 'expert'}, 'missing_text'),
+        ({'model': 'qwen-0.6b', 'style': 'expert', 'file': ['a.txt', 'b.txt']}, 'one_script_per_job'),
     ],
 )
 def test_invalid_params_report_a_code(installed, params, code):

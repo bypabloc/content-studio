@@ -48,6 +48,23 @@ def test_narration_file_paths_become_strings():
     assert submit.narration_params(args)['file'] == ['guion.txt']
 
 
+def test_each_script_of_a_narration_becomes_its_own_job():
+    """Cada guion tiene su carpeta (su blocks/ y su script.json): varios --file son varios trabajos, como en la app."""
+    args = narration_parser().parse_args(['--model', 'qwen-0.6b', '--style', 'expert', '--file', 'a.txt', 'b.txt'])
+
+    params = submit.split_files(submit.narration_params(args))
+
+    assert [item['file'] for item in params] == [['a.txt'], ['b.txt']]
+
+
+def test_a_single_script_or_a_text_stays_one_job():
+    one = narration_parser().parse_args(['--model', 'qwen-0.6b', '--style', 'expert', '--file', 'a.txt'])
+    text = narration_parser().parse_args(['--model', 'qwen-0.6b', '--style', 'expert', '--text', 'Hola.'])
+
+    assert [item['file'] for item in submit.split_files(submit.narration_params(one))] == [['a.txt']]
+    assert submit.split_files(submit.narration_params(text)) == [submit.narration_params(text)]
+
+
 def test_music_keeps_the_style_list_and_the_duration_as_a_number():
     args = music_parser().parse_args(['--model', 'acestep', '--style', 'lofi-chill', 'corporate', '--duration', '15'])
 
