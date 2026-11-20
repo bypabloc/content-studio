@@ -5,4 +5,4 @@
 - **Descartadas**: versionar el WAV (la guarda lo prohíbe, y cambiarla es decisión del usuario); codificarlo en base64 (esquiva la guarda, así que no); generar el WAV en cada prueba sin unir los dos lados.
 - **Cómo revertir**: quitar el `.sha256`, el script y las dos pruebas que lo usan, en un commit.
 - **Cómo comprobarla**: `cd client && bun scripts/wav-fixture.ts` no cambia el `.sha256` (`git status` limpio); `uv run pytest server/tests/unit/src/content_studio/common/test_ffmpeg.py` (incluye la comprobación de la huella y ffprobe).
-- **Pendiente**: el remuestreo a 48 kHz, en PENDING `010-remuestreo-48-khz.md`.
+- **Pendiente**: ninguno. El remuestreo a 48 kHz se cerró en el 7c con la ficha WARNING `010-remuestreo-al-subir`.

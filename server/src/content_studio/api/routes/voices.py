@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import subprocess
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
@@ -103,11 +104,18 @@ def delete_profile(slug: str, confirm: bool = False) -> Response:
 async def add_take(
     slug: str, style: str, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]
 ) -> dict:
-    """Guarda el WAV del cuerpo como la siguiente toma del estilo y encola su chequeo (`voice.check`)."""
+    """Guarda el WAV del cuerpo a 48 kHz como la siguiente toma del estilo y encola su chequeo (`voice.check`).
+    Si el micrófono no dio 48 kHz, el chequeo lo anota: `source_rate` es la frecuencia que dio el micrófono."""
     _profile(slug)
     _style(style)
-    take = profile_takes.save_take(slug, style, await request.body())
+    try:
+        data, source_rate = profile_takes.to_48k(await request.body())
+    except (OSError, subprocess.CalledProcessError):
+        raise ApiError(422, 'unreadable_media') from None
+    take = profile_takes.save_take(slug, style, data)
     params = {'profile': slug, 'style': style, 'take': take}
+    if source_rate is not None:
+        params['source_rate'] = source_rate
     job = queue.enqueue(conn, 'voice.check', params, request.app.state.services)
     return {'style': style, 'take': take, 'job': job}
 

@@ -327,6 +327,7 @@
   "voice.check.pause": "There is a pause longer than 1 s in the middle of the take.",
   "voice.check.peak_high": "The peak goes over −5 dB: move a little away from the microphone.",
   "voice.check.peak_low": "The peak stays below −13 dB: move a little closer to the microphone.",
+  "voice.check.resampled": "The take was resampled to 48 kHz: the microphone did not give 48 kHz.",
   "voice.check.text": "What whisper hears does not match the script.",
   "voice.check.too_long": "The take lasts longer than the range of the style.",
   "voice.check.too_short": "The take lasts less than the range of the style.",

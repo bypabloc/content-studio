@@ -6,9 +6,16 @@ reemplaza no se pierde: pasa a `takes/` con el siguiente número.
 
 from __future__ import annotations
 
+import io
 import shutil
+import tempfile
+import wave
+from pathlib import Path
 
+from content_studio.common import ffmpeg
 from content_studio.narration import profiles, recording_kit
+
+RATE = 48000  # la guía pide 48 kHz: lo que llegue de otra frecuencia se remuestrea (spec 010, D-2)
 
 
 class TakeNotFound(Exception):
@@ -20,6 +27,27 @@ def _kit_style(style: str) -> str:
     if style not in recording_kit.STYLES:
         raise ValueError(f'not a kit style: {style!r}')
     return style
+
+
+def _rate_of(data: bytes) -> int | None:
+    """La frecuencia del WAV; None si la cabecera no se lee (la toma se guarda como llegó)."""
+    try:
+        with wave.open(io.BytesIO(data)) as wav:
+            return wav.getframerate()
+    except (wave.Error, EOFError):
+        return None
+
+
+def to_48k(data: bytes) -> tuple[bytes, int | None]:
+    """El WAV a 48 kHz y, si hubo que remuestrearlo, la frecuencia de origen (None si ya estaba a 48 kHz)."""
+    rate = _rate_of(data)
+    if rate is None or rate == RATE:
+        return data, None
+    with tempfile.TemporaryDirectory() as folder:
+        source, target = Path(folder, 'in.wav'), Path(folder, 'out.wav')
+        source.write_bytes(data)
+        ffmpeg.resample(source, target)
+        return target.read_bytes(), rate
 
 
 def list_takes(profile: str, style: str) -> list[int]:

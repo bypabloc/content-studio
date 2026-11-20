@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import io
+import wave
+
 import pytest
+import soundfile as sf
 
 from content_studio import paths
 from content_studio.narration import profile_takes, profiles, recording_kit
@@ -60,3 +64,29 @@ def test_only_kit_styles_can_have_takes(refs):
 
     with pytest.raises(ValueError):
         profile_takes.save_take(slug, 'nope', b'x')
+
+
+def _wav(rate: int) -> bytes:
+    """Medio segundo de silencio en un WAV mono de 16 bits a `rate`: lo que sube un micrófono que no da 48 kHz."""
+    buffer = io.BytesIO()
+    with wave.open(buffer, 'wb') as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        out.writeframes(b'\x00\x00' * (rate // 2))
+    return buffer.getvalue()
+
+
+def test_a_take_from_a_44100_microphone_is_resampled_to_48k_and_keeps_its_source_rate():
+    out, source = profile_takes.to_48k(_wav(44100))
+
+    assert source == 44100
+    info = sf.info(io.BytesIO(out))  # soundfile lee el WAV de 24 bits que escribe ffmpeg (formato extensible)
+    assert info.samplerate == 48000
+    assert abs(info.frames - 24000) < 100  # medio segundo sigue siendo medio segundo
+
+
+def test_a_take_already_at_48k_is_kept_as_it_is():
+    data = _wav(48000)
+
+    assert profile_takes.to_48k(data) == (data, None)

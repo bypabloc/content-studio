@@ -96,6 +96,13 @@ def extract_wav(source: Path | str, start: float, end: float, destination: Path 
     ffmpeg(*args, '-vn', '-ac', '1', '-ar', '48000', '-c:a', 'pcm_s24le', str(destination))
 
 
+def resample(source: Path | str, destination: Path | str) -> None:
+    """Pasa un WAV a 48 kHz, mono y 24 bits con el conversor soxr de ffmpeg (para un micrófono que no da 48 kHz)."""
+    # cspell:ignore resampler soxr
+    args = ['-y', '-i', str(source), '-vn', '-af', 'aresample=resampler=soxr', '-ar', '48000', '-ac', '1']
+    ffmpeg(*args, '-c:a', 'pcm_s24le', str(destination))
+
+
 def peaks_command(path: Path | str) -> list[str]:
     """ffmpeg que decodifica el audio a mono de 8 kHz, en s16le, hacia la salida estándar."""
     return ['ffmpeg', '-v', 'error', '-i', str(path), '-f', 's16le', '-ac', '1', '-ar', '8000', '-']

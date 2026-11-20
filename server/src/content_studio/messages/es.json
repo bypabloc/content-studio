@@ -327,6 +327,7 @@
   "voice.check.pause": "Hay una pausa de más de 1 s en medio de la toma.",
   "voice.check.peak_high": "El pico pasa de −5 dB: aléjate un poco del micrófono.",
   "voice.check.peak_low": "El pico queda por debajo de −13 dB: acércate un poco al micrófono.",
+  "voice.check.resampled": "La toma se pasó a 48 kHz: el micrófono no dio 48 kHz.",
   "voice.check.text": "Lo que oye whisper no coincide con el guion.",
   "voice.check.too_long": "La toma dura más que el rango del estilo.",
   "voice.check.too_short": "La toma dura menos que el rango del estilo.",

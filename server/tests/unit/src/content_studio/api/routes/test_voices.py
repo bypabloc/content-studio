@@ -2,13 +2,27 @@
 
 from __future__ import annotations
 
+import io
 import json
+import wave
 
 import pytest
+import soundfile as sf
 
 from content_studio import paths
 
 WAV = b'RIFF\x00\x00\x00\x00WAVEfmt '
+
+
+def _wav(rate: int) -> bytes:
+    """Medio segundo de silencio en un WAV mono de 16 bits a `rate` (un micrófono que no da 48 kHz)."""
+    buffer = io.BytesIO()
+    with wave.open(buffer, 'wb') as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        out.writeframes(b'\x00\x00' * (rate // 2))
+    return buffer.getvalue()
 
 
 @pytest.fixture
@@ -79,6 +93,18 @@ def test_a_saved_take_queues_its_check_as_a_voice_check_job(api, refs):
     queued = [job for job in jobs if job['id'] == saved['job']]
     assert len(queued) == 1 and queued[0]['kind'] == 'voice.check'
     assert queued[0]['params'] == {'profile': 'spec-010', 'style': 'expert', 'take': 1}
+
+
+def test_a_take_from_a_44100_microphone_is_saved_at_48k_and_its_job_knows_the_source_rate(api, refs):
+    _create(api)
+
+    saved = api.client.post('/voices/profiles/spec-010/takes/expert', content=_wav(44100), headers=api.headers).json()
+
+    stored = (refs / 'spec-010/takes/expert/1.wav').read_bytes()
+    assert sf.info(io.BytesIO(stored)).samplerate == 48000
+    jobs = api.client.get('/jobs', headers=api.headers).json()
+    queued = [job for job in jobs if job['id'] == saved['job']]
+    assert queued[0]['params'] == {'profile': 'spec-010', 'style': 'expert', 'take': 1, 'source_rate': 44100}
 
 
 def test_the_profile_detail_shows_each_style_with_its_chosen_reference_and_takes(api, refs):

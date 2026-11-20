@@ -380,7 +380,8 @@ export interface paths {
         put?: never;
         /**
          * Add Take
-         * @description Guarda el WAV del cuerpo como la siguiente toma del estilo y encola su chequeo (`voice.check`).
+         * @description Guarda el WAV del cuerpo a 48 kHz como la siguiente toma del estilo y encola su chequeo (`voice.check`).
+         *     Si el micrófono no dio 48 kHz, el chequeo lo anota: `source_rate` es la frecuencia que dio el micrófono.
          */
         post: operations["add_take_voices_profiles__slug__takes__style__post"];
         delete?: never;

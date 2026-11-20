@@ -124,6 +124,19 @@ def test_the_entry_point_writes_the_check_next_to_the_take(refs, monkeypatch, ca
     assert json.loads(capsys.readouterr().out)['verdict'] == 'ok'
 
 
+def test_a_take_resampled_on_upload_says_so_in_its_check(refs, monkeypatch, capsys):
+    slug = profiles.create('Spec 010')
+    profiles.takes_dir(slug, 'expert').mkdir(parents=True)
+    make_take(profiles.takes_dir(slug, 'expert') / '1.wav')
+    monkeypatch.setattr(voice_check.shutil, 'which', lambda name: None)  # sin whisper, para no depender de él
+
+    assert voice_check.main(['--profile', slug, '--style', 'expert', '--take', '1', '--source-rate', '44100']) == 0
+
+    written = json.loads((refs / slug / 'takes/expert/1.check.json').read_text(encoding='utf-8'))
+    assert written['notes'] == ['whisper_missing', 'resampled']
+    assert written['measures']['source_rate'] == 44100
+
+
 def test_the_check_runs_on_the_gpu_queue_and_names_the_take(tmp_path):
     command = voice_check.build_command({'profile': 'spec-010', 'style': 'expert', 'take': 2}, tmp_path)
 

@@ -46,6 +46,8 @@ def validate(params: dict) -> list[dict]:
 def build_command(params: dict, output_dir: Path) -> list[str]:
     """El chequeo corre con el python del server. `output_dir` no hace falta: el resultado va junto a la toma."""
     args = ['--profile', params['profile'], '--style', params['style'], '--take', str(params['take'])]
+    if params.get('source_rate'):
+        args += ['--source-rate', str(params['source_rate'])]
     return [sys.executable, '-m', 'content_studio.services.voice_check', *args]
 
 
@@ -150,9 +152,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--profile', required=True)
     parser.add_argument('--style', required=True)
     parser.add_argument('--take', type=int, required=True)
+    parser.add_argument('--source-rate', type=int)
     args = parser.parse_args(argv)
     take = profiles.takes_dir(args.profile, args.style) / f'{args.take}.wav'
     result = check_take(take, args.style, recording_kit.plain_text(args.style), whisper_text)
+    if args.source_rate:  # la toma se remuestreó al subirla: el chequeo lo anota (spec 010, D-2)
+        result['notes'].append('resampled')
+        result['messages'].append(messages.t('voice.check.resampled'))
+        result['measures']['source_rate'] = args.source_rate
     take.with_suffix('.check.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(result, ensure_ascii=False))
     return 0

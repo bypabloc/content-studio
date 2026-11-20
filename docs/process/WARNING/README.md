@@ -111,5 +111,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [010-progreso-sobre-el-kit](010-progreso-sobre-el-kit.md) | El progreso de un perfil cuenta los 12 estilos obligatorios del kit y se oculta hasta que llega | antes de dev |
 | [010-cliente-patch-upload-y-borrado](010-cliente-patch-upload-y-borrado.md) | El cliente de la API suma PATCH y la subida de un cuerpo crudo; borrar siempre pide la papelera | antes de dev |
 | [010-presupuesto-del-cliente](010-presupuesto-del-cliente.md) | El presupuesto del JS inicial sube de 228 a 232 kB por la pantalla de Mis voces; la importación diferida no baja la cifra con el medidor actual | antes de dev |
+| [010-remuestreo-al-subir](010-remuestreo-al-subir.md) | La toma de un micrófono que no da 48 kHz se convierte a 48 kHz al subirla, y el chequeo lo anota | antes de dev |
+| [010-wav-extensible-en-tomas](010-wav-extensible-en-tomas.md) | ffmpeg escribe las tomas de 24 bits como WAV extensible; las pruebas las leen con soundfile | antes de dev |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
