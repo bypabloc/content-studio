@@ -11,7 +11,7 @@
 | Tipo | feature |
 | Escala | Large (unos 25 archivos entre server y client, más el borrado de `grabar/`) |
 | Rama | `feature/010-voices-recording` desde `origin/dev`, en `../content-studio-worktrees/010-voices-recording/` |
-| Depende de | [009](../009-icons/README.md) (fusionada en `origin/dev`) |
+| Depende de | 009 (fusionada en `origin/dev`) |
 | Origen | Pedido del usuario (lote [001-017-studio](../README.md)) |
 
 ## Objetivo

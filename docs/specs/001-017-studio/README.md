@@ -16,7 +16,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | [006](006-narration-section/README.md) | Sección Narración | feature | 005 | DON |
 | [007](007-i18n/README.md) | Textos centralizados con i18n: un catálogo único (`es`, `en`, `pt`) para el client y el server, idioma en Ajustes y etapa `i18n` que bloquea textos sueltos | feature | 006 | DON |
 | [008](008-atomic-components/README.md) | Componentes con Atomic Design: unos 64 componentes de klinikae (`@base-ui/react` + shadcn v4) en `shared/components/{atoms,molecules,organisms}`, `useForm`, tokens, AppShell, y bloqueo de etiquetas HTML nativas fuera de los átomos | refactor · feature | 007 | DON |
-| [009](009-icons/README.md) | Iconos aplicados: criterio de solo icono y los iconos del shell, la cola, Narración y Ajustes, con los `UIIcon`, `UIIconButton` y `UITooltip` de la 008 | feature | 008 | PEN |
+| 009 | Iconos aplicados: criterio de solo icono y los iconos del shell, la cola, Narración y Ajustes, con los `UIIcon`, `UIIconButton` y `UITooltip` de la 008 | feature | 008 | DON |
 | [010](010-voices-recording/README.md) | Voces (catálogo y construir) + Grabar (micrófono en la UI) | feature | 009 | PEN |
 | [011](011-music-section/README.md) | Sección Música (duración) | feature | 010 | PEN |
 | [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | PEN |
