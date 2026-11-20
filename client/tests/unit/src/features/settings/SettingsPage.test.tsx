@@ -106,6 +106,24 @@ describe('SettingsPage', () => {
     );
   });
 
+  it('el selector de tema muestra el ícono de cada opción (spec 009, D-5)', async () => {
+    renderPage(fetchMock);
+
+    await userEvent.click(await screen.findByRole('combobox', { name: t('settings.theme') }));
+
+    expect(screen.getByRole('option', { name: t('theme.light') }).querySelector('svg.lucide-sun')).not.toBeNull();
+    expect(screen.getByRole('option', { name: t('theme.dark') }).querySelector('svg.lucide-moon')).not.toBeNull();
+    expect(screen.getByRole('option', { name: t('theme.system') }).querySelector('svg.lucide-monitor')).not.toBeNull();
+  });
+
+  it('restablecer lleva su ícono y su texto (spec 009, D-5)', () => {
+    renderPage(fetchMock);
+
+    const reset = screen.getByRole('button', { name: t('settings.reset') });
+    expect(reset.textContent).toBe(t('settings.reset'));
+    expect(reset.querySelector('svg.lucide-rotate-ccw-clock')).not.toBeNull();
+  });
+
   it('si se cancela la confirmación, no se borra nada', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(false);
     renderPage(fetchMock);

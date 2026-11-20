@@ -4,11 +4,11 @@ import { useId, useState } from 'react'
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList } from '../../shadcn/combobox'
 import { UIFieldFrame } from '../../atoms/UIFieldFrame'
 
-import { UIIcon } from '../../atoms/UIIcon'
+import { type IconName, UIIcon } from '../../atoms/UIIcon'
 import { UIBox } from '../../atoms/UIBox'
 
-/** Opción del selector: valor, texto visible y descripción opcional. */
-export type SearchSelectOption = { value: string; label: string; description?: string; disabled?: boolean }
+/** Opción del selector: valor, texto visible, descripción opcional e ícono opcional a su izquierda (spec 009, D-5). */
+export type SearchSelectOption = { value: string; label: string; description?: string; disabled?: boolean; icon?: IconName }
 
 /** Props de `UISearchSelect`, las mismas del combobox interno. */
 export type SearchSelectProps = {
@@ -148,6 +148,7 @@ export function SearchSelectPicker({
                 option.value === '' && 'text-muted-foreground',
               )}
             >
+              {option.icon ? <UIIcon name={option.icon} className="size-4 shrink-0" /> : null}
               <UIBox as="span" className="flex min-w-0 flex-1 flex-col">
                 <UIBox as="span" className="wrap-break-word">{option.label}</UIBox>
                 {option.description ? (

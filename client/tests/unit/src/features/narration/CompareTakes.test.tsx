@@ -94,13 +94,22 @@ describe('CompareTakes', () => {
     renderCompare();
     const columns = await screen.findAllByRole('article');
 
-    fireEvent.click(within(columns[1]).getByRole('button', { name: t('narration.compare.choose') }));
+    fireEvent.click(within(columns[1]).getByRole('button', { name: t('action.choose') }));
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/jobs/4/star'));
     await waitFor(() =>
       expect(within(screen.getAllByRole('article')[1]).getByText(t('narration.compare.chosen'))).toBeTruthy(),
     );
-    expect(within(screen.getAllByRole('article')[0]).getByRole('button', { name: t('narration.compare.choose') })).toBeTruthy();
+    expect(within(screen.getAllByRole('article')[0]).getByRole('button', { name: t('action.choose') })).toBeTruthy();
+  });
+
+  it('Elegir es solo una estrella con su nombre (spec 009, D-4)', async () => {
+    renderCompare();
+    const columns = await screen.findAllByRole('article');
+
+    const choose = within(columns[1]).getByRole('button', { name: t('action.choose') });
+    expect(choose.textContent).toBe('');
+    expect(choose.querySelector('svg.lucide-star')).not.toBeNull();
   });
 
   it('al reproducir una toma se pausan las demás (AC-10)', async () => {

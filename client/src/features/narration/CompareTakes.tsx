@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/shared/api/context';
-import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIGrid } from '@/shared/components/atoms/UIGrid';
+import { UIIcon } from '@/shared/components/atoms/UIIcon';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { type Job, type Take, useTake } from './useTake';
@@ -65,19 +66,13 @@ function TakeColumn({ job, onChoose }: { job: Job; onChoose: () => void }) {
         </UIText>
         {job.starred ? (
           <UIStack direction="row" align="center" gap="xs">
-            <UIStack aria-hidden="true">
-              <UIText variant="caption" className="font-medium">
-                {'★'}
-              </UIText>
-            </UIStack>
+            <UIIcon name="star" className="size-4 fill-current" />
             <UIText variant="caption" className="font-medium">
               {t('narration.compare.chosen')}
             </UIText>
           </UIStack>
         ) : (
-          <UIButton variant="secondary" onClick={onChoose}>
-            {t('narration.compare.choose')}
-          </UIButton>
+          <UIIconButton variant="secondary" icon="star" label={t('action.choose')} onClick={onChoose} />
         )}
       </UIStack>
       <UIStack gap="xs">

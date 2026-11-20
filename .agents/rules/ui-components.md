@@ -34,6 +34,16 @@ Los componentes viven en `client/src/shared/components/` en cinco carpetas: `sha
 * El nombre de cada control contiene su texto visible (WCAG 2.5.3). El botón de tema dice «Cambiar tema: Claro», nunca «Cambiar tema» a secas.
 * Axe no puede tener fallos serios en el shell, la cola ni los ajustes (`tests/e2e/shell/happy-apariencia-axe.e2e.ts`).
 
+## Botones de solo ícono (spec 009, D-4)
+
+* **Solo ícono** (`UIIconButton`, con `label`): las acciones obvias y repetidas, como tema, cerrar, reproducir y pausar, detener, grabar, abrir carpeta, reintentar, cancelar un trabajo, quitar o borrar un ítem, copiar, estrella, asa de arrastre, comparar, regenerar, importar guion y colapsar la barra o la cola.
+* **Ícono y texto** (`UIButton` con `icon`): los ítems de navegación (con la barra colapsada queda el ícono, y el nombre pasa al tooltip), los botones primarios de cada sección («Generar», «Exportar», «Construir») y las confirmaciones destructivas.
+* **Solo texto**: etiquetas de campos, enlaces dentro de un párrafo, opciones de selectores y las acciones sin ícono obvio.
+* El nombre accesible de un botón de solo ícono es su `label` (su `aria-label`), y el tooltip dice lo mismo. Las etiquetas viven una sola vez en `action.*` del catálogo, y varias pantallas las reutilizan.
+* Un conmutador usa `aria-pressed` o cambia su etiqueta, nunca solo el ícono.
+* Los íconos salen del mapa de `UIIcon` (tipo `IconName`): un nombre fuera del mapa no compila.
+* `tests/e2e/shell/happy-icons-tooltips.e2e.ts` recorre los botones de solo ícono con el teclado y comprueba su tooltip.
+
 ## Selectores con recomendado
 
 * `UIRecommendedSelect` (molécula, sobre `UISelect`) recuerda la última elección en `settings` bajo `select.<clave>`. Sin elección guardada, o si la guardada ya no existe, vale la recomendada, marcada con ★ (`select.recommended`).

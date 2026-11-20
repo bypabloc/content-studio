@@ -64,7 +64,7 @@ export function NarrationPage() {
       <UIStack role="complementary" gap="lg" className="lg:w-80 lg:shrink-0">
         <NarrationOptions />
         <UIStack gap="sm">
-          <UIButton variant="primary" onClick={generate} disabled={!text.trim() || !ready} title={t('narration.generate.shortcut')}>
+          <UIButton variant="primary" icon="narration" onClick={generate} disabled={!text.trim() || !ready} title={t('narration.generate.shortcut')}>
             {t('narration.generate')}
           </UIButton>
           {issues > 0 && (

@@ -4,6 +4,7 @@ import { UIFieldFrame } from '../../atoms/UIFieldFrame'
 
 import { UIFixedValue } from '../../atoms/UIFixedValue'
 import { UIHiddenInput } from '../../atoms/UIHiddenInput'
+import type { IconName } from '../../atoms/UIIcon'
 import type { SearchSelectOption } from '../UISearchSelect/Picker'
 import { UISkeleton } from '../../atoms/UISkeleton'
 
@@ -12,7 +13,7 @@ const Picker = lazy(async () => ({ default: (await import('../UISearchSelect/Pic
 /** Umbral de opciones a partir del cual el combobox permite filtrar por texto tecleado. */
 export const FILTER_THRESHOLD = 8
 
-export type UISelectOption = { value: string; label: string; description?: string; disabled?: boolean }
+export type UISelectOption = { value: string; label: string; description?: string; disabled?: boolean; icon?: IconName }
 
 export type UISelectProps = {
   label: string

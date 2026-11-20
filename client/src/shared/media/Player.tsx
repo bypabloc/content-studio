@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { t } from '@/shared/i18n/t';
 
@@ -68,10 +68,10 @@ export function Player({ src, peaks }: { src: string; peaks: number[] }) {
 
   return (
     <UIStack direction="row" align="center" gap="sm" onPointerDown={takeOver} onFocus={takeOver}>
-      <UIButton
+      <UIIconButton
         variant="primary"
         icon={playing ? 'pause' : 'play'}
-        aria-label={playing ? t('player.pause') : t('player.play')}
+        label={playing ? t('action.pause') : t('action.play')}
         onClick={() => void wave.current?.playPause()}
         className="size-11 shrink-0 rounded-full px-0"
       />
