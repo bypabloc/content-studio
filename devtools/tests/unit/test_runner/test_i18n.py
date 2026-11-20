@@ -7,7 +7,7 @@ import shutil
 from collections.abc import Callable
 from pathlib import Path
 
-from devtools.test_runner.i18n import check_catalogs, run
+from devtools.test_runner.i18n import check_catalogs, check_usage, run
 
 VALID = Path(__file__).resolve().parents[2] / 'fixtures' / 'i18n' / 'catalogs' / 'valid'
 
@@ -107,3 +107,83 @@ def test_ac1_run_reports_the_stage_with_the_problems(tmp_path):
 
 def test_ac1_run_passes_on_the_real_catalogs():
     assert run([]) == {'stage': 'i18n', 'status': 'pass', 'detail': ''}
+
+
+def make_repo(tmp_path: Path, files: dict[str, str]) -> Path:
+    root = tmp_path / 'repo'
+    for name, text in files.items():
+        path = root / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding='utf-8')
+    return root
+
+
+def usage(tmp_path: Path, files: dict[str, str], catalog: dict[str, str], prefixes=()) -> list[str]:
+    root = make_repo(tmp_path, files)
+    return check_usage(root, catalog, {'dynamicPrefixes': list(prefixes)})
+
+
+def test_ac3_a_client_key_without_text_is_reported(tmp_path):
+    problems = usage(
+        tmp_path,
+        {'client/src/app/Foo.tsx': "export const label = t('missing.key');\n"},
+        {'nav.settings': 'Ajustes'},
+    )
+
+    assert any('missing.key' in problem and 'Foo.tsx' in problem for problem in problems)
+
+
+def test_ac3_a_key_nobody_uses_is_reported_as_orphan(tmp_path):
+    problems = usage(
+        tmp_path,
+        {'client/src/app/Foo.tsx': "export const label = t('nav.settings');\n"},
+        {'nav.settings': 'Ajustes', 'orphan.key': 'Huérfana'},
+    )
+
+    assert problems == ['messages/es.json: key "orphan.key" is not used']
+
+
+def test_ac3_a_key_under_a_declared_dynamic_prefix_is_not_an_orphan(tmp_path):
+    problems = usage(tmp_path, {}, {'queue.status.error': 'Error'}, prefixes=['queue.status.'])
+
+    assert problems == []
+
+
+def test_ac3_an_api_code_without_its_text_is_reported(tmp_path):
+    problems = usage(
+        tmp_path,
+        {'server/src/content_studio/api/routes/x.py': "def f():\n    raise ApiError(404, 'sin_texto')\n"},
+        {},
+    )
+
+    assert any('sin_texto' in problem and 'x.py' in problem for problem in problems)
+
+
+def test_ac3_an_api_code_with_its_text_passes(tmp_path):
+    problems = usage(
+        tmp_path,
+        {'server/src/content_studio/api/routes/x.py': "def f():\n    raise ApiError(404, 'job_not_found')\n"},
+        {'error.job_not_found': 'No existe el trabajo.'},
+    )
+
+    assert problems == []
+
+
+def test_ac3_a_code_in_a_validation_result_needs_its_text_too(tmp_path):
+    problems = usage(
+        tmp_path,
+        {'server/src/content_studio/services/x.py': "def validate(p):\n    return {'code': 'otro', 'params': {}}\n"},
+        {},
+    )
+
+    assert any('otro' in problem for problem in problems)
+
+
+def test_ac3_a_dynamic_prefix_without_keys_is_reported(tmp_path):
+    problems = usage(tmp_path, {}, {}, prefixes=['queue.kind.'])
+
+    assert any('queue.kind.' in problem for problem in problems)
+
+
+def test_ac3_the_real_repo_has_no_usage_problems():
+    assert check_usage() == []

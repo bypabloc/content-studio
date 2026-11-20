@@ -1,0 +1,10 @@
+{
+  "dynamicPrefixes": [
+    "error.http.",
+    "lint.rule_",
+    "label.narration.style.",
+    "label.narration.engine.",
+    "label.music.style.",
+    "label.music.model."
+  ]
+}

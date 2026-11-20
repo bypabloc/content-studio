@@ -45,10 +45,11 @@ overrides:
   # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: va por palabra también aquí (spec 007, D-1).
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
-    words: [masterización]
+    words: [masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas]
   # Catálogo en portugués de Brasil (spec 007, D-9): se revisa con su diccionario, como el español.
   - filename: 'server/src/content_studio/messages/pt.json'
     language: en,pt-br
+    words: [celtic, christmas, saas]
   # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
   - filename: 'server/src/content_studio/narration/script_lint.py'
     language: en,es

@@ -6,6 +6,7 @@ cada idioma, orden alfabético y sin valores vacíos. Las claves en uso y los te
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from pathlib import Path
@@ -13,8 +14,10 @@ from pathlib import Path
 from .. import paths
 
 CATALOG_DIR = paths.ROOT / 'server' / 'src' / 'content_studio' / 'messages'
+CONFIG = paths.ROOT / 'tests' / 'validators' / 'i18n.json'
 LOCALES = ('es', 'en', 'pt')
 PLACEHOLDER = re.compile(r'\{(\w+)\}')
+T_CALL = re.compile(r"""\bt\(\s*['"]([\w.]+)['"]""")
 
 
 def _show(path: Path) -> str:
@@ -80,7 +83,104 @@ def check_catalogs(directory: Path = CATALOG_DIR) -> list[str]:
     return problems
 
 
-def run(files: list[Path], catalog_dir: Path = CATALOG_DIR) -> dict:
-    """Etapa `i18n`: falla con cada problema de los catálogos. `files` no cambia el resultado: revisa todo."""
+def client_keys(src: Path) -> dict[str, list[str]]:
+    """Clave literal de `t('…')` en client/src → sus lugares `archivo:línea`. Las claves dinámicas no se ven aquí."""
+    found: dict[str, list[str]] = {}
+    for file in sorted(src.rglob('*')):
+        if file.suffix not in {'.ts', '.tsx'}:
+            continue
+        lines = file.read_text(encoding='utf-8').splitlines()
+        for number, line in enumerate(lines, start=1):
+            for match in T_CALL.finditer(line):
+                found.setdefault(match.group(1), []).append(f'{_show(file)}:{number}')
+    return found
+
+
+def _name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        return node.attr
+    return None
+
+
+def _text(node: ast.expr) -> str | None:
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
+def _code_of(node: ast.Call | ast.Dict) -> str | None:
+    """Código de error: `ApiError(status, 'code', …)` o `{'code': 'code', …}` (la forma de `validate`)."""
+    if isinstance(node, ast.Call):
+        if _name(node.func) != 'ApiError' or len(node.args) < 2:
+            return None
+        return _text(node.args[1])
+    for key, value in zip(node.keys, node.values, strict=False):
+        if isinstance(key, ast.Constant) and key.value == 'code':
+            return _text(value)
+    return None
+
+
+def server_codes(src: Path) -> dict[str, list[str]]:
+    """Código de error del server → sus lugares `archivo:línea` (con ast, sin ejecutar nada)."""
+    found: dict[str, list[str]] = {}
+    for file in sorted(src.rglob('*.py')):
+        for node in ast.walk(ast.parse(file.read_text(encoding='utf-8'))):
+            if not isinstance(node, (ast.Call, ast.Dict)):
+                continue
+            code = _code_of(node)
+            if code is not None:
+                found.setdefault(code, []).append(f'{_show(file)}:{node.lineno}')
+    return found
+
+
+def check_usage(
+    root: Path = paths.ROOT, catalog: dict[str, str] | None = None, config: dict | None = None
+) -> list[str]:
+    """Cada `t('…')` del client y cada código de error del server tiene su clave; ninguna clave sobra.
+
+    Una clave sobra si nadie la usa y no entra en un prefijo dinámico declarado (`dynamicPrefixes`); cada prefijo
+    declarado debe tener al menos una clave.
+    """
+    if catalog is None:
+        catalog = _load_dict(CATALOG_DIR / 'es.json')
+    if config is None:
+        config = load_config(CONFIG)
+    prefixes = config.get('dynamicPrefixes', [])
+    used_by_client = client_keys(root / 'client' / 'src')
+    codes = server_codes(root / 'server' / 'src' / 'content_studio')
+    problems: list[str] = []
+    for key, places in sorted(used_by_client.items()):
+        if key not in catalog:
+            problems.append(f'{places[0]}: t("{key}") has no text in messages/es.json')
+    for code, places in sorted(codes.items()):
+        if f'error.{code}' not in catalog:
+            problems.append(f'{places[0]}: error code "{code}" has no text "error.{code}" in messages/es.json')
+    used = set(used_by_client) | {f'error.{code}' for code in codes}
+    for key in sorted(catalog):
+        if key not in used and not any(key.startswith(prefix) for prefix in prefixes):
+            problems.append(f'messages/es.json: key "{key}" is not used')
+    for prefix in prefixes:
+        if not any(key.startswith(prefix) for key in catalog):
+            problems.append(f'tests/validators/i18n.json: dynamic prefix "{prefix}" has no keys')
+    return problems
+
+
+def _load_dict(path: Path) -> dict[str, str]:
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+def load_config(path: Path = CONFIG) -> dict:
+    """Configuración de la etapa (tests/validators/i18n.json): prefijos dinámicos y lo que sumen los ciclos 7 y 9."""
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+def run(files: list[Path], catalog_dir: Path = CATALOG_DIR, root: Path = paths.ROOT) -> dict:
+    """Etapa `i18n`: catálogos parejos y claves en uso. `files` no cambia el resultado: revisa todo."""
     problems = check_catalogs(catalog_dir)
+    if not problems:
+        catalog = _load_dict(catalog_dir / 'es.json')
+        config = load_config(root / 'tests' / 'validators' / 'i18n.json')
+        problems = check_usage(root, catalog, config)
     return {'stage': 'i18n', 'status': 'fail' if problems else 'pass', 'detail': '\n'.join(problems)}
