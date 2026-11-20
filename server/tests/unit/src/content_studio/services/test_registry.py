@@ -8,6 +8,7 @@ from content_studio.services import (
     narration,
     narration_regenerate,
     storage_move,
+    system_install_tool,
     voice_build,
     voice_check,
 )
@@ -23,6 +24,7 @@ def test_every_kind_exposes_validate_and_build_command():
         'voice.check': voice_check,
         'voice.build': voice_build,
         'storage.move': storage_move,
+        'system.install_tool': system_install_tool,
     }
     assert expected == SERVICES
     for service in SERVICES.values():

@@ -33,6 +33,7 @@ compresslevel
 cosyvoice
 creationflags
 cspell
+cuda
 cumbia
 dbfs
 delenv
@@ -58,7 +59,9 @@ flac
 flatnonzero
 frombuffer
 getpid
+gibibytes
 graphify
+gyan
 heartlib
 heartmula
 higgs
@@ -119,9 +122,11 @@ venvs
 voicestudio
 volumedetect
 voxcpm
+vram
 wavesurfer
 wavlm
 wavs
+winget
 worktrees
 yesid
 geist

@@ -128,6 +128,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * System
+         * @description Detecta el estado actual de ffmpeg, git y GPU.
+         */
+        get: operations["system_system_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/tools/{name}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Install
+         * @description Encola la instalación o indica cómo instalar a mano.
+         */
+        post: operations["install_system_tools__name__install_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics/recording": {
         parameters: {
             query?: never;
@@ -682,12 +722,36 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * BinaryInfo
+         * @description Ruta al ejecutable y versión que informa.
+         */
+        BinaryInfo: {
+            /** Path */
+            path: string;
+            /** Version */
+            version: string;
+        };
+        /**
          * ChooseIn
          * @description Cuerpo de `POST /jobs/{id}/choose`: el archivo de la pista elegida.
          */
         ChooseIn: {
             /** File */
             file: string;
+        };
+        /**
+         * GpuInfo
+         * @description Información que reporta el driver de la GPU.
+         */
+        GpuInfo: {
+            /** Name */
+            name: string;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Driver */
+            driver: string;
+            /** Cuda */
+            cuda: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -931,6 +995,15 @@ export interface components {
             /** Styles */
             styles: components["schemas"]["StyleOut"][];
         };
+        /**
+         * SystemInfo
+         * @description Herramientas y adaptador disponibles.
+         */
+        SystemInfo: {
+            ffmpeg: components["schemas"]["BinaryInfo"] | null;
+            git: components["schemas"]["BinaryInfo"] | null;
+            gpu: components["schemas"]["GpuInfo"] | null;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1139,6 +1212,57 @@ export interface operations {
                 "application/json": components["schemas"]["StorageMove"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    system_system_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemInfo"];
+                };
+            };
+        };
+    };
+    install_system_tools__name__install_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             201: {

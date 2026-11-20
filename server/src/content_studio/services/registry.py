@@ -6,6 +6,7 @@ from content_studio.services import (
     narration,
     narration_regenerate,
     storage_move,
+    system_install_tool,
     voice_build,
     voice_check,
 )
@@ -18,4 +19,5 @@ SERVICES = {
     'voice.check': voice_check,
     'voice.build': voice_build,
     storage_move.KIND: storage_move,
+    system_install_tool.KIND: system_install_tool,
 }

@@ -140,5 +140,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [011-comparar-musica](011-comparar-musica.md) | Comparar y elegir pistas con `tracks.json` (sin generalizar CompareTakes) | `main` |
 | [012-rutas-externas](012-rutas-externas.md) | Prioridad de los motores administrados y respaldo a los externos en desarrollo | `main` |
 | [012-mover-entre-discos](012-mover-entre-discos.md) | Copia verificada, turno exclusivo de traslado y enlaces históricos de salidas | `main` |
+| [012-winget](012-winget.md) | Detectar las herramientas y actualizar el PATH del proceso tras la instalación | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

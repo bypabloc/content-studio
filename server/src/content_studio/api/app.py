@@ -28,6 +28,7 @@ from content_studio.api.routes import (
     queue,
     settings,
     storage,
+    system,
     voices,
     voices_catalog,
     voices_import,
@@ -110,6 +111,7 @@ def create_app(
     app.include_router(catalog.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
     app.include_router(storage.router, dependencies=header_only)
+    app.include_router(system.router, dependencies=header_only)
     app.include_router(diagnostics.router, dependencies=header_only)
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
