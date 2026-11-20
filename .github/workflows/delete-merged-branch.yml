@@ -1,0 +1,22 @@
+# Borra la rama de origen de un PR fusionado (traído de klinikae).
+# Nunca main ni dev (además, el ruleset proteger-main-dev bloquea su borrado), ni ramas de forks.
+# Si `devtools worktree close` ya la borró, el DELETE falla y se ignora.
+name: Delete merged branch
+on:
+  pull_request:
+    types: [closed]
+permissions:
+  contents: write
+jobs:
+  delete:
+    if: >-
+      github.event.pull_request.merged &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !contains(fromJSON('["main","dev"]'), github.event.pull_request.head.ref)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete head branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$HEAD_REF" || echo "Branch already deleted"
