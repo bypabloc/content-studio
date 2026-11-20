@@ -41,6 +41,7 @@ GROUPS = {
         'client-typecheck',
         'client-unit',
         'budget',
+        'i18n',
     ],
 }
 FILE_STAGES = {'lint', 'spelling', 'validators', 'unit'}

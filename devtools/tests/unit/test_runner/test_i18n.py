@@ -7,7 +7,10 @@ import shutil
 from collections.abc import Callable
 from pathlib import Path
 
+from devtools import paths
 from devtools.test_runner.i18n import check_catalogs, check_usage, run
+from devtools.test_runner.main import GROUPS
+from devtools.test_runner.spelling import run as run_spelling
 
 VALID = Path(__file__).resolve().parents[2] / 'fixtures' / 'i18n' / 'catalogs' / 'valid'
 
@@ -187,3 +190,34 @@ def test_ac3_a_dynamic_prefix_without_keys_is_reported(tmp_path):
 
 def test_ac3_the_real_repo_has_no_usage_problems():
     assert check_usage() == []
+
+
+def test_ac6_the_all_group_and_the_pre_commit_run_the_i18n_stage():
+    """`all` y el pre-commit corren la etapa i18n: un texto suelto no llega al commit (spec 007, AC-6)."""
+    hook = (paths.ROOT / '.git-hooks' / 'pre-commit').read_text(encoding='utf-8')
+
+    assert 'i18n' in GROUPS['all']
+    assert 'i18n' in hook.split('--type=')[1].split(' ')[0].split(',')
+
+
+def test_ac10_spelling_fails_on_a_misspelled_english_catalog(tmp_path):
+    """La ortografía falla con una palabra mal escrita en un catálogo en inglés (spec 007, AC-10).
+
+    El archivo se crea en tmp_path: si fuera versionado, el changeset de la etapa lo leería y fallaría el gate.
+    """
+    misspelled = tmp_path / 'en.json'
+    misspelled.write_text('{"a.greeting": "Helllo wrld"}', encoding='utf-8')
+
+    result = run_spelling([misspelled])
+
+    assert result['status'] == 'fail'
+    assert 'Helllo' in result['detail']
+
+
+def test_ac10_spelling_passes_on_the_real_catalogs():
+    catalogs = [
+        paths.ROOT / 'server' / 'src' / 'content_studio' / 'messages' / f'{locale}.json'
+        for locale in ('es', 'en', 'pt')
+    ]
+
+    assert run_spelling(catalogs)['status'] == 'pass'
