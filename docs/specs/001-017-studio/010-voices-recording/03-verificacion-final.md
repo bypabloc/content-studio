@@ -19,7 +19,7 @@
    * Prueba de sala y graba `neutral` con el micrófono real del equipo. La toma se sube, el chequeo corre y aparece el veredicto.
    * `ffprobe` de la toma: 48000 Hz, 1 canal y `s32` o `s24` (AC-3 real). Saca el espectrograma en `tmp/spec-010/take.png`, que revisa `image-reader`: sin el recorte de banda de opus (energía por encima de 16 kHz si el micrófono la capta) ni las compuertas de un noise gate.
    * Importa un tramo de 10 s de un video de `tmp/spec-010/` con la casilla de permiso. Sin la casilla, la UI no deja confirmar.
-   * Construye una voz del catálogo que todavía no esté construida (si las 15 están construidas, `Forzar` sobre una) y comprueba el progreso en la cola.
+   * Build del catálogo (AC-7), por decisión del usuario del 2026-11-20: la verificación se hace en copia, con `tmp/spec-010/verificar-build-en-copia.py nick`. No toca las voces del usuario y ya está hecha (`RESULT nick rejected`, 10 de 12 estilos aprobados). El build real sobre las voces del usuario queda como PENDING `010-construir-voces-reales`.
    * Marca una favorita y comprueba el orden en Narración.
 4. Borra el perfil «Spec 010»: queda en `.trash/` y no se pierde ningún byte. La papelera de prueba se puede borrar porque es dato de la spec.
 5. Capturas de las tres pantallas en claro y en oscuro en `tmp/spec-010/`, que revisa `image-reader`.
