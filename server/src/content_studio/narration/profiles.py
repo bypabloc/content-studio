@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from content_studio import paths
+from content_studio.narration import recording_kit
 
 DEFAULT = 'default'  # las referencias de antes de la 010; move-data (paso 3) les pone el nombre «Mi voz»
 PROFILE_FILE = 'profile.json'
@@ -88,9 +89,36 @@ def rename(profile: str, name: str) -> None:
     _write(profile, {**_read(profile), 'name': name})
 
 
+def name_of(profile: str) -> str:
+    """El nombre visible del perfil; sin profile.json, su carpeta."""
+    return _read(profile).get('name', profile)
+
+
 def styles(profile: str) -> list[str]:
     """Estilos con referencia (`.wav`) en el perfil, en orden alfabético."""
     return sorted(p.stem for p in folder(profile).glob('*.wav'))
+
+
+def takes_dir(profile: str, style: str) -> Path:
+    """Carpeta de las tomas de un estilo en el perfil."""
+    return folder(profile) / 'takes' / style
+
+
+def take_numbers(profile: str, style: str) -> list[int]:
+    """Números de las tomas del estilo, en orden."""
+    return sorted(int(p.stem) for p in takes_dir(profile, style).glob('*.wav') if p.stem.isdigit())
+
+
+def styles_status(profile: str) -> list[dict]:
+    """Cada estilo del kit: si tiene referencia elegida y cuántas tomas tiene."""
+    return [
+        {
+            'style': style,
+            'chosen': reference_for(profile, style).is_file(),
+            'takes': len(take_numbers(profile, style)),
+        }
+        for style in recording_kit.STYLES
+    ]
 
 
 def delete(profile: str, confirm: bool = False) -> None:
@@ -111,7 +139,7 @@ def list_profiles() -> list[dict]:
     if not paths.REFERENCE.is_dir():
         return []
     return [
-        {'id': d.name, 'name': _read(d.name).get('name', d.name), 'styles': styles(d.name)}
+        {'id': d.name, 'name': name_of(d.name), 'styles': styles(d.name)}
         for d in sorted(paths.REFERENCE.iterdir())
         if d.is_dir() and _slug_ok(d.name)
     ]

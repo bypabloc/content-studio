@@ -75,6 +75,19 @@ def test_list_profiles_offers_only_the_styles_each_one_has(refs):
     ]
 
 
+def test_styles_status_says_which_styles_have_a_chosen_reference_and_how_many_takes(refs):
+    slug = profiles.create('Spec 010')
+    (refs / slug / 'expert.wav').write_bytes(b'WAV')
+    (refs / slug / 'takes/expert').mkdir(parents=True)
+    (refs / slug / 'takes/expert/1.wav').write_bytes(b'T1')
+    (refs / slug / 'takes/expert/2.wav').write_bytes(b'T2')
+
+    status = {item['style']: item for item in profiles.styles_status(slug)}
+
+    assert status['expert'] == {'style': 'expert', 'chosen': True, 'takes': 2}
+    assert status['clear'] == {'style': 'clear', 'chosen': False, 'takes': 0}
+
+
 def test_a_name_that_is_not_a_slug_is_not_a_profile(refs):
     assert not profiles.exists('../reference')
     with pytest.raises(ValueError):

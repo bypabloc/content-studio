@@ -16,7 +16,7 @@ from starlette.responses import JSONResponse
 from content_studio import paths
 from content_studio.api import events
 from content_studio.api.errors import ApiError
-from content_studio.api.routes import catalog, files, health, jobs, media, narration, queue, settings
+from content_studio.api.routes import catalog, files, health, jobs, media, narration, queue, settings, voices
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
 from content_studio.messages import negotiate, t
@@ -89,6 +89,7 @@ def create_app(
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
+    app.include_router(voices.router, dependencies=header_only)
     # EventSource y <audio> no mandan headers: estas dos rutas también aceptan ?token=.
     query_ok = [Depends(_token_guard(allow_query=True))]
     app.include_router(events.router, dependencies=query_ok)
