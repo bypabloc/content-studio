@@ -1,4 +1,4 @@
-"""GET /media/info y /media/peaks (spec 006, AC-4): duración, LUFS, pico y picos de un audio de 2 s, con ffmpeg real."""
+"""GET /media/info y /media/peaks (spec 006, AC-4). Algunas pruebas usan ffmpeg falso para correr sin el binario."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ import subprocess
 from pathlib import Path
 
 import pytest
+
+from content_studio.common import ffmpeg
 
 
 @pytest.fixture
@@ -74,3 +76,75 @@ def test_ac4_a_path_outside_the_allowed_folders_is_403(api, endpoint):
     response = api.client.get(endpoint, params={'path': str(secret)}, headers=api.headers)
 
     assert response.status_code == 403
+
+
+@pytest.fixture
+def audio(api, request) -> Path:
+    """Un archivo propio de cada prueba dentro de out/ (la caché de la API va por ruta). No hace falta que suene."""
+    path = api.tmp / 'out' / f'{request.node.name}.wav'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b'RIFF')
+    return path
+
+
+def test_media_info_takes_its_numbers_from_ffmpeg(api, audio, monkeypatch):
+    monkeypatch.setattr(ffmpeg, 'loudness', lambda path: (-16.0, -1.5))
+    monkeypatch.setattr(ffmpeg, 'probe_duration', lambda path: 2.0)
+
+    response = api.client.get('/media/info', params={'path': str(audio)}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.json() == {'duration': 2.0, 'lufs': -16.0, 'true_peak': -1.5}
+
+
+def test_media_info_of_silence_gives_the_peak_floor(api, audio, monkeypatch):
+    monkeypatch.setattr(ffmpeg, 'loudness', lambda path: (-70.0, -120.0))
+    monkeypatch.setattr(ffmpeg, 'probe_duration', lambda path: 2.0)
+
+    response = api.client.get('/media/info', params={'path': str(audio)}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.json()['true_peak'] == -120.0
+
+
+def test_media_info_without_a_loudness_summary_is_422(api, audio, monkeypatch):
+    def no_summary(path):
+        raise ValueError('ffmpeg printed no loudness summary')
+
+    monkeypatch.setattr(ffmpeg, 'loudness', no_summary)
+
+    response = api.client.get('/media/info', params={'path': str(audio)}, headers=api.headers)
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'unreadable_media'
+
+
+def test_media_info_when_ffmpeg_fails_is_422(api, audio, monkeypatch):
+    def broken(path):
+        raise subprocess.CalledProcessError(1, 'ffmpeg')
+
+    monkeypatch.setattr(ffmpeg, 'loudness', broken)
+
+    response = api.client.get('/media/info', params={'path': str(audio)}, headers=api.headers)
+
+    assert response.status_code == 422
+
+
+def test_media_peaks_takes_its_peaks_from_ffmpeg(api, audio, monkeypatch):
+    monkeypatch.setattr(ffmpeg, 'peaks', lambda path, n: [0.5] * n)
+
+    response = api.client.get('/media/peaks', params={'path': str(audio), 'n': 3}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.json() == {'peaks': [0.5, 0.5, 0.5]}
+
+
+def test_media_peaks_when_ffmpeg_fails_is_422(api, audio, monkeypatch):
+    def broken(path, n):
+        raise subprocess.CalledProcessError(1, 'ffmpeg')
+
+    monkeypatch.setattr(ffmpeg, 'peaks', broken)
+
+    response = api.client.get('/media/peaks', params={'path': str(audio), 'n': 3}, headers=api.headers)
+
+    assert response.status_code == 422
