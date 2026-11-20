@@ -1,7 +1,7 @@
 import { Button } from '../../shadcn/button'
 
 import { type IconName, UIIcon } from '../../atoms/UIIcon'
-import { UIBox } from '../../atoms/UIBox'
+import { UIIconButton } from '../UIIconButton'
 
 /** Preferencia de tema: claro, oscuro o la del sistema. */
 export type Theme = 'light' | 'dark' | 'system'
@@ -11,11 +11,8 @@ export function toTheme(value: string | undefined): Theme {
   return value === 'light' || value === 'dark' ? value : 'system'
 }
 
-/** Textos de las opciones de tema (del catálogo i18n). */
-export type ThemeLabels = { light: string; dark: string; system: string }
-
-/** Ícono de cada preferencia de tema. */
-export const THEME_ICONS: Record<Theme, IconName> = { light: 'sun', dark: 'moon', system: 'monitor' }
+/** Ícono de cada preferencia de tema (spec 009, D-2). */
+export const THEME_ICONS: Record<Theme, IconName> = { light: 'theme-light', dark: 'theme-dark', system: 'theme-system' }
 
 const NEXT: Record<Theme, Theme> = { light: 'dark', dark: 'system', system: 'light' }
 
@@ -24,14 +21,16 @@ export function nextTheme(theme: Theme): Theme {
   return NEXT[theme]
 }
 
-type Props = { theme: Theme; onThemeChange: (theme: Theme) => void; labels: ThemeLabels & { toggle: string }; visibleLabel?: string }
+type Props = { theme: Theme; onThemeChange: (theme: Theme) => void; labels: { toggle: string }; visibleLabel?: string }
 
 /**
  * Selector de tema de un solo botón: cada clic pasa a la preferencia
  * siguiente (claro → oscuro → sistema). El ícono muestra la actual;
- * `labels.toggle` lo nombra y la preferencia actual lo describe.
- * `visibleLabel` muestra un texto corto junto al ícono (p. ej. en la barra del
- * portal); el nombre accesible sigue siendo `labels.toggle`.
+ * `labels.toggle` es su nombre accesible y su texto de ayuda. El shell lo arma
+ * con `theme.change`, que dice el modo actual y el siguiente. Sin `visibleLabel`
+ * es un `UIIconButton` (spec 009, D-4); con `visibleLabel` muestra un texto corto
+ * junto al ícono (p. ej. en la barra del portal) y el nombre accesible sigue siendo
+ * `labels.toggle`.
  * Es un componente controlado: el shell lee y guarda la preferencia con
  * `useTheme` (`shared/theme`), así la molécula no depende de la API de settings
  * (spec 008, D-7).
@@ -41,17 +40,19 @@ type Props = { theme: Theme; onThemeChange: (theme: Theme) => void; labels: Them
  * @since 2026/11/19
  */
 export function UIThemeToggle({ theme, onThemeChange, labels, visibleLabel }: Props): React.JSX.Element {
-  return (
-    <Button
-      variant="outline"
-      size={visibleLabel ? 'default' : 'icon'}
-      title={labels[theme]}
-      aria-label={visibleLabel ? labels.toggle : undefined}
-      onClick={() => onThemeChange(nextTheme(theme))}
-      className={visibleLabel ? 'min-h-11 cursor-pointer rounded-xl bg-card px-4 font-bold focus-visible:ui-focus' : 'size-11 cursor-pointer rounded-xl bg-card focus-visible:ui-focus'}
-    >
-      <UIIcon name={THEME_ICONS[theme]} className="size-5" />
-      {visibleLabel ? visibleLabel : <UIBox as="span" className="sr-only">{labels.toggle}</UIBox>}
-    </Button>
-  )
+  const onClick = () => onThemeChange(nextTheme(theme))
+  if (visibleLabel) {
+    return (
+      <Button
+        variant="outline"
+        aria-label={labels.toggle}
+        onClick={onClick}
+        className="min-h-11 cursor-pointer rounded-xl bg-card px-4 font-bold focus-visible:ui-focus"
+      >
+        <UIIcon name={THEME_ICONS[theme]} className="size-5" />
+        {visibleLabel}
+      </Button>
+    )
+  }
+  return <UIIconButton variant="secondary" icon={THEME_ICONS[theme]} label={labels.toggle} onClick={onClick} />
 }

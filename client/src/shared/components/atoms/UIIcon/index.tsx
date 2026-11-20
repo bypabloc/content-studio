@@ -13,6 +13,7 @@ import {
   ChartLine,
   ChartPie,
   ChevronDown,
+  ChevronUp,
   ClipboardList,
   Minus,
   Pause,
@@ -127,6 +128,8 @@ const ICONS = {
   'chart-line': ChartLine,
   'chart-pie': ChartPie,
   'chevron-down': ChevronDown,
+  // Fuera de D-2: colapsar y mostrar la cola (WARNING 009-iconos-cola-tema).
+  'chevron-up': ChevronUp,
   'clipboard-list': ClipboardList,
   minus: Minus,
   table: Table2,

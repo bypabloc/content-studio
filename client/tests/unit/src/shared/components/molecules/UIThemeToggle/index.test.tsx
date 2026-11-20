@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
-import { nextTheme, type Theme, toTheme, UIThemeToggle } from '@/shared/components/molecules/UIThemeToggle'
+import { nextTheme, type Theme, THEME_ICONS, toTheme, UIThemeToggle } from '@/shared/components/molecules/UIThemeToggle'
 
 const LABELS = { toggle: 'Tema', light: 'Claro', dark: 'Oscuro', system: 'Sistema' }
 
@@ -17,19 +17,20 @@ describe('UIThemeToggle [AC-6]', () => {
     render(<UIThemeToggle theme={current} onThemeChange={onThemeChange} labels={LABELS} />)
 
     const button = screen.getByRole('button', { name: 'Tema' })
-    expect(button.getAttribute('title')).toBe(LABELS[current])
     await user.click(button)
 
     expect(onThemeChange).toHaveBeenCalledWith(next)
     expect(screen.queryByRole('menu')).toBeNull()
   })
 
-  it('WHEN a preference is given THEN its icon and its title show it', () => {
+  it('WHEN a preference is given THEN its icon shows it and the tooltip names the toggle (AC-2, AC-4)', async () => {
+    const user = userEvent.setup()
     render(<UIThemeToggle theme="dark" onThemeChange={vi.fn()} labels={LABELS} />)
 
     const button = screen.getByRole('button', { name: 'Tema' })
-    expect(button.getAttribute('title')).toBe('Oscuro')
     expect(button.querySelector('svg')?.getAttribute('class')).toContain('lucide-moon')
+    await user.tab()
+    expect((await screen.findByRole('tooltip')).textContent).toBe('Tema')
   })
 
   it('WHEN a visible label is given THEN it is shown and the button keeps the toggle name', () => {
@@ -37,6 +38,10 @@ describe('UIThemeToggle [AC-6]', () => {
 
     const button = screen.getByRole('button', { name: 'Tema' })
     expect(button.textContent).toContain('Claro')
+  })
+
+  it('WHEN a preference is shown THEN its icon is the theme-* name of spec 009 (AC-2)', () => {
+    expect(THEME_ICONS).toEqual({ light: 'theme-light', dark: 'theme-dark', system: 'theme-system' })
   })
 
   it('WHEN cycling THEN light → dark → system → light', () => {

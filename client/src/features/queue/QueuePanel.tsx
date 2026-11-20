@@ -1,9 +1,9 @@
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
-import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { t } from '@/shared/i18n/t';
 import { reorderAccessibility } from './announce';
 import { JobRow } from './JobRow';
@@ -34,12 +34,17 @@ export function QueuePanel() {
           {t('queue.title')}
         </UIText>
         <UIStack direction="row" gap="sm" className="flex-wrap">
-          <UIButton variant="ghost" onClick={queue.togglePause}>
-            {queue.paused ? t('queue.resume') : t('queue.pause')}
-          </UIButton>
-          <UIButton variant="ghost" aria-expanded={open} onClick={() => setOpen(!open)}>
-            {open ? t('queue.collapse') : t('queue.expand')}
-          </UIButton>
+          <UIIconButton
+            icon={queue.paused ? 'play' : 'pause'}
+            label={queue.paused ? t('action.resume') : t('action.pause')}
+            onClick={queue.togglePause}
+          />
+          <UIIconButton
+            icon={open ? 'chevron-down' : 'chevron-up'}
+            label={open ? t('action.collapse') : t('action.expand')}
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+          />
         </UIStack>
       </UIStack>
       {open ? (

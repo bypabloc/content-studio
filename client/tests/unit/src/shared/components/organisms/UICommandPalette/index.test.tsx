@@ -80,4 +80,11 @@ describe('UICommandPalette', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(onSelect).not.toHaveBeenCalled();
   });
+
+  it('WHEN a section has an icon THEN its option shows it before the label (spec 009, D-5)', () => {
+    render(<UICommandPalette items={[{ id: 'narration', label: 'Narración', icon: 'narration' }]} onSelect={vi.fn()} labels={LABELS} />);
+    open();
+
+    expect(screen.getByRole('option', { name: 'Narración' }).querySelector('svg.lucide-audio-lines')).not.toBeNull();
+  });
 });

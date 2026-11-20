@@ -1,6 +1,5 @@
 {
   "untested": [
-    "client/src/app/nav.ts",
     "client/src/features/queue/JobRow.tsx",
     "client/src/features/queue/useQueue.ts",
     "client/src/shared/hooks/useSetting.ts",

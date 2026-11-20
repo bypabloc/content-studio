@@ -1,11 +1,12 @@
 import { useMemo, useState, type KeyboardEvent } from 'react'
 
 import { UIBox } from '../../atoms/UIBox'
+import { type IconName, UIIcon } from '../../atoms/UIIcon'
 import { Input } from '../../shadcn/input'
 import { useShortcut } from '@/shared/hooks/useShortcut'
 
-/** Una sección a la que se puede ir: `id` es lo que recibe `onSelect`; `label`, lo que se busca y se muestra. */
-export type CommandItem = { id: string; label: string }
+/** Una sección a la que se puede ir: `id` es lo que recibe `onSelect`; `label`, lo que se busca y se muestra; `icon`, el que la precede (spec 009, D-5). */
+export type CommandItem = { id: string; label: string; icon?: IconName }
 
 /** Textos que llegan por props, como en el resto de los organismos (spec 008, D-3). */
 type Labels = { title: string; placeholder: string; empty: string }
@@ -87,8 +88,9 @@ export function UICommandPalette({ items, onSelect, labels }: Props): React.JSX.
                 role="option"
                 aria-selected={index === cursor}
                 onClick={() => choose(item)}
-                className={`cursor-pointer rounded-md px-3 py-2 text-sm ${index === cursor ? 'bg-accent' : ''}`}
+                className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm ${index === cursor ? 'bg-accent' : ''}`}
               >
+                {item.icon ? <UIIcon name={item.icon} className="size-4" /> : null}
                 {item.label}
               </UIBox>
             ))
