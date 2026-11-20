@@ -79,5 +79,5 @@ Un cambio chico de una sola sesión puede hacerse en una rama del checkout princ
 - **Sin atribución de IA** en commits, PRs ni comentarios (nada de `Co-Authored-By: Claude`, "Generated with…", etc.).
 - Antes de confirmar cambios: correr `python -m devtools test-runner --type=all` (lo mismo que `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
 - El cuerpo del PR enlaza las fichas de `docs/process/WARNING/` y `PENDING/` que dejó el cambio, o dice que no dejó ninguna.
-- Commit, push y merge solo cuando el usuario lo pida, o cuando lo pide una spec en ejecución (`execute-spec`).
+- Un cambio pedido llega a `dev` sin preguntar: commit, push, PR y merge al pasar los checks.
 - **Todo merge va a `dev`**, con el cierre de la spec (`worktree close`). **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
