@@ -1,7 +1,8 @@
-# 012: instalar, verificar, reparar y desinstalar Qwen en la app
+# 012: validar la instalación de motores desde la app
 
-- **Qué**: ejecutar AC-10 con una carpeta de datos temporal; registrar duración, LUFS, pico y espectrograma del audio de verificación.
-- **Por qué no se hizo**: T6 implementa el servicio; la corrida real depende de las pantallas y el e2e de T7–T8.
+- **Qué**: completar el flujo de instalación, verificación, reparación y desinstalación de Qwen desde la app; revisar las pantallas en claro y oscuro.
+- **Verificado por CLI**: job 2 instaló Qwen 0.6B en almacenamiento temporal (7,622,684,386 B; descarga HF 2,516,106,051 B); job 4 verificó 1.000 s (-18.27 LUFS, -1.50 dBTP); job 10 reparó sin volver a descargar pesos; job 11 desinstaló Qwen y limpió el almacenamiento temporal. El venv externo conservó ruta y fecha.
+- **Por qué falta**: CUA no conectó para operar la app ni capturar sus pantallas.
 - **Cuándo**: T9, antes de fusionar la spec 012.
-- **Quién**: agente.
-- **Qué la cierra**: informe con ruta temporal, mediciones, reparación sin volver a descargar pesos, desinstalación completa y comprobación de que los motores externos siguen intactos.
+- **Quién**: usuario y agente.
+- **Qué la cierra**: operar el flujo desde la app, revisar las capturas en claro y oscuro, y volver a confirmar el venv externo intacto.

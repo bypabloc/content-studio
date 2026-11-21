@@ -5,6 +5,8 @@ import threading
 from pathlib import Path
 from types import ModuleType, SimpleNamespace
 
+import pytest
+
 from content_studio.engines import steps
 from content_studio.engines.recipes import Recipe
 
@@ -210,6 +212,33 @@ def test_file_bytes_skips_files_removed_during_download(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, 'stat', stat)
 
     assert steps._file_bytes(tmp_path) == 3
+
+
+def test_file_bytes_skips_directories_removed_during_scan(tmp_path, monkeypatch):
+    stable = tmp_path / 'stable.bin'
+    stable.write_bytes(b'123')
+    vanishing = tmp_path / 'vanishing'
+    vanishing.mkdir()
+    original_scandir = steps.os.scandir
+
+    def scandir(folder):
+        if Path(folder) == vanishing:
+            raise FileNotFoundError(folder)
+        return original_scandir(folder)
+
+    monkeypatch.setattr(steps.os, 'scandir', scandir)
+
+    assert steps._file_bytes(tmp_path) == 3
+
+
+def test_file_bytes_propagates_directory_scan_errors(tmp_path, monkeypatch):
+    def scandir(_):
+        raise PermissionError('denied')
+
+    monkeypatch.setattr(steps.os, 'scandir', scandir)
+
+    with pytest.raises(PermissionError, match='denied'):
+        steps._file_bytes(tmp_path)
 
 
 def test_download_uses_local_directory_and_filters_patterns(monkeypatch, tmp_path):

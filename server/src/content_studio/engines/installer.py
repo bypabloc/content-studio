@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sqlite3
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
+from types import TracebackType
 
 from content_studio import paths
 from content_studio.common import process, progress
@@ -26,6 +29,25 @@ class InstallError(ValueError):
         """Conserva el código de error para localizarlo."""
         super().__init__(code)
         self.code = code
+
+
+def _ignore_missing_rmtree_error(
+    _: Callable[..., object],
+    __: str,
+    exc_info: tuple[type[BaseException], BaseException, TracebackType | None],
+) -> None:
+    error = exc_info[1]
+    if not isinstance(error, FileNotFoundError):
+        raise error
+
+
+def _rmtree_missing_ok(path: Path) -> None:
+    """Borra una ruta propia y tolera solo entradas que desaparecen durante el recorrido."""
+    target: Path | str = path
+    if os.name == 'nt':
+        absolute = str(path.resolve())
+        target = '\\\\?\\UNC\\' + absolute[2:] if absolute.startswith('\\\\') else '\\\\?\\' + absolute
+    shutil.rmtree(target, onerror=_ignore_missing_rmtree_error)
 
 
 def read_manifest(home: Path) -> dict:
@@ -66,7 +88,7 @@ def remove_paths(root: Path, engine: str, manifest: dict) -> None:
         raise InstallError('engine_external')
     for path in reversed(allowed):
         if path.relative_to(root).as_posix() in owned and path.exists():
-            shutil.rmtree(path)
+            _rmtree_missing_ok(path)
     cache_parent = root / 'hf'
     if cache_parent.is_dir() and not any(cache_parent.iterdir()):
         cache_parent.rmdir()
@@ -92,7 +114,7 @@ def uninstall(engine: str, root: Path, force: bool = False) -> None:
             raise InstallError('engine_external') from None
         if venv.is_symlink() or relative != recipe.venv:
             raise InstallError('engine_external')
-        shutil.rmtree(target)
+        _rmtree_missing_ok(target)
         return
     remove_paths(root, engine, manifest)
 
@@ -125,7 +147,7 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
         if venv.exists():
             if not venv.resolve().is_relative_to(family) or venv.resolve() != venv:
                 raise InstallError('engine_external')
-            shutil.rmtree(venv)
+            _rmtree_missing_ok(venv)
         for index, step in enumerate(recipe.steps):
             if step['kind'] in ('python', 'venv', 'pip', 'verify'):
                 (markers / f'{recipe.version}-{index}.done').unlink(missing_ok=True)

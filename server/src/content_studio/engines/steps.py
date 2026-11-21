@@ -96,14 +96,22 @@ def execute_step(
         _run([str(python), '-m', __name__, json.dumps(step)], env, home)
 
 
+def _ignore_missing_directory(error: OSError) -> None:
+    """Ignora solo un directorio que desapareció durante el escaneo."""
+    if not isinstance(error, FileNotFoundError):
+        raise error
+
+
 def _file_bytes(folder: Path) -> int:
     total = 0
-    for path in folder.rglob('*'):
-        try:
-            if path.is_file() and not path.is_symlink():
-                total += path.stat().st_size
-        except FileNotFoundError:  # La descarga puede publicar un parcial con rename.
-            continue
+    for root, _, names in os.walk(folder, onerror=_ignore_missing_directory):
+        for name in names:
+            path = Path(root, name)
+            try:
+                if not path.is_symlink():
+                    total += path.stat().st_size
+            except FileNotFoundError:  # Un archivo puede desaparecer mientras se mide.
+                continue
     return total
 
 

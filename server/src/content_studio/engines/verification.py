@@ -102,6 +102,8 @@ def verify_engine(engine: str, output_dir: Path) -> dict:
                 '-y',
                 '-i',
                 str(sources[0]),
+                '-af',
+                'apad=whole_dur=1',
                 '-t',
                 '1',
                 '-c:a',

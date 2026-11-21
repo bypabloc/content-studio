@@ -1,8 +1,10 @@
 """Instalación reanudable sin dependencias remotas, AC-3 y AC-4 de la spec 012."""
 
 import json
+import os
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -214,6 +216,17 @@ def test_repair_rebuilds_the_venv_and_preserves_weights(tmp_path, monkeypatch):
     for index in range(len(recipe.steps)):
         (markers / f'{recipe.version}-{index}.done').touch()
     monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    original_rmtree = installer.shutil.rmtree
+
+    def rmtree(path, onerror=None):
+        if path == venv:
+            if onerror is None:
+                raise FileNotFoundError(path / 'vanished')
+            error = FileNotFoundError(path / 'vanished')
+            onerror(os.unlink, str(path / 'vanished'), (FileNotFoundError, error, None))
+        original_rmtree(path)
+
+    monkeypatch.setattr(installer.shutil, 'rmtree', rmtree)
     called = []
     monkeypatch.setattr(installer, 'execute_step', lambda step, *args: called.append(step['kind']))
 
@@ -223,6 +236,39 @@ def test_repair_rebuilds_the_venv_and_preserves_weights(tmp_path, monkeypatch):
     assert (markers / f'{recipe.version}-2.done').is_file()
     assert not (venv / 'old').exists()
     assert (cache / 'weights').read_bytes() == b'keep'
+
+
+def test_rmtree_propagates_errors_other_than_missing_files(tmp_path, monkeypatch):
+    def rmtree(path, onerror):
+        error = PermissionError('denied')
+        onerror(os.unlink, str(path), (PermissionError, error, None))
+
+    monkeypatch.setattr(installer.shutil, 'rmtree', rmtree)
+
+    with pytest.raises(PermissionError, match='denied'):
+        installer._rmtree_missing_ok(tmp_path)
+
+
+def test_rmtree_handles_a_child_beyond_windows_max_path(tmp_path):
+    filename = 'header_' + 'x' * 40 + '.h'
+    parent_length = len(str(tmp_path.resolve()))
+    target = tmp_path / ('n' * max(1, 220 - parent_length - 1))
+    target.mkdir()
+    absolute_target = str(target.resolve())
+    child_path = absolute_target + '\\' + filename
+    assert len(child_path) > 260
+
+    if os.name == 'nt':
+        if absolute_target.startswith('\\\\'):
+            absolute_target = '\\\\?\\UNC\\' + absolute_target[2:]
+        else:
+            absolute_target = '\\\\?\\' + absolute_target
+        child_path = absolute_target + '\\' + filename
+    Path(child_path).write_bytes(b'header')
+
+    installer._rmtree_missing_ok(target)
+
+    assert not target.exists()
 
 
 def test_repair_rejects_a_venv_that_resolves_outside_its_family(tmp_path, monkeypatch):

@@ -46,6 +46,7 @@ def test_tts_smoke_uses_the_consented_voice_and_trims_to_one_second(tmp_path, mo
     model_command = calls[0]
     assert '--voice' in model_command and model_command[model_command.index('--voice') + 1] == 'yesid'
     assert model_command[model_command.index('--text') + 1] == 'Prueba.'
+    assert calls[1][calls[1].index('-af') + 1] == 'apad=whole_dur=1'
     assert calls[1][calls[1].index('-t') + 1] == '1'
     assert result['ok'] is True
     assert result['duration_s'] == 1.0
