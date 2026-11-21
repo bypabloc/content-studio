@@ -4,7 +4,8 @@ import subprocess
 from pathlib import Path
 
 from content_studio import paths
-from content_studio.engines import recipes
+from content_studio.common import process
+from content_studio.engines import installer, recipes
 
 
 def _verify(monkeypatch, tmp_path, engine, model_fails=False):
@@ -14,8 +15,8 @@ def _verify(monkeypatch, tmp_path, engine, model_fails=False):
     monkeypatch.setattr(paths, 'engines_dir', lambda: root)
     monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
     recipe = recipes.load(engine)
-    venv = root / engine / recipe.family / recipe.venv
-    python = venv / 'Scripts' / 'python.exe'
+    venv = installer.engine_venv(recipe, root)
+    python = process.python_de(venv)
     python.parent.mkdir(parents=True)
     python.touch()
     output = tmp_path / 'job-output'

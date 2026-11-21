@@ -7,7 +7,7 @@ import os
 import re
 import shutil
 import subprocess
-from typing import TypedDict
+from typing import Any, TypedDict
 
 PACKAGES = {'ffmpeg': 'Gyan.FFmpeg', 'git': 'Git.Git'}
 HELP = {'ffmpeg': 'https://ffmpeg.org/download.html', 'git': 'https://git-scm.com/install/'}
@@ -43,14 +43,15 @@ def windows_paths() -> list[str]:
         return []
     import winreg
 
+    registry: Any = winreg
     folders: list[str] = []
     for hive, key in (
-        (winreg.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'),
-        (winreg.HKEY_CURRENT_USER, 'Environment'),
+        (registry.HKEY_LOCAL_MACHINE, r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'),
+        (registry.HKEY_CURRENT_USER, 'Environment'),
     ):
         try:
-            with winreg.OpenKey(hive, key) as registry:
-                raw = winreg.QueryValueEx(registry, 'Path')[0]
+            with registry.OpenKey(hive, key) as handle:
+                raw = registry.QueryValueEx(handle, 'Path')[0]
         except OSError:
             continue
         if isinstance(raw, str):
