@@ -24,8 +24,12 @@ function isBinary(reply: unknown): reply is Binary {
   return typeof reply === 'object' && reply !== null && Buffer.isBuffer((reply as Binary).body);
 }
 
+export function apiFixture<T = Record<string, unknown>>(name: string): T {
+  return JSON.parse(readFileSync(new URL(`../_api/${name}.json`, import.meta.url), 'utf8')) as T;
+}
+
 function fixture(name: string): Record<string, unknown> {
-  return JSON.parse(readFileSync(new URL(`../_api/${name}.json`, import.meta.url), 'utf8')) as Record<string, unknown>;
+  return apiFixture<Record<string, unknown>>(name);
 }
 
 /**
@@ -117,6 +121,9 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
   const store: Record<string, unknown> = { ...settings };
   let paused = false;
   const jobs = fixture('jobs') as unknown as unknown[];
+  const engines = fixture('engines/list') as unknown as unknown[];
+  const system = fixture('system/info');
+  const storage = fixture('storage/paths');
 
   await page.route(`${API}/**`, async (route) => {
     const request = route.request();
@@ -129,6 +136,9 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
     let reply: unknown = {};
     if (custom !== undefined) reply = custom;
     else if (method === 'GET' && pathname === '/jobs') reply = jobs;
+    else if (method === 'GET' && pathname === '/engines') reply = engines;
+    else if (method === 'GET' && pathname === '/system') reply = system;
+    else if (method === 'GET' && pathname === '/storage') reply = storage;
     else if (method === 'GET' && pathname === '/queue') reply = { paused };
     else if (method === 'POST' && pathname === '/queue/pause') reply = { paused: (paused = true) };
     else if (method === 'POST' && pathname === '/queue/resume') reply = { paused: (paused = false) };

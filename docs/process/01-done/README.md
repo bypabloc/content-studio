@@ -8,6 +8,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Música | Música de fondo instrumental por estilo | [music.md](music.md) |
 | Servidor | API local y cola de trabajos, con el CLI `studio` | [server.md](server.md) |
 | Cliente | Ventana de escritorio: shell, cola, tema, selectores y ajustes | [client.md](client.md) |
+| Motores y almacenamiento | Instalación de motores con recetas y carpetas elegibles | [engines.md](engines.md) |
 
 ## Plantilla
 

@@ -9,15 +9,12 @@ server/data/narration/
 ├── docs/
 │   ├── formato-guion.md cómo escribir el texto: pausas, estilo, emoción, gestos, pronunciación
 │   └── scripts/         cómo grabar las referencias de voz: un guion por estilo
-├── reference/                 referencias de voz: <estilo>.wav + <estilo>.txt
+└── reference/           referencias de voz y perfiles locales (gitignoreado)
 │   ├── emotions/        (opcional) clips de emoción para IndexTTS
 │   └── prueba/          referencia de prueba (expert.wav + .txt) mientras no grabes las tuyas
-├── engines/             repos de IndexTTS 2.5 y CosyVoice 3, con su venv y sus pesos (gitignoreado)
-├── .venv-qwen/          venv de Qwen3-TTS        (gitignoreado)
-├── .venv-chatterbox/    venv de Chatterbox V3    (gitignoreado)
-├── .venv-omnivoice/     venv de OmniVoice        (gitignoreado)
-└── .venv-voxcpm/        venv de VoxCPM2          (gitignoreado)
 ```
+
+Los entornos virtuales y los pesos de los motores se guardan en la carpeta de motores elegida en Ajustes > Almacenamiento. Por defecto es `%LOCALAPPDATA%\Content Studio\engines`; ya no viven dentro de `server/data/narration/`.
 
 El código está en `server/src/content_studio/narration/` (ver la arquitectura en [AGENTS.md](../../../AGENTS.md#arquitectura)) y se lanza con `uv run studio narration tts` y `uv run studio narration voices`; `grabar` tiene su propio comando ([§5](#5-grabar-las-referencias)). Cada trabajo sale en `out/narration/<AAAA-MM-DD>-<id>-<slug>/` (gitignoreado) con su `params.json`, y su log va a `logs/jobs/<id>.log`: `studio` no acepta `--output`. Dentro de esa carpeta, cada toma deja un `.wav` y un `.json` con sus metadatos.
 
@@ -67,52 +64,17 @@ Los gestos y las emociones de cada motor se traducen por motor (`texto/traducir.
 
 ## 2. Instalación
 
-Cada motor necesita su propio venv porque fijan versiones de `transformers` y de `torch` incompatibles entre sí. Qwen, Chatterbox, OmniVoice y VoxCPM2 viven en `server/data/narration/.venv-*`; IndexTTS 2.5 y CosyVoice 3 son repos clonados en `server/data/narration/engines/`, cada uno con su `.venv`. Chatterbox se instala desde GitHub porque la versión de PyPI (0.1.7) no trae V3.
+Instala los motores desde **Motores** en la app o con el CLI. Cada receta crea un entorno aislado y fija sus paquetes, versiones y revisiones del modelo. La aplicación guarda los venvs y los pesos en la carpeta configurada para motores; puedes cambiarla en Ajustes > Almacenamiento.
 
-```bash
-# Qwen3-TTS y Chatterbox V3. torch 2.15 da segfault en esta WSL: fijar 2.14.1 (Chatterbox fija el suyo)
-uv venv -p 3.12 server/data/narration/.venv-qwen
-VIRTUAL_ENV=server/data/narration/.venv-qwen uv pip install qwen-tts soundfile "torch==2.14.1" "torchaudio==2.11.1"
-
-uv venv -p 3.12 server/data/narration/.venv-chatterbox
-VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install soundfile \
-  "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
-
-# OmniVoice y VoxCPM2 (pip). torch 2.15 da segfault en esta WSL: fijar 2.14.1
-uv venv -p 3.12 server/data/narration/.venv-omnivoice
-VIRTUAL_ENV=server/data/narration/.venv-omnivoice uv pip install omnivoice soundfile "torch==2.14.1" "torchaudio==2.11.1"
-uv venv -p 3.12 server/data/narration/.venv-voxcpm
-VIRTUAL_ENV=server/data/narration/.venv-voxcpm uv pip install voxcpm soundfile "torch==2.14.1" "torchaudio==2.11.1"
-
-# IndexTTS 2.5 (repo)
-git clone --depth 1 https://github.com/index-tts/index-tts server/data/narration/engines/index-tts
-(cd server/data/narration/engines/index-tts && uv sync --python 3.11 --extra webui \
-  && uv tool run --from 'huggingface_hub[cli]' hf download IndexTeam/IndexTTS-2.5 --local-dir=checkpoints)
-
-# CosyVoice 3 (repo): quitar deps de TRT/deepspeed/whisper fijado/gradio; setuptools<80; sin wetext
-git clone --depth 1 --recursive https://github.com/FunAudioLLM/CosyVoice server/data/narration/engines/CosyVoice
-cd server/data/narration/engines/CosyVoice && uv venv -p 3.10 .venv
-grep -v -i -E '^(torch|torchaudio|deepspeed|tensorrt|onnxruntime-gpu|--extra-index-url|openai-whisper|gradio)' requirements.txt > req-social-videos.txt
-VIRTUAL_ENV=.venv uv pip install "torch==2.14.1" "torchaudio==2.11.1" -r req-social-videos.txt onnxruntime openai-whisper huggingface_hub "setuptools<80"
-VIRTUAL_ENV=.venv uv pip uninstall wetext
-.venv/bin/python -c "from huggingface_hub import snapshot_download; snapshot_download('FunAudioLLM/Fun-CosyVoice3-0.5B-2512', local_dir='pretrained_models/Fun-CosyVoice3-0.5B', ignore_patterns=['llm.rl.pt','*.fp32.onnx','*.batch.onnx'])"
-cd ../../..
-
-# Cada venv necesita numpy y soundfile (los importa content_studio.narration)
-server/data/narration/engines/CosyVoice/.venv/bin/python -c "import numpy, soundfile"
+```powershell
+uv run studio engines list
+uv run studio engines install qwen-0.6b
+uv run studio engines verify qwen-0.6b
+uv run studio engines repair qwen-0.6b
+uv run studio engines uninstall qwen-0.6b
 ```
 
-**En Windows**, torch con CUDA no viene de PyPI. Qwen se instala con `--torch-backend=cu128`. Chatterbox fija `torch==2.6.0`, que solo existe para cu126, así que va primero:
-
-```bash
-VIRTUAL_ENV=server/data/narration/.venv-qwen uv pip install --torch-backend=cu128 qwen-tts soundfile
-VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126
-VIRTUAL_ENV=server/data/narration/.venv-chatterbox uv pip install soundfile "chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox"
-```
-
-Los pesos de Qwen, Chatterbox, OmniVoice y VoxCPM2 se bajan solos a `~/.cache/huggingface` la primera vez (Qwen 1.7B ≈ 4 GB, 0.6B ≈ 2 GB). IndexTTS y CosyVoice guardan sus pesos dentro de su repo (`checkpoints/` y `pretrained_models/`). También se necesita `ffmpeg` en el PATH, y `whisper` para `--evaluate`.
-
-Si mueves un repo de `engines/`, recrea su `.venv`: un venv movido deja de funcionar (sus scripts apuntan a rutas absolutas). Los pesos sí se mueven sin problema.
+Las recetas versionadas están en `server/src/content_studio/engines/recipes/`. El instalador descarga los pesos bajo demanda y reanuda los pasos incompletos. En Windows, si falta Git o FFmpeg, la app puede ofrecer instalarlos con winget. Para consultar los identificadores admitidos, ejecuta `uv run studio engines list`.
 
 ---
 

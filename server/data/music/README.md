@@ -228,42 +228,15 @@ Detalles operativos:
 
 ## Instalación (desde cero)
 
-Requisitos: `uv`, `git`, `ffmpeg` y una GPU NVIDIA. Los modelos y los venvs quedan dentro de `server/data/music/`; `models/` y `.venv-*` están gitignoreados.
+Instala ACE-Step o HeartMuLa desde **Motores** en la app o con el CLI. Las recetas fijan los paquetes y versiones; los entornos virtuales, repositorios y pesos se guardan en la carpeta elegida en Ajustes > Almacenamiento. Por defecto es `%LOCALAPPDATA%\Content Studio\engines`.
 
-```bash
-cd music
-git clone --depth 1 https://github.com/ACE-Step/ACE-Step-1.5.git models/ACE-Step-1.5
-git clone --depth 1 https://github.com/HeartMuLa/heartlib.git models/heartlib
-
-# ACE-Step (Python 3.12, torch 2.10 cu128)
-(cd models/ACE-Step-1.5 && UV_PROJECT_ENVIRONMENT=../../.venv-acestep uv sync)
-
-# HeartMuLa (Python 3.10). En Linux se resuelve datasets 2.14, que usa pa.PyExtensionType: pyarrow<21
-uv venv -p 3.10 .venv-heartmula && VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib "pyarrow<21"
+```powershell
+uv run studio engines list
+uv run studio engines install acestep
+uv run studio engines verify acestep
 ```
 
-Los pesos se descargan solos en la primera corrida:
-- ACE-Step → `models/ACE-Step-1.5/checkpoints/` (DiT turbo, VAE, Qwen3-Embedding, LMs).
-- HeartMuLa → `models/heartmula-ckpt/` (HeartMuLaGen, HeartMuLa-oss-3B-happy-new-year, HeartCodec-oss-20260123).
-
-Si se corta la descarga, vuelve a correr el script: reanuda donde quedó.
-
-Para `--evaluate`, demucs en el venv de ACE-Step (sin dependencias, para no cambiar torch):
-
-```bash
-VIRTUAL_ENV=.venv-acestep uv pip install --no-deps demucs
-VIRTUAL_ENV=.venv-acestep uv pip install julius einops lameenc openunmix dora-search
-```
-
-**En Windows** (PowerShell o Git Bash) los comandos son los mismos, salvo HeartMuLa: primero torch con CUDA desde el índice de PyTorch, porque desde PyPI llega la versión que solo usa CPU (y `--torch-backend` no sirve: busca `torchtune` solo en ese índice).
-
-```bash
-uv venv -p 3.10 .venv-heartmula
-VIRTUAL_ENV=.venv-heartmula uv pip install torch==2.10.0 torchaudio==2.10.0 torchvision==0.25.0 --index-url https://download.pytorch.org/whl/cu128
-VIRTUAL_ENV=.venv-heartmula uv pip install -e models/heartlib
-```
-
-Los venvs no se pueden mover de carpeta, porque guardan rutas absolutas. Si mueves `server/data/music/`, borra los `.venv-*` y vuelve a crearlos con los comandos de arriba (con la caché de uv tarda poco).
+Las recetas de ambos motores están en `server/src/content_studio/engines/recipes/`. El instalador coloca los pesos bajo demanda y reanuda los pasos incompletos. En Windows, la app puede ofrecer instalar Git o FFmpeg con winget si no los detecta.
 
 ## Estructura
 
@@ -272,9 +245,6 @@ server/data/music/
 ├── README.md          # este archivo
 ├── INVESTIGACION.md   # modelos evaluados, descartes y fuentes
 ├── ESTILOS.md         # catálogo de presets
-├── models/            # repos clonados y pesos (gitignoreado)
-├── .venv-acestep/     # gitignoreado
-└── .venv-heartmula/   # gitignoreado
 ```
 
 El código está en `server/src/content_studio/music/` (parser, music_main, styles, evaluation y `engines/`), y el servicio de la cola en `server/src/content_studio/services/music.py`. Se lanza con `uv run studio music ...` o, directo, `PYTHONPATH=server/src python -m content_studio.music.music_main ...`. Las salidas van a `out/music/` y los logs a `logs/jobs/`, ambos en la raíz del repo y gitignoreados.

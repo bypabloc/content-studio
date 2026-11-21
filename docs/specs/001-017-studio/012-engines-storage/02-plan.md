@@ -80,8 +80,8 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Ningún test unit
 | T4 | Recetas | AC-2 | — | `unit` | [x] |
 | T5 | Instalador y desinstalar | AC-3, AC-4, AC-5 | T1, T4 | `unit` | [x] |
 | T6 | Verificar y CLI | — | T5 | `unit` | [x] |
-| T7 | Pantallas | AC-8, AC-9 | T2, T3, T5, T6 | `client-unit` | [ ] |
-| T8 | e2e y docs | AC-8 | T7 | `e2e`, `rules` | [ ] |
+| T7 | Pantallas | AC-8, AC-9 | T2, T3, T5, T6 | `client-unit` | [x] |
+| T8 | e2e y docs | AC-8 | T7 | `e2e`, `rules` | [x] |
 | T9 | Instalación real | AC-10 | T8 | verificación final | [ ] |
 
 ## 4. Commits

@@ -1,6 +1,8 @@
 # content-studio
 
-Audio local para videos, en una RTX 4060 Laptop (8 GB) con Windows 11 (nada se corre en WSL). Hay dos herramientas independientes. El código de las dos vive en `server/src/content_studio/`; sus carpetas (`server/data/narration/`, `server/data/music/`) guardan solo datos: docs, voces, catálogo, venvs y modelos.
+Audio local para videos en Windows 11 con una RTX 4060 Laptop de 8 GB; nada se corre en WSL. Hay dos herramientas independientes.
+El código vive en `server/src/content_studio/`. Sus carpetas de datos guardan docs, voces, catálogos y referencias.
+Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en Ajustes > Almacenamiento.
 
 | Carpeta | Qué genera | Código | Documentación |
 | :--- | :--- | :--- | :--- |
@@ -26,13 +28,13 @@ uv run studio jobs list --kind music         # también: jobs cancel ID y jobs r
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).
 
-`studio` es el script de `server/pyproject.toml`. Los motores se relanzan solos en el venv de cada uno (`common/process.py`); los módulos directos siguen con `PYTHONPATH=server/src python -m content_studio.narration.tts ...`.
+`studio` es el script de `server/pyproject.toml`. Los motores se relanzan solos en el venv de cada uno (`common/process.py`); `studio engines` lista, instala, verifica, repara y desinstala motores. Las recetas fijan paquetes, versiones y revisiones. Los módulos directos siguen con `PYTHONPATH=server/src python -m content_studio.narration.tts ...`.
 
 ## Arquitectura
 
 ```
 server/src/content_studio/
-├── paths.py                  ROOT, OUT, LOGS, NARRATION, MUSIC, REFERENCE, VOICES…
+├── paths.py                  ROOT, data_dir(), engines_dir(), outputs_dir(), db_path()…
 ├── messages.py               catálogo de textos (messages/{es,en,pt}.json) e idioma de Accept-Language
 ├── common/                   process (relaunch en un venv, use_venv), ffmpeg, files
 ├── cli/                      argparse de `studio`: main (subcomandos), submit (encola), serve (API y worker)
@@ -44,13 +46,16 @@ server/src/content_studio/
 │   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES
 │   ├── text/ evaluation/     segments y translate por motor; compare y review (whisper)
 │   └── voices/               catálogo de voces libres: catalog, sources, build, main
-└── music/                    parser (liviano), music_main (main), styles, evaluation
+├── music/                    parser (liviano), music_main (main), styles, evaluation
     └── engines/              MusicSpec + MusicEngine y registry.py con MODELS
+├── engines/                  recetas versionadas, instalación y mantenimiento de venvs/modelos
+├── storage/                  reubicación segura de motores y salidas
+└── system/                   detección e instalación de FFmpeg/Git y detección de GPU
 ```
 
 Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch, numpy y los motores se importan dentro de las funciones, así `--help` no necesita sus venvs.
 
-- **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py` (venv, módulo, clase, licencia) y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
+- **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py`, una receta fijada en `server/src/content_studio/engines/recipes/` y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
 - **Agregar un servicio** (un tipo de trabajo): un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES`. La API y `studio` lo usan solos.
 - **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
@@ -98,4 +103,9 @@ python -m devtools test-runner --type=e2e   # Playwright sobre la app construida
 
 ## Requisitos
 
-`ffmpeg`, `uv`, `bun` (para el client), Rust con `cargo` (para la app de Tauri en `client/src-tauri`) y GPU NVIDIA. La instalación de cada herramienta está en su README. Para los agentes, una vez por clon: `git config core.hooksPath .git-hooks` y `uv tool install graphifyy && graphify update .` (skill `graphify-ops`).
+`uv`, `bun` (para el client) y Rust con `cargo` (para Tauri) son requisitos de desarrollo.
+FFmpeg y Git se detectan en el PATH; en Windows, la app puede ofrecer instalarlos con winget.
+Los motores que requieren GPU necesitan una NVIDIA compatible; los motores aptos para CPU siguen disponibles sin ella.
+Los venvs y modelos usan `%LOCALAPPDATA%\Content Studio\engines` por defecto en Windows.
+La ruta se puede cambiar desde Ajustes > Almacenamiento.
+Para los agentes, una vez por clon: `git config core.hooksPath .git-hooks` y `uv tool install graphifyy && graphify update .` (skill `graphify-ops`).
