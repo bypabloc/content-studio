@@ -41,7 +41,7 @@ class EngineSpec:
 
     def path_venv(self) -> Path:
         """Carpeta del venv administrado o externo del motor."""
-        return paths.engine_root('narration', self.venv) / self.venv
+        return paths.engine_root('narration', self.venv, self.name) / self.venv
 
     def installed(self) -> bool:
         """True si el venv del motor existe."""

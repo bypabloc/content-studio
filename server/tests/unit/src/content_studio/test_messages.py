@@ -58,3 +58,14 @@ def test_ac3_every_registry_id_has_a_label():
         *(f'label.music.model.{name}' for name in MUSIC_MODELS),
     ]
     assert [key for key in keys if messages.t(key) == key] == []
+
+
+def test_engine_install_errors_are_translated_in_all_server_catalogs():
+    """Los errores de instalación y propiedad tienen mensajes propios en los tres idiomas."""
+    from content_studio.engines import installer
+
+    codes = [*installer.EXIT_CODES, 'invalid_engine_action']
+    for code in codes:
+        translations = [messages.t(f'error.{code}', locale, model='motor') for locale in messages.LOCALES]
+        assert all(value != f'error.{code}' for value in translations)
+        assert len(set(translations)) == len(messages.LOCALES)

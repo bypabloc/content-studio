@@ -84,12 +84,15 @@ def models_cache() -> Path:
     return engines_dir() / 'hf'
 
 
-def engine_root(kind: str, venv: str) -> Path:
+def engine_root(kind: str, venv: str, engine: str, storage: Path | None = None) -> Path:
     """Usa la instalación administrada o conserva el venv externo del checkout en desarrollo."""
-    managed = engines_dir() / kind
-    if os.environ.get('CONTENT_STUDIO_MODE') == 'installed' or (managed / venv).is_dir():
+    base = (engines_dir() if storage is None else storage) / engine
+    managed = base / kind
+    if os.environ.get('CONTENT_STUDIO_MODE') == 'installed' or (
+        (managed / venv).is_dir() and not (base / 'installing.json').exists()
+    ):
         return managed
-    return NARRATION if kind == 'narration' else MUSIC
+    return {'narration': NARRATION, 'music': MUSIC}.get(kind, managed)
 
 
 def references_dir() -> Path:

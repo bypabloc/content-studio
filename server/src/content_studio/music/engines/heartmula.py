@@ -41,7 +41,7 @@ class HeartMuLa(MusicEngine):
         # heartlib usa torch.compile, que necesita triton (no existe en Windows) y falla recién al generar.
         if importlib.util.find_spec('triton') is None:
             torch._dynamo.config.disable = True
-        checkpoints = paths.engine_root('music', self.spec.venv) / 'models' / 'heartmula-ckpt'
+        checkpoints = paths.engine_root('music', self.spec.venv, self.spec.name) / 'models' / 'heartmula-ckpt'
         download(checkpoints)
         # lazy_load: carga HeartMuLa, la descarga y recién ahí carga el codec (pico ~6 GB).
         pipe = HeartMuLaGenPipeline.from_pretrained(

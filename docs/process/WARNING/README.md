@@ -142,5 +142,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [012-mover-entre-discos](012-mover-entre-discos.md) | Copia verificada, turno exclusivo de traslado y enlaces históricos de salidas | `main` |
 | [012-winget](012-winget.md) | Detectar las herramientas y actualizar el PATH del proceso tras la instalación | `main` |
 | [012-recetas](012-recetas.md) | Versiones de paquetes, commits y revisiones de pesos fijados a partir de la instalación de Windows | `main` |
+| [012-desinstalacion-externa](012-desinstalacion-externa.md) | `force` elimina solo el venv externo conocido y conserva cachés y datos ajenos | `main` |
+| [012-error-disk-full](012-error-disk-full.md) | `disk_full` se localiza como error asíncrono del trabajo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

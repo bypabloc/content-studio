@@ -64,7 +64,9 @@ def claim(conn: sqlite3.Connection, job_id: int) -> bool:
     cursor = conn.execute(
         "UPDATE jobs SET status = 'running', started_at = ?, owner_pid = ? WHERE id = ? AND status = 'queued' "
         "AND NOT EXISTS (SELECT 1 FROM jobs AS active WHERE active.status = 'running' "
-        'AND (active.kind = ? OR jobs.kind = ?))',
+        "AND (active.kind = ? OR jobs.kind = ? OR ((active.kind LIKE 'engine.%' OR jobs.kind LIKE 'engine.%') "
+        "AND COALESCE(json_extract(active.params, '$.engine'), json_extract(active.params, '$.model')) = "
+        "COALESCE(json_extract(jobs.params, '$.engine'), json_extract(jobs.params, '$.model')))))",
         (utc_now(), os.getpid(), job_id, STORAGE_MOVE, STORAGE_MOVE),
     )
     return cursor.rowcount == 1

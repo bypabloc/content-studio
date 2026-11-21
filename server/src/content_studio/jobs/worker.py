@@ -202,11 +202,12 @@ class Worker:
         if code == 0:
             jobs.update(conn, job['id'], status='done', finished_at=utc_now())
         else:
+            errors = getattr(self.services[job['kind']], 'ERROR_CODES', {})
             jobs.update(
                 conn,
                 job['id'],
                 status='error',
-                error_code='process_failed',
+                error_code=errors.get(code, 'process_failed'),
                 error_detail=detail or f'exit {code}',
                 finished_at=utc_now(),
             )

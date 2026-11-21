@@ -61,7 +61,7 @@ class CosyVoice(TTSEngine):
         """Genera el audio de los bloques con CosyVoice."""
         import torch
 
-        root = paths.engine_root('narration', self.spec.venv)
+        root = paths.engine_root('narration', self.spec.venv, self.spec.name)
         assert self.spec.code is not None
         model = load(root / self.spec.code, root / self.spec.repo)
         audios = []

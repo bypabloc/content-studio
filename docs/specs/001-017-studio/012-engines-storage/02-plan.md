@@ -74,11 +74,11 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Ningún test unit
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Rutas dinámicas | AC-1 | — | `unit` | [ ] |
-| T2 | Reubicación | AC-7 | T1 | `unit` | [ ] |
-| T3 | Herramientas del sistema | AC-6 | — | `unit` | [ ] |
-| T4 | Recetas | AC-2 | — | `unit` | [ ] |
-| T5 | Instalador y desinstalar | AC-3, AC-4, AC-5 | T1, T4 | `unit` | [ ] |
+| T1 | Rutas dinámicas | AC-1 | — | `unit` | [x] |
+| T2 | Reubicación | AC-7 | T1 | `unit` | [x] |
+| T3 | Herramientas del sistema | AC-6 | — | `unit` | [x] |
+| T4 | Recetas | AC-2 | — | `unit` | [x] |
+| T5 | Instalador y desinstalar | AC-3, AC-4, AC-5 | T1, T4 | `unit` | [x] |
 | T6 | Verificar y CLI | — | T5 | `unit` | [ ] |
 | T7 | Pantallas | AC-8, AC-9 | T2, T3, T5, T6 | `client-unit` | [ ] |
 | T8 | e2e y docs | AC-8 | T7 | `e2e`, `rules` | [ ] |

@@ -64,7 +64,7 @@ def test_ac1_managed_venv_has_priority_over_external_venv(monkeypatch, tmp_path)
     (external / engine.venv).mkdir(parents=True)
     assert engine.path_venv() == external / engine.venv
 
-    managed = home / 'engines/narration' / engine.venv
+    managed = home / 'engines' / engine.name / 'narration' / engine.venv
     managed.mkdir(parents=True)
     assert engine.path_venv() == managed
 

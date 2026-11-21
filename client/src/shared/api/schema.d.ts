@@ -168,6 +168,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Engines
+         * @description Lista las recetas con la propiedad y el estado actual de cada motor.
+         */
+        get: operations["engines_engines_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines/{name}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Install
+         * @description Encola una instalación o una reparación de la app.
+         */
+        post: operations["install_engines__name__install_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines/{name}/uninstall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Uninstall
+         * @description Encola un borrado de archivos administrados por la app.
+         */
+        post: operations["uninstall_engines__name__uninstall_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics/recording": {
         parameters: {
             query?: never;
@@ -740,6 +800,38 @@ export interface components {
             file: string;
         };
         /**
+         * EngineInfo
+         * @description Estado, requisitos y metadatos de un motor.
+         */
+        EngineInfo: {
+            /** Engine */
+            engine: string;
+            /** Family */
+            family: string;
+            /** Size Gb */
+            size_gb: number;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Cpu */
+            cpu: boolean;
+            /** License */
+            license: string;
+            /** Commercial */
+            commercial: boolean;
+            /** Status */
+            status: string;
+            /** Owner */
+            owner: string | null;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Job Id */
+            job_id: number | null;
+            /** Verification */
+            verification: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
          * GpuInfo
          * @description Información que reporta el driver de la GPU.
          */
@@ -1256,6 +1348,92 @@ export interface operations {
     install_system_tools__name__install_post: {
         parameters: {
             query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    engines_engines_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngineInfo"][];
+                };
+            };
+        };
+    };
+    install_engines__name__install_post: {
+        parameters: {
+            query?: {
+                repair?: boolean;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    uninstall_engines__name__uninstall_post: {
+        parameters: {
+            query?: {
+                force?: boolean;
+            };
             header?: never;
             path: {
                 name: string;

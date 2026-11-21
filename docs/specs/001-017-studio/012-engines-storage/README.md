@@ -28,9 +28,9 @@ Que el estudio pueda instalar, verificar, reparar y desinstalar cada motor desde
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Rutas dinámicas: carpeta de datos y almacenamiento, con la reubicación en el server | PEN |
-| 2 | Herramientas del sistema: ffmpeg, git y GPU (detectar e instalar) | PEN |
-| 3 | Recetas y ejecutor: instalar, verificar, reparar y desinstalar como trabajos | PEN |
+| 1 | Rutas dinámicas: carpeta de datos y almacenamiento, con la reubicación en el server | DON |
+| 2 | Herramientas del sistema: ffmpeg, git y GPU (detectar e instalar) | DON |
+| 3 | Recetas y ejecutor: instalar, verificar, reparar y desinstalar como trabajos | IMP |
 | 4 | Client: Motores, Ajustes > Almacenamiento y bienvenida | PEN |
 
 ## Decisiones clave
@@ -44,5 +44,5 @@ Que el estudio pueda instalar, verificar, reparar y desinstalar cada motor desde
 
 ## WARNING y PENDING
 
-* WARNING: `012-recetas.md` (versiones fijadas y commits de los repos), `012-winget.md` y `012-mover-entre-discos.md`.
+* WARNING: `012-recetas.md` (versiones fijadas y commits de los repos), `012-winget.md`, `012-mover-entre-discos.md`, `012-desinstalacion-externa.md` y `012-error-disk-full.md`.
 * PENDING: ninguna.

@@ -47,8 +47,10 @@ def use_venv(venv: Path, readme: str, module: str | None = None, script: str | N
     """Relanza este proceso con el python de `venv`, si no se está corriendo ya en él: `-m modulo` o `script`,
     con los mismos argumentos. `readme` es el que explica la instalación, para el error si falta el venv."""
     resolved = venv.resolve()
-    if resolved.is_relative_to(paths.engines_dir().resolve()):
-        os.environ['HF_HOME'] = str(paths.models_cache())
+    storage = paths.engines_dir().resolve()
+    if resolved.is_relative_to(storage):
+        engine = resolved.relative_to(storage).parts[0]
+        os.environ['HF_HOME'] = str(paths.models_cache() / engine)
     if Path(sys.prefix).resolve() == resolved:
         return
     py = python_de(venv)

@@ -28,7 +28,7 @@ class MusicSpec:
 
     def path_venv(self) -> Path:
         """Carpeta del venv administrado o externo del motor."""
-        return paths.engine_root('music', self.venv) / self.venv
+        return paths.engine_root('music', self.venv, self.name) / self.venv
 
     def installed(self) -> bool:
         """True si el venv del motor existe."""

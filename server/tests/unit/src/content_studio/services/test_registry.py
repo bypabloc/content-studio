@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from content_studio.services import (
+    engine_install,
+    engine_uninstall,
     music,
     music_samples,
     narration,
@@ -25,6 +27,8 @@ def test_every_kind_exposes_validate_and_build_command():
         'voice.build': voice_build,
         'storage.move': storage_move,
         'system.install_tool': system_install_tool,
+        'engine.install': engine_install,
+        'engine.uninstall': engine_uninstall,
     }
     assert expected == SERVICES
     for service in SERVICES.values():

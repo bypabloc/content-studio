@@ -1,6 +1,8 @@
 """Servicios por tipo de trabajo: la API, el worker y el CLI usan los mismos (spec 004, D-2)."""
 
 from content_studio.services import (
+    engine_install,
+    engine_uninstall,
     music,
     music_samples,
     narration,
@@ -20,4 +22,6 @@ SERVICES = {
     'voice.build': voice_build,
     storage_move.KIND: storage_move,
     system_install_tool.KIND: system_install_tool,
+    engine_install.KIND: engine_install,
+    engine_uninstall.KIND: engine_uninstall,
 }
