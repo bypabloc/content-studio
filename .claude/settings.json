@@ -152,9 +152,5 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "session-handoff@bypabloc": true,
-    "synapse@bypabloc": true
-  },
   "autoCompactEnabled": true
 }
