@@ -153,8 +153,8 @@
     ]
   },
   "enabledPlugins": {
-    "session-handoff@bypabloc": true,
-    "synapse@bypabloc": true
+    "synapse@bypabloc-agents": true,
+    "session-handoff@bypabloc-agents": true
   },
   "autoCompactEnabled": true
 }
