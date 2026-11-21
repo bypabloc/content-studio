@@ -1,4 +1,4 @@
-import catalog from '@messages/es.json';
+import type catalog from '@messages/es.json';
 import { CATALOGS } from './catalogs';
 import { getLocale } from './locale';
 
@@ -22,7 +22,7 @@ export function label(kind: LabelKind, id: string): string {
  * sin texto en ninguno, devuelve la clave tal cual para que se note en pantalla.
  */
 export function t(key: MessageKey, params: Record<string, string | number> = {}): string {
-  const template: string | undefined = CATALOGS[getLocale()][key] ?? CATALOGS.es[key];
+  const template: string | undefined = CATALOGS[getLocale()]?.[key] ?? CATALOGS.es[key];
   if (template === undefined) return key;
   return template.replace(/\{(\w+)\}/g, (match, name: string) => String(params[name] ?? match));
 }

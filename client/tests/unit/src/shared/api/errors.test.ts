@@ -3,10 +3,10 @@ import { ApiError } from '@/shared/api/errors';
 import { setLocale } from '@/shared/i18n/locale';
 
 describe('ApiError', () => {
-  beforeEach(() => setLocale('es'));
+  beforeEach(async () => setLocale('es'));
 
-  it('muestra el texto de su código en el idioma activo', () => {
-    setLocale('en');
+  it('muestra el texto de su código en el idioma activo', async () => {
+    await setLocale('en');
 
     const error = new ApiError(404, { code: 'job_not_found', params: { job_id: 3 }, message: 'No existe el trabajo 3' });
 

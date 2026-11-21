@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { LOCALES, type Locale } from './catalogs';
+import { loadCatalog, LOCALES, type Locale } from './catalogs';
 
 /** `system` sigue la lista de idiomas del sistema; las demás fijan el idioma. */
 export type LanguagePreference = 'system' | Locale;
@@ -30,6 +30,9 @@ export function resolveLocale(preference: LanguagePreference, languages: readonl
 }
 
 let active: Locale = resolveLocale(readCachedLanguage(), navigator.languages);
+let changeId = 0;
+/** Carga el idioma de la caché antes de que main.tsx pinte la primera vista. */
+export const localeReady = loadCatalog(active);
 const listeners = new Set<() => void>();
 
 // Al cargar el módulo, <html lang> ya dice el idioma de la caché.
@@ -47,8 +50,12 @@ export function subscribe(listener: () => void): () => void {
 }
 
 /** Cambia el idioma: `<html lang>` lo sigue, la elección queda en caché y las vistas se vuelven a pintar. */
-export function setLocale(preference: LanguagePreference): void {
-  active = resolveLocale(preference, navigator.languages);
+export async function setLocale(preference: LanguagePreference): Promise<void> {
+  const target = resolveLocale(preference, navigator.languages);
+  const request = ++changeId;
+  await loadCatalog(target);
+  if (request !== changeId) return;
+  active = target;
   document.documentElement.lang = active;
   try {
     localStorage.setItem(CACHE_KEY, preference);

@@ -16,5 +16,5 @@ export function useSectionId(): string {
     return () => window.removeEventListener('hashchange', update)
   }, [])
 
-  return hash.replace(/^#\//, '')
+  return hash.replace(/^#\//, '').split('?')[0]
 }

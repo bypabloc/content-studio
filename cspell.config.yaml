@@ -46,7 +46,7 @@ overrides:
   # Los nombres de idioma («Español», «Português») son iguales en los tres catálogos (spec 007, D-6): por palabra.
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
-    words: [masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português]
+    words: [desinstalación, masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português]
   # Catálogo en inglés (spec 007, D-9): sus nombres de idioma van por palabra.
   - filename: 'server/src/content_studio/messages/en.json'
     language: en

@@ -35,7 +35,15 @@ export function connectEvents(connection: Connection, queryClient: QueryClient, 
     // Si la lista no se pidió todavía, el updater devuelve undefined y la caché no cambia.
     queryClient.setQueryData<Job[]>(['jobs'], (jobs) => (jobs ? upsert(jobs, changed) : jobs));
     const finished = changed.status === 'done' || changed.status === 'error';
-    if (finished && before !== changed.status) options.onFinished?.(changed);
+    if (finished && before !== changed.status) {
+      if (changed.kind.startsWith('engine.')) {
+        void queryClient.invalidateQueries({ queryKey: ['engines'] });
+        void queryClient.invalidateQueries({ queryKey: ['catalog', 'narration'] });
+      } else if (changed.kind === 'storage.move') {
+        void queryClient.invalidateQueries({ queryKey: ['storage'] });
+      }
+      options.onFinished?.(changed);
+    }
   });
 
   source.addEventListener('queue', (event) => {

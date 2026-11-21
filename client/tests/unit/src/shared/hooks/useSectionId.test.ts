@@ -16,6 +16,14 @@ describe('useSectionId', () => {
     expect(result.current).toBe('settings')
   })
 
+  it('WHEN el hash incluye un motor solicitado THEN la sección omite sus parámetros de consulta', () => {
+    window.location.hash = '#/engines?engine=qwen-0.6b'
+
+    const { result } = renderHook(() => useSectionId())
+
+    expect(result.current).toBe('engines')
+  })
+
   it('WHEN the hash changes THEN the section follows without a reload', async () => {
     const { result } = renderHook(() => useSectionId())
 

@@ -97,7 +97,7 @@ export interface paths {
         };
         /**
          * Storage
-         * @description Expone las raíces activas.
+         * @description Expone las raíces activas y el espacio de cada una.
          */
         get: operations["storage_storage_get"];
         put?: never;
@@ -1069,13 +1069,21 @@ export interface components {
         };
         /**
          * StoragePaths
-         * @description Raíces activas de motores y salidas.
+         * @description Rutas activas y métricas de espacio de motores y salidas.
          */
         StoragePaths: {
             /** Engines */
             engines: string;
             /** Outputs */
             outputs: string;
+            /** Engines Used Bytes */
+            engines_used_bytes: number;
+            /** Engines Free Bytes */
+            engines_free_bytes: number;
+            /** Outputs Used Bytes */
+            outputs_used_bytes: number;
+            /** Outputs Free Bytes */
+            outputs_free_bytes: number;
         };
         /**
          * StyleOut

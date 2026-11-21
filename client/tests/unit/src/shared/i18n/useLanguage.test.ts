@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getLocale, setLocale } from '@/shared/i18n/locale';
+import * as localeModule from '@/shared/i18n/locale';
 import { useLanguage } from '@/shared/i18n/useLanguage';
 
 const mocks = vi.hoisted(() => ({ fetch: vi.fn<typeof fetch>() }));
@@ -19,14 +19,15 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('useLanguage', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
     localStorage.setItem('ui.language', 'es');
-    setLocale('es');
+    await localeModule.setLocale('es');
   });
 
   afterEach(() => {
     mocks.fetch.mockReset();
+    vi.restoreAllMocks();
   });
 
   it('aplica al idioma activo la preferencia que guarda el server (ui.language)', async () => {
@@ -34,7 +35,7 @@ describe('useLanguage', () => {
 
     renderHook(() => useLanguage(), { wrapper });
 
-    await waitFor(() => expect(getLocale()).toBe('pt'));
+    await waitFor(() => expect(localeModule.getLocale()).toBe('pt'));
   });
 
   it('sin preferencia del server, deja el idioma que ya estaba', async () => {
@@ -43,6 +44,15 @@ describe('useLanguage', () => {
     renderHook(() => useLanguage(), { wrapper });
 
     await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
-    expect(getLocale()).toBe('es');
+    expect(localeModule.getLocale()).toBe('es');
+  });
+
+  it('ignora el rechazo al cargar el idioma preferido', async () => {
+    mocks.fetch.mockResolvedValue(new Response(JSON.stringify({ key: 'ui.language', value: 'pt' })));
+    const setLocale = vi.spyOn(localeModule, 'setLocale').mockRejectedValueOnce(new Error('catálogo no disponible'));
+
+    renderHook(() => useLanguage(), { wrapper });
+
+    await waitFor(() => expect(setLocale).toHaveBeenCalledWith('pt'));
   });
 });

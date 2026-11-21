@@ -10,6 +10,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['music', 'music'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
+      ['engines', 'server'],
       ['settings', 'settings'],
     ])
   })
@@ -22,6 +23,13 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().find((item) => item.id === 'catalog')).toMatchObject({
       group: t('nav.group.voices'),
       label: t('nav.catalog'),
+    })
+  })
+
+  it('Motores queda en el grupo Ajustes', () => {
+    expect(navItems().find((item) => item.id === 'engines')).toMatchObject({
+      group: t('nav.group.settings'),
+      label: t('nav.engines'),
     })
   })
 })

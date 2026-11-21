@@ -35,6 +35,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 function renderPage() {
@@ -182,5 +183,20 @@ describe('MusicPage (spec 011, D-6, AC-8)', () => {
     await user.click(screen.getByRole('button', { name: t('music.duration.matchFile') }));
 
     await waitFor(() => expect((screen.getByRole('textbox', { name: t('music.duration.label') }) as HTMLInputElement).value).toBe('02:07.0'));
+  });
+
+  it('ofrece instalar el motor de música faltante y abre su tarjeta en Motores', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/music/styles') return { styles };
+      if (path === '/engines') return [{ engine: 'acestep', family: 'music', status: 'missing' }];
+      if (path.startsWith('/settings/')) return { key: path.replace('/settings/', ''), value: null };
+      return [];
+    });
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole('button', { name: t('engines.install_from_options') }));
+
+    expect(window.location.hash).toBe('#/engines?engine=acestep');
   });
 });

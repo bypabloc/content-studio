@@ -17,31 +17,31 @@ describe('resolveLocale', () => {
 });
 
 describe('setLocale', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     localStorage.clear();
-    setLocale('es');
+    await setLocale('es');
   });
 
-  it('cambia el idioma activo y <html lang>', () => {
-    setLocale('en');
+  it('cambia el idioma activo y <html lang>', async () => {
+    await setLocale('en');
 
     expect(getLocale()).toBe('en');
     expect(document.documentElement.lang).toBe('en');
   });
 
-  it('guarda la elección en la caché ui.language', () => {
-    setLocale('pt');
+  it('guarda la elección en la caché ui.language', async () => {
+    await setLocale('pt');
 
     expect(localStorage.getItem('ui.language')).toBe('pt');
   });
 
-  it('avisa a los suscriptores del cambio', () => {
+  it('avisa a los suscriptores del cambio', async () => {
     const listener = vi.fn();
     const unsubscribe = subscribe(listener);
 
-    setLocale('en');
+    await setLocale('en');
     unsubscribe();
-    setLocale('pt');
+    await setLocale('pt');
 
     expect(listener).toHaveBeenCalledTimes(1);
   });

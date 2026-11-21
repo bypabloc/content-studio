@@ -3,24 +3,24 @@ import { label, t, type MessageKey } from '@/shared/i18n/t';
 import { setLocale } from '@/shared/i18n/locale';
 
 describe('t', () => {
-  beforeEach(() => setLocale('es'));
+  beforeEach(async () => setLocale('es'));
 
-  it('label() da el nombre de un estilo, motor o modelo en el idioma activo', () => {
+  it('label() da el nombre de un estilo, motor o modelo en el idioma activo', async () => {
     expect(label('narration.style', 'expert')).toBe('Experto');
-    setLocale('en');
+    await setLocale('en');
     expect(label('narration.style', 'expert')).toBe('Expert');
   });
 
-  it('usa el idioma activo', () => {
-    setLocale('en');
+  it('usa el idioma activo', async () => {
+    await setLocale('en');
     expect(t('nav.settings')).toBe('Settings');
 
-    setLocale('pt');
+    await setLocale('pt');
     expect(t('nav.settings')).toBe('Configurações');
   });
 
-  it('reemplaza los parámetros también en el idioma activo', () => {
-    setLocale('en');
+  it('reemplaza los parámetros también en el idioma activo', async () => {
+    await setLocale('en');
 
     expect(t('app.version', { version: '1.2.3' })).toBe('Version 1.2.3');
   });

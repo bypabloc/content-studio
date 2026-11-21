@@ -145,5 +145,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [012-desinstalacion-externa](012-desinstalacion-externa.md) | `force` elimina solo el venv externo conocido y conserva cachés y datos ajenos | `main` |
 | [012-error-disk-full](012-error-disk-full.md) | `disk_full` se localiza como error asíncrono del trabajo | `main` |
 | [012-verificacion-voz](012-verificacion-voz.md) | La prueba TTS usa la voz de catálogo `yesid` con consentimiento porque falta `reference/test/` | Al cerrar la 012 |
+| [012-pantallas-almacenamiento](012-pantallas-almacenamiento.md) | Umbrales de VRAM y métricas de disco sin seguir enlaces | Al cerrar la 012 |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

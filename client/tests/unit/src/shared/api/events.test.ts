@@ -101,6 +101,27 @@ describe('connectEvents', () => {
     expect(queryClient.getQueryData(['jobs'])).toBeUndefined();
   });
 
+  it('invalida motores y catálogo al terminar una instalación, incluso si falla', () => {
+    const { queryClient, source } = setup();
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+    queryClient.setQueryData(['jobs'], [job(4, { kind: 'engine.install', status: 'running' })]);
+
+    source.emit('job', job(4, { kind: 'engine.install', status: 'error' }));
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['engines'] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['catalog', 'narration'] });
+  });
+
+  it('invalida almacenamiento al terminar un traslado', () => {
+    const { queryClient, source } = setup();
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+    queryClient.setQueryData(['jobs'], [job(5, { kind: 'storage.move', status: 'running' })]);
+
+    source.emit('job', job(5, { kind: 'storage.move', status: 'done' }));
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['storage'] });
+  });
+
   it('un evento queue con paused guarda el estado de la cola', () => {
     const { queryClient, source } = setup();
 
