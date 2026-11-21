@@ -13,7 +13,7 @@ from content_studio.api.errors import ApiError
 from content_studio.api.routes.jobs import NewJob, create_job
 from content_studio.api.schemas import Job
 from content_studio.engines import installer, recipes
-from content_studio.services import engine_install, engine_uninstall
+from content_studio.services import engine_install, engine_uninstall, engine_verify
 
 router = APIRouter()
 Db = Annotated[sqlite3.Connection, Depends(get_conn)]
@@ -80,3 +80,12 @@ def uninstall(name: str, request: Request, conn: Db, force: bool = False) -> dic
         else:
             raise ApiError(409, 'engine_not_installed', model=name)
     return create_job(NewJob(kind=engine_uninstall.KIND, params={'engine': name, 'force': force}), request, conn)
+
+
+@router.post('/engines/{name}/verify', status_code=201, response_model=Job)
+def verify(name: str, request: Request, conn: Db) -> dict:
+    """Encola una prueba de humo solo si el venv del motor existe."""
+    recipe = _recipe(name)
+    if not installer.engine_venv(recipe, _storage(request)).is_dir():
+        raise ApiError(409, 'engine_not_installed', model=name)
+    return create_job(NewJob(kind=engine_verify.KIND, params={'engine': name}), request, conn)

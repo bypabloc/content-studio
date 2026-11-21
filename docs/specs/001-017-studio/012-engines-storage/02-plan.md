@@ -79,7 +79,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Ningún test unit
 | T3 | Herramientas del sistema | AC-6 | — | `unit` | [x] |
 | T4 | Recetas | AC-2 | — | `unit` | [x] |
 | T5 | Instalador y desinstalar | AC-3, AC-4, AC-5 | T1, T4 | `unit` | [x] |
-| T6 | Verificar y CLI | — | T5 | `unit` | [ ] |
+| T6 | Verificar y CLI | — | T5 | `unit` | [x] |
 | T7 | Pantallas | AC-8, AC-9 | T2, T3, T5, T6 | `client-unit` | [ ] |
 | T8 | e2e y docs | AC-8 | T7 | `e2e`, `rules` | [ ] |
 | T9 | Instalación real | AC-10 | T8 | verificación final | [ ] |

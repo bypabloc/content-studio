@@ -122,3 +122,18 @@ def test_imports_the_engine(name):
     assert r.returncode == 0, r.stdout + r.stderr
 
     assert r.stdout.strip().splitlines()[-1] == e.kind
+
+
+@pytest.mark.local
+def test_selected_engine_smoke(tmp_path):
+    """La prueba de humo usa el mismo servicio; solo corre con un motor elegido explícitamente."""
+    engine = os.environ.get('CONTENT_STUDIO_VERIFY_ENGINE')
+    if not engine:
+        pytest.skip('set CONTENT_STUDIO_VERIFY_ENGINE to run one real engine smoke test')
+
+    from content_studio.engines.verification import verify_engine
+
+    result = verify_engine(engine, tmp_path)
+
+    assert result['ok'], result
+    assert result['duration_s'] == pytest.approx(1, abs=0.05)

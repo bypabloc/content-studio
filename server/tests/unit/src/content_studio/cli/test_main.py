@@ -36,7 +36,7 @@ def test_help_lists_the_subcommands(capsys):
 
     assert exit_info.value.code == 0
     out = capsys.readouterr().out
-    assert all(word in out for word in ('serve', 'narration', 'music', 'jobs'))
+    assert all(word in out for word in ('serve', 'narration', 'music', 'jobs', 'engines'))
 
 
 def test_ac9_an_unknown_music_model_exits_2(capsys):
@@ -182,3 +182,35 @@ def test_openapi_job_schema_lists_the_fields_the_client_shows(capsys):
 def test_db_is_accepted_after_the_subcommand(db, capsys):
     assert main(['jobs', 'list', '--db', db]) == 0
     assert main(['--db', db, 'jobs', 'list']) == 0
+
+
+def test_engines_verify_runs_the_gpu_service(monkeypatch, db, checkout):
+    sent = []
+    monkeypatch.setattr(submit, 'run', lambda kind, params, database, root: sent.append((kind, params)) or 0)
+
+    assert main(['--db', db, 'engines', 'verify', 'qwen-0.6b']) == 0
+
+    assert sent == [('engine.verify', {'engine': 'qwen-0.6b'})]
+
+
+def test_engines_actions_use_the_matching_services(monkeypatch, db, checkout):
+    sent = []
+    monkeypatch.setattr(submit, 'run', lambda kind, params, database, root: sent.append((kind, params)) or 0)
+
+    assert main(['engines', 'install', 'qwen-0.6b', '--db', db]) == 0
+    assert main(['engines', 'repair', 'qwen-0.6b', '--db', db]) == 0
+    assert main(['engines', 'uninstall', 'qwen-0.6b', '--force', '--db', db]) == 0
+
+    assert sent == [
+        ('engine.install', {'engine': 'qwen-0.6b', 'repair': False}),
+        ('engine.install', {'engine': 'qwen-0.6b', 'repair': True}),
+        ('engine.uninstall', {'engine': 'qwen-0.6b', 'force': True}),
+    ]
+
+
+def test_engines_list_prints_the_catalog(monkeypatch, db, capsys):
+    monkeypatch.setattr(cli_main.installer, 'list_engines', lambda conn, root: [{'engine': 'qwen-0.6b'}])
+
+    assert main(['engines', 'list', '--db', db]) == 0
+
+    assert json.loads(capsys.readouterr().out) == [{'engine': 'qwen-0.6b'}]

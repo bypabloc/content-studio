@@ -69,3 +69,27 @@ def test_force_external_uninstall_is_explicitly_enqueued(api, tmp_path, monkeypa
 
     assert response.status_code == 201
     assert response.json()['params'] == {'engine': 'qwen-0.6b', 'force': True}
+
+
+def test_verify_enqueues_a_gpu_job_only_for_an_installed_engine(api, tmp_path, monkeypatch):
+    root = tmp_path / 'engines'
+    venv = tmp_path / 'qwen-venv'
+    venv.mkdir()
+    monkeypatch.setattr(engines, '_storage', lambda request: root)
+    monkeypatch.setattr(engines.installer, 'engine_venv', lambda recipe, storage: venv)
+
+    response = api.client.post('/engines/qwen-0.6b/verify', headers=api.headers)
+
+    assert response.status_code == 201
+    assert response.json()['kind'] == 'engine.verify'
+    assert response.json()['params']['engine'] == 'qwen-0.6b'
+
+
+def test_verify_rejects_a_missing_engine(api, tmp_path, monkeypatch):
+    monkeypatch.setattr(engines, '_storage', lambda request: tmp_path / 'engines')
+    monkeypatch.setattr(engines.installer, 'engine_venv', lambda recipe, storage: tmp_path / 'missing-venv')
+
+    response = api.client.post('/engines/qwen-0.6b/verify', headers=api.headers)
+
+    assert response.status_code == 409
+    assert response.json()['code'] == 'engine_not_installed'

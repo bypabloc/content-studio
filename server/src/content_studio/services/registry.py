@@ -3,6 +3,7 @@
 from content_studio.services import (
     engine_install,
     engine_uninstall,
+    engine_verify,
     music,
     music_samples,
     narration,
@@ -24,4 +25,5 @@ SERVICES = {
     system_install_tool.KIND: system_install_tool,
     engine_install.KIND: engine_install,
     engine_uninstall.KIND: engine_uninstall,
+    engine_verify.KIND: engine_verify,
 }
