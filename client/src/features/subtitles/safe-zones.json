@@ -1,0 +1,5 @@
+{
+  "reels": { "top": 14, "bottom": 35, "left": 6, "right": 6 },
+  "tiktok": { "top": 12, "bottom": 30, "left": 6, "right": 14 },
+  "shorts": { "top": 10, "bottom": 28, "left": 6, "right": 6 }
+}

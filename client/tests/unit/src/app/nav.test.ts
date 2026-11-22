@@ -9,6 +9,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['narration', 'narration'],
       ['music', 'music'],
       ['cleaner', 'scissors'],
+      ['subtitles', 'subtitles'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
       ['engines', 'server'],

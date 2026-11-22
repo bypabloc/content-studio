@@ -556,6 +556,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/subtitles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List All
+         * @description Los proyectos guardados, del más reciente al más antiguo.
+         */
+        get: operations["list_all_subtitles_get"];
+        put?: never;
+        /**
+         * Create Project
+         * @description Encola un `subtitles.create` con su origen y parámetros. 422 con `code` si no sirven (como POST /jobs).
+         */
+        post: operations["create_project_subtitles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subtitles/fonts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Font Families
+         * @description Las fuentes para los subtítulos: las incluidas (`bundled: true`) y las instaladas en el sistema (AC-8).
+         */
+        get: operations["list_font_families_subtitles_fonts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/subtitles/{project_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Document
+         * @description El documento de subtítulos del proyecto.
+         */
+        get: operations["get_document_subtitles__project_id__get"];
+        /**
+         * Put Document
+         * @description Guarda el documento editado (el client lo manda entero, con un debounce) y lo devuelve.
+         */
+        put: operations["put_document_subtitles__project_id__put"];
+        post?: never;
+        /**
+         * Delete Project
+         * @description Quita el registro y mueve la carpeta del proyecto a `subtitles/.trash/`: no borra archivos.
+         */
+        delete: operations["delete_project_subtitles__project_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/music/styles": {
         parameters: {
             query?: never;
@@ -910,6 +982,20 @@ export interface components {
             cuts: {
                 [key: string]: unknown;
             }[];
+        };
+        /**
+         * DocumentIn
+         * @description El documento entero, como lo guarda `subtitles/document.py`: `version` y `cues` son obligatorios.
+         */
+        DocumentIn: {
+            /** Version */
+            version: number;
+            /** Cues */
+            cues: {
+                [key: string]: unknown;
+            }[];
+        } & {
+            [key: string]: unknown;
         };
         /**
          * EngineInfo
@@ -2133,6 +2219,184 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Job"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_all_subtitles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    create_project_subtitles_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_font_families_subtitles_fonts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    get_document_subtitles__project_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_document_subtitles__project_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_project_subtitles__project_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
