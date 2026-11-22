@@ -110,6 +110,26 @@ def test_put_keeps_the_edited_regions_and_the_curve_follows_them(api):
     assert curve['total'] == pytest.approx(6, abs=0.05)
 
 
+def test_a_job_lists_its_audio_and_video_outputs_for_the_mix_picker(api):
+    """La ranura «Del historial» elige un archivo: el trabajo lista los de audio y video de su carpeta, en orden."""
+    folder = api.tmp / 'out' / 'narration' / 'take'
+    folder.mkdir(parents=True)
+    (folder / 'b.wav').write_bytes(b'RIFF')
+    (folder / 'a.mp4').write_bytes(b'0')
+    (folder / 'manifest.json').write_text('{}', encoding='utf-8')
+    job = api.client.post('/jobs', json={'kind': 'fake', 'params': {}}, headers=api.headers).json()
+    store_job = connect(api.tmp / 'base.db')
+    try:
+        store_job.execute('UPDATE jobs SET status = ?, output_dir = ? WHERE id = ?', ('done', str(folder), job['id']))
+        store_job.commit()
+    finally:
+        store_job.close()
+
+    outputs = api.client.get(f'/jobs/{job["id"]}/outputs', headers=api.headers).json()
+
+    assert outputs == [str(folder / 'a.mp4'), str(folder / 'b.wav')]
+
+
 def test_migration_six_creates_the_mix_projects_table(tmp_path):
     """La migración 6 crea `mix_projects` solo con nombre, ruta y fechas: ningún BLOB, porque la base guarda rutas."""
     conn = connect(tmp_path / 'base.db')
