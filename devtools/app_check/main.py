@@ -33,6 +33,22 @@ def user_db(root: Path) -> Path:
     return Path(override) if override else main_checkout(root) / 'var' / 'content-studio.db'
 
 
+def build_error(log: Path) -> str:
+    """El motivo de una compilación fallida, con el caso común dicho en claro: el binario sigue abierto.
+
+    >>> import tempfile
+    >>> with tempfile.TemporaryDirectory() as d:
+    ...     log = Path(d) / 'b.log'
+    ...     _ = log.write_text('error: failed to remove file `x/debug/content-studio.exe` (os error 5)')
+    ...     build_error(log)
+    'build failed: content-studio.exe of this worktree is still open; close it and run again'
+    """
+    text = log.read_text(encoding='utf-8', errors='replace') if log.is_file() else ''
+    if 'failed to remove file' in text and 'content-studio' in text:
+        return 'build failed: content-studio.exe of this worktree is still open; close it and run again'
+    return 'build failed: see the log'
+
+
 def collect(run_dir: Path) -> dict:
     """Lo que dejó la fixture de Playwright: una línea por prueba, las escrituras bloqueadas y las capturas."""
     lines = run_dir / 'tests.jsonl'
@@ -84,7 +100,7 @@ def run(names: list[str], data: str) -> int:
     merged = {**os.environ, **run_.env}
     print(f'app-check: building {result["commit"][:7]} ({result["log"]})', file=sys.stderr)
     if launch.build(ROOT, run_.env, log) != 0:
-        return emit({**result, 'error': 'build failed: see the log'}, 2)
+        return emit({**result, 'error': build_error(log)}, 2)
     exe = launch.binary(run_.env)
     if not exe.is_file():
         return emit({**result, 'error': f'binary not found at {exe}'}, 2)
