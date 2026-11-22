@@ -93,6 +93,8 @@ onnx
 onnxruntime
 openbmb
 openunmix
+pytestmark
+yunet
 pipefail
 precompact
 pretrained

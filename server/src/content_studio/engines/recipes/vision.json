@@ -1,0 +1,16 @@
+{
+  "engine": "vision",
+  "family": "vision",
+  "size_gb": 0.1,
+  "vram_gb": 0,
+  "cpu": true,
+  "license": "MIT",
+  "version": 2,
+  "steps": [
+    {"kind": "python", "version": "3.12"},
+    {"kind": "venv", "path": ".venv-vision"},
+    {"kind": "pip", "packages": ["opencv-python==4.13.0.92", "huggingface-hub==0.36.2"]},
+    {"kind": "hf", "repo": "opencv/face_detection_yunet", "revision": "3cc26e7f1014a5ee5d74a42acee58bafc9d0a310", "into": "models", "allow_patterns": ["face_detection_yunet_2023mar.onnx"]},
+    {"kind": "verify", "import": "cv2"}
+  ]
+}

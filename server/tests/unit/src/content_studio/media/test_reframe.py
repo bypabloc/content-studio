@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from content_studio.media import convert
+from content_studio.media import convert, reframe
 
 pytestmark = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
 ENCODERS = frozenset({'libx264', 'aac'})
@@ -141,3 +141,105 @@ def test_ac4_blur_fills_the_top_strip_with_more_than_one_color(tmp_path):
     frame = _first_frame_rgb(out, 1080, 1920)
     row = {_pixel(frame, 1080, x, 2) for x in range(0, 1080, 20)}
     assert len(row) > 10
+
+
+def test_crop_width_keeps_the_output_aspect_and_is_even():
+    """El recorte de 9:16 de una fuente de 1080 de alto mide 608 px (par, con la proporción de salida)."""
+    assert reframe.crop_width(source_height=1080, width=1080, height=1920) == 608
+
+
+def test_crop_xs_centers_the_crop_on_the_face_and_keeps_it_inside_the_frame():
+    """AC-5: la esquina del recorte queda centrada en la cara, en par, y nunca se sale del cuadro."""
+    assert reframe.crop_xs([0.25, 0.75, 0.0, 1.0], source_width=1920, crop_w=608) == [176, 1136, 0, 1312]
+
+
+def test_sendcmd_moves_the_crop_every_fifth_of_a_second():
+    """AC-5: una orden `crop x` por muestra, cada 1/5 s."""
+    script = reframe.sendcmd_script([176, 1136], fps=5)
+
+    assert script.splitlines() == ['0.000000 crop x 176;', '0.200000 crop x 1136;']
+
+
+def test_follow_face_graph_names_the_commands_file_with_colons_escaped():
+    """El grafo de `follow-face` lee las órdenes de `sendcmd` (con los dos puntos de Windows escapados)."""
+    graph = reframe.graph({'mode': 'follow-face', 'commands': 'C:/x/follow.txt', 'crop_w': 608}, 1080, 1920)
+
+    assert graph == "[0:v]sendcmd=f='C\\:/x/follow.txt',crop=w=608:h=ih:x=0:y=0,scale=1080:1920[v]"
+
+
+def _halves(tmp_path: Path) -> Path:
+    """Un video de 1 s: la mitad izquierda roja y la derecha azul (1920×1080, 25 cuadros por segundo)."""
+    path = tmp_path / 'halves.mp4'
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-y',
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-f',
+            'lavfi',
+            '-i',
+            'color=c=red:s=960x1080:r=25:d=1',
+            '-f',
+            'lavfi',
+            '-i',
+            'color=c=blue:s=960x1080:r=25:d=1',
+            '-filter_complex',
+            'hstack',
+            '-c:v',
+            'libx264',
+            '-pix_fmt',
+            'yuv420p',
+            str(path),
+        ],
+        check=True,
+    )
+    return path
+
+
+def _pixel_at(path: Path, seconds: float) -> tuple[int, int, int]:
+    """El color del centro del cuadro de 1080×1920 que cae en `seconds`."""
+    frame = subprocess.run(
+        [
+            'ffmpeg',
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-ss',
+            str(seconds),
+            '-i',
+            str(path),
+            '-frames:v',
+            '1',
+            '-f',
+            'rawvideo',
+            '-pix_fmt',
+            'rgb24',
+            '-s',
+            '1080x1920',
+            '-',
+        ],
+        capture_output=True,
+        check=True,
+    ).stdout
+    return _pixel(frame, 1080, 540, 960)
+
+
+def test_ac5_follow_face_moves_the_crop_with_the_commands(tmp_path):
+    """AC-5: el recorte sigue las órdenes de `sendcmd`: al principio toma la mitad roja y, desde 0,8 s, la azul."""
+    commands = tmp_path / 'follow.txt'
+    commands.write_text(reframe.sendcmd_script([0, 0, 0, 0, 1312], fps=5), encoding='utf-8')
+    out = tmp_path / 'reels.mp4'
+    convert.run(
+        {'path': str(_halves(tmp_path)), 'has_video': True},
+        'mp4-h264',
+        {**REELS, 'reframe': {'mode': 'follow-face', 'commands': str(commands), 'crop_w': 608}},
+        out,
+        encoders=ENCODERS,
+    )
+
+    red, _, blue = _pixel_at(out, 0.1)
+    assert red > 200 and blue < 60
+    red, _, blue = _pixel_at(out, 0.9)
+    assert blue > 200 and red < 60
