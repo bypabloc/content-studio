@@ -64,7 +64,7 @@ Una sola. Cada decisión pasó la escalera de `plan-format.md` §0.
 * Cerrar las fichas de revisión visual que `app-check` destraba (`PENDING/008-revision-visual-organismos`, `012-instalar-motor-real`, `014-capturas-editor`, `015-escucha-y-revision`, `005-tema-sin-parpadeo`): cada una en su PR, con su escenario.
 * Correr `app-check` en la CI: necesita Windows y WebView2 con ventana, y la CI es Linux.
 * Bloquear los plugins de navegador de Codex o de Claude (`browser`, `chrome`): no controlan el escritorio. Si el usuario los quiere fuera, es otra tarea de `02-next/`.
-* Editar configuración del usuario fuera del repo. La lista de apps permitidas de `~/.codex/computer-use/config.toml` ya quedó vacía (`allowed = []`) el 22-11-2026, a pedido del usuario, antes de esta spec.
+* Editar configuración del usuario fuera del repo. `~/.codex/computer-use/config.toml` (la lista de apps permitidas) quedó con `allowed = []` el 22-11-2026, a pedido del usuario, antes de esta spec.
 * Migrar los e2e actuales (`*.e2e.ts`, API simulada) a CDP: siguen igual y siguen en el job `client`.
 * Ocultar la ventana o abrirla fuera de pantalla: el usuario eligió que se vea.
 * Revisión de accesibilidad con axe en `app-check`: ya la cubre `happy-apariencia-axe.e2e.ts`.

@@ -28,7 +28,7 @@ Que cualquier agente (Claude Code, Codex y Antigravity) verifique la app de escr
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 0 | Sondeo: CDP de WebView2 en Tauri y nombres de herramientas y eventos de hooks de cada agente (T1) | PEN |
+| 0 | Sondeo: CDP de WebView2 en Tauri y nombres de herramientas y eventos de hooks de cada agente (T1) | IMP |
 | 1 | Hook `computer_use_guard` y su cableado en los tres agentes (T2–T3) | PEN |
 | 2 | `devtools app-check`: entorno aislado, compilación, arranque, espera de CDP y cierre (T4–T6) | PEN |
 | 3 | Escenarios de Playwright por CDP: `smoke`, diálogo simulado y modo `real` de solo lectura (T7–T8) | PEN |
@@ -47,4 +47,4 @@ Que cualquier agente (Claude Code, Codex y Antigravity) verifique la app de escr
 ## WARNING y PENDING
 
 * WARNING: `024-cdp-webview2` (cómo se abre el puerto de CDP), `024-hooks-por-agente` (qué evento y qué herramienta bloquea cada agente), `024-target-por-worktree` (compilación propia frente al target compartido).
-* PENDING: ninguna propia. `content-studio.exe` ya se quitó de las apps permitidas de `~/.codex/computer-use/config.toml` (22-11-2026, a pedido del usuario; queda `allowed = []`). Las fichas de revisión visual que `app-check` destraba (`008-revision-visual-organismos`, `012-instalar-motor-real`, `014-capturas-editor`, `015-escucha-y-revision`) se cierran en su propio PR, no en esta spec.
+* PENDING: ninguna propia. `content-studio.exe` ya no está permitido: `~/.codex/computer-use/config.toml` quedó con `allowed = []` (22-11-2026, a pedido del usuario, que lo borra a mano). Las fichas de revisión visual que `app-check` destraba (`008-revision-visual-organismos`, `012-instalar-motor-real`, `014-capturas-editor`, `015-escucha-y-revision`) se cierran en su propio PR, no en esta spec.

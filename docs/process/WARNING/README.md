@@ -175,5 +175,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [015-pantallas-convertir-normalizar](015-pantallas-convertir-normalizar.md) | Pantallas de Convertir y Normalizar: 80 % de cobertura por archivo, el esquema de la API en staging antes del gate, y recortar y unir sin pantalla (la edición va al Editor) | `main` |
 | [015-nvenc-solo-con-gpu](015-nvenc-solo-con-gpu.md) | NVENC solo si hay GPU: que el ffmpeg traiga el encoder no basta | `main` |
 | [015-verificacion-final](015-verificacion-final.md) | Corridas reales de 015: insumos generados, manual y seguir a la persona por el servicio, medidas y errores; el video normalizado a −1 dBTP incumplía y pasó a −2 | `main` |
+| [024-cdp-webview2](024-cdp-webview2.md) | El puerto de CDP se abre con `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`, sin tocar Tauri | `main` |
+| [024-hooks-por-agente](024-hooks-por-agente.md) | Cómo bloquea Computer Use cada agente; en Codex los hooks del proyecto corren solo si se aprueban con `/hooks` | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
