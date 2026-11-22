@@ -9,6 +9,15 @@
             "command": "uv run --no-project python \"$(git rev-parse --show-toplevel)/.agents/hooks/shell_guard.py\""
           }
         ]
+      },
+      {
+        "matcher": "^(mcp__node_repl__js|exec|js)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$(git rev-parse --show-toplevel)/.agents/hooks/computer_use_guard.py\""
+          }
+        ]
       }
     ]
   }

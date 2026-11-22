@@ -1,5 +1,6 @@
 [
   "devtools/agent_context.py",
+  "devtools/app_check/launch.py",
   "devtools/gpu_turn.py",
   "devtools/rules.py",
   "devtools/spelling.py",

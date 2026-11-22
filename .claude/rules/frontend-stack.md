@@ -20,6 +20,7 @@ server (`studio serve`) en `client/src-tauri/src/server.rs` y el client le habla
 | Tipos de la API desde OpenAPI | `bun run --cwd client gen:api` (usa `studio openapi`; no se edita `schema.d.ts` a mano) |
 | e2e con Playwright y Chromium (una vez: `bun run --cwd tests/e2e playwright install chromium`) | `bun run --cwd tests/e2e test` |
 | Compilar el crate de Tauri | `python -m devtools test-runner --type=tauri-check` |
+| Verificar la app real (CDP, sin Computer Use) | `python -m devtools app-check run` (`verify-before-claiming-done.md` §3) |
 
 `bun install --frozen-lockfile` en la raíz instala los workspaces `client/` y `tests/e2e/`. `worktree prepare` lo corre en cada worktree (`worktrees.md`).
 

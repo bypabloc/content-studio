@@ -124,6 +124,42 @@ def test_ac10_no_whisper_cli():
     assert hits == []
 
 
+def _guard_matchers(hooks: dict) -> list[str]:
+    """Los matchers de PreToolUse que ejecutan computer_use_guard.py."""
+    return [
+        entry.get('matcher', '')
+        for entry in hooks.get('PreToolUse', [])
+        if any('computer_use_guard.py' in hook.get('command', '') for hook in entry.get('hooks', []))
+    ]
+
+
+def test_ac3_computer_use_guard_wired_for_every_agent():
+    """Spec 024: el guard de Computer Use corre en Claude Code, Codex y Antigravity, con rutas del checkout."""
+    import json
+
+    claude = json.loads((ROOT / '.claude/settings.json').read_text(encoding='utf-8'))['hooks']
+    codex = json.loads((ROOT / '.codex/hooks.json').read_text(encoding='utf-8'))['hooks']
+    antigravity = json.loads((ROOT / '.agents/hooks.json').read_text(encoding='utf-8'))
+    groups = {'claude': claude, 'codex': codex, 'antigravity': next(iter(_named(antigravity)), {})}
+    expected = {
+        'claude': ['mcp__computer-use__screenshot', 'mcp__remote-devices__computer_click'],
+        'codex': ['mcp__node_repl__js', 'exec', 'js'],
+        'antigravity': ['computer_click'],
+    }
+    for agent, names in expected.items():
+        matchers = _guard_matchers(groups[agent])
+        assert matchers, f'{agent}: no PreToolUse runs computer_use_guard.py'
+        assert all(any(re.search(m, n) for m in matchers) for n in names), f'{agent}: {matchers} misses {names}'
+        assert not any(re.search(m, 'Bash') for m in matchers), f'{agent}: the matcher also catches Bash'
+    for text in (ROOT / '.claude/settings.json', ROOT / '.codex/hooks.json', ROOT / '.agents/hooks.json'):
+        assert not re.search(r'[A-Za-z]:[\\/]Users', text.read_text(encoding='utf-8')), f'{text}: absolute path'
+
+
+def _named(antigravity: dict) -> list[dict]:
+    """Antigravity agrupa sus hooks por nombre: el grupo que tenga PreToolUse con el guard."""
+    return [group for group in antigravity.values() if _guard_matchers(group)]
+
+
 TEMPLATE = ROOT / 'docs/specs/_plantilla'
 TEMPLATE_FILES = (
     'README.md',
