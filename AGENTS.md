@@ -9,6 +9,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | `server/data/narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `server/src/content_studio/narration/` | [server/data/narration/README.md](server/data/narration/README.md) · [formato del guion](server/data/narration/docs/formato-guion.md) · [grabar voces](server/data/narration/docs/scripts/README.md) |
 | `server/data/music/` | Música de fondo instrumental (ACE-Step 1.5, HeartMuLa) | `server/src/content_studio/music/` | [server/data/music/README.md](server/data/music/README.md) · [INVESTIGACION.md](server/data/music/INVESTIGACION.md) |
 | — (`studio clean`) | Limpiador de silencios de audio y video, con revisión en línea de tiempo (faster-whisper) | `server/src/content_studio/clean/` | [docs/process/01-done/cleaner.md](docs/process/01-done/cleaner.md) |
+| — (`studio convert`, `normalize`, `trim`, `concat`, `split`) | Convertir y normalizar la sonoridad (ffmpeg), y recortar, unir y dividir medios | `server/src/content_studio/media/` | [convert.md](docs/process/01-done/convert.md) · [edit.md](docs/process/01-done/edit.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 
@@ -25,6 +26,7 @@ uv run studio narration voices --build all   # voces libres aprobadas en los 12 
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
+uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)
 ```
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).

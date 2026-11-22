@@ -36,6 +36,8 @@ function server(settings: Record<string, unknown>) {
     })
     if (url.endsWith('/jobs')) return reply([])
     if (url.endsWith('/subtitles')) return reply([])
+    if (url.includes('/catalog/media')) return reply({ formats: [{ id: 'mp3', kind: 'audio' }], presets: [] })
+    if (url.includes('kind=media.')) return reply([])
     if (url.includes('/voices/kit')) return reply({ styles: [] })
     if (url.includes('/voices/profiles')) return reply([])
     return reply({ paused: false })
@@ -176,5 +178,19 @@ describe('Shell [AC-7]', () => {
       ([url, init]) => String(url).endsWith('/settings/welcome.done') && init?.method === 'PUT' && init.body === JSON.stringify({ value: true }),
     )).toBe(true))
     expect(window.location.hash).toBe('#/narration')
+  })
+
+  it('spec 015: WHEN se abre Convertir THEN muestra el botón de convertir', async () => {
+    window.location.hash = '#/convert'
+    renderShell()
+
+    expect(await screen.findByRole('button', { name: t('convert.submit') })).toBeTruthy()
+  })
+
+  it('spec 015: WHEN se abre Normalizar THEN muestra el botón de normalizar', async () => {
+    window.location.hash = '#/normalize'
+    renderShell()
+
+    expect(await screen.findByRole('button', { name: t('normalize.submit') })).toBeTruthy()
   })
 })

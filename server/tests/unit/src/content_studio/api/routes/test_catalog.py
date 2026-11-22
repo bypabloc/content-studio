@@ -37,3 +37,20 @@ def test_profiles_are_listed_with_the_styles_each_one_has(api, monkeypatch, tmp_
     body = api.client.get('/catalog/narration', headers=api.headers).json()
 
     assert body['profiles'] == [{'id': 'default', 'name': 'Mi voz', 'styles': ['expert']}]
+
+
+def test_the_media_catalog_lists_the_formats_and_one_recommended_preset_for_the_aspect(api):
+    """Convertir: cada formato con su tipo, y exactamente un preset de red ★ según la proporción de la fuente (D-2)."""
+    body = api.client.get('/catalog/media', params={'aspect': 0.5625}, headers=api.headers).json()
+
+    assert {'id': 'mp3', 'kind': 'audio'} in body['formats']
+    assert {'id': 'gif', 'kind': 'gif'} in body['formats']
+    assert sum(preset['recommended'] for preset in body['presets']) == 1
+    recommended = next(preset for preset in body['presets'] if preset['recommended'])
+    assert (recommended['id'], recommended['width'], recommended['height']) == ('reels', 1080, 1920)
+
+
+def test_the_media_catalog_recommends_the_landscape_preset_for_a_wide_source(api):
+    body = api.client.get('/catalog/media', params={'aspect': 1.7778}, headers=api.headers).json()
+
+    assert next(preset for preset in body['presets'] if preset['recommended'])['id'] == 'youtube-1080'

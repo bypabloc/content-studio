@@ -35,6 +35,38 @@ def test_ac4_media_info_gives_duration_loudness_and_peak(api, wav):
     assert isinstance(body['true_peak'], float)
 
 
+def test_a_video_info_gives_its_width_and_height_and_an_audio_has_none(api, wav):
+    """La proporción de la fuente elige el preset de red ★ (spec 015, D-2): el video trae su tamaño; el audio, no."""
+    if shutil.which('ffmpeg') is None:
+        pytest.skip('ffmpeg no está en el PATH')
+    video = api.tmp / 'out' / 'testsrc.mp4'  # con pista de audio: la ficha de medios mide su sonoridad
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-v',
+            'error',
+            '-y',
+            '-f',
+            'lavfi',
+            '-i',
+            'testsrc=size=320x180:rate=10:duration=1',
+            '-f',
+            'lavfi',
+            '-i',
+            'sine=frequency=440:duration=1',
+            '-shortest',
+            str(video),
+        ],
+        check=True,
+    )
+
+    video_body = api.client.get('/media/info', params={'path': str(video)}, headers=api.headers).json()
+    audio_body = api.client.get('/media/info', params={'path': str(wav)}, headers=api.headers).json()
+
+    assert (video_body['width'], video_body['height']) == (320, 180)
+    assert audio_body['width'] is None and audio_body['height'] is None
+
+
 def test_ac4_media_peaks_gives_exactly_n_values_between_0_and_1(api, wav):
     response = api.client.get('/media/peaks', params={'path': str(wav), 'n': 100}, headers=api.headers)
 
@@ -94,7 +126,7 @@ def test_media_info_takes_its_numbers_from_ffmpeg(api, audio, monkeypatch):
     response = api.client.get('/media/info', params={'path': str(audio)}, headers=api.headers)
 
     assert response.status_code == 200
-    assert response.json() == {'duration': 2.0, 'lufs': -16.0, 'true_peak': -1.5}
+    assert response.json() == {'duration': 2.0, 'lufs': -16.0, 'true_peak': -1.5, 'width': None, 'height': None}
 
 
 def test_media_info_of_silence_gives_the_peak_floor(api, audio, monkeypatch):
@@ -148,3 +180,46 @@ def test_media_peaks_when_ffmpeg_fails_is_422(api, audio, monkeypatch):
     response = api.client.get('/media/peaks', params={'path': str(audio), 'n': 3}, headers=api.headers)
 
     assert response.status_code == 422
+
+
+@pytest.fixture
+def clip(api) -> Path:
+    """Un video de 3 s con cuadros de colores dentro de out/. Sin ffmpeg, la prueba se salta."""
+    if shutil.which('ffmpeg') is None:
+        pytest.skip('ffmpeg no está en el PATH')
+    path = api.tmp / 'out' / 'frame-source.mp4'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [
+            'ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc2=size=320x240:rate=25:duration=3',
+            '-c:v', 'libx264', '-pix_fmt', 'yuv420p', str(path),
+        ],
+        check=True,
+    )  # fmt: skip
+    return path
+
+
+def test_ac11_frame_is_a_jpeg_of_the_video_at_that_second(api, clip):
+    """AC-11 (vista previa): GET /media/frame devuelve un JPEG del cuadro pedido, de la fuente."""
+    response = api.client.get('/media/frame', params={'path': str(clip), 't': 1.0}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.headers['content-type'] == 'image/jpeg'
+    assert response.content[:2] == b'\xff\xd8'
+
+
+def test_frame_of_a_path_outside_the_allowed_folders_is_403(api):
+    secret = api.tmp / 'secret.mp4'
+    secret.write_bytes(b'')
+
+    response = api.client.get('/media/frame', params={'path': str(secret), 't': 0}, headers=api.headers)
+
+    assert response.status_code == 403
+
+
+def test_frame_past_the_end_of_the_video_is_422(api, clip):
+    """Un instante después del final no tiene cuadro: 422 con `unreadable_media`, no un JPEG vacío."""
+    response = api.client.get('/media/frame', params={'path': str(clip), 't': 60}, headers=api.headers)
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'unreadable_media'

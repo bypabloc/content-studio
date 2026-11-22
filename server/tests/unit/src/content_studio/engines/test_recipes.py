@@ -79,3 +79,22 @@ def test_ac2_validates_revisions_dependencies_and_local_paths(index, step, messa
     data['steps'][index] = step
     with pytest.raises(ValueError, match=message):
         recipes.validate(data)
+
+
+def test_ac5_the_vision_recipe_pins_opencv_and_only_the_yunet_model():
+    """AC-5: la receta de visión fija OpenCV y baja solo el .onnx de 2023mar, en CPU."""
+    recipe = recipes.load('vision')
+
+    assert (recipe.family, recipe.cpu, recipe.venv) == ('vision', True, '.venv-vision')
+    pip = next(step for step in recipe.steps if step['kind'] == 'pip')
+    assert pip['packages'] == ['opencv-python==4.13.0.92', 'huggingface-hub==0.36.2']
+    hf = next(step for step in recipe.steps if step['kind'] == 'hf')
+    assert hf['allow_patterns'] == ['face_detection_yunet_2023mar.onnx']
+
+
+def test_every_recipe_that_downloads_from_hugging_face_pins_huggingface_hub():
+    """El paso `hf` importa `huggingface_hub` dentro del venv del motor: la receta debe fijarlo o el paso falla."""
+    for recipe in recipes.load_all():
+        if any(step['kind'] == 'hf' for step in recipe.steps):
+            packages = [package for step in recipe.steps if step['kind'] == 'pip' for package in step['packages']]
+            assert any(re.fullmatch(r'huggingface-hub==[\w.]+', package) for package in packages), recipe.engine

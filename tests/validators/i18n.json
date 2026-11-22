@@ -9,7 +9,17 @@
     "label.narration.engine.",
     "label.music.style.",
     "label.music.model.",
-    "label.music.category."
+    "label.music.category.",
+    "convert.channels.",
+    "convert.format.",
+    "convert.fps.",
+    "convert.group.",
+    "convert.preset.",
+    "convert.quality.",
+    "convert.rate.",
+    "convert.reframe.",
+    "convert.resolution.",
+    "normalize.preset."
   ],
   "allowed": ["Bearer "],
   "python": {

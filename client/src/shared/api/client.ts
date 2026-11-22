@@ -37,6 +37,11 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
     /** URL de un archivo de out/ para el <audio> o la forma de onda: sin cabeceras, el token va en la consulta. */
     fileUrl: (path: string) =>
       `${connection.baseUrl}/files?path=${encodeURIComponent(path)}&token=${encodeURIComponent(connection.token)}`,
+    /** URL de una ruta que una imagen o un medio pide sin cabeceras (el cuadro de `/media/frame`): el token va en la consulta. */
+    queryUrl: (path: string, query: Record<string, string | number>) => {
+      const params = new URLSearchParams({ ...Object.fromEntries(Object.entries(query).map(([k, v]) => [k, String(v)])), token: connection.token });
+      return `${connection.baseUrl}${path}?${params}`;
+    },
   };
 }
 

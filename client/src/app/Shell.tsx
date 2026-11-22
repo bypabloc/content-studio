@@ -22,6 +22,8 @@ const CleanerPage = lazy(() => import('@/features/cleaner/CleanerPage').then((mo
 const EnginesPage = lazy(() => import('@/features/engines/EnginesPage').then((module) => ({ default: module.EnginesPage })));
 const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })));
 const SubtitlesPage = lazy(() => import('@/features/subtitles/SubtitlesPage').then((module) => ({ default: module.SubtitlesPage })));
+const ConvertPage = lazy(() => import('@/features/convert/ConvertPage').then((module) => ({ default: module.ConvertPage })));
+const NormalizePage = lazy(() => import('@/features/normalize/NormalizePage').then((module) => ({ default: module.NormalizePage })));
 const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((module) => ({ default: module.WelcomeGate })));
 
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
@@ -78,6 +80,16 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'subtitles' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <SubtitlesPage />
+          </Suspense>
+        )}
+        {section?.id === 'convert' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <ConvertPage />
+          </Suspense>
+        )}
+        {section?.id === 'normalize' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <NormalizePage />
           </Suspense>
         )}
         {section?.id === 'settings' && (

@@ -166,5 +166,14 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [014-vista-previa-set-track](014-vista-previa-set-track.md) | La pista de JASSUB se manda cuando el worker está listo; antes, un cambio del documento tiraba el editor entero | `main` |
 | [014-cleaner-narracion-exportar](014-cleaner-narracion-exportar.md) | Subtitular desde el limpiador usa la última render y remapea las palabras; exportar escribe SRT, VTT o ASS en `out/subtitles/` | `main` |
 | [014-sin-cli-subtitles](014-sin-cli-subtitles.md) | No hay subcomando `studio subtitles`: ningún AC lo pide y la API y la UI cubren el flujo | `main` |
+| [015-armador-de-comandos](015-armador-de-comandos.md) | El catálogo de formatos son datos; `build` no pone la ruta de salida y `codec_unavailable` usa los códecs del sistema | `main` |
+| [015-render-de-conversion](015-render-de-conversion.md) | La duración de AC-2 se mide decodificando (el relleno de LAME); Opus solo admite 8–48 kHz; GIF en dos pasadas | `main` |
+| [015-presets-y-encuadre](015-presets-y-encuadre.md) | El ★ sale de la proporción; el encuadre es un grafo `-filter_complex`; `/media/frame` va en la T7 | `main` |
+| [015-recortar-unir-dividir](015-recortar-unir-dividir.md) | `remove` reusa el render del limpiador (duración exacta); los audios salen en WAV y los videos en MP4; dividir recodifica cada parte | `main` |
+| [015-normalizar](015-normalizar.md) | Dos pasadas con loudnorm lineal; el códec AAC del video va con bitrate fijo (el por defecto movió el nivel); REFACTOR de la narración diferido | `main` |
+| [015-seguir-a-la-persona](015-seguir-a-la-persona.md) | YuNet 2023mar fijado por revisión y SHA; `sendcmd` sin `eval` (este ffmpeg no lo trae); la receta vision va en versión 2 | `main` |
+| [015-pantallas-convertir-normalizar](015-pantallas-convertir-normalizar.md) | Pantallas de Convertir y Normalizar: 80 % de cobertura por archivo, el esquema de la API en staging antes del gate, y recortar y unir sin pantalla (la edición va al Editor) | `main` |
+| [015-nvenc-solo-con-gpu](015-nvenc-solo-con-gpu.md) | NVENC solo si hay GPU: que el ffmpeg traiga el encoder no basta | `main` |
+| [015-verificacion-final](015-verificacion-final.md) | Corridas reales de 015: insumos generados, manual y seguir a la persona por el servicio, medidas y errores; el video normalizado a −1 dBTP incumplía y pasó a −2 | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -1,4 +1,4 @@
-import { useSetting } from '@/shared/hooks/useSetting'
+import { useRecommendedValue } from '@/shared/hooks/useRecommendedValue'
 import { t } from '@/shared/i18n/t'
 
 import { UISelect, type UISelectOption } from '../UISelect'
@@ -33,9 +33,7 @@ export function UIRecommendedSelect({
   onChange?: (value: string) => void
   beforeChange?: (value: string) => Promise<boolean>
 }): React.JSX.Element {
-  const recommended = options.find((option) => option.recommended)?.value ?? options[0]?.value ?? ''
-  const [stored, setStored] = useSetting<string>(settingKey, recommended)
-  const value = options.some((option) => option.value === stored) ? stored : recommended
+  const [value, setStored] = useRecommendedValue(settingKey, options)
   const choose = (next: string) => {
     setStored(next)
     onChange?.(next)

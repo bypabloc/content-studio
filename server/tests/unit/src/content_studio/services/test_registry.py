@@ -8,6 +8,12 @@ from content_studio.services import (
     engine_install,
     engine_uninstall,
     engine_verify,
+    media_concat,
+    media_convert,
+    media_normalize,
+    media_reframe_track,
+    media_split,
+    media_trim,
     music,
     music_samples,
     narration,
@@ -43,6 +49,12 @@ def test_every_kind_exposes_validate_and_build_command():
         'engine.install': engine_install,
         'engine.uninstall': engine_uninstall,
         'engine.verify': engine_verify,
+        'media.reframe_track': media_reframe_track,
+        'media.normalize': media_normalize,
+        'media.convert': media_convert,
+        'media.trim': media_trim,
+        'media.concat': media_concat,
+        'media.split': media_split,
     }
     assert expected == SERVICES
     for service in SERVICES.values():
