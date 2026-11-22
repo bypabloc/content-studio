@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from content_studio import gpu_lock
-from content_studio.db import connection, jobs, schema
+from content_studio.db import connection, jobs, schema, subtitle_projects
 from content_studio.jobs import queue
 from content_studio.jobs.worker import Worker
 
@@ -181,6 +181,27 @@ def test_without_auto_render_the_analysis_queues_no_render(env):
     assert env.worker.run_now(analysis) == 'done'
 
     assert jobs.list_jobs(env.conn, kind='clean.render') == []
+
+
+def test_a_done_subtitles_job_registers_its_project(env):
+    """Al terminar `subtitles.create`, su documento queda como proyecto con el nombre del video (spec 014, D-1)."""
+    script = (
+        'import json, pathlib, sys\n'
+        "doc = {'version': 1, 'source': {'path': 'charla.mp4', 'kind': 'file'}, 'language': 'es', 'cues': []}\n"
+        "pathlib.Path(sys.argv[1], 'subtitles.json').write_text(json.dumps(doc), encoding='utf-8')\n"
+    )
+    env.services['subtitles.create'] = SimpleNamespace(
+        RESOURCE='gpu',
+        validate=lambda params: [],
+        build_command=lambda params, out_dir: [sys.executable, '-c', script, str(out_dir)],
+    )
+    job = queue.enqueue(env.conn, 'subtitles.create', {'origin': 'file', 'input': 'charla.mp4'}, env.services)
+
+    assert env.worker.run_now(job) == 'done'
+
+    [project] = subtitle_projects.list_projects(env.conn)
+    assert (project['name'], project['source_path']) == ('charla', 'charla.mp4')
+    assert project['doc_path'] == str(Path(jobs.get(env.conn, job)['output_dir']) / 'subtitles.json')
 
 
 def test_a_cancel_written_only_to_the_database_stops_a_running_process(env):

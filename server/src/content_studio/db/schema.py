@@ -50,6 +50,17 @@ MIGRATIONS = [
     );
     CREATE INDEX transcripts_source ON transcripts (source_path, model, language);
     """,
+    # Spec 014 (D-1): proyectos de subtítulos, solo nombre y rutas. Es la 5: la 4 ya es la caché de la 013.
+    """
+    CREATE TABLE subtitle_projects (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      source_path TEXT NOT NULL,
+      doc_path TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    """,
 ]
 
 

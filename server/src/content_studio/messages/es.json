@@ -130,6 +130,7 @@
   "error.source_outside_out": "La toma {source} está fuera de out/: solo se rehacen tomas del studio.",
   "error.storage_requires_move": "Cambia esta carpeta desde Ajustes > Almacenamiento.",
   "error.style_needs_key_bpm": "{style} no es un preset: define la tonalidad (key) y el bpm.",
+  "error.subtitle_project_not_found": "No existe el proyecto de subtítulos {project_id}.",
   "error.take_not_found": "No existe la toma {take}.",
   "error.tool_install_failed": "Instala {tool} y agrégalo al PATH. Consulta {instructions}.",
   "error.unauthorized": "Falta el token de la sesión o no es válido.",

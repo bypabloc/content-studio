@@ -130,6 +130,7 @@
   "error.source_outside_out": "A tomada {source} está fora de out/: só se refazem tomadas do studio.",
   "error.storage_requires_move": "Altere esta pasta em Configurações > Armazenamento.",
   "error.style_needs_key_bpm": "{style} não é um preset: defina a tonalidade (key) e o bpm.",
+  "error.subtitle_project_not_found": "O projeto de legendas {project_id} não existe.",
   "error.take_not_found": "A toma {take} não existe.",
   "error.tool_install_failed": "Instale {tool} e adicione-o ao PATH. Consulte {instructions}.",
   "error.unauthorized": "Falta o token da sessão ou ele não é válido.",

@@ -130,6 +130,7 @@
   "error.source_outside_out": "Take {source} is outside out/: only studio takes can be redone.",
   "error.storage_requires_move": "Change this folder in Settings > Storage.",
   "error.style_needs_key_bpm": "{style} is not a preset: set the key and the bpm.",
+  "error.subtitle_project_not_found": "The subtitle project {project_id} does not exist.",
   "error.take_not_found": "The take {take} does not exist.",
   "error.tool_install_failed": "Install {tool} and add it to PATH. See {instructions}.",
   "error.unauthorized": "The session token is missing or is not valid.",
