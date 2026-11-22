@@ -55,9 +55,17 @@ export function ReframePreview({ source, target, onChange }: Props): React.JSX.E
   }));
   const [mode] = useRecommendedValue('select.convert.reframe', modes);
   // El rectángulo que el usuario movió vale solo para este origen y este destino: si cambian, vuelve el de partida.
+  // `source` y `target` llegan como objetos nuevos en cada render: el de partida se memoriza por sus números, para que
+  // `reframe` no cambie de identidad en cada render (con `onChange` que actualiza el padre, eso es un ciclo infinito).
   const sizes = `${source.path}|${source.width}x${source.height}|${target.width}x${target.height}`;
   const [moved, setMoved] = useState<{ sizes: string; rect: CropRect } | null>(null);
-  const rect = moved?.sizes === sizes ? moved.rect : defaultRect(source, target);
+  const { width: sourceWidth, height: sourceHeight } = source;
+  const { width: targetWidth, height: targetHeight } = target;
+  const start = useMemo(
+    () => defaultRect({ width: sourceWidth, height: sourceHeight }, { width: targetWidth, height: targetHeight }),
+    [sourceWidth, sourceHeight, targetWidth, targetHeight],
+  );
+  const rect = moved?.sizes === sizes ? moved.rect : start;
   const setRect = (next: CropRect) => setMoved({ sizes, rect: next });
 
   const [jobId, setJobId] = useState<number | null>(null);

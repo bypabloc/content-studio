@@ -206,4 +206,16 @@ describe('ConvertPage', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
+
+  it('con Redes y un video, el preset y el encuadre aparecen sin un ciclo de renders', async () => {
+    renderPage();
+    await drop(['/media/clip.mp4']);
+
+    await userEvent.click(await screen.findByRole('combobox', { name: t('convert.format.label') }));
+    await userEvent.click(await screen.findByRole('option', { name: new RegExp(t('convert.format.social')) }));
+
+    // Con un solo preset, el selector se muestra como texto fijo: la prueba mira la etiqueta, no el combobox.
+    expect(await screen.findByText(t('convert.social.preset'))).toBeTruthy();
+    expect(await screen.findByRole('combobox', { name: t('convert.reframe.label') })).toBeTruthy();
+  });
 });
