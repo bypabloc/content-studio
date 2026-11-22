@@ -315,6 +315,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/{job_id}/outputs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Job Outputs
+         * @description Los audios y videos de la carpeta del trabajo, por ruta: lo que «Del historial» de Mezcla puede elegir.
+         */
+        get: operations["job_outputs_jobs__job_id__outputs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/jobs/{job_id}/cancel": {
         parameters: {
             query?: never;
@@ -646,6 +666,70 @@ export interface paths {
          * @description Quita el registro y mueve la carpeta del proyecto a `subtitles/.trash/`: no borra archivos.
          */
         delete: operations["delete_project_subtitles__project_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mix/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Prepare
+         * @description Crea el proyecto de mezcla. 422 si el modo de video no existe; 403 o 404 si una ruta no sirve.
+         */
+        post: operations["prepare_mix_prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mix/{project_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Project
+         * @description El proyecto; si su transcripción terminó desde la última vez, aquí quedan sus tramos.
+         */
+        get: operations["get_project_mix__project_id__get"];
+        /**
+         * Put Project
+         * @description Guarda las regiones editadas y los parámetros que cambian (los demás quedan). Devuelve el proyecto.
+         */
+        put: operations["put_project_mix__project_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mix/{project_id}/curve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Curve
+         * @description La curva de ducking del proyecto: su duración y los puntos [segundos, dB] que usa la vista previa.
+         */
+        get: operations["get_curve_mix__project_id__curve_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1043,6 +1127,24 @@ export interface components {
             [key: string]: unknown;
         };
         /**
+         * EditIn
+         * @description Las regiones de voz editadas (segundos de la voz, sin intro) y los parámetros que cambian.
+         */
+        EditIn: {
+            /** Regions */
+            regions: [
+                number,
+                number
+            ][];
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: unknown;
+            };
+        };
+        /**
          * EngineInfo
          * @description Estado, requisitos y metadatos de un motor. faster-whisper trae además sus modelos.
          */
@@ -1251,6 +1353,23 @@ export interface components {
              * @default true
              */
             edges: boolean;
+        };
+        /**
+         * PrepareIn
+         * @description Las pistas del proyecto: la voz, la música y un video opcional con su modo.
+         */
+        PrepareIn: {
+            /** Voice */
+            voice: string;
+            /** Music */
+            music: string;
+            /** Video */
+            video?: string | null;
+            /**
+             * Video Mode
+             * @default replace
+             */
+            video_mode: string;
         };
         /**
          * QueueOrder
@@ -1921,6 +2040,37 @@ export interface operations {
             };
         };
     };
+    job_outputs_jobs__job_id__outputs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     cancel_job_jobs__job_id__cancel_post: {
         parameters: {
             query?: never;
@@ -2489,6 +2639,144 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_mix_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrepareIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_mix__project_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_project_mix__project_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_curve_mix__project_id__curve_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
             };
             /** @description Validation Error */
             422: {

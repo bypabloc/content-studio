@@ -109,6 +109,7 @@ import {
   Magnet,
   Layers,
   Diamond,
+  SlidersHorizontal,
 } from 'lucide-react'
 
 // Íconos de lucide-react (SVG inline, sin red ni icon fonts) por nombre estable.
@@ -227,6 +228,7 @@ const ICONS = {
   narration: AudioLines,
   queue: ListOrdered,
   music: Music,
+  mix: SlidersHorizontal,
   voices: Mic,
   editor: Film,
   scissors: Scissors,

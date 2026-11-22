@@ -8,6 +8,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { label, t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
+import { openSection } from '@/shared/navigation/hash';
 
 type Job = components['schemas']['Job'];
 
@@ -70,7 +71,7 @@ function TrackPlayer({ path }: { path: string }): React.JSX.Element | null {
 
 /**
  * Comparar las pistas de un pedido (spec 011, D-6): duración real, aviso, voz, volumen, tonalidad y BPM. «Elegir» marca
- * una pista y deja una sola elegida por grupo. «Mandar a Mezclar» llega con la 016 y por ahora queda deshabilitado.
+ * una pista y deja una sola elegida por grupo. «Mandar a Mezclar» manda la pista elegida a la ranura de música de Mezcla (spec 016, D-4).
  */
 export function MusicCompare({ groupKey }: { groupKey: string }): React.JSX.Element {
   const api = useApi();
@@ -80,6 +81,8 @@ export function MusicCompare({ groupKey }: { groupKey: string }): React.JSX.Elem
     mutationFn: (row: Row) => api.post(`/jobs/${row.job.id}/choose`, { file: row.track.file }),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['music', 'tracks'] }),
   });
+
+  const chosen = rows.find((row) => row.chosen);
 
   if (rows.length === 0) return <UIText variant="caption">{t('music.compare.empty')}</UIText>;
   return (
@@ -107,8 +110,14 @@ export function MusicCompare({ groupKey }: { groupKey: string }): React.JSX.Elem
           <TrackPlayer path={`${row.job.output_dir ?? ''}/${row.track.file}`} />
         </UIStack>
       ))}
-      <UIButton variant="secondary" disabled>
-        {t('music.compare.mix')}
+      <UIButton
+        variant="secondary"
+        disabled={!chosen}
+        onClick={() => {
+          if (chosen) openSection('mix', { music: `${chosen.job.output_dir ?? ''}/${chosen.track.file}` });
+        }}
+      >
+        {t('mix.send')}
       </UIButton>
     </UIStack>
   );

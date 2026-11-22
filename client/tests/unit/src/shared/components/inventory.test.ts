@@ -13,7 +13,7 @@ const INVENTORY = {
   ],
   molecules: [
     'UIAlert', 'UICheckboxGroup', 'UICollapsible', 'UICombobox', 'UIDateParts', 'UIDateRangeFilter', 'UIDescriptionList',
-    'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
+    'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIJobPicker', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
     'UIPopover', 'UIRadioGroup', 'UIRecommendedSelect', 'UIRemoteImage', 'UIRowActions', 'UISearchField', 'UISearchSelect',
     'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
     'UIWhisperModelSelect',
