@@ -7,6 +7,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UICard } from '@/shared/components/atoms/UICard';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { UIEmpty } from '@/shared/components/molecules/UIEmpty';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
@@ -49,6 +50,8 @@ export function SubtitlesPage(): React.JSX.Element {
       setInput('');
       void queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
+    // El server rechaza el trabajo (p. ej. un .txt al importar) con su código: el aviso lleva el texto del catálogo.
+    onError: (error: Error) => toast.error(error.message),
   });
 
   async function pick() {

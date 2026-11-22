@@ -6,7 +6,9 @@ Un proyecto nace al terminar su trabajo `subtitles.create` (`jobs/worker.py`); a
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
+from content_studio.api.routes import subtitles as subtitles_routes
 from content_studio.db import subtitle_projects
 from content_studio.db.connection import connect
 from content_studio.subtitles.document import new_document, save
@@ -59,6 +61,22 @@ def test_put_saves_the_edited_document_and_get_returns_it(api):
     assert api.client.get(f'/subtitles/{project_id}', headers=api.headers).json()['cues'][0]['text'] == 'hola a todos'
 
 
+def test_export_writes_the_format_to_the_outputs_folder_and_returns_the_path(api, monkeypatch):
+    """POST /subtitles/{id}/export escribe el documento en `out/subtitles/` y devuelve su ruta; un formato malo, 422."""
+    project_id = _project(api)
+    out = api.tmp / 'out'
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: out)
+
+    response = api.client.post(f'/subtitles/{project_id}/export', json={'format': 'srt'}, headers=api.headers)
+
+    assert response.status_code == 200
+    target = Path(response.json()['path'])
+    assert target == out / 'subtitles' / f'{project_id}-clean.srt'
+    assert '00:00:00,000 --> ' in target.read_text(encoding='utf-8')
+    unknown = api.client.post(f'/subtitles/{project_id}/export', json={'format': 'mp3'}, headers=api.headers)
+    assert unknown.status_code == 422
+
+
 def test_put_rejects_a_body_without_cues(api):
     """Un documento sin lista de cues no se guarda: es un error de validación."""
     project_id = _project(api)
@@ -100,7 +118,9 @@ def test_delete_moves_the_folder_to_trash_and_removes_the_row(api):
 
 def test_post_queues_a_subtitles_job(api):
     """POST /subtitles encola `subtitles.create`; el proyecto aparece al terminar el trabajo."""
-    response = api.client.post('/subtitles', json={'origin': 'cleaner', 'input': 'analisis'}, headers=api.headers)
+    response = api.client.post(
+        '/subtitles', json={'origin': 'cleaner', 'input': 'analisis', 'analysis': 'carpeta'}, headers=api.headers
+    )
 
     assert response.status_code == 201
     assert response.json()['kind'] == 'subtitles.create'

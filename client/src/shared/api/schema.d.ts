@@ -580,6 +580,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/subtitles/{project_id}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Project
+         * @description Escribe el documento como SRT, VTT o ASS en `out/subtitles/` y devuelve la ruta del archivo.
+         */
+        post: operations["export_project_subtitles__project_id__export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/subtitles/fonts": {
         parameters: {
             query?: never;
@@ -1030,6 +1050,14 @@ export interface components {
             } | null;
             /** Models */
             models?: components["schemas"]["WhisperModel"][] | null;
+        };
+        /**
+         * ExportIn
+         * @description El formato de la exportación: `srt`, `vtt` o `ass`.
+         */
+        ExportIn: {
+            /** Format */
+            format: string;
         };
         /**
          * GpuInfo
@@ -2275,6 +2303,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_project_subtitles__project_id__export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */

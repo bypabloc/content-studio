@@ -21,7 +21,7 @@ from content_studio.api.schemas import Job
 from content_studio.db import jobs as store
 from content_studio.db import subtitle_projects
 from content_studio.jobs import queue
-from content_studio.subtitles import fonts
+from content_studio.subtitles import export, fonts
 from content_studio.subtitles.document import load, save
 
 router = APIRouter()
@@ -72,6 +72,26 @@ def create_project(
     if created is None:  # no pasa: el trabajo acaba de encolarse en la misma conexión
         raise ApiError(404, 'job_not_found', job_id=job_id)
     return created
+
+
+class ExportIn(BaseModel):
+    """El formato de la exportación: `srt`, `vtt` o `ass`."""
+
+    format: str
+
+
+@router.post('/subtitles/{project_id}/export')
+def export_project(
+    project_id: int, body: ExportIn, conn: Annotated[sqlite3.Connection, Depends(get_conn)]
+) -> dict[str, str]:
+    """Escribe el documento como SRT, VTT o ASS en `out/subtitles/` y devuelve la ruta del archivo."""
+    if body.format not in export.FORMATS:
+        raise ApiError(422, 'unknown_format', format=body.format)
+    document = load(_doc_path(conn, project_id))
+    target = paths.outputs_dir() / 'subtitles' / f'{project_id}-{Path(document["source"]["path"]).stem}.{body.format}'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(export.render(document, body.format), encoding='utf-8')
+    return {'path': str(target)}
 
 
 @router.get('/subtitles/fonts')

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SubtitlesEditor } from '@/features/subtitles/SubtitlesEditor';
 import { BUILTIN_PRESETS } from '@/features/subtitles/presets';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 
 const { api } = vi.hoisted(() => ({
@@ -12,6 +13,7 @@ const { api } = vi.hoisted(() => ({
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 // JASSUB se prueba aparte (SubtitlesPreview): aquí el editor solo recibe el ASS.
 vi.mock('@/features/subtitles/SubtitlesPreview', () => ({ SubtitlesPreview: () => null }));
+vi.mock('@/shared/components/molecules/UIToast', () => ({ toast: { error: vi.fn() } }));
 
 const word = (start: number, end: number, text: string) => ({ start, end, text, keyword: null });
 const doc = {
@@ -143,5 +145,37 @@ describe('SubtitlesEditor', () => {
 
     const uppercase = await screen.findByRole('switch', { name: t('subtitles.style.uppercase') });
     expect(uppercase.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('exporta en el formato elegido y muestra la ruta del archivo', async () => {
+    api.post.mockResolvedValue({ path: 'C:/out/subtitles/7-charla.ass' });
+    renderEditor();
+    await screen.findByDisplayValue('hola a todos');
+
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.export.ass') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/subtitles/7/export', { format: 'ass' }));
+    expect(await screen.findByText(t('subtitles.export.done', { path: 'C:/out/subtitles/7-charla.ass' }))).toBeTruthy();
+  });
+
+  it('un error al exportar avisa con el texto que devuelve el server', async () => {
+    api.post.mockRejectedValueOnce(new Error('El formato no existe'));
+    renderEditor();
+    await screen.findByDisplayValue('hola a todos');
+
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.export.srt') }));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('El formato no existe'));
+  });
+
+  it('un error al quemar avisa con el texto del server y no deja el editor roto', async () => {
+    api.post.mockRejectedValueOnce(new Error('Este ffmpeg no trae libass'));
+    renderEditor();
+    await screen.findByDisplayValue('hola a todos');
+
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.editor.burn') }));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Este ffmpeg no trae libass'));
+    expect(screen.getByDisplayValue('hola a todos')).toBeTruthy();
   });
 });

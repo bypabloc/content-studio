@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from content_studio.clean import cuts as clean_cuts
 from content_studio.subtitles import create_main
 from content_studio.subtitles.document import load
 
@@ -50,11 +51,45 @@ def test_words_from_transcript_reads_a_word_list_and_whisper_segments(tmp_path):
     assert create_main._words_from_transcript(whisper_file) == WORDS
 
 
+def test_cleaner_words_drop_the_cuts_and_move_the_rest_to_the_clean_timeline(tmp_path):
+    """AC-11: las palabras caen sobre el video limpio. Las de un corte se quitan; las demás pasan por `remap`."""
+    analysis = tmp_path / 'analysis'
+    analysis.mkdir()
+    clean_cuts.save(analysis, {'cuts': [{'start': 1.0, 'end': 2.0, 'enabled': True}], 'duration': 4.0})
+    words = [
+        {'word': 'uno', 'start': 0.2, 'end': 0.6},
+        {'word': 'dos', 'start': 1.2, 'end': 1.8},
+        {'word': 'tres', 'start': 2.5, 'end': 3.0},
+    ]
+
+    kept = create_main.clean_words(words, analysis)
+
+    assert [word['word'] for word in kept] == ['uno', 'tres']
+    assert kept[0]['start'] == pytest.approx(0.2)
+    assert kept[1]['start'] == pytest.approx(1.5)
+    assert kept[1]['end'] == pytest.approx(2.0)
+
+
 def test_main_writes_the_document_for_the_cleaner_origin_without_transcribing(tmp_path, capsys):
-    """El origen del limpiador no transcribe: lee sus palabras, deja `subtitles.json` y dice cuántos cues son."""
-    transcript = tmp_path / 'transcript.json'
+    """El origen del limpiador no transcribe: lee sus palabras y los cortes de SU análisis, deja `subtitles.json` y dice
+    cuántos cues son. El transcript vive en la caché de transcripción, no junto a los cortes (AC-11)."""
+    cache = tmp_path / 'cache'
+    cache.mkdir()
+    transcript = cache / 'transcript.json'
     transcript.write_text(json.dumps(WORDS), encoding='utf-8')
-    folder = _job(tmp_path, {'origin': 'cleaner', 'input': str(transcript), 'source': 'charla.mp4', 'language': 'es'})
+    analysis = tmp_path / 'analysis'
+    analysis.mkdir()
+    clean_cuts.save(analysis, {'cuts': [], 'duration': 1.0})
+    folder = _job(
+        tmp_path,
+        {
+            'origin': 'cleaner',
+            'input': str(transcript),
+            'analysis': str(analysis),
+            'source': 'charla.mp4',
+            'language': 'es',
+        },
+    )
 
     assert create_main.main(['--folder', str(folder)]) == 0
 

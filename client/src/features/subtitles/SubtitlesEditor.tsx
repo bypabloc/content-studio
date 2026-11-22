@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
@@ -6,6 +6,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
+import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 
 import { type StyleIn, toAss } from './ass';
@@ -62,11 +63,22 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
     return () => window.removeEventListener('keydown', onKey);
   }, [doc, focus]);
 
+  // Exportar (D-3): el documento como SRT, VTT o ASS en `out/subtitles/`; la ruta vuelve para mostrarla.
+  const exported = useMutation({
+    mutationFn: (format: 'srt' | 'vtt' | 'ass') => api.post<{ path: string }>(`/subtitles/${projectId}/export`, { format }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   async function enqueue(kind: 'subtitles.burn' | 'subtitles.translate') {
     // El trabajo lee el documento al arrancar: se guarda antes lo que aún espera el guardado.
-    if (draft) await api.put(`/subtitles/${projectId}`, draft);
-    await api.post('/jobs', { kind, params: { project_id: projectId } });
-    void queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    try {
+      if (draft) await api.put(`/subtitles/${projectId}`, draft);
+      await api.post('/jobs', { kind, params: { project_id: projectId } });
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] });
+    } catch (error) {
+      // Sin libass, el server rechaza la quema con `ffmpeg_no_libass`: el aviso dice cómo instalarlo.
+      toast.error((error as Error).message);
+    }
   }
 
   if (!doc) return <UIText variant="caption">{t('subtitles.editor.loading')}</UIText>;
@@ -96,6 +108,19 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
           {t('subtitles.editor.translate')}
         </UIButton>
       </UIStack>
+      <UIStack direction="row" gap="sm" align="center">
+        <UIText variant="caption">{t('subtitles.export.label')}</UIText>
+        <UIButton variant="secondary" disabled={exported.isPending} onClick={() => exported.mutate('srt')}>
+          {t('subtitles.export.srt')}
+        </UIButton>
+        <UIButton variant="secondary" disabled={exported.isPending} onClick={() => exported.mutate('vtt')}>
+          {t('subtitles.export.vtt')}
+        </UIButton>
+        <UIButton variant="secondary" disabled={exported.isPending} onClick={() => exported.mutate('ass')}>
+          {t('subtitles.export.ass')}
+        </UIButton>
+      </UIStack>
+      {exported.data && <UIText variant="caption">{t('subtitles.export.done', { path: exported.data.path })}</UIText>}
       <UIStack direction="row" gap="lg" align="start">
         <UIStack gap="md">
           <CueList doc={doc} onChange={setDraft} />

@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Any
 
 from content_studio import paths
+from content_studio.clean import cuts as clean_cuts
+from content_studio.clean.plan import remap
 from content_studio.common import ffmpeg as ff
 from content_studio.common import process
 from content_studio.db import schema
@@ -23,6 +25,19 @@ from content_studio.subtitles.sources import from_cleaner, from_import, from_nar
 from content_studio.transcription import cache, models, transcribe_main
 
 README = 'server/data/narration/README.md'
+
+
+def clean_words(words: list[dict], folder: Path) -> list[dict]:
+    """Las palabras del análisis sobre la línea de tiempo del video limpio (AC-11): las que caen en un corte se quitan
+    y las demás pasan por `remap`, con los cortes de `cuts.json` de la carpeta del análisis."""
+    cuts = clean_cuts.load(folder)['cuts']
+    kept = []
+    for word in words:
+        middle = (word['start'] + word['end']) / 2
+        if any(cut['enabled'] and cut['start'] <= middle < cut['end'] for cut in cuts):
+            continue
+        kept.append({**word, 'start': remap(word['start'], cuts), 'end': remap(word['end'], cuts)})
+    return kept
 
 
 def build_document(
@@ -93,7 +108,9 @@ def main(argv: list[str] | None = None) -> int:
             Path(source), model=params.get('model', models.recommended()), language=language, folder=folder
         )
     else:
-        words = _words_from_transcript(Path(source)) if origin == 'cleaner' else []
+        # Los cortes son los de su análisis (`analysis`): el transcript vive en la caché de transcripción (WARNING 014).
+        analysis = Path(params.get('analysis', ''))
+        words = clean_words(_words_from_transcript(Path(source)), analysis) if origin == 'cleaner' else []
     raw = Path(source).read_text(encoding='utf-8') if origin == 'import' else ''
     doc = build_document(
         origin,

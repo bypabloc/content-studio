@@ -14,6 +14,7 @@ from content_studio.transcription import models
 RESOURCE = 'gpu'
 ORIGINS = ('file', 'cleaner', 'narration', 'import')
 _TRANSCRIBES = ('file', 'narration')
+_IMPORT_SUFFIXES = ('.srt', '.vtt')
 
 
 def validate(params: dict) -> list[dict]:
@@ -25,8 +26,12 @@ def validate(params: dict) -> list[dict]:
     if not params.get('input'):
         code = 'missing_transcript' if origin == 'cleaner' else 'missing_input'
         errors.append({'code': code, 'params': {}})
+    if origin == 'cleaner' and not params.get('analysis'):
+        errors.append({'code': 'missing_analysis', 'params': {}})
     if origin == 'narration' and not params.get('script'):
         errors.append({'code': 'missing_script', 'params': {}})
+    if origin == 'import' and params.get('input') and Path(params['input']).suffix.lower() not in _IMPORT_SUFFIXES:
+        errors.append({'code': 'unsupported_subtitle_format', 'params': {'input': params['input']}})
     model = params.get('model', models.recommended())
     if origin in _TRANSCRIBES and model not in models.MODELS:
         errors.append({'code': 'unknown_engine', 'params': {'model': model}})
