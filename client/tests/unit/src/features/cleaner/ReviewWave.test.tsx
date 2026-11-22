@@ -8,6 +8,7 @@ import WaveSurfer from 'wavesurfer.js';
 // Los plugins y la onda se simulan: jsdom no dibuja la forma de onda. Se prueba la conexión con las regiones.
 const { regions, instance } = vi.hoisted(() => {
   const listeners: Record<string, Array<(...args: unknown[]) => void>> = {};
+  const waveListeners: Record<string, Array<(...args: unknown[]) => void>> = {};
   return {
     regions: {
       listeners,
@@ -18,7 +19,14 @@ const { regions, instance } = vi.hoisted(() => {
         return () => undefined;
       }),
     },
-    instance: { destroy: vi.fn(), on: vi.fn(() => () => undefined) },
+    instance: {
+      destroy: vi.fn(),
+      waveListeners,
+      on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+        (waveListeners[event] ??= []).push(handler);
+        return () => undefined;
+      }),
+    },
   };
 });
 
@@ -31,6 +39,11 @@ function fire(event: string, region: { id: string; start?: number; end?: number 
   for (const handler of regions.listeners[event] ?? []) handler(region);
 }
 
+// WaveSurfer avisa «ready» cuando el audio ya tiene duración: solo entonces se dibujan los cortes.
+function fireReady() {
+  for (const handler of instance.waveListeners.ready ?? []) handler(10);
+}
+
 const cuts: Cut[] = [
   { start: 1, end: 2, enabled: true },
   { start: 5, end: 6, enabled: true },
@@ -39,6 +52,7 @@ const cuts: Cut[] = [
 describe('ReviewWave (spec 013, D-6)', () => {
   beforeEach(() => {
     for (const key of Object.keys(regions.listeners)) delete regions.listeners[key];
+    for (const key of Object.keys(instance.waveListeners)) delete instance.waveListeners[key];
     vi.clearAllMocks();
   });
 
@@ -52,6 +66,11 @@ describe('ReviewWave (spec 013, D-6)', () => {
     render(<ReviewWave media={media} peaks={peaks} duration={10} cuts={cuts} selected={0} onCutsChange={vi.fn()} onSelect={vi.fn()} />);
 
     expect(WaveSurfer.create).toHaveBeenCalledWith(expect.objectContaining({ media, peaks: [peaks] }));
+    // Antes de «ready» la duración es 0 y WaveSurfer fijaría cada región en 0: no se dibuja nada todavía.
+    expect(regions.addRegion).not.toHaveBeenCalled();
+
+    fireReady();
+
     expect(regions.addRegion).toHaveBeenCalledWith(expect.objectContaining({ id: '0', start: 1, end: 2, drag: true, resize: true }));
     expect(regions.addRegion).toHaveBeenCalledWith(expect.objectContaining({ id: '1', start: 5, end: 6, drag: true, resize: true }));
   });
@@ -98,6 +117,7 @@ describe('ReviewWave (spec 013, D-6)', () => {
     const { rerender } = render(
       <ReviewWave media={null} peaks={peaks} duration={10} cuts={cuts} selected={0} onCutsChange={vi.fn()} onSelect={vi.fn()} />,
     );
+    fireReady();
     vi.clearAllMocks();
 
     rerender(

@@ -43,6 +43,7 @@ export interface ReviewWaveProps {
 export function ReviewWave({ media, peaks, duration, cuts, selected, onCutsChange, onSelect }: ReviewWaveProps): React.JSX.Element {
   const container = useRef<HTMLDivElement>(null);
   const regions = useRef<ReturnType<typeof RegionsPlugin.create> | null>(null);
+  const ready = useRef(false);
   // Los oyentes de las regiones leen siempre la lista actual, sin reengancharse en cada cambio.
   const latest = useRef({ cuts, onCutsChange, onSelect });
 
@@ -73,16 +74,22 @@ export function ReviewWave({ media, peaks, duration, cuts, selected, onCutsChang
       latest.current.onSelect(index);
       latest.current.onCutsChange(toggleCut(latest.current.cuts, index));
     });
+    // Los cortes se dibujan al llegar «ready»: antes, WaveSurfer no conoce la duración y fija cada región en 0 (marcadores).
+    ready.current = false;
+    instance.on('ready', () => {
+      ready.current = true;
+      drawCuts(plugin, latest.current.cuts);
+    });
     regions.current = plugin;
-    drawCuts(plugin, latest.current.cuts);
     return () => {
       regions.current = null;
+      ready.current = false;
       instance.destroy();
     };
   }, [media, peaks, duration]);
 
   useEffect(() => {
-    if (regions.current) drawCuts(regions.current, cuts);
+    if (regions.current && ready.current) drawCuts(regions.current, cuts);
   }, [cuts]);
 
   return <UIStack ref={container} data-selected={selected} className="w-full" />;
