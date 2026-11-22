@@ -55,3 +55,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
 | [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 8 carpetas huérfanas de `content-studio-worktrees/` con ACL de administrador; las borra el usuario con terminal elevada | Cuando el usuario lo pida; no bloquea | Usuario |
+| [014-escucha-y-revision](014-escucha-y-revision.md) | Escuchar la narración alineada, revisar la sincronía, la UI real y los presets incluidos (gusto) | Después del merge a dev; no bloquea | Usuario |
+| [014-audio-quemar-copia](014-audio-quemar-copia.md) | Al quemar, el audio PCM de un MOV no se ha probado: la copia del audio puede fallar en MP4 | En la verificación final (T9) | Agente |
+| [014-traduccion-real](014-traduccion-real.md) | Falta la prueba `-m local` automatizada de la traducción con `small`; la corrida real y el cierre ya están verificados a mano | Después del merge a dev; no bloquea | Agente |
+| [014-capturas-editor](014-capturas-editor.md) | Capturas del editor (claro y oscuro) y cuadros de la quema, comparados con `image-reader` (batería 03, puntos 3 y 9) | Después del merge a dev; no bloquea | Agente |

@@ -1,7 +1,7 @@
 {
   "params": { "input": "C:/fake/in/charla.mp4", "min_gap": 0.5, "padding": 0.15, "edges": true },
   "duration": 60,
-  "transcript": "C:/fake/out/clean/9/transcript.json",
+  "transcript": "C:/fake/cache/transcription/9-transcript.json",
   "cuts": [
     { "start": 10.0, "end": 12.5, "enabled": true, "edited": false },
     { "start": 30.0, "end": 31.2, "enabled": true, "edited": false }

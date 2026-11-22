@@ -75,12 +75,12 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Los medios de pru
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Documento y segmentación | AC-1, AC-5 | — | `unit` | [x] |
 | T2 | Formatos y ASS | AC-2, AC-3 | T1 | `unit` | [x] |
-| T3 | Orígenes y alineación | AC-4 | T1 | `unit` | [ ] |
-| T4 | Fuentes | AC-8 | — | `unit` | [ ] |
-| T5 | Quemar | AC-6, AC-7 | T2, T4 | `unit` | [ ] |
-| T6 | Traducir | AC-12 | T3 | `unit`, `-m local` | [ ] |
-| T7 | Client | AC-9, AC-10 | T2–T6 | `client-unit`, `budget` | [ ] |
-| T8 | e2e y docs | AC-11 | T7 | `e2e` | [ ] |
+| T3 | Orígenes y alineación | AC-4 | T1 | `unit` | [x] |
+| T4 | Fuentes | AC-8 | — | `unit` | [x] |
+| T5 | Quemar | AC-6, AC-7 | T2, T4 | `unit` | [x] |
+| T6 | Traducir | AC-12 | T3 | `unit`, `-m local` | [x] |
+| T7 | Client | AC-9, AC-10 | T2–T6 | `client-unit`, `budget` | [x] |
+| T8 | e2e y docs | AC-11 | T7 | `e2e` | [x] |
 | T9 | Corridas reales | AC-6, AC-8, AC-11, AC-12 | T8 | verificación final | [ ] |
 
 ## 4. Commits

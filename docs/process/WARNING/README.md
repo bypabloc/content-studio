@@ -163,5 +163,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [014-alineacion-narracion](014-alineacion-narracion.md) | El guion se alinea con las palabras de whisper por difflib, normalizando tildes y signos; las palabras sin par se interpolan | `main` |
 | [014-origenes-gpu](014-origenes-gpu.md) | `subtitles.create` toma la GPU para todos sus orígenes (la cola no lo decide por parámetro) | `main` |
 | [014-editor-y-preview](014-editor-y-preview.md) | Editor y vista previa con JASSUB 2.5.36 exacto, 35 claves nuevas en el catálogo y el límite del JS inicial a 234 kB | `main` |
+| [014-vista-previa-set-track](014-vista-previa-set-track.md) | La pista de JASSUB se manda cuando el worker está listo; antes, un cambio del documento tiraba el editor entero | `main` |
+| [014-cleaner-narracion-exportar](014-cleaner-narracion-exportar.md) | Subtitular desde el limpiador usa la última render y remapea las palabras; exportar escribe SRT, VTT o ASS en `out/subtitles/` | `main` |
+| [014-sin-cli-subtitles](014-sin-cli-subtitles.md) | No hay subcomando `studio subtitles`: ningún AC lo pide y la API y la UI cubren el flujo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

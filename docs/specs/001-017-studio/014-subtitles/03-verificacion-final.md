@@ -38,3 +38,21 @@ Las rutas de los videos quemados (`reels` y `classic`), los SRT/VTT y la pista e
 2. PR a `dev` si no existe, con los cuadros comparados, las rutas y las fichas.
 3. `gh pr checks <n> --watch` y `gh pr merge <n> --merge`.
 4. En el principal: `git switch dev && git pull` y `python -m devtools worktree close 014-subtitles`.
+
+## 6. Resultados (T8 y T9)
+
+| Punto | Estado | Evidencia |
+| :--- | :--- | :--- |
+| 1. Batería | Hecho: gate `all` y e2e | e2e 44/44 (`logs/e2e-014-t8-final.log`); gate sobre el commit final (`logs/test-runner-all-014-t8-3.log`, ver `PROGRESS.md`) |
+| 2. `pytest -m local` | Pendiente | `PENDING/014-traduccion-real` |
+| 3. CLI `studio subtitles` | Sin efecto | `WARNING/014-sin-cli-subtitles` |
+| 2. Desde un archivo con large-v3-turbo | Pendiente | `PENDING/014-capturas-editor` (no corrido en T9) |
+| 3. Quemar `reels` y `classic` | Parcial: `reels` medido en T5 | 1080×1920, 3 s, amarillo al centro (`WARNING/014-quemar`); `classic` y los cuadros comparados, pendientes |
+| 4. Desde el limpiador (AC-11) | Hecho | `create_main` sobre el análisis 25 y el render 26 de la 013: 75 de 76 palabras, todas dentro del audio limpio (27,25 s), inicios crecientes (`tmp/spec-014/check_t9_cleaner.py`) |
+| 5. Desde una narración | Pendiente (escucha) | Alineación cubierta por tests y e2e de AC-4; la escucha es del usuario (`PENDING/014-escucha-y-revision`) |
+| 6. Importar SRT con BOM y CRLF | Hecho | 2 cues con tiempos exactos y sin BOM (`tmp/spec-014/t9-import`); editar y exportar VTT cubierto por e2e |
+| 7. Traducir al inglés | Hecho, salvo la prueba automatizada | whisper `small` real: 11 segmentos en inglés (`tmp/spec-014/t9-translate`); cierre a `tracks.en` con 11 cues y `.en.srt`/`.en.vtt` (`PENDING/014-traduccion-real`) |
+| 8. Fuentes | Parcial | AC-8 en T4: 5 familias, Arial y Segoe UI detectadas; quemar con Segoe UI no se corrió |
+| 9. Capturas del editor | Pendiente | `PENDING/014-capturas-editor` |
+
+Verificado además: `ffmpeg` del sistema con libass (AC-6 en T5); la cola y la GPU se liberaron al terminar cada corrida real.
