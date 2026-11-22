@@ -25,4 +25,4 @@ def filter_path(path: Path | str) -> str:
     >>> filter_path('C:/x/follow.txt')
     'C\\:/x/follow.txt'
     """
-    return Path(path).as_posix().replace(':', '\\:')
+    return str(path).replace('\\', '/').replace(':', '\\:')
