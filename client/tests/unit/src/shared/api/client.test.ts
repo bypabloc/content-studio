@@ -36,6 +36,14 @@ describe('createApi', () => {
     );
   });
 
+  it('arma la URL de un medio con el token en la consulta, para las imágenes y el audio que no mandan cabeceras', () => {
+    const api = createApi(connection, reply({}));
+
+    expect(api.queryUrl('/media/frame', { path: 'out/a b.mp4', t: 1.5 })).toBe(
+      'http://127.0.0.1:9000/media/frame?path=out%2Fa+b.mp4&t=1.5&token=tok',
+    );
+  });
+
   it('manda el cuerpo como JSON', async () => {
     const fetcher = reply({ key: 'ui.theme', value: 'dark' });
     await createApi(connection, fetcher).put('/settings/ui.theme', { value: 'dark' });

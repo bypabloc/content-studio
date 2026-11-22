@@ -19,8 +19,9 @@ const INVENTORY = {
     'UIWhisperModelSelect',
   ],
   organisms: [
-    'UIAppShell', 'UIBottomSheet', 'UIChart', 'UIChartCard', 'UICommandPalette', 'UIConfirmDialog', 'UIDateRangePicker',
-    'UIDialog', 'UIFileDrop', 'UIFloatingToolbar', 'UIFormDialog', 'UIRepeatGroup', 'UIRowTable', 'UITable',
+    'UIAppShell', 'UIBottomSheet', 'UIChart', 'UIChartCard', 'UICommandPalette', 'UIConfirmDialog', 'UICropArea',
+    'UIDateRangePicker', 'UIDialog', 'UIDropZone', 'UIErrorDetailDialog', 'UIFileDrop', 'UIFloatingToolbar', 'UIFormDialog',
+    'UIRepeatGroup', 'UIRowTable', 'UITable',
   ],
 } as const
 

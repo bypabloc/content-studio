@@ -46,15 +46,15 @@ overrides:
   # Los nombres de idioma («Español», «Português») son iguales en los tres catálogos (spec 007, D-6): por palabra.
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
-    words: [desinstalación, masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português, deutsch, français, renderizar, renderizando]
+    words: [desinstalación, masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português, deutsch, français, renderizar, renderizando, bitrate, kbps, vorbis, youtube]
   # Catálogo en inglés (spec 007, D-9): sus nombres de idioma van por palabra.
   - filename: 'server/src/content_studio/messages/en.json'
     language: en
-    words: [español, português, deutsch, français, italiano]
+    words: [español, português, deutsch, français, italiano, bitrate, kbps, vorbis, youtube]
   # Catálogo en portugués de Brasil (spec 007, D-9): se revisa con su diccionario, como el español.
   - filename: 'server/src/content_studio/messages/pt.json'
     language: en,pt-br
-    words: [celtic, christmas, saas, español, deutsch, français]
+    words: [celtic, christmas, saas, español, deutsch, français, bitrate, kbps, vorbis, youtube]
   # Nombres de códecs, filtros de ffmpeg y de pytest (spec 015, D-1 y T2): el catálogo y sus pruebas los usan tal cual.
   - filename: 'server/**/content_studio/media/**'
     words: [libmp, libopus, libvorbis, vorbis, libvpx, libsvtav, lanczos, palettegen, paletteuse, lavfi, pytestmark, boxblur, deesser, acompressor, anull, aout, vout, acrossfade, xfade, fltp, setsar, frombytes]
@@ -69,7 +69,7 @@ overrides:
   # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: el diccionario es-es no la trae; va por palabra.
   - filename: 'client/**'
     language: en,es
-    words: [masterización, renderiza, renderizar, replanifican, arrastrable, reusa]
+    words: [masterización, renderiza, renderizar, replanifican, arrastrable, reusa, vorbis, youtube]
   # Los e2e (spec 005, D-6) llevan comentarios en español, como client/: sin el locale es, sus palabras fallan.
   - filename: 'tests/e2e/**'
     language: en,es

@@ -34,6 +34,9 @@ export interface paths {
         /**
          * Catalog
          * @description Catálogo de un tipo de trabajo. Cada selector trae exactamente una opción `recommended`.
+         *
+         *     `media` (spec 015, D-1 y D-2) lista los formatos de salida y los presets de red; `aspect` (ancho sobre alto de la
+         *     fuente) elige el preset ★.
          */
         get: operations["catalog_catalog__kind__get"];
         put?: never;
@@ -940,9 +943,31 @@ export interface paths {
         };
         /**
          * Media Info
-         * @description Duración (s), LUFS integrado y pico real (dBTP) del audio.
+         * @description Duración (s), LUFS integrado y pico (dBTP); un video trae además su ancho y alto (para la ★ de Redes).
          */
         get: operations["media_info_media_info_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media/frame": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Media Frame
+         * @description Un cuadro JPEG del video en el segundo `t`, para la vista previa del encuadre (spec 015, D-6).
+         *
+         *     Se guarda en `outputs/tmp/frames/` por (ruta, mtime, tamaño, t): un cambio en el archivo da otro cuadro.
+         */
+        get: operations["media_frame_media_frame_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1415,7 +1440,9 @@ export interface operations {
     };
     catalog_catalog__kind__get: {
         parameters: {
-            query?: never;
+            query?: {
+                aspect?: number;
+            };
             header?: never;
             path: {
                 kind: string;
@@ -3040,6 +3067,38 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    media_frame_media_frame_get: {
+        parameters: {
+            query: {
+                path: string;
+                t?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
