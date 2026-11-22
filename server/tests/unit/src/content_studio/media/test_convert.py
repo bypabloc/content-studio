@@ -115,6 +115,51 @@ def test_an_unknown_target_is_refused():
     assert caught.value.code == 'unknown_target'
 
 
+def test_the_encoders_are_the_names_ffmpeg_lists_after_its_flags():
+    """`ffmpeg -encoders` lista cada códec con sus banderas de seis letras y luego su nombre."""
+    listing = (
+        'Encoders:\n'
+        ' V..... = Video\n'
+        ' V....D libx264              libx264 H.264 / AVC (codec h264)\n'
+        ' A....D aac                  AAC (Advanced Audio Coding)\n'
+    )
+
+    assert convert.parse_encoders(listing) == frozenset({'libx264', 'aac'})
+
+
+@needs_ffmpeg
+def test_main_converts_a_wav_to_mp3_in_the_job_folder(tmp_path):
+    """El CLI del conversor escribe `converted.mp3` en la carpeta del trabajo, con el códec mp3."""
+    source = tmp_path / 'tone.wav'
+    subprocess.run(
+        ['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=1', str(source)], check=True
+    )
+    job = tmp_path / 'job'
+
+    assert convert.main(['--input', str(source), '--target', 'mp3', '--out-dir', str(job), '--options', '{}']) == 0
+
+    out = job / 'converted.mp3'
+    assert out.is_file()
+    codec = subprocess.run(
+        [
+            'ffprobe',
+            '-v',
+            'error',
+            '-select_streams',
+            'a:0',
+            '-show_entries',
+            'stream=codec_name',
+            '-of',
+            'csv=p=0',
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    assert codec == 'mp3'
+
+
 def test_the_catalog_lists_every_audio_target_with_its_extension():
     """AC-1: el catálogo tiene los seis formatos de audio, cada uno con su extensión."""
     from content_studio.media.formats import TARGETS

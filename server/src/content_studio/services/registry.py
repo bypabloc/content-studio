@@ -7,6 +7,7 @@ from content_studio.services import (
     engine_uninstall,
     engine_verify,
     media_concat,
+    media_convert,
     media_normalize,
     media_reframe_track,
     media_split,
@@ -28,6 +29,7 @@ from content_studio.services import (
 SERVICES = {
     'media.reframe_track': media_reframe_track,
     'media.normalize': media_normalize,
+    'media.convert': media_convert,
     'media.trim': media_trim,
     'media.concat': media_concat,
     'media.split': media_split,

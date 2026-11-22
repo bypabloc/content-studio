@@ -6,14 +6,21 @@ salida (la pone quien llama), así `build` es puro y se prueba con argumentos go
 
 from __future__ import annotations
 
+import argparse
+import json
+import re
 import subprocess
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from content_studio.common import progress
 from content_studio.common.encode import video_codec
 from content_studio.common.ffmpeg import probe_duration
+from content_studio.media.edit import has_video
 from content_studio.media.formats import TARGETS
+from content_studio.media.reframe import follow_options
 from content_studio.media.reframe import graph as reframe_graph
 
 _PCM = {16: 'pcm_s16le', 24: 'pcm_s24le', 32: 'pcm_f32le'}
@@ -187,3 +194,54 @@ def _mix_args(options: dict[str, Any]) -> list[str]:
     if 'sample_rate' in options:
         args += ['-ar', str(options['sample_rate'])]
     return args
+
+
+def parse_encoders(listing: str) -> frozenset[str]:
+    """Los nombres de los códecs de `ffmpeg -encoders`: una bandera de seis letras y luego el nombre."""
+    return frozenset(match[1] for match in re.finditer(r'^\s[A-Z.]{6}\s+(?!=\s)(\S+)', listing, re.MULTILINE))
+
+
+def available_encoders() -> frozenset[str]:
+    """Los códecs que trae el ffmpeg del sistema."""
+    listing = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True, check=True).stdout
+    return parse_encoders(listing)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Los flags del conversor de un trabajo: --input, --target, --out-dir y --options (JSON)."""
+    parser = argparse.ArgumentParser(prog='convert', description='Convert one file to a target format.')
+    parser.add_argument('--input', required=True, help='audio or video to convert')
+    parser.add_argument('--target', required=True, choices=sorted(TARGETS), help='target format from the catalog')
+    parser.add_argument('--out-dir', required=True, help='job folder: the result is converted.<ext> inside')
+    parser.add_argument('--options', default='{}', help='JSON with quality, layout and reframe options')
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Entrada del trabajo: convierte el archivo y avisa el avance.
+
+    Un `follow-face` lee su `track.json` y arma las órdenes. Corre en el worker: ffmpeg no carga modelos.
+    """
+    args = build_parser().parse_args(argv)
+    job = Path(args.out_dir)
+    job.mkdir(parents=True, exist_ok=True)
+    options = json.loads(args.options)
+    reframe_options = options.get('reframe')
+    if reframe_options and reframe_options.get('mode') == 'follow-face':
+        track = json.loads(Path(reframe_options['track']).read_text(encoding='utf-8'))
+        options['reframe'] = follow_options(track, options['width'], options['height'], job)
+    source = Path(args.input)
+    output = job / f'converted{TARGETS[args.target]["ext"]}'
+    run(
+        {'path': str(source), 'has_video': has_video(source)},
+        args.target,
+        options,
+        output,
+        encoders=available_encoders(),
+        on_progress=lambda fraction: progress.emit(fraction, 'convert'),
+    )
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -61,6 +61,16 @@ def sendcmd_script(xs: list[int], fps: float) -> str:
     return ''.join(f'{index / fps:.6f} crop x {x};\n' for index, x in enumerate(xs))
 
 
+def follow_options(track: dict[str, Any], width: int, height: int, folder: Path) -> dict[str, Any]:
+    """El encuadre `follow-face` de un `track.json` (el de `vision/face_track_main`): escribe en `folder` las órdenes de
+    `sendcmd` y devuelve las opciones de `graph`, con el ancho del recorte."""
+    crop_w = crop_width(track['height'], width, height)
+    xs = crop_xs(track['centers'], track['width'], crop_w)
+    commands = folder / 'follow.txt'
+    commands.write_text(sendcmd_script(xs, track['fps']), encoding='utf-8')
+    return {'mode': 'follow-face', 'commands': str(commands), 'crop_w': crop_w}
+
+
 def _even(value: int) -> int:
     return value // 2 * 2
 

@@ -167,6 +167,17 @@ def test_follow_face_graph_names_the_commands_file_with_colons_escaped():
     assert graph == "[0:v]sendcmd=f='C\\:/x/follow.txt',crop=w=608:h=ih:x=0:y=0,scale=1080:1920[v]"
 
 
+def test_follow_options_writes_the_crop_commands_from_the_track(tmp_path):
+    """AC-5: el seguimiento (track.json) pasa a ser el modo `follow-face`: órdenes y ancho del recorte."""
+    track = {'fps': 5.0, 'width': 1920, 'height': 1080, 'centers': [0.25, 0.75]}
+
+    options = reframe.follow_options(track, 1080, 1920, tmp_path)
+
+    assert options == {'mode': 'follow-face', 'commands': str(tmp_path / 'follow.txt'), 'crop_w': 608}
+    commands = (tmp_path / 'follow.txt').read_text(encoding='utf-8').splitlines()
+    assert commands == ['0.000000 crop x 176;', '0.200000 crop x 1136;']
+
+
 def _halves(tmp_path: Path) -> Path:
     """Un video de 1 s: la mitad izquierda roja y la derecha azul (1920×1080, 25 cuadros por segundo)."""
     path = tmp_path / 'halves.mp4'
