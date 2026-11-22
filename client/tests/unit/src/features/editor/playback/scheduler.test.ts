@@ -29,9 +29,9 @@ describe('scheduler de vista previa', () => {
 
   it('usa el intervalo de la fuente desde el inicio del clip y deja fuera el extremo final', () => {
     const item = clip('a', 'voice', 3, 5, 9);
-    expect(activeClips(doc([item]), 2.99)).toEqual([]);
+    expect(activeClips(doc([item]), 1)).toEqual([expect.objectContaining({ clip: item })]);
     expect(sourceTimeAt(item, 3.5)).toBe(5.5);
-    expect(activeClips(doc([item]), 7)).toEqual([]);
+    expect(activeClips(doc([item]), 9.01)).toEqual([]);
   });
 
   it('programa rampas lineales de fade en ganancia con el volumen combinado', () => {
@@ -70,8 +70,8 @@ describe('scheduler de vista previa', () => {
     expect(now).toHaveBeenCalledTimes(3);
   });
 
-  it('corrige solo una deriva mayor a 50 ms', () => {
+  it('corrige solo una deriva mayor a 40 ms', () => {
     expect(shouldCorrectDrift(2, 2.04)).toBe(false);
-    expect(shouldCorrectDrift(2, 2.06)).toBe(true);
+    expect(shouldCorrectDrift(2, 2.041)).toBe(true);
   });
 });

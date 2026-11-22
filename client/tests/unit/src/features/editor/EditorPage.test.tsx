@@ -1,12 +1,13 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorPage } from '@/features/editor/EditorPage';
 import type { Doc } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
-const { api } = vi.hoisted(() => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn() } }));
+const { api, open } = vi.hoisted(() => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn() }, open: vi.fn() }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
+vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
 
 const PATH = 'D:/out/editor/2026-11-22-demo/project.json';
 const doc: Doc = {
@@ -25,6 +26,7 @@ beforeEach(() => {
   );
   api.post.mockResolvedValue(project);
   api.put.mockResolvedValue({ hash: 'hash-2', missing: [] });
+  open.mockResolvedValue(null);
 });
 
 afterEach(() => {
@@ -35,7 +37,7 @@ afterEach(() => {
 describe('EditorPage', () => {
   it('crea un proyecto y conecta las operaciones con deshacer y rehacer', async () => {
     render(<EditorPage />);
-    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.create') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('mix.create') }));
 
     expect(api.post).toHaveBeenCalledWith('/editor/projects', { name: t('editor.project.default_name') });
     expect(await screen.findByText('demo')).toBeTruthy();
@@ -76,7 +78,8 @@ describe('EditorPage', () => {
     const workspace = screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) });
     fireEvent.keyDown(workspace, { key: 'Home' });
     fireEvent.keyDown(workspace, { key: 'r' });
-    expect(screen.getByRole('button', { name: t('editor.transport.record') }).getAttribute('aria-pressed')).toBe('true');
+    expect(await screen.findByText(t('editor.recorder.arm_track'))).toBeTruthy();
+    expect(screen.getByRole('button', { name: t('voices.record.start') }).getAttribute('aria-pressed')).toBe('false');
     fireEvent.keyDown(workspace, { key: '+' });
     expect(screen.getByRole('group', { name: t('editor.timeline.ruler') }).getAttribute('style')).toContain('width: 1600px');
     fireEvent.keyDown(workspace, { key: '=' });
@@ -86,10 +89,31 @@ describe('EditorPage', () => {
     fireEvent.keyDown(workspace, { key: 'Spacebar' });
     fireEvent.keyDown(workspace, { key: 'x' });
     fireEvent.keyDown(workspace, { key: 'r', repeat: true });
-    expect(screen.getByRole('button', { name: t('editor.transport.record') }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: t('voices.record.start') }).getAttribute('aria-pressed')).toBe('false');
 
     fireEvent.keyDown(screen.getByRole('toolbar', { name: t('editor.transport.label') }), { key: 'n' });
     expect(screen.getByRole('button', { name: t('editor.transport.magnet') }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('abre un proyecto desde una carpeta elegida con el diálogo nativo', async () => {
+    open.mockResolvedValue('D:\\Proyectos\\demo');
+    render(<EditorPage />);
+    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open_file') }));
+
+    expect(open).toHaveBeenCalledWith({ directory: true, multiple: false });
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(
+      `/editor/projects?path=${encodeURIComponent('D:\\Proyectos\\demo\\project.json')}`,
+    ));
+    expect(await screen.findByRole('toolbar', { name: t('editor.transport.label') })).toBeTruthy();
+  });
+
+  it('crea un proyecto y arma su primera pista al grabar desde Inicio', async () => {
+    render(<EditorPage />);
+    fireEvent.click(await screen.findByRole('button', { name: t('voices.record.start') }));
+
+    expect(api.post).toHaveBeenCalledWith('/editor/projects', { name: t('editor.project.default_name') });
+    const arm = await screen.findByRole('button', { name: t('editor.track.arm', { name: 'Voz' }) });
+    expect(arm.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('muestra el estado de carga y el estado vacío de proyectos recientes', async () => {
@@ -119,7 +143,7 @@ describe('EditorPage', () => {
     api.get.mockResolvedValue({ paths: [] });
     api.post.mockRejectedValueOnce(new Error('offline'));
     render(<EditorPage />);
-    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.create') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('mix.create') }));
     expect(await screen.findByText(t('editor.project.load_error'))).toBeTruthy();
   });
 
@@ -130,5 +154,31 @@ describe('EditorPage', () => {
     render(<EditorPage />);
     fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open', { name: 'project.json' }) }));
     expect(await screen.findByRole('toolbar', { name: t('editor.transport.label') })).toBeTruthy();
+  });
+
+  it('ignora la cancelación del diálogo y abre una carpeta POSIX', async () => {
+    render(<EditorPage />);
+    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open_file') }));
+    await waitFor(() => expect(open).toHaveBeenCalledWith({ directory: true, multiple: false }));
+    expect(api.get).toHaveBeenCalledTimes(1);
+
+    cleanup();
+    open.mockResolvedValueOnce('/home/pablo/editor/');
+    api.get.mockImplementation((url: string) =>
+      url === '/editor/projects/recent' ? Promise.resolve({ paths: [] }) : Promise.resolve(project),
+    );
+    render(<EditorPage />);
+    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open_file') }));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(
+      `/editor/projects?path=${encodeURIComponent('/home/pablo/editor/project.json')}`,
+    ));
+  });
+
+  it('muestra un error si el diálogo nativo no puede abrirse', async () => {
+    open.mockRejectedValueOnce('dialog unavailable');
+    render(<EditorPage />);
+    fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open_file') }));
+
+    expect(await screen.findByText(t('editor.project.load_error'))).toBeTruthy();
   });
 });

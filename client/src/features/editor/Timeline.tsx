@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { DragEvent as ReactDragEvent } from 'react';
 
 import { UILane } from '@/shared/components/atoms/UILane';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -8,6 +9,7 @@ import { t } from '@/shared/i18n/t';
 import { ClipView } from './ClipView';
 import { Ruler } from './Ruler';
 import { TrackHeader } from './TrackHeader';
+import type { Levels } from '@/features/recording/capture/useRecorder';
 import { pxToTime, selectInRange } from './model/timeline';
 import { clipLength } from './model/validate';
 import type { Doc, Op } from './model/types';
@@ -23,8 +25,13 @@ type Props = {
   onCommitPreview: () => void;
   onCancelPreview: () => void;
   onOperation?: (op: Op) => void;
+  onDropFiles?: (paths: string[], trackId: string | undefined, start: number) => void;
   armedTrackIds?: string[];
   onArmedChange?: (trackId: string, armed: boolean) => void;
+  selectedMarker?: string | null;
+  onMarkerSelect?: (id: string) => void;
+  onMarkerRename?: (id: string, label: string) => void;
+  recordingLevels?: Levels;
 };
 
 type Range = { trackId: string; anchor: number; current: number; left: number };
@@ -41,8 +48,13 @@ export function Timeline({
   onCommitPreview,
   onCancelPreview,
   onOperation = () => undefined,
+  onDropFiles,
   armedTrackIds = [],
   onArmedChange = () => undefined,
+  selectedMarker = null,
+  onMarkerSelect,
+  onMarkerRename,
+  recordingLevels,
 }: Props): React.JSX.Element {
   const [range, setRange] = useState<Range | null>(null);
   const rangeRef = useRef<Range | null>(null);
@@ -52,6 +64,33 @@ export function Timeline({
     ...doc.markers.map((marker) => marker.t),
   );
   const width = duration * zoom;
+
+  function droppedPaths(event: ReactDragEvent<HTMLDivElement>): string[] {
+    const data = event.dataTransfer.getData('application/x-content-studio-paths');
+    if (!data) return [];
+    try {
+      const parsed: unknown = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed.filter((path): path is string => typeof path === 'string') : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function dropOnLane(trackId: string, event: ReactDragEvent<HTMLDivElement>): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const paths = droppedPaths(event);
+    if (paths.length) {
+      const left = event.currentTarget.getBoundingClientRect().left;
+      onDropFiles?.(paths, trackId, pxToTime(Math.max(0, event.clientX - left), zoom));
+    }
+  }
+
+  function dropOnTimeline(event: ReactDragEvent<HTMLDivElement>): void {
+    event.preventDefault();
+    const paths = droppedPaths(event);
+    if (paths.length) onDropFiles?.(paths, undefined, playhead);
+  }
 
   function beginRange(trackId: string, event: ReactPointerEvent<HTMLDivElement>): void {
     if (event.button !== 0) return;
@@ -84,10 +123,25 @@ export function Timeline({
   }
 
   return (
-    <UIStack role="group" aria-label={t('editor.timeline.label')} className="min-w-0 overflow-auto" gap="xs">
+    <UIStack
+      role="group"
+      aria-label={t('editor.timeline.label')}
+      className="min-w-0 overflow-auto"
+      gap="xs"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={dropOnTimeline}
+    >
       <UIStack direction="row" align="stretch" gap="xs">
         <UIStack aria-hidden="true" className="w-56 shrink-0" />
-        <Ruler duration={duration} zoom={zoom} playhead={playhead} markers={doc.markers} />
+        <Ruler
+          duration={duration}
+          zoom={zoom}
+          playhead={playhead}
+          markers={doc.markers}
+          selectedMarker={selectedMarker}
+          onMarkerSelect={onMarkerSelect}
+          onMarkerRename={onMarkerRename}
+        />
       </UIStack>
       {doc.tracks.map((track) => {
         const isArmed = armedTrackIds.includes(track.id);
@@ -103,6 +157,7 @@ export function Timeline({
             <TrackHeader
               track={track}
               armed={isArmed}
+            levels={isArmed ? recordingLevels : undefined}
               onChange={onOperation}
               onArmedChange={(armed) => onArmedChange(track.id, armed)}
             />
@@ -114,6 +169,8 @@ export function Timeline({
               onPointerDown={(event) => beginRange(track.id, event)}
               onPointerMove={moveRange}
               onPointerUp={finishRange}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => dropOnLane(track.id, event)}
               onPointerCancel={() => {
                 rangeRef.current = null;
                 setRange(null);

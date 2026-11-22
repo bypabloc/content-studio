@@ -33,6 +33,16 @@ def test_validate_rejects_an_unknown_loudness_preset():
     assert errors == [{'code': 'unknown_preset', 'params': {'preset': 'radio'}}]
 
 
+def test_validate_rejects_an_incomplete_or_reversed_marker_range():
+    """Un tramo debe tener inicio y fin válidos antes de encolarse."""
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'start': 3, 'end': 2}) == [
+        {'code': 'bad_render_range', 'params': {'start': 3, 'end': 2}}
+    ]
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'start': 2}) == [
+        {'code': 'bad_render_range', 'params': {'start': 2, 'end': None}}
+    ]
+
+
 def test_build_command_runs_the_render_main_with_the_project_format_and_folder(tmp_path: Path):
     """El comando es `render_main` con el `project.json`, el formato, la sonoridad (si la hay) y la carpeta."""
     command = editor_render.build_command({'doc': 'x/project.json', 'format': 'wav', 'normalize': 'podcast'}, tmp_path)
@@ -47,6 +57,31 @@ def test_build_command_runs_the_render_main_with_the_project_format_and_folder(t
         'wav',
         '--normalize',
         'podcast',
+        '--out-dir',
+        str(tmp_path),
+    ]
+
+
+def test_build_command_passes_marker_range_and_export_name(tmp_path: Path):
+    """El worker conserva el tramo y el nombre elegidos por el diálogo de exportación."""
+    command = editor_render.build_command(
+        {'doc': 'x/project.json', 'format': 'mp3', 'start': 2, 'end': 5, 'name': 'demo-01'}, tmp_path
+    )
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.editor.render_main',
+        '--project',
+        'x/project.json',
+        '--format',
+        'mp3',
+        '--start',
+        '2',
+        '--end',
+        '5',
+        '--name',
+        'demo-01',
         '--out-dir',
         str(tmp_path),
     ]

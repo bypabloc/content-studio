@@ -10,7 +10,7 @@ from datetime import date
 from pathlib import Path
 from typing import Annotated, Any, cast
 
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel
 
 from content_studio import paths
@@ -93,3 +93,16 @@ def save_project(
     except store.ProjectChanged as error:
         raise ApiError(409, 'project_changed') from error
     return {'hash': digest, 'missing': store.missing(file.parent, body)}
+
+
+@router.post('/projects/media', status_code=201)
+async def upload_recording(path: str, request: Request) -> dict[str, str | float]:
+    """Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones."""
+    file = _project_file(path)
+    if request.headers.get('content-type', '').split(';', maxsplit=1)[0].strip().lower() != 'audio/wav':
+        raise ApiError(422, 'editor_recording_invalid')
+    try:
+        src, duration = store.save_recording(file.parent, await request.body())
+    except ValueError as error:
+        raise ApiError(422, 'editor_recording_invalid') from error
+    return {'src': src, 'duration': duration}

@@ -39,7 +39,13 @@ WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canc
 def stop_tree(proc: subprocess.Popen) -> None:
     """Termina el proceso y sus hijos. Windows: taskkill /T /F. POSIX: SIGTERM al grupo y SIGKILL si no sale en 5 s."""
     if sys.platform == 'win32':  # mypy solo entiende sys.platform: os.name dejaría killpg sin tipo en Windows
-        subprocess.run(['taskkill', '/T', '/F', '/PID', str(proc.pid)], capture_output=True, check=False)
+        try:
+            result = subprocess.run(['taskkill', '/T', '/F', '/PID', str(proc.pid)], capture_output=True, check=False)
+        except OSError:
+            result = None
+        if result is None or result.returncode:
+            with contextlib.suppress(OSError):
+                proc.kill()
     else:
         with contextlib.suppress(ProcessLookupError):
             os.killpg(proc.pid, signal.SIGTERM)
@@ -60,6 +66,21 @@ def _status(conn: sqlite3.Connection, job_id: int) -> str | None:
 def _label(job: dict) -> str:
     """Nombre del trabajo en el candado de la GPU (lo ven `gpu-turn status` y las otras sesiones)."""
     return f'{job["kind"]}-{job["id"]}'
+
+
+def _error_detail(kind: str, out_dir: Path, detail: str, code: int) -> str:
+    """Conserva el resultado estructurado del render del editor cuando falla."""
+    if detail:
+        return detail
+    if kind == 'editor.render':
+        try:
+            result = json.loads((out_dir / 'result.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            pass
+        else:
+            if result.get('status') == 'failed':
+                return json.dumps(result, ensure_ascii=False)
+    return f'exit {code}'
 
 
 class Worker:
@@ -211,7 +232,7 @@ class Worker:
                 job['id'],
                 status='error',
                 error_code=errors.get(code, 'process_failed'),
-                error_detail=detail or f'exit {code}',
+                error_detail=_error_detail(job['kind'], out_dir, detail, code),
                 finished_at=utc_now(),
             )
         self._notify(conn, job['id'])

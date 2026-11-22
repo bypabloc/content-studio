@@ -112,7 +112,7 @@ def render_video(source: Path, keep: Sequence[tuple[float, float]], destination:
     ff.ffmpeg(
         '-y',
         '-i', str(source),
-        '-filter_complex_script', str(script),
+        '-/filter_complex', str(script),
         '-map', '[vout]',
         '-map', '[aout]',
         '-r', ff.frame_rate(source),  # sin esto, ffmpeg une los tramos a 25 cuadros por segundo
@@ -130,6 +130,4 @@ def render_audio(source: Path, keep: Sequence[tuple[float, float]], destination:
     """
     script = _write_script(destination, 'audio-filter.txt', _joined_audio_chains(keep))
     codec = ['-c:a', 'pcm_s24le'] if destination.suffix.lower() == '.wav' else ['-c:a', 'aac', '-b:a', '192k']
-    ff.ffmpeg(
-        '-y', '-i', str(source), '-filter_complex_script', str(script), '-map', '[aout]', *codec, str(destination)
-    )
+    ff.ffmpeg('-y', '-i', str(source), '-/filter_complex', str(script), '-map', '[aout]', *codec, str(destination))

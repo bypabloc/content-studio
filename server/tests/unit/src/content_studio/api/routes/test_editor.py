@@ -5,7 +5,9 @@ Cubre AC-2 (guardado con hash viejo) y AC-10 (fuentes que faltan al abrir).
 
 from __future__ import annotations
 
+import io
 import json
+import wave
 from pathlib import Path
 
 import pytest
@@ -31,6 +33,17 @@ def _put(api, path: str, doc: dict, if_match: str):
     return api.client.put(
         '/editor/projects', params={'path': path}, json=doc, headers={**api.headers, 'If-Match': if_match}
     )
+
+
+def _recording() -> bytes:
+    """Un WAV PCM mono de 24 bits y 48 kHz, como el que produce el AudioWorklet."""
+    buffer = io.BytesIO()
+    with wave.open(buffer, 'wb') as audio:
+        audio.setnchannels(1)
+        audio.setsampwidth(3)
+        audio.setframerate(48000)
+        audio.writeframes(b'\x00\x00\x00' * 480)
+    return buffer.getvalue()
 
 
 def test_create_writes_project_json_version_1_and_its_folders(api, root):
@@ -108,6 +121,68 @@ def test_the_recent_list_has_the_created_project(api, root):
     recent = api.client.get('/editor/projects/recent', headers=api.headers).json()
 
     assert created['path'] in recent['paths']
+
+
+def test_uploading_a_recording_saves_it_inside_the_project_media_folder(api, root):
+    """D-3/D-11: la subida devuelve una fuente relativa y no toca otros archivos."""
+    created = _create(api)
+    recording = _recording()
+
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path']},
+        content=recording,
+        headers={**api.headers, 'Content-Type': 'audio/wav'},
+    )
+
+    assert response.status_code == 201
+    assert response.json() == {'src': 'media/rec-001.wav', 'duration': pytest.approx(0.01)}
+    assert (Path(created['path']).parent / response.json()['src']).read_bytes() == recording
+
+
+def test_uploading_multiple_recordings_never_overwrites_an_existing_take(api, root):
+    """Cada toma recibe un nombre nuevo, incluso si el primer número ya existe."""
+    created = _create(api)
+    first = Path(created['path']).parent / 'media' / 'rec-001.wav'
+    first.write_bytes(b'toma anterior')
+
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path']},
+        content=_recording(),
+        headers={**api.headers, 'Content-Type': 'audio/wav'},
+    )
+
+    assert response.status_code == 201
+    assert response.json()['src'] == 'media/rec-002.wav'
+    assert first.read_bytes() == b'toma anterior'
+
+
+def test_uploading_a_non_recording_wav_is_rejected(api, root):
+    """La subida rechaza WAV que no sea PCM mono de 24 bits y 48 kHz."""
+    created = _create(api)
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path']},
+        content=b'not a wav',
+        headers={**api.headers, 'Content-Type': 'audio/wav'},
+    )
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'editor_recording_invalid'
+
+
+def test_uploading_a_recording_outside_an_editor_project_is_forbidden(api, root):
+    """La subida no acepta destinos fuera de outputs/editor."""
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': str(api.tmp / 'otro' / 'project.json')},
+        content=_recording(),
+        headers={**api.headers, 'Content-Type': 'audio/wav'},
+    )
+
+    assert response.status_code == 403
+    assert response.json()['code'] == 'forbidden_path'
 
 
 def test_an_unknown_project_is_404(api, root):

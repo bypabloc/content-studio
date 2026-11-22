@@ -87,3 +87,39 @@ def test_an_invalid_project_exits_with_2_and_renders_nothing(tmp_path: Path, cap
     assert code == 2
     assert json.loads(capsys.readouterr().out)['errors'] == [{'code': 'unknown_track', 'id': 'c1'}]
     assert not (job / 'result.json').exists()
+
+
+def test_missing_sources_are_preserved_in_the_job_result(tmp_path: Path, capsys):
+    """Una fuente ausente deja su ruta en result.json para que la UI permita encontrarla."""
+    project_file = store.create(tmp_path / 'editor', 'Charla', date(2026, 11, 22))
+    doc, digest = store.read(project_file)
+    doc['clips'] = [
+        {
+            'id': 'c1',
+            'track': 't1',
+            'src': 'media/tono-ausente.wav',
+            'src_in': 0,
+            'src_out': 2,
+            'start': 0,
+            'gain_db': 0,
+            'fade_in': 0,
+            'fade_out': 0,
+        }
+    ]
+    store.write(project_file, doc, digest)
+    job = tmp_path / 'jobs' / 'missing-source'
+    job.mkdir(parents=True)
+
+    code = render_main.main(['--project', str(project_file), '--out-dir', str(job)])
+
+    assert code == 3
+    assert json.loads((job / 'result.json').read_text(encoding='utf-8')) == {
+        'status': 'failed',
+        'error': 'missing_source',
+        'params': {'paths': ['media/tono-ausente.wav']},
+    }
+    assert json.loads(capsys.readouterr().out) == {
+        'status': 'failed',
+        'error': 'missing_source',
+        'params': {'paths': ['media/tono-ausente.wav']},
+    }

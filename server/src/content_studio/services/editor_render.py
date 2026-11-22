@@ -5,6 +5,7 @@ El trabajo corre `content_studio.editor.render_main` y deja el archivo en `expor
 
 from __future__ import annotations
 
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ from typing import Any
 from content_studio.media import formats, normalize
 
 RESOURCE = 'cpu'  # es ffmpeg: no carga modelos, así que no toma el candado de la GPU
+ERROR_CODES = {3: 'missing_source'}
 
 
 def validate(params: dict[str, Any]) -> list[dict[str, Any]]:
@@ -25,6 +27,19 @@ def validate(params: dict[str, Any]) -> list[dict[str, Any]]:
     preset = params.get('normalize')
     if preset is not None and preset not in normalize.TARGETS:
         errors.append({'code': 'unknown_preset', 'params': {'preset': preset}})
+    if 'start' in params or 'end' in params:
+        start, end = params.get('start'), params.get('end')
+        if (
+            not isinstance(start, (int, float))
+            or isinstance(start, bool)
+            or not isinstance(end, (int, float))
+            or isinstance(end, bool)
+            or not math.isfinite(start)
+            or not math.isfinite(end)
+            or start < 0
+            or end <= start
+        ):
+            errors.append({'code': 'bad_render_range', 'params': {'start': start, 'end': end}})
     return errors
 
 
@@ -41,4 +56,10 @@ def build_command(params: dict[str, Any], output_dir: Path) -> list[str]:
     ]
     if params.get('normalize'):
         command += ['--normalize', str(params['normalize'])]
+    if 'start' in params:
+        command += ['--start', str(params['start'])]
+    if 'end' in params:
+        command += ['--end', str(params['end'])]
+    if params.get('name'):
+        command += ['--name', str(params['name'])]
     return [*command, '--out-dir', str(output_dir)]

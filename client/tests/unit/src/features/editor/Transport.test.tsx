@@ -40,7 +40,7 @@ describe('Transport', () => {
     const toolbar = screen.getByRole('toolbar', { name: t('editor.transport.label') });
 
     fireEvent.keyDown(toolbar, { key: ' ' });
-    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.pause') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.pause') }));
 
     expect(props.onPlayingChange).toHaveBeenNthCalledWith(1, false);
     expect(props.onPlayingChange).toHaveBeenNthCalledWith(2, false);
@@ -82,7 +82,7 @@ describe('Transport', () => {
     expect(props.onZoomChange).toHaveBeenNthCalledWith(1, 160);
     expect(props.onZoomChange).toHaveBeenNthCalledWith(2, 40);
     expect(props.onRecordingChange).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.play') }));
+    fireEvent.click(screen.getByRole('button', { name: t('action.play') }));
     expect(props.onPlayingChange).toHaveBeenCalledWith(true);
   });
 
@@ -97,7 +97,7 @@ describe('Transport', () => {
   it('alterna grabación e imán desde sus botones', () => {
     const props = renderTransport();
 
-    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.record') }));
+    fireEvent.click(screen.getByRole('button', { name: t('voices.record.start') }));
     fireEvent.click(screen.getByRole('button', { name: t('editor.transport.magnet') }));
 
     expect(props.onRecordingChange).toHaveBeenCalledWith(true);

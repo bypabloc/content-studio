@@ -1,7 +1,8 @@
 import { clipLength } from '../model/validate';
 import type { Clip, Doc, Track } from '../model/types';
 
-export const DRIFT_TOLERANCE_SEC = 0.05;
+export const PRELOAD_WINDOW_SEC = 2;
+export const DRIFT_TOLERANCE_SEC = 0.04;
 
 export type PlaybackClip = { clip: Clip; track: Track };
 
@@ -15,9 +16,11 @@ export function audibleClips(doc: Doc): PlaybackClip[] {
   });
 }
 
-/** Clips audibles cuyo intervalo de timeline incluye `position`. */
+/** Clips audibles que cruzan la ventana de carga previa de dos segundos alrededor de `position`. */
 export function activeClips(doc: Doc, position: number): PlaybackClip[] {
-  return audibleClips(doc).filter(({ clip }) => clip.start <= position && position < clip.start + clipLength(clip));
+  return audibleClips(doc).filter(
+    ({ clip }) => clip.start <= position + PRELOAD_WINDOW_SEC && clip.start + clipLength(clip) >= position - PRELOAD_WINDOW_SEC,
+  );
 }
 
 /** Posición esperada dentro de la fuente de un clip mientras suena. */
@@ -52,5 +55,5 @@ export function positionAt(startPosition: number, startedAt: number, now: number
 
 /** Determina si conviene buscar el elemento al tiempo esperado para corregir su deriva. */
 export function shouldCorrectDrift(expected: number, actual: number, tolerance = DRIFT_TOLERANCE_SEC): boolean {
-  return Math.abs(expected - actual) > tolerance;
+  return Math.abs(expected - actual) > tolerance + Number.EPSILON * Math.max(1, Math.abs(expected), Math.abs(actual));
 }

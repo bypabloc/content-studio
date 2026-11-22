@@ -19,6 +19,9 @@ function scheduleGain(entry: MediaEntry, clip: Doc['clips'][number], volume: num
   const track = { volume_db: volume };
   entry.gain.gain.cancelScheduledValues(clock);
   entry.gain.gain.setValueAtTime(gainAt(clip, track, position), clock);
+  if (clip.start > position && clip.fade_in === 0) {
+    entry.gain.gain.setValueAtTime(10 ** ((clip.gain_db + volume) / 20), clock + clip.start - position);
+  }
   for (const [at, value] of gainRamps(clip, track)) {
     if (at > position) entry.gain.gain.linearRampToValueAtTime(value, clock + at - position);
   }
@@ -47,6 +50,7 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
   const contextRef = useRef<AudioContext | null>(null);
   const mediaRef = useRef(new Map<string, MediaEntry>());
   const anchorRef = useRef({ position: 0, clock: 0 });
+  const driftCheckRef = useRef(0);
   const frameRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -54,7 +58,7 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
     fileUrlRef.current = fileUrl;
   }, [doc, fileUrl]);
 
-  const syncActive = useCallback((time: number, clock: number) => {
+  const syncActive = useCallback((time: number, clock: number, checkDrift = true, forceGain = false) => {
     const context = contextRef.current;
     if (!context) return;
     const active = activeClips(docRef.current, time);
@@ -80,15 +84,17 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
         mediaRef.current.set(clip.id, entry);
         scheduleGain(entry, clip, track.volume_db, time, clock);
       } else {
-        if (entry.signature !== nextSignature) {
+        if (forceGain || entry.signature !== nextSignature) {
           entry.signature = nextSignature;
           scheduleGain(entry, clip, track.volume_db, time, clock);
         }
-        if (!entry.element.seeking && shouldCorrectDrift(expected, entry.element.currentTime)) {
+        if (checkDrift && !entry.element.seeking && shouldCorrectDrift(expected, entry.element.currentTime)) {
           entry.element.currentTime = expected;
         }
       }
-      if (entry.element.paused) void entry.element.play().catch(() => undefined);
+      const withinClip = clip.start <= time && time < clip.start + clip.src_out - clip.src_in;
+      if (withinClip && entry.element.paused) void entry.element.play().catch(() => undefined);
+      else if (!withinClip && !entry.element.paused) entry.element.pause();
     }
   }, []);
 
@@ -100,9 +106,10 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
       contextRef.current = context;
       void context.resume().catch(() => undefined);
       anchorRef.current = { position: positionRef.current, clock: context.currentTime };
+      driftCheckRef.current = context.currentTime;
       playingRef.current = true;
       setPlayingState(true);
-      syncActive(positionRef.current, context.currentTime);
+      syncActive(positionRef.current, context.currentTime, true, true);
       return;
     }
     playingRef.current = false;
@@ -117,7 +124,7 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
     const context = contextRef.current;
     if (playingRef.current && context) {
       anchorRef.current = { position: next, clock: context.currentTime };
-      syncActive(next, context.currentTime);
+      syncActive(next, context.currentTime, true, true);
     }
   }, [syncActive]);
 
@@ -133,13 +140,17 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
       if (!playingRef.current || !context) return;
       const total = duration(docRef.current);
       const next = positionAt(anchorRef.current.position, anchorRef.current.clock, context.currentTime, total);
-      syncActive(next, context.currentTime);
+      const checkDrift = context.currentTime - driftCheckRef.current >= 0.25;
+      if (checkDrift) driftCheckRef.current = context.currentTime;
+      syncActive(next, context.currentTime, checkDrift);
       if (Math.abs(next - positionRef.current) >= 0.05 || next >= total) {
         positionRef.current = next;
         setPositionState(next);
       }
       if (next >= total) {
         setPlaying(false);
+        for (const entry of mediaRef.current.values()) release(entry);
+        mediaRef.current.clear();
         return;
       }
       frameRef.current = requestAnimationFrame(tick);

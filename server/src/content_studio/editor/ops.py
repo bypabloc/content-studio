@@ -65,6 +65,84 @@ def set_track(doc: Doc, op: Op) -> None:
     track.update(op['changes'])
 
 
+def add_clip(doc: Doc, op: Op) -> None:
+    """Agrega una copia de un clip importado o grabado."""
+    doc['clips'].append(copy.deepcopy(op['clip']))
+
+
+def set_fade(doc: Doc, op: Op) -> None:
+    """Actualiza uno o ambos fundidos del clip."""
+    clip = _find(doc, op['id'])
+    for edge in ('fade_in', 'fade_out'):
+        if edge in op:
+            clip[edge] = float(op[edge])
+
+
+def set_gain(doc: Doc, op: Op) -> None:
+    """Actualiza la ganancia del clip en decibeles."""
+    _find(doc, op['id'])['gain_db'] = float(op['gain_db'])
+
+
+def add_track(doc: Doc, op: Op) -> None:
+    """Inserta una pista de audio en el índice pedido o al final."""
+    track = copy.deepcopy(op['track'])
+    if any(item['id'] == track['id'] for item in doc['tracks']):
+        raise OpError('duplicate_id', {'id': track['id']})
+    index = max(0, min(int(op.get('index', len(doc['tracks']))), len(doc['tracks'])))
+    doc['tracks'].insert(index, track)
+
+
+def remove_track(doc: Doc, op: Op) -> None:
+    """Quita una pista y sus clips."""
+    if not any(track['id'] == op['id'] for track in doc['tracks']):
+        raise OpError('unknown_track', {'id': op['id']})
+    doc['tracks'] = [track for track in doc['tracks'] if track['id'] != op['id']]
+    doc['clips'] = [clip for clip in doc['clips'] if clip['track'] != op['id']]
+
+
+def reorder_tracks(doc: Doc, op: Op) -> None:
+    """Mueve una pista al índice visual indicado, limitado al rango de pistas."""
+    index = next((i for i, track in enumerate(doc['tracks']) if track['id'] == op['id']), None)
+    if index is None:
+        raise OpError('unknown_track', {'id': op['id']})
+    track = doc['tracks'].pop(index)
+    destination = max(0, min(int(op['index']), len(doc['tracks'])))
+    doc['tracks'].insert(destination, track)
+
+
+def add_marker(doc: Doc, op: Op) -> None:
+    """Agrega un marcador al proyecto."""
+    doc['markers'].append(copy.deepcopy(op['marker']))
+
+
+def move_marker(doc: Doc, op: Op) -> None:
+    """Mueve un marcador a otro tiempo."""
+    marker = next((item for item in doc['markers'] if item['id'] == op['id']), None)
+    if marker is None:
+        raise OpError('unknown_marker', {'id': op['id']})
+    marker['t'] = float(op['t'])
+
+
+def rename_marker(doc: Doc, op: Op) -> None:
+    """Renombra un marcador existente."""
+    marker = next((item for item in doc['markers'] if item['id'] == op['id']), None)
+    if marker is None:
+        raise OpError('unknown_marker', {'id': op['id']})
+    marker['label'] = op['label']
+
+
+def delete_marker(doc: Doc, op: Op) -> None:
+    """Quita el marcador con ese id, si todavía existe."""
+    doc['markers'] = [marker for marker in doc['markers'] if marker['id'] != op['id']]
+
+
+def replace_source(doc: Doc, op: Op) -> None:
+    """Reasigna todas las instancias de una fuente compartida."""
+    for clip in doc['clips']:
+        if clip['src'] == op['from']:
+            clip['src'] = op['to']
+
+
 def trim_clip(doc: Doc, op: Op) -> None:
     """Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`."""
     clip = _find(doc, op['id'])
@@ -131,7 +209,18 @@ def _overlaps(start: float, length: float, other: Doc) -> bool:
 
 
 HANDLERS: dict[str, Callable[[Doc, Op], None]] = {
+    'addClip': add_clip,
+    'addTrack': add_track,
+    'addMarker': add_marker,
+    'deleteMarker': delete_marker,
     'moveClip': move_clip,
+    'moveMarker': move_marker,
+    'renameMarker': rename_marker,
+    'removeTrack': remove_track,
+    'reorderTracks': reorder_tracks,
+    'replaceSource': replace_source,
+    'setFade': set_fade,
+    'setGain': set_gain,
     'setTrack': set_track,
     'trimClip': trim_clip,
     'splitAt': split_at,

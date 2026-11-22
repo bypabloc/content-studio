@@ -165,7 +165,7 @@ describe('Shell [AC-7]', () => {
     window.location.hash = '#/editor'
     renderShell()
 
-    expect(await screen.findByRole('button', { name: t('editor.project.create') })).toBeTruthy()
+    expect(await screen.findByRole('button', { name: t('mix.create') })).toBeTruthy()
   })
 
   it('AC-8: el primer uso sin motores abre bienvenida, la completa y va a Narración', async () => {

@@ -26,6 +26,20 @@ describe('TrackHeader', () => {
     expect(screen.getByRole('slider', { name: t('editor.track.volume', { name: 'Voz' }) })).toBeTruthy();
   });
 
+  it('muestra el medidor de entrada en la cabecera armada', () => {
+    render(
+      <TrackHeader
+        track={track}
+        armed
+        levels={{ rms: -9, peak: -3 }}
+        onChange={vi.fn()}
+        onArmedChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('meter', { name: t('editor.recorder.level') }).getAttribute('aria-valuenow')).toBe('-9');
+  });
+
   it('cambia el volumen con la operación setTrack', () => {
     const onChange = vi.fn();
     render(<TrackHeader track={track} armed={false} onChange={onChange} onArmedChange={vi.fn()} />);

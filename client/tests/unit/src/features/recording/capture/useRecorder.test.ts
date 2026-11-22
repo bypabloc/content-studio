@@ -12,6 +12,8 @@ const { stopTrack, closeContext, getUserMedia } = vi.hoisted(() => ({
 class FakeAudioContext {
   static created: { options: AudioContextOptions | undefined }[] = [];
   sampleRate = 48000;
+  baseLatency = 0.01;
+  outputLatency = 0.005;
   audioWorklet = { addModule: vi.fn().mockResolvedValue(undefined) };
   constructor(options?: AudioContextOptions) {
     FakeAudioContext.created.push({ options });
@@ -44,8 +46,10 @@ class FakeWorkletNode {
 }
 
 beforeEach(() => {
+  const track = { stop: stopTrack, getSettings: () => ({ sampleRate: 48000, latency: 0.012 }) };
   getUserMedia.mockResolvedValue({
-    getTracks: () => [{ stop: stopTrack, getSettings: () => ({ sampleRate: 48000 }) }],
+    getTracks: () => [track],
+    getAudioTracks: () => [track],
   });
   Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia }, configurable: true });
   vi.stubGlobal('AudioContext', FakeAudioContext);
@@ -88,6 +92,14 @@ describe('useRecorder', () => {
     expect(result.current.recording).toBe(true);
   });
 
+  it('expone la latencia de entrada y salida para alinear la toma con el cabezal', async () => {
+    const { result } = renderHook(() => useRecorder());
+
+    await act(() => result.current.start());
+
+    expect(result.current.latencyMs).toBe(27);
+  });
+
   it('parar suelta el micrófono, cierra el contexto y devuelve un WAV', async () => {
     const { result } = renderHook(() => useRecorder());
     await act(() => result.current.start());
@@ -126,7 +138,7 @@ describe('useRecorder', () => {
   });
 
   it('si el dispositivo no informa su frecuencia, vale la del contexto', async () => {
-    getUserMedia.mockResolvedValueOnce({ getTracks: () => [] });
+    getUserMedia.mockResolvedValueOnce({ getTracks: () => [], getAudioTracks: () => [] });
     const { result } = renderHook(() => useRecorder());
 
     await act(() => result.current.start());

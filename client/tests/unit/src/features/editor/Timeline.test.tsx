@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Timeline } from '@/features/editor/Timeline';
@@ -86,6 +86,60 @@ describe('Timeline', () => {
 
     const preview = callbacks.onPreview.mock.calls.at(-1)?.[0] as Doc;
     expect(preview.clips.find((item) => item.id === 'voice-clip')?.start).toBeCloseTo(9.95);
+  });
+
+  it('recibe rutas soltadas en la posición de una pista', () => {
+    const onDropFiles = vi.fn();
+    render(
+      <Timeline
+        doc={document()}
+        selectedIds={[]}
+        playhead={0}
+        zoom={80}
+        magnet
+        onSelectionChange={vi.fn()}
+        onPreview={vi.fn()}
+        onCommitPreview={vi.fn()}
+        onCancelPreview={vi.fn()}
+        onDropFiles={onDropFiles}
+      />,
+    );
+    const lane = screen.getByRole('group', { name: t('editor.timeline.lane', { name: 'Voz' }) });
+    const dataTransfer = { getData: vi.fn(() => JSON.stringify(['D:\\media\\take.wav'])) };
+
+    const drop = createEvent.drop(lane, { dataTransfer });
+    Object.defineProperty(drop, 'clientX', { value: 80 });
+    fireEvent(lane, drop);
+
+    expect(onDropFiles).toHaveBeenCalledWith(['D:\\media\\take.wav'], 'voice', 1);
+  });
+
+  it('ignora payloads vacíos o inválidos y admite rutas soltadas en el fondo', () => {
+    const onDropFiles = vi.fn();
+    render(
+      <Timeline
+        doc={document()}
+        selectedIds={[]}
+        playhead={4}
+        zoom={80}
+        magnet
+        onSelectionChange={vi.fn()}
+        onPreview={vi.fn()}
+        onCommitPreview={vi.fn()}
+        onCancelPreview={vi.fn()}
+        onDropFiles={onDropFiles}
+      />,
+    );
+    const timeline = screen.getByRole('group', { name: t('editor.timeline.label') });
+    const lane = screen.getByRole('group', { name: t('editor.timeline.lane', { name: 'Voz' }) });
+    for (const payload of ['', '{', '{}']) {
+      fireEvent.drop(timeline, { dataTransfer: { getData: () => payload } });
+      fireEvent.drop(lane, { dataTransfer: { getData: () => payload } });
+    }
+    fireEvent.drop(timeline, { dataTransfer: { getData: () => JSON.stringify(['D:/media/fondo.wav']) } });
+
+    expect(onDropFiles).toHaveBeenCalledOnce();
+    expect(onDropFiles).toHaveBeenCalledWith(['D:/media/fondo.wav'], undefined, 4);
   });
 
   it('recorta el borde final al marcador con el imán', () => {

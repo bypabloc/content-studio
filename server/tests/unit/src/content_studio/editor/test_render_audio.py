@@ -67,6 +67,31 @@ def test_a_project_without_active_clips_cannot_render(tmp_path):
     assert caught.value.code == 'nothing_to_render'
 
 
+def test_a_marker_segment_keeps_only_its_source_range_and_resets_the_timeline(tmp_path):
+    """Un tramo entre marcadores empieza en cero y recorta el rango de fuente de cada clip."""
+    doc = _doc([_track('t1')], [_clip('c1', 't1', 'media/a.wav', 1, 8)])
+
+    plan = render_audio.build(doc, tmp_path, start=2, end=5)
+
+    assert plan.script == (
+        '[0:a]atrim=start=1:end=4,asetpts=PTS-STARTPTS,aresample=48000,'
+        'aformat=sample_fmts=fltp:channel_layouts=stereo,volume=0dB,adelay=0:all=1[c0];\n'
+        '[c0]amix=inputs=1:normalize=0:dropout_transition=0[mix];\n'
+        '[mix]apad=whole_dur=3,atrim=end=3[out]\n'
+    )
+
+
+def test_a_missing_source_fails_with_the_paths_in_the_error(tmp_path):
+    """AC-10: exportar con una fuente ausente devuelve `missing_source` y sus rutas."""
+    doc = _doc([_track('t1')], [_clip('c1', 't1', 'missing.wav', 0, 2)])
+
+    with pytest.raises(render_audio.RenderError) as caught:
+        render_audio.render(doc, tmp_path, tmp_path / 'output.wav')
+
+    assert caught.value.code == 'missing_source'
+    assert caught.value.params == {'paths': ['missing.wav']}
+
+
 @needs_ffmpeg
 def test_the_wav_lasts_as_long_as_the_project(tmp_path):
     """AC-4: la salida dura lo que el proyecto: 1 s de inicio y 2 s de clip, 3 s."""

@@ -30,6 +30,10 @@ def test_the_operation_gives_the_expected_clips(path):
     tracks = {track['id']: track for track in result['tracks']}
     for track_id, fields in expected.get('tracks', {}).items():
         assert {key: tracks[track_id][key] for key in fields} == fields
+    if 'track_ids' in expected:
+        assert [track['id'] for track in result['tracks']] == expected['track_ids']
+    if 'markers' in expected:
+        assert result['markers'] == expected['markers']
     assert fixture['doc'] == before
 
 

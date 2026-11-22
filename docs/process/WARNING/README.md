@@ -182,5 +182,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [024-dialogo-por-webview](024-dialogo-por-webview.md) | El diálogo nativo se simula redefiniendo `chrome.webview.postMessage`; `confirm` se responde sin mostrarlo | `main` |
 | [016-render-y-sendcmd](016-render-y-sendcmd.md) | El ducking del audio va con `asendcmd` y objetivo `volume@duck`; escape de la ruta entre comillas; fades y `apad` del sidechain | `main` |
 | [016-proyectos-y-migracion-6](016-proyectos-y-migracion-6.md) | `mix_projects` es la migración 6 (la 5 es de 014); los tramos llegan con la caché o al consultar, sin hook en el worker | `main` |
+| [017-presupuesto-js](017-presupuesto-js.md) | Presupuesto inicial sube de 236 a 237 kB gzip por las claves en español del Editor | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

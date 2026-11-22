@@ -1,3 +1,6 @@
+import { useState } from 'react';
+
+import { UIField } from '@/shared/components/molecules/UIField';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
@@ -5,16 +8,40 @@ import { t } from '@/shared/i18n/t';
 import { gridStep } from './model/snap';
 import type { Marker } from './model/types';
 
-type Props = { duration: number; zoom: number; playhead: number; markers: Marker[] };
+type Props = {
+  duration: number;
+  zoom: number;
+  playhead: number;
+  markers: Marker[];
+  selectedMarker?: string | null;
+  onMarkerSelect?: (id: string) => void;
+  onMarkerRename?: (id: string, label: string) => void;
+};
 
 const MAX_TICKS = 120;
 
 /** Regla horizontal con marcas, marcadores y el cabezal de reproducción. */
-export function Ruler({ duration, zoom, playhead, markers }: Props): React.JSX.Element {
+export function Ruler({
+  duration,
+  zoom,
+  playhead,
+  markers,
+  selectedMarker = null,
+  onMarkerSelect = () => undefined,
+  onMarkerRename,
+}: Props): React.JSX.Element {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
   const baseStep = gridStep(zoom);
   const step = baseStep * Math.max(1, Math.ceil(duration / baseStep / MAX_TICKS));
   const count = Math.floor(duration / step);
   const width = duration * zoom;
+
+  function saveLabel(id: string): void {
+    const label = draft.trim();
+    if (label) onMarkerRename?.(id, label);
+    setEditingId(null);
+  }
 
   return (
     <UIStack
@@ -39,12 +66,49 @@ export function Ruler({ duration, zoom, playhead, markers }: Props): React.JSX.E
       {markers.map((marker) => (
         <UIStack
           key={marker.id}
-          role="note"
-          aria-label={marker.label}
-          className="absolute top-0 z-10 h-full border-l-2 px-1"
+          role={editingId === marker.id ? 'group' : 'button'}
+          aria-label={editingId === marker.id ? undefined : marker.label}
+          aria-pressed={editingId === marker.id ? undefined : selectedMarker === marker.id}
+          tabIndex={editingId === marker.id ? -1 : 0}
+          className={`absolute top-0 z-10 h-full border-l-2 px-1 ${selectedMarker === marker.id ? 'bg-primary/10' : ''}`}
           style={{ left: `${marker.t * zoom}px`, borderColor: marker.color, color: marker.color }}
+          onClick={() => onMarkerSelect(marker.id)}
+          onDoubleClick={(event) => {
+            event.stopPropagation();
+            setDraft(marker.label);
+            setEditingId(marker.id);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              event.stopPropagation();
+              onMarkerSelect(marker.id);
+            }
+          }}
         >
-          <UIText variant="caption">{marker.label}</UIText>
+          {editingId === marker.id ? (
+            <UIField
+              label={t('editor.marker.rename')}
+              hideLabel
+              autoFocus
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              onBlur={() => saveLabel(marker.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  saveLabel(marker.id);
+                } else if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setEditingId(null);
+                }
+              }}
+            />
+          ) : (
+            <UIText variant="caption">{marker.label}</UIText>
+          )}
         </UIStack>
       ))}
       <UIStack

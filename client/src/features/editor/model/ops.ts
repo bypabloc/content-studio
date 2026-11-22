@@ -54,6 +54,76 @@ function setTrack(doc: Doc, op: Extract<Op, { type: 'setTrack' }>): void {
   Object.assign(track, op.changes);
 }
 
+/** Agrega una copia de un clip importado o grabado. */
+function addClip(doc: Doc, op: Extract<Op, { type: 'addClip' }>): void {
+  doc.clips.push(structuredClone(op.clip));
+}
+
+/** Actualiza los fundidos pedidos del clip. */
+function setFade(doc: Doc, op: Extract<Op, { type: 'setFade' }>): void {
+  const clip = findClip(doc, op.id);
+  if (op.fade_in !== undefined) clip.fade_in = op.fade_in;
+  if (op.fade_out !== undefined) clip.fade_out = op.fade_out;
+}
+
+/** Actualiza la ganancia del clip en dB. */
+function setGain(doc: Doc, op: Extract<Op, { type: 'setGain' }>): void {
+  findClip(doc, op.id).gain_db = op.gain_db;
+}
+
+/** Inserta una pista de audio en el índice indicado o al final. */
+function addTrack(doc: Doc, op: Extract<Op, { type: 'addTrack' }>): void {
+  if (doc.tracks.some((track) => track.id === op.track.id)) throw new OpError('duplicate_id');
+  const index = Math.max(0, Math.min(op.index ?? doc.tracks.length, doc.tracks.length));
+  doc.tracks.splice(index, 0, structuredClone(op.track));
+}
+
+/** Quita una pista y sus clips. */
+function removeTrack(doc: Doc, op: Extract<Op, { type: 'removeTrack' }>): void {
+  const exists = doc.tracks.some((track) => track.id === op.id);
+  if (!exists) throw new OpError('unknown_track');
+  doc.tracks = doc.tracks.filter((track) => track.id !== op.id);
+  doc.clips = doc.clips.filter((clip) => clip.track !== op.id);
+}
+
+/** Mueve una pista al índice visual indicado, limitado al rango de pistas. */
+function reorderTracks(doc: Doc, op: Extract<Op, { type: 'reorderTracks' }>): void {
+  const index = doc.tracks.findIndex((track) => track.id === op.id);
+  if (index < 0) throw new OpError('unknown_track');
+  const [track] = doc.tracks.splice(index, 1);
+  const destination = Math.max(0, Math.min(op.index, doc.tracks.length));
+  doc.tracks.splice(destination, 0, track);
+}
+
+/** Agrega un marcador al proyecto. */
+function addMarker(doc: Doc, op: Extract<Op, { type: 'addMarker' }>): void {
+  doc.markers.push(structuredClone(op.marker));
+}
+
+/** Mueve un marcador a otro tiempo. */
+function moveMarker(doc: Doc, op: Extract<Op, { type: 'moveMarker' }>): void {
+  const marker = doc.markers.find((item) => item.id === op.id);
+  if (marker === undefined) throw new OpError('unknown_marker');
+  marker.t = op.t;
+}
+
+/** Renombra un marcador existente. */
+function renameMarker(doc: Doc, op: Extract<Op, { type: 'renameMarker' }>): void {
+  const marker = doc.markers.find((item) => item.id === op.id);
+  if (marker === undefined) throw new OpError('unknown_marker');
+  marker.label = op.label;
+}
+
+/** Quita el marcador con ese id, si todavía existe. */
+function deleteMarker(doc: Doc, op: Extract<Op, { type: 'deleteMarker' }>): void {
+  doc.markers = doc.markers.filter((marker) => marker.id !== op.id);
+}
+
+/** Reasigna todas las instancias de una fuente compartida. */
+function replaceSource(doc: Doc, op: Extract<Op, { type: 'replaceSource' }>): void {
+  for (const clip of doc.clips) if (clip.src === op.from) clip.src = op.to;
+}
+
 /** Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`. */
 function trimClip(doc: Doc, op: Extract<Op, { type: 'trimClip' }>): void {
   const clip = findClip(doc, op.id);
@@ -114,6 +184,17 @@ function overlaps(start: number, length: number, other: Clip): boolean {
 }
 
 const HANDLERS: { [K in Op['type']]: (doc: Doc, op: Extract<Op, { type: K }>) => void } = {
+  addClip,
+  addTrack,
+  addMarker,
+  deleteMarker,
+  moveMarker,
+  removeTrack,
+  reorderTracks,
+  renameMarker,
+  replaceSource,
+  setFade,
+  setGain,
   moveClip,
   setTrack,
   trimClip,

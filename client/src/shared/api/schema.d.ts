@@ -783,6 +783,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editor/projects/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Recording
+         * @description Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones.
+         */
+        post: operations["upload_recording_editor_projects_media_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/fs/roots": {
         parameters: {
             query?: never;
@@ -812,9 +832,49 @@ export interface paths {
         };
         /**
          * List Folder
-         * @description Las carpetas de `path` y los medios de los tipos pedidos (`audio`, `video`), carpetas primero.
+         * @description Las carpetas de `path` y los medios de los tipos pedidos, carpetas primero.
          */
         get: operations["list_folder_fs_list_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fs/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview Media
+         * @description Entrega una fuente de audio para la vista previa del explorador; nunca modifica archivos.
+         */
+        get: operations["preview_media_fs_media_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fs/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Media Info
+         * @description Mide la duración de un medio elegido para crear el clip, incluso si está fuera de `out/`.
+         */
+        get: operations["media_info_fs_info_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3016,6 +3076,39 @@ export interface operations {
             };
         };
     };
+    upload_recording_editor_projects_media_post: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string | number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     roots_fs_roots_get: {
         parameters: {
             query?: never;
@@ -3060,6 +3153,70 @@ export interface operations {
                 content: {
                     "application/json": {
                         [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_media_fs_media_get: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    media_info_fs_info_get: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
                     };
                 };
             };

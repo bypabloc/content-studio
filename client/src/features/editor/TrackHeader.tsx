@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
+import { UILevelMeter } from '@/shared/components/atoms/UILevelMeter';
 import { UIRangeInput } from '@/shared/components/atoms/UIRangeInput';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
@@ -7,10 +8,12 @@ import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { t } from '@/shared/i18n/t';
 
 import type { Op, Track } from './model/types';
+import type { Levels } from '@/features/recording/capture/useRecorder';
 
 type Props = {
   track: Track;
   armed: boolean;
+  levels?: Levels;
   onChange: (op: Op) => void;
   onArmedChange: (armed: boolean) => void;
 };
@@ -18,7 +21,7 @@ type Props = {
 const MUTE_SHORTCUT = 'M'; // i18n-ignore: tecla de acceso rápido estándar
 
 /** Controles persistidos y de grabación temporal de una pista de audio. */
-export function TrackHeader({ track, armed, onChange, onArmedChange }: Props): React.JSX.Element {
+export function TrackHeader({ track, armed, levels, onChange, onArmedChange }: Props): React.JSX.Element {
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.key.toLowerCase() !== 'm' || event.repeat) return;
     event.preventDefault();
@@ -75,6 +78,9 @@ export function TrackHeader({ track, armed, onChange, onArmedChange }: Props): R
         value={track.volume_db}
         onValueChange={(volume_db) => onChange({ type: 'setTrack', id: track.id, changes: { volume_db } })}
       />
+      {armed && levels ? (
+        <UILevelMeter label={t('editor.recorder.level')} rms={levels.rms} peak={levels.peak} zone={[-12, -6]} alertAbove={-1} />
+      ) : null}
     </UIStack>
   );
 }

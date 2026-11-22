@@ -37,6 +37,7 @@ function concat(chunks: Float32Array[]): Float32Array {
 export function useRecorder() {
   const [recording, setRecording] = useState(false);
   const [sampleRate, setSampleRate] = useState<number | null>(null);
+  const [latencyMs, setLatencyMs] = useState(0);
   const [levels, setLevels] = useState<Levels>(SILENCE);
   const current = useRef<Session | null>(null);
 
@@ -64,6 +65,8 @@ export function useRecorder() {
     });
     const context = new AudioContext({ sampleRate: RATE });
     await context.audioWorklet.addModule(workletUrl);
+    const inputLatency = (stream.getAudioTracks()[0]?.getSettings() as MediaTrackSettings & { latency?: number } | undefined)?.latency ?? 0;
+    setLatencyMs((context.baseLatency + context.outputLatency + inputLatency) * 1000);
     const chunks: Float32Array[] = [];
     let last = SILENCE;
     const node = new AudioWorkletNode(context, 'recorder');
@@ -92,5 +95,5 @@ export function useRecorder() {
   // Si la pantalla se cierra grabando, se suelta el micrófono.
   useEffect(() => () => void finish(), [finish]);
 
-  return { recording, sampleRate, levels, start, stop };
+  return { recording, sampleRate, levels, latencyMs, start, stop };
 }

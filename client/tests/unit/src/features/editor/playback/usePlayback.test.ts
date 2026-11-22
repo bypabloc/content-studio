@@ -76,20 +76,23 @@ describe('usePlayback', () => {
     expect(gainParam.linearRampToValueAtTime).toHaveBeenCalledTimes(3);
   });
 
-  it('crea cada elemento cuando el reloj simulado llega al inicio de su clip', () => {
+  it('prepara el clip dentro de la ventana y reproduce al llegar a su inicio', () => {
     const delayed: Doc = { ...doc, clips: [{ ...doc.clips[0], start: 1 }] };
     const { result } = renderHook(() => usePlayback(delayed, (path) => path));
     act(() => result.current.setPlaying(true));
-    expect(elements).toHaveLength(0);
+    expect(elements).toHaveLength(1);
+    expect(elements[0].currentTime).toBe(2);
+    expect(elements[0].play).not.toHaveBeenCalled();
 
     context.currentTime = 1;
     act(() => frames.shift()?.(0));
     expect(elements).toHaveLength(1);
     expect(elements[0].currentTime).toBe(2);
+    expect(elements[0].play).toHaveBeenCalledOnce();
     expect(result.current.position).toBe(1);
   });
 
-  it('corrige una deriva de más de 50 ms usando el reloj del contexto', () => {
+  it('corrige una deriva de más de 40 ms usando el reloj del contexto', () => {
     const { result } = renderHook(() => usePlayback(doc, (path) => path));
     act(() => result.current.setPlaying(true));
     elements[0].currentTime = 2.8;
@@ -125,7 +128,7 @@ describe('usePlayback', () => {
     context.currentTime = 0.1;
     act(() => frames.shift()?.(0));
 
-    expect(gainParam.cancelScheduledValues).toHaveBeenCalledTimes(2);
+    expect(gainParam.cancelScheduledValues).toHaveBeenCalledTimes(3);
     expect(result.current.position).toBe(1.1);
   });
 

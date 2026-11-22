@@ -7,10 +7,12 @@ el `If-Match` de un guardado: si el archivo cambió desde que se leyó, el guard
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import re
 import unicodedata
+import wave
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -74,6 +76,17 @@ def create(root: Path, name: str, today: date) -> Path:
     return path
 
 
+def unique_export_path(folder: Path, name: str, extension: str) -> Path:
+    """Elige un nombre de exportación libre sin reemplazar salidas anteriores del proyecto."""
+    base = slug(name)
+    target = folder / f'{base}{extension}'
+    number = 2
+    while target.exists():
+        target = folder / f'{base}-{number}{extension}'
+        number += 1
+    return target
+
+
 def serialize(doc: Doc) -> bytes:
     """El JSON del proyecto, en UTF-8 y con un salto final: lo mismo siempre para el mismo documento."""
     return (json.dumps(doc, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
@@ -115,3 +128,34 @@ def missing(folder: Path, doc: dict[str, Any]) -> list[str]:
         if not target.exists() and clip['src'] not in found:
             found.append(clip['src'])
     return found
+
+
+def save_recording(folder: Path, data: bytes) -> tuple[str, float]:
+    """Valida y guarda una toma PCM mono de 24 bits y 48 kHz sin sobrescribir otra grabación."""
+    try:
+        with wave.open(io.BytesIO(data), 'rb') as recording:
+            if (
+                recording.getnchannels() != 1
+                or recording.getsampwidth() != 3
+                or recording.getframerate() != SAMPLE_RATE
+                or recording.getnframes() <= 0
+            ):
+                raise ValueError('editor_recording_invalid')
+            duration = recording.getnframes() / recording.getframerate()
+    except (wave.Error, EOFError) as error:
+        raise ValueError('editor_recording_invalid') from error
+
+    media = folder / 'media'
+    if not media.is_dir():
+        raise ValueError('editor_recording_invalid')
+    number = 1
+    while True:
+        relative = Path('media') / f'rec-{number:03}.wav'
+        target = folder / relative
+        try:
+            with target.open('xb') as output:
+                output.write(data)
+        except FileExistsError:
+            number += 1
+            continue
+        return relative.as_posix(), duration

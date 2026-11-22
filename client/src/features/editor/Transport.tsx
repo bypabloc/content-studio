@@ -72,7 +72,7 @@ export function Transport({
       <UIIconButton icon="chevron-left" label={t('editor.transport.start')} shortcut={SHORTCUTS.home} onClick={onStart} />
       <UIIconButton
         icon={playing ? 'pause' : 'play'}
-        label={playing ? t('editor.transport.pause') : t('editor.transport.play')}
+        label={playing ? t('action.pause') : t('action.play')}
         shortcut={SHORTCUTS.space}
         onClick={() => onPlayingChange(!playing)}
       />
@@ -87,7 +87,7 @@ export function Transport({
       />
       <UIIconButton
         icon="record"
-        label={t('editor.transport.record')}
+        label={t('voices.record.start')}
         shortcut={SHORTCUTS.record}
         pressed={recording}
         onClick={() => onRecordingChange(!recording)}
