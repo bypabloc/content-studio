@@ -55,6 +55,9 @@ overrides:
   - filename: 'server/src/content_studio/messages/pt.json'
     language: en,pt-br
     words: [celtic, christmas, saas, español, deutsch, français]
+  # Nombres de códecs de ffmpeg (spec 015, D-1): el catálogo de salidas los usa tal cual, así que van por palabra.
+  - filename: 'server/src/content_studio/media/**'
+    words: [libmp, libopus, libvorbis, vorbis, libvpx, libsvtav]
   # Tipos generados de la API (`gen:api`): sus descripciones vienen de los docstrings del server, en español.
   - filename: 'client/src/shared/api/schema.d.ts'
     language: en,es
