@@ -1,0 +1,117 @@
+{
+  "formats": [
+    {
+      "id": "mp3",
+      "kind": "audio"
+    },
+    {
+      "id": "wav",
+      "kind": "audio"
+    },
+    {
+      "id": "flac",
+      "kind": "audio"
+    },
+    {
+      "id": "ogg-opus",
+      "kind": "audio"
+    },
+    {
+      "id": "ogg-vorbis",
+      "kind": "audio"
+    },
+    {
+      "id": "m4a",
+      "kind": "audio"
+    },
+    {
+      "id": "mp4-h264",
+      "kind": "video"
+    },
+    {
+      "id": "mp4-h265",
+      "kind": "video"
+    },
+    {
+      "id": "webm-vp9",
+      "kind": "video"
+    },
+    {
+      "id": "webm-av1",
+      "kind": "video"
+    },
+    {
+      "id": "mov",
+      "kind": "video"
+    },
+    {
+      "id": "mkv",
+      "kind": "video"
+    },
+    {
+      "id": "gif",
+      "kind": "gif"
+    }
+  ],
+  "presets": [
+    {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "reframe": "center",
+      "lufs": -14,
+      "id": "reels",
+      "recommended": false
+    },
+    {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "reframe": "center",
+      "lufs": -14,
+      "id": "tiktok",
+      "recommended": false
+    },
+    {
+      "width": 1080,
+      "height": 1920,
+      "fps": 60,
+      "reframe": "center",
+      "lufs": -14,
+      "id": "shorts",
+      "recommended": false
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "reframe": "center",
+      "id": "youtube-1080",
+      "recommended": true
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "fps": 30,
+      "reframe": "center",
+      "id": "youtube-4k",
+      "recommended": false
+    },
+    {
+      "width": 1080,
+      "height": 1080,
+      "fps": 30,
+      "reframe": "center",
+      "id": "square",
+      "recommended": false
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "reframe": "center",
+      "id": "x-landscape",
+      "recommended": false
+    }
+  ]
+}
