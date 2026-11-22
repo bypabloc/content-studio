@@ -159,5 +159,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [013-silencios-y-cuadricula](013-silencios-y-cuadricula.md) | El plan corta silencios audibles; video en la cuadrícula de cuadros; ni video ni audio usan acrossfade (informe = archivo) | `main` |
 | [013-regiones-duracion-del-analisis](013-regiones-duracion-del-analisis.md) | Las regiones de la revisión usan la duración del análisis; con la del archivo quedan en su tiempo (medido en el DOM) | `main` |
 | [014-segmentacion](014-segmentacion.md) | `segment` sin `min_duration`: la puntuación fuerte es corte obligatorio; cortes débiles solo si un límite lo exige | `main` |
+| [014-ass-y-ffmpeg](014-ass-y-ffmpeg.md) | `-f null` no sirve para subtítulos: la prueba de ffmpeg usa `-c:s ass -f ass -` y cuenta los Dialogue; ffmpeg es permisivo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

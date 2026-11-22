@@ -74,7 +74,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Los medios de pru
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Documento y segmentación | AC-1, AC-5 | — | `unit` | [x] |
-| T2 | Formatos y ASS | AC-2, AC-3 | T1 | `unit` | [ ] |
+| T2 | Formatos y ASS | AC-2, AC-3 | T1 | `unit` | [x] |
 | T3 | Orígenes y alineación | AC-4 | T1 | `unit` | [ ] |
 | T4 | Fuentes | AC-8 | — | `unit` | [ ] |
 | T5 | Quemar | AC-6, AC-7 | T2, T4 | `unit` | [ ] |
