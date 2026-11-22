@@ -17,6 +17,7 @@ from content_studio.mix import envelope
 # cspell:ignore sidechaincompress adelay amix asplit asendcmd: filtros de ffmpeg, que el diccionario no trae.
 
 MODES = ('transcript', 'sidechain')
+VIDEO_MODES = ('replace', 'under')  # `replace`: la mezcla es el audio del video; `under`: va bajo su propio audio
 STEP_S = 0.02  # un paso de volumen cada 20 ms: dentro de las rampas, porque en los tramos planos no cambia
 FADE_IN_S = 1.0  # la música entra con un fade de 1 s
 FADE_OUT_S = 2.0  # y sale con 2 s, o un tercio de la mezcla si es más corta (como `music/duration.fit`)
@@ -49,15 +50,27 @@ def render(
     intro: float = 0.0,
     outro: float = 0.0,
     lufs: float = -14.0,
+    video: Path | str | None = None,
+    video_mode: str = 'replace',
 ) -> dict:
     """Mezcla `voice` sobre `music` con ducking y escribe `out` normalizado a `lufs`. Devuelve lo medido.
+
+    Con `video`, `out` es el video: `replace` cambia su audio por la mezcla, y `under` la pone bajo su propio audio.
 
     `regions` son los tramos de voz en el tiempo de la voz (sin la intro). Sin ellos, `transcript` no baja nada.
     """
     if mode not in MODES:
         raise MixError('unknown_mix_mode', {'mode': mode})
-    voice, music, out = Path(voice), Path(music), Path(out)
-    total = intro + ff.probe_duration(voice) + outro
+    if video is not None and video_mode not in VIDEO_MODES:
+        raise MixError('unknown_video_mode', {'mode': video_mode})
+    if video is not None and video_mode == 'under':
+        source, intro, outro = Path(video), 0.0, 0.0  # la voz es el audio del propio video: sin intro ni outro
+    elif voice is not None:
+        source = Path(voice)
+    else:
+        raise MixError('voice_missing')
+    music, out = Path(music), Path(out)
+    total = intro + ff.probe_duration(source) + outro
     music_len = ff.probe_duration(music)
     if music_len < total - TOLERANCE_S:
         raise MixError('music_too_short', {'music': round(music_len, 3), 'total': round(total, 3)})
@@ -70,7 +83,7 @@ def render(
     ff.ffmpeg(
         '-y',
         '-i',
-        str(voice),
+        str(source),
         '-i',
         str(music),
         '-filter_complex',
@@ -81,7 +94,29 @@ def render(
         'pcm_s16le',
         str(raw),
     )
-    report = normalize.normalize(raw, out, target=lufs)
+    if video is None:
+        report = normalize.normalize(raw, out, target=lufs)
+    else:
+        # Audio AAC (con pérdida): normalize usa el techo de −2 dBTP, porque el pico sube al codificar.
+        audio = out.with_name('mix-audio.m4a')
+        report = normalize.normalize(raw, audio, target=lufs)
+        ff.ffmpeg(
+            '-y',
+            '-i',
+            str(video),
+            '-i',
+            str(audio),
+            '-map',
+            '0:v:0',
+            '-map',
+            '1:a:0',
+            '-c:v',
+            'copy',
+            '-c:a',
+            'copy',
+            str(out),
+        )
+        audio.unlink()
     raw.unlink()
     return {
         'mode': mode,
