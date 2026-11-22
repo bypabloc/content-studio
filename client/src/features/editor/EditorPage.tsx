@@ -12,6 +12,7 @@ import { Timeline } from './Timeline';
 import { Transport } from './Transport';
 import { zoomIn, zoomOut } from './model/timeline';
 import type { Doc } from './model/types';
+import { usePlayback } from './playback/usePlayback';
 import { useEditorDoc } from './useEditorDoc';
 
 type Project = { path: string; hash: string; doc: Doc; missing?: string[] };
@@ -104,14 +105,14 @@ export function EditorPage(): React.JSX.Element {
 }
 
 function EditorWorkspace({ project, onBack }: { project: Project; onBack: () => void }): React.JSX.Element {
+  const api = useApi();
   const editor = useEditorDoc(project);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [armedTrackIds, setArmedTrackIds] = useState<string[]>([]);
-  const [playing, setPlaying] = useState(false);
+  const playback = usePlayback(editor.doc, api.fileUrl);
   const [recording, setRecording] = useState(false);
   const [magnet, setMagnet] = useState(true);
   const [zoom, setZoom] = useState(80);
-  const [playhead, setPlayhead] = useState(0);
   const saveLabel =
     editor.saveState === 'saved'
       ? t('editor.save.saved')
@@ -130,8 +131,8 @@ function EditorWorkspace({ project, onBack }: { project: Project; onBack: () => 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.defaultPrevented || event.repeat) return;
     const key = event.key.toLowerCase();
-    if (event.key === 'Home') setPlayhead(0);
-    else if (event.key === ' ' || event.key === 'Spacebar') setPlaying((current) => !current);
+    if (event.key === 'Home') playback.seek(0);
+    else if (event.key === ' ' || event.key === 'Spacebar') playback.setPlaying(!playback.playing);
     else if (key === 'r') setRecording((current) => !current);
     else if (key === 'n') setMagnet((current) => !current);
     else if (event.key === '+' || event.key === '=') setZoom((current) => zoomIn(current));
@@ -179,13 +180,13 @@ function EditorWorkspace({ project, onBack }: { project: Project; onBack: () => 
           onClick={editor.redo}
         />
         <Transport
-          playing={playing}
+          playing={playback.playing}
           recording={recording}
           magnet={magnet}
           zoom={zoom}
-          onStart={() => setPlayhead(0)}
-          onPlayingChange={setPlaying}
-          onStop={() => setPlayhead(0)}
+          onStart={() => playback.seek(0)}
+          onPlayingChange={playback.setPlaying}
+          onStop={playback.stop}
           onRecordingChange={setRecording}
           onMagnetChange={setMagnet}
           onZoomChange={setZoom}
@@ -194,7 +195,7 @@ function EditorWorkspace({ project, onBack }: { project: Project; onBack: () => 
       <Timeline
         doc={editor.doc}
         selectedIds={selectedIds}
-        playhead={playhead}
+        playhead={playback.position}
         zoom={zoom}
         magnet={magnet}
         onSelectionChange={setSelectedIds}

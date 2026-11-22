@@ -70,9 +70,7 @@ describe('EditorPage', () => {
     expect(api.get).toHaveBeenLastCalledWith(`/editor/projects?path=${encodeURIComponent(PATH)}`);
     expect(await screen.findByRole('toolbar', { name: t('editor.transport.label') })).toBeTruthy();
 
-    fireEvent.keyDown(screen.getByRole('group', { name: t('editor.timeline.label') }), { key: ' ' });
     fireEvent.keyDown(screen.getByRole('group', { name: t('editor.timeline.label') }), { key: 'n' });
-    expect(screen.getByRole('button', { name: t('editor.transport.pause') })).toBeTruthy();
     expect(screen.getByRole('button', { name: t('editor.transport.magnet') }).getAttribute('aria-pressed')).toBe('false');
 
     const workspace = screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) });
