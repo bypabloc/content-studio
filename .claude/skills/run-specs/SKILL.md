@@ -17,7 +17,7 @@ argument-hint: "<spec> [<spec> ...]  (número, carpeta o ruta: 12 | 012-musica-c
 
 ## 2. Ejecutar
 
-* **Una spec**: lee todos sus archivos y el código que citan (con graphify) y ejecútala completa con la skill `execute-spec`.
+* **Una spec**: lee su `README.md`, `01-contexto-y-decision.md`, `02-diseno.md`, cada carpeta `fases/<n>-<tema>/`, `03-verificacion-final.md` y el código que citan (con graphify) y ejecútala completa con la skill `execute-spec`.
 * **Varias**: lee solo el `README.md` de cada una. Ejecuta la primera completa con `execute-spec`. Está terminada solo cuando su PR está fusionado en `dev` y lo comprobaste (`git fetch origin dev`, merge commit en `origin/dev`, worktree cerrado en `git worktree list`). Recién entonces pasa a la siguiente, en el mismo turno y desde el `origin/dev` que ya la contiene. Nunca dos specs a la vez. La compactación es automática: no pares para pedirla.
 * **Sin pedir permiso**: el pedido del usuario ya autoriza todo el ciclo de cada spec (worktree, commits, push, PR, merge a `dev`, cierre). No preguntes «¿sigo?», «¿hago el merge?» ni «¿paso a la siguiente?». **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
 * Solo para con una categoría de bloqueo de `.claude/session-handoff.json` (`user-data`, `cost`, `credentials`, `user-stop`): deja el estado en el reporte y pregunta. Todo lo demás lo decides tú, lo anotas en `docs/process/WARNING/` (crítico) o `PENDING/` (no bloquea) y sigues. Ver la tabla de §4.
