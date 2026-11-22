@@ -59,7 +59,8 @@ def second_pass(first: dict, target: float, enhance: bool = False, true_peak: fl
     )
     return _chain(
         enhance,
-        f'loudnorm=I={target}:TP={true_peak}:LRA={RANGE}:{measured}:linear=true:print_format=summary',
+        # aresample: loudnorm sube el audio a 192 kHz para medir el pico y lo deja así; se devuelve a 48 kHz.
+        f'loudnorm=I={target}:TP={true_peak}:LRA={RANGE}:{measured}:linear=true:print_format=summary,aresample=48000',
     )
 
 
