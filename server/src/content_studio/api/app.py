@@ -20,8 +20,10 @@ from content_studio.api.routes import (
     catalog,
     clean,
     diagnostics,
+    editor,
     engines,
     files,
+    fs,
     health,
     jobs,
     media,
@@ -125,6 +127,8 @@ def create_app(
     app.include_router(clean.router, dependencies=header_only)
     app.include_router(subtitles.router, dependencies=header_only)
     app.include_router(mix.router, dependencies=header_only)
+    app.include_router(editor.router, dependencies=header_only)
+    app.include_router(fs.router, dependencies=header_only)
     app.include_router(music.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
     app.include_router(voices.router, dependencies=header_only)
