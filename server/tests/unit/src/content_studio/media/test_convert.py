@@ -98,6 +98,15 @@ def test_mp4_h264_uses_the_shared_encoder_and_aac_audio():
     ]
 
 
+def test_a_social_preset_with_reframe_keeps_its_frame_rate():
+    """Un preset de red (1080x1920 a 30 fps) con encuadre: la salida sale a 30 fps, no a los de la fuente."""
+    options = {'width': 1080, 'height': 1920, 'fps': 30, 'reframe': {'mode': 'center'}}
+
+    args = convert.build(VIDEO_IN, 'mp4-h264', options, ALL)
+
+    assert args[args.index('-r') + 1] == '30'
+
+
 def test_a_codec_missing_from_the_system_ffmpeg_is_refused_with_its_name():
     """Un codec que el ffmpeg del sistema no trae da `codec_unavailable`, con el nombre del codec."""
     with pytest.raises(convert.ConvertError) as caught:

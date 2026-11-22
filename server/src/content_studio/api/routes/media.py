@@ -17,6 +17,7 @@ from content_studio import paths
 from content_studio.api.errors import ApiError
 from content_studio.api.paths_guard import allowed_file
 from content_studio.common import ffmpeg
+from content_studio.media.formats import is_video
 
 router = APIRouter()
 _info: dict[tuple, dict] = {}
@@ -31,13 +32,20 @@ def _key(target: Path) -> tuple[str, int, int]:
 
 @router.get('/media/info')
 def media_info(path: str, request: Request) -> dict:
-    """Duración (s), LUFS integrado y pico real (dBTP) del audio."""
+    """Duración (s), LUFS integrado y pico (dBTP); un video trae además su ancho y alto (para la ★ de Redes)."""
     target = allowed_file(request, path)
     key = _key(target)
     if key not in _info:
         try:
             lufs, true_peak = ffmpeg.loudness(target)
-            _info[key] = {'duration': ffmpeg.probe_duration(target), 'lufs': lufs, 'true_peak': true_peak}
+            width, height = ffmpeg.video_size(target) if is_video(target) else (None, None)
+            _info[key] = {
+                'duration': ffmpeg.probe_duration(target),
+                'lufs': lufs,
+                'true_peak': true_peak,
+                'width': width,
+                'height': height,
+            }
         except (subprocess.CalledProcessError, ValueError) as error:  # ValueError: ffmpeg no dio el resumen
             raise ApiError(422, 'unreadable_media') from error
     return _info[key]

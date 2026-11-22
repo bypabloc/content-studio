@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from content_studio.api.errors import ApiError
+from content_studio.media import presets as media_presets
+from content_studio.media.formats import TARGETS
 from content_studio.music.engines.registry import MODELS
 from content_studio.music.styles import STYLES as MUSIC_STYLES
 from content_studio.narration import profiles
@@ -16,8 +18,20 @@ DEFAULT_STYLE = {'narration': 'expert', 'music': 'lofi-chill'}
 
 
 @router.get('/catalog/{kind}')
-def catalog(kind: str) -> dict:
-    """Catálogo de un tipo de trabajo. Cada selector trae exactamente una opción `recommended`."""
+def catalog(kind: str, aspect: float = Query(1.7778, gt=0)) -> dict:
+    """Catálogo de un tipo de trabajo. Cada selector trae exactamente una opción `recommended`.
+
+    `media` (spec 015, D-1 y D-2) lista los formatos de salida y los presets de red; `aspect` (ancho sobre alto de la
+    fuente) elige el preset ★.
+    """
+    if kind == 'media':
+        recommended = media_presets.recommended(aspect)
+        return {
+            'formats': [{'id': name, 'kind': spec['kind']} for name, spec in TARGETS.items()],
+            'presets': [
+                {**spec, 'id': name, 'recommended': name == recommended} for name, spec in media_presets.PRESETS.items()
+            ],
+        }
     if kind == 'narration':
         return {
             'engines': [

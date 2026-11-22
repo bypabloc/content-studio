@@ -62,6 +62,8 @@ def build(input_info: dict[str, Any], target: str, options: dict[str, Any], enco
         if 'reframe' in options:
             graph = reframe_graph(options['reframe'], options['width'], options['height'])
             args += ['-filter_complex', graph, '-map', '[v]', '-map', '0:a?']
+            if 'fps' in options:  # el encuadre no cambia los cuadros: la tasa del preset va como -r
+                args += ['-r', str(options['fps'])]
         else:
             filters = _video_filters(options)
             if filters:
