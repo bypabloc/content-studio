@@ -57,7 +57,7 @@ overrides:
     words: [celtic, christmas, saas, español, deutsch, français]
   # Nombres de códecs, filtros de ffmpeg y de pytest (spec 015, D-1 y T2): el catálogo y sus pruebas los usan tal cual.
   - filename: 'server/**/content_studio/media/**'
-    words: [libmp, libopus, libvorbis, vorbis, libvpx, libsvtav, lanczos, palettegen, paletteuse, lavfi, pytestmark, boxblur]
+    words: [libmp, libopus, libvorbis, vorbis, libvpx, libsvtav, lanczos, palettegen, paletteuse, lavfi, pytestmark, boxblur, deesser, acompressor]
   # Tipos generados de la API (`gen:api`): sus descripciones vienen de los docstrings del server, en español.
   - filename: 'client/src/shared/api/schema.d.ts'
     language: en,es

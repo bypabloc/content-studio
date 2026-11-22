@@ -61,4 +61,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [014-capturas-editor](014-capturas-editor.md) | Capturas del editor (claro y oscuro) y cuadros de la quema, comparados con `image-reader` (batería 03, puntos 3 y 9) | Después del merge a dev; no bloquea | Agente |
 | [015-bitrates-presets](015-bitrates-presets.md) | Los bitrates máximos por plataforma de los presets de redes (D-2) faltan, con sus fuentes | Antes de la verificación final de 015 (T9) | Agente |
 | [015-foto-de-prueba](015-foto-de-prueba.md) | La prueba `-m local` de cara real se salta: falta una foto con licencia clara en `server/tests/fixtures/vision/` | Antes de la verificación final de 015 (T9) | Usuario |
+| [015-refactor-masterizacion-narracion](015-refactor-masterizacion-narracion.md) | La masterización de la narración repite las dos pasadas de `normalize.py`; migrarla cambia su salida (commit aparte) | Después del merge de 015; no bloquea | Agente |
 | [015-repair-primera-instalacion](015-repair-primera-instalacion.md) | `repair` rechaza un motor cuya primera instalación no terminó (`engine_external`); de la spec 009 | Después del merge de 015; no bloquea | Agente |

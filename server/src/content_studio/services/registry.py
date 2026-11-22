@@ -6,6 +6,7 @@ from content_studio.services import (
     engine_install,
     engine_uninstall,
     engine_verify,
+    media_normalize,
     media_reframe_track,
     music,
     music_samples,
@@ -23,6 +24,7 @@ from content_studio.services import (
 
 SERVICES = {
     'media.reframe_track': media_reframe_track,
+    'media.normalize': media_normalize,
     'narration': narration,
     'transcribe': transcribe,
     'clean.analyze': clean_analyze,
