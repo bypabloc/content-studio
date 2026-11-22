@@ -39,6 +39,22 @@ def test_the_second_pass_is_linear_and_carries_the_first_pass_measurements():
 
     assert 'linear=true' in chain
     assert 'measured_I=-30.0' in chain and 'measured_TP=-10.0' in chain and 'measured_LRA=0.0' in chain
+
+
+def test_the_second_pass_returns_the_audio_to_48_khz():
+    """loudnorm sube el audio a 192 kHz para medir el pico verdadero y lo deja así: la salida vuelve a 48 kHz (spec 016,
+    la mezcla salía a 192 kHz y su AAC a 96 kHz, con 80 ms de más)."""
+    first = {
+        'input_i': '-30.0',
+        'input_tp': '-10.0',
+        'input_lra': '0.0',
+        'input_thresh': '-40.0',
+        'target_offset': '0.5',
+    }
+
+    chain = normalize.second_pass(first, target=-16.0)
+
+    assert chain.endswith('aresample=48000')
     assert 'measured_thresh=-40.0' in chain and 'offset=0.5' in chain
     assert 'I=-16.0' in chain and 'TP=-1.0' in chain
 

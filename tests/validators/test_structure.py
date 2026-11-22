@@ -158,3 +158,50 @@ def test_ac3_computer_use_guard_wired_for_every_agent():
 def _named(antigravity: dict) -> list[dict]:
     """Antigravity agrupa sus hooks por nombre: el grupo que tenga PreToolUse con el guard."""
     return [group for group in antigravity.values() if _guard_matchers(group)]
+
+
+TEMPLATE = ROOT / 'docs/specs/_plantilla'
+TEMPLATE_FILES = (
+    'README.md',
+    '01-contexto-y-decision.md',
+    '02-diseno.md',
+    '03-verificacion-final.md',
+    'fases/1-tema/plan-tdd.md',
+    'fases/1-tema/archivos.md',
+    'fases/1-tema/commits.md',
+)
+
+
+def test_spec_template_has_phase_folders():
+    """plan-format.md §2: la plantilla trae los archivos raíz y una carpeta de fase (plan-tdd, archivos, commits),
+    sin el viejo 02-plan.md, y la regla la nombra completa."""
+    found = sorted(p.relative_to(TEMPLATE).as_posix() for p in TEMPLATE.rglob('*.md'))
+    assert found == sorted(TEMPLATE_FILES)
+    rule = (ROOT / '.agents/rules/plan-format.md').read_text(encoding='utf-8')
+    assert [name for name in ('02-diseno.md', 'plan-tdd.md', 'archivos.md', 'commits.md') if name not in rule] == []
+    assert '02-plan.md' not in rule
+
+
+def test_spec_template_fixed_block_links_resolve():
+    """El bloque fijo va en los archivos raíz y en cada plan-tdd.md, y sus enlaces a docs/process/ existen."""
+    with_block = [f for f in TEMPLATE_FILES if not f.endswith(('archivos.md', 'commits.md'))]
+    broken = []
+    for name in with_block:
+        path = TEMPLATE / name
+        text = path.read_text(encoding='utf-8')
+        assert '**Datos del usuario: solo los que crea esta spec**' in text, name
+        for link in re.findall(r'\]\(([./]+process/[^)]+)\)', text):
+            if not (path.parent / link).resolve().is_file():
+                broken.append(f'{name}: {link}')
+    assert broken == []
+
+
+def test_spec_template_without_stale_commands():
+    """La plantilla usa los comandos vigentes: studio no acepta --output/--salida ni hay cli.py en la raíz."""
+    stale = re.compile(r'--salida|--output|python cli\.py|contexto-agentes|turno-gpu run|--trabajo=|02-plan\.md')
+    hits = [
+        f'{name}: {m.group(0)}'
+        for name in TEMPLATE_FILES
+        for m in stale.finditer((TEMPLATE / name).read_text(encoding='utf-8'))
+    ]
+    assert hits == []

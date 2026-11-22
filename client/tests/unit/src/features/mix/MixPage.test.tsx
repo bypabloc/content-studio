@@ -1,0 +1,151 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { MixPage } from '@/features/mix/MixPage';
+import { t } from '@/shared/i18n/t';
+
+const { api, open } = vi.hoisted(() => ({
+  api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), del: vi.fn(), fileUrl: (path: string) => `file://${path}` },
+  open: vi.fn(),
+}));
+vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
+vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
+
+function renderPage() {
+  return render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MixPage />
+    </QueryClientProvider>,
+  );
+}
+
+beforeEach(() => {
+  api.get.mockResolvedValue([]);
+  api.post.mockResolvedValue({ id: 7, status: 'ready', regions: [] });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+describe('MixPage', () => {
+  it('muestra tres ranuras (voz, música y video), cada una con su origen de archivo', async () => {
+    renderPage();
+
+    for (const slot of ['mix.slot.voice', 'mix.slot.music', 'mix.slot.video'] as const) {
+      expect(await screen.findByRole('group', { name: t(slot) })).toBeTruthy();
+    }
+    expect(screen.getAllByRole('button', { name: t('mix.source.file') })).toHaveLength(3);
+  });
+
+  it('no crea el proyecto hasta tener la voz y la música', async () => {
+    renderPage();
+
+    const create = await screen.findByRole('button', { name: t('mix.create') });
+
+    expect(create).toHaveProperty('disabled', true);
+  });
+
+  it('crea el proyecto con las rutas elegidas (el video es opcional)', async () => {
+    open.mockResolvedValueOnce('D:/media/voz.wav').mockResolvedValueOnce('D:/media/musica.wav');
+    renderPage();
+    const files = await screen.findAllByRole('button', { name: t('mix.source.file') });
+    await userEvent.click(files[0]);
+    await userEvent.click(files[1]);
+
+    fireEvent.click(screen.getByRole('button', { name: t('mix.create') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/mix/prepare', {
+        voice: 'D:/media/voz.wav',
+        music: 'D:/media/musica.wav',
+        video: null,
+        video_mode: 'replace',
+      }),
+    );
+  });
+
+  it('el modo de video viaja con el proyecto', async () => {
+    open
+      .mockResolvedValueOnce('D:/media/voz.wav')
+      .mockResolvedValueOnce('D:/media/musica.wav')
+      .mockResolvedValueOnce('D:/media/video.mp4');
+    renderPage();
+    const files = await screen.findAllByRole('button', { name: t('mix.source.file') });
+    await userEvent.click(files[0]);
+    await userEvent.click(files[1]);
+    await userEvent.click(files[2]);
+    await userEvent.click(await screen.findByRole('combobox', { name: t('mix.video.mode.label') }));
+    await userEvent.click(await screen.findByRole('option', { name: t('mix.video.under') }));
+
+    fireEvent.click(screen.getByRole('button', { name: t('mix.create') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/mix/prepare',
+        expect.objectContaining({ video: 'D:/media/video.mp4', video_mode: 'under' }),
+      ),
+    );
+  });
+
+  it('«Generar música para esta voz» abre Música con la voz como ?match=', async () => {
+    open.mockResolvedValueOnce('D:/media/voz.wav');
+    renderPage();
+    await userEvent.click((await screen.findAllByRole('button', { name: t('mix.source.file') }))[0]);
+
+    await userEvent.click(await screen.findByRole('button', { name: t('mix.music.generate') }));
+
+    expect(decodeURIComponent(window.location.hash)).toBe('#/music?match=D:/media/voz.wav');
+    window.location.hash = '';
+  });
+
+  it('«Volver» regresa a las ranuras después de crear el proyecto', async () => {
+    const params = {
+      mode: 'transcript',
+      duck_db: -12,
+      ramp_ms: 300,
+      music_db: -6,
+      voice_db: 0,
+      intro: 0,
+      outro: 0,
+      lufs: -14,
+      merge_gap: 0.6,
+      pre: 0.2,
+      post: 0.4,
+    };
+    api.get.mockImplementation(async (path: string) =>
+      path.startsWith('/jobs')
+        ? []
+        : path.endsWith('/curve')
+        ? { total: 10, points: [] }
+        : { id: 7, name: 'x', voice: 'v.wav', music: 'm.wav', video: null, video_mode: 'replace', regions: [], params, transcribe_job: null, status: 'ready' },
+    );
+    open.mockResolvedValueOnce('D:/media/voz.wav').mockResolvedValueOnce('D:/media/musica.wav');
+    renderPage();
+    const files = await screen.findAllByRole('button', { name: t('mix.source.file') });
+    await userEvent.click(files[0]);
+    await userEvent.click(files[1]);
+    fireEvent.click(screen.getByRole('button', { name: t('mix.create') }));
+
+    await userEvent.click(await screen.findByRole('button', { name: t('mix.back') }));
+
+    expect(await screen.findByRole('button', { name: t('mix.create') })).toBeTruthy();
+  });
+
+  it('si el server rechaza el proyecto, se queda en el formulario', async () => {
+    open.mockResolvedValueOnce('D:/media/voz.wav').mockResolvedValueOnce('D:/media/musica.wav');
+    api.post.mockRejectedValueOnce(new Error('ruta no permitida'));
+    renderPage();
+    const files = await screen.findAllByRole('button', { name: t('mix.source.file') });
+    await userEvent.click(files[0]);
+    await userEvent.click(files[1]);
+
+    fireEvent.click(screen.getByRole('button', { name: t('mix.create') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled());
+    expect(screen.getByRole('button', { name: t('mix.create') })).toBeTruthy();
+  });
+});

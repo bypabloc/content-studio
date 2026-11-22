@@ -12,6 +12,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['subtitles', 'subtitles'],
       ['convert', 'download'],
       ['normalize', 'volume'],
+      ['mix', 'mix'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
       ['engines', 'server'],
@@ -27,6 +28,13 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().find((item) => item.id === 'catalog')).toMatchObject({
       group: t('nav.group.voices'),
       label: t('nav.catalog'),
+    })
+  })
+
+  it('spec 016 (D-4): Mezcla va en el grupo Editar', () => {
+    expect(navItems().find((item) => item.id === 'mix')).toMatchObject({
+      group: t('nav.group.edit'),
+      label: t('nav.mix'),
     })
   })
 

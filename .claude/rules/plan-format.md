@@ -17,32 +17,41 @@ Todo plan formal es una carpeta en `docs/specs/` y sigue **Explore → Interview
 
 ## 2. Carpeta y escala
 
+Toda spec nueva se copia de la plantilla (`cp -r docs/specs/_plantilla docs/specs/<NN>-<slug>`); no se inventa otra estructura. Al terminar no quedan marcadores `<...>` ni comentarios de la plantilla. Si cambia la estructura, se cambian la plantilla y esta regla en el mismo PR.
+
 ```text
 docs/specs/<NN>-<slug>/
-├── README.md                  # tipo, escala, rama, dependencias, objetivo, fases (PEN/IMP), WARNING/PENDING
-├── 01-contexto-y-decision.md  # precondición, contexto, decisiones D-n, fuera de alcance, AC, diagrama, «debe sonar»
-├── 02-plan.md                 # ciclos TDD, archivos, tareas y commits
-└── 03-verificacion-final.md   # batería, escucha y espectrograma, cierre y PR
+├── README.md                  # índice, metadatos, estado por fase, decisiones cerradas, reglas críticas, matriz AC → fase → ciclo → test
+├── 01-contexto-y-decision.md  # precondición, términos, hallazgos con evidencia, D-n, fuera de alcance, AC, «debe sonar»
+├── 02-diseno.md               # transversal: flujo antes/después, CLI y API, datos, diseño por módulo, textos
+├── fases/<n>-<tema>/          # una fase = un grupo de commit
+│   ├── plan-tdd.md            # ciclos TDD y matriz e2e de la fase
+│   ├── archivos.md            # crear/modificar/eliminar con Verify
+│   └── commits.md             # mensaje exacto y gate del grupo
+└── 03-verificacion-final.md   # batería, mediciones y escucha, cierre y PR
 ```
 
 | Escala | Archivos de código | Carpeta |
 | :--- | :--- | :--- |
-| Micro | 1–2 | Solo `README.md`, con todo condensado y un commit |
-| Small / Medium | 3–10 | Los cuatro archivos |
-| Large | 11+ | Si pasa de 8 ciclos TDD, se divide en un lote |
+| Micro | 1–2 | Solo `README.md`, con contexto, AC, ciclos, archivos, commit y verificación condensados |
+| Small | 3–5 | README, `01`, una fase y `03` (`02` opcional) |
+| Medium / Large | 6+ | La plantilla completa; más de 8 ciclos TDD o 5 fases se divide en un lote |
 
-* Cada archivo abre con el bloque fijo de **decisiones** (se toman sin preguntar y van a `docs/process/WARNING/`) y de **datos del usuario** (la spec no borra ni cambia voces grabadas, `out/` ni modelos que no creó). Texto exacto en la plantilla.
-* **Lote**: dos o más specs de un mismo pedido en `docs/specs/<primera>-<última>-<tema>/`; la última es la de verificación integral (escucha comparada, todas las salidas juntas) y borra la carpeta del lote.
+* **Fase = grupo de commit**: cada carpeta de `fases/` deja verdes ruff y pytest y termina en un commit; su fila de «Estado por fase» del README pasa a `IMP` con el hash. Lo propio de una fase va en su `plan-tdd.md`; `02-diseno.md` solo trae lo que comparten varias.
+* El bloque fijo de **decisiones** (se toman sin preguntar y van a `docs/process/WARNING/`) y de **datos del usuario** (la spec no borra ni cambia voces grabadas, `out/` ni modelos que no creó) va en los archivos raíz y en cada `plan-tdd.md`, con las rutas relativas un nivel más arriba por carpeta. Texto exacto en la plantilla.
+* `_plantilla/` es permanente y no lleva fila en el índice.
+* **Lote**: dos o más specs de un mismo pedido en `docs/specs/<primera>-<última>-<tema>/`, cada una con la plantilla; la última es la de verificación integral (escucha comparada, todas las salidas juntas) y borra la carpeta del lote.
 
 ## 3. Contenido
 
-* **AC** en BDD (`Given/When/Then`) o EARS (`WHEN … THEN …`), `AC-1`…, cada uno verificable con una prueba (pytest, doctest o una medición de la salida real: duración, volumen, espectrograma).
+* **AC** en BDD (`Given/When/Then`) o EARS (`WHEN … THEN …`), `AC-1`…, cada uno verificable con una prueba (pytest, doctest o una medición de la salida real: duración, volumen, espectrograma). Ciclos (`C1`…) y AC con numeración global a la spec; la matriz del README cruza AC → fase → ciclo → test.
+* **Hallazgos** de `01` con evidencia (archivo y símbolo del grafo, o una medición con fecha); cada `D-n` con la alternativa descartada y repetida en una línea en «Decisiones cerradas» del README.
 * **Ciclo TDD**: RED (test en `server/tests/test_<área>.py` o doctest, con el AC en el nombre o el docstring; falla por el motivo esperado), GREEN (mínimo, con su Verify), REFACTOR. Un fix empieza con un test de regresión en `server/tests/test_bugs.py`.
 * Si la spec toca la salida de audio: «debe sonar / no debe sonar» en `01` (duración, volumen LUFS, sin voz en la música, sin cortes) y la escucha la hace el usuario al final: si hay que elegir entre opciones, el agente elige con ese criterio, lo registra en `docs/process/WARNING/` y sigue.
 
 ## 4. Por grupo de commit y verificación final
 
-* Por grupo: el Verify de sus tareas, `uv run ruff check`, `uv run ruff format --check` y `uv run pytest`. Nada que cargue un modelo por grupo.
+* Por fase: el Verify de sus archivos, `uv run ruff check`, `uv run ruff format --check` y `uv run pytest`. Nada que cargue un modelo por grupo.
 * **Verificación final**, una vez, con todos los commits hechos y antes del push: lo anterior, `uv run pytest -m local` si toca un motor, la corrida real con `gpu-turn run` de lo que cambió, y duración, volumen y espectrograma de las salidas (`verify-before-claiming-done.md`; las imágenes las abre `image-reader`).
 * Lo que bloquea el pase a `main` va a `docs/process/WARNING/`; lo que no, a `docs/process/PENDING/` (`project-progress.md`). Nada importante puede quedar solo en la carpeta de la spec: se borra al cerrar.
 * Un solo push y un solo PR a `dev`, creado solo si no existe; merge con merge commit y cierre del worktree.
@@ -50,4 +59,4 @@ docs/specs/<NN>-<slug>/
 
 ## 5. Dependencias
 
-Una spec que depende de otra lo declara en su README y lo comprueba contra `origin/dev` antes del primer commit; si falla, primero se fusiona la dependencia.
+Una spec que depende de otra lo declara en su README y lo comprueba contra `origin/dev` antes del primer commit; si falla, primero se fusiona la dependencia. Si la dependencia cambió algo que la spec cita, una fase `0-ajustes` ajusta la carpeta en un commit `docs:` antes de seguir.

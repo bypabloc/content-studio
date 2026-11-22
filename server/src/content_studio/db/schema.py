@@ -61,6 +61,16 @@ MIGRATIONS = [
       updated_at TEXT NOT NULL
     );
     """,
+    # Spec 016 (D-3): proyectos de mezcla, solo nombre y ruta del documento. Es la 6: la 5 ya es subtítulos (014).
+    """
+    CREATE TABLE mix_projects (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      doc_path TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    """,
 ]
 
 

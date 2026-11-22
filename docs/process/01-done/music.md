@@ -1,6 +1,6 @@
 ---
 modulo: music
-actualizada: 2026-11-20
+actualizada: 2026-11-22
 ---
 
 # Música
@@ -17,6 +17,7 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 - Duración exacta: la pista sale con los segundos pedidos (±10 ms); si queda corta, regenera hasta 2 veces y avisa `music_short`.
 - `studio music samples`: una muestra de 10 s por preset para el buscador. Cada trabajo deja `tracks.json` con sus pistas.
 - Sección Música en la app: motor, duración con «Igualar a…», buscador de estilos (categoría, modo, BPM, favoritos) o texto libre, «Avanzado» con variantes, y comparar con «Elegir».
+- Las pistas se mezclan con la voz (ducking, LUFS final, video opcional) en la sección Mezcla: ver [mix.md](mix.md).
 
 ## Dónde vive
 

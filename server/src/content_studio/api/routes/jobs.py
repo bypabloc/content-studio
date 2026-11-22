@@ -68,6 +68,18 @@ def get_job(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)
     return _found(conn, job_id)
 
 
+OUTPUT_SUFFIXES = ('.wav', '.mp3', '.m4a', '.flac', '.ogg', '.aac', '.mp4', '.mov', '.mkv', '.webm')
+
+
+@router.get('/jobs/{job_id}/outputs')
+def job_outputs(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> list[str]:
+    """Los audios y videos de la carpeta del trabajo, por ruta: lo que «Del historial» de Mezcla puede elegir."""
+    folder = FsPath(_found(conn, job_id)['output_dir'] or '')
+    if not folder.is_dir():
+        return []
+    return sorted(str(path) for path in folder.iterdir() if path.suffix.lower() in OUTPUT_SUFFIXES)
+
+
 @router.post('/jobs/{job_id}/cancel')
 def cancel_job(job_id: JobId, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Cancela un trabajo en espera o en curso; con el worker activo también termina su proceso."""
