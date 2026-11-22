@@ -97,6 +97,8 @@ ignorePaths:
   - server/tests/integration/fixtures/*.txt
   # Golden del ASS (spec 014, AC-9): tags de formato y frases de prueba, no prosa.
   - server/tests/fixtures/subtitles/*.ass
+  # Golden del grafo del editor (spec 017, D-4): nombres de filtros de ffmpeg, no prosa.
+  - server/tests/fixtures/editor/*.filter
   # Código de proveedor copiado de klinikae (spec 008, D-1): se trae tal cual, con sus comentarios y sus clases.
   - client/src/shared/components/shadcn/**
   # Dependencias, salidas, grafo y datos que no son código: no se revisan.
