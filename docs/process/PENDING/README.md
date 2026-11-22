@@ -59,3 +59,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [014-audio-quemar-copia](014-audio-quemar-copia.md) | Al quemar, el audio PCM de un MOV no se ha probado: la copia del audio puede fallar en MP4 | En la verificación final (T9) | Agente |
 | [014-traduccion-real](014-traduccion-real.md) | Falta la prueba `-m local` automatizada de la traducción con `small`; la corrida real y el cierre ya están verificados a mano | Después del merge a dev; no bloquea | Agente |
 | [014-capturas-editor](014-capturas-editor.md) | Capturas del editor (claro y oscuro) y cuadros de la quema, comparados con `image-reader` (batería 03, puntos 3 y 9) | Después del merge a dev; no bloquea | Agente |
+| [015-bitrates-presets](015-bitrates-presets.md) | Los bitrates máximos por plataforma de los presets de redes (D-2) faltan, con sus fuentes | Antes de la verificación final de 015 (T9) | Agente |

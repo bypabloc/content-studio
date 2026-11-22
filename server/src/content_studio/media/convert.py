@@ -14,6 +14,7 @@ from typing import Any
 from content_studio.common.encode import video_codec
 from content_studio.common.ffmpeg import probe_duration
 from content_studio.media.formats import TARGETS
+from content_studio.media.reframe import graph as reframe_graph
 
 _PCM = {16: 'pcm_s16le', 24: 'pcm_s24le', 32: 'pcm_f32le'}
 _OPUS_RATES = frozenset({8000, 12000, 16000, 24000, 48000})  # libopus no codifica otras frecuencias
@@ -51,9 +52,13 @@ def build(input_info: dict[str, Any], target: str, options: dict[str, Any], enco
         audio = _video_audio(spec)
         codec_args = codec_args + audio
         needed = [name, audio[1]]
-        filters = _video_filters(options)
-        if filters:
-            args += ['-vf', ','.join(filters)]
+        if 'reframe' in options:
+            graph = reframe_graph(options['reframe'], options['width'], options['height'])
+            args += ['-filter_complex', graph, '-map', '[v]', '-map', '0:a?']
+        else:
+            filters = _video_filters(options)
+            if filters:
+                args += ['-vf', ','.join(filters)]
     missing = [codec for codec in needed if codec not in encoders]
     if missing:
         raise ConvertError('codec_unavailable', codec=missing[0])

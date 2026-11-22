@@ -168,5 +168,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [014-sin-cli-subtitles](014-sin-cli-subtitles.md) | No hay subcomando `studio subtitles`: ningún AC lo pide y la API y la UI cubren el flujo | `main` |
 | [015-armador-de-comandos](015-armador-de-comandos.md) | El catálogo de formatos son datos; `build` no pone la ruta de salida y `codec_unavailable` usa los códecs del sistema | `main` |
 | [015-render-de-conversion](015-render-de-conversion.md) | La duración de AC-2 se mide decodificando (el relleno de LAME); Opus solo admite 8–48 kHz; GIF en dos pasadas | `main` |
+| [015-presets-y-encuadre](015-presets-y-encuadre.md) | El ★ sale de la proporción; el encuadre es un grafo `-filter_complex`; `/media/frame` va en la T7 | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
