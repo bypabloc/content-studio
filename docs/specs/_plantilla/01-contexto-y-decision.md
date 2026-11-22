@@ -1,40 +1,58 @@
-# <NN>: contexto y decisión
+# Spec <NN>: contexto y decisión
 
-> **Decisiones y pendientes al ejecutar**: quien implemente esta spec puede tomar **todas las decisiones técnicas** que necesite, sin detenerse a pedir confirmación. Cada una queda en [`docs/process/WARNING/`](../../process/WARNING/README.md); toda revisión pendiente, en [`docs/process/PENDING/`](../../process/PENDING/README.md).
+> **Decisiones y pendientes al ejecutar**: quien implemente esta spec puede tomar **todas las decisiones técnicas** que necesite, sin detenerse a pedir confirmación.
+> Cada una queda anotada en [`docs/process/WARNING/`](../../process/WARNING/README.md) (ficha `<NN>-<tema>.md` con contexto, elegida, descartadas, cómo revertir y cómo comprobarla, y su fila en el README de la carpeta).
+> Toda revisión pendiente queda en [`docs/process/PENDING/`](../../process/PENDING/README.md) (ficha y fila, con qué la cierra).
 >
-> **Datos del usuario: solo los que crea esta spec**. No borra ni sobrescribe voces grabadas, voces construidas, salidas de `out/` ni modelos que no creó; si algo parece exigirlo, es un `blocked — user-data`.
+> **Datos del usuario: solo los que crea esta spec**. La spec no borra ni sobrescribe voces grabadas (`server/data/narration/voz/`), voces construidas, salidas de `out/` ni modelos descargados que ella no creó. Sus pruebas escriben en carpetas nuevas (`out/<herramienta>/spec-<NN>/` o `tmp/spec-<NN>/`). Si algo parece exigir tocar datos existentes, no se decide al ejecutar: es un `blocked — user-data` y se pregunta. Los cambios locales o sin rastrear del checkout principal no son de la spec: no se tocan y no bloquean.
 
-## 1. Precondición (si aplica)
+## 1. Precondición
 
-<Spec de la que depende y cómo comprobarla contra `origin/dev`: `git show origin/dev:<ruta> | ...`.>
+<Si depende de otra spec: comandos contra `origin/dev` que lo comprueban y se corren antes del primer commit (plan-format.md §5). Si no, «no aplica».>
+
+```bash
+git log origin/dev --merges --oneline | grep -q '<rama de la dependencia>' || echo FALLA
+git cat-file -e origin/dev:<ruta que usa esta spec> || echo FALLA
+```
 
 ## 2. Contexto
 
-<La necesidad o el defecto, y lo que encontró la exploración: archivos, funciones (`ruta:línea` del grafo), mediciones actuales (tiempos, VRAM, LUFS).>
+<Cómo funciona hoy y qué problema causa, escrito para alguien que no estuvo en la conversación.>
+
+### Términos
+
+| Término | Significado | En el código |
+| :--- | :--- | :--- |
+| <término> | <qué es> | `<símbolo>` / `<clave>` |
+
+### Hallazgos de la exploración
+
+Cada hallazgo con su evidencia: archivo y símbolo (de `graphify query|explain`) o medición actual con fecha (tiempos, VRAM, LUFS).
+
+- **<Hallazgo>.** <Evidencia: `server/src/content_studio/<…>.py` (`<función>`) o «medido el <fecha>: <valor>»>.
 
 ## 3. Solución
 
-Una sola. Cada decisión pasó la escalera de `plan-format.md` §0 (¿debe existir? ¿ya existe? ¿stdlib o una dependencia que ya está?):
+<Resumen en 2-4 puntos de qué se construye y dónde.>
 
-* **D-1: <qué>** — <por qué; qué alternativa más simple se descartó y por qué no alcanza>.
+Cada decisión pasa por la escalera de plan-format.md §0 (¿debe existir? ¿ya existe? ¿stdlib o una dependencia que ya está?).
+
+- **D-1: <qué>** — <por qué>. Se descarta <alternativa> porque <razón>.
 
 ## 4. Fuera de alcance
 
-* <Lo que esta spec deliberadamente no hace; lo pendiente va a `docs/process/02-next/` o `PENDING/`.>
+- <Lo que esta spec no hace; si queda pendiente, su ficha en `docs/process/02-next/` o `PENDING/`>.
 
 ## 5. Criterios de aceptación
 
-* **AC-1**: WHEN <acción> THEN <resultado observable>. Lo verifica: <test o medición>.
-* **AC-2**: Given <estado> When <acción> Then <resultado>.
+BDD (`Given/When/Then`) o EARS (`WHEN/THEN`); cada uno verificable con una prueba (pytest, doctest o una medición de la salida real).
 
-## 6. Diagrama antes y después (si cambia un flujo)
+- **AC-1**: WHEN <acción> THEN <resultado observable>.
+- **AC-2**: Given <estado> When <acción> Then <resultado>.
 
-```mermaid
-flowchart LR
-    A[antes] --> B[después]
-```
+## 6. Debe sonar / no debe sonar
 
-## 7. Debe sonar / no debe sonar (si toca la salida de audio)
+<Solo si toca la salida de audio. Si no, «no aplica».>
 
 | Salida | Debe | No debe |
 | :--- | :--- | :--- |
