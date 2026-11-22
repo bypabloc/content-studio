@@ -9,6 +9,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Servidor | API local y cola de trabajos, con el CLI `studio` | [server.md](server.md) |
 | Cliente | Ventana de escritorio: shell, cola, tema, selectores y ajustes | [client.md](client.md) |
 | Motores y almacenamiento | Instalación de motores con recetas y carpetas elegibles | [engines.md](engines.md) |
+| Subtítulos | Subtítulos desde archivo, limpiador, narración o SRT/VTT, con editor, quemado y traducción | [subtitles.md](subtitles.md) |
 
 ## Plantilla
 
