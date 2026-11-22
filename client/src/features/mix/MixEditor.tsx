@@ -7,6 +7,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { toast } from '@/shared/components/molecules/UIToast';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
+import { jobErrorMessage } from '@/shared/media/formats';
 
 import { MixTimeline } from './MixTimeline';
 import { useMixPreview } from './useMixPreview';
@@ -35,6 +36,13 @@ export function MixEditor({ projectId }: { projectId: number }): React.JSX.Eleme
     queryFn: () => api.get<MixProject>(`/mix/${projectId}`),
     refetchInterval: (query) => (query.state.data?.status === 'transcribing' ? 2000 : false),
   });
+  // El último render de este proyecto que falló: su código dice qué corregir (AC-4). Los trabajos llegan en arreglo.
+  const renders = useQuery({
+    queryKey: ['jobs', 'mix.render'],
+    queryFn: () => api.get<{ id: number; status: string; error_code: string | null; params: { mix_id?: number } }[]>('/jobs?kind=mix.render'),
+    refetchInterval: 3000,
+  });
+  const failed = (renders.data ?? []).find((job) => job.status === 'failed' && job.params.mix_id === projectId);
   const curve = useQuery({
     queryKey: ['mix', projectId, 'curve', project.data?.regions, project.data?.params],
     queryFn: () => api.get<CurveOut>(`/mix/${projectId}/curve`),
@@ -126,6 +134,14 @@ export function MixEditor({ projectId }: { projectId: number }): React.JSX.Eleme
       >
         {preview.active ? t('mix.preview.stop') : t('mix.preview.play')}
       </UIButton>
+      {failed ? (
+        <UIStack role="alert">
+          {/* La clave va escrita entera: la etapa i18n no ve las que `jobErrorMessage` arma con el código. */}
+          <UIText variant="body">
+            {failed.error_code === 'music_too_short' ? t('error.music_too_short') : jobErrorMessage(failed.error_code)}
+          </UIText>
+        </UIStack>
+      ) : null}
       <UIButton onClick={() => render.mutate()}>{t('mix.render')}</UIButton>
     </UIStack>
   );

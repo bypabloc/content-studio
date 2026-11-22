@@ -26,6 +26,7 @@ const PARAMS = {
 };
 
 let status = 'ready';
+let renderJobs: unknown[] = [];
 
 function project(state: string) {
   return {
@@ -52,9 +53,11 @@ function renderEditor() {
 
 beforeEach(() => {
   status = 'ready';
-  api.get.mockImplementation(async (path: string) =>
-    path.endsWith('/curve') ? { total: 10, points: [] } : project(status),
-  );
+  renderJobs = [];
+  api.get.mockImplementation(async (path: string) => {
+    if (path.startsWith('/jobs')) return renderJobs;
+    return path.endsWith('/curve') ? { total: 10, points: [] } : project(status);
+  });
   api.post.mockResolvedValue({ id: 9 });
 });
 
@@ -134,6 +137,14 @@ describe('MixEditor (spec 016, D-4)', () => {
     expect(context.close).toHaveBeenCalled();
     expect(await screen.findByRole('button', { name: t('mix.preview.play') })).toBeTruthy();
     vi.unstubAllGlobals();
+  });
+
+  it('si el render falló por música corta, lo dice con su código (AC-4)', async () => {
+    renderJobs = [{ id: 9, status: 'failed', error_code: 'music_too_short', params: { mix_id: 7 } }];
+    renderEditor();
+
+    expect(await screen.findByRole('alert', {}, { timeout: 4000 })).toBeTruthy();
+    expect(screen.getByText(t('error.music_too_short'))).toBeTruthy();
   });
 
   it.each([

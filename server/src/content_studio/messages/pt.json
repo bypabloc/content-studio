@@ -215,6 +215,7 @@
   "error.missing_text": "Falta o texto ou o arquivo do roteiro.",
   "error.mix_project_not_found": "O projeto de mistura {project_id} não existe.",
   "error.mixed_kinds": "Não é possível unir áudio com vídeo na mesma união.",
+  "error.music_too_short": "A música é mais curta que a mistura: gere uma mais longa.",
   "error.no_voices": "Escolha pelo menos uma voz do catálogo.",
   "error.not_found": "Não existe.",
   "error.one_script_per_job": "Cada trabalho de narração leva um único roteiro: um trabalho por arquivo.",

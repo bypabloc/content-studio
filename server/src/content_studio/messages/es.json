@@ -215,6 +215,7 @@
   "error.missing_text": "Falta el texto o el archivo del guion.",
   "error.mix_project_not_found": "No existe el proyecto de mezcla {project_id}.",
   "error.mixed_kinds": "No se puede unir audio con video en una misma unión.",
+  "error.music_too_short": "La música es más corta que la mezcla: genera una más larga.",
   "error.no_voices": "Elige al menos una voz del catálogo.",
   "error.not_found": "No existe.",
   "error.one_script_per_job": "Cada trabajo de narración lleva un solo guion: un trabajo por archivo.",

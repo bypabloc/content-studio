@@ -215,6 +215,7 @@
   "error.missing_text": "The text or the script file is missing.",
   "error.mix_project_not_found": "The mix project {project_id} does not exist.",
   "error.mixed_kinds": "Audio and video cannot be joined in the same join.",
+  "error.music_too_short": "The music is shorter than the mix: generate a longer one.",
   "error.no_voices": "Pick at least one voice from the catalog.",
   "error.not_found": "It does not exist.",
   "error.one_script_per_job": "Each narration job takes a single script: one job per file.",
