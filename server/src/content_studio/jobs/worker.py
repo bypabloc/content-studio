@@ -201,6 +201,7 @@ class Worker:
             return
         if code == 0:
             jobs.update(conn, job['id'], status='done', finished_at=utc_now())
+            self._chain(conn, job, out_dir)
         else:
             errors = getattr(self.services[job['kind']], 'ERROR_CODES', {})
             jobs.update(
@@ -212,6 +213,15 @@ class Worker:
                 finished_at=utc_now(),
             )
         self._notify(conn, job['id'])
+
+    def _chain(self, conn: sqlite3.Connection, job: dict, out_dir: Path) -> None:
+        """«Aplicar todos sin revisar» (spec 013, D-4): un análisis con `auto_render` encola su render al terminar."""
+        if job['kind'] != 'clean.analyze' or not job['params'].get('auto_render'):
+            return
+        new_id = queue.enqueue(
+            conn, 'clean.render', {'input': job['params']['input'], 'analysis': str(out_dir)}, self.services
+        )
+        self._notify(conn, new_id)
 
     def _watch_cancel(self, job_id: int, finished: threading.Event) -> None:
         """Mientras el proceso corre, mira la base: si el trabajo se canceló desde otro proceso, lo termina."""

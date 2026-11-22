@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from content_studio.services import (
+    clean_analyze,
+    clean_render,
     engine_install,
     engine_uninstall,
     engine_verify,
@@ -12,6 +14,7 @@ from content_studio.services import (
     narration_regenerate,
     storage_move,
     system_install_tool,
+    transcribe,
     voice_build,
     voice_check,
 )
@@ -21,6 +24,9 @@ from content_studio.services.registry import SERVICES
 def test_every_kind_exposes_validate_and_build_command():
     expected = {
         'narration': narration,
+        'transcribe': transcribe,
+        'clean.analyze': clean_analyze,
+        'clean.render': clean_render,
         'music': music,
         'music.samples': music_samples,
         'narration.regenerate': narration_regenerate,
