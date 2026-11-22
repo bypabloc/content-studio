@@ -32,4 +32,7 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 
 - Gate `test-runner --type=all`: 12 etapas en verde (lint, spelling, validators, unit, typecheck, tdd, client-lint, client-typecheck, client-unit, ui-structure, budget, i18n).
 - e2e en desktop-chromium: 36 de 36 pasan, con los cuatro del limpiador.
-- Pendiente (T9): corrida real con un video de 3 a 5 minutos (VRAM de la transcripción, silencios de salida, sincronía, espectrograma y escucha del usuario) y la evaluación de narración con `--evaluate` sobre el servicio real.
+- Corrida real (video de 232 s, large-v3-turbo): silencios ≥0,8 s = 0; sincronía 3 ms; informe = archivo; VRAM de la transcripción +1,28 GB; sin clics en las uniones; EDL con 42 eventos y XML con 42 clips. Lote de 3 archivos con `--auto` OK.
+- Evaluación de narración con `--evaluate` (faster-whisper) en real: transcripción = texto pedido, sin observaciones (AC-10).
+- Regiones de la revisión: se dibujan al recibir «ready» (fix 8); posiciones medidas en el DOM con la duración del archivo. Ver [WARNING 013-regiones-duracion-del-analisis](../WARNING/013-regiones-duracion-del-analisis.md).
+- Pendiente: escucha del usuario y revisión manual de la UI, en [PENDING 013-escucha-y-revision-manual](../PENDING/013-escucha-y-revision-manual.md).
