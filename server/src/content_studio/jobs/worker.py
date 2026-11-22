@@ -30,6 +30,7 @@ from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
 from content_studio.services.registry import SERVICES
 from content_studio.services.storage_move import KIND as STORAGE_MOVE
+from content_studio.subtitles import translate
 from content_studio.subtitles.document import load
 
 WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canceló desde otro proceso
@@ -224,6 +225,9 @@ class Worker:
             doc = out_dir / 'subtitles.json'
             source = load(doc)['source']['path']
             subtitle_projects.insert(conn, Path(source).stem, source, str(doc))
+            return
+        if job['kind'] == 'subtitles.translate':
+            translate.finish(Path(job['params']['doc']), out_dir)
             return
         if job['kind'] != 'clean.analyze' or not job['params'].get('auto_render'):
             return

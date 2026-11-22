@@ -54,13 +54,18 @@ def progress_fraction(end: float, duration: float) -> float:
     return round(min(end / duration, 1.0), 4)
 
 
-def transcribe(audio: Path, *, language: str, out: Path, model: Any) -> None:
+def transcribe(audio: Path, *, language: str, out: Path, model: Any, task: str = 'transcribe') -> None:
     """Transcribe `audio` con un modelo ya cargado y escribe el JSON en `out`.
 
-    «auto» deja que el modelo detecte el idioma. Emite el progreso por segmento (`@@progress`).
+    «auto» deja que el modelo detecte el idioma. `task='translate'` lo traduce al inglés (spec 014, D-8): whisper
+    no da tiempos por palabra en ese modo, así que sus segmentos salen sin palabras. Emite el progreso por segmento.
     """
     segments, info = model.transcribe(
-        str(audio), language=None if language == 'auto' else language, word_timestamps=True, vad_filter=True
+        str(audio),
+        language=None if language == 'auto' else language,
+        task=task,
+        word_timestamps=task == 'transcribe',
+        vad_filter=True,
     )
     done = []
     for segment in segments:
@@ -75,6 +80,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument('--input', required=True, help='audio or video to transcribe')
     parser.add_argument('--model', required=True, choices=sorted(models.MODELS), help='model from the catalog')
     parser.add_argument('--language', default='auto', help='language code, or auto to detect it')
+    parser.add_argument(
+        '--task', default='transcribe', choices=('transcribe', 'translate'), help='translate to English'
+    )
     parser.add_argument('--out', required=True, help='output JSON with the words and their times')
     return parser
 
@@ -98,7 +106,7 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     wav = out.parent / 'audio-16k.wav'
     ff.ffmpeg('-y', '-i', args.input, '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', str(wav))
-    transcribe(wav, language=args.language, out=out, model=_load_model(args.model))
+    transcribe(wav, language=args.language, out=out, model=_load_model(args.model), task=args.task)
     return 0
 
 
