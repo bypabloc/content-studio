@@ -13,17 +13,17 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 ## 1. Preparación
 
 1. Usa la spec que indique el usuario; si no indica una, lista `docs/specs/README.md` y pregunta.
-2. Lee `README.md`, `01-contexto-y-decision.md` y `02-plan.md` (y el README del lote si vive en uno). Corre su «Precondición». Ordena los grupos de commit por dependencia y omite los ya hechos.
+2. Lee `README.md`, `01-contexto-y-decision.md`, `02-diseno.md` y cada carpeta `fases/<n>-<tema>/` (`plan-tdd.md`, `archivos.md` y `commits.md`), y el README del lote si vive en uno. Corre su «Precondición». Cada fase es un grupo de commit: ordénalas por dependencia y omite las que el README ya marca `IMP`.
 3. Worktree propio: `git fetch origin dev`, `git worktree add ../content-studio-worktrees/<NN>-<slug> -b <prefijo>/<NN>-<slug> origin/dev` y `python -m devtools worktree prepare <NN>-<slug>`; si ya existe, reutilízalo. Nunca commits en `dev` ni `main`.
 4. Resuelve contradicciones con las reglas antes de tocar archivos; lee las fichas de `docs/process/WARNING/` y `PENDING/` que cite.
 
-## 2. Por cada grupo de commit
+## 2. Por cada fase (grupo de commit)
 
-1. TDD (skill `tdd-workflow`): test en rojo, implementación mínima, refactor. Solo los archivos del grupo. Marca las tareas como hechas en el README de la spec.
-2. Verify de cada tarea y `uv run ruff check && uv run ruff format --check && uv run pytest`. Nada que cargue un modelo por grupo.
+1. TDD (skill `tdd-workflow`): test en rojo, implementación mínima, refactor. Solo los archivos de su `archivos.md`. Al cerrar la fase, pasa su fila del README a `IMP` con el hash del commit y marca sus filas de la matriz de verificación.
+2. Verify de cada archivo y `uv run ruff check && uv run ruff format --check && uv run pytest`. Nada que cargue un modelo por grupo.
 3. Si falla, diagnostica y repite solo lo afectado; no avances con el grupo en rojo.
 4. Toda disyuntiva la decides tú (la opción correcta, no la más rápida) y va a `docs/process/WARNING/<NN>-<tema>.md` con la plantilla de su README; lo diferido, a `PENDING/`. Solo preguntas con un `blocked` de `user-data`, `cost`, `credentials` o `user-stop` (categorías de `.claude/session-handoff.json`); la elección sonora también es tuya (con el «debe sonar» de la spec, registrada en WARNING). Commits, push, PR, merge y cierre no se consultan: la spec ya los autoriza.
-5. Commit con el mensaje exacto del grupo en `02-plan.md` tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
+5. Commit con el mensaje exacto del `commits.md` de la fase tras revisar el diff contra la escalera KISS y «Fuera de alcance». Si un hook falla, corrige (skill `fix-hooks`) y repite.
 
 ## 3. Verificación final, PR y merge
 
@@ -35,4 +35,4 @@ La ventana principal implementa la spec de principio a fin y conserva el context
 
 ## 4. Reporte final
 
-Cada grupo con su commit y su verificación, el PR y su merge en `dev`, las fichas de WARNING y PENDING que dejó (o que no dejó ninguna) y las rutas de `out/` para que el usuario escuche.
+Cada fase con su commit y su verificación, el PR y su merge en `dev`, las fichas de WARNING y PENDING que dejó (o que no dejó ninguna) y las rutas de `out/` para que el usuario escuche.
