@@ -4,15 +4,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SubtitlesPreview } from '@/features/subtitles/SubtitlesPreview';
 import { t } from '@/shared/i18n/t';
 
-// JASSUB necesita un canvas y un worker: aquí se reemplaza por un objeto con los métodos que usa la vista previa.
-const { setTrack, destroy, constructed } = vi.hoisted(() => ({
+// JASSUB necesita un canvas y un worker: aquí se reemplaza por un objeto con los métodos que usa la vista previa. `ready`
+// se fija en cada prueba: resuelto si el worker arranca, rechazado si no hay WebGL.
+const { setTrack, destroy, constructed, ready } = vi.hoisted(() => ({
   setTrack: vi.fn(),
   destroy: vi.fn(() => Promise.resolve()),
   constructed: vi.fn(),
+  ready: { current: Promise.resolve() as Promise<void> },
 }));
 vi.mock('jassub', () => ({
   default: class FakeJassub {
     renderer = { setTrack };
+    ready = ready.current;
     constructor() {
       constructed();
     }
@@ -25,6 +28,7 @@ vi.mock('jassub', () => ({
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  ready.current = Promise.resolve();
 });
 
 describe('SubtitlesPreview', () => {
@@ -66,6 +70,12 @@ describe('SubtitlesPreview', () => {
     expect(onAspect).not.toHaveBeenCalled();
   });
 
+  it('manda la pista al renderer cuando el worker está listo', async () => {
+    render(<SubtitlesPreview src="file://x.mp4" ass="uno" zone={null} onAspect={() => {}} />);
+
+    await waitFor(() => expect(setTrack).toHaveBeenCalledWith('uno'));
+  });
+
   it('sends a new subtitle track to the renderer when the ASS changes', async () => {
     const { rerender } = render(<SubtitlesPreview src="file://x.mp4" ass="uno" zone={null} onAspect={() => {}} />);
     await waitFor(() => expect(constructed).toHaveBeenCalled());
@@ -73,5 +83,15 @@ describe('SubtitlesPreview', () => {
     rerender(<SubtitlesPreview src="file://x.mp4" ass="dos" zone={null} onAspect={() => {}} />);
 
     expect(setTrack).toHaveBeenLastCalledWith('dos');
+  });
+
+  it('sin WebGL el worker no arranca: la vista previa queda vacía y el editor sigue en pie', async () => {
+    ready.current = Promise.reject(new Error('webgl'));
+    const { container } = render(<SubtitlesPreview src="file://x.mp4" ass="uno" zone={null} onAspect={() => {}} />);
+    await waitFor(() => expect(constructed).toHaveBeenCalled());
+    await Promise.resolve();
+
+    expect(setTrack).not.toHaveBeenCalled();
+    expect(container.querySelector('video')).not.toBeNull();
   });
 });

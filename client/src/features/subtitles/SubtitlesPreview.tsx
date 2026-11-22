@@ -33,7 +33,8 @@ export function SubtitlesPreview({
 
   useEffect(() => {
     subtitles.current = ass;
-    void renderer.current?.renderer.setTrack(ass);
+    // JASSUB asigna `renderer` cuando su worker está listo; antes, la pista más reciente va al crear la instancia (abajo).
+    if (renderer.current?.renderer) void renderer.current.renderer.setTrack(ass);
   }, [ass]);
 
   useEffect(() => {
@@ -46,7 +47,12 @@ export function SubtitlesPreview({
     video.addEventListener('loadedmetadata', measure);
     void import('jassub').then(({ default: JassubCtor }) => {
       if (!active) return;
-      renderer.current = new JassubCtor({ video, subContent: subtitles.current });
+      const instance = new JassubCtor({ video, subContent: subtitles.current });
+      renderer.current = instance;
+      // Con el worker listo se manda la pista más reciente. Sin WebGL, la vista previa queda vacía sin romper el editor.
+      void instance.ready
+        .then(() => instance.renderer.setTrack(subtitles.current))
+        .catch(() => undefined);
     });
     return () => {
       active = false;
