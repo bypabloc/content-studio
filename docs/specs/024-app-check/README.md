@@ -47,4 +47,4 @@ Que cualquier agente (Claude Code, Codex y Antigravity) verifique la app de escr
 ## WARNING y PENDING
 
 * WARNING: `024-cdp-webview2` (cómo se abre el puerto de CDP), `024-hooks-por-agente` (qué evento y qué herramienta bloquea cada agente), `024-target-por-worktree` (compilación propia frente al target compartido).
-* PENDING: `024-allowlist-computer-use` (quitar `content-studio.exe` de `~/.codex/computer-use/config.toml`; es configuración del usuario, fuera del repo). Las fichas de revisión visual que `app-check` destraba (`008-revision-visual-organismos`, `012-instalar-motor-real`, `014-capturas-editor`, `015-escucha-y-revision`) se cierran en su propio PR, no en esta spec.
+* PENDING: ninguna propia. `content-studio.exe` ya se quitó de las apps permitidas de `~/.codex/computer-use/config.toml` (22-11-2026, a pedido del usuario; queda `allowed = []`). Las fichas de revisión visual que `app-check` destraba (`008-revision-visual-organismos`, `012-instalar-motor-real`, `014-capturas-editor`, `015-escucha-y-revision`) se cierran en su propio PR, no en esta spec.

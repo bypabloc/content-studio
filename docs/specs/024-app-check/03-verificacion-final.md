@@ -48,7 +48,7 @@ No aplica: la spec no genera audio. Las capturas de la corrida 1 van en el PR co
 ## 5. Cierre
 
 * Spec técnica: no actualiza `docs/process/01-done/`.
-* Fichas `WARNING/024-cdp-webview2`, `024-hooks-por-agente` y `024-target-por-worktree`, y `PENDING/024-allowlist-computer-use`, con sus filas en cada README.
+* Fichas `WARNING/024-cdp-webview2`, `024-hooks-por-agente` y `024-target-por-worktree`, con sus filas en el README de WARNING.
 * Último commit: `git rm -r docs/specs/024-app-check/` y su fila de `docs/specs/README.md`.
 
 ## 6. PR y merge

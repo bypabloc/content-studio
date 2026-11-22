@@ -90,7 +90,7 @@ El hook temporal y su cableado se borran al terminar T1: no entran en ningún co
 | Modificar | `.agents/rules/verify-before-claiming-done.md`, `devtools.md`, `frontend-stack.md`, `.agents/skills/devtools/SKILL.md` y sus copias en `.claude/` | `python -m devtools rules` y `agent-context` |
 | Modificar | `AGENTS.md` (Reglas y Atajos) | `python -m devtools agent-context` |
 | Modificar | `.gitignore` (solo si `tmp/app-check/` no queda cubierto por `tmp/`) | `git check-ignore tmp/app-check/x` |
-| Crear | `docs/process/WARNING/024-*.md`, `docs/process/PENDING/024-allowlist-computer-use.md` y sus filas | — |
+| Crear | `docs/process/WARNING/024-*.md` y sus filas | — |
 
 Cada `.py`, `.ts` y `.rs` de fuente queda en 300 líneas o menos, y cada test en 800 (`file-size.json`). Los `.py` nuevos de `devtools/` tienen su espejo en `devtools/tests/unit/`. Si `launch.py` baja del 80 % de cobertura en Linux, porque el Job solo corre en Windows, se agrega al baseline con su ficha, como `WARNING/004-cobertura-linux-gpu-lock`.
 
@@ -106,7 +106,7 @@ Cada `.py`, `.ts` y `.rs` de fuente queda en 300 líneas o menos, y cada test en
 | T6 | `launch.py`: compilar y esperar CDP (ciclo 6) | AC-5 | T4 | `uv run pytest devtools/tests/unit/app_check/test_launch.py -q` | [ ] |
 | T7 | Job Object, `main.py` y `COMMANDS` (ciclo 7) | AC-5, AC-6, AC-7 | T5, T6 | `uv run pytest devtools/tests/unit -q` y `python -m devtools app-check --help` | [ ] |
 | T8 | Fixture, helpers, configuración y escenarios (ciclo 8); respaldo de `lib.rs` si T1 lo pidió | AC-7, AC-8, AC-9 | T7 | `python -m devtools test-runner --type=e2e`; los `.check.ts`, verificación final | [ ] |
-| T9 | Reglas, skill, `AGENTS.md`, `rules --sync` y validación headless (AC-10); ficha `PENDING/024-allowlist-computer-use` | AC-10 | T3, T8 | `python -m devtools rules`, `agent-context` y `tmp/config-tests/024-app-check.json` | [ ] |
+| T9 | Reglas, skill, `AGENTS.md`, `rules --sync` y validación headless (AC-10) | AC-10 | T3, T8 | `python -m devtools rules`, `agent-context` y `tmp/config-tests/024-app-check.json` | [ ] |
 
 ## 4. Commits
 
