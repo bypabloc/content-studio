@@ -53,4 +53,3 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Completar aceptación manual de Qwen/UI, winget, traslado, bienvenida y capturas (CLI Qwen pasó) | T9, antes de fusionar la 012 | Usuario y agente |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
-| [012-validacion-reglas-agente](012-validacion-reglas-agente.md) | Validación conductual de stack, codigo-python y worktrees con Codex CLI | Después de autorización manual de Synapse | Usuario y agente |
