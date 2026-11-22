@@ -53,6 +53,15 @@ def test_opus_bitrate_channels_and_rate_go_after_the_codec():
     assert args == ['-y', '-i', 'in.wav', '-c:a', 'libopus', '-b:a', '96k', '-ac', '1', '-ar', '48000']
 
 
+def test_opus_refuses_a_rate_it_cannot_encode():
+    """Opus solo codifica 8, 12, 16, 24 y 48 kHz: otra frecuencia da `sample_rate_unsupported`, sin llegar a ffmpeg."""
+    with pytest.raises(convert.ConvertError) as caught:
+        convert.build(AUDIO_IN, 'ogg-opus', {'sample_rate': 22050}, ALL)
+
+    assert caught.value.code == 'sample_rate_unsupported'
+    assert caught.value.params == {'codec': 'libopus', 'rate': 22050}
+
+
 def test_video_to_audio_drops_the_video_stream():
     """Extraer audio de un video: `-vn`, para que el contenedor no lleve el video."""
     args = convert.build(VIDEO_IN, 'm4a', {'bitrate': 192}, ALL)

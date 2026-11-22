@@ -22,6 +22,7 @@ TARGETS: dict[str, dict[str, Any]] = {
     'webm-av1': {'kind': 'video', 'ext': '.webm', 'codec': 'libsvtav1'},
     'mov': {'kind': 'video', 'ext': '.mov', 'codec': 'libx264', 'nvenc': 'h264_nvenc'},
     'mkv': {'kind': 'video', 'ext': '.mkv', 'codec': 'libx264', 'nvenc': 'h264_nvenc'},
+    'gif': {'kind': 'gif', 'ext': '.gif', 'codec': 'gif'},
 }
 
 

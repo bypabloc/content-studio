@@ -73,7 +73,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Los medios se gen
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Catálogo y armador | AC-1 | — | `unit` | [x] |
-| T2 | Render y GIF | AC-2, AC-3 | T1 | `unit` | [ ] |
+| T2 | Render y GIF | AC-2, AC-3 | T1 | `unit` | [x] |
 | T3 | Presets y encuadre fijo | AC-4 | T2 | `unit` | [ ] |
 | T4 | Seguir a la persona | AC-5 | T3 | `unit`, `-m local` | [ ] |
 | T5 | Normalizar | AC-6 | — | `unit` | [ ] |
