@@ -14,7 +14,9 @@ def insert(conn: sqlite3.Connection, name: str, doc_path: str) -> int:
         'INSERT INTO mix_projects (name, doc_path, created_at, updated_at) VALUES (?, ?, ?, ?)',
         (name, doc_path, now, now),
     )
-    return int(cursor.lastrowid)
+    project_id = cursor.lastrowid
+    assert project_id is not None  # un INSERT siempre deja el id de la fila
+    return project_id
 
 
 def get(conn: sqlite3.Connection, project_id: int) -> dict | None:

@@ -105,7 +105,7 @@ def prepare(body: PrepareIn, request: Request, conn: Annotated[sqlite3.Connectio
     voice = allowed_file(request, body.voice)
     music = allowed_file(request, body.music)
     video = allowed_file(request, body.video) if body.video else None
-    model = settings.get(conn, 'select.whisper.model', models.RECOMMENDED)
+    model = str(settings.get(conn, 'select.whisper.model', models.RECOMMENDED))
     hit = cache.find(conn, *project.transcript_key(voice, model))
     regions: list[list[float]] = []
     job_id = None

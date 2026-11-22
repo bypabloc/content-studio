@@ -44,7 +44,7 @@ def run(args: argparse.Namespace) -> int:
     conn = connect(args.db)
     try:
         schema.migrate(conn)
-        model = settings.get(conn, 'select.whisper.model', models.RECOMMENDED)
+        model = str(settings.get(conn, 'select.whisper.model', models.RECOMMENDED))
         hit = cache.find(conn, *project.transcript_key(voice, model))
         if hit is None:
             print(t('mix.transcript_missing', path=str(voice)), file=sys.stderr)
