@@ -45,7 +45,7 @@ def gain_curve(
             merged.append([start, end])
     points = [point for start, end in merged for point in _ramps(start, end, duck_db, ramp, base_db)]
     inside = [(t, db) for t, db in points if 0 < t < duration]
-    curve = [(0.0, _value(points, 0.0, base_db)), *inside, (duration, _value(points, duration, base_db))]
+    curve = [(0.0, value_at(points, 0.0, base_db)), *inside, (duration, value_at(points, duration, base_db))]
     return [(round(float(t), 3), round(float(db), 3)) for t, db in curve]
 
 
@@ -54,7 +54,7 @@ def _ramps(start: float, end: float, duck_db: float, ramp: float, base_db: float
     return [(start - ramp, base_db), (start, duck_db), (end, duck_db), (end + ramp, base_db)]
 
 
-def _value(points: list[tuple[float, float]], t: float, default: float) -> float:
+def value_at(points: list[tuple[float, float]], t: float, default: float) -> float:
     """El valor de la curva en `t`: interpolado entre sus puntos y sostenido en los extremos."""
     if not points:
         return default
