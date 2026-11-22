@@ -32,11 +32,11 @@ Las herramientas de ffmpeg del estudio, cada una con su lote, su cola y su vista
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Catálogo de formatos y presets, y el armador de comandos de conversión | PEN |
-| 2 | Encuadre: centrado, manual, barras o desenfoque, y seguir a la persona (YuNet) | PEN |
-| 3 | Normalizar (loudnorm en dos pasadas y mejorar voz) | PEN |
-| 4 | Recortar, unir, fades y dividir | PEN |
-| 5 | Client: Convertir y Normalizar | PEN |
+| 1 | Catálogo de formatos y presets, y el armador de comandos de conversión (T1–T2) | DON |
+| 2 | Encuadre: centrado, manual, barras o desenfoque, y seguir a la persona (YuNet) (T3–T4) | DON |
+| 3 | Normalizar (loudnorm en dos pasadas y mejorar voz) (T5) | DON |
+| 4 | Recortar, unir, fades y dividir (T6) | DON |
+| 5 | Client: Convertir y Normalizar (T7; el commit espera el gate) | IMP |
 
 ## Decisiones clave
 
