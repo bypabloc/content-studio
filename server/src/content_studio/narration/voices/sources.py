@@ -11,7 +11,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from content_studio.paths import VOICES
+from content_studio.paths import voices_dir
 
 UA = {'User-Agent': 'content-studio-voces'}
 PAUSE_PARTS = 0.4  # s entre las partes de una base armada con varios clips
@@ -61,7 +61,7 @@ def fetch(url: str, member: str | None = None) -> Path:
     """Archivo de la fuente en la caché server/data/narration/voices/.fuentes:
     la URL entera o, con `miembro`, ese archivo de
     un zip."""
-    cache = VOICES / '.fuentes' / (member or url.rsplit('/', 1)[-1].replace('%28', '(').replace('%29', ')'))
+    cache = voices_dir() / '.fuentes' / (member or url.rsplit('/', 1)[-1].replace('%28', '(').replace('%29', ')'))
     if not cache.exists():
         cache.parent.mkdir(parents=True, exist_ok=True)
         print(f'Downloading {url}' + (f' → {member}' if member else ''))

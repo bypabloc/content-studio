@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { NarrationPage } from '@/features/narration/NarrationPage';
 import { QueuePanel } from '@/features/queue/QueuePanel';
-import { SettingsPage } from '@/features/settings/SettingsPage';
 import { CatalogPage } from '@/features/voices/CatalogPage';
 import { MyVoicesPage } from '@/features/voices/MyVoicesPage';
 import { UISkeleton } from '@/shared/components/atoms/UISkeleton';
@@ -19,6 +18,9 @@ import { navItems } from './nav';
 
 // La página de Música solo se carga al abrirla: así el JS de arranque queda bajo el presupuesto de client/budget.json.
 const MusicPage = lazy(() => import('@/features/music/MusicPage').then((module) => ({ default: module.MusicPage })));
+const EnginesPage = lazy(() => import('@/features/engines/EnginesPage').then((module) => ({ default: module.EnginesPage })));
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })));
+const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((module) => ({ default: module.WelcomeGate })));
 
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
 export function Shell({ version }: { version: string }) {
@@ -59,11 +61,21 @@ export function Shell({ version }: { version: string }) {
             <MusicPage />
           </Suspense>
         )}
+        {section?.id === 'engines' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <EnginesPage />
+          </Suspense>
+        )}
         {section?.id === 'voices' && <MyVoicesPage />}
         {section?.id === 'catalog' && <CatalogPage />}
-        {section?.id === 'settings' && <SettingsPage />}
+        {section?.id === 'settings' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <SettingsPage />
+          </Suspense>
+        )}
         {!section && <UIText variant="caption">{t('shell.empty')}</UIText>}
       </UIAppShell>
+      <Suspense fallback={null}><WelcomeGate /></Suspense>
       <UICommandPalette
         items={nav}
         onSelect={(id) => {

@@ -74,6 +74,11 @@ export function NarrationOptions() {
         }))}
         beforeChange={confirmLicense}
       />
+      {current && !current.installed ? (
+        <UIButton variant="secondary" className="self-start" onClick={() => { window.location.hash = `#/engines?engine=${encodeURIComponent(current.id)}`; }}>
+          {t('engines.install_from_options')}
+        </UIButton>
+      ) : null}
       <VoiceSelect settingKey="select.narration.voice" label={t('narration.options.voice')} voices={choice.voices} />
       <UIRecommendedSelect
         settingKey="select.narration.style"

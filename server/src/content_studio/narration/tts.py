@@ -44,7 +44,7 @@ def main() -> None:
         sheet = approved_voices(STYLES)[a.voice]
         if sheet['language'] != a.language:
             ap.error(f'la voz {a.voice} es en "{sheet["language"]}": usa --language {sheet["language"]}')
-        ref = paths.VOICES / a.voice
+        ref = paths.voices_dir() / a.voice
     elif profiles.exists(a.profile):
         ref = profiles.folder(a.profile)
     else:

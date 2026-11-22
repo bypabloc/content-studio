@@ -92,4 +92,4 @@ def test_the_files_route_serves_out_the_references_and_the_voice_catalog(tmp_pat
     """/files sirve out/, las referencias y el catálogo de voces: las muestras se reproducen desde la UI (D-5)."""
     app = create_app(tmp_path / 'base.db', 'token')
 
-    assert {paths.OUT.resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()} <= set(app.state.roots)
+    assert {paths.outputs_dir().resolve(), paths.REFERENCE.resolve(), paths.VOICES.resolve()} <= set(app.state.roots)

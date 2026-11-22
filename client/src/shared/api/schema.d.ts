@@ -88,6 +88,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/storage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Storage
+         * @description Expone las raíces activas y el espacio de cada una.
+         */
+        get: operations["storage_storage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/storage/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move
+         * @description Encola un traslado sin modificar las preferencias por adelantado.
+         */
+        post: operations["move_storage_move_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * System
+         * @description Detecta el estado actual de ffmpeg, git y GPU.
+         */
+        get: operations["system_system_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/tools/{name}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Install
+         * @description Encola la instalación o indica cómo instalar a mano.
+         */
+        post: operations["install_system_tools__name__install_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Engines
+         * @description Lista las recetas con la propiedad y el estado actual de cada motor.
+         */
+        get: operations["engines_engines_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines/{name}/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Install
+         * @description Encola una instalación o una reparación de la app.
+         */
+        post: operations["install_engines__name__install_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines/{name}/uninstall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Uninstall
+         * @description Encola un borrado de archivos administrados por la app.
+         */
+        post: operations["uninstall_engines__name__uninstall_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/engines/{name}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify
+         * @description Encola una prueba de humo solo si el venv del motor existe.
+         */
+        post: operations["verify_engines__name__verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/diagnostics/recording": {
         parameters: {
             query?: never;
@@ -642,12 +802,68 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * BinaryInfo
+         * @description Ruta al ejecutable y versión que informa.
+         */
+        BinaryInfo: {
+            /** Path */
+            path: string;
+            /** Version */
+            version: string;
+        };
+        /**
          * ChooseIn
          * @description Cuerpo de `POST /jobs/{id}/choose`: el archivo de la pista elegida.
          */
         ChooseIn: {
             /** File */
             file: string;
+        };
+        /**
+         * EngineInfo
+         * @description Estado, requisitos y metadatos de un motor.
+         */
+        EngineInfo: {
+            /** Engine */
+            engine: string;
+            /** Family */
+            family: string;
+            /** Size Gb */
+            size_gb: number;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Cpu */
+            cpu: boolean;
+            /** License */
+            license: string;
+            /** Commercial */
+            commercial: boolean;
+            /** Status */
+            status: string;
+            /** Owner */
+            owner: string | null;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Job Id */
+            job_id: number | null;
+            /** Verification */
+            verification: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
+         * GpuInfo
+         * @description Información que reporta el driver de la GPU.
+         */
+        GpuInfo: {
+            /** Name */
+            name: string;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Driver */
+            driver: string;
+            /** Cuda */
+            cuda: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -842,6 +1058,34 @@ export interface components {
             value: unknown;
         };
         /**
+         * StorageMove
+         * @description Raíz que se va a mover y su destino.
+         */
+        StorageMove: {
+            /** Target */
+            target: string;
+            /** To */
+            to: string;
+        };
+        /**
+         * StoragePaths
+         * @description Rutas activas y métricas de espacio de motores y salidas.
+         */
+        StoragePaths: {
+            /** Engines */
+            engines: string;
+            /** Outputs */
+            outputs: string;
+            /** Engines Used Bytes */
+            engines_used_bytes: number;
+            /** Engines Free Bytes */
+            engines_free_bytes: number;
+            /** Outputs Used Bytes */
+            outputs_used_bytes: number;
+            /** Outputs Free Bytes */
+            outputs_free_bytes: number;
+        };
+        /**
          * StyleOut
          * @description Un preset del catálogo de Música (spec 011, D-2): su categoría, tonalidad, BPM, compás y si tiene muestra.
          */
@@ -870,6 +1114,15 @@ export interface components {
         StylesOut: {
             /** Styles */
             styles: components["schemas"]["StyleOut"][];
+        };
+        /**
+         * SystemInfo
+         * @description Herramientas y adaptador disponibles.
+         */
+        SystemInfo: {
+            ffmpeg: components["schemas"]["BinaryInfo"] | null;
+            git: components["schemas"]["BinaryInfo"] | null;
+            gpu: components["schemas"]["GpuInfo"] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -1034,6 +1287,227 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    storage_storage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoragePaths"];
+                };
+            };
+        };
+    };
+    move_storage_move_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StorageMove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    system_system_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemInfo"];
+                };
+            };
+        };
+    };
+    install_system_tools__name__install_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    engines_engines_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngineInfo"][];
+                };
+            };
+        };
+    };
+    install_engines__name__install_post: {
+        parameters: {
+            query?: {
+                repair?: boolean;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    uninstall_engines__name__uninstall_post: {
+        parameters: {
+            query?: {
+                force?: boolean;
+            };
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_engines__name__verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
                 };
             };
             /** @description Validation Error */

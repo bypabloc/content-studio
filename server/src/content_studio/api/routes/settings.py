@@ -34,6 +34,8 @@ def read_setting(key: str, conn: Annotated[sqlite3.Connection, Depends(get_conn)
 @router.put('/settings/{key}', response_model=SettingOut)
 def write_setting(key: str, body: SettingValue, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Guarda la preferencia y la devuelve."""
+    if key.startswith('storage.'):
+        raise ApiError(422, 'storage_requires_move')
     store.set_value(conn, key, body.value)
     return {'key': key, 'value': body.value}
 

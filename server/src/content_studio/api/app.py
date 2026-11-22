@@ -19,6 +19,7 @@ from content_studio.api.errors import ApiError
 from content_studio.api.routes import (
     catalog,
     diagnostics,
+    engines,
     files,
     health,
     jobs,
@@ -27,6 +28,8 @@ from content_studio.api.routes import (
     narration,
     queue,
     settings,
+    storage,
+    system,
     voices,
     voices_catalog,
     voices_import,
@@ -92,14 +95,15 @@ def create_app(
     app.state.services = services
     app.state.worker = worker
     app.state.broker = broker or events.Broker()
+    app.state.dynamic_outputs = not roots
     app.state.roots = (
         [Path(root).resolve() for root in roots]
         if roots
         else [
-            paths.OUT.resolve(),
-            paths.REFERENCE.resolve(),
-            paths.VOICES.resolve(),
-            (paths.MUSIC / 'samples').resolve(),
+            paths.outputs_dir(db_path).resolve(),
+            paths.references_dir().resolve(),
+            paths.voices_dir().resolve(),
+            paths.samples_dir().resolve(),
         ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
@@ -107,6 +111,9 @@ def create_app(
     app.include_router(health.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
+    app.include_router(storage.router, dependencies=header_only)
+    app.include_router(system.router, dependencies=header_only)
+    app.include_router(engines.router, dependencies=header_only)
     app.include_router(diagnostics.router, dependencies=header_only)
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)

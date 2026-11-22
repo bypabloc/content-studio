@@ -6,16 +6,15 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+from pathlib import Path
 
 from content_studio import paths
 from content_studio.common import progress
 from content_studio.music.duration import finish, plan_duration
 from content_studio.music.engines.base import Jobs, MusicEngine
 
-HEART_CKPT = paths.MUSIC / 'models' / 'heartmula-ckpt'
 
-
-def download() -> None:
+def download(checkpoints: Path) -> None:
     """Descarga los pesos de HeartMuLa desde Hugging Face."""
     from huggingface_hub import snapshot_download
 
@@ -24,7 +23,7 @@ def download() -> None:
         ('HeartMuLa/HeartMuLa-oss-3B-happy-new-year', 'HeartMuLa-oss-3B'),
         ('HeartMuLa/HeartCodec-oss-20260123', 'HeartCodec-oss'),
     ]:
-        snapshot_download(repo, local_dir=HEART_CKPT / sub)  # reanuda y salta lo ya bajado
+        snapshot_download(repo, local_dir=checkpoints / sub)  # reanuda y salta lo ya bajado
 
 
 class HeartMuLa(MusicEngine):
@@ -42,10 +41,11 @@ class HeartMuLa(MusicEngine):
         # heartlib usa torch.compile, que necesita triton (no existe en Windows) y falla recién al generar.
         if importlib.util.find_spec('triton') is None:
             torch._dynamo.config.disable = True
-        download()
+        checkpoints = paths.engine_root('music', self.spec.venv, self.spec.name) / 'models' / 'heartmula-ckpt'
+        download(checkpoints)
         # lazy_load: carga HeartMuLa, la descarga y recién ahí carga el codec (pico ~6 GB).
         pipe = HeartMuLaGenPipeline.from_pretrained(
-            str(HEART_CKPT),
+            str(checkpoints),
             # cspell:ignore mula: nombre del componente de HeartMuLa en su API, no una palabra del código
             device={'mula': torch.device('cuda'), 'codec': torch.device('cuda')},
             dtype={'mula': torch.bfloat16, 'codec': torch.float32},

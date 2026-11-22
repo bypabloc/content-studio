@@ -1,0 +1,16 @@
+{
+  "engine": "qwen-0.6b",
+  "family": "narration",
+  "size_gb": 7,
+  "vram_gb": 3.2,
+  "cpu": false,
+  "license": "Apache-2.0",
+  "steps": [
+    {"kind": "python", "version": "3.12"},
+    {"kind": "venv", "path": ".venv-qwen"},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["qwen-tts==0.1.1", "soundfile==0.14.0", "huggingface-hub==0.36.2"]},
+    {"kind": "hf", "repo": "Qwen/Qwen3-TTS-12Hz-0.6B-Base", "revision": "5d83992436eae1d760afd27aff78a71d676296fc", "into": "hf"},
+    {"kind": "verify", "import": "qwen_tts"}
+  ]
+}

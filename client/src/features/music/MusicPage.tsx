@@ -20,6 +20,7 @@ import { StyleBrowser } from './StyleBrowser';
 import { useMatchSources } from './useMatchSources';
 
 type StylesOut = components['schemas']['StylesOut'];
+type EngineInfo = components['schemas']['EngineInfo'];
 
 /** Motores de música (spec 011, D-6): ACE-Step es el recomendado. Sus máximos son los del server (`MusicSpec`). */
 type Job = components['schemas']['Job'];
@@ -44,6 +45,7 @@ export function MusicPage(): React.JSX.Element {
   const api = useApi();
   const queryClient = useQueryClient();
   const catalog = useQuery({ queryKey: ['music', 'styles'], queryFn: () => api.get<StylesOut>('/music/styles') });
+  const engines = useQuery({ queryKey: ['engines'], queryFn: () => api.get<EngineInfo[]>('/engines') });
   const sources = useMatchSources();
   const [model] = useSetting<string>('select.music.model', 'acestep');
   const [favorites, setFavorites] = useSetting<string[]>('music.favorites', []);
@@ -60,6 +62,8 @@ export function MusicPage(): React.JSX.Element {
   const [group, setGroup] = useState<string | null>(null);
 
   const max = ENGINES.find((engine) => engine.id === model)?.max ?? 600;
+  const selectedEngine = engines.data?.find((engine) => engine.engine === model);
+  const engineMissing = selectedEngine && !['installed', 'external'].includes(selectedEngine.status);
   const freeReady = freeTextComplete(free);
   const ready = mode === 'presets' ? selected.length > 0 : freeReady;
   const generate = useMutation({
@@ -121,6 +125,11 @@ export function MusicPage(): React.JSX.Element {
           hint: label('music.model', engine.id),
         }))}
       />
+      {engineMissing ? (
+        <UIButton variant="secondary" className="self-start" onClick={() => { window.location.hash = `#/engines?engine=${encodeURIComponent(model)}`; }}>
+          {t('engines.install_from_options')}
+        </UIButton>
+      ) : null}
       <DurationField
         value={duration}
         max={max}

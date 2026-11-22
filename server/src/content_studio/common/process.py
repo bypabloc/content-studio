@@ -46,11 +46,17 @@ def env_src(env: dict[str, str] | None = None) -> dict[str, str]:
 def use_venv(venv: Path, readme: str, module: str | None = None, script: str | None = None) -> None:
     """Relanza este proceso con el python de `venv`, si no se está corriendo ya en él: `-m modulo` o `script`,
     con los mismos argumentos. `readme` es el que explica la instalación, para el error si falta el venv."""
-    if Path(sys.prefix).resolve() == venv.resolve():
+    resolved = venv.resolve()
+    storage = paths.engines_dir().resolve()
+    if resolved.is_relative_to(storage):
+        engine = resolved.relative_to(storage).parts[0]
+        os.environ['HF_HOME'] = str(paths.models_cache() / engine)
+    if Path(sys.prefix).resolve() == resolved:
         return
     py = python_de(venv)
     if not py.exists():
-        sys.exit(f'Missing {Path(os.path.relpath(venv, paths.ROOT)).as_posix()}. See the installation in {readme}.')
+        display = venv.relative_to(paths.ROOT) if venv.is_relative_to(paths.ROOT) else venv
+        sys.exit(f'Missing {display.as_posix()}. See the installation in {readme}.')
     relaunch([str(py), *(['-m', module] if module else [script]), *sys.argv[1:]], env_src())
 
 

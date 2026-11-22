@@ -8,6 +8,8 @@ import { readCachedLanguage, setLocale, type LanguagePreference } from './locale
  */
 export function useLanguage(): [LanguagePreference, (preference: LanguagePreference) => void] {
   const [preference, setPreference] = useSetting<LanguagePreference>('ui.language', readCachedLanguage());
-  useEffect(() => setLocale(preference), [preference]);
+  useEffect(() => {
+    void setLocale(preference).catch(() => undefined);
+  }, [preference]);
   return [preference, setPreference];
 }

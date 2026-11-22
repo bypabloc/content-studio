@@ -1,0 +1,16 @@
+{
+  "engine": "omnivoice",
+  "family": "narration",
+  "size_gb": 9,
+  "vram_gb": 5.4,
+  "cpu": false,
+  "license": "CC-BY-NC + Higgs Audio 2",
+  "steps": [
+    {"kind": "python", "version": "3.12"},
+    {"kind": "venv", "path": ".venv-omnivoice"},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["omnivoice==0.2.1", "soundfile==0.14.0", "huggingface-hub==2.4.0"]},
+    {"kind": "hf", "repo": "k2-fsa/OmniVoice", "revision": "c5fdb5ccb189668d56333f77ba2629f4cd7535f4", "into": "hf"},
+    {"kind": "verify", "import": "omnivoice"}
+  ]
+}

@@ -79,7 +79,7 @@ def test_main_runs_inside_the_acestep_venv_and_generates_the_missing_samples(tmp
             return engine
 
     monkeypatch.setitem(samples_main.MODELS, 'acestep', Spec())
-    monkeypatch.setattr(samples_main, 'SAMPLES', tmp_path / 'samples')
+    monkeypatch.setattr(samples_main.paths, 'samples_dir', lambda: tmp_path / 'samples')
     monkeypatch.setattr(samples_main.process, 'console_utf8', lambda: None)
     monkeypatch.setattr(samples_main.process, 'use_venv', lambda venv, readme, module: venvs.append((venv, module)))
     monkeypatch.setattr(sys, 'argv', ['samples_main', '--styles', 'lofi-chill', 'corporate'])

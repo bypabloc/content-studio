@@ -1,0 +1,30 @@
+[
+  {
+    "engine": "voxcpm2",
+    "family": "narration",
+    "size_gb": 4.8,
+    "vram_gb": 5.5,
+    "cpu": false,
+    "license": "Apache-2.0",
+    "commercial": true,
+    "status": "missing",
+    "owner": null,
+    "size_bytes": 0,
+    "job_id": null,
+    "verification": null
+  },
+  {
+    "engine": "acestep",
+    "family": "music",
+    "size_gb": 5.2,
+    "vram_gb": 7.2,
+    "cpu": false,
+    "license": "MIT",
+    "commercial": true,
+    "status": "missing",
+    "owner": null,
+    "size_bytes": 0,
+    "job_id": null,
+    "verification": null
+  }
+]

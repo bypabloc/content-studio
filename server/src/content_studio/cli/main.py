@@ -15,6 +15,7 @@ from content_studio.cli import serve, submit
 from content_studio.common import process
 from content_studio.common.checkout import main_checkout
 from content_studio.db import connection, jobs, schema
+from content_studio.engines import installer
 from content_studio.jobs import queue
 from content_studio.music.parser import build_parser as music_flags
 from content_studio.narration.parser import build_parser as narration_flags
@@ -30,7 +31,7 @@ def _db_flag() -> argparse.ArgumentParser:
 def build_parser() -> argparse.ArgumentParser:
     """Subcommands of `studio`. The narration and music flags are the ones of their services, with the same names."""
     ap = argparse.ArgumentParser(prog='studio', description='content-studio without a UI: local API, jobs and CLI.')
-    ap.add_argument('--db', type=Path, default=paths.DB, help='job queue database (default var/content-studio.db)')
+    ap.add_argument('--db', type=Path, default=paths.db_path(), help='job queue database')
     sub = ap.add_subparsers(dest='command', required=True, metavar='command')
 
     serve_p = sub.add_parser('serve', help='local API on 127.0.0.1 with the job worker')
@@ -74,6 +75,16 @@ def build_parser() -> argparse.ArgumentParser:
     job_cmds.add_parser('retry', parents=[_db_flag()], help='new job with the same parameters').add_argument(
         'id', type=int
     )
+
+    engines = sub.add_parser('engines', help='list, install, verify, repair and uninstall engines')
+    engine_cmds = engines.add_subparsers(dest='action', required=True, metavar='action')
+    engine_cmds.add_parser('list', parents=[_db_flag()], help='engines, ownership and verification status')
+    for action in ('install', 'verify', 'repair', 'uninstall'):
+        command = engine_cmds.add_parser(action, parents=[_db_flag()], help=f'{action} an engine')
+        command.add_argument('engine', help='engine identifier from the catalog')
+        if action == 'uninstall':
+            command.add_argument('--force', action='store_true', help='confirm removal of the known external venv')
+
     sub.add_parser('openapi', help='print the API schema (OpenAPI JSON); no server and no database')
     return ap
 
@@ -108,6 +119,27 @@ def _jobs(args: argparse.Namespace) -> int:
         return 0
 
 
+def _engines(args: argparse.Namespace) -> int:
+    """Lista motores o envía la acción al servicio compartido con la API."""
+    if args.action == 'list':
+        with closing(connection.connect(args.db)) as conn:
+            schema.migrate(conn)
+            print(json.dumps(installer.list_engines(conn, paths.engines_dir(args.db)), ensure_ascii=False, indent=2))
+        return 0
+    if args.action == 'uninstall':
+        kind = 'engine.uninstall'
+    elif args.action == 'verify':
+        kind = 'engine.verify'
+    else:
+        kind = 'engine.install'
+    params = {'engine': args.engine}
+    if args.action in ('install', 'repair'):
+        params['repair'] = args.action == 'repair'
+    elif args.action == 'uninstall':
+        params['force'] = args.force
+    return submit.run(kind, params, args.db, main_checkout(paths.ROOT))
+
+
 def _openapi() -> int:
     """El schema OpenAPI para generar los tipos del client; sin base ni puerto (la app usa una base en memoria)."""
     from content_studio.api.app import create_app  # fastapi solo aquí, como en `serve`
@@ -136,6 +168,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'openapi':
         return _openapi()
+    if args.command == 'engines':
+        return _engines(args)
     return _jobs(args)
 
 

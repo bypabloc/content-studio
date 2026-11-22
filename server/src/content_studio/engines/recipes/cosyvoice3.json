@@ -1,0 +1,18 @@
+{
+  "engine": "cosyvoice3",
+  "family": "narration",
+  "size_gb": 9,
+  "vram_gb": 4.1,
+  "cpu": true,
+  "license": "Apache-2.0 (card: academic purposes)",
+  "steps": [
+    {"kind": "python", "version": "3.10"},
+    {"kind": "git", "url": "https://github.com/FunAudioLLM/CosyVoice.git", "commit": "074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc", "into": "engines/CosyVoice", "recursive": true},
+    {"kind": "venv", "path": "engines/CosyVoice/.venv"},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["onnxruntime==1.23.2", "openai-whisper==20250625", "huggingface-hub==0.36.2", "setuptools==79.0.1"], "requirements": "engines/CosyVoice/requirements.txt", "exclude": ["torch", "torchaudio", "deepspeed", "tensorrt", "onnxruntime-gpu", "--extra-index-url", "openai-whisper", "gradio"]},
+    {"kind": "pip", "packages": ["wetext"], "uninstall": true},
+    {"kind": "hf", "repo": "FunAudioLLM/Fun-CosyVoice3-0.5B-2512", "revision": "29e01c4e8d000f4bcd70751be16fa94bf3d85a18", "into": "engines/CosyVoice/pretrained_models/Fun-CosyVoice3-0.5B", "ignore_patterns": ["llm.rl.pt", "*.fp32.onnx", "*.batch.onnx"]},
+    {"kind": "verify", "import": "cosyvoice.cli.cosyvoice", "paths": ["engines/CosyVoice", "engines/CosyVoice/third_party/Matcha-TTS"]}
+  ]
+}

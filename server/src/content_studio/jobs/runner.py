@@ -28,6 +28,9 @@ def run(
     """
     log_dir.mkdir(parents=True, exist_ok=True)
     env = {**os.environ, 'PYTHONIOENCODING': 'utf-8'}
+    database = conn.execute('PRAGMA database_list').fetchone()[2]
+    if database:
+        env['CONTENT_STUDIO_DB'] = database
     with (
         (log_dir / f'{job_id}.log').open('w', encoding='utf-8') as log,
         subprocess.Popen(

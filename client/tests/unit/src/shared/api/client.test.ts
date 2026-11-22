@@ -10,7 +10,7 @@ function reply(body: unknown, status = 200) {
 }
 
 describe('createApi', () => {
-  beforeEach(() => setLocale('es'));
+  beforeEach(async () => setLocale('es'));
 
   it('manda el Bearer y la URL completa', async () => {
     const fetcher = reply({ paused: false });
@@ -26,7 +26,7 @@ describe('createApi', () => {
   });
 
   it('manda el idioma activo en Accept-Language (AC-7)', async () => {
-    setLocale('pt');
+    await setLocale('pt');
     const fetcher = reply({ paused: false });
     await createApi(connection, fetcher).get('/queue');
 

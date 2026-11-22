@@ -1,6 +1,9 @@
 {
   "dynamicPrefixes": [
+    "engines.group.",
+    "engines.size.",
     "error.http.",
+    "error.disk_full",
     "lint.rule_",
     "label.narration.style.",
     "label.narration.engine.",

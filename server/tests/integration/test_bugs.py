@@ -99,6 +99,7 @@ def test_approval_reads_the_english_keys(tmp_path, monkeypatch):
     """aprobacion.json usa claves en inglés desde la migración (WARNING 002-voces-migracion)."""
     import json
 
+    from content_studio import paths
     from content_studio.narration.voices import catalog
 
     voices = tmp_path / 'voices'
@@ -108,7 +109,7 @@ def test_approval_reads_the_english_keys(tmp_path, monkeypatch):
         json.dumps({'voice': 'ana', 'approved': True, 'styles': {'neutral': {'ok': True}}}), encoding='utf-8'
     )
     (voices / 'catalog.json').write_text(json.dumps({'ana': {'license': 'CC0'}}), encoding='utf-8')
-    monkeypatch.setattr(catalog, 'VOICES', voices)
+    monkeypatch.setattr(paths, 'VOICES', voices)
     monkeypatch.setattr(catalog, 'CATALOG', voices / 'catalog.json')
     assert list(catalog.approved_voices(['neutral'])) == ['ana']
     assert catalog.state('ana', ['neutral']) == 'approved'

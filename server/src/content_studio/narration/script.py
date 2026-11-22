@@ -84,7 +84,7 @@ def plan(a: argparse.Namespace, scripts: list[tuple]) -> list[tuple[str, str, Pa
             output = a.output
         else:
             wav = f'{name}-{a.model}.wav' if name else f'{a.model}-{style}.wav'
-            output = (a.output or paths.OUT / 'narration') / wav
+            output = (a.output or paths.outputs_dir() / 'narration') / wav
         if any(s == output for *_, s in jobs):
             sys.exit(f'Two scripts go to the same file: {output.name} (use different ids)')
         jobs.append((text, style, output))

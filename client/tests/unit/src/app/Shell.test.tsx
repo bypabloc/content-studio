@@ -27,6 +27,13 @@ function server(settings: Record<string, unknown>) {
       }
       return reply({ key, value: settings[key] ?? null })
     }
+    if (url.endsWith('/engines')) return reply(settings.mockEngines ?? [])
+    if (url.endsWith('/voices/catalog')) return reply({ voices: [] })
+    if (url.endsWith('/system')) return reply(settings.mockSystem ?? { ffmpeg: { path: 'ffmpeg.exe', version: '9.1' }, git: null, gpu: null })
+    if (url.endsWith('/storage')) return reply(settings.mockStorage ?? {
+      engines: 'C:/Studio/engines', outputs: 'C:/Studio/outputs',
+      engines_used_bytes: 0, engines_free_bytes: 10, outputs_used_bytes: 0, outputs_free_bytes: 10,
+    })
     if (url.endsWith('/jobs')) return reply([])
     if (url.includes('/voices/kit')) return reply({ styles: [] })
     if (url.includes('/voices/profiles')) return reply([])
@@ -35,7 +42,7 @@ function server(settings: Record<string, unknown>) {
 }
 
 function renderShell(settings: Record<string, unknown> = {}) {
-  const fetchMock = server(settings)
+  const fetchMock = server({ 'welcome.done': true, ...settings })
   vi.stubGlobal('fetch', fetchMock)
   render(
     <Providers>
@@ -114,10 +121,52 @@ describe('Shell [AC-7]', () => {
     expect(await screen.findByText(t('music.duration.label'))).toBeTruthy()
   })
 
+  it('spec 009 (AC-7): WHEN se abre Motores THEN muestra la lista instalada', async () => {
+    window.location.hash = '#/engines'
+    renderShell()
+
+    expect(await screen.findByRole('heading', { level: 1, name: t('engines.title') })).toBeTruthy()
+  })
+
+  it('WHEN se abre el catálogo THEN muestra sus opciones de construcción', async () => {
+    window.location.hash = '#/catalog'
+    renderShell()
+
+    expect(await screen.findByText(t('voices.catalog.intro'))).toBeTruthy()
+  })
+
+  it('WHEN se abre Ajustes THEN carga la configuración y el almacenamiento', async () => {
+    window.location.hash = '#/settings'
+    renderShell()
+
+    expect(await screen.findByText(t('settings.appearance'))).toBeTruthy()
+    expect(await screen.findByText(t('storage.title'))).toBeTruthy()
+  })
+
   it('spec 010 (D-6): WHEN se abre Mis voces THEN la sección lista los perfiles', async () => {
     window.location.hash = '#/voices'
     renderShell()
 
     expect(await screen.findByText(t('voices.empty'))).toBeTruthy()
+  })
+
+  it('AC-8: el primer uso sin motores abre bienvenida, la completa y va a Narración', async () => {
+    const user = userEvent.setup()
+    const fetchMock = renderShell({
+      'welcome.done': false,
+      mockEngines: [],
+      mockSystem: { ffmpeg: null, git: null, gpu: null },
+    })
+
+    expect(await screen.findByRole('dialog', { name: t('welcome.title') })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: t('welcome.next') }))
+    await user.click(screen.getByRole('button', { name: t('welcome.next') }))
+    await user.click(screen.getByRole('button', { name: t('welcome.next') }))
+    await user.click(screen.getByRole('button', { name: t('welcome.install_continue') }))
+
+    await waitFor(() => expect(fetchMock.mock.calls.some(
+      ([url, init]) => String(url).endsWith('/settings/welcome.done') && init?.method === 'PUT' && init.body === JSON.stringify({ value: true }),
+    )).toBe(true))
+    expect(window.location.hash).toBe('#/narration')
   })
 })

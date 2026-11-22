@@ -138,5 +138,16 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [011-muestras](011-muestras.md) | Muestras de 10 s por preset con semilla fija; `studio music samples` y `--model` | `main` |
 | [011-db-despues-del-subcomando](011-db-despues-del-subcomando.md) | `--db` también después del subcomando (cierra PENDING 004) | `main` |
 | [011-comparar-musica](011-comparar-musica.md) | Comparar y elegir pistas con `tracks.json` (sin generalizar CompareTakes) | `main` |
+| [012-rutas-externas](012-rutas-externas.md) | Prioridad de los motores administrados y respaldo a los externos en desarrollo | `main` |
+| [012-mover-entre-discos](012-mover-entre-discos.md) | Copia verificada, turno exclusivo de traslado y enlaces históricos de salidas | `main` |
+| [012-winget](012-winget.md) | Detectar las herramientas y actualizar el PATH del proceso tras la instalación | `main` |
+| [012-recetas](012-recetas.md) | Versiones de paquetes, commits y revisiones de pesos fijados a partir de la instalación de Windows | `main` |
+| [012-desinstalacion-externa](012-desinstalacion-externa.md) | `force` elimina solo el venv externo conocido y conserva cachés y datos ajenos | `main` |
+| [012-error-disk-full](012-error-disk-full.md) | `disk_full` se localiza como error asíncrono del trabajo | `main` |
+| [012-verificacion-voz](012-verificacion-voz.md) | La prueba TTS usa la voz de catálogo `yesid` con consentimiento porque falta `reference/test/` | Al cerrar la 012 |
+| [012-pantallas-almacenamiento](012-pantallas-almacenamiento.md) | Umbrales de VRAM y métricas de disco sin seguir enlaces | Al cerrar la 012 |
+| [012-aceptacion-sin-usuario](012-aceptacion-sin-usuario.md) | La bienvenida se prueba con e2e; la revisión visual y las capturas quedan en PENDING y no bloquean | `main` (revisión visual en PENDING) |
+| [012-trabajos-engine-uninstall-en-error](012-trabajos-engine-uninstall-en-error.md) | Tres trabajos `engine.uninstall` fallidos se conservan como historial, sin reintentar | `main` |
+| [lote-limpieza-huerfanos](lote-limpieza-huerfanos.md) | Se borraron 41 de 49 carpetas huérfanas de `content-studio-worktrees/`; 8 bloqueadas en PENDING | No bloquea |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

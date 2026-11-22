@@ -34,6 +34,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 // Espera a que llegue el catálogo: el selector del motor muestra la recomendada cuando ya tiene opciones.
@@ -122,5 +123,18 @@ describe('NarrationOptions', () => {
     expect(await screen.findByRole('combobox', { name: t('narration.advanced.master') })).toBeTruthy();
     expect(screen.getByRole('spinbutton', { name: t('narration.advanced.seed') })).toBeTruthy();
     expect(screen.getByRole('spinbutton', { name: t('narration.advanced.retries') })).toBeTruthy();
+  });
+
+  it('ofrece instalar el motor faltante y abre su tarjeta en Motores', async () => {
+    api.get.mockImplementation(async (path: string) =>
+      path === '/catalog/narration'
+        ? { ...CATALOG, engines: CATALOG.engines.map((engine) => ({ ...engine, installed: engine.id !== 'voxcpm2' })) }
+        : { key: path.replace('/settings/', ''), value: null },
+    );
+    await renderOptions();
+
+    await userEvent.click(screen.getByRole('button', { name: t('engines.install_from_options') }));
+
+    expect(window.location.hash).toBe('#/engines?engine=voxcpm2');
   });
 });

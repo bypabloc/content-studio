@@ -19,6 +19,10 @@ from pathlib import Path
 from devtools.migrations import new, profile_path
 from devtools.worktree import main_checkout
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server' / 'src'))
+
+from content_studio.storage.relocate import rewrite_installs  # noqa: E402
+
 FOLDERS = ('narration', 'music')
 DESTINATION = ('server', 'data')
 NARRATION = (*DESTINATION, 'narration')
@@ -130,45 +134,12 @@ def _merge(source: Path, destination: Path) -> None:
     source.rmdir()
 
 
-def _forms(path: Path) -> list[str]:
-    """Cómo aparece una ruta en un .pth (nativa) y en un direct_url.json (JSON escapado o con `/`)."""
-    native = str(path)
-    return [native, native.replace('\\', '\\\\'), path.as_posix()]
-
-
-def _pares(root: Path) -> list[tuple[bytes, bytes]]:
-    """Prefijos viejos y nuevos: el paso 1 (carpetas del checkout) y el paso 2 (motores, ya en server/data)."""
-    changes = [(root / n, root.joinpath(*DESTINATION, n)) for n in FOLDERS]
-    changes.append((root.joinpath(*NARRATION, 'motores'), root.joinpath(*NARRATION, 'engines')))
-    pares = []
-    for old, new_path in changes:
-        pares += [(a.encode(), b.encode()) for a, b in zip(_forms(old), _forms(new_path), strict=True)]
-    return pares
-
-
-def _installs(data: Path):
-    """Los .pth y direct_url.json de los venvs de Windows (Lib/) y de POSIX (lib/python*/)."""
-    for venv in (p for p in data.rglob('.venv*') if p.is_dir()):
-        for site in (venv / 'Lib/site-packages', *venv.glob('lib/python*/site-packages')):
-            if site.is_dir():
-                yield from site.glob('*.pth')
-                yield from site.glob('*.dist-info/direct_url.json')
-
-
 def rewrite(root: Path) -> list[str]:
     """Cambia el prefijo `<raíz>/narration|music` por `<raíz>/server/data/...` (y `motores` por `engines`) en las
     instalaciones editables. Idempotente: el texto nuevo no contiene el viejo."""
-    changed = []
-    pares = _pares(root)
-    for file in _installs(root.joinpath(*DESTINATION)):
-        old = file.read_bytes()
-        new = old
-        for a, b in pares:
-            new = new.replace(a, b)
-        if new != old:
-            file.write_bytes(new)
-            changed.append(str(file))
-    return changed
+    changes = [(root / name, root.joinpath(*DESTINATION, name)) for name in FOLDERS]
+    changes.append((root.joinpath(*NARRATION, 'motores'), root.joinpath(*NARRATION, 'engines')))
+    return rewrite_installs(root.joinpath(*DESTINATION), changes)
 
 
 def main(argv: list[str]) -> int:

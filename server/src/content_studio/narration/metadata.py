@@ -37,7 +37,7 @@ def voice_from_reference(ref: Path) -> dict | None:
     """Ficha del catálogo de la voz a la que pertenece una referencia
     (server/data/narration/voices/<voz>/<estilo>.wav), o None."""
     ref = Path(ref).resolve()
-    if ref.parent.parent != paths.VOICES.resolve():
+    if ref.parent.parent != paths.voices_dir().resolve():
         return None
     sheet = catalog().get(ref.parent.name)
     return sheet and {'voice': ref.parent.name, 'license': sheet['license'], 'source': sheet['source'],

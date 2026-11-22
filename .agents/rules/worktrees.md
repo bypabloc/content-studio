@@ -22,7 +22,11 @@ git worktree add ../content-studio-worktrees/<nombre> -b <prefijo>/<nombre> orig
 python -m devtools worktree prepare <nombre>     # desde el checkout principal
 ```
 
-`git worktree add` trae solo lo versionado. `prepare` **enlaza** al principal venvs, motores, modelos, voces y audios (`server/data/`, que pesan GB), copia los audios que faltan y crea `tmp/`. Corre `bun install` (no enlaza `node_modules`: `bun` escribiría en el principal) y el target de Cargo va a `<principal>/tmp/cargo-target` (si ya existe, no se toca). Luego `uv sync`.
+`git worktree add` trae solo lo versionado. `prepare` **enlaza** los venvs y modelos desde el `paths.engines_dir()` efectivo del principal.
+También enlaza voces, referencias y audios desde `server/data/`, copia los audios que faltan y crea `tmp/`.
+No asume que los motores viven dentro del checkout.
+Corre `bun install` (no enlaza `node_modules`: `bun` escribiría en el principal) y luego `uv sync`.
+El target de Cargo va a `<principal>/tmp/cargo-target`; si ya existe, no se toca.
 
 `.claude/settings.json` declara `../content-studio-worktrees` en `permissions.additionalDirectories`: una sesión del principal lee y edita ahí sin pedir permiso.
 

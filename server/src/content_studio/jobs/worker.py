@@ -29,6 +29,7 @@ from content_studio.db import connection, jobs
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
 from content_studio.services.registry import SERVICES
+from content_studio.services.storage_move import KIND as STORAGE_MOVE
 
 WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canceló desde otro proceso
 
@@ -67,7 +68,7 @@ class Worker:
         db_path: Path,
         main: Path,
         services: Mapping[str, Any] = SERVICES,
-        out_root: Path = paths.OUT,
+        out_root: Path | None = None,
         log_dir: Path = paths.LOGS / 'jobs',
         cpu_slots: int | None = None,
         poll: float = 0.2,
@@ -103,7 +104,7 @@ class Worker:
             if changed:
                 self._notify(conn, job_id)
         proc = self._processes.get(job_id)
-        if proc is not None:
+        if changed and proc is not None:
             stop_tree(proc)
         return changed
 
@@ -142,6 +143,8 @@ class Worker:
                         threading.Thread(target=self._run_cpu, args=(cpu_job,), daemon=True).start()
                         continue
                     self._cpu.release()
+                if cpu_job and cpu_job['kind'] == STORAGE_MOVE:
+                    continue  # Deja terminar los trabajos activos antes de abrir otros.
                 gpu_job = jobs.next_queued(conn, 'gpu')
                 if gpu_job and not self._gpu_busy:
                     self._gpu_busy = True
@@ -199,11 +202,12 @@ class Worker:
         if code == 0:
             jobs.update(conn, job['id'], status='done', finished_at=utc_now())
         else:
+            errors = getattr(self.services[job['kind']], 'ERROR_CODES', {})
             jobs.update(
                 conn,
                 job['id'],
                 status='error',
-                error_code='process_failed',
+                error_code=errors.get(code, 'process_failed'),
                 error_detail=detail or f'exit {code}',
                 finished_at=utc_now(),
             )
@@ -227,7 +231,8 @@ class Worker:
         text = str(job['params'].get('text') or job['params'].get('style') or job['kind'])
         slug = re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')[:40] or 'run'
         folder = job['kind'].split('.')[0]  # narration.regenerate sale en out/narration/, junto a sus tomas
-        out_dir = self.out_root / folder / f'{datetime.now():%Y-%m-%d}-{job["id"]}-{slug}'
+        out_root = self.out_root if self.out_root is not None else paths.outputs_dir(self.db_path)
+        out_dir = out_root / folder / f'{datetime.now():%Y-%m-%d}-{job["id"]}-{slug}'
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / 'params.json').write_text(json.dumps(job['params'], ensure_ascii=False, indent=2), encoding='utf-8')
         return out_dir

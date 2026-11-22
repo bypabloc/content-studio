@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { MicrophonePicker } from '@/features/recording/MicrophonePicker';
+import { StorageSettings } from './StorageSettings';
 import { MICROPHONE_SETTING } from '@/features/recording/microphones';
 import { RECORDING_LOG, useRecordingLog } from '@/features/recording/recordingLog';
 import { useApi } from '@/shared/api/context';
@@ -100,6 +101,8 @@ export function SettingsPage() {
           {t('settings.reset')}
         </UIButton>
       </UIStack>
+
+      <StorageSettings />
     </UIStack>
   );
 }

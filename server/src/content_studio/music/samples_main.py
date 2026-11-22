@@ -17,7 +17,6 @@ from content_studio.music.styles import STYLES
 
 SAMPLE_SECONDS = 10
 SEED = 1234  # la misma para todas las muestras: regenerar una da el mismo clip
-SAMPLES = paths.MUSIC / 'samples'
 
 
 def pending(styles: list[str], folder: Path, force: bool) -> list[str]:
@@ -51,8 +50,9 @@ def main() -> None:
     a = ap.parse_args()
     spec = MODELS['acestep']
     process.use_venv(spec.path_venv(), 'server/data/music/README.md', module='content_studio.music.samples_main')
-    done = render_samples(spec.create(), a.styles, SAMPLES, a.force)
-    print(f'{len(done)} sample(s) generated in {SAMPLES}', flush=True)
+    samples = paths.samples_dir()
+    done = render_samples(spec.create(), a.styles, samples, a.force)
+    print(f'{len(done)} sample(s) generated in {samples}', flush=True)
 
 
 if __name__ == '__main__':

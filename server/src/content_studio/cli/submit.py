@@ -94,7 +94,7 @@ def music_params(args: argparse.Namespace) -> dict[str, Any]:
     """Parámetros del servicio de música a partir de los flags de `studio music`."""
     if args.model is None:
         raise UsageError('the following arguments are required: --model')
-    if args.folder != paths.OUT / 'music':
+    if args.folder != paths.outputs_dir() / 'music':
         raise UsageError(FOLDER_REFUSED)
     return _params(args, MUSIC_FLAGS)
 

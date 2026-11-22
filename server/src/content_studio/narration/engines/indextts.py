@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 from functools import lru_cache
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from content_studio import paths
@@ -17,17 +18,16 @@ if TYPE_CHECKING:
 
 
 @lru_cache
-def load(code: str, ckpt: str) -> Any:
+def load(code: Path, checkpoints: Path) -> Any:
     """Carga IndexTTS2 desde su código y su checkpoint."""
-    sys.path.insert(0, str(paths.NARRATION / code))
+    sys.path.insert(0, str(code))
     # IndexTTS escribe checkpoints/hf_cache relativo al directorio actual: se fija antes de importarlo.
-    os.environ['HF_HUB_CACHE'] = str(paths.NARRATION / ckpt / 'hf_cache')
+    os.environ['HF_HUB_CACHE'] = str(checkpoints / 'hf_cache')
     from indextts.infer_v2_5 import IndexTTS2
 
-    d = paths.NARRATION / ckpt
     return IndexTTS2(
-        cfg_path=str(d / 'config.yaml'),
-        model_dir=str(d),
+        cfg_path=str(checkpoints / 'config.yaml'),
+        model_dir=str(checkpoints),
         use_bf16=True,
         use_cuda_kernel=False,
         use_deepspeed=False,
@@ -61,7 +61,9 @@ class IndexTTS(TTSEngine):
         """Genera el audio de los bloques con IndexTTS."""
         import soundfile as sf
 
-        model = load(self.spec.code, self.spec.repo)
+        root = paths.engine_root('narration', self.spec.venv, self.spec.name)
+        assert self.spec.code is not None
+        model = load(root / self.spec.code, root / self.spec.repo)
         audios = []
         for b in blocks:
             kw = dict(self.params)

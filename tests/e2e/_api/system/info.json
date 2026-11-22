@@ -1,0 +1,10 @@
+{
+  "ffmpeg": { "path": "C:/Studio/bin/ffmpeg.exe", "version": "9.1" },
+  "git": { "path": "C:/Program Files/Git/bin/git.exe", "version": "2.48.1" },
+  "gpu": {
+    "name": "RTX 4060 Laptop GPU",
+    "vram_gb": 8,
+    "driver": "572.83",
+    "cuda": "12.8"
+  }
+}

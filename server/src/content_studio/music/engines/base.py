@@ -27,8 +27,8 @@ class MusicSpec:
     max_seconds: int = 0  # la duración máxima que acepta el motor (ACE 600 s, HeartMuLa 240 s)
 
     def path_venv(self) -> Path:
-        """Carpeta del venv del motor, en server/data/music/."""
-        return paths.MUSIC / self.venv
+        """Carpeta del venv administrado o externo del motor."""
+        return paths.engine_root('music', self.venv, self.name) / self.venv
 
     def installed(self) -> bool:
         """True si el venv del motor existe."""

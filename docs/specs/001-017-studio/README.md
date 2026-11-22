@@ -8,10 +8,10 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 
 | Spec | Qué | Tipo | Depende de | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| [001](001-server-devtools/README.md) | Python a `server/` (uv workspace), datos a `server/data/` y `devtools/` en la raíz | refactor | — | PEN |
-| [002](002-english-cspell/README.md) | Código y datos en inglés + cspell de klinikae (spelling en pre-commit y CI) | refactor | 001 | PEN |
+| 001 | Python a `server/` (uv workspace), datos a `server/data/` y `devtools/` en la raíz | refactor | — | DON |
+| 002 | Código y datos en inglés + cspell de klinikae (spelling en pre-commit y CI) | refactor | 001 | DON |
 | 003 | test-runner en devtools, tests espejo, tamaño, cobertura, docstrings y typecheck | chore | 002 | DON |
-| [004](004-server-api/README.md) | Server FastAPI + SQLite (jobs, settings) + cola con turno-gpu + SSE + CLI headless; se borra `cli.py` | feature | 003 | IMP |
+| 004 | Server FastAPI + SQLite (jobs, settings) + cola con turno-gpu + SSE + CLI headless; se borra `cli.py` | feature | 003 | DON |
 | [005](005-client-base/README.md) | Client: Tauri 2, shadcn, catálogo `es.json`, tema light/dark/system, sidebar + cola, selector con estrella, budget, vitest, e2e base | feature | 004 | DON |
 | [006](006-narration-section/README.md) | Sección Narración | feature | 005 | DON |
 | [007](007-i18n/README.md) | Textos centralizados con i18n: un catálogo único (`es`, `en`, `pt`) para el client y el server, idioma en Ajustes y etapa `i18n` que bloquea textos sueltos | feature | 006 | DON |
@@ -19,7 +19,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | 009 | Iconos aplicados: criterio de solo icono y los iconos del shell, la cola, Narración y Ajustes, con los `UIIcon`, `UIIconButton` y `UITooltip` de la 008 | feature | 008 | DON |
 | 010 | Voces (catálogo y construir) + Grabar (micrófono en la UI) | feature | 009 | DON |
 | 011 | Sección Música (duración exacta, muestras, comparar y elegir) | feature | 010 | DON |
-| [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | PEN |
+| [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | DON |
 | [013](013-whisper-cleaner/README.md) | faster-whisper + Limpiador de silencios (audio y video, revisión en línea de tiempo) | feature | 012 | PEN |
 | [014](014-subtitles/README.md) | Subtítulos: SRT/VTT, editor, quemar, estilo redes (ASS) | feature | 013 | PEN |
 | [015](015-convert-normalize-trim/README.md) | Convertir (audio/video, presets de redes, GIF, extraer audio), normalizar, y los trabajos de recortar, unir y dividir (su pantalla es el Editor) | feature | 014 | PEN |

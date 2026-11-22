@@ -8,7 +8,7 @@ description: Dónde vive el código, 300 líneas por .py, Python 3.10, dos capas
 ## Dónde vive el código
 
 - Todo el código vive en `server/src/content_studio/`. En la raíz no queda ningún `.py`: el CLI es `studio` (`uv run studio <comando>`). La excepción son los hooks de agentes, con solo stdlib: los de Claude Code en `.claude/hooks/` (probados en `.claude/hooks/tests/test_hooks.py`) y los compartidos con Codex y Antigravity en `.agents/hooks/` (probados en `.agents/hooks/tests/`).
-- `server/data/narration/` y `server/data/music/` son carpetas de datos: README, docs, voces, catálogo, venvs, `engines/` y `models/`. **No se mueven venvs ni assets**: hacerlo rompe los venvs o dispara descargas de varios GB. Un worktree los enlaza (`worktrees.md`).
+- `server/data/narration/` y `server/data/music/` guardan README, docs, voces, catálogo, referencias y datos versionados. Los venvs y modelos se instalan bajo demanda en `paths.engines_dir()` (por defecto, fuera del checkout) y se pueden reubicar desde Ajustes > Almacenamiento. Un worktree enlaza la carpeta efectiva de motores y los datos locales del checkout (`worktrees.md`).
 - Las herramientas del flujo de agentes viven en `devtools/`, en la raíz, con solo stdlib (`devtools.md`).
 
 ## Reglas
@@ -21,7 +21,7 @@ description: Dónde vive el código, 300 líneas por .py, Python 3.10, dos capas
 
 ## Cómo agregar
 
-- **Un motor TTS o de música**: un archivo en `engines/`, una línea en `engines/registry.py`, su venv y la librería en `LIBRARIES` de `server/tests/integration/test_venvs.py`.
+- **Un motor TTS o de música**: un archivo en su `engines/`, una línea en el registro, una receta JSON con paquetes, commits y revisiones fijados en `server/src/content_studio/engines/recipes/`, y su librería en `LIBRARIES` de `server/tests/integration/test_venvs.py`.
 - **Un tipo de trabajo**: un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES` (`services/registry.py`). La API y `studio` lo usan solos.
 - **Un subcomando de `studio`**: una línea en `build_parser` de `cli/main.py`.
 - **Un comando de devtools**: un módulo con `main(argv)` y una línea en `COMMANDS` (`devtools.md`).

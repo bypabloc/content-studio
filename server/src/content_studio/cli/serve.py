@@ -14,6 +14,7 @@ import uvicorn
 from content_studio.api import events
 from content_studio.api.app import create_app
 from content_studio.jobs.worker import Worker
+from content_studio.system import tools
 
 
 def pick_free_port() -> int:
@@ -38,6 +39,7 @@ def serve(db: Path, main: Path, port: int, token: str | None) -> int:
     worker = Worker(db, main=main, publish=broker.publish)
     app = create_app(db, token, worker=worker, broker=broker)
     server = uvicorn.Server(uvicorn.Config(app, host='127.0.0.1', port=port, log_level='warning'))
+    tools.detect()
     worker.start()
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
