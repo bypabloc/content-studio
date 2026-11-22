@@ -12,6 +12,7 @@ from pathlib import Path
 
 from content_studio import gpu_lock, paths
 from content_studio.cli import media as media_cli
+from content_studio.cli import mix as mix_cli
 from content_studio.cli import serve, submit
 from content_studio.common import process
 from content_studio.common.checkout import main_checkout
@@ -80,6 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
     clean_p.add_argument('--padding', type=float, default=0.15, help='margin kept next to each cut (seconds)')
     clean_p.add_argument('--no-edges', action='store_true', help='keep the silence at the start and at the end')
     clean_p.add_argument('--auto', action='store_true', help='render every cut without reviewing them')
+    mix_cli.add_subcommand(sub, _db_flag())
     media_cli.add_parsers(sub, _db_flag)
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
@@ -225,6 +227,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _engines(args)
     if args.command == 'clean':
         return _clean(args)
+    if args.command == 'mix':
+        return mix_cli.run(args)
     if args.command in media_cli.COMMANDS:
         return media_cli.dispatch(args)
     return _jobs(args)

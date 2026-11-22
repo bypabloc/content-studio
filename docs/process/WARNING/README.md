@@ -175,5 +175,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [015-pantallas-convertir-normalizar](015-pantallas-convertir-normalizar.md) | Pantallas de Convertir y Normalizar: 80 % de cobertura por archivo, el esquema de la API en staging antes del gate, y recortar y unir sin pantalla (la edición va al Editor) | `main` |
 | [015-nvenc-solo-con-gpu](015-nvenc-solo-con-gpu.md) | NVENC solo si hay GPU: que el ffmpeg traiga el encoder no basta | `main` |
 | [015-verificacion-final](015-verificacion-final.md) | Corridas reales de 015: insumos generados, manual y seguir a la persona por el servicio, medidas y errores; el video normalizado a −1 dBTP incumplía y pasó a −2 | `main` |
+| [016-render-y-sendcmd](016-render-y-sendcmd.md) | El ducking del audio va con `asendcmd` y objetivo `volume@duck`; escape de la ruta entre comillas; fades y `apad` del sidechain | `main` |
+| [016-proyectos-y-migracion-6](016-proyectos-y-migracion-6.md) | `mix_projects` es la migración 6 (la 5 es de 014); los tramos llegan con la caché o al consultar, sin hook en el worker | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

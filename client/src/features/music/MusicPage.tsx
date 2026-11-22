@@ -17,6 +17,7 @@ import { FreeTextStyle, type FreeText, freeTextComplete } from './FreeTextStyle'
 import { MusicCompare } from './MusicCompare';
 import { MusicOptions } from './MusicOptions';
 import { StyleBrowser } from './StyleBrowser';
+import { useMatchDuration } from './useMatchDuration';
 import { useMatchSources } from './useMatchSources';
 
 type StylesOut = components['schemas']['StylesOut'];
@@ -47,6 +48,7 @@ export function MusicPage(): React.JSX.Element {
   const catalog = useQuery({ queryKey: ['music', 'styles'], queryFn: () => api.get<StylesOut>('/music/styles') });
   const engines = useQuery({ queryKey: ['engines'], queryFn: () => api.get<EngineInfo[]>('/engines') });
   const sources = useMatchSources();
+  const matched = useMatchDuration();
   const [model] = useSetting<string>('select.music.model', 'acestep');
   const [favorites, setFavorites] = useSetting<string[]>('music.favorites', []);
   const [tail, setTail] = useSetting<number>('music.match_tail', 2);
@@ -89,6 +91,13 @@ export function MusicPage(): React.JSX.Element {
     },
   });
   const { mutate } = generate;
+
+  // Con `?match=` (Mezcla), la duración es la de la voz más la cola: se fija una vez al llegar.
+  const [appliedMatch, setAppliedMatch] = useState<number | null>(null);
+  if (matched !== null && matched !== appliedMatch) {
+    setAppliedMatch(matched);
+    setDuration(matched);
+  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

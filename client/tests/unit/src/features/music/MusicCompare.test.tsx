@@ -67,4 +67,32 @@ describe('MusicCompare (spec 011, D-6, AC-8)', () => {
 
     expect(api.post).toHaveBeenCalledWith('/jobs/7/choose', { file: 'acestep-lofi-chill-v2.wav' });
   });
+
+  it('WHEN se pulsa «Mandar a Mezclar» THEN Mezcla abre con la pista elegida (spec 016, D-4)', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path.startsWith('/jobs?group_key=')) return [job];
+      if (path.includes('tracks.json')) return manifest;
+      return { peaks: [] };
+    });
+
+    renderCompare();
+    await waitFor(() => expect(document.querySelectorAll('[data-track]')).toHaveLength(4));
+    await userEvent.click(screen.getByRole('button', { name: t('mix.send') }));
+
+    expect(decodeURIComponent(window.location.hash)).toBe('#/mix?music=out/music/x/acestep-corporate-v2.wav');
+    window.location.hash = '';
+  });
+
+  it('sin pista elegida, «Mandar a Mezclar» está deshabilitado', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path.startsWith('/jobs?group_key=')) return [job];
+      if (path.includes('tracks.json')) return { ...manifest, chosen: null };
+      return { peaks: [] };
+    });
+
+    renderCompare();
+    await waitFor(() => expect(document.querySelectorAll('[data-track]')).toHaveLength(4));
+
+    expect(screen.getByRole('button', { name: t('mix.send') })).toHaveProperty('disabled', true);
+  });
 });

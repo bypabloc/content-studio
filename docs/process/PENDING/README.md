@@ -54,7 +54,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
-| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 8 carpetas huérfanas de `content-studio-worktrees/` con ACL de administrador; las borra el usuario con terminal elevada | Cuando el usuario lo pida; no bloquea | Usuario |
+| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 9 carpetas huérfanas de `content-studio-worktrees/` (8 con ACL de administrador; la de 015 retenida por un proceso); las borra el usuario | Cuando el usuario lo pida; no bloquea | Usuario |
 | [014-escucha-y-revision](014-escucha-y-revision.md) | Escuchar la narración alineada, revisar la sincronía, la UI real y los presets incluidos (gusto) | Después del merge a dev; no bloquea | Usuario |
 | [014-audio-quemar-copia](014-audio-quemar-copia.md) | Al quemar, el audio PCM de un MOV no se ha probado: la copia del audio puede fallar en MP4 | En la verificación final (T9) | Agente |
 | [014-traduccion-real](014-traduccion-real.md) | Falta la prueba `-m local` automatizada de la traducción con `small`; la corrida real y el cierre ya están verificados a mano | Después del merge a dev; no bloquea | Agente |

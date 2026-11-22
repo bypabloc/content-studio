@@ -14,6 +14,7 @@ from content_studio.services import (
     media_reframe_track,
     media_split,
     media_trim,
+    mix_render,
     music,
     music_samples,
     narration,
@@ -55,6 +56,7 @@ def test_every_kind_exposes_validate_and_build_command():
         'media.trim': media_trim,
         'media.concat': media_concat,
         'media.split': media_split,
+        'mix.render': mix_render,
     }
     assert expected == SERVICES
     for service in SERVICES.values():

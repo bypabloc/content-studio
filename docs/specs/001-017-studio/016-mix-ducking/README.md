@@ -28,9 +28,9 @@ Poner la música bajo la voz. El ducking sale de la transcripción (rampas edita
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Envolvente de ducking desde la transcripción (pura) | PEN |
-| 2 | Render: envolvente o sidechain, intro y outro, ajuste de la música, LUFS final y video | PEN |
-| 3 | Client: Mezcla con línea de tiempo, rampas y vista previa WebAudio | PEN |
+| 1 | Envolvente de ducking desde la transcripción (pura) | DON |
+| 2 | Render: envolvente o sidechain, intro y outro, ajuste de la música, LUFS final y video (AC-3 con picos: PENDING) | DON |
+| 3 | Client: Mezcla con línea de tiempo, rampas y vista previa WebAudio (sin probar con la app real: PENDING) | DON |
 
 ## Decisiones clave
 
@@ -40,5 +40,5 @@ Poner la música bajo la voz. El ducking sale de la transcripción (rampas edita
 
 ## WARNING y PENDING
 
-* WARNING: `016-valores-ducking.md` (atenuación, rampas y márgenes por defecto).
-* PENDING: ninguna.
+* WARNING: `016-valores-ducking.md` (atenuación, rampas y márgenes por defecto; salida a 48 kHz; techo por códec).
+* PENDING: `016-lufs-real-fuera-de-ac3.md` (LUFS -14 con TP ≤ -1 no se cumple con mezclas de picos), `016-escucha-y-capturas.md` (escucha, capturas, ducking medido y corrida de la UI real).
