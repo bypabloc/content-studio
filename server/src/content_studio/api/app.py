@@ -30,6 +30,7 @@ from content_studio.api.routes import (
     queue,
     settings,
     storage,
+    subtitles,
     system,
     voices,
     voices_catalog,
@@ -39,6 +40,7 @@ from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
 from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
+from content_studio.subtitles import fonts
 
 # La ventana de Tauri pide a la API desde su propio origen: http://tauri.localhost en Windows (tauri://localhost en
 # macOS y Linux), y el dev server de Vite en 1420.
@@ -105,6 +107,7 @@ def create_app(
             paths.references_dir().resolve(),
             paths.voices_dir().resolve(),
             paths.samples_dir().resolve(),
+            *fonts.font_roots(paths.DATA / 'fonts'),
         ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
@@ -119,6 +122,7 @@ def create_app(
     app.include_router(jobs.router, dependencies=header_only)
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(clean.router, dependencies=header_only)
+    app.include_router(subtitles.router, dependencies=header_only)
     app.include_router(music.router, dependencies=header_only)
     app.include_router(narration.router, dependencies=header_only)
     app.include_router(voices.router, dependencies=header_only)

@@ -151,4 +151,75 @@ describe('CleanReview (spec 013, D-6, AC-7)', () => {
 
     expect(screen.getByText(t('cleaner.review.transcript'))).toBeTruthy();
   });
+
+  describe('Subtitular (spec 014, AC-11)', () => {
+    const subtitleButton = () => screen.getByRole('button', { name: t('cleaner.review.subtitle') }) as HTMLButtonElement;
+
+    function withRenders(input: string, renders: unknown[]) {
+      api.get.mockImplementation(async (path: string) => {
+        if (path === '/jobs?kind=clean.analyze') return [{ id: 7, status: 'done', output_dir: 'D:/out/clean/7', params: {} }];
+        if (path === '/jobs?kind=clean.render') return renders;
+        return routes(input)(path);
+      });
+    }
+
+    it('sin una render de este análisis, el botón espera', async () => {
+      withRenders('/media/charla.mp4', []);
+      renderReview();
+      await screen.findByText(t('cleaner.review.duration', { duration: clock(8) }));
+
+      expect(subtitleButton().disabled).toBe(true);
+    });
+
+    it('una render de otro análisis no cuenta', async () => {
+      withRenders('/media/charla.mp4', [
+        { id: 9, status: 'done', output_dir: 'D:/out/clean/9', params: { analysis: 'D:/out/clean/5' } },
+      ]);
+      renderReview();
+      await screen.findByText(t('cleaner.review.duration', { duration: clock(8) }));
+
+      expect(subtitleButton().disabled).toBe(true);
+    });
+
+    it('con la render de este análisis, encola subtitles.create con el video limpio', async () => {
+      const user = userEvent.setup();
+      withRenders('/media/charla.mp4', [
+        { id: 9, status: 'done', output_dir: 'D:/out/clean/9', params: { analysis: 'D:\\out\\clean\\7' } },
+      ]);
+      renderReview();
+      await waitFor(() => expect(subtitleButton().disabled).toBe(false));
+
+      await user.click(subtitleButton());
+
+      await waitFor(() =>
+        expect(api.post).toHaveBeenCalledWith('/jobs', {
+          kind: 'subtitles.create',
+          params: {
+            origin: 'cleaner',
+            input: 'out/clean/7/transcript.json',
+            analysis: 'D:/out/clean/7',
+            source: 'D:/out/clean/9/clean.mp4',
+          },
+        }),
+      );
+    });
+
+    it('un audio sin video pasa su clean.wav', async () => {
+      const user = userEvent.setup();
+      withRenders('/media/charla.wav', [
+        { id: 9, status: 'done', output_dir: 'D:/out/clean/9', params: { analysis: 'D:/out/clean/7' } },
+      ]);
+      renderReview();
+      await waitFor(() => expect(subtitleButton().disabled).toBe(false));
+
+      await user.click(subtitleButton());
+
+      await waitFor(() =>
+        expect(api.post).toHaveBeenCalledWith(
+          '/jobs',
+          expect.objectContaining({ params: expect.objectContaining({ source: 'D:/out/clean/9/clean.wav' }) }),
+        ),
+      );
+    });
+  });
 });

@@ -35,6 +35,7 @@ class System(TypedDict):
     ffmpeg: Binary | None
     git: Binary | None
     gpu: GPU | None
+    subtitles_filter: bool
 
 
 def windows_paths() -> list[str]:
@@ -120,9 +121,23 @@ def _gpu() -> GPU | None:
 
 
 def detect() -> System:
-    """Detecta las herramientas ejecutables y la GPU con más VRAM."""
+    """Detecta las herramientas ejecutables, la GPU con más VRAM y si el ffmpeg trae el filtro `subtitles` (libass)."""
     _refresh_path()
-    return {'ffmpeg': _binary('ffmpeg', '-version'), 'git': _binary('git', '--version'), 'gpu': _gpu()}
+    ffmpeg = _binary('ffmpeg', '-version')
+    return {
+        'ffmpeg': ffmpeg,
+        'git': _binary('git', '--version'),
+        'gpu': _gpu(),
+        'subtitles_filter': _subtitles_filter(ffmpeg),
+    }
+
+
+def _subtitles_filter(ffmpeg: Binary | None) -> bool:
+    """El filtro `subtitles` (libass) figura en la lista que da `ffmpeg -filters`."""
+    if ffmpeg is None:
+        return False
+    result = _run([ffmpeg['path'], '-hide_banner', '-filters'], timeout=10)
+    return result is not None and re.search(r'^\s*\S+\s+subtitles\s', result.stdout, re.MULTILINE) is not None
 
 
 def winget_path() -> str | None:

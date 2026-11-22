@@ -28,11 +28,12 @@ Crear subtítulos a partir de cuatro fuentes: un archivo transcrito con faster-w
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Documento de subtítulos, segmentación y formatos (SRT, VTT y ASS) | PEN |
-| 2 | Orígenes: transcribir, limpiador, narración (alineación) e importar | PEN |
-| 3 | Estilos, presets, fuentes y quemado | PEN |
-| 4 | Traducción al inglés | PEN |
-| 5 | Client: editor, vista previa JASSUB, zonas seguras y estilos | PEN |
+| 1 | Documento de subtítulos, segmentación y formatos (SRT, VTT y ASS) | DON |
+| 2 | Orígenes: transcribir, limpiador, narración (alineación) e importar | DON |
+| 3 | Estilos, presets, fuentes y quemado | DON |
+| 4 | Traducción al inglés | DON |
+| 5 | Client: editor, vista previa JASSUB, zonas seguras y estilos, y «Subtitular» desde el limpiador y la narración (e2e) | DON |
+| 6 | Corridas reales y verificación final (T9): parcial, ver `03-verificacion-final.md` §6 | PEN |
 
 ## Decisiones clave
 
@@ -44,5 +45,5 @@ Crear subtítulos a partir de cuatro fuentes: un archivo transcrito con faster-w
 
 ## WARNING y PENDING
 
-* WARNING: `014-jassub.md` (dependencia nueva y su peso) y `014-fuentes-ofl.md`.
-* PENDING: ninguna.
+* WARNING: fichas `014-*` en [`docs/process/WARNING/`](../../../process/WARNING/README.md) (editor y preview, quemar, traducir, fuentes OFL, migración 5, orígenes, exportar y la corrección de la vista previa).
+* PENDING: `014-audio-quemar-copia`, `014-traduccion-real`, `014-capturas-editor` y `014-escucha-y-revision` en [`docs/process/PENDING/`](../../../process/PENDING/README.md).

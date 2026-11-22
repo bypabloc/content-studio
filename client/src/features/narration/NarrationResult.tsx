@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import { UIDiffText } from '@/shared/components/atoms/UIDiffText';
+import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
@@ -55,6 +56,21 @@ export function NarrationResult({ job }: { job: Job }) {
       api.post('/jobs', { kind: 'narration.regenerate', params: { source_job: job.id, index } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
   });
+  // «Subtitular» (spec 014, D-4): el texto de los cues es el del guion; los tiempos salen de alinear la toma.
+  const subtitle = useMutation({
+    mutationFn: () =>
+      api.post('/jobs', {
+        kind: 'subtitles.create',
+        params: {
+          origin: 'narration',
+          input: wav,
+          source: wav,
+          script: (script.data?.segments ?? []).map((segment) => segment.text).join(' '),
+          language: 'es',
+        },
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+  });
 
   if (!script.data) return null;
   const evaluated = take.data?.evaluation ?? null;
@@ -78,6 +94,11 @@ export function NarrationResult({ job }: { job: Job }) {
         )}
       </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
+      <UIStack direction="row" gap="sm">
+        <UIButton variant="secondary" disabled={subtitle.isPending} onClick={() => subtitle.mutate()}>
+          {t('narration.result.subtitle')}
+        </UIButton>
+      </UIStack>
       {info.data && (
         <UIText variant="caption">
           {t('narration.result.loudness', {

@@ -37,6 +37,13 @@ interface PlanValues {
   padding: number;
   edges: boolean;
 }
+/** Un trabajo del limpiador: su id, su carpeta de salida y sus parámetros (spec 014, AC-11). */
+interface CleanJob {
+  id: number;
+  status: string;
+  output_dir: string;
+  params: Record<string, unknown>;
+}
 
 const VIDEO_EXTENSIONS = ['.mp4', '.mov', '.mkv', '.webm', '.avi', '.m4v'];
 
@@ -119,6 +126,32 @@ export function CleanReview({ jobId, onBack }: { jobId: number; onBack?: () => v
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['jobs'] }),
   });
 
+  // «Subtitular» (AC-11): el video limpio de la última render de este análisis. Sin render, el botón espera.
+  const renders = useQuery({
+    queryKey: ['jobs', 'clean.render'],
+    queryFn: () => api.get<CleanJob[]>('/jobs?kind=clean.render'),
+  });
+  // La render guarda la carpeta de salida de su análisis. El transcript no sirve para ligarlas: vive en la caché de transcripción.
+  const analyses = useQuery({
+    queryKey: ['jobs', 'clean.analyze'],
+    queryFn: () => api.get<CleanJob[]>('/jobs?kind=clean.analyze'),
+  });
+  const folderOf = (path: unknown) => String(path ?? '').replace(/\\/g, '/');
+  const analysisDir = (analyses.data ?? []).find((job) => job.id === jobId)?.output_dir ?? '';
+  const analysisFolder = folderOf(analysisDir);
+  const cleanRender = (renders.data ?? []).find(
+    (job) => job.status === 'done' && analysisFolder !== '' && folderOf(job.params.analysis) === analysisFolder,
+  );
+  const cleanSource = cleanRender ? `${cleanRender.output_dir}/clean.${/\.(mp4|mov|mkv|webm|avi|m4v)$/i.test(input) ? 'mp4' : 'wav'}` : null;
+  const subtitle = useMutation({
+    mutationFn: () =>
+      api.post('/jobs', {
+        kind: 'subtitles.create',
+        params: { origin: 'cleaner', input: analysis.data?.transcript, analysis: analysisDir, source: cleanSource },
+      }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+  });
+
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (isTyping(event.target)) return;
@@ -183,6 +216,9 @@ export function CleanReview({ jobId, onBack }: { jobId: number; onBack?: () => v
         </UIButton>
         <UIButton disabled={render.isPending} onClick={() => render.mutate()}>
           {t('cleaner.review.render')}
+        </UIButton>
+        <UIButton variant="secondary" disabled={!cleanSource || subtitle.isPending} onClick={() => subtitle.mutate()}>
+          {t('cleaner.review.subtitle')}
         </UIButton>
       </UIStack>
       <UIStack direction="row" align="end" gap="sm">

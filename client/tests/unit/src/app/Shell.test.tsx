@@ -35,6 +35,7 @@ function server(settings: Record<string, unknown>) {
       engines_used_bytes: 0, engines_free_bytes: 10, outputs_used_bytes: 0, outputs_free_bytes: 10,
     })
     if (url.endsWith('/jobs')) return reply([])
+    if (url.endsWith('/subtitles')) return reply([])
     if (url.includes('/voices/kit')) return reply({ styles: [] })
     if (url.includes('/voices/profiles')) return reply([])
     return reply({ paused: false })
@@ -148,6 +149,13 @@ describe('Shell [AC-7]', () => {
     renderShell()
 
     expect(await screen.findByText(t('voices.empty'))).toBeTruthy()
+  })
+
+  it('spec 014: WHEN se abre Subtítulos THEN la sección muestra su lista de proyectos', async () => {
+    window.location.hash = '#/subtitles'
+    renderShell()
+
+    expect(await screen.findByText(t('subtitles.home.empty'))).toBeTruthy()
   })
 
   it('AC-8: el primer uso sin motores abre bienvenida, la completa y va a Narración', async () => {

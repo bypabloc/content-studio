@@ -158,5 +158,13 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [013-cuda-windows](013-cuda-windows.md) | faster-whisper en CUDA con `int8_float16` y respaldo a CPU; la VRAM pico se mide en la verificación final | `main` |
 | [013-silencios-y-cuadricula](013-silencios-y-cuadricula.md) | El plan corta silencios audibles; video en la cuadrícula de cuadros; ni video ni audio usan acrossfade (informe = archivo) | `main` |
 | [013-regiones-duracion-del-analisis](013-regiones-duracion-del-analisis.md) | Las regiones de la revisión usan la duración del análisis; con la del archivo quedan en su tiempo (medido en el DOM) | `main` |
+| [014-segmentacion](014-segmentacion.md) | `segment` sin `min_duration`: la puntuación fuerte es corte obligatorio; cortes débiles solo si un límite lo exige | `main` |
+| [014-ass-y-ffmpeg](014-ass-y-ffmpeg.md) | `-f null` no sirve para subtítulos: la prueba de ffmpeg usa `-c:s ass -f ass -` y cuenta los Dialogue; ffmpeg es permisivo | `main` |
+| [014-alineacion-narracion](014-alineacion-narracion.md) | El guion se alinea con las palabras de whisper por difflib, normalizando tildes y signos; las palabras sin par se interpolan | `main` |
+| [014-origenes-gpu](014-origenes-gpu.md) | `subtitles.create` toma la GPU para todos sus orígenes (la cola no lo decide por parámetro) | `main` |
+| [014-editor-y-preview](014-editor-y-preview.md) | Editor y vista previa con JASSUB 2.5.36 exacto, 35 claves nuevas en el catálogo y el límite del JS inicial a 234 kB | `main` |
+| [014-vista-previa-set-track](014-vista-previa-set-track.md) | La pista de JASSUB se manda cuando el worker está listo; antes, un cambio del documento tiraba el editor entero | `main` |
+| [014-cleaner-narracion-exportar](014-cleaner-narracion-exportar.md) | Subtitular desde el limpiador usa la última render y remapea las palabras; exportar escribe SRT, VTT o ASS en `out/subtitles/` | `main` |
+| [014-sin-cli-subtitles](014-sin-cli-subtitles.md) | No hay subcomando `studio subtitles`: ningún AC lo pide y la API y la UI cubren el flujo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -11,6 +11,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from content_studio.common import ffmpeg as ff
+from content_studio.common.encode import video_codec
 
 # cspell:ignore acrossfade afade anull aout vout STARTPTS setpts nvenc libx: filtros y codificadores de ffmpeg.
 
@@ -95,17 +96,6 @@ def video_graph(keep: Sequence[tuple[float, float]]) -> str:
     [v0][v1]concat=n=2:v=1:a=0[vout]
     """
     return ';\n'.join(_video_chains(keep)) + '\n'
-
-
-def video_codec(nvenc: bool) -> list[str]:
-    """Codificador de video: NVENC si el equipo tiene NVIDIA; si no, libx264 con CRF 18.
-
-    >>> video_codec(nvenc=False)
-    ['-c:v', 'libx264', '-crf', '18', '-preset', 'medium']
-    """
-    if nvenc:
-        return ['-c:v', 'h264_nvenc', '-preset', 'p5', '-cq', '19']
-    return ['-c:v', 'libx264', '-crf', '18', '-preset', 'medium']
 
 
 def _write_script(destination: Path, name: str, chains: list[str]) -> Path:

@@ -76,7 +76,13 @@ def test_transcribe_writes_the_words_json_with_the_model_options(tmp_path):
     transcribe_main.transcribe(tmp_path / 'audio.wav', language='es', out=out, model=model)
 
     assert model.calls == [
-        {'audio': str(tmp_path / 'audio.wav'), 'language': 'es', 'word_timestamps': True, 'vad_filter': True}
+        {
+            'audio': str(tmp_path / 'audio.wav'),
+            'language': 'es',
+            'task': 'transcribe',
+            'word_timestamps': True,
+            'vad_filter': True,
+        }
     ]
     written = json.loads(out.read_text(encoding='utf-8'))
     assert written['segments'][0]['words'][0]['word'] == 'buenas'
@@ -161,7 +167,9 @@ def test_main_relaunches_extracts_the_audio_and_transcribes_to_out(tmp_path, mon
     monkeypatch.setattr(
         transcribe_main,
         'transcribe',
-        lambda audio, *, language, out, model: seen.update(language=language, out=out, with_model=model),
+        lambda audio, *, language, out, model, task: seen.update(
+            language=language, out=out, with_model=model, task=task
+        ),
     )
 
     assert (
@@ -176,6 +184,7 @@ def test_main_relaunches_extracts_the_audio_and_transcribes_to_out(tmp_path, mon
     assert seen['loaded'] == 'small'
     assert seen['with_model'] == 'modelo'
     assert seen['language'] == 'auto'
+    assert seen['task'] == 'transcribe'
     assert seen['out'] == tmp_path / 'out' / 'words.json'
 
 

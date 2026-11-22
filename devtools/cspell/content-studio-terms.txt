@@ -58,6 +58,7 @@ fingerstyle
 fintech
 flac
 flatnonzero
+fontsdir
 followlinks
 frombuffer
 getpid
@@ -76,6 +77,8 @@ keyscale
 killpg
 lameenc
 lastrowid
+libass
+libx
 lofi
 loudnorm
 lufs
@@ -151,6 +154,11 @@ serde
 getrandom
 recv
 jobobject
+jassub
+fontname
+colour
+fscx
+fscy
 contentstudio
 unstub
 describedby
@@ -162,6 +170,7 @@ shadcn
 timecode
 xmeml
 timebase
+tiktok
 ntsc
 pathurl
 clipitem

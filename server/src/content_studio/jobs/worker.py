@@ -25,11 +25,13 @@ from pathlib import Path
 from typing import Any
 
 from content_studio import gpu_lock, paths
-from content_studio.db import connection, jobs
+from content_studio.db import connection, jobs, subtitle_projects
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
 from content_studio.services.registry import SERVICES
 from content_studio.services.storage_move import KIND as STORAGE_MOVE
+from content_studio.subtitles import translate
+from content_studio.subtitles.document import load
 
 WATCH_SECONDS = 0.5  # cada cuánto mira la base si el trabajo que corre se canceló desde otro proceso
 
@@ -215,7 +217,18 @@ class Worker:
         self._notify(conn, job['id'])
 
     def _chain(self, conn: sqlite3.Connection, job: dict, out_dir: Path) -> None:
-        """«Aplicar todos sin revisar» (spec 013, D-4): un análisis con `auto_render` encola su render al terminar."""
+        """Al terminar: un `subtitles.create` registra su proyecto (spec 014, D-1).
+
+        «Aplicar todos sin revisar» (spec 013, D-4): un análisis con `auto_render` encola su render.
+        """
+        if job['kind'] == 'subtitles.create' and (out_dir / 'subtitles.json').exists():
+            doc = out_dir / 'subtitles.json'
+            source = load(doc)['source']['path']
+            subtitle_projects.insert(conn, Path(source).stem, source, str(doc))
+            return
+        if job['kind'] == 'subtitles.translate':
+            translate.finish(Path(job['params']['doc']), out_dir)
+            return
         if job['kind'] != 'clean.analyze' or not job['params'].get('auto_render'):
             return
         new_id = queue.enqueue(

@@ -135,6 +135,23 @@ describe('NarrationResult', () => {
     expect(regenerate.querySelector('svg.lucide-refresh-cw')).not.toBeNull();
   });
 
+  it('Subtitular encola subtitles.create con el guion de la toma (spec 014, D-4)', async () => {
+    renderResult();
+    await screen.findByText('Adiós.');
+
+    fireEvent.click(screen.getByRole('button', { name: t('narration.result.subtitle') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/jobs',
+        expect.objectContaining({
+          kind: 'subtitles.create',
+          params: expect.objectContaining({ origin: 'narration', script: 'Hola. Adiós.', language: 'es' }),
+        }),
+      ),
+    );
+  });
+
   it('un trabajo sin carpeta de salida no pide nada', () => {
     renderResult({ ...JOB, output_dir: null } as Job);
 
