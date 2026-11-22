@@ -58,6 +58,16 @@ describe('createApi', () => {
     );
   });
 
+  it('permite mandar If-Match al guardar un proyecto', async () => {
+    const fetcher = reply({ hash: 'next' });
+    await createApi(connection, fetcher).put('/editor/projects?path=project.json', { version: 1 }, { 'If-Match': 'current' });
+
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://127.0.0.1:9000/editor/projects?path=project.json',
+      expect.objectContaining({ headers: expect.objectContaining({ 'If-Match': 'current' }) }),
+    );
+  });
+
   it('ante un error con código lanza ApiError con su mensaje', async () => {
     const body = { code: 'job_not_found', params: { job_id: 3 }, message: 'No existe el trabajo 3' };
     const error = await createApi(connection, reply(body, 404))

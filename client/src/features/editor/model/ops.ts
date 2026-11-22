@@ -47,6 +47,13 @@ function moveClip(doc: Doc, op: Extract<Op, { type: 'moveClip' }>): void {
   Object.assign(clip, { track: op.track, start: best });
 }
 
+/** Actualiza propiedades persistidas de una pista, como espejo del server. */
+function setTrack(doc: Doc, op: Extract<Op, { type: 'setTrack' }>): void {
+  const track = doc.tracks.find((candidate) => candidate.id === op.id);
+  if (track === undefined) throw new OpError('unknown_track');
+  Object.assign(track, op.changes);
+}
+
 /** Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`. */
 function trimClip(doc: Doc, op: Extract<Op, { type: 'trimClip' }>): void {
   const clip = findClip(doc, op.id);
@@ -108,6 +115,7 @@ function overlaps(start: number, length: number, other: Clip): boolean {
 
 const HANDLERS: { [K in Op['type']]: (doc: Doc, op: Extract<Op, { type: K }>) => void } = {
   moveClip,
+  setTrack,
   trimClip,
   splitAt,
   deleteClips,

@@ -28,6 +28,11 @@ describe('operaciones del editor (AC-1)', () => {
       const clip = byId.get(clipId) as unknown as Record<string, unknown>;
       expect(Object.fromEntries(Object.keys(fields).map((key) => [key, clip[key]]))).toEqual(fields);
     }
+    const tracks = new Map(result.tracks.map((track) => [track.id, track]));
+    for (const [trackId, fields] of Object.entries<Record<string, unknown>>(expected.tracks ?? {})) {
+      const track = tracks.get(trackId) as unknown as Record<string, unknown>;
+      expect(Object.fromEntries(Object.keys(fields).map((key) => [key, track[key]]))).toEqual(fields);
+    }
     expect(fixture.doc).toEqual(before);
   });
 
@@ -35,5 +40,11 @@ describe('operaciones del editor (AC-1)', () => {
     const doc: Doc = { version: 1, name: 'x', sample_rate: 48000, tracks: [], clips: [], markers: [] };
 
     expect(() => apply(doc, { type: 'nope' } as unknown as Op)).toThrow('unknown_op');
+  });
+
+  it('rechaza una actualización de pista inexistente', () => {
+    const doc: Doc = { version: 1, name: 'x', sample_rate: 48000, tracks: [], clips: [], markers: [] };
+
+    expect(() => apply(doc, { type: 'setTrack', id: 'missing', changes: { mute: true } })).toThrow('unknown_track');
   });
 });

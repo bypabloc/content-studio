@@ -36,6 +36,7 @@ function server(settings: Record<string, unknown>) {
     })
     if (url.endsWith('/jobs')) return reply([])
     if (url.endsWith('/subtitles')) return reply([])
+    if (url.endsWith('/editor/projects/recent')) return reply({ paths: [] })
     if (url.includes('/catalog/media')) return reply({ formats: [{ id: 'mp3', kind: 'audio' }], presets: [] })
     if (url.includes('kind=media.')) return reply([])
     if (url.includes('/voices/kit')) return reply({ styles: [] })
@@ -158,6 +159,13 @@ describe('Shell [AC-7]', () => {
     renderShell()
 
     expect(await screen.findByText(t('subtitles.home.empty'))).toBeTruthy()
+  })
+
+  it('spec 017: WHEN se abre el Editor THEN permite crear un proyecto', async () => {
+    window.location.hash = '#/editor'
+    renderShell()
+
+    expect(await screen.findByRole('button', { name: t('editor.project.create') })).toBeTruthy()
   })
 
   it('AC-8: el primer uso sin motores abre bienvenida, la completa y va a Narración', async () => {

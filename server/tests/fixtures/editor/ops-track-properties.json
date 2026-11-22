@@ -1,0 +1,43 @@
+{
+  "doc": {
+    "version": 1,
+    "name": "demo",
+    "sample_rate": 48000,
+    "tracks": [
+      {
+        "id": "t1",
+        "kind": "audio",
+        "name": "Voz",
+        "volume_db": 0,
+        "mute": false,
+        "solo": false,
+        "locked": false,
+        "height": 80
+      }
+    ],
+    "clips": [],
+    "markers": []
+  },
+  "op": {
+    "type": "setTrack",
+    "id": "t1",
+    "changes": {
+      "volume_db": -12,
+      "mute": true,
+      "solo": true,
+      "locked": true
+    }
+  },
+  "expected": {
+    "ids": [],
+    "clips": {},
+    "tracks": {
+      "t1": {
+        "volume_db": -12,
+        "mute": true,
+        "solo": true,
+        "locked": true
+      }
+    }
+  }
+}

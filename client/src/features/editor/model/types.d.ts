@@ -48,6 +48,7 @@ export interface ValidationError {
 /** Las operaciones de `ops.py`. Cada una nombra su tipo en `type`. */
 export type Op =
   | { type: 'moveClip'; id: string; track: string; start: number }
+  | { type: 'setTrack'; id: string; changes: Partial<Pick<Track, 'volume_db' | 'mute' | 'solo' | 'locked'>> }
   | { type: 'trimClip'; id: string; edge: 'start' | 'end'; t: number }
   | { type: 'splitAt'; t: number; ids?: string[] }
   | { type: 'deleteClips'; ids: string[]; ripple?: boolean }

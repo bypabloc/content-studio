@@ -57,6 +57,14 @@ def move_clip(doc: Doc, op: Op) -> None:
     clip.update(track=track, start=min(free, key=lambda t: (abs(t - requested), t)))
 
 
+def set_track(doc: Doc, op: Op) -> None:
+    """Actualiza volumen, mute, solo o bloqueo de una pista existente."""
+    track = next((item for item in doc['tracks'] if item['id'] == op['id']), None)
+    if track is None:
+        raise OpError('unknown_track', {'id': op['id']})
+    track.update(op['changes'])
+
+
 def trim_clip(doc: Doc, op: Op) -> None:
     """Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`."""
     clip = _find(doc, op['id'])
@@ -124,6 +132,7 @@ def _overlaps(start: float, length: float, other: Doc) -> bool:
 
 HANDLERS: dict[str, Callable[[Doc, Op], None]] = {
     'moveClip': move_clip,
+    'setTrack': set_track,
     'trimClip': trim_clip,
     'splitAt': split_at,
     'deleteClips': delete_clips,
