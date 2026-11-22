@@ -84,6 +84,7 @@ noheader
 nostats
 nounits
 numpy
+nvenc
 omnivoice
 onnx
 onnxruntime
@@ -158,3 +159,13 @@ executemany
 klinikae
 oklch
 shadcn
+timecode
+xmeml
+timebase
+ntsc
+pathurl
+clipitem
+cublas
+cudnn
+systran
+mobiuslabsgmbh

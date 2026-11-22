@@ -159,6 +159,30 @@ def test_run_now_runs_one_job_in_this_process_and_returns_its_final_status(env):
     assert Path(jobs.get(env.conn, job)['output_dir'], 'params.json').is_file()
 
 
+def test_auto_render_queues_the_render_when_the_analysis_ends(env):
+    env.services['clean.analyze'] = _service('cpu')
+    env.services['clean.render'] = _service('cpu')
+    params = {'input': 'charla.mp4', 'auto_render': True, 'label': 'analisis', 'sleep': 0, 'log': str(env.log)}
+    analysis = queue.enqueue(env.conn, 'clean.analyze', params, env.services)
+
+    assert env.worker.run_now(analysis) == 'done'
+
+    [render] = jobs.list_jobs(env.conn, kind='clean.render')
+    assert render['status'] == 'queued'
+    assert render['params'] == {'input': 'charla.mp4', 'analysis': jobs.get(env.conn, analysis)['output_dir']}
+
+
+def test_without_auto_render_the_analysis_queues_no_render(env):
+    env.services['clean.analyze'] = _service('cpu')
+    env.services['clean.render'] = _service('cpu')
+    params = {'input': 'charla.mp4', 'label': 'analisis', 'sleep': 0, 'log': str(env.log)}
+    analysis = queue.enqueue(env.conn, 'clean.analyze', params, env.services)
+
+    assert env.worker.run_now(analysis) == 'done'
+
+    assert jobs.list_jobs(env.conn, kind='clean.render') == []
+
+
 def test_a_cancel_written_only_to_the_database_stops_a_running_process(env):
     job = _enqueue(env, 'long', sleep=60)
     env.worker.start()

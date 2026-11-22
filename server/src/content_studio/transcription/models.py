@@ -1,0 +1,69 @@
+"""Catálogo de modelos de faster-whisper (spec 013, D-1): repo, tamaño y VRAM aproximada. Solo stdlib."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import NamedTuple
+
+
+class WhisperSpec(NamedTuple):
+    """Un modelo de faster-whisper: su repo, su tamaño en disco y su VRAM aproximada."""
+
+    repo: str
+    size_gb: float
+    vram_gb: float
+
+
+RECOMMENDED = 'large-v3-turbo'
+MODELS: dict[str, WhisperSpec] = {
+    'small': WhisperSpec('Systran/faster-whisper-small', 0.5, 1.0),
+    'medium': WhisperSpec('Systran/faster-whisper-medium', 1.5, 2.0),
+    'large-v3-turbo': WhisperSpec('mobiuslabsgmbh/faster-whisper-large-v3-turbo', 1.6, 3.0),
+    'large-v3': WhisperSpec('Systran/faster-whisper-large-v3', 3.1, 4.5),
+}
+
+
+def recommended() -> str:
+    """El modelo que el selector marca con ★."""
+    return RECOMMENDED
+
+
+def repo(model: str) -> str:
+    """El repo de Hugging Face de un modelo del catálogo."""
+    return MODELS[model].repo
+
+
+def selected(db: Path) -> str:
+    """El modelo que el usuario eligió en el selector (preferencia `select.whisper.model`); el recomendado si no hay
+    base de datos o no eligió. No crea la base: si falta, no hay preferencia que leer."""
+    if not db.exists():
+        return RECOMMENDED
+    from content_studio.db import schema, settings
+    from content_studio.db.connection import connect
+
+    conn = connect(db)
+    try:
+        schema.migrate(conn)  # idempotente: una base que aún no tiene la tabla settings
+        return str(settings.get(conn, 'select.whisper.model', RECOMMENDED))
+    finally:
+        conn.close()
+
+
+def downloaded(model: str, cache: Path) -> bool:
+    """¿El modelo ya está en la caché de Hugging Face? Cuenta el `model.bin` de su snapshot, no la carpeta."""
+    folder_name = 'models--' + repo(model).replace('/', '--')
+    return any((cache / folder_name / 'snapshots').glob('*/model.bin'))
+
+
+def status(cache: Path) -> list[dict]:
+    """Cada modelo con su tamaño, su VRAM, si es el recomendado y si ya está descargado (AC-9, `GET /engines`)."""
+    return [
+        {
+            'model': name,
+            'size_gb': spec.size_gb,
+            'vram_gb': spec.vram_gb,
+            'recommended': name == RECOMMENDED,
+            'downloaded': downloaded(name, cache),
+        }
+        for name, spec in MODELS.items()
+    ]

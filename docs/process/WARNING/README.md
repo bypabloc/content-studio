@@ -149,5 +149,14 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [012-aceptacion-sin-usuario](012-aceptacion-sin-usuario.md) | La bienvenida se prueba con e2e; la revisión visual y las capturas quedan en PENDING y no bloquean | `main` (revisión visual en PENDING) |
 | [012-trabajos-engine-uninstall-en-error](012-trabajos-engine-uninstall-en-error.md) | Tres trabajos `engine.uninstall` fallidos se conservan como historial, sin reintentar | `main` |
 | [lote-limpieza-huerfanos](lote-limpieza-huerfanos.md) | Se borraron 41 de 49 carpetas huérfanas de `content-studio-worktrees/`; 8 bloqueadas en PENDING | No bloquea |
+| [013-plan-y-render](013-plan-y-render.md) | Sin palabras no hay cortes; remap pega los tiempos del corte al borde; crossfade de 15 ms y grafo en archivo | `main` |
+| [013-render-precision](013-render-precision.md) | Tasa de cuadros de la fuente con `-r` (sin ella, 25 fps); yuv420p; NVENC p5 cq19 o libx264 crf 18 | `main` |
+| [013-transcripcion-cache](013-transcripcion-cache.md) | Migración 4 (la 3 es de la 006); familia `transcription`; caché por sha1 y modelos del catálogo | `main` |
+| [013-presupuesto-js](013-presupuesto-js.md) | `initialJsGzipKb` de 232 a 233: las claves nuevas del catálogo `es` suman al arranque | `main` |
+| [013-limpiador-lote-y-revision](013-limpiador-lote-y-revision.md) | `auto_render` en el worker; `studio clean --auto` sin worker; `clean.wav`/`clean.mp4`; `models` en `GET /engines`; onda con Regions, Timeline y Zoom sobre el `media` | `main` |
+| [013-evaluacion-faster-whisper](013-evaluacion-faster-whisper.md) | La evaluación y el chequeo de tomas usan faster-whisper con el modelo de Ajustes; tres desvíos de D-7 | `main` |
+| [013-cuda-windows](013-cuda-windows.md) | faster-whisper en CUDA con `int8_float16` y respaldo a CPU; la VRAM pico se mide en la verificación final | `main` |
+| [013-silencios-y-cuadricula](013-silencios-y-cuadricula.md) | El plan corta silencios audibles; video en la cuadrícula de cuadros; ni video ni audio usan acrossfade (informe = archivo) | `main` |
+| [013-regiones-duracion-del-analisis](013-regiones-duracion-del-analisis.md) | Las regiones de la revisión usan la duración del análisis; con la del archivo quedan en su tiempo (medido en el DOM) | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

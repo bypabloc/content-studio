@@ -8,17 +8,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import shutil
-import subprocess
 import sys
-import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
-from content_studio import messages
+from content_studio import messages, paths
 from content_studio.common import ffmpeg
 from content_studio.narration import profiles, recording_kit
 from content_studio.narration.evaluation.compare import compare, normalize
+from content_studio.transcription import models, transcribe_main
 
 RESOURCE = 'gpu'  # whisper usa la GPU: un chequeo a la vez, con el candado
 PEAK_RANGE = (-12.0, -6.0)  # dBFS de la guía (docs/scripts/README.md)
@@ -134,16 +132,11 @@ def check_take(path: Path, style: str, expected: str, transcribe: Callable[[Path
     }
 
 
-def whisper_text(path: Path) -> str | None:
-    """Lo que oye whisper en la toma, en español; None si el comando `whisper` no está instalado."""
-    if shutil.which('whisper') is None:
+def transcribe_text(path: Path) -> str | None:
+    """Lo que oye faster-whisper en la toma, en español; None si su servicio no está instalado (spec 013, D-7)."""
+    if not transcribe_main.available():
         return None
-    from content_studio.narration.evaluation.review import WHISPER_MODEL  # review importa numpy: solo al chequear
-
-    with tempfile.TemporaryDirectory() as folder:
-        command = ['whisper', str(path), '--model', WHISPER_MODEL, '--language', 'es', '--output_format', 'txt']
-        subprocess.run([*command, '--output_dir', folder], check=True, capture_output=True)
-        return (Path(folder) / f'{path.stem}.txt').read_text(encoding='utf-8').strip()
+    return transcribe_main.transcribe_text(path, model=models.selected(paths.db_path()), language='es')
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -155,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--source-rate', type=int)
     args = parser.parse_args(argv)
     take = profiles.takes_dir(args.profile, args.style) / f'{args.take}.wav'
-    result = check_take(take, args.style, recording_kit.plain_text(args.style), whisper_text)
+    result = check_take(take, args.style, recording_kit.plain_text(args.style), transcribe_text)
     if args.source_rate:  # la toma se remuestreó al subirla: el chequeo lo anota (spec 010, D-2)
         result['notes'].append('resampled')
         result['messages'].append(messages.t('voice.check.resampled'))

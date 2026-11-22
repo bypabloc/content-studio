@@ -1,6 +1,8 @@
 """Servicios por tipo de trabajo: la API, el worker y el CLI usan los mismos (spec 004, D-2)."""
 
 from content_studio.services import (
+    clean_analyze,
+    clean_render,
     engine_install,
     engine_uninstall,
     engine_verify,
@@ -10,12 +12,16 @@ from content_studio.services import (
     narration_regenerate,
     storage_move,
     system_install_tool,
+    transcribe,
     voice_build,
     voice_check,
 )
 
 SERVICES = {
     'narration': narration,
+    'transcribe': transcribe,
+    'clean.analyze': clean_analyze,
+    'clean.render': clean_render,
     'music': music,
     'music.samples': music_samples,
     'narration.regenerate': narration_regenerate,

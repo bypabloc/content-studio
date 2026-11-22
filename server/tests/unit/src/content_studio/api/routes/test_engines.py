@@ -59,6 +59,23 @@ def test_owned_engine_uninstall_is_enqueued(api, tmp_path, monkeypatch):
     assert response.json()['params']['engine'] == 'qwen-0.6b'
 
 
+def test_faster_whisper_lists_its_models_with_their_download_state(api, tmp_path, monkeypatch):
+    """AC-9: GET /engines dice qué modelos de whisper hay, su tamaño y cuáles ya están descargados."""
+    root = tmp_path / 'engines'
+    snapshot = root / 'hf' / 'models--Systran--faster-whisper-small' / 'snapshots' / 'abc123'
+    snapshot.mkdir(parents=True)
+    (snapshot / 'model.bin').write_bytes(b'')
+    monkeypatch.setattr(engines, '_storage', lambda request: root)
+
+    entries = api.client.get('/engines', headers=api.headers).json()
+
+    whisper = next(entry for entry in entries if entry['engine'] == 'faster-whisper')
+    states = {model['model']: model['downloaded'] for model in whisper['models']}
+    assert states == {'small': True, 'medium': False, 'large-v3-turbo': False, 'large-v3': False}
+    assert next(model for model in whisper['models'] if model['recommended'])['model'] == 'large-v3-turbo'
+    assert next(entry for entry in entries if entry['engine'] == 'qwen-0.6b')['models'] is None
+
+
 def test_force_external_uninstall_is_explicitly_enqueued(api, tmp_path, monkeypatch):
     venv = tmp_path / 'external' / '.venv-qwen'
     venv.mkdir(parents=True)

@@ -16,6 +16,7 @@ export function navItems(): NavItem[] {
   return [
     { id: 'narration', group: t('nav.group.generate'), label: t('nav.narration'), icon: 'narration' },
     { id: 'music', group: t('nav.group.generate'), label: t('nav.music'), icon: 'music' },
+    { id: 'cleaner', group: t('nav.group.edit'), label: t('nav.cleaner'), icon: 'scissors' },
     { id: 'voices', group: t('nav.group.voices'), label: t('nav.voices'), icon: 'voices' },
     { id: 'catalog', group: t('nav.group.voices'), label: t('nav.catalog'), icon: 'layers' },
     { id: 'engines', group: t('nav.group.settings'), label: t('nav.engines'), icon: 'server' },

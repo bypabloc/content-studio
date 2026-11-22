@@ -18,6 +18,7 @@ import { navItems } from './nav';
 
 // La página de Música solo se carga al abrirla: así el JS de arranque queda bajo el presupuesto de client/budget.json.
 const MusicPage = lazy(() => import('@/features/music/MusicPage').then((module) => ({ default: module.MusicPage })));
+const CleanerPage = lazy(() => import('@/features/cleaner/CleanerPage').then((module) => ({ default: module.CleanerPage })));
 const EnginesPage = lazy(() => import('@/features/engines/EnginesPage').then((module) => ({ default: module.EnginesPage })));
 const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })));
 const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((module) => ({ default: module.WelcomeGate })));
@@ -59,6 +60,11 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'music' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <MusicPage />
+          </Suspense>
+        )}
+        {section?.id === 'cleaner' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <CleanerPage />
           </Suspense>
         )}
         {section?.id === 'engines' && (

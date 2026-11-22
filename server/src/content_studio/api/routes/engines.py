@@ -14,13 +14,25 @@ from content_studio.api.routes.jobs import NewJob, create_job
 from content_studio.api.schemas import Job
 from content_studio.engines import installer, recipes
 from content_studio.services import engine_install, engine_uninstall, engine_verify
+from content_studio.transcription import models as transcription_models
 
 router = APIRouter()
 Db = Annotated[sqlite3.Connection, Depends(get_conn)]
+WHISPER_ENGINE = 'faster-whisper'
+
+
+class WhisperModel(BaseModel):
+    """Un modelo de faster-whisper: tamaño, VRAM, si es el recomendado y si ya está descargado."""
+
+    model: str
+    size_gb: float
+    vram_gb: float
+    recommended: bool
+    downloaded: bool
 
 
 class EngineInfo(BaseModel):
-    """Estado, requisitos y metadatos de un motor."""
+    """Estado, requisitos y metadatos de un motor. faster-whisper trae además sus modelos."""
 
     engine: str
     family: str
@@ -34,6 +46,7 @@ class EngineInfo(BaseModel):
     size_bytes: int
     job_id: int | None
     verification: dict | None
+    models: list[WhisperModel] | None = None
 
 
 def _recipe(name: str) -> recipes.Recipe:
@@ -49,8 +62,13 @@ def _storage(request: Request) -> Path:
 
 @router.get('/engines', response_model=list[EngineInfo])
 def engines(request: Request, conn: Db) -> list[dict]:
-    """Lista las recetas con la propiedad y el estado actual de cada motor."""
-    return installer.list_engines(conn, _storage(request))
+    """Lista las recetas con la propiedad y el estado actual de cada motor. faster-whisper suma sus modelos (AC-9)."""
+    root = _storage(request)
+    listed = installer.list_engines(conn, root)
+    for entry in listed:
+        if entry['engine'] == WHISPER_ENGINE:
+            entry['models'] = transcription_models.status(root / 'hf')  # la caché de transcribe_main (models_cache)
+    return listed
 
 
 @router.post('/engines/{name}/install', status_code=201, response_model=Job)

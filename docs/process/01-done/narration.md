@@ -1,6 +1,6 @@
 ---
 modulo: narration
-actualizada: 2026-11-20
+actualizada: 2026-11-21
 ---
 
 # Narración
@@ -15,7 +15,7 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 - Motores: VoxCPM2, Qwen3-TTS (0.6B y 1.7B), Chatterbox, CosyVoice 3, OmniVoice e IndexTTS, cada uno en su venv (licencias en `AGENTS.md`).
 - `uv run studio narration voices`: catálogo de voces libres (CC0 o dominio público) que se construyen con `--build`.
 - `uv run studio narration regenerate <job> <index>`: toma nueva con un párrafo rehecho; los demás bloques se copian byte a byte.
-- Evaluación con whisper contra el guion (`--evaluate`): por párrafo, lo que oyó distinto, los silencios y los ritmos.
+- Evaluación con faster-whisper contra el guion (`--evaluate`), con el modelo de Ajustes (large-v3-turbo por defecto): por párrafo, lo que oyó distinto, los silencios y los ritmos.
 - Sección **Narración** de la app: editor con avisos en vivo (las reglas del guion que se comprueban sin modelo), importación de `.txt` y `.json`, opciones con ★ y licencia por motor, Generar con Ctrl+Enter. El resultado tiene onda, LUFS y pico; «Regenerar» rehace un párrafo; «Comparar» pone en columnas las tomas del texto y elige una con ★.
 - Voces de referencia propias: se graban desde la app, en Mis voces (spec 010). El CLI `grabar`, legacy, se retiró en la 010.
 
@@ -32,6 +32,7 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 
 ## Historial
 
+- 2026-11-21: spec 013 (limpiador y faster-whisper): `--evaluate` y el chequeo de tomas usan el servicio de faster-whisper, no el comando `whisper` (AC-10). Ver [WARNING 013-evaluacion-faster-whisper](../WARNING/013-evaluacion-faster-whisper.md).
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
 - 2026-11-20: spec 010 (voces y grabación): perfiles de voz con tomas y referencia elegida, grabación guiada con prueba de sala y chequeo, importar tramos de audio o video y favoritas en el catálogo (PR #80).
 - 2026-11-19: CLI `studio` (004): `python cli.py narration tts` pasa a `uv run studio narration tts`; la salida va a `out/narration/<fecha>-<id>-<slug>/`. `grabar` se retiró en la 010.

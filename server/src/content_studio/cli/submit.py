@@ -111,8 +111,9 @@ def _show_progress(event: dict) -> None:
         print(f'job {job["id"]}: {job["status"]} {job["progress"]:.0%} {job["stage"] or ""}'.rstrip(), file=sys.stderr)
 
 
-def run(kind: str, params: dict[str, Any], db: Path, main: Path) -> int:
-    """Encola el trabajo y lo corre en este proceso. El progreso va a stderr y el resultado a stdout (JSON)."""
+def execute(kind: str, params: dict[str, Any], db: Path, main: Path) -> dict[str, Any] | None:
+    """Encola el trabajo y lo corre en este proceso (progreso a stderr). Devuelve su job, estado y carpeta; None si el
+    pedido no es válido (los motivos van a stderr)."""
     with closing(connection.connect(db)) as conn:
         schema.migrate(conn)
         try:
@@ -120,9 +121,17 @@ def run(kind: str, params: dict[str, Any], db: Path, main: Path) -> int:
         except queue.InvalidJob as error:
             for item in error.errors:
                 print(t(f'error.{item["code"]}', **item['params']), file=sys.stderr)
-            return 2
+            return None
     status = Worker(db, main, publish=_show_progress).run_now(job_id)
     with closing(connection.connect(db)) as conn:
         output_dir = (jobs.get(conn, job_id) or {}).get('output_dir')
-    print(json.dumps({'job': job_id, 'status': status, 'output_dir': output_dir}, ensure_ascii=False))
-    return 0 if status == 'done' else 1
+    return {'job': job_id, 'status': status, 'output_dir': output_dir}
+
+
+def run(kind: str, params: dict[str, Any], db: Path, main: Path) -> int:
+    """`execute` y el resultado a stdout (JSON). 0 si el trabajo terminó, 1 si falló, 2 si el pedido no es válido."""
+    result = execute(kind, params, db, main)
+    if result is None:
+        return 2
+    print(json.dumps(result, ensure_ascii=False))
+    return 0 if result['status'] == 'done' else 1

@@ -35,6 +35,21 @@ MIGRATIONS = [
     ALTER TABLE jobs ADD COLUMN group_key TEXT;
     CREATE INDEX jobs_group_key ON jobs (group_key);
     """,
+    # Spec 013 (D-4): caché de transcripciones. Solo rutas y metadatos; el texto va en el JSON de su ruta. Es la 4:
+    # la 3 ya es starred y group_key.
+    """
+    CREATE TABLE transcripts (
+      id INTEGER PRIMARY KEY,
+      source_path TEXT NOT NULL,
+      source_mtime REAL NOT NULL,
+      source_size INTEGER NOT NULL,
+      model TEXT NOT NULL,
+      language TEXT NOT NULL,
+      json_path TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX transcripts_source ON transcripts (source_path, model, language);
+    """,
 ]
 
 

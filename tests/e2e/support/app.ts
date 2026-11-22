@@ -20,8 +20,17 @@ export interface Binary {
 /** Respuestas propias de una prueba: lo que devuelve (JSON o `Binary`) se usa; `undefined`, la respuesta por defecto. */
 export type Replies = (call: Call) => unknown;
 
+/** Una respuesta de error del server: el estado HTTP y el cuerpo JSON que devuelve (p. ej. un 422 con su código). */
+export interface Failed {
+  failed: { status: number; body: unknown };
+}
+
 function isBinary(reply: unknown): reply is Binary {
   return typeof reply === 'object' && reply !== null && Buffer.isBuffer((reply as Binary).body);
+}
+
+function isFailed(reply: unknown): reply is Failed {
+  return typeof reply === 'object' && reply !== null && 'failed' in reply;
 }
 
 export function apiFixture<T = Record<string, unknown>>(name: string): T {
@@ -156,7 +165,9 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
       reply = { key, value: store[key] ?? null };
     }
 
-    if (isBinary(reply)) await route.fulfill({ status: 200, contentType: reply.contentType, body: reply.body });
+    if (isFailed(reply)) {
+      await route.fulfill({ status: reply.failed.status, contentType: 'application/json', body: JSON.stringify(reply.failed.body) });
+    } else if (isBinary(reply)) await route.fulfill({ status: 200, contentType: reply.contentType, body: reply.body });
     else await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(reply) });
   });
 

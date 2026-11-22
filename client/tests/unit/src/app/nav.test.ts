@@ -8,6 +8,7 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().map((item) => [item.id, item.icon])).toEqual([
       ['narration', 'narration'],
       ['music', 'music'],
+      ['cleaner', 'scissors'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
       ['engines', 'server'],

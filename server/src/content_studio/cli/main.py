@@ -17,8 +17,11 @@ from content_studio.common.checkout import main_checkout
 from content_studio.db import connection, jobs, schema
 from content_studio.engines import installer
 from content_studio.jobs import queue
+from content_studio.media.formats import is_supported
+from content_studio.messages import t
 from content_studio.music.parser import build_parser as music_flags
 from content_studio.narration.parser import build_parser as narration_flags
+from content_studio.transcription import models as whisper
 
 
 def _db_flag() -> argparse.ArgumentParser:
@@ -63,6 +66,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     samples_p.add_argument('--styles', nargs='+', help='presets to sample (default: all)')
     samples_p.add_argument('--force', action='store_true', help='regenerate the samples that already exist')
+
+    clean_p = sub.add_parser(
+        'clean', parents=[_db_flag()], help='cut the silences of audio or video: analyze here, --auto renders too'
+    )
+    clean_p.add_argument('files', nargs='+', type=Path, help='audio or video files; the input is never modified')
+    clean_p.add_argument(
+        '--model', choices=sorted(whisper.MODELS), default=whisper.recommended(), help='faster-whisper model'
+    )
+    clean_p.add_argument('--language', default='auto', help='transcription language, or auto')
+    clean_p.add_argument('--min-gap', type=float, default=0.5, help='silences longer than this are cut (seconds)')
+    clean_p.add_argument('--padding', type=float, default=0.15, help='margin kept next to each cut (seconds)')
+    clean_p.add_argument('--no-edges', action='store_true', help='keep the silence at the start and at the end')
+    clean_p.add_argument('--auto', action='store_true', help='render every cut without reviewing them')
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
     job_cmds = jobs_p.add_subparsers(dest='action', required=True, metavar='action')
@@ -140,6 +156,41 @@ def _engines(args: argparse.Namespace) -> int:
     return submit.run(kind, params, args.db, main_checkout(paths.ROOT))
 
 
+def _clean(args: argparse.Namespace) -> int:
+    """Analiza cada medio (GPU) y, con `--auto`, lo renderiza sin revisar. Un archivo que no sirve sale con 2 antes."""
+    for path in args.files:
+        if not path.is_file():
+            print(t('clean.file_not_found', path=str(path)), file=sys.stderr)
+            return 2
+        if not is_supported(path):
+            print(t('clean.unsupported_format', path=str(path)), file=sys.stderr)
+            return 2
+    checkout = main_checkout(paths.ROOT)
+    codes = []
+    for path in args.files:
+        params = {
+            'input': str(path),
+            'model': args.model,
+            'language': args.language,
+            'min_gap': args.min_gap,
+            'padding': args.padding,
+            'edges': not args.no_edges,
+        }
+        analysis = submit.execute('clean.analyze', params, args.db, checkout)
+        if analysis is None:
+            codes.append(2)
+            continue
+        print(json.dumps(analysis, ensure_ascii=False))
+        if analysis['status'] != 'done':
+            codes.append(1)
+        elif args.auto:
+            render = {'input': str(path), 'analysis': analysis['output_dir']}
+            codes.append(submit.run('clean.render', render, args.db, checkout))
+        else:
+            codes.append(0)
+    return max(codes)
+
+
 def _openapi() -> int:
     """El schema OpenAPI para generar los tipos del client; sin base ni puerto (la app usa una base en memoria)."""
     from content_studio.api.app import create_app  # fastapi solo aquí, como en `serve`
@@ -170,6 +221,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return _openapi()
     if args.command == 'engines':
         return _engines(args)
+    if args.command == 'clean':
+        return _clean(args)
     return _jobs(args)
 
 

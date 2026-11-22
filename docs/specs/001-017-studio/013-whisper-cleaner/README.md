@@ -34,11 +34,11 @@ El resultado es el archivo limpio (video con el corte exacto en el cuadro y cros
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | faster-whisper: receta, modelos, servicio de transcripción y caché | PEN |
-| 2 | Plan de cortes (puro) y reasignación de tiempos | PEN |
-| 3 | Render de audio y video y exportaciones (SRT, EDL, XML, informe) | PEN |
-| 4 | Client: selector de whisper, Limpiador con lote y revisión en la línea de tiempo | PEN |
-| 5 | Migrar la evaluación y el chequeo a faster-whisper | PEN |
+| 1 | faster-whisper: receta, modelos, servicio de transcripción y caché | DON |
+| 2 | Plan de cortes (puro) y reasignación de tiempos | DON |
+| 3 | Render de audio y video y exportaciones (SRT, EDL, XML, informe) | DON |
+| 4 | Client: selector de whisper, Limpiador con lote y revisión en la línea de tiempo | DON |
+| 5 | Migrar la evaluación y el chequeo a faster-whisper | DON |
 
 ## Decisiones clave
 

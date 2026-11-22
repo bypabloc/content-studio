@@ -43,7 +43,8 @@ export function UIRecommendedSelect({
   const items: UISelectOption[] = options.map((option) => ({
     value: option.value,
     label: option.recommended ? `★ ${option.label}` : option.label,
-    description: option.recommended ? t('select.recommended') : option.hint,
+    // La recomendada dice «Recomendado» y, si trae pista (p. ej. el tamaño de un modelo), la sigue con ella.
+    description: [option.recommended ? t('select.recommended') : null, option.hint].filter(Boolean).join(' · ') || undefined,
     disabled: option.disabled,
   }))
 

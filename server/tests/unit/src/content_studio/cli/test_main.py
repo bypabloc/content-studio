@@ -13,6 +13,7 @@ import content_studio.cli.main as cli_main
 from content_studio.cli import serve, submit
 from content_studio.cli.main import main
 from content_studio.db import connection, jobs, schema
+from content_studio.transcription import models
 
 
 @pytest.fixture
@@ -214,3 +215,115 @@ def test_engines_list_prints_the_catalog(monkeypatch, db, capsys):
     assert main(['engines', 'list', '--db', db]) == 0
 
     assert json.loads(capsys.readouterr().out) == [{'engine': 'qwen-0.6b'}]
+
+
+# `studio clean` (spec 013, D-2 y D-4): valida los medios antes de encolar y, con `--auto`, renderiza el análisis.
+
+
+def _fake_clean_jobs(monkeypatch, status: str = 'done') -> list[tuple[str, dict]]:
+    """Reemplaza el encolado de `studio clean`: anota cada trabajo que pide, sin correr motores."""
+    requested: list[tuple[str, dict]] = []
+
+    def execute(kind, params, db, main_folder):
+        requested.append((kind, params))
+        return {'job': len(requested), 'status': status, 'output_dir': f'out/analysis-{len(requested)}'}
+
+    def run(kind, params, db, main_folder):
+        requested.append((kind, params))
+        return 0
+
+    monkeypatch.setattr(submit, 'execute', execute)
+    monkeypatch.setattr(submit, 'run', run)
+    monkeypatch.setattr(cli_main, 'main_checkout', lambda start: Path('.'))
+    return requested
+
+
+def test_clean_help_shows_the_auto_flag(capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main(['clean', '--help'])
+
+    assert exit_info.value.code == 0
+    assert '--auto' in capsys.readouterr().out
+
+
+def test_clean_analyzes_with_the_recommended_model_by_default(tmp_path, db, monkeypatch):
+    media = tmp_path / 'charla.mp4'
+    media.write_bytes(b'')  # `studio clean` solo mira que exista y su extensión: el análisis no corre aquí
+    requested = _fake_clean_jobs(monkeypatch)
+
+    assert main(['clean', str(media), '--db', db]) == 0
+
+    assert requested == [
+        (
+            'clean.analyze',
+            {
+                'input': str(media),
+                'model': models.recommended(),
+                'language': 'auto',
+                'min_gap': 0.5,
+                'padding': 0.15,
+                'edges': True,
+            },
+        )
+    ]
+
+
+def test_clean_without_auto_only_analyzes(tmp_path, db, monkeypatch):
+    media = tmp_path / 'charla.mp4'
+    media.write_bytes(b'')
+    requested = _fake_clean_jobs(monkeypatch)
+
+    main(['clean', str(media), '--db', db])
+
+    assert [kind for kind, _ in requested] == ['clean.analyze']
+
+
+def test_clean_auto_renders_the_analysis_folder(tmp_path, db, monkeypatch):
+    media = tmp_path / 'charla.mp4'
+    media.write_bytes(b'')
+    requested = _fake_clean_jobs(monkeypatch)
+
+    assert main(['clean', str(media), '--auto', '--db', db]) == 0
+
+    assert requested[1] == ('clean.render', {'input': str(media), 'analysis': 'out/analysis-1'})
+
+
+def test_clean_no_edges_turns_off_the_edge_cuts(tmp_path, db, monkeypatch):
+    media = tmp_path / 'charla.mp4'
+    media.write_bytes(b'')
+    requested = _fake_clean_jobs(monkeypatch)
+
+    main(['clean', str(media), '--no-edges', '--db', db])
+
+    assert requested[0][1]['edges'] is False
+
+
+def test_clean_failed_analysis_is_not_rendered(tmp_path, db, monkeypatch):
+    media = tmp_path / 'charla.mp4'
+    media.write_bytes(b'')
+    requested = _fake_clean_jobs(monkeypatch, status='error')
+
+    assert main(['clean', str(media), '--auto', '--db', db]) == 1
+
+    assert [kind for kind, _ in requested] == ['clean.analyze']
+
+
+def test_clean_missing_file_exits_2_before_queueing(tmp_path, db, monkeypatch, capsys):
+    requested = _fake_clean_jobs(monkeypatch)
+    missing = tmp_path / 'no-existe.mp4'
+
+    assert main(['clean', str(missing), '--db', db]) == 2
+
+    assert requested == []
+    assert 'no-existe.mp4' in capsys.readouterr().err
+
+
+def test_clean_unsupported_format_exits_2_before_queueing(tmp_path, db, monkeypatch, capsys):
+    requested = _fake_clean_jobs(monkeypatch)
+    notes = tmp_path / 'notas.txt'
+    notes.write_text('no es audio', encoding='utf-8')
+
+    assert main(['clean', str(notes), '--db', db]) == 2
+
+    assert requested == []
+    assert 'notas.txt' in capsys.readouterr().err

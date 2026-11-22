@@ -17,7 +17,7 @@ type SystemInfo = { ffmpeg: { path: string; version: string } | null; git: { pat
 type StorageInfo = components['schemas']['StoragePaths'];
 type Props = { open: boolean; system: SystemInfo; storage: StorageInfo; engines?: EngineInfo[]; onComplete: () => void };
 
-const RECOMMENDED = ['voxcpm2', 'acestep'];
+const RECOMMENDED = ['voxcpm2', 'acestep', 'faster-whisper'];
 
 function formatBytes(bytes: number): string {
   if (bytes >= 1_000_000_000) return `${Number((bytes / 1_000_000_000).toFixed(1))} GB`;

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 import random
-import shutil
 import sys
 import time
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
+from content_studio import paths
 from content_studio.common import progress
 from content_studio.narration.audio import trim, write
 from content_studio.narration.blocks import prepare_blocks
@@ -18,6 +18,7 @@ from content_studio.narration.engines.registry import free_todo
 from content_studio.narration.evaluation.review import review, save_blocks, seed_round, transcribe
 from content_studio.narration.styles import EMOTIONS, STYLES
 from content_studio.narration.text.segments import segments, tags
+from content_studio.transcription import models, transcribe_main
 
 # VRAM de Qwen por encima de los pesos: ~1.15 GiB la primera frase de ~300
 # letras y ~1.3 GiB cada frase extra del lote. Más de 4 no mejora en 8 GB.
@@ -171,14 +172,15 @@ def regenerate(engine: TTSEngine, g: dict, indices: Iterable[int], batch: int, s
 
 
 def evaluate(engine: TTSEngine, results: list[dict], batch: int, seed: int, retries: int, language: str) -> None:
-    """Evalúa los audios con whisper y reintenta los bloques con error."""
-    if not shutil.which('whisper'):
-        sys.exit('The whisper command is missing (pip install openai-whisper); cannot evaluate.')
+    """Evalúa los audios con faster-whisper (el modelo de Ajustes) y reintenta los bloques con error."""
+    if not transcribe_main.available():
+        sys.exit('The faster-whisper engine is not installed; install it from the Engines screen to evaluate.')
+    model = models.selected(paths.db_path())
     report: dict[int, tuple[list[str], list[int]]] = {}  # guion -> (observaciones, bloques con error)
     pending = {k: list(range(len(g['secs']))) for k, g in enumerate(results)}  # guion -> bloques
     for round in range(retries + 1):  # noqa: B007  (ronda se usa después del bucle)
-        free_todo()  # libera la VRAM para whisper
-        transcribe([w for k, idx in pending.items() for w in save_blocks(results[k], idx)], language)
+        free_todo()  # libera la VRAM para faster-whisper
+        transcribe([w for k, idx in pending.items() for w in save_blocks(results[k], idx)], language, model)
         for k in pending:
             report[k] = review(results[k])
         pending = {k: report[k][1] for k in pending if report[k][1]}
