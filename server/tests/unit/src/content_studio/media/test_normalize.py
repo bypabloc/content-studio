@@ -4,6 +4,7 @@ fixtures generadas aquí con ffmpeg; sin ffmpeg, las pruebas que lo usan se salt
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -172,3 +173,55 @@ def test_ac6_a_video_keeps_its_video_packets_and_only_the_audio_changes(tmp_path
 
     assert _video_md5(source) == _video_md5(out)
     assert abs(normalize.measure(out)['I'] + 16.0) <= 0.5
+
+
+def test_a_custom_preset_needs_its_target():
+    with pytest.raises(ValueError, match='custom preset needs a target'):
+        normalize.target_lufs('custom')
+
+
+def test_each_container_gets_its_own_output_codec():
+    assert normalize.audio_args('a.mp3') == ['-c:a', 'libmp3lame', '-b:a', '192k']
+    assert normalize.audio_args('a.MOV') == ['-c:a', 'aac', '-b:a', '192k']
+
+
+def test_a_report_without_a_loudness_range_is_an_error(monkeypatch):
+    """Si ffmpeg no imprime el rango de sonoridad, la medición falla en vez de dar un LRA inventado."""
+    monkeypatch.setattr(normalize.ff, 'ffmpeg', lambda *args: 'Integrated loudness: -16.0\n')
+    monkeypatch.setattr(normalize.ff, 'parse_loudness', lambda report: (-16.0, -1.0))
+
+    with pytest.raises(ValueError, match='no loudness range'):
+        normalize.measure('a.wav')
+
+
+def test_the_cli_writes_the_report_as_json(monkeypatch, tmp_path):
+    """La CLI llama a `normalize` con el preset traducido a LUFS y escribe el reporte en JSON."""
+    report = {
+        'before': {'I': -30.0, 'TP': -10.0, 'LRA': 4.0},
+        'after': {'I': -16.0, 'TP': -1.2, 'LRA': 3.5},
+        'mode': 'linear',
+        'target': -16.0,
+    }
+    seen: dict = {}
+
+    def fake(source, out, *, target, enhance):
+        seen.update(source=source, out=out, target=target, enhance=enhance)
+        return report
+
+    monkeypatch.setattr(normalize, 'normalize', fake)
+    report_path = tmp_path / 'report.json'
+
+    code = normalize.main(
+        ['--input', 'a.wav', '--out', 'b.wav', '--preset', 'podcast', '--report', str(report_path), '--enhance']
+    )
+
+    assert code == 0
+    assert json.loads(report_path.read_text(encoding='utf-8')) == report
+    assert seen == {'source': 'a.wav', 'out': 'b.wav', 'target': -16.0, 'enhance': True}
+
+
+def test_the_custom_preset_without_a_target_is_a_usage_error(tmp_path):
+    with pytest.raises(SystemExit):
+        normalize.main(
+            ['--input', 'a.wav', '--out', 'b.wav', '--preset', 'custom', '--report', str(tmp_path / 'r.json')]
+        )
