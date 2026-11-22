@@ -161,5 +161,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [014-segmentacion](014-segmentacion.md) | `segment` sin `min_duration`: la puntuación fuerte es corte obligatorio; cortes débiles solo si un límite lo exige | `main` |
 | [014-ass-y-ffmpeg](014-ass-y-ffmpeg.md) | `-f null` no sirve para subtítulos: la prueba de ffmpeg usa `-c:s ass -f ass -` y cuenta los Dialogue; ffmpeg es permisivo | `main` |
 | [014-alineacion-narracion](014-alineacion-narracion.md) | El guion se alinea con las palabras de whisper por difflib, normalizando tildes y signos; las palabras sin par se interpolan | `main` |
+| [014-origenes-gpu](014-origenes-gpu.md) | `subtitles.create` toma la GPU para todos sus orígenes (la cola no lo decide por parámetro) | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
