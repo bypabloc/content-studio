@@ -30,7 +30,9 @@ def test_ac4_temp_run_isolates_webview_home_db_and_target(tmp_path):
     assert run.env['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] == f'--remote-debugging-port={run.port}'
     assert 1024 < run.port < 65536
     # Las salidas de la corrida tampoco caen en out/ del worktree.
-    assert settings_of(run.dir / 'content-studio.db')['storage.outputs'] == f'"{(run.dir / "out").as_posix()}"'
+    fresh = settings_of(run.dir / 'content-studio.db')
+    assert fresh['storage.outputs'] == f'"{(run.dir / "out").as_posix()}"'
+    assert fresh['welcome.done'] == 'true'
     assert (run.dir / 'shots').is_dir()
 
 
@@ -49,6 +51,7 @@ def test_ac9_real_run_copies_db_and_pauses_queue(tmp_path):
         conn.execute("INSERT INTO settings (key, value, updated_at) VALUES ('storage.outputs', '\"D:/out\"', 'x')")
     before = (hashlib.sha256(source.read_bytes()).hexdigest(), source.stat().st_mtime_ns)
     run = env.prepare(tmp_path, 'real', NOW, source_db=source)
+    assert run.db == 'copy'
     assert 'CONTENT_STUDIO_HOME' not in run.env
     copy = Path(run.env['CONTENT_STUDIO_DB'])
     assert copy == run.dir / 'content-studio.db'
@@ -59,9 +62,16 @@ def test_ac9_real_run_copies_db_and_pauses_queue(tmp_path):
     assert 'queue.paused' not in settings_of(source)
 
 
-def test_ac4_real_run_without_db_is_an_error(tmp_path):
-    with pytest.raises(env.AppCheckError, match='no database'):
-        env.prepare(tmp_path, 'real', NOW, source_db=tmp_path / 'missing.db')
+def test_ac4_real_run_without_db_starts_a_fresh_paused_db_with_the_user_outputs(tmp_path):
+    outputs = tmp_path / 'user-out'
+    outputs.mkdir()
+    run = env.prepare(tmp_path, 'real', NOW, source_db=tmp_path / 'missing.db', outputs=outputs)
+    assert run.db == 'fresh'
+    assert 'CONTENT_STUDIO_HOME' not in run.env
+    fresh = settings_of(Path(run.env['CONTENT_STUDIO_DB']))
+    assert fresh['queue.paused'] == 'true'
+    assert fresh['storage.outputs'] == f'"{outputs.as_posix()}"'
+    assert not (tmp_path / 'missing.db').exists()
 
 
 def test_ac4_unknown_data_mode_is_an_error(tmp_path):

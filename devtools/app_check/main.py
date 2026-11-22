@@ -33,6 +33,17 @@ def user_db(root: Path) -> Path:
     return Path(override) if override else main_checkout(root) / 'var' / 'content-studio.db'
 
 
+def collect(run_dir: Path) -> dict:
+    """Lo que dejó la fixture de Playwright: una línea por prueba, las escrituras bloqueadas y las capturas."""
+    lines = run_dir / 'tests.jsonl'
+    tests = (
+        [json.loads(line) for line in lines.read_text(encoding='utf-8').splitlines() if line] if lines.is_file() else []
+    )
+    blocked = sorted({write for test in tests for write in test.get('blocked_writes', [])})
+    shots = sorted(shot.relative_to(ROOT).as_posix() for shot in (run_dir / 'shots').glob('*.png'))
+    return {'tests': tests, 'blocked_writes': blocked, 'shots': shots}
+
+
 def parser() -> argparse.ArgumentParser:
     """Los argumentos de `app-check`."""
     top = argparse.ArgumentParser(prog='python -m devtools app-check', description=__doc__.splitlines()[0])
@@ -56,7 +67,9 @@ def run(names: list[str], data: str) -> int:
     if os.name != 'nt':
         return emit({'error': 'app-check needs Windows and WebView2'}, 2)
     try:
-        run_ = env.prepare(ROOT, data, datetime.now(), source_db=user_db(ROOT) if data == 'real' else None)
+        real = data == 'real'
+        source, outputs = (user_db(ROOT), main_checkout(ROOT) / 'out') if real else (None, None)
+        run_ = env.prepare(ROOT, data, datetime.now(), source_db=source, outputs=outputs)
     except env.AppCheckError as error:
         return emit({'error': str(error)}, 2)
     log = ROOT / 'logs' / f'app-check-{run_.dir.name}.log'
@@ -64,6 +77,7 @@ def run(names: list[str], data: str) -> int:
         'run': run_.dir.relative_to(ROOT).as_posix(),
         'commit': commit(ROOT),
         'data': data,
+        'db': run_.db,
         'scenarios': names,
         'log': log.relative_to(ROOT).as_posix(),
     }
@@ -85,9 +99,8 @@ def run(names: list[str], data: str) -> int:
     except KeyboardInterrupt:
         print('app-check: interrupted; the run processes were closed', file=sys.stderr)
         return 130
-    report = run_.dir / 'report.json'
-    if report.is_file():
-        result.update(json.loads(report.read_text(encoding='utf-8')))
+    result.update(collect(run_.dir))
+    (run_.dir / 'report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     return emit(result, 0 if code == 0 else 1)
 
 

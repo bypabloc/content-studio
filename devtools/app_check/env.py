@@ -41,6 +41,7 @@ class Run:
     env: dict[str, str]
     port: int
     data: str
+    db: str
 
 
 def free_port() -> int:
@@ -50,26 +51,32 @@ def free_port() -> int:
         return sock.getsockname()[1]
 
 
-def _fresh_db(path: Path, outputs: Path) -> None:
-    """Base nueva con el esquema del server y las salidas dentro de la corrida."""
-    outputs.mkdir(parents=True, exist_ok=True)
+def _fresh_db(path: Path, outputs: Path | None, paused: bool) -> None:
+    """Base nueva con el esquema del server; las salidas van a `outputs` si se da."""
     with closing(sqlite3.connect(path)) as conn, conn:
         migrate(conn)
-        settings.set_value(conn, 'storage.outputs', outputs.as_posix())
+        if outputs is not None:
+            settings.set_value(conn, 'storage.outputs', outputs.as_posix())
+        if paused:
+            settings.set_value(conn, PAUSED, True)
+        # La bienvenida taparía las secciones; se prueba con su propio escenario o con su e2e.
+        settings.set_value(conn, 'welcome.done', True)
 
 
 def _paused_copy(source: Path, path: Path) -> None:
     """Copia consistente (también con WAL) de la base del usuario, con la cola en pausa. La original no se escribe."""
-    if not source.is_file():
-        raise AppCheckError(f'--data=real: no database at {source}. Open the app once or use --data=temp.')
     readonly = f'{source.resolve().as_uri()}?mode=ro'
     with closing(sqlite3.connect(readonly, uri=True)) as src, closing(sqlite3.connect(path)) as dst, dst:
         src.backup(dst)
         settings.set_value(dst, PAUSED, True)
 
 
-def prepare(root: Path, data: str, now: datetime, source_db: Path | None = None) -> Run:
-    """Crea la carpeta de la corrida y devuelve el entorno que la aísla, sin tocar `os.environ`."""
+def prepare(root: Path, data: str, now: datetime, source_db: Path | None = None, outputs: Path | None = None) -> Run:
+    """Crea la carpeta de la corrida y devuelve el entorno que la aísla, sin tocar `os.environ`.
+
+    En `real`, `source_db` es la base del usuario: se copia en pausa. Si no existe (la app nunca se abrió desde el
+    checkout), la base es nueva y en pausa, con las salidas del usuario (`outputs`) para verlas igual.
+    """
     if data not in MODES:
         raise AppCheckError(f'--data must be one of {", ".join(MODES)}, not {data!r}')
     base = root / 'tmp' / 'app-check'
@@ -86,8 +93,13 @@ def prepare(root: Path, data: str, now: datetime, source_db: Path | None = None)
     }
     if data == 'temp':
         (run_dir / 'home').mkdir(exist_ok=True)
+        (run_dir / 'out').mkdir(exist_ok=True)
         env['CONTENT_STUDIO_HOME'] = str(run_dir / 'home')
-        _fresh_db(db, run_dir / 'out')
-    else:
-        _paused_copy(source_db if source_db is not None else root / 'var' / 'content-studio.db', db)
-    return Run(run_dir, env, port, data)
+        _fresh_db(db, run_dir / 'out', paused=False)
+        return Run(run_dir, env, port, data, 'fresh')
+    source = source_db if source_db is not None else root / 'var' / 'content-studio.db'
+    if source.is_file():
+        _paused_copy(source, db)
+        return Run(run_dir, env, port, data, 'copy')
+    _fresh_db(db, outputs if outputs is not None and outputs.is_dir() else None, paused=True)
+    return Run(run_dir, env, port, data, 'fresh')

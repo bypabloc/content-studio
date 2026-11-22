@@ -36,7 +36,9 @@ def fake(tmp_path, monkeypatch):
     monkeypatch.setattr(launch, 'wait_cdp', lambda port, **kw: state.cdp)
 
     def scenarios(root, port, run_dir, data, names, log):
-        (run_dir / 'report.json').write_text(json.dumps({'tests': [{'title': 'smoke', 'status': 'passed'}]}))
+        test = {'title': 'smoke', 'status': 'passed', 'blocked_writes': ['PUT /settings/x']}
+        (run_dir / 'tests.jsonl').write_text(json.dumps(test) + '\n')
+        (run_dir / 'shots' / 'settings-dark.png').write_bytes(b'')
         return state.scenarios
 
     monkeypatch.setattr(launch, 'scenarios', scenarios)
@@ -54,7 +56,10 @@ def test_ac7_run_prints_one_json_line(fake, capsys):
     assert out['data'] == 'temp'
     assert out['binary'].endswith('content-studio.exe')
     assert out['scenarios'] == ['smoke']
-    assert out['tests'] == [{'title': 'smoke', 'status': 'passed'}]
+    assert out['tests'][0]['status'] == 'passed'
+    assert out['blocked_writes'] == ['PUT /settings/x']
+    assert out['shots'][0].endswith('shots/settings-dark.png')
+    assert json.loads((main.ROOT / out['run'] / 'report.json').read_text())['commit'] == 'abc123'
     assert out['log'].startswith('logs/app-check-')
     assert fake.started and fake.started[0][0].endswith('content-studio.exe')
 
@@ -74,10 +79,21 @@ def test_ac5_launch_failures_are_exit_2(fake, capsys, field, value, error):
     assert error in line(capsys)['error']
 
 
-def test_ac4_real_without_database_is_exit_2(fake, capsys, monkeypatch):
+def test_ac9_real_without_database_runs_on_a_fresh_paused_db(fake, capsys, monkeypatch):
     monkeypatch.setattr(main, 'user_db', lambda root: main.ROOT / 'missing.db')
-    assert main.main(['run', '--data=real']) == 2
-    assert 'no database' in line(capsys)['error']
+    monkeypatch.setattr(main, 'main_checkout', lambda root: main.ROOT)
+    assert main.main(['run', '--data=real']) == 0
+    out = line(capsys)
+    assert (out['data'], out['db']) == ('real', 'fresh')
+
+
+def test_ac4_env_errors_are_exit_2(fake, capsys, monkeypatch):
+    def broken(*args, **kwargs):
+        raise main.env.AppCheckError('--data must be one of temp, real')
+
+    monkeypatch.setattr(main.env, 'prepare', broken)
+    assert main.main(['run']) == 2
+    assert '--data' in line(capsys)['error']
 
 
 def test_bad_arguments_and_help(fake, capsys):
