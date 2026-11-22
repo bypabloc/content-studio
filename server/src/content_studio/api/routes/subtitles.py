@@ -13,6 +13,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, ConfigDict
 
+from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.api.routes.jobs import JobId
@@ -20,6 +21,7 @@ from content_studio.api.schemas import Job
 from content_studio.db import jobs as store
 from content_studio.db import subtitle_projects
 from content_studio.jobs import queue
+from content_studio.subtitles import fonts
 from content_studio.subtitles.document import load, save
 
 router = APIRouter()
@@ -67,6 +69,12 @@ def create_project(
         first = error.errors[0]
         raise ApiError(422, first['code'], extra={'errors': error.errors}, **first['params']) from error
     return store.get(conn, job_id)
+
+
+@router.get('/subtitles/fonts')
+def list_font_families() -> list[dict[str, Any]]:
+    """Las fuentes para los subtítulos: las incluidas (`bundled: true`) y las instaladas en el sistema (AC-8)."""
+    return fonts.list_fonts(paths.DATA / 'fonts', fonts.system_font_files())
 
 
 @router.get('/subtitles/{project_id}')

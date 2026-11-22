@@ -113,3 +113,12 @@ def test_post_with_an_unknown_origin_is_refused(api):
 
     assert response.status_code == 422
     assert response.json()['code'] == 'unknown_origin'
+
+
+def test_fonts_lists_the_bundled_families(api):
+    """AC-8: GET /subtitles/fonts devuelve las fuentes incluidas con `bundled: true`."""
+    response = api.client.get('/subtitles/fonts', headers=api.headers)
+
+    assert response.status_code == 200
+    bundled = {entry['family'] for entry in response.json() if entry['bundled']}
+    assert {'Montserrat', 'Inter', 'Poppins'} <= bundled

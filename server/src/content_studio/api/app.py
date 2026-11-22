@@ -40,6 +40,7 @@ from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
 from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
+from content_studio.subtitles import fonts
 
 # La ventana de Tauri pide a la API desde su propio origen: http://tauri.localhost en Windows (tauri://localhost en
 # macOS y Linux), y el dev server de Vite en 1420.
@@ -106,6 +107,7 @@ def create_app(
             paths.references_dir().resolve(),
             paths.voices_dir().resolve(),
             paths.samples_dir().resolve(),
+            *fonts.font_roots(paths.DATA / 'fonts'),
         ]
     )
     app.add_exception_handler(StarletteHTTPException, _http_error)
