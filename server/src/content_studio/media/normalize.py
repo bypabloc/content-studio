@@ -19,7 +19,11 @@ from content_studio.common import ffmpeg as ff
 TARGETS = {'youtube': -14.0, 'podcast': -16.0, 'broadcast': -23.0}  # objetivo integrado en LUFS
 PRESETS = (*TARGETS, 'custom')
 ENHANCE = 'highpass=f=80,deesser=i=0.3,acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150'
-TRUE_PEAK = -1.0  # dBTP
+TRUE_PEAK = -1.0  # dBTP: el techo de una salida sin pérdida (WAV, FLAC)
+# Un códec con pérdida sube el pico al codificar: el WAV a −1,0 dBTP salió a −0,0 con AAC de 128 kbps y el video de
+# prueba a −0,8 con AAC de 192 kbps (medido). Esas salidas leen un techo más bajo, para cumplir −1 dBTP después.
+LOSSY_TRUE_PEAK = -2.0  # dBTP
+LOSSY_SUFFIXES = ('.mp4', '.mov', '.mkv', '.m4a', '.webm', '.mp3')
 RANGE = 11.0  # LRA que pide loudnorm
 
 
@@ -37,19 +41,25 @@ def _chain(enhance: bool, loudnorm: str) -> str:
     return f'{ENHANCE},{loudnorm}' if enhance else loudnorm
 
 
-def first_pass(target: float, enhance: bool = False) -> str:
+def true_peak_for(out: Path | str) -> float:
+    """El techo de pico real (dBTP) de la salida: −2 si su códec tiene pérdida, −1 si no."""
+    return LOSSY_TRUE_PEAK if Path(out).suffix.lower() in LOSSY_SUFFIXES else TRUE_PEAK
+
+
+def first_pass(target: float, enhance: bool = False, true_peak: float = TRUE_PEAK) -> str:
     """La cadena de la primera pasada: solo mide, y loudnorm escribe sus medidas en JSON."""
-    return _chain(enhance, f'loudnorm=I={target}:TP={TRUE_PEAK}:LRA={RANGE}:print_format=json')
+    return _chain(enhance, f'loudnorm=I={target}:TP={true_peak}:LRA={RANGE}:print_format=json')
 
 
-def second_pass(first: dict, target: float, enhance: bool = False) -> str:
+def second_pass(first: dict, target: float, enhance: bool = False, true_peak: float = TRUE_PEAK) -> str:
     """La cadena de la segunda pasada: lineal, con las medidas de la primera (`measured_*`) y el mismo objetivo."""
     measured = (
         f'measured_I={first["input_i"]}:measured_TP={first["input_tp"]}:measured_LRA={first["input_lra"]}:'
         f'measured_thresh={first["input_thresh"]}:offset={first["target_offset"]}'
     )
     return _chain(
-        enhance, f'loudnorm=I={target}:TP={TRUE_PEAK}:LRA={RANGE}:{measured}:linear=true:print_format=summary'
+        enhance,
+        f'loudnorm=I={target}:TP={true_peak}:LRA={RANGE}:{measured}:linear=true:print_format=summary',
     )
 
 
@@ -90,8 +100,19 @@ def normalize(source: Path | str, out: Path | str, *, target: float, enhance: bo
     """
     source = Path(source)
     before = measure(source)
+    peak = true_peak_for(out)
     first = ff.json_loudnorm(
-        ff.ffmpeg('-i', str(source), '-map', '0:a:0', '-af', first_pass(target, enhance), '-f', 'null', '-')
+        ff.ffmpeg(
+            '-i',
+            str(source),
+            '-map',
+            '0:a:0',
+            '-af',
+            first_pass(target, enhance, peak),
+            '-f',
+            'null',
+            '-',
+        )
     )
     report = ff.ffmpeg(
         '-y',
@@ -104,7 +125,7 @@ def normalize(source: Path | str, out: Path | str, *, target: float, enhance: bo
         '-map',
         '0:a:0',
         '-af',
-        second_pass(first, target, enhance),
+        second_pass(first, target, enhance, peak),
         *audio_args(out),
         str(out),
     )

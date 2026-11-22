@@ -175,6 +175,19 @@ def test_ac6_a_video_keeps_its_video_packets_and_only_the_audio_changes(tmp_path
     assert abs(normalize.measure(out)['I'] + 16.0) <= 0.5
 
 
+@needs_ffmpeg
+def test_a_lossy_output_keeps_the_true_peak_under_minus_one_after_encoding(tmp_path):
+    """Con AAC, el pico sube al codificar: el techo de una salida con pérdida es −2 y el pico medido, −1 o menos."""
+    assert normalize.true_peak_for(tmp_path / 'normalized.m4a') == -2.0
+    assert normalize.true_peak_for(tmp_path / 'normalized.wav') == -1.0
+    source = _pink(tmp_path / 'source.wav')
+    out = tmp_path / 'normalized.m4a'
+
+    normalize.normalize(source, out, target=-14.0)
+
+    assert normalize.measure(out)['TP'] <= -1.0
+
+
 def test_a_custom_preset_needs_its_target():
     with pytest.raises(ValueError, match='custom preset needs a target'):
         normalize.target_lufs('custom')
