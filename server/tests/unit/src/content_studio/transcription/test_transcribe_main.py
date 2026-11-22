@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from types import SimpleNamespace
 
 import pytest
 
 from content_studio.common import ffmpeg as ff
 from content_studio.common import process
+from content_studio.system import tools
 from content_studio.transcription import transcribe_main
 
 
@@ -110,3 +112,55 @@ def test_transcribes_three_seconds_with_small_in_the_whisper_venv(tmp_path):
     payload = json.loads(out.read_text(encoding='utf-8'))
     assert abs(payload['duration'] - 3.0) < 0.1
     assert isinstance(payload['segments'], list)
+
+
+def test_main_relaunches_extracts_the_audio_and_transcribes_to_out(tmp_path, monkeypatch):
+    """`main` se relanza en el venv de whisper, extrae el audio a 16 kHz mono y transcribe hacia `--out`."""
+    seen: dict = {}
+    monkeypatch.setattr(process, 'use_venv', lambda path, readme, module: seen.update(module=module))
+    monkeypatch.setattr(transcribe_main, '_venv', lambda: tmp_path / 'venv')
+    monkeypatch.setattr(ff, 'ffmpeg', lambda *args: seen.update(ffmpeg=args))
+    monkeypatch.setattr(transcribe_main, '_load_model', lambda name: seen.update(loaded=name) or 'modelo')
+    monkeypatch.setattr(
+        transcribe_main,
+        'transcribe',
+        lambda audio, *, language, out, model: seen.update(language=language, out=out, with_model=model),
+    )
+
+    assert (
+        transcribe_main.main(
+            ['--input', 'charla.mp4', '--model', 'small', '--out', str(tmp_path / 'out' / 'words.json')]
+        )
+        == 0
+    )
+
+    assert seen['module'] == 'content_studio.transcription.transcribe_main'
+    assert seen['ffmpeg'][:3] == ('-y', '-i', 'charla.mp4')
+    assert seen['loaded'] == 'small'
+    assert seen['with_model'] == 'modelo'
+    assert seen['language'] == 'auto'
+    assert seen['out'] == tmp_path / 'out' / 'words.json'
+
+
+def test_load_model_uses_cuda_with_a_gpu_and_cpu_without_one(monkeypatch):
+    """Con GPU NVIDIA el modelo carga en CUDA con int8_float16; sin ella, en CPU con int8."""
+    loaded: dict = {}
+
+    class WhisperModel:
+        def __init__(self, repo, **options):
+            loaded.update(repo=repo, **options)
+
+    monkeypatch.setitem(sys.modules, 'faster_whisper', SimpleNamespace(WhisperModel=WhisperModel))
+    monkeypatch.setattr(tools, 'detect', lambda: {'gpu': 'RTX 4060'})
+    transcribe_main._load_model('small')
+    assert (loaded['device'], loaded['compute_type']) == ('cuda', 'int8_float16')
+
+    monkeypatch.setattr(tools, 'detect', lambda: {'gpu': None})
+    transcribe_main._load_model('small')
+    assert (loaded['device'], loaded['compute_type']) == ('cpu', 'int8')
+    assert loaded['repo'] == 'Systran/faster-whisper-small'
+
+
+def test_the_venv_is_the_one_of_the_faster_whisper_recipe():
+    """El servicio corre en `.venv-whisper`, el venv de su receta."""
+    assert transcribe_main._venv().name == '.venv-whisper'

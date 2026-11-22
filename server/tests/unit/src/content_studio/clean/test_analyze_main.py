@@ -101,3 +101,43 @@ def test_ac6_another_model_transcribes_again(conn, source, tmp_path):
     )
 
     assert transcriber.calls == 2
+
+
+def test_the_transcriber_extracts_the_audio_and_transcribes_with_the_model(tmp_path, monkeypatch, source):
+    """El transcriptor real extrae el audio a 16 kHz mono y transcribe con el modelo pedido (sin GPU)."""
+    seen: dict = {}
+    monkeypatch.setattr(analyze_main.ff, 'ffmpeg', lambda *args: seen.update(ffmpeg=args))
+    monkeypatch.setattr(analyze_main.transcribe_main, '_load_model', lambda name: seen.update(loaded=name) or 'modelo')
+    monkeypatch.setattr(
+        analyze_main.transcribe_main,
+        'transcribe',
+        lambda audio, *, language, out, model: seen.update(transcribe=(audio, language, out, model)),
+    )
+
+    analyze_main._transcriber('small', 'es', tmp_path)(source, tmp_path / 'words.json')
+
+    assert seen['ffmpeg'][:3] == ('-y', '-i', str(source))
+    assert seen['loaded'] == 'small'
+    assert seen['transcribe'] == (tmp_path / 'audio-16k.wav', 'es', tmp_path / 'words.json', 'modelo')
+
+
+def test_main_runs_the_analysis_in_the_whisper_venv_and_prints_the_result(tmp_path, monkeypatch, capsys):
+    """`main` se relanza en el venv de whisper, corre el análisis con `--no-edges` y da el resultado en JSON."""
+    seen: dict = {}
+    monkeypatch.setattr(analyze_main.process, 'use_venv', lambda path, readme, module: seen.update(module=module))
+    monkeypatch.setattr(analyze_main.transcribe_main, '_venv', lambda: tmp_path / 'venv')
+    monkeypatch.setattr(analyze_main, 'connect', lambda path: connect(tmp_path / 'content-studio.db'))
+    monkeypatch.setattr(
+        analyze_main, 'run', lambda conn, source, **kwargs: {'cuts': 0, 'duration': 3.5, 'params': kwargs['params']}
+    )
+
+    assert (
+        analyze_main.main(
+            ['--input', 'charla.mp4', '--model', 'small', '--folder', str(tmp_path / 'job'), '--no-edges']
+        )
+        == 0
+    )
+
+    assert seen['module'] == 'content_studio.clean.analyze_main'
+    result = json.loads(capsys.readouterr().out)
+    assert result['params'] == {'min_gap': 0.5, 'padding': 0.15, 'edges': False}

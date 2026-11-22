@@ -177,7 +177,7 @@ export interface paths {
         };
         /**
          * Engines
-         * @description Lista las recetas con la propiedad y el estado actual de cada motor.
+         * @description Lista las recetas con la propiedad y el estado actual de cada motor. faster-whisper suma sus modelos (AC-9).
          */
         get: operations["engines_engines_get"];
         put?: never;
@@ -468,6 +468,88 @@ export interface paths {
          */
         put: operations["reorder_queue_order_put"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clean/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Cuts
+         * @description El documento de cortes del análisis: parámetros, duración, idioma y cortes.
+         */
+        get: operations["get_cuts_clean__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clean/{job_id}/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Plan Cuts
+         * @description Replanifica con otro hueco o margen, sin GPU: los cortes sin editar cambian y los editados se conservan.
+         *     No guarda nada; para guardar, `PUT /clean/{job_id}/cuts`.
+         */
+        post: operations["plan_cuts_clean__job_id__plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clean/{job_id}/cuts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save Cuts
+         * @description Guarda los cortes del usuario en cuts.json. 422 si un corte no tiene inicio menor que su fin dentro de la
+         *     duración.
+         */
+        put: operations["save_cuts_clean__job_id__cuts_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/clean/{job_id}/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Render
+         * @description Encola `clean.render` con el original del análisis y su carpeta de cortes.
+         */
+        post: operations["render_clean__job_id__render_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -820,8 +902,18 @@ export interface components {
             file: string;
         };
         /**
+         * CutsIn
+         * @description Los cortes que el usuario dejó: se guardan tal cual en cuts.json.
+         */
+        CutsIn: {
+            /** Cuts */
+            cuts: {
+                [key: string]: unknown;
+            }[];
+        };
+        /**
          * EngineInfo
-         * @description Estado, requisitos y metadatos de un motor.
+         * @description Estado, requisitos y metadatos de un motor. faster-whisper trae además sus modelos.
          */
         EngineInfo: {
             /** Engine */
@@ -850,6 +942,8 @@ export interface components {
             verification: {
                 [key: string]: unknown;
             } | null;
+            /** Models */
+            models?: components["schemas"]["WhisperModel"][] | null;
         };
         /**
          * GpuInfo
@@ -999,6 +1093,27 @@ export interface components {
             };
         };
         /**
+         * PlanIn
+         * @description Parámetros para replanificar: hueco mínimo, margen y bordes.
+         */
+        PlanIn: {
+            /**
+             * Min Gap
+             * @default 0.5
+             */
+            min_gap: number;
+            /**
+             * Padding
+             * @default 0.15
+             */
+            padding: number;
+            /**
+             * Edges
+             * @default true
+             */
+            edges: boolean;
+        };
+        /**
          * QueueOrder
          * @description Cuerpo de PUT /queue/order: los ids de los trabajos en el orden en que deben correr.
          */
@@ -1136,6 +1251,22 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /**
+         * WhisperModel
+         * @description Un modelo de faster-whisper: tamaño, VRAM, si es el recomendado y si ya está descargado.
+         */
+        WhisperModel: {
+            /** Model */
+            model: string;
+            /** Size Gb */
+            size_gb: number;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Recommended */
+            recommended: boolean;
+            /** Downloaded */
+            downloaded: boolean;
         };
     };
     responses: never;
@@ -1863,6 +1994,144 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_cuts_clean__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    plan_cuts_clean__job_id__plan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_cuts_clean__job_id__cuts_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CutsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    render_clean__job_id__render_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
                 };
             };
             /** @description Validation Error */

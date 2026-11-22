@@ -10,6 +10,7 @@ import json
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 from content_studio import paths
 from content_studio.common import ffmpeg as ff
@@ -21,7 +22,7 @@ from content_studio.transcription import models
 README = 'server/data/narration/README.md'
 
 
-def words_payload(segments: Iterable[object], info: object) -> dict:
+def words_payload(segments: Iterable[Any], info: Any) -> dict:
     """El JSON de la transcripción: idioma, probabilidad, duración y segmentos con sus palabras."""
     return {
         'language': info.language,
@@ -49,7 +50,7 @@ def progress_fraction(end: float, duration: float) -> float:
     return round(min(end / duration, 1.0), 4)
 
 
-def transcribe(audio: Path, *, language: str, out: Path, model: object) -> None:
+def transcribe(audio: Path, *, language: str, out: Path, model: Any) -> None:
     """Transcribe `audio` con un modelo ya cargado y escribe el JSON en `out`.
 
     «auto» deja que el modelo detecte el idioma. Emite el progreso por segmento (`@@progress`).
@@ -74,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _load_model(name: str) -> object:
+def _load_model(name: str) -> Any:
     """Carga el modelo en la GPU si el equipo tiene NVIDIA; si no, en CPU con int8."""
     from faster_whisper import WhisperModel  # solo existe en .venv-whisper
 

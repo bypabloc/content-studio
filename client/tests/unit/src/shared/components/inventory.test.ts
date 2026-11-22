@@ -8,7 +8,7 @@ const INVENTORY = {
   atoms: [
     'UIAvatar', 'UIBadge', 'UIBox', 'UIButton', 'UICard', 'UIChartMarker', 'UIChartPlaceholder', 'UICheckbox',
     'UIDetailText', 'UIDiffText', 'UIEmphasis', 'UIFieldError', 'UIFieldFrame', 'UIFixedValue', 'UIForm', 'UIGrid', 'UIHiddenInput',
-    'UIIcon', 'UIImage', 'UILevelMeter', 'UILink', 'UIMarkedText', 'UIPage', 'UIProgress', 'UIQrCode', 'UIQrImage', 'UIRouteTransition',
+    'UIIcon', 'UIImage', 'UILevelMeter', 'UILink', 'UIMarkedText', 'UIMedia', 'UIPage', 'UIProgress', 'UIQrCode', 'UIQrImage', 'UIRouteTransition',
     'UISkeleton', 'UIStack', 'UIStatus', 'UIStatusBadge', 'UISwitch', 'UITime', 'UIText', 'UITooltip',
   ],
   molecules: [
@@ -16,6 +16,7 @@ const INVENTORY = {
     'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
     'UIPopover', 'UIRadioGroup', 'UIRecommendedSelect', 'UIRemoteImage', 'UIRowActions', 'UISearchField', 'UISearchSelect',
     'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
+    'UIWhisperModelSelect',
   ],
   organisms: [
     'UIAppShell', 'UIBottomSheet', 'UIChart', 'UIChartCard', 'UICommandPalette', 'UIConfirmDialog', 'UIDateRangePicker',

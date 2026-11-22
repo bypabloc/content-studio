@@ -17,6 +17,7 @@ from content_studio.api.routes.jobs import JobId
 from content_studio.api.schemas import Job
 from content_studio.clean import cuts as cut_file
 from content_studio.clean.cuts import replan
+from content_studio.clean.plan import Span
 from content_studio.db import jobs as store
 from content_studio.jobs import queue
 
@@ -37,9 +38,9 @@ class CutsIn(BaseModel):
     cuts: list[dict[str, Any]]
 
 
-def _analysis(conn: sqlite3.Connection, job_id: int) -> tuple[dict, Path]:
-    """El documento de cortes de un análisis terminado y su carpeta. 404 si no existe; 409 si no es un análisis del
-    limpiador o no terminó."""
+def _analysis(conn: sqlite3.Connection, job_id: int) -> tuple[dict, dict, Path]:
+    """El trabajo, el documento de cortes de un análisis terminado y su carpeta. 404 si no existe; 409 si no es un
+    análisis del limpiador o no terminó."""
     job = store.get(conn, job_id)
     if job is None:
         raise ApiError(404, 'job_not_found', job_id=job_id)
@@ -48,10 +49,10 @@ def _analysis(conn: sqlite3.Connection, job_id: int) -> tuple[dict, Path]:
     if job['status'] != 'done':
         raise ApiError(409, 'job_not_done', job_id=job_id)
     folder = Path(job['output_dir'])
-    return cut_file.load(folder), folder
+    return job, cut_file.load(folder), folder
 
 
-def _words(document: dict) -> list[dict]:
+def _words(document: dict) -> list[Span]:
     transcript = json.loads(Path(document['transcript']).read_text(encoding='utf-8'))
     return [word for segment in transcript['segments'] for word in segment['words']]
 
@@ -59,7 +60,7 @@ def _words(document: dict) -> list[dict]:
 @router.get('/clean/{job_id}')
 def get_cuts(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """El documento de cortes del análisis: parámetros, duración, idioma y cortes."""
-    document, _ = _analysis(conn, job_id)
+    _, document, _ = _analysis(conn, job_id)
     return document
 
 
@@ -67,7 +68,7 @@ def get_cuts(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn
 def plan_cuts(job_id: JobId, body: PlanIn, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Replanifica con otro hueco o margen, sin GPU: los cortes sin editar cambian y los editados se conservan.
     No guarda nada; para guardar, `PUT /clean/{job_id}/cuts`."""
-    document, _ = _analysis(conn, job_id)
+    _, document, _ = _analysis(conn, job_id)
     found = replan(
         _words(document),
         document['duration'],
@@ -83,7 +84,7 @@ def plan_cuts(job_id: JobId, body: PlanIn, conn: Annotated[sqlite3.Connection, D
 def save_cuts(job_id: JobId, body: CutsIn, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Guarda los cortes del usuario en cuts.json. 422 si un corte no tiene inicio menor que su fin dentro de la
     duración."""
-    document, folder = _analysis(conn, job_id)
+    _, document, folder = _analysis(conn, job_id)
     for cut in body.cuts:
         if not 0 <= cut['start'] < cut['end'] <= document['duration']:
             raise ApiError(422, 'invalid_cut')
@@ -95,8 +96,8 @@ def save_cuts(job_id: JobId, body: CutsIn, conn: Annotated[sqlite3.Connection, D
 @router.post('/clean/{job_id}/render', status_code=201, response_model=Job)
 def render(job_id: JobId, request: Request, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Encola `clean.render` con el original del análisis y su carpeta de cortes."""
-    _, folder = _analysis(conn, job_id)
-    original = store.get(conn, job_id)['params']['input']
+    job, _, folder = _analysis(conn, job_id)
+    original = job['params']['input']
     try:
         new_id = queue.enqueue(
             conn, 'clean.render', {'input': original, 'analysis': str(folder)}, request.app.state.services
@@ -104,4 +105,7 @@ def render(job_id: JobId, request: Request, conn: Annotated[sqlite3.Connection, 
     except queue.InvalidJob as error:
         first = error.errors[0]
         raise ApiError(422, first['code'], extra={'errors': error.errors}, **first['params']) from error
-    return store.get(conn, new_id)
+    created = store.get(conn, new_id)
+    if created is None:  # no pasa: acaba de encolarse en la misma conexión
+        raise ApiError(500, 'job_not_found', job_id=new_id)
+    return created

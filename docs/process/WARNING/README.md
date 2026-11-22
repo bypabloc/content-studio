@@ -152,5 +152,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [013-plan-y-render](013-plan-y-render.md) | Sin palabras no hay cortes; remap pega los tiempos del corte al borde; crossfade de 15 ms y grafo en archivo | `main` |
 | [013-render-precision](013-render-precision.md) | Tasa de cuadros de la fuente con `-r` (sin ella, 25 fps); yuv420p; NVENC p5 cq19 o libx264 crf 18 | `main` |
 | [013-transcripcion-cache](013-transcripcion-cache.md) | Migración 4 (la 3 es de la 006); familia `transcription`; caché por sha1 y modelos del catálogo | `main` |
+| [013-presupuesto-js](013-presupuesto-js.md) | `initialJsGzipKb` de 232 a 233: las claves nuevas del catálogo `es` suman al arranque | `main` |
+| [013-limpiador-lote-y-revision](013-limpiador-lote-y-revision.md) | `auto_render` en el worker; `studio clean --auto` sin worker; `clean.wav`/`clean.mp4`; `models` en `GET /engines`; onda con Regions, Timeline y Zoom sobre el `media` | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

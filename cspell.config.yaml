@@ -46,15 +46,19 @@ overrides:
   # Los nombres de idioma («Español», «Português») son iguales en los tres catálogos (spec 007, D-6): por palabra.
   - filename: 'server/src/content_studio/messages/es.json'
     language: en,es
-    words: [desinstalación, masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português]
+    words: [desinstalación, masterización, minimalista, minimalistas, motivacional, celtic, christmas, saas, português, deutsch, français, renderizar, renderizando]
   # Catálogo en inglés (spec 007, D-9): sus nombres de idioma van por palabra.
   - filename: 'server/src/content_studio/messages/en.json'
     language: en
-    words: [español, português]
+    words: [español, português, deutsch, français, italiano]
   # Catálogo en portugués de Brasil (spec 007, D-9): se revisa con su diccionario, como el español.
   - filename: 'server/src/content_studio/messages/pt.json'
     language: en,pt-br
-    words: [celtic, christmas, saas, español]
+    words: [celtic, christmas, saas, español, deutsch, français]
+  # Tipos generados de la API (`gen:api`): sus descripciones vienen de los docstrings del server, en español.
+  - filename: 'client/src/shared/api/schema.d.ts'
+    language: en,es
+    words: [replanifica, replanificar]
   # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
   - filename: 'server/src/content_studio/narration/script_lint.py'
     language: en,es
@@ -62,7 +66,7 @@ overrides:
   # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: el diccionario es-es no la trae; va por palabra.
   - filename: 'client/**'
     language: en,es
-    words: [masterización]
+    words: [masterización, renderiza, renderizar, replanifican, arrastrable, reusa]
   # Los e2e (spec 005, D-6) llevan comentarios en español, como client/: sin el locale es, sus palabras fallan.
   - filename: 'tests/e2e/**'
     language: en,es

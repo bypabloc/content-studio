@@ -41,7 +41,7 @@ def replan(
 
     Un corte calculado que se solapa con uno editado cede el paso al editado.
     """
-    kept = [dict(c) for c in previous if c.get('edited')]
-    added = [c for c in plan(words, duration, min_gap=min_gap, padding=padding, edges=edges)]
+    kept = [c for c in previous if c.get('edited')]
+    added = plan(words, duration, min_gap=min_gap, padding=padding, edges=edges)
     added = [c for c in added if not any(_overlaps(c, k) for k in kept)]
     return sorted(kept + added, key=lambda c: c['start'])

@@ -15,4 +15,4 @@
   - Un modelo por defecto distinto de large-v3-turbo: la spec lo marca como ★.
 - **Cómo revertir**: quitar la migración 4 y el paquete `transcription/`; la receta y la familia se quitan con el mismo commit.
 - **Cómo comprobarla**: `pytest server/tests/unit/src/content_studio/transcription server/tests/unit/src/content_studio/db` y, con el venv instalado, `pytest -m local server/tests/unit/src/content_studio/transcription` (transcribe 3 s con `small`).
-- **Pendiente**: `GET /engines` con los modelos y su estado (descargado o no) se hace en la spec de la API (T6) y del selector (T7).
+- **Pendiente**: resuelto en `68be271`: `GET /engines` trae los modelos de faster-whisper con su estado (`downloaded`), ver [013-limpiador-lote-y-revision](013-limpiador-lote-y-revision.md).
