@@ -94,6 +94,15 @@
             "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/graphify_guard.py\" read"
           }
         ]
+      },
+      {
+        "matcher": "^mcp__(computer-use__|remote-devices__computer)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/computer_use_guard.py\""
+          }
+        ]
       }
     ],
     "PostToolBatch": [
