@@ -57,6 +57,15 @@ def probe_duration(path: Path | str) -> float:
     return float(subprocess.run(probe_command(path), capture_output=True, text=True, check=True).stdout)
 
 
+def frame_rate(path: Path | str) -> str:
+    """Tasa de cuadros del primer video del archivo, como fracción de ffprobe (por ejemplo, '30/1')."""
+    return subprocess.run(
+        ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=r_frame_rate',
+         '-of', 'default=nw=1:nk=1', str(path)],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()  # fmt: skip
+
+
 def peak_dbfs(path: Path | str) -> float:
     """Pico de muestra del audio en dBFS (volumedetect); un silencio da el piso de -120 dBFS."""
     found = re.search(
