@@ -97,7 +97,7 @@ python -m devtools test-runner --type=e2e   # Playwright sobre la app construida
 1. **Salidas** en `out/` (cada trabajo en su carpeta `<AAAA-MM-DD>-<id>-<slug>/`, con `params.json`) y **logs** en `logs/`. Ambas están gitignoreadas y no se limpian. Las corridas largas (HeartMuLa tarda ~5 min por pista) van en segundo plano, con la salida en `logs/`.
 2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Entre sesiones, con `gpu-turn run` ([turno-gpu](.agents/rules/turno-gpu.md)); `studio` y el worker toman el candado solos.
 3. **La música es siempre instrumental**: nada de voz ni de letra.
-4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). El gusto lo decide el usuario: entrégale las rutas.
+4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). La UI se verifica con `python -m devtools app-check run`; **Computer Use está prohibido** y lo bloquea un hook. El gusto lo decide el usuario: entrégale las rutas.
 5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial.
    OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.

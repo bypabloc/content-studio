@@ -32,7 +32,7 @@ Que cualquier agente (Claude Code, Codex y Antigravity) verifique la app de escr
 | 1 | Hook `computer_use_guard` y su cableado en los tres agentes (T2–T3) | IMP |
 | 2 | `devtools app-check`: entorno aislado, compilación, arranque, espera de CDP y cierre (T4–T6) | IMP |
 | 3 | Escenarios de Playwright por CDP: `smoke`, diálogo simulado y modo `real` de solo lectura (T7–T8) | IMP |
-| 4 | Reglas, skill y `AGENTS.md`; validación de los tres agentes (T9) | PEN |
+| 4 | Reglas, skill y `AGENTS.md`; validación de los tres agentes (T9) | IMP |
 
 ## Decisiones clave
 
