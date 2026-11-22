@@ -178,6 +178,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [024-cdp-webview2](024-cdp-webview2.md) | El puerto de CDP se abre con `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`, sin tocar Tauri | `main` |
 | [024-hooks-por-agente](024-hooks-por-agente.md) | Cómo bloquea Computer Use cada agente; en Codex los hooks del proyecto corren solo si se aprueban con `/hooks` | `main` |
 | [024-target-por-worktree](024-target-por-worktree.md) | `app-check` compila en `tmp/app-check/cargo-target` del worktree: el binario abre el server de su propio checkout | `main` |
+| [024-cobertura-linux-launch](024-cobertura-linux-launch.md) | `app_check/launch.py` queda en 62,96 % en Linux (el Job Object es de Windows) y entra al baseline de cobertura | `main` |
 | [024-dialogo-por-webview](024-dialogo-por-webview.md) | El diálogo nativo se simula redefiniendo `chrome.webview.postMessage`; `confirm` se responde sin mostrarlo | `main` |
 | [016-render-y-sendcmd](016-render-y-sendcmd.md) | El ducking del audio va con `asendcmd` y objetivo `volume@duck`; escape de la ruta entre comillas; fades y `apad` del sidechain | `main` |
 | [016-proyectos-y-migracion-6](016-proyectos-y-migracion-6.md) | `mix_projects` es la migración 6 (la 5 es de 014); los tramos llegan con la caché o al consultar, sin hook en el worker | `main` |
