@@ -22,6 +22,7 @@ from content_studio.media.edit import has_video
 from content_studio.media.formats import TARGETS
 from content_studio.media.reframe import follow_options
 from content_studio.media.reframe import graph as reframe_graph
+from content_studio.system import tools
 
 _PCM = {16: 'pcm_s16le', 24: 'pcm_s24le', 32: 'pcm_f32le'}
 _OPUS_RATES = frozenset({8000, 12000, 16000, 24000, 48000})  # libopus no codifica otras frecuencias
@@ -174,9 +175,9 @@ def _audio_args(target: str, options: dict[str, Any]) -> tuple[str, list[str]]:
 
 
 def _video_args(spec: dict[str, Any], options: dict[str, Any], encoders: frozenset[str]) -> tuple[str, list[str]]:
-    """El códec de video: NVENC si el ffmpeg lo trae y no se pide otra cosa; si no, el libx264 compartido."""
+    """NVENC solo si las opciones lo piden (`main` lo pide con GPU) y el ffmpeg lo trae; si no, libx264."""
     if spec['codec'] == 'libx264':
-        nvenc = spec['nvenc'] in encoders and options.get('nvenc', True)
+        nvenc = spec['nvenc'] in encoders and options.get('nvenc', False)
         return (spec['nvenc'] if nvenc else 'libx264'), video_codec(bool(nvenc))
     return spec['codec'], ['-c:v', spec['codec']]
 
@@ -228,6 +229,7 @@ def main(argv: list[str] | None = None) -> int:
     job = Path(args.out_dir)
     job.mkdir(parents=True, exist_ok=True)
     options = json.loads(args.options)
+    options.setdefault('nvenc', tools.detect()['gpu'] is not None)
     reframe_options = options.get('reframe')
     if reframe_options and reframe_options.get('mode') == 'follow-face':
         track = json.loads(Path(reframe_options['track']).read_text(encoding='utf-8'))

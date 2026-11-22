@@ -98,6 +98,20 @@ def test_mp4_h264_uses_the_shared_encoder_and_aac_audio():
     ]
 
 
+def test_nvenc_is_not_chosen_by_default_so_a_machine_without_a_gpu_uses_libx264():
+    """Con NVENC en el ffmpeg pero sin pedirlo, un MP4 H.264 usa libx264: sin GPU NVIDIA, NVENC no codifica."""
+    args = convert.build(VIDEO_IN, 'mp4-h264', {}, ALL | {'h264_nvenc'})
+
+    assert args[args.index('-c:v') + 1] == 'libx264'
+
+
+def test_nvenc_is_chosen_when_the_gpu_is_there():
+    """Con `nvenc` pedido (el equipo tiene GPU) y NVENC en el ffmpeg, un MP4 H.264 usa h264_nvenc."""
+    args = convert.build(VIDEO_IN, 'mp4-h264', {'nvenc': True}, ALL | {'h264_nvenc'})
+
+    assert args[args.index('-c:v') + 1] == 'h264_nvenc'
+
+
 def test_a_social_preset_with_reframe_keeps_its_frame_rate():
     """Un preset de red (1080x1920 a 30 fps) con encuadre: la salida sale a 30 fps, no a los de la fuente."""
     options = {'width': 1080, 'height': 1920, 'fps': 30, 'reframe': {'mode': 'center'}}
