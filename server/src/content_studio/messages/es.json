@@ -449,6 +449,8 @@
   "media.status.error": "Error",
   "media.status.queued": "En cola",
   "media.status.running": "Procesando {percent} %",
+  "mix.file_not_found": "No existe el archivo {path}.",
+  "mix.transcript_missing": "La voz {path} no está transcrita. Corre antes `studio clean` sobre ella.",
   "music.advanced": "Avanzado",
   "music.compare.choose": "Elegir",
   "music.compare.empty": "Todavía no hay pistas para comparar.",

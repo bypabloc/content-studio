@@ -7,14 +7,12 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import date
 from pathlib import Path
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
-from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.api.paths_guard import allowed_file
@@ -54,12 +52,6 @@ def _row(conn: sqlite3.Connection, project_id: int) -> dict:
     return row
 
 
-def _key(voice: Path, model: str) -> tuple[str, float, int, str, str]:
-    """Los argumentos de la caché de transcripciones para la voz: ruta, fecha, tamaño, modelo e idioma (automático)."""
-    stat = voice.stat()
-    return str(voice), stat.st_mtime, stat.st_size, model, 'auto'
-
-
 def _resolve(conn: sqlite3.Connection, row: dict) -> dict:
     """Si el trabajo de transcripción ya terminó, sus tramos entran al proyecto y su JSON va a la caché."""
     doc_path = Path(row['doc_path'])
@@ -72,7 +64,7 @@ def _resolve(conn: sqlite3.Connection, row: dict) -> dict:
         return doc
     words = Path(job['output_dir']) / 'words.json'
     voice = Path(doc['voice'])
-    cache.store(conn, *_key(voice, job['params']['model']), str(words))
+    cache.store(conn, *project.transcript_key(voice, job['params']['model']), str(words))
     doc['regions'] = project.speech_regions(words, doc['params'])
     project.save(doc_path, doc)
     mix_projects.touch(conn, row['id'])
@@ -114,28 +106,35 @@ def prepare(body: PrepareIn, request: Request, conn: Annotated[sqlite3.Connectio
     music = allowed_file(request, body.music)
     video = allowed_file(request, body.video) if body.video else None
     model = settings.get(conn, 'select.whisper.model', models.RECOMMENDED)
-    project_id = mix_projects.insert(conn, voice.stem, '')
-    folder = paths.outputs_dir(request.app.state.db_path) / 'mix' / f'{date.today().isoformat()}-{project_id}'
-    folder.mkdir(parents=True, exist_ok=True)
-    doc_path = folder / 'mix.json'
-    mix_projects.set_doc_path(conn, project_id, str(doc_path))
-    doc = project.new_document(str(voice), str(music), str(video) if video else None, body.video_mode, None)
-    hit = cache.find(conn, *_key(voice, model))
+    hit = cache.find(conn, *project.transcript_key(voice, model))
+    regions: list[list[float]] = []
+    job_id = None
     if hit is not None:
-        doc['regions'] = project.speech_regions(Path(hit), doc['params'])
+        regions = project.speech_regions(Path(hit), project.DEFAULT_PARAMS)
     else:
         try:
-            doc['transcribe_job'] = queue.enqueue(
+            job_id = queue.enqueue(
                 conn,
                 'transcribe',
-                {'input': str(voice), 'model': model, 'language': 'auto'},
+                {'input': str(voice), 'model': model, 'language': project.AUTO_LANGUAGE},
                 request.app.state.services,
             )
         except queue.InvalidJob as error:
             first = error.errors[0]
             raise ApiError(422, first['code'], extra={'errors': error.errors}, **first['params']) from error
-    project.save(doc_path, doc)
+    project_id = project.create(
+        conn,
+        request.app.state.db_path,
+        voice=voice,
+        music=music,
+        video=video,
+        video_mode=body.video_mode,
+        regions=regions,
+        params={},
+        transcribe_job=job_id,
+    )
     row = _row(conn, project_id)
+    doc = project.load(Path(row['doc_path']))
     return _view(row, doc, _status(conn, doc))
 
 

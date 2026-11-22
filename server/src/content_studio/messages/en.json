@@ -449,6 +449,8 @@
   "media.status.error": "Error",
   "media.status.queued": "Queued",
   "media.status.running": "Processing {percent} %",
+  "mix.file_not_found": "The file {path} does not exist.",
+  "mix.transcript_missing": "The voice {path} is not transcribed. Run `studio clean` on it first.",
   "music.advanced": "Advanced",
   "music.compare.choose": "Choose",
   "music.compare.empty": "There are no tracks to compare yet.",

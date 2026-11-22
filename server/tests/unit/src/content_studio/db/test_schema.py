@@ -11,14 +11,14 @@ def _tables(conn) -> set[str]:
     return {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
 
 
-def test_ac1_migrate_twice_sets_version_5_and_creates_tables(tmp_path):
-    """La versión 5 suma `subtitle_projects` (spec 014, D-1); la 4 es la caché de transcripciones (spec 013, D-4)."""
+def test_ac1_migrate_twice_sets_version_6_and_creates_tables(tmp_path):
+    """La versión 6 suma `mix_projects` (spec 016, D-3); la 5, `subtitle_projects` (014); la 4, la caché (013)."""
     with closing(connection.connect(tmp_path / 'base.db')) as conn:
         schema.migrate(conn)
         schema.migrate(conn)
 
-        assert conn.execute('PRAGMA user_version').fetchone()[0] == 5
-        assert {'jobs', 'settings', 'transcripts', 'subtitle_projects'} <= _tables(conn)
+        assert conn.execute('PRAGMA user_version').fetchone()[0] == 6
+        assert {'jobs', 'settings', 'transcripts', 'subtitle_projects', 'mix_projects'} <= _tables(conn)
 
 
 def test_no_blob_columns(tmp_path):
