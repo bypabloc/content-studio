@@ -58,6 +58,24 @@ def test_ac6_missing_winget_returns_manual_instructions(monkeypatch):
     assert 'ffmpeg.org' in result['instructions']
 
 
+def test_detect_reports_whether_the_ffmpeg_has_the_subtitles_filter(monkeypatch):
+    """`detect()` informa si el ffmpeg trae el filtro `subtitles` (libass), con `ffmpeg -filters` (spec 014, D-7)."""
+
+    class Done:
+        returncode = 0
+
+    binaries = {'ffmpeg': {'path': '/bin/ffmpeg', 'version': 'x'}, 'git': None}
+    monkeypatch.setattr(tools, '_binary', lambda name, flag: binaries[name])
+    monkeypatch.setattr(tools, '_gpu', lambda: None)
+
+    Done.stdout = ' ... anull  A->A  Pass the source.\n T.. subtitles  V->V  Render subtitles.\n'
+    monkeypatch.setattr(tools, '_run', lambda command, timeout=5: Done)
+    assert tools.detect()['subtitles_filter'] is True
+
+    Done.stdout = ' ... anull  A->A  Pass the source.\n'
+    assert tools.detect()['subtitles_filter'] is False
+
+
 def test_ac9_detect_returns_vram_in_gibibytes_without_loading_a_model(monkeypatch):
     """La detección de hardware usa información del driver."""
 

@@ -57,6 +57,29 @@ def probe_duration(path: Path | str) -> float:
     return float(subprocess.run(probe_command(path), capture_output=True, text=True, check=True).stdout)
 
 
+def video_size(path: Path | str) -> tuple[int, int]:
+    """Ancho y alto del primer video del archivo, en píxeles."""
+    size = subprocess.run(
+        [
+            'ffprobe',
+            '-v',
+            'error',
+            '-select_streams',
+            'v:0',
+            '-show_entries',
+            'stream=width,height',
+            '-of',
+            'csv=p=0:s=x',
+            str(path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    width, height = size.split('x')
+    return int(width), int(height)
+
+
 def frame_rate(path: Path | str) -> str:
     """Tasa de cuadros del primer video del archivo, como fracción de ffprobe (por ejemplo, '30/1')."""
     return subprocess.run(

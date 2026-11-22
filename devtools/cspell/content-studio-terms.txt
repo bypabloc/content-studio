@@ -58,6 +58,7 @@ fingerstyle
 fintech
 flac
 flatnonzero
+fontsdir
 followlinks
 frombuffer
 getpid
@@ -76,6 +77,8 @@ keyscale
 killpg
 lameenc
 lastrowid
+libass
+libx
 lofi
 loudnorm
 lufs
