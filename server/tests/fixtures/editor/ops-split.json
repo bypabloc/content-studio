@@ -1,0 +1,22 @@
+{
+  "doc": {
+    "version": 1,
+    "name": "demo",
+    "sample_rate": 48000,
+    "tracks": [
+      {"id": "t1", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}
+    ],
+    "clips": [
+      {"id": "c1", "track": "t1", "src": "media/a.wav", "src_in": 0, "src_out": 10, "start": 0, "gain_db": 0, "fade_in": 1, "fade_out": 2}
+    ],
+    "markers": []
+  },
+  "op": {"type": "splitAt", "t": 4},
+  "expected": {
+    "ids": ["c1", "c1-r"],
+    "clips": {
+      "c1": {"track": "t1", "start": 0, "src_in": 0, "src_out": 4, "fade_in": 1, "fade_out": 0},
+      "c1-r": {"track": "t1", "start": 4, "src_in": 4, "src_out": 10, "fade_in": 0, "fade_out": 2}
+    }
+  }
+}
