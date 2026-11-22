@@ -164,3 +164,7 @@ timebase
 ntsc
 pathurl
 clipitem
+cublas
+cudnn
+systran
+mobiuslabsgmbh

@@ -10,12 +10,14 @@ from content_studio.services import (
     narration_regenerate,
     storage_move,
     system_install_tool,
+    transcribe,
     voice_build,
     voice_check,
 )
 
 SERVICES = {
     'narration': narration,
+    'transcribe': transcribe,
     'music': music,
     'music.samples': music_samples,
     'narration.regenerate': narration_regenerate,

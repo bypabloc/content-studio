@@ -124,7 +124,7 @@ def validate(document: object) -> Recipe:
     engine, family = document.get('engine'), document.get('family')
     if not isinstance(engine, str) or not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    if family not in ('narration', 'music', 'system'):
+    if family not in ('narration', 'music', 'system', 'transcription'):
         raise ValueError('Invalid engine family')
     cpu, license_name = document.get('cpu'), document.get('license')
     if not isinstance(cpu, bool) or not isinstance(license_name, str) or not _text(license_name):

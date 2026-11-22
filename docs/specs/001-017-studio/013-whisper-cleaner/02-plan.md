@@ -78,7 +78,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Los medios de pru
 | T2 | Exportaciones | AC-5 | T1 | `unit` | [x] |
 | T3 | Render de audio | AC-3 | T1 | `unit` | [x] |
 | T4 | Render de video | AC-4 | T3 | `unit`, `-m local` | [x] |
-| T5 | Transcripción y caché | AC-6 | — | `unit`, `-m local` | [ ] |
+| T5 | Transcripción y caché | AC-6 | — | `unit`, `-m local` | [x] |
 | T6 | Trabajos y API | AC-7 | T2–T5 | `unit` | [ ] |
 | T7 | Client | AC-7, AC-8, AC-9 | T6 | `client-unit` | [ ] |
 | T8 | Migrar la evaluación, e2e y docs | AC-8, AC-10 | T7 | `all`, `e2e` | [ ] |
