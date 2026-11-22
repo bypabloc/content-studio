@@ -68,7 +68,10 @@ def create_project(
     except queue.InvalidJob as error:
         first = error.errors[0]
         raise ApiError(422, first['code'], extra={'errors': error.errors}, **first['params']) from error
-    return store.get(conn, job_id)
+    created = store.get(conn, job_id)
+    if created is None:  # no pasa: el trabajo acaba de encolarse en la misma conexión
+        raise ApiError(404, 'job_not_found', job_id=job_id)
+    return created
 
 
 @router.get('/subtitles/fonts')

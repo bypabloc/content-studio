@@ -14,7 +14,8 @@ RESOURCE = 'gpu'  # whisper carga un modelo: toma el candado de la GPU
 
 def prepare(conn: sqlite3.Connection, params: dict) -> tuple[dict, None]:
     """Agrega el documento y el video del proyecto. Sin proyecto no agrega nada y `validate` lo rechaza."""
-    project = subtitle_projects.get(conn, params.get('project_id'))
+    project_id = params.get('project_id')
+    project = subtitle_projects.get(conn, project_id) if isinstance(project_id, int) else None
     if project is None:
         return params, None
     return {**params, 'doc': project['doc_path'], 'source': project['source_path']}, None

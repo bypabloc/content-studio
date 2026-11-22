@@ -15,7 +15,7 @@ from content_studio.subtitles.formats import to_srt, to_vtt
 
 def cues_from_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Un cue por segmento, con sus tiempos y el texto sin espacios; los segmentos vacíos no entran."""
-    cues = []
+    cues: list[dict[str, Any]] = []
     for segment in segments:
         text = segment['text'].strip()
         if text:
