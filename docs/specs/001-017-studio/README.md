@@ -22,7 +22,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | DON |
 | [013](013-whisper-cleaner/README.md) | faster-whisper + Limpiador de silencios (audio y video, revisión en línea de tiempo) | feature | 012 | DON |
 | [014](014-subtitles/README.md) | Subtítulos: SRT/VTT, editor, quemar, estilo redes (ASS) | feature | 013 | DON |
-| [015](015-convert-normalize-trim/README.md) | Convertir (audio/video, presets de redes, GIF, extraer audio), normalizar, y los trabajos de recortar, unir y dividir (su pantalla es el Editor) | feature | 014 | PEN |
+| [015](015-convert-normalize-trim/README.md) | Convertir (audio/video, presets de redes, GIF, extraer audio), normalizar, y los trabajos de recortar, unir y dividir (su pantalla es el Editor) | feature | 014 | DON |
 | [016](016-mix-ducking/README.md) | Mezcla narración + música con ducking | feature | 015 | PEN |
 | [017](017-editor-core/README.md) | Editor (núcleo): proyecto, línea de tiempo multipista, explorador de carpetas, importar, grabar, deshacer, imán, marcadores y exportar audio | feature | 016 | PEN |
 | [018](018-editor-visual/README.md) | Editor (visual): pistas de video e imagen con alfa, transformar con keyframes, transiciones, vista previa WebGL y exportar video | feature | 017 | PEN |
