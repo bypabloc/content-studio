@@ -33,6 +33,22 @@ def repo(model: str) -> str:
     return MODELS[model].repo
 
 
+def selected(db: Path) -> str:
+    """El modelo que el usuario eligió en el selector (preferencia `select.whisper.model`); el recomendado si no hay
+    base de datos o no eligió. No crea la base: si falta, no hay preferencia que leer."""
+    if not db.exists():
+        return RECOMMENDED
+    from content_studio.db import schema, settings
+    from content_studio.db.connection import connect
+
+    conn = connect(db)
+    try:
+        schema.migrate(conn)  # idempotente: una base que aún no tiene la tabla settings
+        return str(settings.get(conn, 'select.whisper.model', RECOMMENDED))
+    finally:
+        conn.close()
+
+
 def downloaded(model: str, cache: Path) -> bool:
     """¿El modelo ya está en la caché de Hugging Face? Cuenta el `model.bin` de su snapshot, no la carpeta."""
     folder_name = 'models--' + repo(model).replace('/', '--')

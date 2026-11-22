@@ -190,7 +190,7 @@ uv run studio narration tts --model qwen-0.6b --file guiones/*.json --evaluate -
 
 En los reintentos solo se vuelven a transcribir los párrafos regenerados. Con los 22 guiones de prueba y `--retries 4`, las rondas regeneraron 40 → 15 → 8 → 5 párrafos y terminaron con 18 de 22 guiones sin errores.
 
-Necesita el comando `whisper` en el PATH (`pip install openai-whisper`). Los párrafos y sus transcripciones quedan en `<carpeta de salida>/whisper/<guion>/<n>.wav` y `.json`.
+Usa el servicio de faster-whisper (la receta `faster-whisper` en Motores) con el modelo elegido en el selector de Ajustes, large-v3-turbo por defecto; no hace falta el comando `whisper`. Los párrafos y sus transcripciones quedan en `<carpeta de salida>/whisper/<guion>/<n>.wav` y `.json` (el texto que oyó está en el campo `text`).
 
 ### Cómo funciona
 

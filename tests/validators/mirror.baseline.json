@@ -13,7 +13,6 @@
     "server/src/content_studio/narration/audio.py",
     "server/src/content_studio/narration/blocks.py",
     "server/src/content_studio/narration/evaluation/compare.py",
-    "server/src/content_studio/narration/evaluation/review.py",
     "server/src/content_studio/narration/metadata.py",
     "server/src/content_studio/narration/reference.py",
     "server/src/content_studio/narration/script.py",

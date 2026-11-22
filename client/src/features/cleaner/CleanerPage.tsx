@@ -8,6 +8,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISwitch } from '@/shared/components/atoms/UISwitch';
+import { UIAlert } from '@/shared/components/molecules/UIAlert';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
 import { UIWhisperModelSelect } from '@/shared/components/molecules/UIWhisperModelSelect';
@@ -161,6 +162,7 @@ export function CleanerPage(): React.JSX.Element {
           {t('cleaner.auto')}
         </UIButton>
       </UIStack>
+      {submit.error ? <UIAlert>{submit.error.message}</UIAlert> : null}
       <UIText variant="subtitle">{t('cleaner.batch.title')}</UIText>
       {(analyses.data ?? []).length === 0 ? (
         <UIText variant="caption">{t('cleaner.batch.empty')}</UIText>

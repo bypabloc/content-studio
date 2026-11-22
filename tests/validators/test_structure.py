@@ -110,3 +110,15 @@ def test_ac10_no_legacy_recording():
         text = (ROOT / path).read_text(encoding='utf-8', errors='ignore')
         failures += [f'{path}: {m.group(0)}' for m in legacy.finditer(text)]
     assert failures == []
+
+
+def test_ac10_no_whisper_cli():
+    """AC-10: el código no llama al comando `whisper` (openai-whisper): la evaluación y el chequeo de tomas usan el
+    servicio de faster-whisper (spec 013, D-7)."""
+    cli = re.compile(r"""which\(\s*['"]whisper['"]\s*\)|\[\s*['"]whisper['"]\s*,""")
+    hits = [
+        f'{path.relative_to(ROOT)}: {m.group(0)}'
+        for path in (ROOT / 'server/src').rglob('*.py')
+        for m in cli.finditer(path.read_text(encoding='utf-8'))
+    ]
+    assert hits == []

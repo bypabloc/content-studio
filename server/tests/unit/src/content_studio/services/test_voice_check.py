@@ -115,7 +115,7 @@ def test_the_entry_point_writes_the_check_next_to_the_take(refs, monkeypatch, ca
     slug = profiles.create('Spec 010')
     profiles.takes_dir(slug, 'expert').mkdir(parents=True)
     make_take(profiles.takes_dir(slug, 'expert') / '1.wav')
-    monkeypatch.setattr(voice_check.shutil, 'which', lambda name: None)  # sin whisper: el chequeo lo anota
+    monkeypatch.setattr(voice_check, 'transcribe_text', lambda path: None)  # sin servicio: el chequeo lo anota
 
     assert voice_check.main(['--profile', slug, '--style', 'expert', '--take', '1']) == 0
 
@@ -128,13 +128,27 @@ def test_a_take_resampled_on_upload_says_so_in_its_check(refs, monkeypatch, caps
     slug = profiles.create('Spec 010')
     profiles.takes_dir(slug, 'expert').mkdir(parents=True)
     make_take(profiles.takes_dir(slug, 'expert') / '1.wav')
-    monkeypatch.setattr(voice_check.shutil, 'which', lambda name: None)  # sin whisper, para no depender de él
+    monkeypatch.setattr(voice_check, 'transcribe_text', lambda path: None)  # sin servicio, para no depender de él
 
     assert voice_check.main(['--profile', slug, '--style', 'expert', '--take', '1', '--source-rate', '44100']) == 0
 
     written = json.loads((refs / slug / 'takes/expert/1.check.json').read_text(encoding='utf-8'))
     assert written['notes'] == ['whisper_missing', 'resampled']
     assert written['measures']['source_rate'] == 44100
+
+
+def test_the_check_hears_the_take_with_the_service_in_spanish_and_the_chosen_model(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(voice_check.transcribe_main, 'available', lambda: True)
+    monkeypatch.setattr(voice_check.models, 'selected', lambda db: 'large-v3-turbo')
+    monkeypatch.setattr(
+        voice_check.transcribe_main,
+        'transcribe_text',
+        lambda path, *, model, language: calls.append((model, language)) or TEXT,
+    )
+
+    assert voice_check.transcribe_text(tmp_path / 'a.wav') == TEXT
+    assert calls == [('large-v3-turbo', 'es')]
 
 
 def test_the_check_runs_on_the_gpu_queue_and_names_the_take(tmp_path):

@@ -1,6 +1,6 @@
 # content-studio
 
-Audio local para videos en Windows 11 con una RTX 4060 Laptop de 8 GB; nada se corre en WSL. Hay dos herramientas independientes.
+Audio local para videos en Windows 11 con una RTX 4060 Laptop de 8 GB; nada se corre en WSL. Hay tres herramientas independientes.
 El código vive en `server/src/content_studio/`. Sus carpetas de datos guardan docs, voces, catálogos y referencias.
 Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en Ajustes > Almacenamiento.
 
@@ -8,6 +8,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | :--- | :--- | :--- | :--- |
 | `server/data/narration/` | Narración TTS en español neutro clonando una voz (Qwen3-TTS, Chatterbox) | `server/src/content_studio/narration/` | [server/data/narration/README.md](server/data/narration/README.md) · [formato del guion](server/data/narration/docs/formato-guion.md) · [grabar voces](server/data/narration/docs/scripts/README.md) |
 | `server/data/music/` | Música de fondo instrumental (ACE-Step 1.5, HeartMuLa) | `server/src/content_studio/music/` | [server/data/music/README.md](server/data/music/README.md) · [INVESTIGACION.md](server/data/music/INVESTIGACION.md) |
+| — (`studio clean`) | Limpiador de silencios de audio y video, con revisión en línea de tiempo (faster-whisper) | `server/src/content_studio/clean/` | [docs/process/01-done/cleaner.md](docs/process/01-done/cleaner.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 

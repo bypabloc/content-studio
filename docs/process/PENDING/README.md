@@ -46,7 +46,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [008-underscore-row](008-underscore-row.md) | `_row` en UIRowTable y UIRepeatGroup da avisos de no-underscore-dangle (no bloquean) | Al tocar esos organismos o antes de la 022 | Agente |
 | [009-abrir-carpeta](009-abrir-carpeta.md) | «Abrir carpeta» (solo ícono, D-5) no tiene botón hoy en Narración ni en la cola: no hay carpeta que mostrar | Cuando una pantalla muestre la carpeta de salida | Agente |
 | [010-contraste-tema-oscuro](010-contraste-tema-oscuro.md) | Contraste del tema oscuro en Mis voces y el catálogo: medir y decidir (tokens del design system) | Después de publicar la 010 | Agente |
-| [010-whisper-a-faster-whisper](010-whisper-a-faster-whisper.md) | El chequeo y la evaluación de tomas usan openai-whisper; la 013 pasa a faster-whisper | En la 013 | Agente |
+| [013-receta-cosyvoice](013-receta-cosyvoice.md) | La receta de CosyVoice sigue instalando openai-whisper sin comprobar si lo usa | Antes de la próxima instalación de CosyVoice | Agente |
 | [010-construir-voces-reales](010-construir-voces-reales.md) | El build real del catálogo sobre las voces del usuario (AC-7): decidir voces y ejecutar | Cuando el usuario lo pida; no bloquea el merge | Usuario |
 | [011-generar-muestras](011-generar-muestras.md) | Generar las 126 muestras de 10 s del buscador (corrida larga en GPU) | Después del merge a dev | Agente o usuario |
 | [011-escucha-muestras](011-escucha-muestras.md) | Escuchar `lofi-chill`: el espectrograma muestra transitorios; el gusto lo decide el usuario | Antes de generar las 126 | Usuario |

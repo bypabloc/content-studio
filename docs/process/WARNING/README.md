@@ -154,5 +154,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [013-transcripcion-cache](013-transcripcion-cache.md) | Migración 4 (la 3 es de la 006); familia `transcription`; caché por sha1 y modelos del catálogo | `main` |
 | [013-presupuesto-js](013-presupuesto-js.md) | `initialJsGzipKb` de 232 a 233: las claves nuevas del catálogo `es` suman al arranque | `main` |
 | [013-limpiador-lote-y-revision](013-limpiador-lote-y-revision.md) | `auto_render` en el worker; `studio clean --auto` sin worker; `clean.wav`/`clean.mp4`; `models` en `GET /engines`; onda con Regions, Timeline y Zoom sobre el `media` | `main` |
+| [013-evaluacion-faster-whisper](013-evaluacion-faster-whisper.md) | La evaluación y el chequeo de tomas usan faster-whisper con el modelo de Ajustes; tres desvíos de D-7 | `main` |
+| [013-cuda-windows](013-cuda-windows.md) | faster-whisper en CUDA con `int8_float16` y respaldo a CPU; la VRAM pico se mide en la verificación final | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

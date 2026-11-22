@@ -151,6 +151,17 @@ describe('CleanerPage (spec 013, D-6)', () => {
     expect(screen.getAllByText(t('cleaner.status.error'))).toHaveLength(2);
   });
 
+  it('si el servidor rechaza el envío, muestra su motivo y el lote no cambia (AC-9, formato no soportado)', async () => {
+    api.post.mockRejectedValueOnce(new Error('a.txt no es un formato de audio o video que acepte el limpiador.'));
+    renderPage();
+    await chooseFiles();
+
+    await userEvent.click(screen.getByRole('button', { name: t('cleaner.analyze') }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain('no es un formato de audio o video');
+    expect(screen.getByText(t('cleaner.batch.empty'))).toBeTruthy();
+  });
+
   it('elegir archivos: cancelar no agrega nada, una sola ruta cuenta, y analizar espera a tener archivos', async () => {
     vi.mocked(open).mockResolvedValueOnce(null);
     renderPage();

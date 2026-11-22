@@ -1,21 +1,20 @@
-"""--evaluate: whisper transcribe cada bloque por separado y se revisan palabras, silencios y ritmo."""
+"""--evaluate: faster-whisper transcribe cada bloque por separado y se revisan palabras, silencios y ritmo."""
 
 from __future__ import annotations
 
 import json
 import statistics
-import subprocess
 from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from content_studio.narration.evaluation.compare import compare, normalize
+from content_studio.transcription import transcribe_main
 
 if TYPE_CHECKING:
     import numpy as np
 
-# --evaluate: whisper transcribe la salida y se compara con el texto pedido.
-WHISPER_MODEL = 'medium'  # small confundía palabras ("horarios" -> "cerrarios")
+# --evaluate: faster-whisper transcribe la salida (el modelo de Ajustes) y se compara con el texto pedido.
 SILENCE_MAX = 1.3  # criterio: un silencio más largo dentro de un párrafo es una pausa que nadie pidió
 RHYTHM_TOLERANCE = (0.7, 1.4)  # criterio: palabras/s del párrafo frente a la mediana del guion
 
@@ -81,29 +80,12 @@ def save_blocks(g: dict, indices: Iterable[int]) -> list[Path]:
     return paths
 
 
-def transcribe(wavs: list[Path], language: str) -> None:
-    """Whisper en una sola pasada (el modelo se carga una vez); deja <wav>.json junto a cada audio."""
-    folders: dict[Path, list[Path]] = {}
-    for w in wavs:
-        folders.setdefault(w.parent, []).append(w)
-    print(f'Evaluating {len(wavs)} paragraph(s) with whisper {WHISPER_MODEL}...', flush=True)
-    for folder, items in folders.items():
-        subprocess.run(
-            [
-                'whisper',
-                *map(str, items),
-                '--model',
-                WHISPER_MODEL,
-                '--language',
-                language,
-                '--output_format',
-                'json',
-                '--output_dir',
-                str(folder),
-            ],
-            check=True,
-            capture_output=True,
-        )
+def transcribe(wavs: list[Path], language: str, model: str) -> None:
+    """faster-whisper transcribe cada bloque por separado y deja <wav>.json con su texto ({'text': ...})."""
+    print(f'Evaluating {len(wavs)} paragraph(s) with faster-whisper {model}...', flush=True)
+    for wav in wavs:
+        text = transcribe_main.transcribe_text(wav, model=model, language=language)
+        wav.with_suffix('.json').write_text(json.dumps({'text': text}, ensure_ascii=False), encoding='utf-8')
 
 
 def review(g: dict) -> tuple[list[str], list[int]]:

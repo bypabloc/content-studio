@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -50,6 +51,14 @@ def test_the_words_payload_keeps_language_duration_and_word_times():
     assert payload['segments'][0]['words'][1] == {'start': 0.5, 'end': 1.0, 'word': 'mundo', 'probability': 0.9}
 
 
+def test_the_payload_has_the_text_of_all_segments_for_the_evaluation():
+    """El JSON trae el texto plano de la transcripción (la evaluación compara palabras, no tiempos)."""
+    segments = [_segment(0.0, 1.0, ' hola', []), _segment(1.0, 2.0, ' mundo ', [])]
+    info = SimpleNamespace(language='es', language_probability=0.98, duration=2.0)
+
+    assert transcribe_main.words_payload(segments, info)['text'] == 'hola mundo'
+
+
 def test_progress_is_the_end_of_the_segment_over_the_duration():
     """El progreso es el fin del último segmento dividido por la duración del audio."""
     assert transcribe_main.progress_fraction(end=2.5, duration=10.0) == 0.25
@@ -81,6 +90,34 @@ def test_auto_language_passes_no_language_to_the_model(tmp_path):
     transcribe_main.transcribe(tmp_path / 'a.wav', language='auto', out=tmp_path / 'w.json', model=model)
 
     assert model.calls[0]['language'] is None
+
+
+def test_transcribe_text_runs_the_service_in_its_venv_and_returns_its_text(monkeypatch, tmp_path):
+    """Lo que oye el servicio en texto plano: un subproceso del módulo con el modelo y el idioma pedidos."""
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        Path(command[command.index('--out') + 1]).write_text(json.dumps({'text': 'hola mundo'}), encoding='utf-8')
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(transcribe_main.subprocess, 'run', fake_run)
+
+    assert transcribe_main.transcribe_text(tmp_path / 'a.wav', model='medium', language='es') == 'hola mundo'
+    command, kwargs = calls[0]
+    assert command[1:3] == ['-m', 'content_studio.transcription.transcribe_main']
+    assert command[command.index('--model') + 1] == 'medium'
+    assert command[command.index('--language') + 1] == 'es'
+    assert kwargs['check'] is True
+
+
+def test_the_service_is_available_only_with_its_venv(monkeypatch, tmp_path):
+    """Sin la carpeta del venv de faster-whisper no hay transcripción: el chequeo de tomas lo anota."""
+    monkeypatch.setattr(transcribe_main, '_venv', lambda: tmp_path / 'missing')
+    assert transcribe_main.available() is False
+
+    (tmp_path / 'missing').mkdir()
+    assert transcribe_main.available() is True
 
 
 def test_the_parser_takes_input_model_language_and_out():

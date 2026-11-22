@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
+import tempfile
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -23,11 +25,13 @@ README = 'server/data/narration/README.md'
 
 
 def words_payload(segments: Iterable[Any], info: Any) -> dict:
-    """El JSON de la transcripción: idioma, probabilidad, duración y segmentos con sus palabras."""
+    """El JSON de la transcripción: idioma, probabilidad, duración, texto plano y segmentos con sus palabras."""
+    segments = list(segments)
     return {
         'language': info.language,
         'language_probability': info.language_probability,
         'duration': info.duration,
+        'text': ' '.join(segment.text.strip() for segment in segments),
         'segments': [
             {
                 'start': segment.start,
@@ -102,6 +106,34 @@ def _venv() -> Path:
     """El venv de la receta `faster-whisper` (su carpeta la decide `paths.engine_root`)."""
     recipe = recipes.load('faster-whisper')
     return paths.engine_root(recipe.family, recipe.venv, recipe.engine) / recipe.venv
+
+
+def available() -> bool:
+    """¿Está instalado el venv de faster-whisper? Sin él no hay transcripción (spec 013, D-7)."""
+    return _venv().is_dir()
+
+
+def transcribe_text(audio: Path, *, model: str, language: str) -> str:
+    """Lo que oye faster-whisper en `audio`, en texto plano. Corre el servicio en su venv: un proceso por audio."""
+    from content_studio.common import process
+
+    with tempfile.TemporaryDirectory() as folder:
+        out = Path(folder) / 'words.json'
+        command = [
+            sys.executable,
+            '-m',
+            'content_studio.transcription.transcribe_main',
+            '--input',
+            str(audio),
+            '--model',
+            model,
+            '--language',
+            language,
+            '--out',
+            str(out),
+        ]
+        subprocess.run(command, check=True, capture_output=True, env=process.env_src())
+        return json.loads(out.read_text(encoding='utf-8'))['text']
 
 
 if __name__ == '__main__':
