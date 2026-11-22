@@ -169,6 +169,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [015-armador-de-comandos](015-armador-de-comandos.md) | El catálogo de formatos son datos; `build` no pone la ruta de salida y `codec_unavailable` usa los códecs del sistema | `main` |
 | [015-render-de-conversion](015-render-de-conversion.md) | La duración de AC-2 se mide decodificando (el relleno de LAME); Opus solo admite 8–48 kHz; GIF en dos pasadas | `main` |
 | [015-presets-y-encuadre](015-presets-y-encuadre.md) | El ★ sale de la proporción; el encuadre es un grafo `-filter_complex`; `/media/frame` va en la T7 | `main` |
+| [015-recortar-unir-dividir](015-recortar-unir-dividir.md) | `remove` reusa el render del limpiador (duración exacta); los audios salen en WAV y los videos en MP4; dividir recodifica cada parte | `main` |
 | [015-normalizar](015-normalizar.md) | Dos pasadas con loudnorm lineal; el códec AAC del video va con bitrate fijo (el por defecto movió el nivel); REFACTOR de la narración diferido | `main` |
 | [015-seguir-a-la-persona](015-seguir-a-la-persona.md) | YuNet 2023mar fijado por revisión y SHA; `sendcmd` sin `eval` (este ffmpeg no lo trae); la receta vision va en versión 2 | `main` |
 

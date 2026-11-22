@@ -32,6 +32,7 @@ ckpt
 compresslevel
 cosyvoice
 creationflags
+crossfade
 cspell
 cuda
 cumbia
