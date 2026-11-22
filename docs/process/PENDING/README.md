@@ -51,5 +51,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-generar-muestras](011-generar-muestras.md) | Generar las 126 muestras de 10 s del buscador (corrida larga en GPU) | Después del merge a dev | Agente o usuario |
 | [011-escucha-muestras](011-escucha-muestras.md) | Escuchar `lofi-chill`: el espectrograma muestra transitorios; el gusto lo decide el usuario | Antes de generar las 126 | Usuario |
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
-| [012-instalar-motor-real](012-instalar-motor-real.md) | Completar aceptación manual de Qwen/UI, winget, traslado, bienvenida y capturas (CLI Qwen pasó) | T9, antes de fusionar la 012 | Usuario y agente |
+| [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |

@@ -19,7 +19,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | 009 | Iconos aplicados: criterio de solo icono y los iconos del shell, la cola, Narración y Ajustes, con los `UIIcon`, `UIIconButton` y `UITooltip` de la 008 | feature | 008 | DON |
 | 010 | Voces (catálogo y construir) + Grabar (micrófono en la UI) | feature | 009 | DON |
 | 011 | Sección Música (duración exacta, muestras, comparar y elegir) | feature | 010 | DON |
-| [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | PEN |
+| [012](012-engines-storage/README.md) | Pantalla Motores: instalar venvs y modelos bajo demanda, licencias, ffmpeg del sistema | feature | 011 | DON |
 | [013](013-whisper-cleaner/README.md) | faster-whisper + Limpiador de silencios (audio y video, revisión en línea de tiempo) | feature | 012 | PEN |
 | [014](014-subtitles/README.md) | Subtítulos: SRT/VTT, editor, quemar, estilo redes (ASS) | feature | 013 | PEN |
 | [015](015-convert-normalize-trim/README.md) | Convertir (audio/video, presets de redes, GIF, extraer audio), normalizar, y los trabajos de recortar, unir y dividir (su pantalla es el Editor) | feature | 014 | PEN |
