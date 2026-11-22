@@ -71,6 +71,28 @@ def test_cut_shorter_than_50_ms_is_discarded():
     assert plan(words, duration=1.4, min_gap=0.5, padding=0.28, edges=False) == []
 
 
+def test_the_audible_silence_that_contains_a_word_gap_covers_it():
+    """Whisper ubica la palabra siguiente antes de que suene: el corte cubre el silencio audible entero (AC-11)."""
+    cuts = plan(_words((140.0, 147.80), (148.52, 149.00)), duration=150.0, edges=False, silences=[(147.80, 149.09)])
+
+    assert _spans(cuts) == [(147.95, 148.94)]
+
+
+def test_an_audible_silence_longer_than_min_gap_is_cut_even_when_the_word_gaps_are_short():
+    """Whisper ubica «corto.» hasta 190,18 s y el audio calla desde 189,6 s: el silencio audible se corta (AC-11)."""
+    words = _words((140.0, 189.0), (189.46, 190.18), (190.64, 191.4))
+
+    cuts = plan(words, duration=200.0, edges=False, silences=[(189.6, 190.86)])
+
+    assert _spans(cuts) == [(189.75, 190.71)]
+
+
+def test_without_silences_the_gap_is_the_one_between_the_words():
+    cuts = plan(_words((140.0, 147.80), (148.52, 149.00)), duration=150.0, edges=False)
+
+    assert _spans(cuts) == [(147.95, 148.37)]
+
+
 def test_keep_segments_is_the_complement_of_the_enabled_cuts():
     """Los tramos a conservar son el complemento de los cortes activos dentro de la duración."""
     cuts = [{'start': 0.55, 'end': 1.05, 'enabled': True}, {'start': 2.45, 'end': 3.35, 'enabled': True}]

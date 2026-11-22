@@ -26,17 +26,34 @@ class Cut(TypedDict):
     enabled: bool
 
 
+def _merge(spans: Sequence[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Une los cortes que se tocan o se solapan.
+
+    >>> _merge([(1.0, 2.0), (1.5, 3.0), (4.0, 5.0)])
+    [(1.0, 3.0), (4.0, 5.0)]
+    """
+    merged: list[tuple[float, float]] = []
+    for start, end in sorted(spans):
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
 def plan(
     words: Sequence[Span],
     duration: float,
     min_gap: float = 0.5,
     padding: float = 0.15,
     edges: bool = True,
+    silences: Sequence[tuple[float, float]] = (),
 ) -> list[Cut]:
     """Devuelve los cortes activos para los huecos de más de `min_gap` entre palabras.
 
     Cada corte deja `padding` segundos de margen a cada lado del hueco. Con `edges`, también se cortan el
-    inicio y el final si el silencio supera `min_gap`.
+    inicio y el final si el silencio supera `min_gap`. `silences` son los silencios audibles del audio (inicio, fin):
+    cada uno más largo que `min_gap` también se corta, con el mismo margen.
 
     >>> plan([{'start': 0.0, 'end': 0.4}, {'start': 1.2, 'end': 1.6}], duration=2.0, edges=False)
     [{'start': 0.55, 'end': 1.05, 'enabled': True}]
@@ -53,11 +70,13 @@ def plan(
             spans.append((before['end'] + padding, after['start'] - padding))
     if edges and duration - words[-1]['end'] > min_gap:
         spans.append((words[-1]['end'] + padding, duration - padding))
-    return [
-        {'start': round(start, 6), 'end': round(end, 6), 'enabled': True}
-        for start, end in spans
-        if end - start >= MIN_CUT
-    ]
+    # Whisper ubica las palabras con sus tiempos, y el audio puede callar más de lo que dicen las palabras: un
+    # silencio audible más largo que min_gap también se corta (AC-11).
+    for start, end in silences:
+        if end - start > min_gap and (edges or (start > 0 and end < duration)):
+            spans.append((start + padding, end - padding))
+    kept = [span for span in spans if span[1] - span[0] >= MIN_CUT]
+    return [{'start': round(start, 6), 'end': round(end, 6), 'enabled': True} for start, end in _merge(kept)]
 
 
 def _active(cuts: Sequence[Cut]) -> list[Cut]:

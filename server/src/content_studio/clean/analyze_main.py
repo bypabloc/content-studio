@@ -9,7 +9,7 @@ import argparse
 import json
 import sqlite3
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from content_studio import paths
@@ -34,8 +34,11 @@ def run(
     params: dict,
     folder: Path,
     transcribe: Transcribe,
+    silences: Sequence[tuple[float, float | None]] = (),
 ) -> dict:
-    """Transcribe `source` (o usa la caché), calcula los cortes y los guarda en `folder/cuts.json`."""
+    """Transcribe `source` (o usa la caché), calcula los cortes y los guarda en `folder/cuts.json`.
+
+    `silences` son los silencios audibles del audio (inicio, fin); un fin None llega al final del audio."""
     stat = source.stat()
     key_args = (str(source), stat.st_mtime, stat.st_size, model, language)
     hit = cache.find(conn, *key_args)
@@ -50,7 +53,15 @@ def run(
     transcript = json.loads(Path(json_path).read_text(encoding='utf-8'))
     words = [word for segment in transcript['segments'] for word in segment['words']]
     duration = transcript['duration']
-    found = plan(words, duration, min_gap=params['min_gap'], padding=params['padding'], edges=params['edges'])
+    audible = [(start, duration if end is None else end) for start, end in silences]
+    found = plan(
+        words,
+        duration,
+        min_gap=params['min_gap'],
+        padding=params['padding'],
+        edges=params['edges'],
+        silences=audible,
+    )
     cuts.save(
         folder,
         {
@@ -59,6 +70,7 @@ def run(
             'language': transcript['language'],
             'duration': duration,
             'transcript': json_path,
+            'silences': [list(span) for span in audible],
             'cuts': found,
         },
     )
@@ -108,6 +120,7 @@ def main(argv: list[str] | None = None) -> int:
         params=params,
         folder=folder,
         transcribe=_transcriber(args.model, args.language, folder),
+        silences=ff.silences(Path(args.input)),
     )
     print(json.dumps(result), flush=True)
     return 0

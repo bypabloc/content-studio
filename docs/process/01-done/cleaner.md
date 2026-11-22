@@ -12,7 +12,7 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 ## Qué hace hoy
 
 - `uv run studio clean <archivos> [--auto]`: analiza cada archivo y propone cortes por huecos entre palabras (huecos de 500 ms o más, margen de 150 ms a cada lado). Con `--auto` renderiza sin revisar.
-- Salidas: `clean.wav` (audio, con crossfade de 15 ms en cada corte) o `clean.mp4` (video, con corte exacto en el cuadro; NVENC p5 cq19, o libx264 crf 18 si no hay NVENC). Cada análisis deja la transcripción, `cuts.json`, SRT, EDL, XML e informe.
+- Salidas: `clean.wav` (audio, con fundido de 15 ms de entrada y de salida en cada tramo, sin solaparse) o `clean.mp4` (video, con corte exacto en el cuadro y el mismo audio; NVENC p5 cq19, o libx264 crf 18 si no hay NVENC). El informe, el EDL y el XML usan los mismos tiempos que el archivo. Cada análisis deja la transcripción, `cuts.json`, SRT, EDL, XML e informe.
 - Sección **Limpiador** de la app: lote con «Analizar» y «Aplicar todos sin revisar»; «Revisar» abre el video o solo el audio con su onda, los cortes como regiones arrastrables, márgenes que replanifican sin GPU, «Escuchar sin cortes», atajos (Espacio, ← y →, D) y «Renderizar».
 - Modelo de transcripción: el que se elige en el selector (`select.whisper.model`), large-v3-turbo por defecto (★). La evaluación de narración y el chequeo de tomas usan el mismo servicio: el comando `whisper` ya no se usa.
 - Un envío que el servidor rechaza (por ejemplo, un formato que no acepta) muestra su motivo en la sección.

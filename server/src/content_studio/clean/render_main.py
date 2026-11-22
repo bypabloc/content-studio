@@ -5,26 +5,18 @@ Corre en el venv principal: es ffmpeg y texto, sin modelos.
 
 from __future__ import annotations
 
+import argparse
 import json
+import sys
 import time
 from pathlib import Path
 
 from content_studio.clean import cuts, exports
 from content_studio.clean.plan import keep_segments
-from content_studio.clean.render import render_audio, render_video
-from content_studio.common import ffmpeg as ff
+from content_studio.clean.render import frames_per_second, on_frame_grid, render_audio, render_video
 from content_studio.media import formats
 
 AUDIO_FPS = 25.0  # las exportaciones de solo audio usan 25 cuadros, como el EDL de la spec
-
-
-def _fps(source: Path) -> float:
-    """Tasa de cuadros del video como número: ffprobe da fracciones como «30000/1001»."""
-    rate = ff.frame_rate(source)
-    if '/' in rate:
-        numerator, denominator = rate.split('/')
-        return int(numerator) / int(denominator)
-    return float(rate)
 
 
 def _nvenc(choice: bool | None) -> bool:
@@ -47,8 +39,9 @@ def run(source: Path, analysis: Path, out: Path, *, nvenc: bool | None = None) -
 
     if formats.is_video(source):
         clean = out / 'clean.mp4'
+        fps = frames_per_second(source)
+        keep = on_frame_grid(keep, fps)  # el video corta en cuadros: informe y exportaciones usan esos mismos tiempos
         render_video(source, keep, clean, nvenc=_nvenc(nvenc))
-        fps = _fps(source)
     else:
         clean = out / 'clean.wav'
         render_audio(source, keep, clean)
@@ -75,3 +68,24 @@ def run(source: Path, analysis: Path, out: Path, *, nvenc: bool | None = None) -
     )
     (out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     return report
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Los flags de `clean.render`: el original, la carpeta del análisis y la salida del trabajo."""
+    parser = argparse.ArgumentParser(prog='render_main', description='Render the clean file, exports and report.')
+    parser.add_argument('--input', required=True, help='the original audio or video')
+    parser.add_argument('--analysis', required=True, help='folder of the analysis, with its cuts.json')
+    parser.add_argument('--out', required=True, help='output folder of the job')
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Entrada del servicio: renderiza y deja el informe en stdout. Corre sin modelos, así que no relanza venv."""
+    args = build_parser().parse_args(argv)
+    report = run(Path(args.input), Path(args.analysis), Path(args.out))
+    print(json.dumps(report), flush=True)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

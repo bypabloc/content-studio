@@ -36,12 +36,13 @@ def replan(
     padding: float,
     edges: bool,
     previous: Sequence[Cut],
+    silences: Sequence[tuple[float, float]] = (),
 ) -> list[Cut]:
     """Recalcula los cortes sin editar con los nuevos parámetros, y conserva los editados a mano (AC-7).
 
     Un corte calculado que se solapa con uno editado cede el paso al editado.
     """
     kept = [c for c in previous if c.get('edited')]
-    added = plan(words, duration, min_gap=min_gap, padding=padding, edges=edges)
+    added = plan(words, duration, min_gap=min_gap, padding=padding, edges=edges, silences=silences)
     added = [c for c in added if not any(_overlaps(c, k) for k in kept)]
     return sorted(kept + added, key=lambda c: c['start'])

@@ -127,8 +127,13 @@ def test_main_runs_the_analysis_in_the_whisper_venv_and_prints_the_result(tmp_pa
     monkeypatch.setattr(analyze_main.process, 'use_venv', lambda path, readme, module: seen.update(module=module))
     monkeypatch.setattr(analyze_main.transcribe_main, '_venv', lambda: tmp_path / 'venv')
     monkeypatch.setattr(analyze_main, 'connect', lambda path: connect(tmp_path / 'content-studio.db'))
+    monkeypatch.setattr(analyze_main.ff, 'silences', lambda path: [(1.0, 1.5)])  # el archivo de la prueba no existe
     monkeypatch.setattr(
-        analyze_main, 'run', lambda conn, source, **kwargs: {'cuts': 0, 'duration': 3.5, 'params': kwargs['params']}
+        analyze_main,
+        'run',
+        lambda conn, source, **kwargs: (
+            seen.update(silences=kwargs['silences']) or {'cuts': 0, 'duration': 3.5, 'params': kwargs['params']}
+        ),
     )
 
     assert (
@@ -139,5 +144,6 @@ def test_main_runs_the_analysis_in_the_whisper_venv_and_prints_the_result(tmp_pa
     )
 
     assert seen['module'] == 'content_studio.clean.analyze_main'
+    assert seen['silences'] == [(1.0, 1.5)]
     result = json.loads(capsys.readouterr().out)
     assert result['params'] == {'min_gap': 0.5, 'padding': 0.15, 'edges': False}

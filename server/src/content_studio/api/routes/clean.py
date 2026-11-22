@@ -76,6 +76,7 @@ def plan_cuts(job_id: JobId, body: PlanIn, conn: Annotated[sqlite3.Connection, D
         padding=body.padding,
         edges=body.edges,
         previous=document['cuts'],
+        silences=[tuple(span) for span in document.get('silences', [])],
     )
     return {**document, 'params': body.model_dump(), 'cuts': found}
 
