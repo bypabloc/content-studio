@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Sequence
 
 from content_studio.clean.plan import Cut, remap
+from content_studio.subtitles.segment import segment, wrap_lines
 
 SRT_LINE_CHARS = 42
 SRT_MAX_LINES = 2
@@ -26,22 +27,6 @@ def transcript_json(words: Sequence[dict], cuts: Sequence[Cut]) -> list[dict]:
     ]
 
 
-def _wrap(words: Sequence[str]) -> list[str]:
-    """Parte las palabras en renglones de hasta 42 caracteres, sin cortar palabras."""
-    lines: list[str] = []
-    line = ''
-    for word in words:
-        candidate = f'{line} {word}' if line else word
-        if len(candidate) <= SRT_LINE_CHARS or not line:
-            line = candidate
-        else:
-            lines.append(line)
-            line = word
-    if line:
-        lines.append(line)
-    return lines
-
-
 def _srt_time(seconds: float) -> str:
     milliseconds = round(seconds * 1000)
     hours, rest = divmod(milliseconds, 3_600_000)
@@ -51,21 +36,13 @@ def _srt_time(seconds: float) -> str:
 
 
 def srt(words: Sequence[dict], cuts: Sequence[Cut]) -> str:
-    """Subtítulos del limpio: bloques de hasta 2 renglones de 42 caracteres y 7 s."""
-    timed = [(w['word'], remap(w['start'], cuts), remap(w['end'], cuts)) for w in words]
-    blocks: list[list[tuple[str, float, float]]] = []
-    for item in timed:
-        if blocks:
-            current = blocks[-1] + [item]
-            span = current[-1][2] - current[0][1]
-            if len(_wrap([text for text, _, _ in current])) <= SRT_MAX_LINES and span <= SRT_MAX_SECONDS:
-                blocks[-1] = current
-                continue
-        blocks.append([item])
+    """Subtítulos del limpio: bloques de hasta 2 renglones de 42 caracteres y 7 s, con la segmentación de la 014."""
+    timed = [{'word': w['word'], 'start': remap(w['start'], cuts), 'end': remap(w['end'], cuts)} for w in words]
+    cues = segment(timed, max_chars=SRT_LINE_CHARS, max_lines=SRT_MAX_LINES, max_duration=SRT_MAX_SECONDS)
     parts: list[str] = []
-    for number, block in enumerate(blocks, start=1):
-        text = '\n'.join(_wrap([word for word, _, _ in block]))
-        parts.append(f'{number}\n{_srt_time(block[0][1])} --> {_srt_time(block[-1][2])}\n{text}\n')
+    for number, cue in enumerate(cues, start=1):
+        text = '\n'.join(wrap_lines([w['word'] for w in cue['words']], SRT_LINE_CHARS))
+        parts.append(f'{number}\n{_srt_time(cue["start"])} --> {_srt_time(cue["end"])}\n{text}\n')
     return '\n'.join(parts)
 
 
