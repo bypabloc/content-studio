@@ -12,5 +12,19 @@
         ]
       }
     ]
+  },
+  "computer-use-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "computer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$(git rev-parse --show-toplevel)/.agents/hooks/computer_use_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

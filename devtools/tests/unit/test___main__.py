@@ -20,4 +20,4 @@ def test_ac3_help_list_commands():
     """AC-3: devtools vive en la raíz; `python -m devtools --help` lista sus comandos y sale con 0."""
     r = subprocess.run([sys.executable, '-m', 'devtools', '--help'], cwd=paths.ROOT, capture_output=True, text=True)
     assert r.returncode == 0
-    assert all(c in r.stderr for c in ('worktree', 'gpu-turn', 'agent-context', 'rules', 'move-data'))
+    assert all(c in r.stderr for c in ('worktree', 'gpu-turn', 'agent-context', 'rules', 'move-data', 'app-check'))

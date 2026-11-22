@@ -1,0 +1,7 @@
+# 024: el diálogo nativo se simula en `chrome.webview.postMessage`
+
+- **Contexto**: `app-check` debe responder el selector de archivos sin abrir el de Windows. En la app real, Tauri define `__TAURI_INTERNALS__.invoke`, `ipc`, `postMessage` y `window.ipc` como no escribibles ni configurables. Su IPC por `fetch` a `http://ipc.localhost` guarda su propia referencia a `fetch` y lo bloquea la CSP (`connect-src` no incluye `ipc.localhost`), así que Tauri cae a `window.chrome.webview.postMessage`.
+- **Elegida**: `pickPaths` redefine `window.chrome.webview.postMessage` (configurable en WebView2). Responde los mensajes `plugin:dialog|open` y `plugin:dialog|save` con `__TAURI_INTERNALS__.runCallback` y pasa los demás al original. `window.confirm`, `alert` y `prompt` son diálogos nativos que CDP no ve: `answerDialogs` los reemplaza. Comprobado el 22-11-2026: `dialog-pick` pasa contra la app real y `plugin:app|version` sigue devolviendo `0.1.0`.
+- **Descartadas**: reemplazar `invoke` (no escribible); `page.route` sobre `ipc.localhost` (CDP no ve esas peticiones); `addInitScript` con recarga para envolver `fetch` antes que Tauri (la CSP bloquea igual el `fetch` del IPC); un gancho de prueba en el client o en Rust (cambia el producto para una prueba).
+- **Cómo revertir**: borrar `tests/e2e/app-check/support/tauri.ts` y `dialog-pick.check.ts`.
+- **Cómo comprobarla**: `python -m devtools app-check run --scenario=dialog-pick` y `bun run --cwd tests/e2e playwright test app-check-support`. Si una versión nueva de Tauri o WebView2 cambia el IPC, falla `dialog-pick`.

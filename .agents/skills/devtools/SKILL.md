@@ -2,10 +2,12 @@
 name: devtools
 description: >
   Referencia de los devtools de content-studio (python -m devtools): worktree prepare|close,
-  gpu-turn status|run, agent-context y reglas. SIEMPRE invocar ANTES de crear o cerrar un worktree, de correr algo
+  gpu-turn status|run, agent-context, reglas y app-check (la app real por CDP, sin Computer Use). SIEMPRE invocar ANTES
+  de crear o cerrar un worktree, de verificar la UI de la app, de correr algo
   que cargue un modelo en la GPU, de editar reglas o skills de .agents/ o .claude/, o de escribir un comando nuevo en
   devtools/ (raíz). Usar cuando el usuario diga "devtools", "worktree", "turno de la GPU", "gpu ocupada",
-  "sincronizar reglas", "contexto de agentes", "crear un comando de devtools".
+  "sincronizar reglas", "contexto de agentes", "crear un comando de devtools", "app-check", "verificar la app",
+  "capturas de la app".
 allowed-tools: Read, Glob, Grep, Bash(python -m devtools:*), Bash(uv run python -m devtools:*)
 argument-hint: "worktree | gpu-turn | agent-context | rules | crear <comando>"
 ---
@@ -22,6 +24,7 @@ Fuente: `.agents/rules/devtools.md`. Desde la raíz del checkout (o con `uv run 
 | Correr algo que carga un modelo | `python -m devtools gpu-turn run --job=<t> -- uv run studio music ...` |
 | Medir lo que cargan los agentes | `python -m devtools agent-context` |
 | Copiar a `.claude/` una regla o skill editada en `.agents/` | `python -m devtools rules --sync` |
+| Ver la app real del worktree (capturas, flujos), sin Computer Use | `python -m devtools app-check run [--scenario=<n>] [--data=temp\|real]` |
 
 ## Reglas
 
