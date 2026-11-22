@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from content_studio.subtitles.ass import to_ass
 from content_studio.subtitles.document import new_document
@@ -81,3 +84,15 @@ def test_ac3_the_generated_ass_is_accepted_by_ffmpeg(tmp_path: Path):
     )
 
     assert result.stdout.decode('utf-8').count('Dialogue:') == ass.count('Dialogue:') == 3
+
+
+FIXTURES = Path(__file__).resolve().parents[5] / 'tests' / 'fixtures' / 'subtitles'
+
+
+@pytest.mark.parametrize('name', ['classic', 'minimal', 'karaoke', 'reels'])
+def test_to_ass_matches_the_golden_file(name):
+    """El ASS de cada fixture (clásico, mínimo, karaoke y reels) es igual a su golden del server (AC-9)."""
+    data = json.loads((FIXTURES / f'{name}.json').read_text(encoding='utf-8'))
+    golden = (FIXTURES / f'{name}.ass').read_text(encoding='utf-8')
+
+    assert to_ass(data['doc'], data['style'], tuple(data['play_res'])) == golden
