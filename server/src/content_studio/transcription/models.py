@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import NamedTuple
 
 
@@ -30,3 +31,23 @@ def recommended() -> str:
 def repo(model: str) -> str:
     """El repo de Hugging Face de un modelo del catálogo."""
     return MODELS[model].repo
+
+
+def downloaded(model: str, cache: Path) -> bool:
+    """¿El modelo ya está en la caché de Hugging Face? Cuenta el `model.bin` de su snapshot, no la carpeta."""
+    folder_name = 'models--' + repo(model).replace('/', '--')
+    return any((cache / folder_name / 'snapshots').glob('*/model.bin'))
+
+
+def status(cache: Path) -> list[dict]:
+    """Cada modelo con su tamaño, su VRAM, si es el recomendado y si ya está descargado (AC-9, `GET /engines`)."""
+    return [
+        {
+            'model': name,
+            'size_gb': spec.size_gb,
+            'vram_gb': spec.vram_gb,
+            'recommended': name == RECOMMENDED,
+            'downloaded': downloaded(name, cache),
+        }
+        for name, spec in MODELS.items()
+    ]

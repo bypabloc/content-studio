@@ -38,3 +38,26 @@ def test_the_faster_whisper_recipe_is_pinned_and_ends_with_verify():
     assert any(p.startswith('faster-whisper==') for p in packages)
     assert any(p.startswith('nvidia-cublas-cu12==') for p in packages)
     assert all('==' in p for p in packages)
+
+
+def test_downloaded_is_true_only_when_the_snapshot_has_its_model_file(tmp_path):
+    """AC-9: un modelo está descargado si su snapshot de Hugging Face trae `model.bin`, no antes."""
+    snapshot = tmp_path / 'models--Systran--faster-whisper-small' / 'snapshots' / 'abc123'
+    snapshot.mkdir(parents=True)
+    assert models.downloaded('small', tmp_path) is False
+
+    (snapshot / 'model.bin').write_bytes(b'')
+
+    assert models.downloaded('small', tmp_path) is True
+    assert models.downloaded('medium', tmp_path) is False
+
+
+def test_status_lists_every_model_with_size_recommendation_and_download_state(tmp_path):
+    """El estado de los modelos: tamaño, VRAM, cuál es el recomendado y cuáles ya están en la caché."""
+    entries = {entry['model']: entry for entry in models.status(tmp_path)}
+
+    assert set(entries) == set(models.MODELS)
+    assert entries['large-v3-turbo']['recommended'] is True
+    assert entries['small']['recommended'] is False
+    assert entries['small']['size_gb'] == models.MODELS['small'].size_gb
+    assert all(entry['downloaded'] is False for entry in entries.values())
