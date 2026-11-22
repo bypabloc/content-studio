@@ -173,5 +173,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [015-normalizar](015-normalizar.md) | Dos pasadas con loudnorm lineal; el códec AAC del video va con bitrate fijo (el por defecto movió el nivel); REFACTOR de la narración diferido | `main` |
 | [015-seguir-a-la-persona](015-seguir-a-la-persona.md) | YuNet 2023mar fijado por revisión y SHA; `sendcmd` sin `eval` (este ffmpeg no lo trae); la receta vision va en versión 2 | `main` |
 | [015-pantallas-convertir-normalizar](015-pantallas-convertir-normalizar.md) | Pantallas de Convertir y Normalizar: 80 % de cobertura por archivo, el esquema de la API en staging antes del gate, y recortar y unir sin pantalla (la edición va al Editor) | `main` |
+| [015-verificacion-final](015-verificacion-final.md) | Corridas reales de 015: insumos generados, manual y seguir a la persona por el servicio, medidas y errores; el video normalizado a −1 dBTP incumplía y pasó a −2 | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -36,7 +36,7 @@ Las herramientas de ffmpeg del estudio, cada una con su lote, su cola y su vista
 | 2 | Encuadre: centrado, manual, barras o desenfoque, y seguir a la persona (YuNet) (T3–T4) | DON |
 | 3 | Normalizar (loudnorm en dos pasadas y mejorar voz) (T5) | DON |
 | 4 | Recortar, unir, fades y dividir (T6) | DON |
-| 5 | Client: Convertir y Normalizar (T7; el commit espera el gate) | IMP |
+| 5 | Client: Convertir y Normalizar (T7), con la CLI y el e2e de T8 | DON |
 
 ## Decisiones clave
 
@@ -48,5 +48,5 @@ Las herramientas de ffmpeg del estudio, cada una con su lote, su cola y su vista
 
 ## WARNING y PENDING
 
-* WARNING: `015-yunet.md` (modelo y licencia) y `015-mejorar-voz.md` (cadena de filtros elegida).
-* PENDING: ninguna.
+* WARNING: `015-seguir-a-la-persona.md` (YuNet: modelo y licencia), `015-normalizar.md` (cadena de «mejorar voz» y techo de pico con pérdida) y `015-verificacion-final.md` (corridas reales), más las fichas de cada tarea.
+* PENDING: `015-escucha-y-revision.md` (lo que escucha y mira el usuario), `015-trayectoria-y-ab-fuera-de-out.md`, `015-foto-de-prueba.md`, `015-bitrates-presets.md`, `015-refactor-masterizacion-narracion.md` y `015-repair-primera-instalacion.md`.

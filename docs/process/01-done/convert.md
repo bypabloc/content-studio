@@ -28,6 +28,7 @@ Convierte audio y video a los formatos estándar, a presets de redes con encuadr
 
 - 2026-11-22: spec 015 (T1 a T8): catálogo y armador, render y GIF, presets y encuadre, seguir a la persona, normalizar, pantallas del cliente, CLI y e2e.
 
-## Verificación
+## Verificación (2026-11-22)
 
-- Pendiente: corridas reales de cada formato, la escucha del A/B y la revisión de las pantallas (T9, con sus fichas en PENDING).
+- Corridas reales: formatos con su duración y códec, GIF de 5 s a 15 fps, y normalizaciones medidas con `ebur128`. El video cumple −1 dBTP con un techo de −2 para los códecs con pérdida ([015-verificacion-final](../WARNING/015-verificacion-final.md)).
+- Escucha y revisión pendientes: [015-escucha-y-revision](../PENDING/015-escucha-y-revision.md).

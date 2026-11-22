@@ -27,6 +27,7 @@ Recorta un tramo de un audio o de un video (o quita ese tramo y une el resto), u
 
 - 2026-11-22: spec 015 (T6 y T8): recortar, unir y dividir en el servidor y la CLI. La pantalla de edición queda en el Editor (017–019).
 
-## Verificación
+## Verificación (2026-11-22)
 
-- Pendiente: corridas reales de cada operación y su medición (duración, volumen, espectrograma), en T9.
+- Corridas reales por API: recorte de 10 s (30 s al quitar un tramo), unión de tres clips en 28,08 s con fundido de 1 s, y división de 180 s en tres partes de 60 s. Sin clics medidos en los cruces ([015-verificacion-final](../WARNING/015-verificacion-final.md)).
+- Escucha pendiente: [015-escucha-y-revision](../PENDING/015-escucha-y-revision.md).
