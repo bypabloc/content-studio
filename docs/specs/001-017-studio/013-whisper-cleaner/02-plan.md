@@ -76,7 +76,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Los medios de pru
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Plan y remap | AC-1, AC-2 | — | `unit` | [x] |
 | T2 | Exportaciones | AC-5 | T1 | `unit` | [x] |
-| T3 | Render de audio | AC-3 | T1 | `unit` | [ ] |
+| T3 | Render de audio | AC-3 | T1 | `unit` | [x] |
 | T4 | Render de video | AC-4 | T3 | `unit`, `-m local` | [ ] |
 | T5 | Transcripción y caché | AC-6 | — | `unit`, `-m local` | [ ] |
 | T6 | Trabajos y API | AC-7 | T2–T5 | `unit` | [ ] |
