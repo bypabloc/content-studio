@@ -148,6 +148,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [012-pantallas-almacenamiento](012-pantallas-almacenamiento.md) | Umbrales de VRAM y métricas de disco sin seguir enlaces | Al cerrar la 012 |
 | [012-aceptacion-sin-usuario](012-aceptacion-sin-usuario.md) | La bienvenida se prueba con e2e; la revisión visual y las capturas quedan en PENDING y no bloquean | `main` (revisión visual en PENDING) |
 | [012-trabajos-engine-uninstall-en-error](012-trabajos-engine-uninstall-en-error.md) | Tres trabajos `engine.uninstall` fallidos se conservan como historial, sin reintentar | `main` |
-| [lote-limpieza-huerfanos](lote-limpieza-huerfanos.md) | Se borraron 49 carpetas huérfanas de `content-studio-worktrees/`; informativa | No bloquea |
+| [lote-limpieza-huerfanos](lote-limpieza-huerfanos.md) | Se borraron 41 de 49 carpetas huérfanas de `content-studio-worktrees/`; 8 bloqueadas en PENDING | No bloquea |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

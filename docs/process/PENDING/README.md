@@ -53,3 +53,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
+| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 8 carpetas huérfanas de `content-studio-worktrees/` con ACL de administrador; las borra el usuario con terminal elevada | Cuando el usuario lo pida; no bloquea | Usuario |

@@ -1,8 +1,8 @@
-# Lote 001-017: borradas las 49 carpetas huérfanas de content-studio-worktrees
+# Lote 001-017: limpieza de carpetas huérfanas de content-studio-worktrees (41 de 49 borradas)
 
-- **Contexto**: `../content-studio-worktrees/` tenía 49 carpetas sin `.git` que `git worktree list` no reconoce. Eran restos de cierres y de corridas de pytest y test-runner (`pytest-of-pacg1/`, `tmp-012-*`, `_tmp`, `spec-007-i18n`, etc.). Tenían 4 859 enlaces, todos dentro de su propia carpeta (`pytest-current` y similares). Ninguno apuntaba al checkout principal ni a otro worktree.
-- **Elegida**: desenlazar primero, uno a uno, con `rmdir` y `del` sin `/S` (solo quitan el enlace), y después borrar cada carpeta con `Remove-Item -Recurse -Force`. Se conserva `012-engines-storage`, que sí está registrado en git.
-- **Descartadas**: dejarlas (ocupaban disco y mezclaban temporales con worktrees reales); borrar con `Remove-Item -Recurse` sin desenlazar (en Windows puede seguir enlaces de directorio).
+- **Contexto**: `../content-studio-worktrees/` tenía 49 carpetas sin `.git` que `git worktree list` no reconoce. Eran restos de cierres y de corridas de pytest y test-runner. Tenían 4 859 enlaces, todos dentro de su propia carpeta (`pytest-current` y similares). Ninguno apuntaba al checkout principal ni a otro worktree. Al borrar, 41 se fueron del todo. 8 quedaron con archivos de `pytest-of-pacg1/` y `pytest-base/` con ACL de otra cuenta (creados en corridas elevadas): ni se pueden leer ni cambiar su propietario sin administrador.
+- **Elegida**: desenlazar primero, uno a uno, con `rmdir` y `del` sin `/S` (solo quitan el enlace); después borrar archivo por archivo con `Remove-Item -Force`; y, por último, borrar cada carpeta. Las 8 bloqueadas se dejan tal cual y se anotan en PENDING. Se conserva `012-engines-storage`, que sí está registrado en git.
+- **Descartadas**: forzar el propietario con `takeown` o `icacls` (falla sin administrador); borrar con `Remove-Item -Recurse` sin desenlazar (en Windows puede seguir enlaces de directorio).
 - **Cómo revertir**: no es reversible, pero eran temporales: los datos eran fixtures de pytest, regenerables con `uv run pytest`.
-- **Cómo comprobarla**: `git worktree list` muestra solo `012-engines-storage`, y `Get-ChildItem ...\content-studio-worktrees -Directory` devuelve solo esa carpeta.
-- **Pendiente**: ninguno.
+- **Cómo comprobarla**: `git worktree list` muestra solo `012-engines-storage`. Las 8 bloqueadas están en PENDING con el comando de terminal elevada.
+- **Pendiente**: [lote-huerfanos-bloqueadas](../PENDING/lote-huerfanos-bloqueadas.md).
