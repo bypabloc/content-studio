@@ -19,8 +19,18 @@ const RESOURCE = /^Failed to load resource/;
 /** Captura de la ventana real en `<run>/shots/<nombre>.png`. */
 export type Shot = (name: string) => Promise<void>;
 
-/** Tema visual sin escribir `ui.theme`: la clase `dark` de `<html>`, la misma que pone useTheme. */
+/** Espera a que la API no tenga peticiones pendientes (sin contar el SSE de `/events`). */
+export type Settled = () => Promise<void>;
+
+const API = /^http:\/\/127\.0\.0\.1:\d+\/(?!events)/;
+
+/**
+ * Tema visual sin escribir `ui.theme`. Emula `prefers-color-scheme`, así con `ui.theme = system` la app lo resuelve
+ * sola, y pone la clase `dark` de `<html>` (la de useTheme) para un `ui.theme` fijo. Cada pantalla que monta useTheme
+ * vuelve a pintar el tema guardado: se llama otra vez después de navegar.
+ */
 export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
+  await page.emulateMedia({ colorScheme: theme });
   await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), theme === 'dark');
 }
 
@@ -28,7 +38,7 @@ export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<voi
  * La página de la ventana de Tauri por CDP. Junta errores de consola, excepciones y respuestas 5xx, que hacen fallar la
  * prueba, y en `--data=real` aborta las escrituras a la API. Cada prueba suma su resultado a `<run>/tests.jsonl`.
  */
-export const test = base.extend<{ app: Page; shot: Shot }>({
+export const test = base.extend<{ app: Page; shot: Shot; settled: Settled }>({
   // eslint-disable-next-line no-empty-pattern -- Playwright exige el patrón de objeto aunque no use otras fixtures.
   app: async ({}, use, testInfo) => {
     if (!CDP) throw new Error('APP_CHECK_CDP is missing: run python -m devtools app-check run');
@@ -63,6 +73,21 @@ export const test = base.extend<{ app: Page; shot: Shot }>({
     // close() de una conexión CDP solo desconecta: la ventana la cierra el Job de devtools.
     await browser.close();
     expect(problems, 'console errors, page errors or 5xx from the API').toEqual({ console: [], http: [] });
+  },
+  settled: async ({ app }, use) => {
+    const pending = new Set<unknown>();
+    app.on('request', (request) => {
+      if (API.test(request.url())) pending.add(request);
+    });
+    const done = (request: unknown) => pending.delete(request);
+    app.on('requestfinished', done);
+    app.on('requestfailed', done);
+    await use(async () => {
+      // Dos lecturas seguidas sin pendientes: una respuesta puede disparar la petición siguiente (la lista, sus detalles).
+      await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0);
+      await app.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve(null))));
+      await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0);
+    });
   },
   shot: async ({ app }, use) => {
     const dir = join(RUN || 'tmp/app-check', 'shots');

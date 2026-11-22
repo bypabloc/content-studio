@@ -177,6 +177,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [015-verificacion-final](015-verificacion-final.md) | Corridas reales de 015: insumos generados, manual y seguir a la persona por el servicio, medidas y errores; el video normalizado a −1 dBTP incumplía y pasó a −2 | `main` |
 | [024-cdp-webview2](024-cdp-webview2.md) | El puerto de CDP se abre con `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS`, sin tocar Tauri | `main` |
 | [024-hooks-por-agente](024-hooks-por-agente.md) | Cómo bloquea Computer Use cada agente; en Codex los hooks del proyecto corren solo si se aprueban con `/hooks` | `main` |
+| [024-target-por-worktree](024-target-por-worktree.md) | `app-check` compila en `tmp/app-check/cargo-target` del worktree: el binario abre el server de su propio checkout | `main` |
 | [024-dialogo-por-webview](024-dialogo-por-webview.md) | El diálogo nativo se simula redefiniendo `chrome.webview.postMessage`; `confirm` se responde sin mostrarlo | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
