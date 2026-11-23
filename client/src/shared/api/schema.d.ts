@@ -783,6 +783,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editor/projects/frame": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Project Frame
+         * @description Devuelve como PNG el fotograma exacto del lienzo en `t`, con caché por revisión del proyecto.
+         */
+        get: operations["project_frame_editor_projects_frame_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editor/projects/media": {
         parameters: {
             query?: never;
@@ -3072,6 +3092,38 @@ export interface operations {
                     "application/json": {
                         [key: string]: string[];
                     };
+                };
+            };
+        };
+    };
+    project_frame_editor_projects_frame_get: {
+        parameters: {
+            query: {
+                path: string;
+                t?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -67,7 +67,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Esquema v2 y keyframes | AC-1 | — | `unit`, `client-unit` | [x] |
-| T2 | Proxies y fotograma exacto | AC-4 | T1 | `unit` | [ ] |
+| T2 | Proxies y fotograma exacto | AC-4 | T1 | `unit` | [x] |
 | T3 | Render de capas y keyframes | AC-2 | T1 | `unit` | [ ] |
 | T4 | Transiciones y escala | AC-3, AC-6 | T3 | `unit`, `-m local` | [ ] |
 | T5 | Compositor | AC-5 | T1, T2 | `client-unit`, `e2e` | [ ] |
