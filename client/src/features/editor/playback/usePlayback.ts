@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { duration } from '../model/validate';
+import { clipLength, duration } from '../model/validate';
 import type { AudioClip, Doc } from '../model/types';
 import { activeClips, gainAt, gainRamps, positionAt, shouldCorrectDrift, sourceTimeAt } from './scheduler';
 
@@ -12,7 +12,7 @@ type MediaEntry = {
 };
 
 function signature(clip: AudioClip, volume: number): string {
-  return [clip.src, clip.src_in, clip.src_out, clip.start, clip.gain_db, clip.fade_in, clip.fade_out, volume].join(':');
+  return [clip.src, clip.src_in, clip.src_out, clip.start, clip.speed ?? 1, clip.gain_db, clip.fade_in, clip.fade_out, volume].join(':');
 }
 
 function scheduleGain(entry: MediaEntry, clip: AudioClip, volume: number, position: number, clock: number): void {
@@ -92,7 +92,9 @@ export function usePlayback(doc: Doc, fileUrl: (path: string) => string): {
           entry.element.currentTime = expected;
         }
       }
-      const withinClip = clip.start <= time && time < clip.start + clip.src_out - clip.src_in;
+      entry.element.playbackRate = clip.speed ?? 1;
+      entry.element.preservesPitch = true;
+      const withinClip = clip.start <= time && time < clip.start + clipLength(clip);
       if (withinClip && entry.element.paused) void entry.element.play().catch(() => undefined);
       else if (!withinClip && !entry.element.paused) entry.element.pause();
     }

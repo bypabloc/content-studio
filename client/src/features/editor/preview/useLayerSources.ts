@@ -24,7 +24,7 @@ function sourceUrl(api: Api, projectPath: string, clip: VisualClip): string {
 }
 
 function createSource(clip: VisualClip): LayerSource {
-  if (clip.media === 'image') {
+  if (clip.media === 'image' || clip.media === 'text') {
     const image = new Image();
     image.decoding = 'async';
     image.crossOrigin = 'anonymous';
@@ -43,14 +43,14 @@ export function useLayerSources(doc: Doc, projectPath: string, api: Api): LayerS
   const sources = useMemo(() => new LayerSourceStore(), []);
   const sourceSignature = JSON.stringify(
     doc.clips.flatMap((clip) =>
-      clip.media === 'video' || clip.media === 'image' ? [[clip.id, clip.media, clip.src]] : [],
+      clip.media === 'video' || clip.media === 'image' || clip.media === 'text' ? [[clip.id, clip.media, clip.src]] : [],
     ),
   );
 
   useEffect(() => {
     const next = new Map<string, LayerSource>();
     for (const clip of doc.clips) {
-      if (clip.media !== 'video' && clip.media !== 'image') continue;
+      if (clip.media !== 'video' && clip.media !== 'image' && clip.media !== 'text') continue;
       const source = createSource(clip);
       source.src = sourceUrl(api, projectPath, clip);
       next.set(clip.id, source);

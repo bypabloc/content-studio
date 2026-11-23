@@ -180,7 +180,7 @@ def _visual_inputs(doc: dict[str, Any], folder: Path, start: float, end: float) 
         source = Path(clip['src'])
         source = source if source.is_absolute() else folder / source
         source = source.resolve()
-        inputs.setdefault(source, RenderInput(source, clip['media'] == 'image', clip['src']))
+        inputs.setdefault(source, RenderInput(source, clip['media'] in {'image', 'text'}, clip['src']))
     return list(inputs.values())
 
 

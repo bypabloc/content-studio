@@ -1,4 +1,4 @@
-/** Modelo v2 del proyecto del editor. Espejo de server/src/content_studio/editor/project.py. */
+/** Modelo v3 del proyecto del editor. Espejo de server/src/content_studio/editor/project.py. */
 
 export interface AudioTrack {
   id: string;

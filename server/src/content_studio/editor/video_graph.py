@@ -99,10 +99,17 @@ def build(
                 source_start, clip_start, clip_end = _range_for(clip, start, finish)
                 length = clip_end - clip_start
                 stream = f's{layer_index}'
-                source_in = 0 if clip['media'] == 'image' else clip['src_in'] + source_start
+                speed = clip.get('speed', 1) if clip['media'] == 'video' else 1
+                source_in = 0 if clip['media'] == 'image' else clip['src_in'] + source_start * speed
+                source_length = length * speed
+                setpts = (
+                    f'setpts=(PTS-STARTPTS)/{_num(speed)}+{_num(clip_start)}/TB'
+                    if speed != 1
+                    else f'setpts=PTS-STARTPTS+{_num(clip_start)}/TB'
+                )
                 lines.append(
-                    f'[{indexes[source]}:v]trim=start={_num(source_in)}:duration={_num(length)},'
-                    f'setpts=PTS-STARTPTS+{_num(clip_start)}/TB,fps={_num(canvas["fps"])},format=rgba[{stream}]'
+                    f'[{indexes[source]}:v]trim=start={_num(source_in)}:duration={_num(source_length)},'
+                    f'{setpts},fps={_num(canvas["fps"])},format=rgba[{stream}]'
                 )
                 transformed = _transform(clip, clip_track, stream, start, source_size, f'c{layer_index}_')
                 lines.extend(transformed.lines)

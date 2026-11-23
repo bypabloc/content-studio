@@ -1,4 +1,4 @@
-"""Modelo del proyecto del editor (spec 018, D-1): migración v1→v2, validación y duración. Puro, solo stdlib."""
+"""Modelo del proyecto del editor (spec 019, T1): migración v1/v2→v3, validación y duración. Puro, solo stdlib."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ def clip_length(clip: Doc) -> float:
     """La duración del clip en la línea de tiempo: el rango de su fuente.
 
     >>> clip_length({'src_in': 2, 'src_out': 6})
-    4
+    4.0
     """
     try:
         return clip_duration(clip)
@@ -77,7 +77,7 @@ def duration(doc: Doc) -> float:
     """El final del clip que más tarde termina; 0 sin clips.
 
     >>> duration({'clips': [{'start': 0, 'src_in': 0, 'src_out': 4}, {'start': 2, 'src_in': 0, 'src_out': 3}]})
-    5
+    5.0
     """
     return max((clip['start'] + clip_length(clip) for clip in doc['clips']), default=0)
 

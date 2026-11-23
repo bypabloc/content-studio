@@ -44,5 +44,5 @@ Cerrar el Editor como NLE: clips de texto con estilo y animación, cambio de vel
 
 ## WARNING y PENDING
 
-* WARNING: `019-texto-rasterizado.md` (por qué no `drawtext`), `019-fusion-con-alfa.md` (cadena de filtros) y `019-chroma-paridad.md` (fórmula y umbral).
+* WARNING: `019-texto-rasterizado.md` (por qué no `drawtext`), `019-control-velocidad.md` (control en el Inspector), `019-fusion-con-alfa.md` (cadena de filtros) y `019-chroma-paridad.md` (fórmula y umbral).
 * PENDING: ninguna.

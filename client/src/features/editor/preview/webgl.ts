@@ -171,7 +171,10 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
     const size = dimensions(source);
     if (isVideo) {
       const video = source as HTMLVideoElement;
-      const sourceTime = clip.src_in + Math.max(0, time - clip.start);
+      const speed = clip.speed ?? 1;
+      video.playbackRate = speed;
+      video.preservesPitch = true;
+      const sourceTime = clip.src_in + Math.max(0, time - clip.start) * speed;
       if (Number.isFinite(sourceTime) && Math.abs(video.currentTime - sourceTime) > 0.05 &&
         (!Number.isFinite(video.duration) || sourceTime < video.duration)) video.currentTime = sourceTime;
       if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
@@ -264,9 +267,7 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
     }
     drawClip(layer.from, layer.track, time, doc.canvas, sources.get(layer.from.id), layer.transition.type, layer.progress, 1, fromShift);
     drawClip(layer.to, layer.track, time, doc.canvas, sources.get(layer.to.id), layer.transition.type, layer.progress, 2, toShift);
-    if (layer.transition.type === 'fadeblack' || layer.transition.type === 'fadewhite') {
-      fill(layer.transition.type, layer.progress, layer.transition.type === 'fadewhite');
-    }
+    if (layer.transition.type === 'fadeblack' || layer.transition.type === 'fadewhite') fill(layer.transition.type, layer.progress, layer.transition.type === 'fadewhite');
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     compositeTarget(width, height);
   }

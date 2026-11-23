@@ -22,7 +22,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 #### Ciclo 3: velocidad [AC-4]
 
-- **RED**: `editor/test_render_speed.py` (duración, tono con FFT y cadena de `atempo`).
+- **RED**: `editor/test_render_audio.py`, `editor/test_render_video.py` y `editor/test_video_transitions.py` (speed y audio con FFT).
 - **GREEN**: `setpts` y `atempo` en `render_video.py` y `render_audio.py`; `playbackRate` en `playback/` y `preview/`.
 - **REFACTOR**: ninguno.
 

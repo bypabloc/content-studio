@@ -190,5 +190,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [018-render-video](018-render-video.md) | El recorte animado usa alfa; la caja de rotación es fija y las etiquetas del grafo son únicas | antes de `main` |
 | [018-transiciones](018-transiciones.md) | Cada transición combina capas transparentes del lienzo y conserva el alfa de las pistas inferiores | antes de `main` |
 | [018-paridad-preview-export](018-paridad-preview-export.md) | Fórmulas de `xfade` y captura del canvas real: AC-5 pasa en cinco tiempos con SSIM >= 0,95 | antes de `main` |
+| [019-texto-rasterizado](019-texto-rasterizado.md) | Un PNG con alfa se comparte entre el visor y FFmpeg; hash por texto y presets de título | antes de `main` |
+| [019-control-velocidad](019-control-velocidad.md) | El Inspector cambia la velocidad de clips de audio y video; guarda el valor en el proyecto | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

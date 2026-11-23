@@ -5,6 +5,7 @@ Cubre AC-2 (guardado con hash viejo) y AC-10 (fuentes que faltan al abrir).
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import os
@@ -49,6 +50,15 @@ def _recording() -> bytes:
     return buffer.getvalue()
 
 
+def _transparent_png() -> bytes:
+    """Un PNG transparente mínimo para probar la subida de títulos rasterizados."""
+    import base64
+
+    return base64.b64decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+    )
+
+
 def _visual_project(project_file: Path, source: str, media: str) -> None:
     """Agrega al proyecto una fuente visual v2 para probar el endpoint de medios."""
     source_file = project_file.parent / source
@@ -59,36 +69,37 @@ def _visual_project(project_file: Path, source: str, media: str) -> None:
     for key in ('volume_db', 'mute', 'solo'):
         track.pop(key, None)
     doc['tracks'] = [track]
-    doc['clips'] = [
-        {
-            'id': 'v1',
-            'track': track['id'],
-            'src': source,
-            'media': media,
-            'src_in': 0,
-            'src_out': 1,
-            'start': 0,
-            'fade_in': 0,
-            'fade_out': 0,
-            'transform': {
-                'x': 0,
-                'y': 0,
-                'scale_x': 1,
-                'scale_y': 1,
-                'rotation': 0,
-                'opacity': 1,
-                'crop': {'l': 0, 't': 0, 'r': 0, 'b': 0},
-                'anchor_x': 0.5,
-                'anchor_y': 0.5,
-            },
-            'keyframes': {},
-        }
-    ]
+    clip = {
+        'id': 'v1',
+        'track': track['id'],
+        'src': source,
+        'media': media,
+        'src_in': 0,
+        'src_out': 1,
+        'start': 0,
+        'fade_in': 0,
+        'fade_out': 0,
+        'transform': {
+            'x': 0,
+            'y': 0,
+            'scale_x': 1,
+            'scale_y': 1,
+            'rotation': 0,
+            'opacity': 1,
+            'crop': {'l': 0, 't': 0, 'r': 0, 'b': 0},
+            'anchor_x': 0.5,
+            'anchor_y': 0.5,
+        },
+        'keyframes': {},
+    }
+    if media == 'text':
+        clip['raster'] = source
+    doc['clips'] = [clip]
     project_file.write_text(json.dumps(doc), encoding='utf-8')
 
 
-def test_create_writes_project_json_version_2_and_its_folders(api, root):
-    """Crear un proyecto escribe `project.json` versión 2 y las carpetas `media/` y `exports/`."""
+def test_create_writes_project_json_version_3_and_its_folders(api, root):
+    """Crear un proyecto escribe `project.json` versión 3 y las carpetas `media/` y `exports/`."""
     created = _create(api)
 
     project_file = Path(created['path'])
@@ -96,7 +107,7 @@ def test_create_writes_project_json_version_2_and_its_folders(api, root):
     assert project_file.is_relative_to(root)
     assert (project_file.parent / 'media').is_dir()
     assert (project_file.parent / 'exports').is_dir()
-    assert json.loads(project_file.read_text(encoding='utf-8'))['version'] == 2
+    assert json.loads(project_file.read_text(encoding='utf-8'))['version'] == 3
 
 
 def test_a_save_with_the_current_hash_changes_the_file(api, root):
@@ -181,6 +192,53 @@ def test_uploading_a_recording_saves_it_inside_the_project_media_folder(api, roo
     assert (Path(created['path']).parent / response.json()['src']).read_bytes() == recording
 
 
+def test_uploading_a_text_raster_saves_it_by_clip_and_content_hash(api, root):
+    """D-2: los PNG de texto quedan en media/ con el id del clip y su SHA-256."""
+    created = _create(api)
+    raster = _transparent_png()
+    digest = hashlib.sha256(raster).hexdigest()
+
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path'], 'clip_id': 'title-1', 'sha256': digest},
+        content=raster,
+        headers={**api.headers, 'Content-Type': 'image/png'},
+    )
+
+    expected = f'media/text-title-1-{digest}.png'
+    assert response.status_code == 201
+    assert response.json() == {'src': expected}
+    assert (Path(created['path']).parent / expected).read_bytes() == raster
+
+
+def test_uploading_a_text_raster_rejects_a_wrong_hash(api, root):
+    """La ruta del PNG no puede anunciar un hash distinto a sus bytes."""
+    created = _create(api)
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path'], 'clip_id': 'title-1', 'sha256': '0' * 64},
+        content=_transparent_png(),
+        headers={**api.headers, 'Content-Type': 'image/png'},
+    )
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'editor_text_raster_invalid'
+
+
+def test_uploading_a_non_png_as_text_raster_is_rejected(api, root):
+    """La subida de texto requiere PNG y no crea archivos con bytes arbitrarios."""
+    created = _create(api)
+    response = api.client.post(
+        '/editor/projects/media',
+        params={'path': created['path'], 'clip_id': 'title-1', 'sha256': hashlib.sha256(b'bad').hexdigest()},
+        content=b'bad',
+        headers={**api.headers, 'Content-Type': 'image/png'},
+    )
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'editor_text_raster_invalid'
+
+
 def test_visual_media_serves_the_requested_video_proxy_with_query_token(api, root, monkeypatch, tmp_path: Path):
     """El compositor puede cargar el proxy sin headers y solo para fuentes del proyecto."""
     from content_studio.editor import proxy
@@ -211,6 +269,22 @@ def test_visual_media_serves_an_image_source_with_query_token(api, root):
     response = api.client.get(
         '/editor/projects/media',
         params={'path': str(project_file), 'source': 'media/logo.png', 'token': api.token},
+    )
+
+    assert response.status_code == 200
+    assert response.headers['content-type'] == 'image/png'
+    assert response.content == b'visual source'
+
+
+def test_visual_media_serves_a_text_raster_from_the_project_media_folder(api, root):
+    """El título rasterizado se entrega como una fuente de imagen del proyecto."""
+    created = _create(api)
+    project_file = Path(created['path'])
+    _visual_project(project_file, 'media/text-title-hash.png', 'text')
+
+    response = api.client.get(
+        '/editor/projects/media',
+        params={'path': str(project_file), 'source': 'media/text-title-hash.png', 'token': api.token},
     )
 
     assert response.status_code == 200

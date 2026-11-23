@@ -818,7 +818,7 @@ export interface paths {
         put?: never;
         /**
          * Upload Recording
-         * @description Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones.
+         * @description Guarda una toma WAV o una imagen PNG dentro de la carpeta de medios del proyecto.
          */
         post: operations["upload_recording_editor_projects_media_post"];
         delete?: never;

@@ -19,7 +19,16 @@ const context = {
   resume: vi.fn(async () => undefined),
   close: vi.fn(async () => undefined),
 };
-const elements: { src: string; currentTime: number; paused: boolean; seeking: boolean; play: ReturnType<typeof vi.fn>; pause: ReturnType<typeof vi.fn> }[] = [];
+const elements: {
+  src: string;
+  currentTime: number;
+  playbackRate: number;
+  preservesPitch: boolean;
+  paused: boolean;
+  seeking: boolean;
+  play: ReturnType<typeof vi.fn>;
+  pause: ReturnType<typeof vi.fn>;
+}[] = [];
 const frames: FrameRequestCallback[] = [];
 
 const doc: Doc = {
@@ -45,6 +54,8 @@ beforeEach(() => {
     const element = {
       src,
       currentTime: 0,
+      playbackRate: 1,
+      preservesPitch: false,
       paused: true,
       seeking: false,
       play: vi.fn(async () => { element.paused = false; }),
@@ -92,6 +103,19 @@ describe('usePlayback', () => {
     expect(elements[0].currentTime).toBe(2);
     expect(elements[0].play).toHaveBeenCalledOnce();
     expect(result.current.position).toBe(1);
+  });
+
+  it('reproduce el audio a la velocidad del clip sin cambiar su tono', () => {
+    const sped: Doc = { ...doc, clips: [{ ...doc.clips[0], speed: 2 }] };
+    const { result } = renderHook(() => usePlayback(sped, (path) => path));
+
+    act(() => result.current.setPlaying(true));
+    context.currentTime = 1;
+    act(() => frames.shift()?.(0));
+
+    expect(elements[0].playbackRate).toBe(2);
+    expect(elements[0].preservesPitch).toBe(true);
+    expect(elements[0].currentTime).toBe(4);
   });
 
   it('corrige una deriva de más de 40 ms usando el reloj del contexto', () => {

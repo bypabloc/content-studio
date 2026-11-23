@@ -16,6 +16,7 @@ import { pxToTime, selectInRange } from './model/timeline';
 import { resizeTransition } from './model/visual';
 import { clipLength } from './model/validate';
 import type { Doc, Op, TransitionType } from './model/types';
+import { TEXT_PRESETS, type TextPresetName } from './text/presets';
 
 type Props = {
   doc: Doc;
@@ -36,6 +37,7 @@ type Props = {
   onMarkerRename?: (id: string, label: string) => void;
   recordingLevels?: Levels;
   onDropTransition?: (type: TransitionType, trackId: string | undefined, time: number) => void;
+  onDropText?: (preset: TextPresetName, trackId: string | undefined, time: number) => void;
 };
 
 type Range = { trackId: string; anchor: number; current: number; left: number };
@@ -60,6 +62,7 @@ export function Timeline({
   onMarkerRename,
   recordingLevels,
   onDropTransition,
+  onDropText,
 }: Props): React.JSX.Element {
   const [range, setRange] = useState<Range | null>(null);
   const rangeRef = useRef<Range | null>(null);
@@ -91,6 +94,12 @@ export function Timeline({
       onDropTransition?.(type, trackId, pxToTime(Math.max(0, event.clientX - left), zoom));
       return;
     }
+    const preset = textPreset(event.dataTransfer.getData('application/x-editor-text-preset'));
+    if (preset) {
+      const left = event.currentTarget.getBoundingClientRect().left;
+      onDropText?.(preset, trackId, pxToTime(Math.max(0, event.clientX - left), zoom));
+      return;
+    }
     const paths = droppedPaths(event);
     if (paths.length) {
       const left = event.currentTarget.getBoundingClientRect().left;
@@ -103,6 +112,11 @@ export function Timeline({
     const type = transitionType(event.dataTransfer.getData('application/x-editor-transition'));
     if (type) {
       onDropTransition?.(type, undefined, playhead);
+      return;
+    }
+    const preset = textPreset(event.dataTransfer.getData('application/x-editor-text-preset'));
+    if (preset) {
+      onDropText?.(preset, undefined, playhead);
       return;
     }
     const paths = droppedPaths(event);
@@ -276,4 +290,8 @@ function transitionType(value: string): TransitionType | null {
   return ['fade', 'fadeblack', 'fadewhite', 'wipeleft', 'wiperight', 'slideleft', 'slideright', 'circleopen'].includes(value)
     ? (value as TransitionType)
     : null;
+}
+
+function textPreset(value: string): TextPresetName | null {
+  return TEXT_PRESETS.includes(value as TextPresetName) ? value as TextPresetName : null;
 }

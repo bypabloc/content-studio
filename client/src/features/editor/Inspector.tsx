@@ -7,7 +7,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 
 import { clipProperty } from './preview/compositor';
-import type { Doc, Keyframe, VisualClip } from './model/types';
+import type { Clip, Doc, Keyframe, VisualClip } from './model/types';
 import type { VisualProperty } from './model/visual';
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
   clipId: string | null;
   time: number;
   onChange: (property: VisualProperty, value: number) => void;
+  onSpeedChange: (clipId: string, speed: number) => void;
   onToggleKeyframe: (property: VisualProperty) => void;
   onEaseChange: (property: VisualProperty, ease: Keyframe['ease']) => void;
   onSeek: (time: number) => void;
@@ -54,9 +55,8 @@ function propertyLabel(property: VisualProperty): string {
   return PROPERTY_LABELS[property];
 }
 
-function visualClip(doc: Doc, id: string | null): VisualClip | null {
-  const clip = doc.clips.find((item) => item.id === id);
-  return clip && (clip.media === 'video' || clip.media === 'image') ? clip : null;
+function visualClip(clip: Clip | undefined): VisualClip | null {
+  return clip && (clip.media === 'video' || clip.media === 'image' || clip.media === 'text') ? clip : null;
 }
 
 function limits(property: VisualProperty): { min?: number; max?: number } {
@@ -77,8 +77,10 @@ function activeEase(clip: VisualClip, property: VisualProperty, time: number, fp
 }
 
 /** Edición numérica de propiedades, keyframes y ajustes del lienzo del proyecto. */
-export function Inspector({ doc, clipId, time, onChange, onToggleKeyframe, onEaseChange, onSeek, onCanvasChange }: Props): React.JSX.Element {
-  const clip = visualClip(doc, clipId);
+export function Inspector({ doc, clipId, time, onChange, onSpeedChange, onToggleKeyframe, onEaseChange, onSeek, onCanvasChange }: Props): React.JSX.Element {
+  const selected = doc.clips.find((item) => item.id === clipId);
+  const clip = visualClip(selected);
+  const canChangeSpeed = selected && (selected.media === undefined || selected.media === 'video');
   const times = clip ? keyframeTimes(clip) : [];
   const previous = [...times].reverse().find((point) => point < time - 0.5 / doc.canvas.fps);
   const next = times.find((point) => point > time + 0.5 / doc.canvas.fps);
@@ -92,10 +94,26 @@ export function Inspector({ doc, clipId, time, onChange, onToggleKeyframe, onEas
     if (Number.isFinite(value) && value > 0) onCanvasChange({ [property]: Math.round(value) });
   }
 
+  function setClipSpeed(raw: string): void {
+    const speed = Number(raw);
+    if (canChangeSpeed && Number.isFinite(speed) && speed >= 0.25 && speed <= 4) onSpeedChange(selected.id, speed);
+  }
+
   return (
     <UICard aria-label={t('editor.inspector.label')}>
       <UIStack gap="sm">
         <UIText variant="heading">{t('editor.inspector.label')}</UIText>
+        {canChangeSpeed ? (
+          <UIField
+            label={t('editor.inspector.speed')}
+            type="number"
+            min={0.25}
+            max={4}
+            step="any"
+            value={selected.speed ?? 1}
+            onChange={(event) => setClipSpeed(event.currentTarget.value)}
+          />
+        ) : null}
         {clip ? (
           <>
             <UIStack direction="row" gap="xs">
@@ -141,7 +159,7 @@ export function Inspector({ doc, clipId, time, onChange, onToggleKeyframe, onEas
               );
             })}
           </>
-        ) : <UIText variant="caption">{t('editor.inspector.no_selection')}</UIText>}
+        ) : selected ? null : <UIText variant="caption">{t('editor.inspector.no_selection')}</UIText>}
         <UISelect
           label={t('editor.inspector.canvas_preset')}
           value={presetValue}

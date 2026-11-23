@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import array
+import cmath
+import math
 import shutil
 import subprocess
+import wave
 from pathlib import Path
 
 import pytest
 
+# cspell:ignore frombytes: método de array de la biblioteca estándar.
 from content_studio.common.ffmpeg import probe_duration
 from content_studio.editor import render_audio
 
@@ -106,6 +111,20 @@ def test_a_marker_segment_keeps_only_its_source_range_and_resets_the_timeline(tm
     )
 
 
+def test_speed_scales_partial_source_ranges_and_keeps_pitch_in_the_graph(tmp_path):
+    """AC-4: el rango de fuente se escala por velocidad y la cadena conserva el tono."""
+    doc = _doc(
+        [_track('audio')],
+        [_clip('voice', 'audio', 'voice.wav', 0, 4, src_in=1, src_out=5, speed=2)],
+    )
+    doc['version'] = 3
+
+    plan = render_audio.build(doc, tmp_path, start=0.5, end=1.5)
+
+    assert 'atrim=start=2:end=4' in plan.script
+    assert 'atempo=2' in plan.script
+
+
 def test_a_missing_source_fails_with_the_paths_in_the_error(tmp_path):
     """AC-10: exportar con una fuente ausente devuelve `missing_source` y sus rutas."""
     doc = _doc([_track('t1')], [_clip('c1', 't1', 'missing.wav', 0, 2)])
@@ -142,3 +161,78 @@ def test_the_wav_lasts_as_long_as_the_project(tmp_path):
     render_audio.render(doc, tmp_path, out, format='wav')
 
     assert probe_duration(out) == pytest.approx(3, abs=0.01)
+
+
+def _fft(values: list[float]) -> list[complex]:
+    """FFT iterativo de radix 2 para medir el tono sin dependencias de prueba."""
+    size = len(values)
+    result = [complex(value) for value in values]
+    reversed_index = 0
+    for index in range(1, size):
+        bit = size >> 1
+        while reversed_index & bit:
+            reversed_index ^= bit
+            bit >>= 1
+        reversed_index ^= bit
+        if index < reversed_index:
+            result[index], result[reversed_index] = result[reversed_index], result[index]
+    width = 2
+    while width <= size:
+        half = width // 2
+        step = cmath.exp(-2j * math.pi / width)
+        for start in range(0, size, width):
+            factor = 1 + 0j
+            for offset in range(half):
+                even = result[start + offset]
+                odd = factor * result[start + offset + half]
+                result[start + offset] = even + odd
+                result[start + offset + half] = even - odd
+                factor *= step
+        width *= 2
+    return result
+
+
+def _dominant_frequency(path: Path) -> float:
+    """Devuelve el pico FFT de una ventana mono de 8192 muestras."""
+    size = 8192
+    with wave.open(str(path), 'rb') as audio:
+        rate, channels = audio.getframerate(), audio.getnchannels()
+        audio.setpos(int(rate * 0.25))
+        frames = array.array('h')
+        frames.frombytes(audio.readframes(size))
+    samples = [float(frames[index * channels]) for index in range(size)]
+    windowed = [
+        sample * (0.5 - 0.5 * math.cos(2 * math.pi * index / (size - 1))) for index, sample in enumerate(samples)
+    ]
+    spectrum = _fft(windowed)
+    peak = max(range(1, size // 2), key=lambda index: abs(spectrum[index]))
+    return peak * rate / size
+
+
+@needs_ffmpeg
+def test_speed_render_is_shorter_and_keeps_its_fundamental(tmp_path):
+    """AC-4: 4 s a 2× duran 2 s y conservan la frecuencia fundamental ±2 %."""
+    source = tmp_path / 'tone.wav'
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-y',
+            '-v',
+            'error',
+            '-f',
+            'lavfi',
+            '-i',
+            'sine=frequency=440:duration=4:sample_rate=48000',
+            str(source),
+        ],
+        check=True,
+    )
+    output = tmp_path / 'speed.wav'
+    doc = _doc([_track('audio')], [_clip('voice', 'audio', source.as_posix(), 0, 4, speed=2)])
+    doc['version'] = 3
+
+    render_audio.render(doc, tmp_path, output)
+
+    assert probe_duration(output) == pytest.approx(2, abs=0.02)
+    assert 'atempo=2' in output.with_suffix('.filter').read_text(encoding='utf-8')
+    assert _dominant_frequency(output) == pytest.approx(_dominant_frequency(source), rel=0.02)

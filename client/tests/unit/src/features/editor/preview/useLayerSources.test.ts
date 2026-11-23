@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useLayerSources } from '@/features/editor/preview/useLayerSources';
 import type { Api } from '@/shared/api/client';
-import type { Canvas, Doc, VideoTrack, VisualClip } from '@/features/editor/model/types';
+import type { Canvas, Doc, TextClip, VideoTrack, VisualClip } from '@/features/editor/model/types';
 
 const canvas: Canvas = { width: 1280, height: 720, fps: 30, background: '#000000' };
 const track: VideoTrack = { id: 'v1', kind: 'video', name: 'Video', opacity: 1, hidden: false, locked: false };
@@ -54,6 +54,32 @@ describe('fuentes de capas del compositor', () => {
 
     expect(result.current.get('clip')).toBeInstanceOf(HTMLVideoElement);
     expect(result.current.get('clip')).not.toBe(initial);
+    unmount();
+  });
+
+  it('carga el PNG rasterizado de un clip de texto como una imagen', () => {
+    const api = { queryUrl: vi.fn((_path: string, query: Record<string, string>) => '/preview?' + query.source) } as unknown as Api;
+    const initial = doc();
+    const image = initial.clips[0] as VisualClip;
+    const title: TextClip = {
+      ...image,
+      id: 'title',
+      src: 'media/text-title-hash.png',
+      media: 'text',
+      raster: 'media/text-title-hash.png',
+      text: {
+        content: 'Hola', font: 'Arial', weight: 700, size: 48, color: '#ffffff',
+        stroke: { width: 2, color: '#000000' }, shadow: { x: 0, y: 2, blur: 4, color: '#000000' },
+        align: 'center', line_height: 1.2, max_width: 800,
+      },
+    };
+    const model = { ...initial, version: 3 as const, clips: [title] };
+    const { result, unmount } = renderHook(() => useLayerSources(model, '/project/project.json', api));
+
+    expect(result.current.get('title')).toBeInstanceOf(HTMLImageElement);
+    expect(api.queryUrl).toHaveBeenCalledWith('/editor/projects/media', {
+      path: '/project/project.json', source: 'media/text-title-hash.png',
+    });
     unmount();
   });
 

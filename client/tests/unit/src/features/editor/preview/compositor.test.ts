@@ -192,9 +192,11 @@ describe('compositor WebGL2', () => {
       readyState: { value: 2 },
       currentTime: { get: () => currentTime, set: (value: number) => { currentTime = value; } },
     });
-    const videoDoc = project([videoTrack('v1')], [visualClip('video', 'v1')]);
+    const videoClip = { ...visualClip('video', 'v1'), media: 'video' as const, speed: 2 };
+    const videoDoc = project([videoTrack('v1')], [videoClip]);
     compositor.render(videoDoc, 1, new Map([['video', video]]));
-    expect(currentTime).toBe(1);
+    expect(currentTime).toBe(2);
+    expect(video.playbackRate).toBe(2);
 
     compositor.destroy();
     compositor.destroy();

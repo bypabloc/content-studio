@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import time
@@ -9,11 +10,119 @@ from pathlib import Path
 
 import pytest
 
-from content_studio.editor import project, render_video
+from content_studio.editor import project, render_video, video_graph
 from content_studio.media import convert, formats
 from content_studio.system import tools
 
 TRANSITIONS = ('fade', 'fadeblack', 'fadewhite', 'wipeleft', 'wiperight', 'slideleft', 'slideright', 'circleopen')
+FIXTURES = Path(__file__).resolve().parents[4] / 'fixtures' / 'editor'
+
+
+def _video_speed_doc(source: str) -> dict:
+    """Proyecto v3 mínimo con un video de 4 s configurado a 2×."""
+    doc = json.loads((FIXTURES / 'valid-visual-v2.json').read_text(encoding='utf-8'))['doc']
+    migrated = project.migrate(doc)
+    clip = next(item for item in migrated['clips'] if item.get('media') == 'video')
+    clip.update(src=source, src_in=0, src_out=4, start=0, speed=2)
+    migrated['clips'] = [clip]
+    migrated['tracks'] = [track for track in migrated['tracks'] if track['id'] == clip['track']]
+    migrated['transitions'] = []
+    return migrated
+
+
+def test_video_graph_scales_source_range_and_pts():
+    """AC-4: un segundo del timeline a 2× consume dos segundos de fuente."""
+    source = Path('video.mp4')
+    doc = _video_speed_doc(source.as_posix())
+    source_path = (Path('.') / source).resolve()
+
+    plan = video_graph.build(doc, Path('.'), start=0.5, end=1.5, source_sizes={source_path: (1280, 720)})
+
+    assert 'trim=start=1:duration=2' in plan.script
+    assert 'setpts=(PTS-STARTPTS)/2+0/TB' in plan.script
+
+
+@pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
+def test_video_with_audio_renders_at_double_speed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """AC-4: el video y su audio a 2× duran 2 s en el render completo."""
+    source = tmp_path / 'source.mp4'
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-y',
+            '-v',
+            'error',
+            '-f',
+            'lavfi',
+            '-i',
+            'testsrc2=size=320x180:rate=30:duration=4',
+            '-f',
+            'lavfi',
+            '-i',
+            'sine=frequency=440:sample_rate=48000:duration=4',
+            '-c:v',
+            'libx264',
+            '-preset',
+            'ultrafast',
+            '-pix_fmt',
+            'yuv420p',
+            '-c:a',
+            'aac',
+            '-shortest',
+            str(source),
+        ],
+        check=True,
+    )
+    doc = _video_speed_doc(source.as_posix())
+    doc['tracks'].append(
+        {
+            'id': 'audio',
+            'kind': 'audio',
+            'name': 'Audio',
+            'volume_db': 0,
+            'mute': False,
+            'solo': False,
+            'locked': False,
+            'height': 80,
+        }
+    )
+    doc['clips'].append(
+        {
+            'id': 'sound',
+            'track': 'audio',
+            'src': source.as_posix(),
+            'src_in': 0,
+            'src_out': 4,
+            'start': 0,
+            'gain_db': 0,
+            'fade_in': 0,
+            'fade_out': 0,
+            'speed': 2,
+        }
+    )
+    monkeypatch.setattr(tools, 'detect', lambda: {'gpu': None})
+    output = tmp_path / 'double-speed.mp4'
+
+    render_video.render(doc, tmp_path, output)
+
+    result = subprocess.run(
+        [
+            'ffprobe',
+            '-v',
+            'error',
+            '-show_entries',
+            'stream=codec_type,duration',
+            '-of',
+            'json',
+            str(output),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    durations = {stream['codec_type']: float(stream['duration']) for stream in json.loads(result.stdout)['streams']}
+    assert durations['video'] == pytest.approx(2, abs=0.05)
+    assert durations['audio'] == pytest.approx(2, abs=0.05)
 
 
 def test_video_quality_uses_crf_without_a_hardware_encoder(monkeypatch: pytest.MonkeyPatch):
@@ -246,6 +355,46 @@ def test_build_graph_composes_tracks_in_array_order_and_skips_hidden_tracks(tmp_
 
     assert [item.path.name for item in plan.inputs] == ['bottom.png', 'top.png']
     assert plan.script.index('[1:v]') < plan.script.index('[2:v]')
+
+
+def test_text_raster_is_a_looped_image_input(tmp_path: Path):
+    """La imagen PNG del título se trata igual que un logo estático durante el render."""
+    doc = {
+        'canvas': {**project.DEFAULT_CANVAS, 'width': 320, 'height': 240},
+        'tracks': [{'id': 'titles', 'kind': 'video', 'opacity': 1, 'hidden': False}],
+        'clips': [
+            {
+                'id': 'title',
+                'track': 'titles',
+                'src': 'media/text-title-hash.png',
+                'raster': 'media/text-title-hash.png',
+                'media': 'text',
+                'src_in': 0,
+                'src_out': 2,
+                'start': 0,
+                'fade_in': 0,
+                'fade_out': 0,
+                'transform': {
+                    'x': 0,
+                    'y': 0,
+                    'scale_x': 1,
+                    'scale_y': 1,
+                    'rotation': 0,
+                    'opacity': 1,
+                    'anchor_x': 0.5,
+                    'anchor_y': 0.5,
+                    'crop': {'l': 0, 't': 0, 'r': 0, 'b': 0},
+                },
+                'keyframes': {},
+            }
+        ],
+    }
+
+    inputs = render_video._visual_inputs(doc, tmp_path, 0, 1)
+
+    assert len(inputs) == 1
+    assert inputs[0].image is True
+    assert inputs[0].source == 'media/text-title-hash.png'
 
 
 def test_render_frame_applies_animated_crop_scale_rotation_and_track_opacity(tmp_path: Path):

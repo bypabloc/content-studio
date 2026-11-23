@@ -137,7 +137,7 @@ def project_media(path: str, source: str) -> FileResponse:
         (
             item
             for item in doc.get('clips', [])
-            if item.get('media') in {'video', 'image'} and item.get('src') == source
+            if item.get('media') in {'video', 'image', 'text'} and item.get('src') == source
         ),
         None,
     )
@@ -152,6 +152,11 @@ def project_media(path: str, source: str) -> FileResponse:
 
         if original.suffix.lower() not in IMAGE_EXTENSIONS:
             raise ApiError(422, 'unreadable_media')
+        target = original
+    elif clip['media'] == 'text':
+        media_root = (file.parent / 'media').resolve()
+        if source != clip.get('raster') or Path(source).is_absolute() or not original.is_relative_to(media_root):
+            raise ApiError(404, 'fs_media_not_found', path=source)
         target = original
     else:
         from content_studio.editor import proxy
@@ -174,7 +179,7 @@ def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) 
     stat = file.stat()
     sources: list[tuple[str, int | None, int | None]] = []
     for clip in doc.get('clips', []):
-        if clip.get('media') not in {'video', 'image'}:
+        if clip.get('media') not in {'video', 'image', 'text'}:
             continue
         source = Path(clip['src'])
         source = (source if source.is_absolute() else file.parent / source).resolve()
@@ -189,9 +194,18 @@ def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) 
 
 @router.post('/projects/media', status_code=201)
 async def upload_recording(path: str, request: Request) -> dict[str, str | float]:
-    """Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones."""
+    """Guarda una toma WAV o una imagen PNG dentro de la carpeta de medios del proyecto."""
     file = _project_file(path)
-    if request.headers.get('content-type', '').split(';', maxsplit=1)[0].strip().lower() != 'audio/wav':
+    content_type = request.headers.get('content-type', '').split(';', maxsplit=1)[0].strip().lower()
+    if content_type == 'image/png':
+        clip_id = request.query_params.get('clip_id', '')
+        digest = request.query_params.get('sha256', '')
+        try:
+            src = store.save_text_raster(file.parent, await request.body(), clip_id, digest)
+        except ValueError as error:
+            raise ApiError(422, 'editor_text_raster_invalid') from error
+        return {'src': src}
+    if content_type != 'audio/wav':
         raise ApiError(422, 'editor_recording_invalid')
     try:
         src, duration = store.save_recording(file.parent, await request.body())

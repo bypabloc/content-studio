@@ -162,7 +162,7 @@ export function resizeTransition(doc: Doc, transitionId: string, requested: numb
 
 function findVisualClip(doc: Doc, id: string): VisualClip {
   const clip = doc.clips.find((item) => item.id === id);
-  if (clip === undefined || (clip.media !== 'image' && clip.media !== 'video')) {
+  if (clip === undefined || (clip.media !== 'image' && clip.media !== 'video' && clip.media !== 'text')) {
     throw new Error(`unknown visual clip: ${id}`);
   }
   return clip;

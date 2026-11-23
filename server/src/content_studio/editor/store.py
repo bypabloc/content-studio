@@ -17,9 +17,12 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+# cspell:ignore IHDR: identificador de bloque PNG.
 from content_studio.editor.project import DEFAULT_CANVAS, SAMPLE_RATE, VERSION, Doc, migrate
 
 FILE = 'project.json'
+PNG_SIGNATURE = b'\x89PNG\r\n\x1a\n'
+TEXT_RASTER_LIMIT = 16 * 1024 * 1024
 
 
 class ProjectChanged(Exception):
@@ -42,7 +45,7 @@ def slug(name: str) -> str:
 
 
 def new_doc(name: str) -> Doc:
-    """El documento vacío del esquema v2, con lienzo y una pista de audio."""
+    """El documento vacío del esquema v3, con lienzo y una pista de audio."""
     track = {
         'id': 't1',
         'kind': 'audio',
@@ -161,3 +164,42 @@ def save_recording(folder: Path, data: bytes) -> tuple[str, float]:
             number += 1
             continue
         return relative.as_posix(), duration
+
+
+def save_text_raster(folder: Path, data: bytes, clip_id: str, expected_hash: str) -> str:
+    """Valida y guarda un PNG con alfa con nombre determinista dentro de `media/`."""
+    if (
+        len(data) > TEXT_RASTER_LIMIT
+        or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', clip_id)
+        or not re.fullmatch(r'[a-f0-9]{64}', expected_hash)
+        or len(data) < 26
+        or data[:8] != PNG_SIGNATURE
+        or data[12:16] != b'IHDR'
+    ):
+        raise ValueError('editor_text_raster_invalid')
+    width = int.from_bytes(data[16:20], 'big')
+    height = int.from_bytes(data[20:24], 'big')
+    color_type = data[25]
+    digest = hashlib.sha256(data).hexdigest()
+    if (
+        width < 1
+        or height < 1
+        or width > 16384
+        or height > 16384
+        or color_type not in {4, 6}
+        or digest != expected_hash
+    ):
+        raise ValueError('editor_text_raster_invalid')
+
+    relative = Path('media') / f'text-{clip_id}-{digest}.png'
+    media = folder / 'media'
+    if not media.is_dir():
+        raise ValueError('editor_text_raster_invalid')
+    target = media / relative.name
+    try:
+        with target.open('xb') as output:
+            output.write(data)
+    except FileExistsError:
+        if target.read_bytes() != data:
+            raise ValueError('editor_text_raster_invalid') from None
+    return relative.as_posix()

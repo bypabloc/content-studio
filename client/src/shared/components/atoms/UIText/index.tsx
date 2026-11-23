@@ -1,5 +1,5 @@
 import { cn } from 'cn'
-import type { ReactNode } from 'react'
+import type { AriaRole, ReactNode } from 'react'
 
 const VARIANTS = {
   display: { tag: 'p', className: 'ui-typography-display text-foreground' },
@@ -11,7 +11,7 @@ const VARIANTS = {
   overline: { tag: 'p', className: 'ui-typography-overline text-accent-foreground' },
 } as const
 
-type Props = { variant?: keyof typeof VARIANTS; children: ReactNode; className?: string; id?: string }
+type Props = { variant?: keyof typeof VARIANTS; children: ReactNode; className?: string; id?: string; role?: AriaRole }
 
 /**
  * Texto tipográfico: la variante define el elemento semántico (h1-h3 o p)
@@ -22,10 +22,10 @@ type Props = { variant?: keyof typeof VARIANTS; children: ReactNode; className?:
  * @since 2026/09/27
  * @since 2026/11/19
  */
-export function UIText({ variant = 'body', children, className = '', id }: Props): React.JSX.Element {
+export function UIText({ variant = 'body', children, className = '', id, role }: Props): React.JSX.Element {
   const { tag: Tag, className: base } = VARIANTS[variant]
   return (
-    <Tag id={id} className={cn(base, className)}>
+    <Tag id={id} role={role} className={cn(base, className)}>
       {children}
     </Tag>
   )
