@@ -9,7 +9,13 @@ export interface Connection {
 /** Cliente HTTP de la API local: cada llamada lleva el Bearer, y cualquier respuesta que no es 2xx lanza ApiError. */
 export function createApi(connection: Connection, fetcher: typeof fetch = fetch) {
   /** Con `contentType`, el cuerpo va tal cual con ese tipo (una toma WAV); sin él, va como JSON. */
-  async function request<T>(method: string, path: string, body?: unknown, contentType?: string): Promise<T> {
+  async function request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    contentType?: string,
+    extraHeaders: Record<string, string> = {},
+  ): Promise<T> {
     const json = body !== undefined && contentType === undefined;
     const response = await fetcher(`${connection.baseUrl}${path}`, {
       method,
@@ -18,6 +24,7 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
         'Accept-Language': getLocale(),
         ...(json ? { 'Content-Type': 'application/json' } : {}),
         ...(contentType ? { 'Content-Type': contentType } : {}),
+        ...extraHeaders,
       },
       body: json ? JSON.stringify(body) : (body as BodyInit | undefined),
     });
@@ -29,7 +36,7 @@ export function createApi(connection: Connection, fetcher: typeof fetch = fetch)
   return {
     get: <T>(path: string) => request<T>('GET', path),
     post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
-    put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
+    put: <T>(path: string, body?: unknown, headers?: Record<string, string>) => request<T>('PUT', path, body, undefined, headers),
     patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
     del: <T>(path: string) => request<T>('DELETE', path),
     /** Sube un cuerpo crudo, como la toma WAV del micrófono: no pasa por JSON. */

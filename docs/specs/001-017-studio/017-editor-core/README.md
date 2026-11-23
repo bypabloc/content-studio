@@ -28,12 +28,12 @@ Una sección **Editor** (un NLE no destructivo) donde se crea un proyecto, se tr
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Modelo del proyecto (puro, versionado) y fixtures compartidas server/client | PEN |
-| 2 | Proyectos en disco y API; explorador de carpetas | PEN |
-| 3 | Render de audio con `filter_complex` y exportación con normalizar | PEN |
-| 4 | Client: estado, historial (deshacer y rehacer) y operaciones de edición | PEN |
-| 5 | Client: línea de tiempo, imán, marcadores, transporte y vista previa | PEN |
-| 6 | Client: explorador, importar, soltar desde Windows y grabar | PEN |
+| 1 | Modelo del proyecto (puro, versionado) y fixtures compartidas server/client | DON |
+| 2 | Proyectos en disco y API; explorador de carpetas | DON |
+| 3 | Render de audio con `filter_complex` y exportación con normalizar | DON |
+| 4 | Client: estado, historial (deshacer y rehacer) y operaciones de edición | DON |
+| 5 | Client: línea de tiempo, imán, marcadores, transporte y vista previa | DON |
+| 6 | Client: explorador, importar, soltar desde Windows y grabar | DON |
 
 ## Decisiones clave
 
@@ -45,5 +45,5 @@ Una sección **Editor** (un NLE no destructivo) donde se crea un proyecto, se tr
 
 ## WARNING y PENDING
 
-* WARNING: `017-proyecto-json.md` (esquema v1 y migraciones de versión), `017-latencia-grabacion.md` (compensación al grabar sobre lo que suena) y `017-preview-media-elements.md` (por qué no `decodeAudioData`).
-* PENDING: ninguna.
+* WARNING: `017-proyecto-json.md`, `017-latencia-grabacion.md`, `017-preview-media-elements.md` y `017-presupuesto-js.md`.
+* PENDING: `017-app-check-y-flujo-real.md`, `017-e2e-runner.md` y `017-pytest-temp.md`; el CLI y los cuatro e2e del Editor pasan.

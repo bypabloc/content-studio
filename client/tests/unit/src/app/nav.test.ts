@@ -13,6 +13,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['convert', 'download'],
       ['normalize', 'volume'],
       ['mix', 'mix'],
+      ['editor', 'editor'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
       ['engines', 'server'],
@@ -35,6 +36,13 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().find((item) => item.id === 'mix')).toMatchObject({
       group: t('nav.group.edit'),
       label: t('nav.mix'),
+    })
+  })
+
+  it('spec 017: Editor va en el grupo Editar', () => {
+    expect(navItems().find((item) => item.id === 'editor')).toMatchObject({
+      group: t('nav.group.edit'),
+      label: t('nav.editor'),
     })
   })
 

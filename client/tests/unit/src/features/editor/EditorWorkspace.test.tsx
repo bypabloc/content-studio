@@ -1,0 +1,149 @@
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { EditorWorkspace } from '@/features/editor/EditorWorkspace';
+import type { Doc } from '@/features/editor/model/types';
+import { t } from '@/shared/i18n/t';
+
+const { api, open, playback, recorder } = vi.hoisted(() => ({
+  api: { get: vi.fn(), put: vi.fn(), upload: vi.fn(), queryUrl: vi.fn((path: string) => path), fileUrl: vi.fn() },
+  open: vi.fn(),
+  playback: { position: 2, playing: false, seek: vi.fn(), setPlaying: vi.fn(), stop: vi.fn() },
+  recorder: { recording: false, uploading: false, levels: { rms: -96, peak: -96 }, latencyMs: 0, error: null, start: vi.fn(), stop: vi.fn() },
+}));
+vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
+vi.mock('@/features/editor/playback/usePlayback', () => ({ usePlayback: () => playback }));
+vi.mock('@/features/editor/useTrackRecorder', () => ({ useTrackRecorder: () => recorder }));
+vi.mock('@/features/editor/useNativeDrop', () => ({
+  useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(['D:/Music/song.wav']) }),
+}));
+vi.mock('@/features/recording/MicrophonePicker', () => ({ MicrophonePicker: () => null }));
+vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
+
+const PATH = 'D:/out/editor/demo/project.json';
+const DOC: Doc = {
+  version: 1,
+  name: 'demo',
+  sample_rate: 48000,
+  tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
+  clips: [{ id: 'clip-1', track: 'voice', src: 'missing.wav', src_in: 0, src_out: 4, start: 0, gain_db: 0, fade_in: 0, fade_out: 0 }],
+  markers: [],
+};
+const project = { path: PATH, hash: 'hash-1', doc: DOC, missing: ['missing.wav'] };
+
+beforeEach(() => {
+  playback.position = 2;
+  playback.playing = false;
+  api.get.mockImplementation((url: string) => {
+    if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'Music', path: 'D:/Music' }] });
+    if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+    if (url.includes('/settings/')) return Promise.resolve({ value: null });
+    if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Music', entries: [] });
+    if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 3 });
+    return Promise.reject(new Error('unknown endpoint'));
+  });
+  api.put.mockResolvedValue({ hash: 'hash-2' });
+  open.mockResolvedValue('D:/Music/song.wav');
+  recorder.recording = false;
+  recorder.uploading = false;
+  recorder.error = null;
+  recorder.start.mockReset();
+  recorder.stop.mockReset();
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+describe('EditorWorkspace', () => {
+  it('importa medios en una pista nueva, divide en el cabezal y renombra y borra marcadores', async () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    const workspace = screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) });
+
+    fireEvent.keyDown(workspace, { key: 's' });
+    await waitFor(() => expect(screen.getAllByRole('button', { name: /missing\.wav/ })).toHaveLength(2));
+    fireEvent.keyDown(workspace, { key: 'm' });
+    const marker = await screen.findByRole('button', { name: t('editor.marker.default_name', { n: 1 }) });
+    fireEvent.doubleClick(marker);
+    const name = screen.getByRole('textbox', { name: t('editor.marker.rename') });
+    fireEvent.change(name, { target: { value: 'Fin' } });
+    fireEvent.keyDown(name, { key: 'Enter' });
+    const renamed = await screen.findByRole('button', { name: 'Fin' });
+    fireEvent.click(renamed);
+    fireEvent.keyDown(workspace, { key: 'Delete' });
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Fin' })).toBeNull());
+
+    fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/fs/info?path=D%3A%2FMusic%2Fsong.wav'));
+    expect(await screen.findByRole('group', { name: t('editor.timeline.lane', { name: t('editor.track.new_name', { n: 2 }) }) })).toBeTruthy();
+  });
+
+  it('arma la primera pista y comienza a grabar al crear un proyecto desde Inicio', async () => {
+    const onAutoRecordComplete = vi.fn();
+    render(<EditorWorkspace project={project} onBack={vi.fn()} autoRecord onAutoRecordComplete={onAutoRecordComplete} />);
+
+    await waitFor(() => expect(recorder.start).toHaveBeenCalledOnce());
+    expect(screen.getByRole('button', { name: t('editor.track.arm', { name: 'Voz' }) }).getAttribute('aria-pressed')).toBe('true');
+    expect(onAutoRecordComplete).toHaveBeenCalledOnce();
+  });
+
+  it('maneja selección, borrado con ripple, teclas en campos, transporte y retorno', async () => {
+    const onBack = vi.fn();
+    render(<EditorWorkspace project={project} onBack={onBack} />);
+    const workspace = screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) });
+    fireEvent.click(screen.getByRole('button', { name: /missing\.wav/ }));
+    fireEvent.keyDown(workspace, { key: 'Delete', shiftKey: true });
+    await waitFor(() => expect(screen.queryByText(t('editor.clip.missing', { source: 'missing.wav' }))).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.home.back') }));
+    expect(onBack).toHaveBeenCalledOnce();
+
+    cleanup();
+    const second = render(<EditorWorkspace project={project} onBack={onBack} />);
+    const arm = screen.getByRole('button', { name: t('editor.track.arm', { name: 'Voz' }) });
+    fireEvent.click(arm);
+    expect(arm.getAttribute('aria-pressed')).toBe('true');
+    const range = screen.getByRole('slider', { name: t('editor.recorder.offset') });
+    fireEvent.keyDown(range, { key: 'r' });
+    expect(recorder.start).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: t('voices.record.start') }));
+    expect(recorder.start).toHaveBeenCalledOnce();
+    recorder.recording = true;
+    second.rerender(<EditorWorkspace project={project} onBack={onBack} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.stop') }));
+    expect(playback.stop).toHaveBeenCalled();
+    expect(recorder.stop).toHaveBeenCalledOnce();
+  });
+
+  it('muestra el error al importar una duración inválida y permite reasignar la fuente ausente', async () => {
+    api.get.mockImplementation((url: string) => {
+      if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 0 });
+      if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'Music', path: 'D:/Music' }] });
+      if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+      if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Music', entries: [] });
+      if (url.includes('/settings/')) return Promise.resolve({ value: null });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    open.mockResolvedValue('D:/Media/voz.wav');
+    const { rerender } = render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: t('action.import') }));
+    expect(await screen.findByText(t('editor.import.error'))).toBeTruthy();
+
+    api.get.mockImplementation((url: string) => {
+      if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'Music', path: 'D:/Music' }] });
+      if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+      if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Music', entries: [] });
+      if (url.includes('/settings/')) return Promise.resolve({ value: null });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    rerender(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.clip.find') }));
+    await waitFor(() => expect(screen.queryByText(t('editor.clip.missing', { source: 'missing.wav' }))).toBeNull());
+  });
+
+  it('inicia la grabación automática aunque no se proporcione un callback opcional', async () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} autoRecord />);
+
+    await waitFor(() => expect(recorder.start).toHaveBeenCalledOnce());
+  });
+});

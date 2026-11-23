@@ -1,0 +1,20 @@
+{
+  "doc": {
+    "version": 1,
+    "name": "demo",
+    "sample_rate": 48000,
+    "tracks": [],
+    "clips": [],
+    "markers": [
+      { "id": "marker-1", "t": 5, "label": "intro", "color": "#ef4444" }
+    ]
+  },
+  "op": { "type": "renameMarker", "id": "marker-1", "label": "Inicio" },
+  "expected": {
+    "ids": [],
+    "clips": {},
+    "markers": [
+      { "id": "marker-1", "t": 5, "label": "Inicio", "color": "#ef4444" }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "doc": {"version": 1, "name": "demo", "sample_rate": 48000, "tracks": [], "clips": [], "markers": []},
+  "op": {"type": "addMarker", "marker": {"id": "m1", "t": 2, "label": "Parte", "color": "#ffffff"}},
+  "expected": {"ids": [], "clips": {}, "track_ids": [], "markers": [{"id": "m1", "t": 2, "label": "Parte", "color": "#ffffff"}]}
+}

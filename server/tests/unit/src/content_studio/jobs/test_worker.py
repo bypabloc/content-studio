@@ -13,7 +13,7 @@ import pytest
 from content_studio import gpu_lock
 from content_studio.db import connection, jobs, schema, subtitle_projects
 from content_studio.jobs import queue
-from content_studio.jobs.worker import Worker
+from content_studio.jobs.worker import Worker, stop_tree
 
 # Proceso falso: anota en el log cuándo arranca y termina, duerme `sleep` segundos y emite un progreso.
 SCRIPT = """
@@ -81,6 +81,23 @@ def _spans(env) -> dict[str, tuple[float, float]]:
     for what, label, when in _marks(env):
         times.setdefault(label, {})[what] = float(when)
     return {label: (t['start'], t['end']) for label, t in times.items()}
+
+
+def test_stop_tree_falls_back_to_the_process_handle_when_taskkill_is_denied(monkeypatch):
+    """El handle abierto por Popen todavía puede terminar el proceso si taskkill no tiene permiso."""
+    monkeypatch.setattr(sys, 'platform', 'win32')
+    process = SimpleNamespace(pid=123, killed=False, waited=False)
+    process.kill = lambda: setattr(process, 'killed', True)
+    process.wait = lambda: setattr(process, 'waited', True)
+    monkeypatch.setattr(
+        'content_studio.jobs.worker.subprocess.run',
+        lambda *args, **kwargs: SimpleNamespace(returncode=1),
+    )
+
+    stop_tree(process)
+
+    assert process.killed
+    assert process.waited
 
 
 def test_ac2_paused_queue_runs_nothing_and_resume_follows_the_new_order(env):
@@ -157,6 +174,35 @@ def test_run_now_runs_one_job_in_this_process_and_returns_its_final_status(env):
 
     assert env.worker.run_now(job) == 'done'
     assert Path(jobs.get(env.conn, job)['output_dir'], 'params.json').is_file()
+
+
+def test_editor_render_failure_keeps_structured_missing_source_paths(env):
+    """El job conserva el detalle estructurado del render para mostrar las fuentes faltantes."""
+    payload = {'status': 'failed', 'error': 'missing_source', 'params': {'paths': ['media/tono.wav']}}
+    script = (
+        'import pathlib, sys; '
+        'pathlib.Path(sys.argv[1], "result.json").write_text(sys.argv[2], encoding="utf-8"); '
+        'sys.exit(3)'
+    )
+    env.services['editor.render'] = SimpleNamespace(
+        RESOURCE='cpu',
+        ERROR_CODES={3: 'missing_source'},
+        validate=lambda params: [],
+        build_command=lambda params, out_dir: [
+            sys.executable,
+            '-c',
+            script,
+            str(out_dir),
+            json.dumps(payload),
+        ],
+    )
+    job = queue.enqueue(env.conn, 'editor.render', {'doc': 'project.json'}, env.services)
+
+    assert env.worker.run_now(job) == 'error'
+
+    row = jobs.get(env.conn, job)
+    assert row['error_code'] == 'missing_source'
+    assert json.loads(row['error_detail']) == payload
 
 
 def test_auto_render_queues_the_render_when_the_analysis_ends(env):

@@ -1,0 +1,5 @@
+{
+  "doc": {"version": 1, "name": "demo", "sample_rate": 48000, "tracks": [], "clips": [], "markers": [{"id": "m1", "t": 2, "label": "Parte", "color": "#ffffff"}, {"id": "m2", "t": 4, "label": "Fin", "color": "#ff0000"}]},
+  "op": {"type": "deleteMarker", "id": "m1"},
+  "expected": {"ids": [], "clips": {}, "track_ids": [], "markers": [{"id": "m2", "t": 4, "label": "Fin", "color": "#ff0000"}]}
+}

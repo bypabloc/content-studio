@@ -29,7 +29,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [005-avisos-foco](005-avisos-foco.md) | El cableado de los avisos (sin foco y con ajuste) no tiene prueba | Después de la 005 | Agente |
 | [005-worktree-enlaces-rotos](005-worktree-enlaces-rotos.md) | `worktree` no limpia enlaces rotos y `close` falla si la carpeta se borró a mano | Después de la 005 | Agente |
 | [005-stop-durante-arranque](005-stop-durante-arranque.md) | Cerrar la ventana mientras el server arranca puede esperar hasta 30 s | Después de la 005 | Agente |
-| [005-desvios-d1-d8](005-desvios-d1-d8.md) | Desvíos de shadcn, plugin-dialog, CSP, Geist y theme-init frente a D-1, D-2, D-4 y D-8 | Antes de la 022 y según cada sección | Agente |
+| [005-desvios-d1-d8](005-desvios-d1-d8.md) | Desvíos de shadcn, CSP, Geist, theme-init y confirmación de Restablecer; el diálogo de archivos ya se usa en 017 | Antes de la 022 y según cada sección | Agente |
 | [005-aviso-windows-y-sonido](005-aviso-windows-y-sonido.md) | AC-5: la notificación de Windows y el sonido con la ventana minimizada no se comprobaron en la app real | Al primer uso real o antes de la 022 | Usuario |
 | [006-cli-carpeta-compartida](006-cli-carpeta-compartida.md) | Con `--output archivo.wav`, dos tomas en una misma carpeta comparten `blocks/` y `script.json` | Después de publicar, o antes si la 010 o la 011 usan la CLI en lote | Agente |
 | [006-evaluar-toma-regenerada](006-evaluar-toma-regenerada.md) | Evaluar con whisper solo el párrafo regenerado, sin reintentar los bloques ajenos | Antes de elegir una toma por su evaluación | Agente |
@@ -54,7 +54,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
-| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 9 carpetas huérfanas de `content-studio-worktrees/` (8 con ACL de administrador; la de 015 retenida por un proceso); las borra el usuario | Cuando el usuario lo pida; no bloquea | Usuario |
+| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 10 carpetas huérfanas en `content-studio-worktrees/`; la de 016 requiere aprobación manual de Synapse | Cuando el usuario lo autorice; no bloquea | Usuario |
 | [014-escucha-y-revision](014-escucha-y-revision.md) | Escuchar la narración alineada, revisar la sincronía, la UI real y los presets incluidos (gusto) | Después del merge a dev; no bloquea | Usuario |
 | [014-audio-quemar-copia](014-audio-quemar-copia.md) | Al quemar, el audio PCM de un MOV no se ha probado: la copia del audio puede fallar en MP4 | En la verificación final (T9) | Agente |
 | [014-traduccion-real](014-traduccion-real.md) | Falta la prueba `-m local` automatizada de la traducción con `small`; la corrida real y el cierre ya están verificados a mano | Después del merge a dev; no bloquea | Agente |
@@ -65,5 +65,8 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [015-repair-primera-instalacion](015-repair-primera-instalacion.md) | `repair` rechaza un motor cuya primera instalación no terminó (`engine_external`); de la spec 009 | Después del merge de 015; no bloquea | Agente |
 | [015-trayectoria-y-ab-fuera-de-out](015-trayectoria-y-ab-fuera-de-out.md) | Dibujar la trayectoria de «Seguir a la persona» (con el Editor 017) y el A/B de Normalizar cuando el original está fuera de `out/` y `reference/` | En el e2e de T8 (A/B); la trayectoria, con el Editor | Agente |
 | [015-escucha-y-revision](015-escucha-y-revision.md) | Escuchar las normalizaciones, la unión y las convertidas; mirar los encuadres y las capturas; decidir el techo de pico con pérdida y el contraste de la fila de trabajo | Después del merge de 015; no bloquea | Usuario |
+| [017-app-check-y-flujo-real](017-app-check-y-flujo-real.md) | Tres corridas compilaron, pero app-check no obtuvo CDP; faltan grabación física, arrastre desde Windows, latencia y capturas | Cuando WebView2 responda a CDP; no bloquea el merge | Agente |
+| [017-e2e-runner](017-e2e-runner.md) | Los escenarios pasan, pero Playwright y test-runner no terminan con resumen tras tres corridas | Antes de la publicación final; no bloquea el merge | Agente |
+| [017-pytest-temp](017-pytest-temp.md) | Dos temporales de pytest en la raíz del worktree; Synapse bloquea borrarlos sin aprobación manual | Tras aprobación puntual de Synapse, antes de cerrar el worktree | Usuario |
 | [024-aprobar-hooks-codex](024-aprobar-hooks-codex.md) | Aprobar en Codex (`/hooks`) `shell_guard.py` y `computer_use_guard.py`, y probar que bloquea `sky.list_apps()` | Después del merge de 024 y tras cada cambio de un hook | Usuario |
 | [024-peaks-403-catalogo](024-peaks-403-catalogo.md) | `/media/peaks` da 403 a las muestras del catálogo de voces (hallado por `app-check`) | Con la próxima spec de voces o `/media` | Agente |

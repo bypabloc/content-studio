@@ -7,6 +7,7 @@ from typing import Any
 
 AUDIO_EXTENSIONS = frozenset({'.wav', '.mp3', '.m4a', '.flac', '.ogg', '.aac'})
 VIDEO_EXTENSIONS = frozenset({'.mp4', '.mov', '.mkv', '.webm', '.avi', '.m4v'})
+IMAGE_EXTENSIONS = frozenset({'.png', '.jpg', '.jpeg', '.webp', '.bmp', '.tif', '.tiff', '.gif'})
 
 # Los formatos de salida son datos (spec 015, D-1): extensión, códec y, en video, si usa NVENC cuando hay NVIDIA.
 TARGETS: dict[str, dict[str, Any]] = {

@@ -72,15 +72,15 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Modelo y fixtures | AC-1 | — | `unit` | [ ] |
-| T2 | Espejo TS, historial e imán | AC-1, AC-6, AC-7 | T1 | `client-unit` | [ ] |
-| T3 | API de proyectos y explorador | AC-2, AC-3, AC-10 | T1 | `unit` | [ ] |
-| T4 | Render de audio y CLI | AC-4, AC-5 | T1 | `unit` | [ ] |
-| T5 | Línea de tiempo y transporte | AC-7 | T2, T3 | `client-unit` | [ ] |
-| T6 | Vista previa | AC-4 | T5 | `client-unit` | [ ] |
-| T7 | Explorador, importar, soltar y grabar | AC-8, AC-9, AC-10 | T5 | `client-unit` | [ ] |
-| T8 | e2e y docs | AC-8 | T6, T7 | `e2e` | [ ] |
-| T9 | Corrida real | AC-9 | T8 | verificación final | [ ] |
+| T1 | Modelo y fixtures | AC-1 | — | `unit` | [x] |
+| T2 | Espejo TS, historial e imán | AC-1, AC-6, AC-7 | T1 | `client-unit` | [x] |
+| T3 | API de proyectos y explorador | AC-2, AC-3, AC-10 | T1 | `unit` | [x] |
+| T4 | Render de audio y CLI | AC-4, AC-5 | T1 | `unit` | [x] |
+| T5 | Línea de tiempo y transporte | AC-7 | T2, T3 | `client-unit` | [x] |
+| T6 | Vista previa | AC-4 | T5 | `client-unit` | [x] |
+| T7 | Explorador, importar, soltar y grabar | AC-8, AC-9, AC-10 | T5 | `client-unit` | [x] |
+| T8 | e2e y docs | AC-8 | T6, T7 | `e2e` | [x] |
+| T9 | Corrida real | AC-9 | T8 | verificación final | [x] |
 
 ## 4. Commits
 

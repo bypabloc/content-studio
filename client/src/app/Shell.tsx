@@ -25,6 +25,7 @@ const SubtitlesPage = lazy(() => import('@/features/subtitles/SubtitlesPage').th
 const ConvertPage = lazy(() => import('@/features/convert/ConvertPage').then((module) => ({ default: module.ConvertPage })));
 const NormalizePage = lazy(() => import('@/features/normalize/NormalizePage').then((module) => ({ default: module.NormalizePage })));
 const MixPage = lazy(() => import('@/features/mix/MixPage').then((module) => ({ default: module.MixPage })));
+const EditorPage = lazy(() => import('@/features/editor/EditorPage').then((module) => ({ default: module.EditorPage })));
 const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((module) => ({ default: module.WelcomeGate })));
 
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
@@ -96,6 +97,11 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'mix' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <MixPage />
+          </Suspense>
+        )}
+        {section?.id === 'editor' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <EditorPage />
           </Suspense>
         )}
         {section?.id === 'settings' && (

@@ -1,0 +1,21 @@
+{
+  "doc": {
+    "version": 1,
+    "name": "demo",
+    "sample_rate": 48000,
+    "tracks": [
+      {"id": "t1", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80},
+      {"id": "t2", "kind": "audio", "name": "Música", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}
+    ],
+    "clips": [
+      {"id": "c1", "track": "t1", "src": "media/a.wav", "src_in": 0, "src_out": 5, "start": 0, "gain_db": 0, "fade_in": 0, "fade_out": 0},
+      {"id": "c2", "track": "t1", "src": "media/b.wav", "src_in": 0, "src_out": 5, "start": 5, "gain_db": 0, "fade_in": 0, "fade_out": 0}
+    ],
+    "markers": []
+  },
+  "op": {"type": "moveClip", "id": "c2", "track": "t2", "start": 3},
+  "expected": {
+    "ids": ["c1", "c2"],
+    "clips": {"c2": {"track": "t2", "start": 3}}
+  }
+}

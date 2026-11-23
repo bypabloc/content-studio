@@ -1,0 +1,5 @@
+{
+  "doc": {"version": 1, "name": "demo", "sample_rate": 48000, "tracks": [{"id": "t1", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}, {"id": "t2", "kind": "audio", "name": "Música", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}, {"id": "t3", "kind": "audio", "name": "Efectos", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}], "clips": [], "markers": []},
+  "op": {"type": "reorderTracks", "id": "t3", "index": 0},
+  "expected": {"ids": [], "clips": {}, "track_ids": ["t3", "t1", "t2"], "markers": []}
+}
