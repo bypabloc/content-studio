@@ -28,8 +28,10 @@ test('AC-3: aplica un fundido en el corte visual y lo incluye en la exportación
   await page.getByRole('button', { name: 'Abrir demo' }).click();
   const workspace = page.getByRole('region', { name: 'Proyecto demo' });
   await expect(workspace).toBeVisible();
-  const lane = page.getByRole('group', { name: 'Pista Video' });
-  await page.getByRole('button', { name: 'Fundido', exact: true }).dragTo(lane, { targetPosition: { x: 240, y: 45 } });
+  const lane = page.getByRole('group', { name: 'Pista Video', exact: true });
+  const fade = page.getByRole('group', { name: 'Transiciones', exact: true }).getByRole('button', { name: 'Fundido', exact: true });
+  await lane.scrollIntoViewIfNeeded();
+  await fade.dragTo(lane, { targetPosition: { x: 240, y: 45 } });
   await expect.poll(() => state.project.doc.transitions).toEqual([
     expect.objectContaining({ type: 'fade', a: 'first', b: 'second', track: 'video', duration: 0.5 }),
   ]);

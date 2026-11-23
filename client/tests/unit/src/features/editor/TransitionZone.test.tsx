@@ -12,7 +12,7 @@ const transition: Transition = {
 };
 
 describe('TransitionZone', () => {
-  it('expone ambos bordes y cambia la duracion al arrastrarlos', () => {
+  it('expone ambos bordes, localiza la transición y cambia la duración al arrastrarlos', () => {
     const onResize = vi.fn();
     const onCommitResize = vi.fn();
     render(<TransitionZone transition={transition} left={350} zoom={100} locked={false} onResize={onResize} onCommitResize={onCommitResize} />);
@@ -22,7 +22,7 @@ describe('TransitionZone', () => {
     fireEvent.pointerMove(start, { pointerId: 10, clientX: 330 });
     fireEvent.pointerUp(start, { pointerId: 10, clientX: 330 });
 
-    expect(screen.getByRole('group', { name: t('editor.transition.zone', { type: 'fade' }) })).toBeTruthy();
+    expect(screen.getByRole('group', { name: t('editor.transition.zone', { type: t('editor.transitions.fade') }) })).toBeTruthy();
     expect(onResize).toHaveBeenCalledWith('transition-1', 0.7);
     expect(onCommitResize).toHaveBeenCalledOnce();
   });

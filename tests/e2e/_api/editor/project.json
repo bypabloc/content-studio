@@ -2,12 +2,14 @@
   "path": "D:/out/editor/demo/project.json",
   "hash": "hash-1",
   "doc": {
-    "version": 1,
+    "version": 2,
     "name": "demo",
     "sample_rate": 48000,
+    "canvas": { "width": 1920, "height": 1080, "fps": 30, "background": "#000000" },
     "tracks": [{ "id": "t1", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80 }],
     "clips": [{ "id": "c1", "track": "t1", "src": "D:/media/voz.wav", "src_in": 0, "src_out": 8, "start": 0, "gain_db": 0, "fade_in": 0, "fade_out": 0 }],
-    "markers": []
+    "markers": [],
+    "transitions": []
   },
   "missing": []
 }

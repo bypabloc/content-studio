@@ -3,9 +3,9 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
-import { t } from '@/shared/i18n/t';
+import { t, type MessageKey } from '@/shared/i18n/t';
 
-import type { Transition } from './model/types';
+import type { Transition, TransitionType } from './model/types';
 
 type Props = {
   transition: Transition;
@@ -18,6 +18,17 @@ type Props = {
 };
 type Edge = 'start' | 'end';
 type Drag = { edge: Edge; origin: number; duration: number; moved: boolean };
+// cspell:ignore fadeblack fadewhite wipeleft wiperight slideleft slideright circleopen: identificadores xfade de FFmpeg.
+const TRANSITION_LABELS: Record<TransitionType, MessageKey> = {
+  fade: 'editor.transitions.fade',
+  fadeblack: 'editor.transitions.fade_black',
+  fadewhite: 'editor.transitions.fade_white',
+  wipeleft: 'editor.transitions.wipe_left',
+  wiperight: 'editor.transitions.wipe_right',
+  slideleft: 'editor.transitions.slide_left',
+  slideright: 'editor.transitions.slide_right',
+  circleopen: 'editor.transitions.circle_open',
+};
 
 /** Zona de transición entre clips; ambos bordes ajustan el solapamiento de entrada. */
 export function TransitionZone({
@@ -52,7 +63,7 @@ export function TransitionZone({
   return (
     <UIStack
       role="group"
-      aria-label={t('editor.transition.zone', { type: transition.type })}
+      aria-label={t('editor.transition.zone', { type: t(TRANSITION_LABELS[transition.type]) })}
       direction="row"
       align="center"
       justify="between"

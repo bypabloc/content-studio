@@ -9,7 +9,9 @@ test('AC-10: informa de la fuente ausente y permite reasignarla', async ({ page 
   const alert = page.getByRole('alert');
   await expect(alert.getByText('Fuente no encontrada: D:/missing/voz.wav')).toBeVisible();
   await page.getByRole('button', { name: 'Exportar…' }).click();
-  await page.getByRole('dialog', { name: 'Exportar audio' }).getByRole('button', { name: 'Iniciar exportación' }).click();
+  const exportDialog = page.getByRole('dialog', { name: 'Exportar proyecto' });
+  await exportDialog.getByRole('checkbox', { name: 'Solo audio' }).check();
+  await exportDialog.getByRole('button', { name: 'Iniciar exportación' }).click();
   await expect(page.getByText('No se encontraron estas fuentes: D:/missing/voz.wav')).toBeVisible();
 
   await setDialogPick(page, ['D:/media/voz.wav']);
