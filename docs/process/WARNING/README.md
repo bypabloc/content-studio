@@ -189,5 +189,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [018-proxies](018-proxies.md) | VP9 con alfa requiere `libvpx-vp9`; la caché de fotogramas incluye el estado de sus fuentes | antes de `main` |
 | [018-render-video](018-render-video.md) | El recorte animado usa alfa; la caja de rotación es fija y las etiquetas del grafo son únicas | antes de `main` |
 | [018-transiciones](018-transiciones.md) | Cada transición combina capas transparentes del lienzo y conserva el alfa de las pistas inferiores | antes de `main` |
+| [018-paridad-preview-export](018-paridad-preview-export.md) | La paridad de píxeles se ejecuta con el visor de T6 antes del cierre de T7 | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

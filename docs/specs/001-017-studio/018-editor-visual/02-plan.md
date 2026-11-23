@@ -34,7 +34,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 #### Ciclo 5: compositor [AC-5]
 
-- **RED**: `preview/compositor.test.ts` (matrices y orden de capas con un contexto WebGL simulado) y el e2e `editor/parity-preview-export.e2e.ts` contra `fixtures/editor/parity-*.json`.
+- **RED**: `preview/compositor.test.ts` (matrices y orden de capas con un contexto WebGL simulado). El e2e `editor/parity-preview-export.e2e.ts` contra `fixtures/editor/parity-*.json` se integra en T6, cuando exista el visor, y se ejecuta antes de cerrar T7.
 - **GREEN**: `preview/{compositor,shaders,transitions,useLayerSources}.ts`.
 - **REFACTOR**: ninguno.
 

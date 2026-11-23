@@ -6,6 +6,7 @@ Un proyecto solo se abre o se guarda dentro de esa carpeta (403 si no). `missing
 from __future__ import annotations
 
 import hashlib
+import mimetypes
 import os
 import sqlite3
 import subprocess
@@ -25,6 +26,7 @@ from content_studio.db import settings
 from content_studio.editor import store
 
 router = APIRouter(prefix='/editor')
+preview_router = APIRouter(prefix='/editor')
 RECENT = 'editor.recent'
 RECENT_MAX = 20
 
@@ -124,6 +126,42 @@ def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
         finally:
             temporary.unlink(missing_ok=True)
     return FileResponse(frame, media_type='image/png')
+
+
+@preview_router.get('/projects/media')
+def project_media(path: str, source: str) -> FileResponse:
+    """Sirve una fuente visual del proyecto; los videos usan su proxy y la ruta acepta token de consulta."""
+    file = _project_file(path)
+    doc, _ = store.read(file)
+    clip = next(
+        (
+            item
+            for item in doc.get('clips', [])
+            if item.get('media') in {'video', 'image'} and item.get('src') == source
+        ),
+        None,
+    )
+    if clip is None:
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    original = Path(source)
+    original = (original if original.is_absolute() else file.parent / original).resolve()
+    if not original.is_file():
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    if clip['media'] == 'image':
+        from content_studio.media.formats import IMAGE_EXTENSIONS
+
+        if original.suffix.lower() not in IMAGE_EXTENSIONS:
+            raise ApiError(422, 'unreadable_media')
+        target = original
+    else:
+        from content_studio.editor import proxy
+
+        try:
+            target = proxy.create(original, file.parent)
+        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+            raise ApiError(422, 'unreadable_media') from error
+    media_type = mimetypes.guess_type(target.name)[0] or 'application/octet-stream'
+    return FileResponse(target, media_type=media_type)
 
 
 def _finite_time(value: float) -> bool:

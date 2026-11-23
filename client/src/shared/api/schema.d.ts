@@ -810,7 +810,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Project Media
+         * @description Sirve una fuente visual del proyecto; los videos usan su proxy y la ruta acepta token de consulta.
+         */
+        get: operations["project_media_editor_projects_media_get"];
         put?: never;
         /**
          * Upload Recording
@@ -3101,6 +3105,38 @@ export interface operations {
             query: {
                 path: string;
                 t?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_media_editor_projects_media_get: {
+        parameters: {
+            query: {
+                path: string;
+                source: string;
             };
             header?: never;
             path?: never;

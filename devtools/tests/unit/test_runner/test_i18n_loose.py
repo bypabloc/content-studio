@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
 
+from devtools.test_runner import i18n_loose
 from devtools.test_runner.i18n_loose import check_loose_python, check_loose_ts, is_prose
 
 FIXTURES = Path(__file__).resolve().parents[2] / 'fixtures' / 'i18n'
@@ -103,6 +105,23 @@ def test_ac5_flags_visible_text_in_tsx_with_file_line_and_text():
 
 def test_ac5_leaves_classes_imports_types_keys_and_t_calls_alone():
     assert check_loose_ts([FIXTURES / 'client' / 'allowed.tsx']) == []
+
+
+def test_ac5_long_ts_file_list_stays_under_the_windows_command_limit(tmp_path, monkeypatch):
+    files = [tmp_path / f'file-{index:03d}-{"x" * 72}.tsx' for index in range(250)]
+    commands = []
+
+    def run(command, **_kwargs):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout='[]', stderr='')
+
+    monkeypatch.setattr(i18n_loose.subprocess, 'run', run)
+
+    assert i18n_loose.check_loose_ts(files, tmp_path) == []
+
+    assert len(commands) > 1
+    assert [Path(path) for command in commands for path in command[5:]] == files
+    assert all(len(subprocess.list2cmdline(command)) <= 16_000 for command in commands)
 
 
 def test_ac5_class_strings_in_variant_maps_are_not_text(tmp_path):

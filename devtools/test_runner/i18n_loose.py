@@ -137,19 +137,44 @@ def check_loose_python(files: list[Path], allowed: frozenset[str] = frozenset())
     return sorted(findings, key=lambda finding: (finding.path, finding.line))
 
 
+MAX_TS_COMMAND_LENGTH = 16_000
+
+
+def _ts_file_batches(files: list[Path], root: Path) -> list[list[Path]]:
+    """Agrupa rutas antes de superar el límite de CreateProcess en Windows."""
+    prefix = ['bun', 'run', '--cwd', str(root / 'client'), 'loose-texts']
+    batches: list[list[Path]] = []
+    batch: list[Path] = []
+    for file in files:
+        candidate = [*batch, file]
+        command = [*prefix, *(str(path) for path in candidate)]
+        if batch and len(subprocess.list2cmdline(command)) > MAX_TS_COMMAND_LENGTH:
+            batches.append(batch)
+            batch = [file]
+        else:
+            batch = candidate
+    if batch:
+        batches.append(batch)
+    return batches
+
+
 def check_loose_ts(files: list[Path], root: Path = paths.ROOT) -> list[Finding]:
     """Texto suelto en archivos de TS/TSX: corre client/scripts/loose-texts.ts con bun y lee su JSON."""
-    command = ['bun', 'run', '--cwd', str(root / 'client'), 'loose-texts', *[str(file) for file in files]]
-    try:
-        done = subprocess.run(command, capture_output=True, encoding='utf-8', errors='replace', check=False)
-    except FileNotFoundError as error:
-        raise RuntimeError('bun is not in PATH: install it, run `bun install`, and try again') from error
-    if done.returncode != 0:
-        raise RuntimeError((done.stderr or done.stdout).strip())
-    return [
-        Finding(_show(Path(row['path'])), row['line'], row['text'], row['reasonMissing'])
-        for row in json.loads(done.stdout)
-    ]
+    prefix = ['bun', 'run', '--cwd', str(root / 'client'), 'loose-texts']
+    findings: list[Finding] = []
+    for batch in _ts_file_batches(files, root):
+        command = [*prefix, *(str(file) for file in batch)]
+        try:
+            done = subprocess.run(command, capture_output=True, encoding='utf-8', errors='replace', check=False)
+        except FileNotFoundError as error:
+            raise RuntimeError('bun is not in PATH: install it, run `bun install`, and try again') from error
+        if done.returncode != 0:
+            raise RuntimeError((done.stderr or done.stdout).strip())
+        findings.extend(
+            Finding(_show(Path(row['path'])), row['line'], row['text'], row['reasonMissing'])
+            for row in json.loads(done.stdout)
+        )
+    return findings
 
 
 def check_loose(root: Path = paths.ROOT) -> list[Finding]:
