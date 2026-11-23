@@ -211,6 +211,65 @@ def test_uploading_a_text_raster_saves_it_by_clip_and_content_hash(api, root):
     assert (Path(created['path']).parent / expected).read_bytes() == raster
 
 
+def test_uploading_a_cube_lut_saves_it_inside_project_media(api, root):
+    """D-4: una LUT 3D validada se guarda en media/luts con un nombre determinista."""
+    created = _create(api)
+    cube = b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 8
+
+    response = api.client.post(
+        '/editor/projects/luts',
+        params={'path': created['path']},
+        content=cube,
+        headers={**api.headers, 'Content-Type': 'text/plain'},
+    )
+
+    assert response.status_code == 201
+    assert response.json()['src'].startswith('media/luts/lut-')
+    assert response.json()['src'].endswith('.cube')
+    assert (Path(created['path']).parent / response.json()['src']).read_bytes() == cube
+
+
+def test_uploading_an_invalid_cube_lut_is_rejected(api, root):
+    """Una declaración LUT 1D no se guarda como LUT 3D."""
+    created = _create(api)
+
+    response = api.client.post(
+        '/editor/projects/luts',
+        params={'path': created['path']},
+        content=b'LUT_1D_SIZE 2\n',
+        headers={**api.headers, 'Content-Type': 'text/plain'},
+    )
+
+    assert response.status_code == 422
+    assert response.json()['code'] == 'editor_lut_invalid'
+
+
+def test_project_lut_only_serves_a_declared_file_inside_its_media(api, root):
+    """La vista previa solo puede leer LUT declaradas por un clip del proyecto."""
+    from content_studio.editor.effects import save_lut
+
+    created = _create(api, 'LUT')
+    project_file = Path(created['path'])
+    _visual_project(project_file, 'media/image.png', 'image')
+    relative = save_lut(project_file.parent, b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 8)
+    doc = json.loads(project_file.read_text(encoding='utf-8'))
+    doc['clips'][0]['color'] = {'brightness': 0, 'contrast': 1, 'saturation': 1, 'gamma': 1, 'lut': relative}
+    project_file.write_text(json.dumps(doc), encoding='utf-8')
+
+    served = api.client.get(
+        '/editor/projects/luts', params={'path': str(project_file), 'source': relative}, headers=api.headers
+    )
+    undeclared = api.client.get(
+        '/editor/projects/luts',
+        params={'path': str(project_file), 'source': 'media/luts/lut-' + 'b' * 64 + '.cube'},
+        headers=api.headers,
+    )
+
+    assert served.status_code == 200
+    assert served.content == b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 8
+    assert undeclared.status_code == 404
+
+
 def test_uploading_a_text_raster_rejects_a_wrong_hash(api, root):
     """La ruta del PNG no puede anunciar un hash distinto a sus bytes."""
     created = _create(api)

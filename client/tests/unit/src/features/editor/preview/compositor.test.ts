@@ -99,14 +99,21 @@ describe('compositor WebGL2', () => {
       FLOAT: 5126,
       TEXTURE_2D: 3553,
       TEXTURE0: 33984,
+      TEXTURE1: 33985,
+      TEXTURE2: 33986,
+      TEXTURE_3D: 32879,
       RGBA: 6408,
+      RGB: 6407,
+      RGB8: 32849,
       UNSIGNED_BYTE: 5121,
       TEXTURE_MIN_FILTER: 10241,
       TEXTURE_MAG_FILTER: 10240,
       LINEAR: 9729,
       TEXTURE_WRAP_S: 10242,
       TEXTURE_WRAP_T: 10243,
+      TEXTURE_WRAP_R: 32882,
       CLAMP_TO_EDGE: 33071,
+      NEAREST: 9728,
       UNPACK_FLIP_Y_WEBGL: 37440,
       TRIANGLES: 4,
       BLEND: 3042,
@@ -134,6 +141,8 @@ describe('compositor WebGL2', () => {
       texParameteri: vi.fn(),
       pixelStorei: vi.fn(),
       texImage2D: vi.fn(),
+      texImage3D: vi.fn(),
+      copyTexImage2D: vi.fn(),
       activeTexture: vi.fn(),
       enableVertexAttribArray: vi.fn(),
       vertexAttribPointer: vi.fn(),
@@ -150,6 +159,7 @@ describe('compositor WebGL2', () => {
       clearColor: vi.fn(),
       clear: vi.fn(),
       enable: vi.fn(),
+      disable: vi.fn(),
       blendFunc: vi.fn(),
       drawArrays: draws,
       deleteBuffer: vi.fn(),
@@ -157,6 +167,8 @@ describe('compositor WebGL2', () => {
       deleteFramebuffer: vi.fn(),
       deleteProgram: vi.fn(),
       deleteShader: vi.fn(),
+      drawingBufferWidth: 64,
+      drawingBufferHeight: 64,
     } as unknown as WebGL2RenderingContext;
     const element = document.createElement('canvas');
     vi.spyOn(element, 'getContext').mockReturnValue(gl);
@@ -167,6 +179,20 @@ describe('compositor WebGL2', () => {
     compositor.render(doc, 1, new Map([['low', source], ['high', source]]));
 
     expect(draws).toHaveBeenCalledTimes(2);
+    const effectClip = { ...visualClip('effects', 'high'), blend_mode: 'multiply' as const };
+    effectClip.color = {
+      brightness: 0.1, contrast: 1.2, saturation: 0.9, gamma: 1.1,
+      lut: 'media/luts/lut-' + 'a'.repeat(64) + '.cube',
+    };
+    effectClip.chroma = { color: '#00ff00', similarity: 0.2, blend: 0.1, despill: true };
+    const lut = { size: 2, data: new Uint8Array(24), domainMin: [0, 0, 0] as [number, number, number], domainMax: [1, 1, 1] as [number, number, number] };
+    const effectSources = { get: (id: string) => id === 'effects' ? source : undefined, getLut: () => lut };
+    compositor.render(project([videoTrack('high')], [effectClip]), 1, effectSources);
+    expect(gl.texImage3D).toHaveBeenCalledOnce();
+    expect(gl.copyTexImage2D).toHaveBeenCalledOnce();
+    expect(gl.disable).toHaveBeenCalledWith(gl.BLEND);
+    expect(gl.uniform1i).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_hasChroma' }), 1);
+    expect(gl.uniform1i).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_blendMode' }), 1);
     const transitionDoc = project(
       [videoTrack('v1')],
       [visualClip('a', 'v1'), visualClip('b', 'v1', 3)],

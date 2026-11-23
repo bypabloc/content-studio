@@ -5,10 +5,11 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import Any
 
-from content_studio.editor import expr, project, render_audio, video_transitions
+from content_studio.editor import effects, expr, project, render_audio, video_transitions
 
 # cspell:ignore setpts STARTPTS vout repeatlast cropmask colorchannelmixer: filtros y etiquetas de FFmpeg.
 
@@ -71,6 +72,7 @@ def build(
     lines = ['[0:v]format=rgba[base]']
     current = 'base'
     layer_index = 0
+    transform = partial(_transform, folder=folder)
     for track in (item for item in doc.get('tracks', []) if item['id'] in by_track):
         for group in video_transitions.groups(by_track[track['id']], doc.get('transitions', []), start, finish):
             if group.transitions:
@@ -83,7 +85,7 @@ def build(
                     start,
                     finish,
                     f't{layer_index}',
-                    _transform,
+                    transform,
                 )
                 lines.extend(layer.lines)
                 clip_start, clip_end = layer.start - start, layer.end - start
@@ -111,15 +113,15 @@ def build(
                     f'[{indexes[source]}:v]trim=start={_num(source_in)}:duration={_num(source_length)},'
                     f'{setpts},fps={_num(canvas["fps"])},format=rgba[{stream}]'
                 )
-                transformed = _transform(clip, clip_track, stream, start, source_size, f'c{layer_index}_')
+                transformed = _transform(clip, clip_track, stream, start, source_size, f'c{layer_index}_', folder)
                 lines.extend(transformed.lines)
                 label, x, y = transformed.label, transformed.x, transformed.y
-            output = f'v{layer_index}'
             enable = f'gte(t,{_num(clip_start)})*lt(t,{_num(clip_end)})'
-            lines.append(
-                f'[{current}][{label}]overlay=x={x}:y={y}:'
-                f"eval=frame:format=auto:alpha=straight:eof_action=pass:repeatlast=0:enable='{enable}'[{output}]"
+            mode = group.items[-1][0].get('blend_mode', 'normal')
+            blend_lines, output = effects.blend_graph(
+                current, label, mode, canvas, duration, x, y, enable, str(layer_index)
             )
+            lines.extend(blend_lines)
             current = output
             layer_index += 1
     if layer_index == 0:
@@ -165,6 +167,7 @@ def _transform(
     start: float,
     source_size: tuple[int, int],
     namespace: str,
+    folder: Path,
 ) -> _Transform:
     """Aplica máscara alfa, rotación con caja fija y escala animable al flujo del clip."""
     transform = clip['transform']
@@ -208,6 +211,11 @@ def _transform(
             )
             source_width = max(1, int(source_width * (1 - left - right)))
             source_height = max(1, int(source_height * (1 - top - bottom)))
+    for index, filter_name in enumerate(effects.clip_filters(clip, folder)):
+        next_label = _append(lines, f'effect{index}', namespace)
+        lines.append(f'[{current}]{filter_name}[{next_label}]')
+        current = next_label
+    if not crop_frames:
         if opacity_frames or clip['fade_in'] > 0 or clip['fade_out'] > 0:
             next_label = _append(lines, 'alpha', namespace)
             alpha = _alpha_multiplier(clip, track, offset, length, prop)

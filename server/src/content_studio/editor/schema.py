@@ -50,6 +50,7 @@ def valid_chroma(value: Any) -> bool:
         and all(char in '0123456789abcdefABCDEF' for char in color[1:])
         and _between(value.get('similarity'), 0, 1)
         and _between(value.get('blend'), 0, 1)
+        and ('despill' not in value or isinstance(value['despill'], bool))
     )
 
 

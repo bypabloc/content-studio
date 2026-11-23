@@ -184,7 +184,8 @@ function validChroma(value: unknown): boolean {
   if (!isRecord(value)) return false;
   return (
     typeof value.color === 'string' && /^#[0-9a-f]{6}$/i.test(value.color) &&
-    between(value.similarity, 0, 1) && between(value.blend, 0, 1)
+    between(value.similarity, 0, 1) && between(value.blend, 0, 1) &&
+    (value.despill === undefined || typeof value.despill === 'boolean')
   );
 }
 

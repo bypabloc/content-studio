@@ -45,7 +45,7 @@ const PROPERTIES: VisualProperty[] = [
 
 function selectedClip(doc: Doc, id: string | null): VisualClip | null {
   const clip = doc.clips.find((item) => item.id === id);
-  return clip && (clip.media === 'image' || clip.media === 'video') ? clip : null;
+  return clip && (clip.media === 'image' || clip.media === 'video' || clip.media === 'text') ? clip : null;
 }
 
 function cropValue(clip: VisualClip, edge: 'l' | 't' | 'r' | 'b'): number {
@@ -73,7 +73,7 @@ export function Viewer({
   const sourceSignature = JSON.stringify([
     path,
     doc.clips.flatMap((item) =>
-      item.media === 'image' || item.media === 'video' ? [[item.id, item.media, item.src]] : [],
+      item.media === 'image' || item.media === 'video' || item.media === 'text' ? [[item.id, item.media, item.src]] : [],
     ),
   ]);
   const clip = selectedClip(doc, selectedClipId);
@@ -105,7 +105,7 @@ export function Viewer({
     const refresh = () => {
       if (active) setSourceRevision((revision) => revision + 1);
     };
-    const [, descriptors] = JSON.parse(sourceSignature) as [string, Array<[string, 'image' | 'video', string]>];
+    const [, descriptors] = JSON.parse(sourceSignature) as [string, Array<[string, 'image' | 'video' | 'text', string]>];
     for (const [id] of descriptors) {
       const source = sources.get(id);
       if (!source) continue;

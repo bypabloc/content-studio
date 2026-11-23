@@ -69,6 +69,7 @@ export interface ChromaKey {
   color: string;
   similarity: number;
   blend: number;
+  despill?: boolean;
 }
 
 export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'add' | 'difference';

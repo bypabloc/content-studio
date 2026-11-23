@@ -7,6 +7,8 @@ addopts
 aformat
 afrobeat
 alimiter
+alphaextract
+alphamerge
 anthemic
 apad
 aresample
@@ -28,7 +30,9 @@ chatterbox
 chillhop
 chillwave
 chiptune
+chromakey
 ckpt
+colorchannelmixer
 compresslevel
 cosyvoice
 creationflags
@@ -40,6 +44,7 @@ dbfs
 delenv
 demucs
 denoiser
+despill
 dests
 devtools
 docstrings
@@ -74,6 +79,7 @@ htdemucs
 httpx
 huggingface
 indextts
+interp
 keyscale
 killpg
 lameenc
@@ -83,6 +89,7 @@ libx
 lofi
 loudnorm
 lufs
+luts
 matcha
 noheader
 nostats
@@ -97,6 +104,7 @@ openunmix
 pytestmark
 yunet
 pipefail
+playhead
 precompact
 pretrained
 pyarrow
@@ -109,6 +117,7 @@ qwen
 realestate
 renderable
 renderables
+repeatlast
 retrowave
 rfilename
 prueba

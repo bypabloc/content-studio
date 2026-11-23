@@ -827,6 +827,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editor/projects/luts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Project Lut
+         * @description Sirve una LUT 3D declarada por un clip y dentro de los medios del proyecto.
+         */
+        get: operations["project_lut_editor_projects_luts_get"];
+        put?: never;
+        /**
+         * Upload Lut
+         * @description Valida una LUT 3D `.cube` y la guarda dentro de los medios del proyecto.
+         */
+        post: operations["upload_lut_editor_projects_luts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/fs/roots": {
         parameters: {
             query?: never;
@@ -3198,6 +3222,71 @@ export interface operations {
                 content: {
                     "application/json": {
                         [key: string]: string | number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_lut_editor_projects_luts_get: {
+        parameters: {
+            query: {
+                path: string;
+                source: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_lut_editor_projects_luts_post: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
                     };
                 };
             };

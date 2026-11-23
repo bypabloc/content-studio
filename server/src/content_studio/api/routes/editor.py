@@ -23,7 +23,7 @@ from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.db import settings
-from content_studio.editor import store
+from content_studio.editor import effects, store
 
 router = APIRouter(prefix='/editor')
 preview_router = APIRouter(prefix='/editor')
@@ -169,6 +169,27 @@ def project_media(path: str, source: str) -> FileResponse:
     return FileResponse(target, media_type=media_type)
 
 
+@preview_router.get('/projects/luts')
+def project_lut(path: str, source: str) -> FileResponse:
+    """Sirve una LUT 3D declarada por un clip y dentro de los medios del proyecto."""
+    file = _project_file(path)
+    doc, _ = store.read(file)
+    if not any(
+        isinstance(clip.get('color'), dict) and clip['color'].get('lut') == source for clip in doc.get('clips', [])
+    ):
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    try:
+        target = effects.resolve_lut(file.parent, source)
+    except ValueError as error:
+        raise ApiError(404, 'fs_media_not_found', path=source) from error
+    if not target.is_file():
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    return FileResponse(
+        target,
+        media_type='text/plain; charset=utf-8',  # i18n-ignore: tipo MIME de un LUT, no es texto de interfaz
+    )
+
+
 def _finite_time(value: float) -> bool:
     """El fotograma no acepta `NaN` ni infinitos."""
     return value == value and value not in (float('inf'), float('-inf'))
@@ -188,6 +209,15 @@ def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) 
             sources.append((str(source), media_stat.st_mtime_ns, media_stat.st_size))
         except OSError:
             sources.append((str(source), None, None))
+        color = clip.get('color')
+        lut = color.get('lut') if isinstance(color, dict) else None
+        if lut:
+            try:
+                source = effects.resolve_lut(file.parent, lut)
+                stat = source.stat()
+                sources.append((str(source), stat.st_mtime_ns, stat.st_size))
+            except (OSError, ValueError):
+                sources.append((lut, None, None))
     identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources))
     return hashlib.sha256(repr(identity).encode('utf-8')).hexdigest()
 
@@ -212,3 +242,19 @@ async def upload_recording(path: str, request: Request) -> dict[str, str | float
     except ValueError as error:
         raise ApiError(422, 'editor_recording_invalid') from error
     return {'src': src, 'duration': duration}
+
+
+@router.post('/projects/luts', status_code=201)
+async def upload_lut(path: str, request: Request) -> dict[str, str]:
+    """Valida una LUT 3D `.cube` y la guarda dentro de los medios del proyecto."""
+    file = _project_file(path)
+    data = bytearray()
+    async for chunk in request.stream():
+        if len(data) + len(chunk) > effects.LUT_LIMIT:
+            raise ApiError(422, 'editor_lut_invalid')
+        data.extend(chunk)
+    try:
+        src = effects.save_lut(file.parent, bytes(data))
+    except ValueError as error:
+        raise ApiError(422, 'editor_lut_invalid') from error
+    return {'src': src}

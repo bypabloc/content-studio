@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorVisualPanel } from '@/features/editor/EditorVisualPanel';
-import type { Clip, Doc, TextClip, VideoClip, VisualClip } from '@/features/editor/model/types';
+import type { BlendMode, ChromaKey, Clip, ColorEffects, Doc, TextClip, VideoClip, VisualClip } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
 const mocks = vi.hoisted(() => ({
@@ -36,6 +36,34 @@ vi.mock('@/features/editor/TextInspector', () => ({
     );
   },
 }));
+vi.mock('@/features/editor/ColorInspector', () => ({
+  ColorInspector: ({
+    clip, onChange,
+  }: { clip: VisualClip | null; onChange: (id: string, color: ColorEffects) => void }) => {
+    if (!clip) return null;
+    return <button type="button" onClick={() => {
+      const color = { brightness: 0.25, contrast: 1, saturation: 1, gamma: 1 };
+      onChange('missing', color);
+      onChange(clip.id, color);
+    }}>change-color</button>;
+  },
+}));
+vi.mock('@/features/editor/EffectsInspector', () => ({
+  EffectsInspector: ({
+    clip, onChange,
+  }: {
+    clip: VisualClip | null;
+    onChange: (id: string, change: { blend_mode?: BlendMode; chroma?: ChromaKey | null }) => void;
+  }) => {
+    if (!clip) return null;
+    return <button type="button" onClick={() => {
+      onChange('missing', { blend_mode: 'screen' });
+      onChange(clip.id, { blend_mode: 'multiply' });
+      onChange(clip.id, { chroma: { color: '#00ff00', similarity: 0.2, blend: 0.1 } });
+      onChange(clip.id, { chroma: null });
+    }}>change-effects</button>;
+  },
+}));
 
 afterEach(cleanup);
 
@@ -55,6 +83,26 @@ const doc: Doc = {
 };
 
 describe('EditorVisualPanel', () => {
+  it('aplica color y efectos solo al clip visual seleccionado', () => {
+    const onPreviewDoc = vi.fn();
+    const onCommitPreview = vi.fn();
+    render(
+      <EditorVisualPanel
+        doc={doc} path="/project.json" time={0} selectedIds={['logo']}
+        onPreviewDoc={onPreviewDoc} onCommitPreview={onCommitPreview} onCancelPreview={vi.fn()}
+        onSeek={vi.fn()} onAddTransition={vi.fn()} onAddText={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'change-color' }));
+    expect((onPreviewDoc.mock.calls[0][0] as Doc).clips[0]).toMatchObject({ color: { brightness: 0.25 } });
+    fireEvent.click(screen.getByRole('button', { name: 'change-effects' }));
+    expect((onPreviewDoc.mock.calls[1][0] as Doc).clips[0]).toMatchObject({ blend_mode: 'multiply' });
+    expect((onPreviewDoc.mock.calls[2][0] as Doc).clips[0]).toMatchObject({ chroma: { color: '#00ff00' } });
+    expect((onPreviewDoc.mock.calls[3][0] as Doc).clips[0]).not.toHaveProperty('chroma');
+    expect(onCommitPreview).toHaveBeenCalledTimes(4);
+  });
+
   it('permite editar transformaciones de un título seleccionado', () => {
     const title = {
       ...visual, id: 'title', src: 'media/text-title-hash.png', media: 'text', raster: 'media/text-title-hash.png',

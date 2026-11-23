@@ -1,21 +1,30 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { Api } from '@/shared/api/client';
 
-import type { Doc, VisualClip } from '../model/types';
+import type { Clip, Doc, VisualClip } from '../model/types';
+import { parseCube, type Lut3D } from './lut';
 
 export type LayerSource = HTMLVideoElement | HTMLImageElement;
-export type LayerSourceLookup = Pick<ReadonlyMap<string, LayerSource>, 'get'>;
+export type LayerSourceLookup = Pick<ReadonlyMap<string, LayerSource>, 'get'> & {
+  getLut?: (path: string) => Lut3D | undefined;
+};
 
 export class LayerSourceStore implements LayerSourceLookup {
   private sources = new Map<string, LayerSource>();
+  private luts = new Map<string, Lut3D>();
 
   get(id: string): LayerSource | undefined {
     return this.sources.get(id);
   }
 
-  replace(sources: Map<string, LayerSource>): void {
+  getLut(path: string): Lut3D | undefined {
+    return this.luts.get(path);
+  }
+
+  replace(sources: Map<string, LayerSource>, luts = new Map<string, Lut3D>()): void {
     this.sources = sources;
+    this.luts = luts;
   }
 }
 
@@ -38,25 +47,43 @@ function createSource(clip: VisualClip): LayerSource {
   return video;
 }
 
+function isVisualClip(clip: Clip): clip is VisualClip {
+  return clip.media === 'video' || clip.media === 'image' || clip.media === 'text';
+}
+
 /** Mantiene una sola fuente silenciosa por clip visual y libera los medios al cambiar de proyecto. */
 export function useLayerSources(doc: Doc, projectPath: string, api: Api): LayerSourceStore {
   const sources = useMemo(() => new LayerSourceStore(), []);
-  const sourceSignature = JSON.stringify(
-    doc.clips.flatMap((clip) =>
-      clip.media === 'video' || clip.media === 'image' || clip.media === 'text' ? [[clip.id, clip.media, clip.src]] : [],
-    ),
-  );
+  const [, setLutRevision] = useState(0);
+  const visualClips = doc.clips.filter(isVisualClip);
+  const sourceSignature = JSON.stringify(visualClips.map((clip) => [clip.id, clip.media, clip.src, clip.color?.lut ?? '']));
 
   useEffect(() => {
+    let active = true;
     const next = new Map<string, LayerSource>();
-    for (const clip of doc.clips) {
-      if (clip.media !== 'video' && clip.media !== 'image' && clip.media !== 'text') continue;
+    const luts = new Map<string, Lut3D>();
+    for (const clip of visualClips) {
       const source = createSource(clip);
       source.src = sourceUrl(api, projectPath, clip);
       next.set(clip.id, source);
     }
-    sources.replace(next);
+    const lutPaths = [...new Set(visualClips.flatMap((clip) => clip.color?.lut ? [clip.color.lut] : []))];
+    sources.replace(next, luts);
+    void Promise.all(lutPaths.map(async (lutPath) => {
+      try {
+        const response = await fetch(api.queryUrl('/editor/projects/luts', { path: projectPath, source: lutPath }));
+        if (response.ok) luts.set(lutPath, parseCube(await response.text()));
+      } catch {
+        return;
+      }
+    })).then(() => {
+      if (active) {
+        sources.replace(next, luts);
+        setLutRevision((revision) => revision + 1);
+      }
+    });
     return () => {
+      active = false;
       for (const source of next.values()) {
         if (source instanceof HTMLVideoElement) {
           source.pause();
@@ -66,7 +93,7 @@ export function useLayerSources(doc: Doc, projectPath: string, api: Api): LayerS
           source.src = '';
         }
       }
-      sources.replace(new Map());
+      sources.replace(new Map(), new Map());
     };
     // Transform edits replace `doc.clips` but do not require new media elements.
     // eslint-disable-next-line react-hooks/exhaustive-deps

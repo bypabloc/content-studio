@@ -1,9 +1,11 @@
 import { UIStack } from '@/shared/components/atoms/UIStack';
 
 import { Inspector } from './Inspector';
+import { ColorInspector } from './ColorInspector';
+import { EffectsInspector } from './EffectsInspector';
 import { TextInspector } from './TextInspector';
 import { setKeyframeEase, toggleKeyframe, writeVisualValue } from './model/visual';
-import type { Doc, Keyframe, TextClip, TextStyle, TransitionType, VisualClip } from './model/types';
+import type { BlendMode, ChromaKey, Clip, ColorEffects, Doc, Keyframe, TextClip, TextStyle, TransitionType, VisualClip } from './model/types';
 import type { TextPresetName } from './text/presets';
 import { Viewer } from './preview/Viewer';
 import { TransitionsPanel } from './TransitionsPanel';
@@ -21,10 +23,14 @@ type Props = {
   onAddText: (preset: TextPresetName) => void;
 };
 
+function isVisualClip(clip: Clip): clip is VisualClip {
+  return clip.media === 'image' || clip.media === 'video' || clip.media === 'text';
+}
+
 function selectedVisualId(doc: Doc, ids: string[]): string | null {
   return ids.find((id) => {
     const clip = doc.clips.find((item) => item.id === id);
-    return clip?.media === 'image' || clip?.media === 'video' || clip?.media === 'text';
+    return clip !== undefined && isVisualClip(clip);
   }) ?? null;
 }
 
@@ -39,7 +45,7 @@ export function EditorVisualPanel({
   const clipId = selectedClipId(doc, selectedIds);
   const visualId = selectedVisualId(doc, selectedIds);
   const clip = doc.clips.find((item) => item.id === visualId);
-  const visual = clip && (clip.media === 'image' || clip.media === 'video' || clip.media === 'text') ? (clip as VisualClip) : null;
+  const visual = clip && isVisualClip(clip) ? clip : null;
   const textClip = clip?.media === 'text' ? clip as TextClip : null;
 
   function commit(next: Doc): void {
@@ -95,6 +101,26 @@ export function EditorVisualPanel({
     onCommitPreview();
   }
 
+  function changeColor(id: string, color: ColorEffects): void {
+    const next = structuredClone(doc);
+    const target = next.clips.find((item): item is VisualClip => item.id === id && isVisualClip(item));
+    if (!target) return;
+    target.color = color;
+    commit(next);
+  }
+
+  function changeEffects(id: string, changeSet: { blend_mode?: BlendMode; chroma?: ChromaKey | null }): void {
+    const next = structuredClone(doc);
+    const target = next.clips.find((item): item is VisualClip => item.id === id && isVisualClip(item));
+    if (!target) return;
+    if (changeSet.blend_mode) target.blend_mode = changeSet.blend_mode;
+    if ('chroma' in changeSet) {
+      if (changeSet.chroma) target.chroma = changeSet.chroma;
+      else delete target.chroma;
+    }
+    commit(next);
+  }
+
   return (
     <UIStack gap="sm">
       <UIStack direction="row" align="start" className="flex-col items-stretch gap-4 lg:flex-row">
@@ -121,6 +147,8 @@ export function EditorVisualPanel({
             onSeek={onSeek}
             onCanvasChange={changeCanvas}
           />
+          <ColorInspector clip={visual} path={path} onChange={changeColor} />
+          <EffectsInspector clip={visual} onChange={changeEffects} />
         </UIStack>
       </UIStack>
       <TextInspector
