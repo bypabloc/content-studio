@@ -37,6 +37,7 @@ describe('ExportDialog', () => {
   it('encola el render, muestra su progreso y permite abrir la carpeta y reproducir', async () => {
     render(<ExportDialog path={PATH} duration={10} markers={[]} />);
     fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+    fireEvent.click(screen.getByRole('checkbox', { name: t('editor.export.audio_only') }));
     fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/jobs', {
@@ -47,6 +48,38 @@ describe('ExportDialog', () => {
     expect(openPath).toHaveBeenCalledWith('D:/out/editor/demo/exports');
     fireEvent.click(screen.getByRole('button', { name: t('editor.export.play') }));
     await waitFor(() => expect(api.queryUrl).toHaveBeenCalledWith('/fs/media', { path: 'D:/out/editor/demo/exports/demo.wav' }));
+  });
+
+  it('exporta MP4 recomendado por defecto con la calidad elegida', async () => {
+    render(<ExportDialog path={PATH} duration={10} markers={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+
+    expect(screen.getByRole('spinbutton', { name: t('editor.export.quality') })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/jobs', {
+      kind: 'editor.render',
+      params: { doc: PATH, format: 'mp4-h264', name: 'demo', normalize: null, quality: 19 },
+    }));
+  });
+
+  it('reproduce el video exportado más reciente', async () => {
+    api.get.mockImplementation((url: string) => {
+      if (url === '/jobs/7') return Promise.resolve({ id: 7, status: 'done', progress: 1, error_code: null });
+      if (url.startsWith('/fs/list?')) {
+        return Promise.resolve({ entries: [{ kind: 'video', path: 'D:/out/editor/demo/exports/demo.mp4', modified: 5 }] });
+      }
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    const { container } = render(<ExportDialog path={PATH} duration={10} markers={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
+    expect(api.post).toHaveBeenCalled();
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/jobs/7'));
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.play') }));
+
+    await waitFor(() => expect(container.querySelector('video')).toBeTruthy());
+    expect(api.queryUrl).toHaveBeenCalledWith('/fs/media', { path: 'D:/out/editor/demo/exports/demo.mp4' });
   });
 
   it('encola un trabajo por cada tramo delimitado por marcadores', async () => {

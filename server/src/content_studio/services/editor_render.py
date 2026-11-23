@@ -24,6 +24,15 @@ def validate(params: dict[str, Any]) -> list[dict[str, Any]]:
     target = formats.TARGETS.get(params.get('format', 'wav'))
     if target is None or target['kind'] not in {'audio', 'video'}:
         errors.append({'code': 'unknown_target', 'params': {'target': params.get('format')}})
+    quality = params.get('quality')
+    if 'quality' in params and (
+        target is None
+        or target['kind'] != 'video'
+        or not isinstance(quality, int)
+        or isinstance(quality, bool)
+        or not 0 <= quality <= 51
+    ):
+        errors.append({'code': 'invalid_video_quality', 'params': {'quality': quality}})
     preset = params.get('normalize')
     if preset is not None and preset not in normalize.TARGETS:
         errors.append({'code': 'unknown_preset', 'params': {'preset': preset}})
@@ -56,6 +65,8 @@ def build_command(params: dict[str, Any], output_dir: Path) -> list[str]:
     ]
     if params.get('normalize'):
         command += ['--normalize', str(params['normalize'])]
+    if 'quality' in params:
+        command += ['--quality', str(params['quality'])]
     if 'start' in params:
         command += ['--start', str(params['start'])]
     if 'end' in params:

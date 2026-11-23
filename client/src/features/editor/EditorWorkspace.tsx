@@ -13,18 +13,20 @@ import { MicrophonePicker } from '@/features/recording/MicrophonePicker';
 
 import { ClipMissing } from './browser/ClipMissing';
 import { FileBrowser } from './browser/FileBrowser';
+import { EditorVisualPanel } from './EditorVisualPanel';
 import { ExportDialog } from './ExportDialog';
 import { Timeline } from './Timeline';
 import { Transport } from './Transport';
 import { duration } from './model/validate';
-import type { Doc } from './model/types';
+import { addTransitionAtCut } from './model/visual';
+import type { Doc, TransitionType } from './model/types';
 import { usePlayback } from './playback/usePlayback';
 import { useEditorDoc } from './useEditorDoc';
 import { useTrackRecorder } from './useTrackRecorder';
 import { zoomIn, zoomOut } from './model/timeline';
 
 type Project = { path: string; hash: string; doc: Doc; missing?: string[] };
-const SHORTCUTS = 'Home Space R N M S Delete + -'; // i18n-ignore: secuencia estándar de teclas de edición
+const SHORTCUTS = 'Home Space R N M S T Delete + -'; // i18n-ignore: secuencia estándar de teclas de edición
 
 /** Espacio de trabajo del editor: explorador, captura, transporte, línea de tiempo y exportación. */
 export function EditorWorkspace({
@@ -162,6 +164,16 @@ export function EditorWorkspace({
     else void stopRecording();
   }
 
+  function addTransition(type: TransitionType, time = playback.position, trackId?: string): void {
+    const selected = editor.doc.clips.find((clip) => selectedIds.includes(clip.id) && (clip.media === 'image' || clip.media === 'video'));
+    const targetTrack = trackId ?? selected?.track ?? editor.doc.tracks.find((track) => track.kind === 'video')?.id;
+    if (!targetTrack) return;
+    const next = addTransitionAtCut(editor.doc, targetTrack, time, type, crypto.randomUUID());
+    if (!next) return;
+    editor.previewDoc(next);
+    editor.commitPreview();
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
     if (event.defaultPrevented || event.repeat || (event.target as HTMLElement).closest('input,textarea,select')) return;
     const key = event.key.toLowerCase();
@@ -187,6 +199,8 @@ export function EditorWorkspace({
     } else if (event.key === 'Delete' && selectedIds.length) {
       applyOp({ type: 'deleteClips', ids: selectedIds, ripple: event.shiftKey });
       setSelectedIds([]);
+    } else if (key === 't') {
+      addTransition('fade');
     } else if (event.key === '+' || event.key === '=') setZoom((current) => zoomIn(current));
     else if (event.key === '-' || event.key === '_') setZoom((current) => zoomOut(current));
     else return;
@@ -219,16 +233,9 @@ export function EditorWorkspace({
         <UIIconButton icon="history" label={t('editor.history.undo')} shortcut="Ctrl+Z" aria-keyshortcuts="Control+Z" disabled={!editor.canUndo} onClick={editor.undo} />
         <UIIconButton icon="regenerate" label={t('editor.history.redo')} shortcut="Ctrl+Y" aria-keyshortcuts="Control+Y" disabled={!editor.canRedo} onClick={editor.redo} />
         <Transport
-          playing={playback.playing}
-          recording={recording || uploading}
-          magnet={magnet}
-          zoom={zoom}
-          onStart={() => playback.seek(0)}
-          onPlayingChange={playback.setPlaying}
-          onStop={playback.stop}
-          onRecordingChange={recordChange}
-          onMagnetChange={setMagnet}
-          onZoomChange={setZoom}
+          playing={playback.playing} recording={recording || uploading} magnet={magnet} zoom={zoom}
+          onStart={() => playback.seek(0)} onPlayingChange={playback.setPlaying} onStop={playback.stop}
+          onRecordingChange={recordChange} onMagnetChange={setMagnet} onZoomChange={setZoom}
         />
         <ExportDialog path={project.path} duration={duration(editor.doc)} markers={editor.doc.markers} />
       </UIStack>
@@ -260,24 +267,20 @@ export function EditorWorkspace({
           />
         </UIStack>
         <UIStack className="min-w-0 flex-1" gap="sm">
+          <EditorVisualPanel
+            doc={editor.doc} path={project.path} time={playback.position} selectedIds={selectedIds}
+            onPreviewDoc={editor.previewDoc} onCommitPreview={editor.commitPreview}
+            onCancelPreview={editor.cancelPreview} onSeek={playback.seek} onAddTransition={addTransition}
+          />
           <Timeline
-            doc={editor.doc}
-            selectedIds={selectedIds}
-            playhead={playback.position}
-            zoom={zoom}
-            magnet={magnet}
-            onSelectionChange={setSelectedIds}
-            onPreview={editor.previewDoc}
-            onCommitPreview={editor.commitPreview}
-            onCancelPreview={editor.cancelPreview}
-            onOperation={editor.applyOp}
+            doc={editor.doc} selectedIds={selectedIds} playhead={playback.position} zoom={zoom} magnet={magnet}
+            onSelectionChange={setSelectedIds} onPreview={editor.previewDoc} onCommitPreview={editor.commitPreview}
+            onCancelPreview={editor.cancelPreview} onOperation={editor.applyOp}
             onDropFiles={(paths, track, start) => void addFiles(paths, track, start)}
-            armedTrackIds={armedTrackIds}
-            onArmedChange={setTrackArmed}
-            onMarkerSelect={setSelectedMarker}
+            onDropTransition={(type, track, time) => addTransition(type, time, track)}
+            armedTrackIds={armedTrackIds} onArmedChange={setTrackArmed} onMarkerSelect={setSelectedMarker}
             onMarkerRename={(id, label) => applyOp({ type: 'renameMarker', id, label })}
-            selectedMarker={selectedMarker}
-            recordingLevels={levels}
+            selectedMarker={selectedMarker} recordingLevels={levels}
           />
         </UIStack>
       </UIStack>

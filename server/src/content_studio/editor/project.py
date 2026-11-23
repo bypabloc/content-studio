@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Any
+from typing import Any, TypeGuard
 
 VERSION = 2
 SAMPLE_RATE = 48000
@@ -98,9 +98,18 @@ def _visual_errors(clip: Doc) -> list[dict[str, str]]:
     transform = clip.get('transform')
     if clip['media'] not in ('video', 'image') or not isinstance(transform, dict):
         return [{'code': 'bad_transform', 'id': clip_id}]
-    values = [transform.get(key) for key in TRANSFORM_KEYS]
     crop = transform.get('crop')
-    valid = all(_finite_number(value) for value in values) and isinstance(crop, dict)
+    if not isinstance(crop, dict):
+        return [{'code': 'bad_transform', 'id': clip_id}]
+    values = [transform.get(key) for key in TRANSFORM_KEYS]
+    valid = all(_finite_number(value) for value in values)
+    crop_values: dict[str, int | float] = {}
+    for edge in ('l', 't', 'r', 'b'):
+        value = crop.get(edge)
+        if not _finite_number(value) or not 0 <= value <= 1:
+            valid = False
+            break
+        crop_values[edge] = value
     if valid:
         valid = (
             transform['scale_x'] > 0
@@ -108,9 +117,8 @@ def _visual_errors(clip: Doc) -> list[dict[str, str]]:
             and 0 <= transform['opacity'] <= 1
             and 0 <= transform['anchor_x'] <= 1
             and 0 <= transform['anchor_y'] <= 1
-            and all(_finite_number(crop.get(edge)) and 0 <= crop[edge] <= 1 for edge in ('l', 't', 'r', 'b'))
-            and crop['l'] + crop['r'] < 1
-            and crop['t'] + crop['b'] < 1
+            and crop_values['l'] + crop_values['r'] < 1
+            and crop_values['t'] + crop_values['b'] < 1
         )
     if not valid:
         found.append({'code': 'bad_transform', 'id': clip_id})
@@ -143,22 +151,25 @@ def _transition_errors(transitions: list[Doc], clips: dict[str, Doc], tracks: di
     found: list[dict[str, str]] = []
     for transition in transitions:
         transition_id = transition.get('id', '')
-        a, b = clips.get(transition.get('a')), clips.get(transition.get('b'))
-        track = tracks.get(transition.get('track'))
-        valid = a is not None and b is not None and track is not None and track.get('kind') == 'video'
-        if valid:
-            length_a, length_b = clip_length(a), clip_length(b)
-            overlap = a['start'] + length_a - b['start']
-            valid = (
-                a['track'] == b['track'] == transition['track']
-                and a.get('media') in {'video', 'image'}
-                and b.get('media') in {'video', 'image'}
-                and isinstance(transition.get('type'), str)
-                and transition.get('type') in TRANSITIONS
-                and _finite_number(transition.get('duration'))
-                and 0 < transition['duration'] <= min(length_a, length_b)
-                and math.isclose(overlap, transition['duration'], abs_tol=1e-9)
-            )
+        a_id, b_id, track_id = transition.get('a'), transition.get('b'), transition.get('track')
+        a = clips.get(a_id) if isinstance(a_id, str) else None
+        b = clips.get(b_id) if isinstance(b_id, str) else None
+        track = tracks.get(track_id) if isinstance(track_id, str) else None
+        if a is None or b is None or track is None or track.get('kind') != 'video':
+            found.append({'code': 'bad_transition', 'id': transition_id})
+            continue
+        length_a, length_b = clip_length(a), clip_length(b)
+        overlap = a['start'] + length_a - b['start']
+        valid = (
+            a['track'] == b['track'] == track_id
+            and a.get('media') in {'video', 'image'}
+            and b.get('media') in {'video', 'image'}
+            and isinstance(transition.get('type'), str)
+            and transition.get('type') in TRANSITIONS
+            and _finite_number(transition.get('duration'))
+            and 0 < transition['duration'] <= min(length_a, length_b)
+            and math.isclose(overlap, transition['duration'], abs_tol=1e-9)
+        )
         if not valid:
             found.append({'code': 'bad_transition', 'id': transition_id})
     return found
@@ -188,6 +199,6 @@ def _link_errors(clips: list[Doc], tracks: dict[str, Doc]) -> list[dict[str, str
     return found
 
 
-def _finite_number(value: Any) -> bool:
+def _finite_number(value: Any) -> TypeGuard[int | float]:
     """Acepta enteros y flotantes finitos, pero no booleanos."""
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)

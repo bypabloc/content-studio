@@ -32,6 +32,7 @@ describe('fuentes de capas del compositor', () => {
     const { result, unmount } = renderHook(() => useLayerSources(initialDoc, '/project/project.json', api));
 
     expect(result.current.get('clip')).toBeInstanceOf(HTMLVideoElement);
+    expect((result.current.get('clip') as HTMLVideoElement).crossOrigin).toBe('anonymous');
     expect(api.queryUrl).toHaveBeenCalledWith('/editor/projects/media', { path: '/project/project.json', source: 'media.mp4' });
     unmount();
     expect(pause).toHaveBeenCalledOnce();
@@ -44,6 +45,7 @@ describe('fuentes de capas del compositor', () => {
       initialProps: { model: doc('logo.png') },
     });
     expect(result.current.get('clip')).toBeInstanceOf(HTMLImageElement);
+    expect((result.current.get('clip') as HTMLImageElement).crossOrigin).toBe('anonymous');
     const initial = result.current.get('clip');
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined);
     vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined);
@@ -53,5 +55,20 @@ describe('fuentes de capas del compositor', () => {
     expect(result.current.get('clip')).toBeInstanceOf(HTMLVideoElement);
     expect(result.current.get('clip')).not.toBe(initial);
     unmount();
+  });
+
+  it('conserva la fuente cuando solo cambia la transformacion del clip', () => {
+    const api = { queryUrl: vi.fn(() => '/preview') } as unknown as Api;
+    const initial = doc();
+    const { result, rerender } = renderHook(({ model }) => useLayerSources(model, '/project/project.json', api), {
+      initialProps: { model: initial },
+    });
+    const source = result.current.get('clip');
+    const clip = initial.clips[0] as VisualClip;
+
+    act(() => rerender({ model: { ...initial, clips: [{ ...clip, transform: { ...clip.transform, x: 120 } }] } }));
+
+    expect(result.current.get('clip')).toBe(source);
+    expect(api.queryUrl).toHaveBeenCalledOnce();
   });
 });

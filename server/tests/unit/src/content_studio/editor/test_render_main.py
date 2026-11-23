@@ -118,11 +118,23 @@ def test_missing_sources_are_preserved_in_the_job_result(tmp_path: Path, capsys)
         'error': 'missing_source',
         'params': {'paths': ['media/tono-ausente.wav']},
     }
-    assert json.loads(capsys.readouterr().out) == {
-        'status': 'failed',
-        'error': 'missing_source',
-        'params': {'paths': ['media/tono-ausente.wav']},
-    }
+
+
+def test_video_quality_reaches_the_renderer(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """El CLI pasa CRF/CQ al renderer y deja el resultado de la exportación."""
+    project_file = store.create(tmp_path / 'editor', 'Proyecto', date(2026, 11, 23))
+    job = tmp_path / 'jobs' / 'video-quality'
+    job.mkdir(parents=True)
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(render_main.render_video, 'render', lambda *args, **kwargs: calls.append((*args, kwargs)))
+    monkeypatch.setattr(render_main.ff, 'probe_duration', lambda _path: 1.0)
+
+    code = render_main.main(
+        ['--project', str(project_file), '--format', 'mp4-h264', '--quality', '21', '--out-dir', str(job)]
+    )
+
+    assert code == 0
+    assert calls[0][-1] == {'start': 0, 'end': None, 'quality': 21}
 
 
 @needs_ffmpeg

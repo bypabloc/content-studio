@@ -5,6 +5,7 @@ from __future__ import annotations
 from content_studio.services import (
     clean_analyze,
     clean_render,
+    editor_proxy,
     editor_render,
     engine_install,
     engine_uninstall,
@@ -59,6 +60,7 @@ def test_every_kind_exposes_validate_and_build_command():
         'media.split': media_split,
         'mix.render': mix_render,
         'editor.render': editor_render,
+        'editor.proxy': editor_proxy,
     }
     assert expected == SERVICES
     for service in SERVICES.values():

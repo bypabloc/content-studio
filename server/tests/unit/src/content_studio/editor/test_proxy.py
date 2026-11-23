@@ -145,3 +145,35 @@ def test_ac4_alpha_source_uses_vp9_webm_and_keeps_alpha(tmp_path: Path, media_to
     tags = {key.lower(): value for key, value in stream.get('tags', {}).items()}
     assert tags.get('alpha_mode') == '1'
     assert alpha and 0 < max(alpha) < 255
+
+
+def test_proxy_cli_resolves_relative_source_and_prints_result(tmp_path: Path, monkeypatch, capsys):
+    """El CLI resuelve la fuente desde la carpeta del proyecto e imprime la caché creada."""
+    project = tmp_path / 'project' / 'project.json'
+    expected_source = project.parent / 'media' / 'clip.mp4'
+    output = project.parent / '.cache' / 'proxies' / 'clip.mp4'
+
+    def fake_create(source: Path, folder: Path) -> Path:
+        assert source == expected_source
+        assert folder == project.parent
+        return output
+
+    monkeypatch.setattr(proxy, 'create', fake_create)
+
+    result = proxy.main(['--project', str(project), '--source', 'media/clip.mp4'])
+
+    assert result == 0
+    assert capsys.readouterr().out == f'{output}\n'
+
+
+def test_proxy_cli_returns_three_when_source_cannot_be_read(tmp_path: Path, monkeypatch):
+    """El CLI informa fallo si no puede crear el proxy."""
+
+    def fail_create(_source: Path, _folder: Path) -> Path:
+        raise ValueError('unreadable_media')
+
+    monkeypatch.setattr(proxy, 'create', fail_create)
+
+    result = proxy.main(['--project', str(tmp_path / 'project.json'), '--source', 'missing.mp4'])
+
+    assert result == 3

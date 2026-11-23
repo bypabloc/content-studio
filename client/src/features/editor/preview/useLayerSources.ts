@@ -27,9 +27,11 @@ function createSource(clip: VisualClip): LayerSource {
   if (clip.media === 'image') {
     const image = new Image();
     image.decoding = 'async';
+    image.crossOrigin = 'anonymous';
     return image;
   }
   const video = document.createElement('video');
+  video.crossOrigin = 'anonymous';
   video.muted = true;
   video.playsInline = true;
   video.preload = 'auto';
@@ -39,6 +41,11 @@ function createSource(clip: VisualClip): LayerSource {
 /** Mantiene una sola fuente silenciosa por clip visual y libera los medios al cambiar de proyecto. */
 export function useLayerSources(doc: Doc, projectPath: string, api: Api): LayerSourceStore {
   const sources = useMemo(() => new LayerSourceStore(), []);
+  const sourceSignature = JSON.stringify(
+    doc.clips.flatMap((clip) =>
+      clip.media === 'video' || clip.media === 'image' ? [[clip.id, clip.media, clip.src]] : [],
+    ),
+  );
 
   useEffect(() => {
     const next = new Map<string, LayerSource>();
@@ -61,7 +68,9 @@ export function useLayerSources(doc: Doc, projectPath: string, api: Api): LayerS
       }
       sources.replace(new Map());
     };
-  }, [api, doc.clips, projectPath, sources]);
+    // Transform edits replace `doc.clips` but do not require new media elements.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, projectPath, sourceSignature, sources]);
 
   return sources;
 }

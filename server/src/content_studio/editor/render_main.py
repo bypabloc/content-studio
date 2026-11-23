@@ -23,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog='render_main')
     parser.add_argument('--project', required=True, type=Path)
     parser.add_argument('--format', default='wav')
+    parser.add_argument('--quality', type=int)
     parser.add_argument('--normalize')
     parser.add_argument('--start', type=float)
     parser.add_argument('--end', type=float)
@@ -44,6 +45,9 @@ def main(argv: list[str] | None = None) -> int:
     if target is None or target['kind'] not in {'audio', 'video'}:
         print(json.dumps({'status': 'failed', 'error': 'unknown_target', 'params': {'target': args.format}}))
         return 2
+    if args.quality is not None and (target['kind'] != 'video' or not 0 <= args.quality <= 51):
+        print(json.dumps({'status': 'failed', 'error': 'invalid_video_quality', 'params': {'quality': args.quality}}))
+        return 2
     extension = target['ext']
     exports = project_file.parent / 'exports'
     out = store.unique_export_path(exports, args.name or args.out_dir.name, extension)
@@ -55,7 +59,14 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             render_video.render(
-                doc, project_file.parent, out, args.format, args.normalize, start=args.start or 0, end=args.end
+                doc,
+                project_file.parent,
+                out,
+                args.format,
+                args.normalize,
+                start=args.start or 0,
+                end=args.end,
+                quality=args.quality,
             )
     except (render_audio.RenderError, subprocess.CalledProcessError) as error:
         failure_result = (

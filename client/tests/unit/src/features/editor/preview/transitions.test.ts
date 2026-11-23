@@ -20,18 +20,24 @@ describe('transiciones de vista previa', () => {
   it('mezcla fade y fundido a negro y blanco', () => {
     expect(transitionWeights('fade', 0.25, 0.5, 0.5)).toEqual({ from: 0.75, to: 0.25, fill: 0 });
     expect(transitionWeights('fadeblack', 0, 0.5, 0.5)).toEqual({ from: 1, to: 0, fill: 0 });
-    expect(transitionWeights('fadeblack', 0.5, 0.5, 0.5)).toEqual({ from: 0, to: 0, fill: 1 });
+    for (const type of ['fadeblack', 'fadewhite'] as const) {
+      const weights = transitionWeights(type, 0.5, 0.5, 0.5);
+      expect(weights.from).toBe(0.5);
+      expect(weights.to).toBeCloseTo(0.158203125);
+      expect(weights.fill).toBeCloseTo(0.341796875);
+    }
     expect(transitionWeights('fadewhite', 1, 0.5, 0.5)).toEqual({ from: 0, to: 1, fill: 0 });
     expect(transitionWeights('fade', -1, 0.5, 0.5)).toEqual({ from: 1, to: 0, fill: 0 });
     expect(transitionWeights('fade', 2, 0.5, 0.5)).toEqual({ from: 0, to: 1, fill: 0 });
   });
 
   it('revela clips con wipe y circleopen segun las coordenadas', () => {
-    expect(transitionWeights('wipeleft', 0.4, 0.2, 0.5).to).toBe(1);
-    expect(transitionWeights('wipeleft', 0.4, 0.8, 0.5).from).toBe(1);
-    expect(transitionWeights('wiperight', 0.4, 0.8, 0.5).to).toBe(1);
-    expect(transitionWeights('wiperight', 0.4, 0.2, 0.5).from).toBe(1);
-    expect(transitionWeights('circleopen', 0.5, 0.5, 0.5).to).toBe(1);
+    expect(transitionWeights('wipeleft', 0.4, 0.8, 0.5).to).toBe(1);
+    expect(transitionWeights('wipeleft', 0.4, 0.2, 0.5).from).toBe(1);
+    expect(transitionWeights('wiperight', 0.4, 0.2, 0.5).to).toBe(1);
+    expect(transitionWeights('wiperight', 0.4, 0.8, 0.5).from).toBe(1);
+    expect(transitionWeights('circleopen', 0.5, 0.5, 0.5).to).toBe(0);
+    expect(transitionWeights('circleopen', 0.5, 0, 0).to).toBe(1);
     expect(transitionWeights('circleopen', 0.1, 0, 0).from).toBe(1);
   });
 

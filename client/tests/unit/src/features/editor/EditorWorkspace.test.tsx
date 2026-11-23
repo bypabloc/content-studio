@@ -17,7 +17,11 @@ vi.mock('@/features/editor/useTrackRecorder', () => ({ useTrackRecorder: () => r
 vi.mock('@/features/editor/useNativeDrop', () => ({
   useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(['D:/Music/song.wav']) }),
 }));
-vi.mock('@/features/recording/MicrophonePicker', () => ({ MicrophonePicker: () => null }));
+vi.mock('@/features/recording/MicrophonePicker', () => ({
+  MicrophonePicker: ({ onChange }: { onChange: (value: string) => void }) => (
+    <button aria-label="test-microphone" onClick={() => onChange('device-2')} />
+  ),
+}));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
 
 const PATH = 'D:/out/editor/demo/project.json';
@@ -147,5 +151,22 @@ describe('EditorWorkspace', () => {
     render(<EditorWorkspace project={project} onBack={vi.fn()} autoRecord />);
 
     await waitFor(() => expect(recorder.start).toHaveBeenCalledOnce());
+  });
+
+  it('guarda micrófono y latencia y envía el transporte al inicio', async () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'test-microphone' }));
+    fireEvent.change(screen.getByRole('slider', { name: t('editor.recorder.offset') }), { target: { value: '35' } });
+    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.start') }));
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/editor.record_offset_ms', { value: 35 }));
+    expect(api.put).toHaveBeenCalledWith('/settings/select.recording.microphone', { value: 'device-2' });
+    expect(playback.seek).toHaveBeenCalledWith(0);
+  });
+
+  it('ignora la tecla de transición si el proyecto no tiene pistas visuales', () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.keyDown(screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) }), { key: 't' });
+    expect(api.put).not.toHaveBeenCalledWith(expect.stringContaining('/projects'), expect.anything());
   });
 });

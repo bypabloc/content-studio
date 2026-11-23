@@ -10,10 +10,39 @@ from pathlib import Path
 import pytest
 
 from content_studio.editor import project, render_video
-from content_studio.media import convert
+from content_studio.media import convert, formats
 from content_studio.system import tools
 
 TRANSITIONS = ('fade', 'fadeblack', 'fadewhite', 'wipeleft', 'wiperight', 'slideleft', 'slideright', 'circleopen')
+
+
+def test_video_quality_uses_crf_without_a_hardware_encoder(monkeypatch: pytest.MonkeyPatch):
+    """Con CPU, la calidad elegida se pasa como CRF al codificador del formato."""
+    monkeypatch.setattr(tools, 'detect', lambda: {'gpu': None})
+
+    assert render_video._video_codec_args(formats.TARGETS['mp4-h264'], 21) == [
+        '-c:v',
+        'libx264',
+        '-crf',
+        '21',
+        '-preset',
+        'medium',
+    ]
+
+
+def test_video_quality_uses_cq_with_nvenc(monkeypatch: pytest.MonkeyPatch):
+    """Con NVENC, la calidad elegida se pasa como CQ al codificador de NVIDIA."""
+    monkeypatch.setattr(tools, 'detect', lambda: {'gpu': 'NVIDIA'})
+    monkeypatch.setattr(convert, 'available_encoders', lambda: ['h264_nvenc'])
+
+    assert render_video._video_codec_args(formats.TARGETS['mp4-h264'], 21) == [
+        '-c:v',
+        'h264_nvenc',
+        '-preset',
+        'p5',
+        '-cq',
+        '21',
+    ]
 
 
 @pytest.mark.parametrize('time', [-0.1, 0.1])

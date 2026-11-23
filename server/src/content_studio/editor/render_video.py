@@ -64,11 +64,14 @@ def render(
     *,
     start: float = 0,
     end: float | None = None,
+    quality: int | None = None,
 ) -> Path:
     """Exporta el lienzo y, si existe, el grafo de audio de la 017 en el mismo trabajo de FFmpeg."""
     target = formats.TARGETS.get(format)
     if target is None or target['kind'] != 'video':
         raise render_audio.RenderError('unknown_target', {'target': format})
+    if quality is not None and (isinstance(quality, bool) or not isinstance(quality, int) or not 0 <= quality <= 51):
+        raise render_audio.RenderError('invalid_video_quality', {'quality': quality})
     finish = timeline_end(doc, start, end)
     inputs = _visual_inputs(doc, folder, start, finish)
     missing = _missing_visual_sources(inputs) + _missing_audio_sources(doc, folder)
@@ -90,7 +93,7 @@ def render(
     args += ['-map', '[vout]', '-t', _num(plan.duration)]
     if audio_plan is not None:
         args += ['-map', '[out]', *normalize.audio_args(out)]
-    args += _video_codec_args(target)
+    args += _video_codec_args(target, quality)
     args += ['-pix_fmt', 'yuv420p', '-r', _num(plan.canvas['fps']), str(out)]
     out.parent.mkdir(parents=True, exist_ok=True)
     graph = _graph_path(out)
@@ -142,20 +145,26 @@ def _shift_audio_inputs(script: str, offset: int) -> str:
     return re.sub(r'\[(\d+):a\]', lambda match: f'[{int(match[1]) + offset}:a]', script)
 
 
-def _video_codec_args(target: dict[str, Any]) -> list[str]:
+def _video_codec_args(target: dict[str, Any], quality: int | None = None) -> list[str]:
     """Selecciona NVENC si está disponible; conserva una salida por software en los demás equipos."""
     codec = target['codec']
     nvenc = target.get('nvenc')
     if nvenc and tools.detect()['gpu'] is not None and nvenc in convert.available_encoders():
+        if quality is not None:
+            return ['-c:v', nvenc, '-preset', 'p5', '-cq', str(quality)]
         if nvenc == 'h264_nvenc':
             return encode.video_codec(True)
         return ['-c:v', nvenc, '-preset', 'p5', '-cq', '23']
     if codec == 'libx264':
+        if quality is not None:
+            return ['-c:v', codec, '-crf', str(quality), '-preset', 'medium']
         return encode.video_codec(False)
     if codec == 'libx265':
-        return ['-c:v', codec, '-crf', '23', '-preset', 'medium']
+        return ['-c:v', codec, '-crf', str(quality if quality is not None else 23), '-preset', 'medium']
     if codec == 'libvpx-vp9':
-        return ['-c:v', codec, '-crf', '31', '-b:v', '0']
+        return ['-c:v', codec, '-crf', str(quality if quality is not None else 31), '-b:v', '0']
+    if quality is not None:
+        return ['-c:v', codec, '-crf', str(quality)]
     return ['-c:v', codec]
 
 

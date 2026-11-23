@@ -36,7 +36,7 @@ class Plan:
 
 
 @dataclass(frozen=True)
-class _Transform:
+class _Transform(video_transitions.Transform):
     lines: list[str]
     label: str
     x: str

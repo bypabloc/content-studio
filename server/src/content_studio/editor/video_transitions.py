@@ -66,10 +66,10 @@ def groups(items: list[ClipTrack], transitions: list[Doc], start: float, end: fl
         group_transitions = []
         while index + 1 < len(items):
             pair = (items[index][0]['id'], items[index + 1][0]['id'])
-            transition = active.get(pair)
-            if transition is None:
+            active_transition = active.get(pair)
+            if active_transition is None:
                 break
-            group_transitions.append(transition)
+            group_transitions.append(active_transition)
             index += 1
             group_items.append(items[index])
         result.append(Group(group_items, group_transitions))

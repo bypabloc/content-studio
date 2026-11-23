@@ -28,21 +28,28 @@ export function transitionWeights(type: TransitionType, progress: number, x: num
   const p = Math.max(0, Math.min(1, progress));
   if (type === 'fade') return { from: 1 - p, to: p, fill: 0 };
   if (type === 'fadeblack' || type === 'fadewhite') {
-    const first = Math.max(0, 1 - 2 * p);
-    const second = Math.max(0, 2 * p - 1);
-    return { from: first, to: second, fill: 1 - first - second };
+    const fadeOut = smoothstep(0.8, 1, p);
+    const fadeIn = smoothstep(0.2, 1, p);
+    const from = (1 - fadeOut) * (1 - p);
+    const to = fadeIn * p;
+    return { from, to, fill: 1 - from - to };
   }
   if (type === 'wipeleft') {
-    const reveal = x < p;
+    const reveal = x > p;
     return { from: reveal ? 0 : 1, to: reveal ? 1 : 0, fill: 0 };
   }
   if (type === 'wiperight') {
-    const reveal = x >= 1 - p;
+    const reveal = x <= 1 - p;
     return { from: reveal ? 0 : 1, to: reveal ? 1 : 0, fill: 0 };
   }
   if (type === 'circleopen') {
-    const reveal = Math.hypot(x - 0.5, y - 0.5) <= p * Math.SQRT1_2;
-    return { from: reveal ? 0 : 1, to: reveal ? 1 : 0, fill: 0 };
+    const to = smoothstep(0, 1, Math.hypot(x - 0.5, y - 0.5) * Math.SQRT2 + (p - 0.5) * 3);
+    return { from: 1 - to, to, fill: 0 };
   }
   return { from: 1, to: 1, fill: 0 };
+}
+
+function smoothstep(edge0: number, edge1: number, value: number): number {
+  const t = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
 }

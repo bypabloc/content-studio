@@ -41,7 +41,7 @@ def create(source: Path, project_folder: Path) -> Path:
     if target.is_file() and target.stat().st_size:
         return target
     target.parent.mkdir(parents=True, exist_ok=True)
-    temporary = target.with_name(f'.{target.stem}.{uuid4().hex}.tmp{target.suffix}')
+    temporary = target.with_name(f'.{uuid4().hex}{target.suffix}')
     try:
         subprocess.run(_command(source, temporary, has_alpha), check=True, capture_output=True)
         if not temporary.is_file() or not temporary.stat().st_size:

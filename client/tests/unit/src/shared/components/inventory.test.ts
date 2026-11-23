@@ -3,10 +3,10 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 // AC-1 (spec 008): el inventario de D-3 más los componentes que llegaron después (los átomos de la gráfica, `UIFieldFrame`,
-// `UIQrCode`, `UIDiffText`, `UIImage`, `UITime` y los átomos de la línea de tiempo de la spec 017). Cambiar esta lista es decidir que entra o sale un componente.
+// `UIQrCode`, `UIDiffText`, `UIImage`, `UITime` y los átomos de timeline y canvas de las specs 017 y 018). Cambiar esta lista es decidir que entra o sale un componente.
 const INVENTORY = {
   atoms: [
-    'UIAvatar', 'UIBadge', 'UIBox', 'UIButton', 'UICard', 'UIChartMarker', 'UIChartPlaceholder', 'UICheckbox', 'UIClip',
+    'UIAvatar', 'UIBadge', 'UIBox', 'UIButton', 'UICanvas', 'UICard', 'UIChartMarker', 'UIChartPlaceholder', 'UICheckbox', 'UIClip',
     'UIDetailText', 'UIDiffText', 'UIEmphasis', 'UIFieldError', 'UIFieldFrame', 'UIFixedValue', 'UIForm', 'UIGrid', 'UIHiddenInput',
     'UIIcon', 'UIImage', 'UILevelMeter', 'UILane', 'UILink', 'UIMarkedText', 'UIMedia', 'UIPage', 'UIProgress', 'UIQrCode', 'UIQrImage', 'UIRangeInput', 'UIRouteTransition',
     'UISkeleton', 'UIStack', 'UIStatus', 'UIStatusBadge', 'UISwitch', 'UITime', 'UIText', 'UITooltip',
