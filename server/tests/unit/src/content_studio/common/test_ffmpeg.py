@@ -21,6 +21,22 @@ def test_ac4_probe_command_asks_ffprobe_for_the_duration_only():
     ]  # fmt: skip
 
 
+def test_has_audio_stream_checks_for_the_first_audio_stream(monkeypatch):
+    calls = []
+
+    def run(args, **kwargs):
+        calls.append((args, kwargs))
+        return subprocess.CompletedProcess(args, 0, stdout='0\n', stderr='')
+
+    monkeypatch.setattr(ffmpeg.subprocess, 'run', run)
+
+    assert ffmpeg.has_audio_stream('scene.mp4') is True
+    assert calls[0][0] == [
+        'ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=index',
+        '-of', 'csv=p=0', 'scene.mp4',
+    ]  # fmt: skip
+
+
 def test_ac4_peaks_command_decodes_mono_8_kHz_s16le_to_a_pipe():
     assert ffmpeg.peaks_command('a.wav') == [
         'ffmpeg', '-v', 'error', '-i', 'a.wav', '-f', 's16le', '-ac', '1', '-ar', '8000', '-',

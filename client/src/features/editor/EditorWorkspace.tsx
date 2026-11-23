@@ -15,6 +15,7 @@ import { ClipMissing } from './browser/ClipMissing';
 import { FileBrowser } from './browser/FileBrowser';
 import { EditorVisualPanel } from './EditorVisualPanel';
 import { ExportDialog } from './ExportDialog';
+import { buildImportOperations } from './importMedia';
 import { Timeline } from './Timeline';
 import { Transport } from './Transport';
 import { duration } from './model/validate';
@@ -113,50 +114,22 @@ export function EditorWorkspace({
       setImportError(false);
       try {
         const files = await Promise.all(paths.map(async (source) => {
-          const info = await api.get<{ duration: number }>(`/fs/info?path=${encodeURIComponent(source)}`);
+          const info = await api.get<{
+            duration: number;
+            kind: 'audio' | 'video' | 'image';
+            has_audio: boolean;
+          }>(`/fs/info?path=${encodeURIComponent(source)}`);
           if (!Number.isFinite(info.duration) || info.duration <= 0) throw new Error('invalid duration');
-          return { source, duration: info.duration };
+          return { source, ...info };
         }));
-        let track = targetTrack;
-        if (!track) {
-          track = `track-${crypto.randomUUID()}`;
-            applyOp({
-            type: 'addTrack',
-            track: {
-              id: track,
-              kind: 'audio',
-              name: t('editor.track.new_name', { n: trackCount + 1 }),
-              volume_db: 0,
-              mute: false,
-              solo: false,
-              locked: false,
-              height: 80,
-            },
-          });
-        }
-        let cursor = Math.max(0, start);
-        for (const { source, duration: length } of files) {
-          applyOp({
-            type: 'addClip',
-            clip: {
-              id: crypto.randomUUID(),
-              track,
-              src: source,
-              src_in: 0,
-              src_out: length,
-              start: cursor,
-              gain_db: 0,
-              fade_in: 0,
-              fade_out: 0,
-            },
-          });
-          cursor += length;
+        for (const operation of buildImportOperations(files, editor.doc.tracks, trackCount, targetTrack, start)) {
+          applyOp(operation);
         }
       } catch {
         setImportError(true);
       }
     },
-    [api, applyOp, trackCount],
+    [api, applyOp, editor.doc.tracks, trackCount],
   );
 
   function recordChange(next: boolean): void {

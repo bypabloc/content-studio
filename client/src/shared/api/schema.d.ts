@@ -896,7 +896,7 @@ export interface paths {
         };
         /**
          * Media Info
-         * @description Mide la duración de un medio elegido para crear el clip, incluso si está fuera de `out/`.
+         * @description Describe una fuente elegida para crear su clip, incluso si está fuera de `out/`.
          */
         get: operations["media_info_fs_info_get"];
         put?: never;
@@ -1492,6 +1492,21 @@ export interface components {
             seconds: number;
             /** Guide */
             guide: string;
+        };
+        /**
+         * MediaInfo
+         * @description Metadatos que necesita el editor para crear clips de audio y video.
+         */
+        MediaInfo: {
+            /** Duration */
+            duration: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "audio" | "video" | "image";
+            /** Has Audio */
+            has_audio: boolean;
         };
         /**
          * Name
@@ -3303,9 +3318,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: number;
-                    };
+                    "application/json": components["schemas"]["MediaInfo"];
                 };
             };
             /** @description Validation Error */

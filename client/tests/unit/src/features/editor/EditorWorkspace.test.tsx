@@ -5,17 +5,18 @@ import { EditorWorkspace } from '@/features/editor/EditorWorkspace';
 import type { Doc } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
-const { api, open, playback, recorder } = vi.hoisted(() => ({
+const { api, open, playback, recorder, importedPaths } = vi.hoisted(() => ({
   api: { get: vi.fn(), put: vi.fn(), upload: vi.fn(), queryUrl: vi.fn((path: string) => path), fileUrl: vi.fn() },
   open: vi.fn(),
   playback: { position: 2, playing: false, seek: vi.fn(), setPlaying: vi.fn(), stop: vi.fn() },
   recorder: { recording: false, uploading: false, levels: { rms: -96, peak: -96 }, latencyMs: 0, error: null, start: vi.fn(), stop: vi.fn() },
+  importedPaths: [] as string[],
 }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('@/features/editor/playback/usePlayback', () => ({ usePlayback: () => playback }));
 vi.mock('@/features/editor/useTrackRecorder', () => ({ useTrackRecorder: () => recorder }));
 vi.mock('@/features/editor/useNativeDrop', () => ({
-  useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(['D:/Music/song.wav']) }),
+  useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(importedPaths) }),
 }));
 vi.mock('@/features/recording/MicrophonePicker', () => ({
   MicrophonePicker: ({ onChange }: { onChange: (value: string) => void }) => (
@@ -38,6 +39,7 @@ const DOC: Doc = {
 const project = { path: PATH, hash: 'hash-1', doc: DOC, missing: ['missing.wav'] };
 
 beforeEach(() => {
+  importedPaths.splice(0, importedPaths.length, 'D:/Music/song.wav');
   playback.position = 2;
   playback.playing = false;
   api.get.mockImplementation((url: string) => {
@@ -45,7 +47,7 @@ beforeEach(() => {
     if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
     if (url.includes('/settings/')) return Promise.resolve({ value: null });
     if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Music', entries: [] });
-    if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 3 });
+    if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 3, kind: 'audio', has_audio: true });
     return Promise.reject(new Error('unknown endpoint'));
   });
   api.put.mockResolvedValue({ hash: 'hash-2' });
@@ -83,6 +85,37 @@ describe('EditorWorkspace', () => {
     fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/fs/info?path=D%3A%2FMusic%2Fsong.wav'));
     expect(await screen.findByRole('group', { name: t('editor.timeline.lane', { name: t('editor.track.new_name', { n: 2 }) }) })).toBeTruthy();
+  });
+
+  it('importa imágenes y videos en pistas visuales y enlaza el audio del video', async () => {
+    importedPaths.splice(0, importedPaths.length, 'D:/Media/logo.png', 'D:/Media/scene.mp4');
+    api.get.mockImplementation((url: string) => {
+      if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'Media', path: 'D:/Media' }] });
+      if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+      if (url.includes('/settings/')) return Promise.resolve({ value: null });
+      if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Media', entries: [] });
+      if (url.includes('logo.png')) return Promise.resolve({ duration: 5, kind: 'image', has_audio: false });
+      if (url.includes('scene.mp4')) return Promise.resolve({ duration: 3, kind: 'video', has_audio: true });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+    const visualTrack = saved.tracks.find((track) => track.kind === 'video');
+    const importedAudioTrack = saved.tracks.find((track) => track.kind === 'audio' && track.id !== 'voice');
+    const image = saved.clips.find((clip) => clip.src === 'D:/Media/logo.png');
+    const video = saved.clips.find((clip) => clip.src === 'D:/Media/scene.mp4' && clip.media === 'video');
+    const linkedAudio = saved.clips.find((clip) => clip.src === 'D:/Media/scene.mp4' && !clip.media);
+
+    expect(visualTrack).toBeTruthy();
+    expect(image).toMatchObject({ media: 'image', track: visualTrack?.id, src_in: 0, src_out: 5, start: 2 });
+    expect(video).toMatchObject({ media: 'video', track: visualTrack?.id, src_in: 0, src_out: 3, start: 7 });
+    expect(linkedAudio).toMatchObject({ track: importedAudioTrack?.id, src_in: 0, src_out: 3, start: 7, gain_db: 0 });
+    expect(video?.link).toBeTruthy();
+    expect(linkedAudio?.link).toBe(video?.link);
   });
 
   it('arma la primera pista y comienza a grabar al crear un proyecto desde Inicio', async () => {
