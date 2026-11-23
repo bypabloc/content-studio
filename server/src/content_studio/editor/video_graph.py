@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from content_studio.editor import expr, project, render_audio
+from content_studio.editor import expr, project, render_audio, video_transitions
 
 # cspell:ignore setpts STARTPTS vout repeatlast cropmask colorchannelmixer: filtros y etiquetas de FFmpeg.
 
@@ -59,37 +59,66 @@ def build(
     sizes = source_sizes or {}
     inputs: list[RenderInput] = []
     indexes: dict[Path, int] = {}
-    lines = ['[0:v]format=rgba[base]']
-    current = 'base'
-    for index, (clip, track) in enumerate(clips):
+    by_track: dict[str, list[tuple[Doc, Doc]]] = {}
+    for clip, track in clips:
+        by_track.setdefault(track['id'], []).append((clip, track))
         source = Path(clip['src'])
         source = source if source.is_absolute() else folder / source
         source = source.resolve()
-        source_size = sizes.get(source)
-        if source_size is None:
-            raise ValueError('unreadable_media')
         if source not in indexes:
             indexes[source] = len(inputs) + 1
             inputs.append(RenderInput(source, clip['media'] == 'image', clip['src']))
-        source_start, clip_start, clip_end = _range_for(clip, start, finish)
-        length = clip_end - clip_start
-        stream = f's{index}'
-        source_in = 0 if clip['media'] == 'image' else clip['src_in'] + source_start
-        lines.append(
-            f'[{indexes[source]}:v]trim=start={_num(source_in)}:duration={_num(length)},'
-            f'setpts=PTS-STARTPTS+{_num(clip_start)}/TB,fps={_num(canvas["fps"])},format=rgba[{stream}]'
-        )
-        transformed = _transform(clip, track, stream, start, source_size)
-        lines.extend(transformed.lines)
-        output = 'vout' if index == len(clips) - 1 else f'v{index}'
-        enable = f'gte(t,{_num(clip_start)})*lt(t,{_num(clip_end)})'
-        lines.append(
-            f'[{current}][{transformed.label}]overlay=x={transformed.x}:y={transformed.y}:'
-            f"eval=frame:format=auto:alpha=straight:eof_action=pass:repeatlast=0:enable='{enable}'[{output}]"
-        )
-        current = output
-    if not clips:
+    lines = ['[0:v]format=rgba[base]']
+    current = 'base'
+    layer_index = 0
+    for track in (item for item in doc.get('tracks', []) if item['id'] in by_track):
+        for group in video_transitions.groups(by_track[track['id']], doc.get('transitions', []), start, finish):
+            if group.transitions:
+                layer = video_transitions.compose(
+                    group,
+                    folder,
+                    indexes,
+                    sizes,
+                    canvas,
+                    start,
+                    finish,
+                    f't{layer_index}',
+                    _transform,
+                )
+                lines.extend(layer.lines)
+                clip_start, clip_end = layer.start - start, layer.end - start
+                label, x, y = layer.label, '0', '0'
+            else:
+                clip, clip_track = group.items[0]
+                source = Path(clip['src'])
+                source = source if source.is_absolute() else folder / source
+                source = source.resolve()
+                source_size = sizes.get(source)
+                if source_size is None:
+                    raise ValueError('unreadable_media')
+                source_start, clip_start, clip_end = _range_for(clip, start, finish)
+                length = clip_end - clip_start
+                stream = f's{layer_index}'
+                source_in = 0 if clip['media'] == 'image' else clip['src_in'] + source_start
+                lines.append(
+                    f'[{indexes[source]}:v]trim=start={_num(source_in)}:duration={_num(length)},'
+                    f'setpts=PTS-STARTPTS+{_num(clip_start)}/TB,fps={_num(canvas["fps"])},format=rgba[{stream}]'
+                )
+                transformed = _transform(clip, clip_track, stream, start, source_size, f'c{layer_index}_')
+                lines.extend(transformed.lines)
+                label, x, y = transformed.label, transformed.x, transformed.y
+            output = f'v{layer_index}'
+            enable = f'gte(t,{_num(clip_start)})*lt(t,{_num(clip_end)})'
+            lines.append(
+                f'[{current}][{label}]overlay=x={x}:y={y}:'
+                f"eval=frame:format=auto:alpha=straight:eof_action=pass:repeatlast=0:enable='{enable}'[{output}]"
+            )
+            current = output
+            layer_index += 1
+    if layer_index == 0:
         lines.append('[base]null[vout]')
+    else:
+        lines.append(f'[{current}]null[vout]')
     return Plan(inputs, ';\n'.join(lines) + '\n', duration, canvas)
 
 
@@ -122,7 +151,14 @@ def timeline_end(doc: Doc, start: float, end: float | None) -> float:
     return finish
 
 
-def _transform(clip: Doc, track: Doc, source: str, start: float, source_size: tuple[int, int]) -> _Transform:
+def _transform(
+    clip: Doc,
+    track: Doc,
+    source: str,
+    start: float,
+    source_size: tuple[int, int],
+    namespace: str,
+) -> _Transform:
     """Aplica máscara alfa, rotación con caja fija y escala animable al flujo del clip."""
     transform = clip['transform']
     frames = clip.get('keyframes', {})
@@ -148,7 +184,7 @@ def _transform(clip: Doc, track: Doc, source: str, start: float, source_size: tu
     lines: list[str] = []
     current = source
     if crop_frames:
-        current = _append(lines, 'cropmask')
+        current = _append(lines, 'cropmask', namespace)
         inside = (
             f'gte(X,W*({mask_edges["l"]}))*lt(X,W*(1-({mask_edges["r"]})))'
             f'*gte(Y,H*({mask_edges["t"]}))*lt(Y,H*(1-({mask_edges["b"]})))'
@@ -158,7 +194,7 @@ def _transform(clip: Doc, track: Doc, source: str, start: float, source_size: tu
     else:
         left, top, right, bottom = (crop[key] for key in ('l', 't', 'r', 'b'))
         if any((left, top, right, bottom)):
-            current = _append(lines, 'crop')
+            current = _append(lines, 'crop', namespace)
             lines.append(
                 f'[{source}]crop=w=iw*(1-{_num(left)}-{_num(right)}):h=ih*(1-{_num(top)}-{_num(bottom)}):'
                 f'x=iw*{_num(left)}:y=ih*{_num(top)}[{current}]'
@@ -166,24 +202,22 @@ def _transform(clip: Doc, track: Doc, source: str, start: float, source_size: tu
             source_width = max(1, int(source_width * (1 - left - right)))
             source_height = max(1, int(source_height * (1 - top - bottom)))
         if opacity_frames or clip['fade_in'] > 0 or clip['fade_out'] > 0:
-            next_label = _append(lines, 'alpha')
+            next_label = _append(lines, 'alpha', namespace)
             alpha = _alpha_multiplier(clip, track, offset, length, prop)
-            lines.append(f"[{current}]geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='alpha(X,Y)*{alpha}[{next_label}]")
+            lines.append(f"[{current}]geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='alpha(X,Y)*{alpha}'[{next_label}]")
             current = next_label
         elif transform['opacity'] * track.get('opacity', 1) < 1:
-            next_label = _append(lines, 'opacity')
+            next_label = _append(lines, 'opacity', namespace)
             opacity = _num(transform['opacity'] * track.get('opacity', 1))
             lines.append(f'[{current}]colorchannelmixer=aa={opacity}[{next_label}]')
             current = next_label
     rotation = prop('rotation')
-    next_label = _append(lines, 'rot')
-    lines.append(
-        f"[{current}]rotate=angle='({rotation})*PI/180':ow='ceil(hypot(iw,ih))':"
-        f"oh='ceil(hypot(iw,ih))':c=black@0[{next_label}]"
-    )
+    next_label = _append(lines, 'rot', namespace)
+    diagonal = math.ceil(math.hypot(source_width, source_height))
+    lines.append(f"[{current}]rotate=angle='({rotation})*PI/180':ow={diagonal}:oh={diagonal}:c=black@0[{next_label}]")
     current = next_label
     scale_x, scale_y = prop('scale_x'), prop('scale_y')
-    next_label = _append(lines, 'scale')
+    next_label = _append(lines, 'scale', namespace)
     lines.append(f"[{current}]scale=w='max(1,iw*({scale_x}))':h='max(1,ih*({scale_y}))':eval=frame[{next_label}]")
     anchor_x, anchor_y = prop('anchor_x'), prop('anchor_y')
     x, y = prop('x'), prop('y')
@@ -237,8 +271,8 @@ def _range_for(clip: Doc, start: float, end: float) -> tuple[float, float, float
     return source_start, clip_start, clip_end
 
 
-def _append(lines: list[str], prefix: str) -> str:
-    return f'{prefix}{len(lines)}'
+def _append(lines: list[str], prefix: str, namespace: str) -> str:
+    return f'{namespace}{prefix}{len(lines)}'
 
 
 def _time(variable: str, offset: float) -> str:
