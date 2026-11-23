@@ -144,7 +144,7 @@ export function Timeline({
         />
       </UIStack>
       {doc.tracks.map((track) => {
-        const isArmed = armedTrackIds.includes(track.id);
+        const isArmed = track.kind === 'audio' && armedTrackIds.includes(track.id);
         return (
           <UIStack
             key={track.id}
@@ -165,7 +165,7 @@ export function Timeline({
               role="group"
               aria-label={t('editor.timeline.lane', { name: track.name })}
               className="min-w-0 shrink-0"
-              style={{ width: `${width}px`, height: `${track.height}px` }}
+              style={{ width: `${width}px`, height: `${track.height ?? 96}px` }}
               onPointerDown={(event) => beginRange(track.id, event)}
               onPointerMove={moveRange}
               onPointerUp={finishRange}

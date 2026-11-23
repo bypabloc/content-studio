@@ -67,6 +67,31 @@ def test_a_project_without_active_clips_cannot_render(tmp_path):
     assert caught.value.code == 'nothing_to_render'
 
 
+def test_audio_render_ignores_visual_tracks_and_clips(tmp_path):
+    """El render de audio solo lee clips de audio dentro de un proyecto mixto v2."""
+    video_track = {'id': 'v1', 'kind': 'video', 'name': 'Video', 'opacity': 1, 'hidden': False, 'locked': False}
+    visual_clip = {
+        'id': 'picture',
+        'track': 'v1',
+        'src': 'missing.mp4',
+        'src_in': 0,
+        'src_out': 2,
+        'start': 0,
+        'fade_in': 0,
+        'fade_out': 0,
+        'media': 'video',
+        'transform': {},
+        'keyframes': {},
+    }
+    doc = _doc([_track('audio'), video_track], [_clip('voice', 'audio', 'voice.wav', 0, 2), visual_clip])
+    doc.update(version=2, canvas={'width': 1920, 'height': 1080, 'fps': 30, 'background': '#000000'}, transitions=[])
+
+    plan = render_audio.build(doc, tmp_path)
+
+    assert [path.name for path in plan.inputs] == ['voice.wav']
+    assert render_audio._missing_sources({'clips': [visual_clip]}, tmp_path) == []
+
+
 def test_a_marker_segment_keeps_only_its_source_range_and_resets_the_timeline(tmp_path):
     """Un tramo entre marcadores empieza en cero y recorta el rango de fuente de cada clip."""
     doc = _doc([_track('t1')], [_clip('c1', 't1', 'media/a.wav', 1, 8)])

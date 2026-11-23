@@ -1,0 +1,14 @@
+{
+  "doc": {
+    "version": 2,
+    "name": "Split linked",
+    "sample_rate": 48000,
+    "canvas": {"width": 1920, "height": 1080, "fps": 30, "background": "#000000"},
+    "tracks": [{"id": "a", "kind": "audio", "name": "Audio", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}, {"id": "v", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false}],
+    "clips": [{"id": "audio-1", "track": "a", "src": "voice.wav", "src_in": 0, "src_out": 4, "start": 0, "gain_db": 0, "fade_in": 0, "fade_out": 0, "link": "take-1"}, {"id": "video-1", "track": "v", "src": "take.mp4", "src_in": 0, "src_out": 4, "start": 0, "fade_in": 0, "fade_out": 0, "media": "video", "link": "take-1", "transform": {}, "keyframes": {}}],
+    "markers": [],
+    "transitions": []
+  },
+  "op": {"type": "splitAt", "t": 2, "ids": ["video-1"]},
+  "expected": {"ids": ["audio-1", "audio-1-r", "video-1", "video-1-r"], "clips": {"audio-1": {"src_out": 2}, "audio-1-r": {"start": 2, "src_in": 2, "link": "take-1"}, "video-1": {"src_out": 2}, "video-1-r": {"start": 2, "src_in": 2, "link": "take-1"}}}
+}

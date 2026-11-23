@@ -13,15 +13,17 @@ function clip(id: string, track: string, src: string, start: number, length: num
 
 function document(): Doc {
   return {
-    version: 1,
+    version: 2,
     name: 'demo',
     sample_rate: 48000,
+    canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
     tracks: [
       { id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
       { id: 'music', kind: 'audio', name: 'Música', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
     ],
     clips: [clip('voice-clip', 'voice', 'D:/media/voice.wav', 9.9, 2), clip('music-clip', 'music', 'D:/media/music.wav', 0, 2)],
     markers: [{ id: 'marker-1', t: 10, label: 'corte', color: '#f00' }],
+    transitions: [],
   };
 }
 

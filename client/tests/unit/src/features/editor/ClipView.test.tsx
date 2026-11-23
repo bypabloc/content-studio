@@ -20,12 +20,14 @@ const clip: Clip = {
 };
 
 const doc: Doc = {
-  version: 1,
+  version: 2,
   name: 'demo',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
   clips: [clip],
   markers: [],
+  transitions: [],
 };
 
 describe('ClipView', () => {

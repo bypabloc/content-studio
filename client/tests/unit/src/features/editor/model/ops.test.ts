@@ -35,29 +35,35 @@ describe('operaciones del editor (AC-1)', () => {
     }
     if (expected.track_ids !== undefined) expect(result.tracks.map((track) => track.id)).toEqual(expected.track_ids);
     if (expected.markers !== undefined) expect(result.markers).toEqual(expected.markers);
+    if (expected.transitions !== undefined) expect(result.transitions).toEqual(expected.transitions);
+    for (const clipId of expected.without_link ?? []) {
+      expect(result.clips.find((clip) => clip.id === clipId)).not.toHaveProperty('link');
+    }
     expect(fixture.doc).toEqual(before);
   });
 
   it('rechaza una operación desconocida con su código', () => {
-    const doc: Doc = { version: 1, name: 'x', sample_rate: 48000, tracks: [], clips: [], markers: [] };
+    const doc: Doc = { version: 2, name: 'x', sample_rate: 48000, canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' }, tracks: [], clips: [], markers: [], transitions: [] };
 
     expect(() => apply(doc, { type: 'nope' } as unknown as Op)).toThrow('unknown_op');
   });
 
   it('rechaza una actualización de pista inexistente', () => {
-    const doc: Doc = { version: 1, name: 'x', sample_rate: 48000, tracks: [], clips: [], markers: [] };
+    const doc: Doc = { version: 2, name: 'x', sample_rate: 48000, canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' }, tracks: [], clips: [], markers: [], transitions: [] };
 
     expect(() => apply(doc, { type: 'setTrack', id: 'missing', changes: { mute: true } })).toThrow('unknown_track');
   });
 
   it('actualiza un fundido sin cambiar el borde omitido', () => {
     const doc: Doc = {
-      version: 1,
+      version: 2,
       name: 'x',
       sample_rate: 48000,
+      canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
       tracks: [],
       clips: [{ id: 'c1', track: 't1', src: 'a.wav', src_in: 0, src_out: 2, start: 0, gain_db: 0, fade_in: 0.1, fade_out: 0.2 }],
       markers: [],
+      transitions: [],
     };
 
     expect(apply(doc, { type: 'setFade', id: 'c1', fade_in: 0.5 }).clips[0]).toMatchObject({ fade_in: 0.5, fade_out: 0.2 });

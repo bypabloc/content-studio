@@ -17,12 +17,30 @@ def test_slug_is_kebab_case_ascii_and_never_empty():
 
 
 def test_create_makes_the_dated_folder_with_media_exports_and_the_document(tmp_path):
-    """La carpeta es `<AAAA-MM-DD>-<slug>/` y trae `media/`, `exports/` y el `project.json` de la versión 1."""
+    """La carpeta es `<AAAA-MM-DD>-<slug>/` y trae `media/`, `exports/` y el documento v2."""
     file = store.create(tmp_path, 'Charla', date(2026, 11, 22))
 
     assert file.parent.name == '2026-11-22-charla'
     assert (file.parent / 'media').is_dir() and (file.parent / 'exports').is_dir()
-    assert json.loads(file.read_text(encoding='utf-8'))['version'] == 1
+    assert json.loads(file.read_text(encoding='utf-8'))['version'] == 2
+
+
+def test_read_migrates_a_v1_project_and_keeps_the_original_hash(tmp_path):
+    """Al leer, la v1 se entrega como v2 y el hash sigue describiendo el archivo original."""
+    file = store.create(tmp_path, 'Charla', date(2026, 11, 22))
+    old = json.loads(file.read_text(encoding='utf-8'))
+    old['version'] = 1
+    old.pop('canvas')
+    old.pop('transitions')
+    original = json.dumps(old).encode('utf-8')
+    file.write_bytes(original)
+
+    doc, digest = store.read(file)
+
+    assert doc['version'] == 2
+    assert doc['canvas'] == {'width': 1920, 'height': 1080, 'fps': 30, 'background': '#000000'}
+    assert doc['transitions'] == []
+    assert digest == store.hash_of(original)
 
 
 def test_a_second_project_with_the_same_name_the_same_day_gets_a_new_folder(tmp_path):

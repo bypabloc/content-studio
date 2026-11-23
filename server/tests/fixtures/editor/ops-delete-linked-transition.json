@@ -1,0 +1,25 @@
+{
+  "doc": {
+    "version": 2,
+    "name": "Delete linked transition",
+    "sample_rate": 48000,
+    "canvas": {"width": 1920, "height": 1080, "fps": 30, "background": "#000000"},
+    "tracks": [
+      {"id": "a", "kind": "audio", "name": "Audio", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80},
+      {"id": "v", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false, "height": 96}
+    ],
+    "clips": [
+      {"id": "audio-b", "track": "a", "src": "b.wav", "src_in": 0, "src_out": 2, "start": 1, "gain_db": 0, "fade_in": 0, "fade_out": 0, "link": "group-b"},
+      {"id": "video-a", "track": "v", "src": "a.mp4", "src_in": 0, "src_out": 2, "start": 0, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}},
+      {"id": "video-b", "track": "v", "src": "b.mp4", "src_in": 0, "src_out": 2, "start": 1, "fade_in": 0, "fade_out": 0, "media": "video", "link": "group-b", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}},
+      {"id": "video-c", "track": "v", "src": "c.mp4", "src_in": 0, "src_out": 2, "start": 2, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}}
+    ],
+    "markers": [],
+    "transitions": [
+      {"id": "t1", "track": "v", "a": "video-a", "b": "video-b", "type": "fade", "duration": 1},
+      {"id": "t2", "track": "v", "a": "video-b", "b": "video-c", "type": "wipeleft", "duration": 1}
+    ]
+  },
+  "op": {"type": "deleteClips", "ids": ["audio-b"]},
+  "expected": {"ids": ["video-a", "video-c"], "clips": {}, "transitions": []}
+}

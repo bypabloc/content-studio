@@ -23,7 +23,7 @@ const MUTE_SHORTCUT = 'M'; // i18n-ignore: tecla de acceso rápido estándar
 /** Controles persistidos y de grabación temporal de una pista de audio. */
 export function TrackHeader({ track, armed, levels, onChange, onArmedChange }: Props): React.JSX.Element {
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
-    if (event.key.toLowerCase() !== 'm' || event.repeat) return;
+    if (track.kind !== 'audio' || event.key.toLowerCase() !== 'm' || event.repeat) return;
     event.preventDefault();
     onChange({ type: 'setTrack', id: track.id, changes: { mute: !track.mute } });
   }
@@ -32,7 +32,7 @@ export function TrackHeader({ track, armed, levels, onChange, onArmedChange }: P
     <UIStack
       role="group"
       aria-label={track.name}
-      aria-keyshortcuts={MUTE_SHORTCUT}
+      aria-keyshortcuts={track.kind === 'audio' ? MUTE_SHORTCUT : undefined}
       className="min-w-56 border-r border-border bg-card px-3 py-2"
       direction="column"
       gap="xs"
@@ -42,43 +42,51 @@ export function TrackHeader({ track, armed, levels, onChange, onArmedChange }: P
       <UIStack direction="row" align="center" justify="between" gap="sm">
         <UIText variant="heading" className="truncate">{track.name}</UIText>
         <UIStack direction="row" align="center" gap="xs">
-          <UIIconButton
-            icon={track.mute ? 'mute' : 'volume'}
-            label={t('editor.track.mute', { name: track.name })}
-            pressed={track.mute}
-            shortcut={MUTE_SHORTCUT}
-            aria-keyshortcuts={MUTE_SHORTCUT}
-            onClick={() => onChange({ type: 'setTrack', id: track.id, changes: { mute: !track.mute } })}
-          />
-          <UIIconButton
-            icon="music"
-            label={t('editor.track.solo', { name: track.name })}
-            pressed={track.solo}
-            onClick={() => onChange({ type: 'setTrack', id: track.id, changes: { solo: !track.solo } })}
-          />
+          {track.kind === 'audio' ? (
+            <>
+              <UIIconButton
+                icon={track.mute ? 'mute' : 'volume'}
+                label={t('editor.track.mute', { name: track.name })}
+                pressed={track.mute}
+                shortcut={MUTE_SHORTCUT}
+                aria-keyshortcuts={MUTE_SHORTCUT}
+                onClick={() => onChange({ type: 'setTrack', id: track.id, changes: { mute: !track.mute } })}
+              />
+              <UIIconButton
+                icon="music"
+                label={t('editor.track.solo', { name: track.name })}
+                pressed={track.solo}
+                onClick={() => onChange({ type: 'setTrack', id: track.id, changes: { solo: !track.solo } })}
+              />
+            </>
+          ) : null}
           <UIIconButton
             icon="lock"
             label={t('editor.track.lock', { name: track.name })}
             pressed={track.locked}
             onClick={() => onChange({ type: 'setTrack', id: track.id, changes: { locked: !track.locked } })}
           />
-          <UIIconButton
-            icon="record"
-            label={t('editor.track.arm', { name: track.name })}
-            pressed={armed}
-            onClick={() => onArmedChange(!armed)}
-          />
+          {track.kind === 'audio' ? (
+            <UIIconButton
+              icon="record"
+              label={t('editor.track.arm', { name: track.name })}
+              pressed={armed}
+              onClick={() => onArmedChange(!armed)}
+            />
+          ) : null}
         </UIStack>
       </UIStack>
-      <UIRangeInput
-        label={t('editor.track.volume', { name: track.name })}
-        min={-60}
-        max={12}
-        step={0.1}
-        value={track.volume_db}
-        onValueChange={(volume_db) => onChange({ type: 'setTrack', id: track.id, changes: { volume_db } })}
-      />
-      {armed && levels ? (
+      {track.kind === 'audio' ? (
+        <UIRangeInput
+          label={t('editor.track.volume', { name: track.name })}
+          min={-60}
+          max={12}
+          step={0.1}
+          value={track.volume_db}
+          onValueChange={(volume_db) => onChange({ type: 'setTrack', id: track.id, changes: { volume_db } })}
+        />
+      ) : null}
+      {track.kind === 'audio' && armed && levels ? (
         <UILevelMeter label={t('editor.recorder.level')} rms={levels.rms} peak={levels.peak} zone={[-12, -6]} alertAbove={-1} />
       ) : null}
     </UIStack>

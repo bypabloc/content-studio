@@ -34,6 +34,13 @@ def test_validate_accepts_the_document_of_a_valid_fixture():
     assert project.validate(doc) == []
 
 
+def test_validate_accepts_a_visual_project_with_keyframes_transition_and_link():
+    """AC-1: una pista visual, su transición y el audio enlazado son válidos en v2."""
+    doc = _load(FIXTURES / 'valid-visual-v2.json')['doc']
+
+    assert project.validate(doc) == []
+
+
 def test_duration_is_the_end_of_the_last_clip():
     """`duration` es el final del clip que más tarde termina; sin clips, 0."""
     doc = _load(FIXTURES / 'ops-delete-sin-ripple.json')['doc']
@@ -42,8 +49,18 @@ def test_duration_is_the_end_of_the_last_clip():
     assert project.duration({**doc, 'clips': []}) == 0
 
 
-def test_migrate_keeps_a_version_1_document_as_it_is():
-    """El esquema v1 no cambia: `migrate` lo devuelve igual (la 018 sube de versión sin perder campos)."""
+def test_migrate_adds_the_v2_canvas_without_losing_v1_fields():
+    """AC-1: la migración suma lienzo y transiciones sin mutar ni perder campos v1."""
     doc = _load(FIXTURES / 'ops-split.json')['doc']
+    before = json.loads(json.dumps(doc))
 
-    assert project.migrate(doc) == doc
+    migrated = project.migrate(doc)
+
+    assert migrated == {
+        **before,
+        'version': 2,
+        'canvas': {'width': 1920, 'height': 1080, 'fps': 30, 'background': '#000000'},
+        'transitions': [],
+    }
+    assert doc == before
+    assert project.validate(migrated) == []
