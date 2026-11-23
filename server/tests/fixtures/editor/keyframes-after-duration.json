@@ -1,0 +1,13 @@
+{
+  "default": 7,
+  "clip_duration": 3,
+  "keyframes": [
+    {"t": 5, "value": 2, "ease": "linear"},
+    {"t": 6, "value": 4, "ease": "linear"}
+  ],
+  "samples": [
+    {"t": 0, "expected": 2},
+    {"t": 5.5, "expected": 3}
+  ],
+  "segments": [[0, 3, 2, 2, "hold"]]
+}

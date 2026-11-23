@@ -28,11 +28,12 @@ Que el Editor de la 017 sea un NLE de video: pistas ilimitadas de video e imagen
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Esquema v2 (lienzo, pistas visuales, transformación y keyframes) e interpolación compartida | PEN |
-| 2 | Proxies y fotograma exacto bajo demanda | PEN |
-| 3 | Render de video: capas, keyframes y transiciones en `filter_complex` | PEN |
-| 4 | Client: compositor WebGL2 de vista previa | PEN |
-| 5 | Client: lienzo, inspector, keyframes y transiciones en la línea de tiempo | PEN |
+| 1 | Esquema v2 (lienzo, pistas visuales, transformación y keyframes) e interpolación compartida | IMP (`584b402`) |
+| 2 | Proxies y fotograma exacto bajo demanda | IMP (`87edebf`) |
+| 3 | Render de video: capas, keyframes y transiciones en `filter_complex` | IMP (`5d9394a`, `0a35e9b`) |
+| 4 | Client: compositor WebGL2 de vista previa | IMP |
+| 5 | Client: lienzo, inspector, keyframes y transiciones en la línea de tiempo | IMP (`fd1816b`) |
+| 6 | E2E y documentación visual | IMP |
 
 ## Decisiones clave
 
@@ -43,5 +44,6 @@ Que el Editor de la 017 sea un NLE de video: pistas ilimitadas de video e imagen
 
 ## WARNING y PENDING
 
-* WARNING: `018-paridad-preview-export.md` (umbral de SSIM y casos), `018-proxies.md` (resolución, códec y caché) y `018-transiciones.md` (lista elegida).
-* PENDING: ninguna.
+* PENDING: [018-app-check-cdp](../../../process/PENDING/018-app-check-cdp.md) (tres corridas compilaron la app, pero WebView2 no respondió en CDP).
+* WARNING: `018-paridad-preview-export.md` (umbral de SSIM y casos), `018-proxies.md` (resolución, códec y caché), `018-render-video.md` (crop animado y tamaño de transformaciones) y `018-transiciones.md` (lista elegida).
+* PENDING: [018-e2e-runner](../../../process/PENDING/018-e2e-runner.md) (el reintento de T8 quedó sin reporte; repetir antes del cierre de 023).

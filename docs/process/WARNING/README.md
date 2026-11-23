@@ -186,5 +186,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [017-proyecto-json](017-proyecto-json.md) | Proyecto v1 portable en JSON, con hash para evitar sobrescrituras y sin migraciones silenciosas | `main` |
 | [017-latencia-grabacion](017-latencia-grabacion.md) | Compensación de latencia configurable; falta medir con micrófono y auriculares físicos | antes de `main` |
 | [017-preview-media-elements](017-preview-media-elements.md) | Vista previa transmite clips con elementos HTML y corrige la deriva con WebAudio | `main` |
+| [018-proxies](018-proxies.md) | VP9 con alfa requiere `libvpx-vp9`; la caché de fotogramas incluye el estado de sus fuentes | antes de `main` |
+| [018-render-video](018-render-video.md) | El recorte animado usa alfa; la caja de rotación es fija y las etiquetas del grafo son únicas | antes de `main` |
+| [018-transiciones](018-transiciones.md) | Cada transición combina capas transparentes del lienzo y conserva el alfa de las pistas inferiores | antes de `main` |
+| [018-paridad-preview-export](018-paridad-preview-export.md) | Fórmulas de `xfade` y captura del canvas real: AC-5 pasa en cinco tiempos con SSIM >= 0,95 | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

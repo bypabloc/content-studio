@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { usePlayback } from '@/features/editor/playback/usePlayback';
-import type { Doc } from '@/features/editor/model/types';
+import type { AudioTrack, Doc } from '@/features/editor/model/types';
 
 const source = { connect: vi.fn(), disconnect: vi.fn() };
 const gainParam = {
@@ -23,14 +23,16 @@ const elements: { src: string; currentTime: number; paused: boolean; seeking: bo
 const frames: FrameRequestCallback[] = [];
 
 const doc: Doc = {
-  version: 1,
+  version: 2,
   name: 'preview',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: -3, mute: false, solo: false, locked: false, height: 80 }],
   clips: [
     { id: 'voice-1', track: 'voice', src: 'D:/media/voice.wav', src_in: 2, src_out: 6, start: 0, gain_db: -3, fade_in: 0.5, fade_out: 0.5 },
   ],
   markers: [],
+  transitions: [],
 };
 
 beforeEach(() => {
@@ -124,7 +126,7 @@ describe('usePlayback', () => {
     act(() => result.current.seek(1));
     expect(elements[0].currentTime).toBe(3);
 
-    rerender({ value: { ...doc, tracks: [{ ...doc.tracks[0], volume_db: -9 }] } });
+    rerender({ value: { ...doc, tracks: [{ ...(doc.tracks[0] as AudioTrack), volume_db: -9 }] } });
     context.currentTime = 0.1;
     act(() => frames.shift()?.(0));
 

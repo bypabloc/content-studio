@@ -17,7 +17,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from content_studio.editor.project import SAMPLE_RATE, VERSION, Doc
+from content_studio.editor.project import DEFAULT_CANVAS, SAMPLE_RATE, VERSION, Doc, migrate
 
 FILE = 'project.json'
 
@@ -42,7 +42,7 @@ def slug(name: str) -> str:
 
 
 def new_doc(name: str) -> Doc:
-    """El documento vacío del esquema v1, con una pista de audio."""
+    """El documento vacío del esquema v2, con lienzo y una pista de audio."""
     track = {
         'id': 't1',
         'kind': 'audio',
@@ -56,9 +56,11 @@ def new_doc(name: str) -> Doc:
         'version': VERSION,
         'name': name,
         'sample_rate': SAMPLE_RATE,
+        'canvas': dict(DEFAULT_CANVAS),
         'tracks': [{**track, 'height': 80}],
         'clips': [],
         'markers': [],
+        'transitions': [],
     }
 
 
@@ -98,9 +100,9 @@ def hash_of(data: bytes) -> str:
 
 
 def read(path: Path) -> tuple[Doc, str]:
-    """El documento y su hash."""
+    """El documento migrado al esquema actual y el hash original para `If-Match`."""
     data = path.read_bytes()
-    doc: Doc = json.loads(data.decode('utf-8'))
+    doc: Doc = migrate(json.loads(data.decode('utf-8')))
     return doc, hash_of(data)
 
 

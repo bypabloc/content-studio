@@ -1,0 +1,46 @@
+{
+  "path": "D:/out/editor/demo/project.json",
+  "hash": "visual-hash-1",
+  "doc": {
+    "version": 2,
+    "name": "demo",
+    "sample_rate": 48000,
+    "canvas": { "width": 800, "height": 450, "fps": 24, "background": "#000000" },
+    "tracks": [
+      { "id": "video", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false }
+    ],
+    "clips": [
+      {
+        "id": "logo",
+        "track": "video",
+        "src": "D:/media/logo.png",
+        "src_in": 0,
+        "src_out": 5,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "media": "image",
+        "transform": {
+          "x": 0,
+          "y": 0,
+          "scale_x": 1,
+          "scale_y": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": { "l": 0, "t": 0, "r": 0, "b": 0 },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {
+          "x": [
+            { "t": 0, "value": 0, "ease": "linear" },
+            { "t": 2, "value": 100, "ease": "linear" }
+          ]
+        }
+      }
+    ],
+    "markers": [],
+    "transitions": []
+  },
+  "missing": []
+}

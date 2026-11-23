@@ -133,6 +133,11 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
   const engines = fixture('engines/list') as unknown as unknown[];
   const system = fixture('system/info');
   const storage = fixture('storage/paths');
+  const corsHeaders = {
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'authorization,content-type',
+  };
 
   await page.route(`${API}/**`, async (route) => {
     const request = route.request();
@@ -166,9 +171,12 @@ export async function mockApi(page: Page, settings: Record<string, unknown>, rep
     }
 
     if (isFailed(reply)) {
-      await route.fulfill({ status: reply.failed.status, contentType: 'application/json', body: JSON.stringify(reply.failed.body) });
-    } else if (isBinary(reply)) await route.fulfill({ status: 200, contentType: reply.contentType, body: reply.body });
-    else await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(reply) });
+      await route.fulfill({ status: reply.failed.status, headers: corsHeaders, contentType: 'application/json', body: JSON.stringify(reply.failed.body) });
+    } else if (isBinary(reply)) {
+      await route.fulfill({ status: 200, headers: corsHeaders, contentType: reply.contentType, body: reply.body });
+    } else {
+      await route.fulfill({ status: 200, headers: corsHeaders, contentType: 'application/json', body: JSON.stringify(reply) });
+    }
   });
 
   // Después del catch-all: Playwright usa la última ruta que coincide, así que el SSE gana sobre el resto.

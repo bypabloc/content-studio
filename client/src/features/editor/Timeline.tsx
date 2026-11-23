@@ -9,10 +9,13 @@ import { t } from '@/shared/i18n/t';
 import { ClipView } from './ClipView';
 import { Ruler } from './Ruler';
 import { TrackHeader } from './TrackHeader';
+import { KeyframeLane } from './KeyframeLane';
+import { TransitionZone } from './TransitionZone';
 import type { Levels } from '@/features/recording/capture/useRecorder';
 import { pxToTime, selectInRange } from './model/timeline';
+import { resizeTransition } from './model/visual';
 import { clipLength } from './model/validate';
-import type { Doc, Op } from './model/types';
+import type { Doc, Op, TransitionType } from './model/types';
 
 type Props = {
   doc: Doc;
@@ -32,6 +35,7 @@ type Props = {
   onMarkerSelect?: (id: string) => void;
   onMarkerRename?: (id: string, label: string) => void;
   recordingLevels?: Levels;
+  onDropTransition?: (type: TransitionType, trackId: string | undefined, time: number) => void;
 };
 
 type Range = { trackId: string; anchor: number; current: number; left: number };
@@ -55,6 +59,7 @@ export function Timeline({
   onMarkerSelect,
   onMarkerRename,
   recordingLevels,
+  onDropTransition,
 }: Props): React.JSX.Element {
   const [range, setRange] = useState<Range | null>(null);
   const rangeRef = useRef<Range | null>(null);
@@ -64,6 +69,7 @@ export function Timeline({
     ...doc.markers.map((marker) => marker.t),
   );
   const width = duration * zoom;
+  const orderedTracks = [...doc.tracks].sort((a, b) => Number(a.kind === 'audio') - Number(b.kind === 'audio'));
 
   function droppedPaths(event: ReactDragEvent<HTMLDivElement>): string[] {
     const data = event.dataTransfer.getData('application/x-content-studio-paths');
@@ -79,6 +85,12 @@ export function Timeline({
   function dropOnLane(trackId: string, event: ReactDragEvent<HTMLDivElement>): void {
     event.preventDefault();
     event.stopPropagation();
+    const type = transitionType(event.dataTransfer.getData('application/x-editor-transition'));
+    if (type) {
+      const left = event.currentTarget.getBoundingClientRect().left;
+      onDropTransition?.(type, trackId, pxToTime(Math.max(0, event.clientX - left), zoom));
+      return;
+    }
     const paths = droppedPaths(event);
     if (paths.length) {
       const left = event.currentTarget.getBoundingClientRect().left;
@@ -88,6 +100,11 @@ export function Timeline({
 
   function dropOnTimeline(event: ReactDragEvent<HTMLDivElement>): void {
     event.preventDefault();
+    const type = transitionType(event.dataTransfer.getData('application/x-editor-transition'));
+    if (type) {
+      onDropTransition?.(type, undefined, playhead);
+      return;
+    }
     const paths = droppedPaths(event);
     if (paths.length) onDropFiles?.(paths, undefined, playhead);
   }
@@ -143,8 +160,13 @@ export function Timeline({
           onMarkerRename={onMarkerRename}
         />
       </UIStack>
-      {doc.tracks.map((track) => {
-        const isArmed = armedTrackIds.includes(track.id);
+      {orderedTracks.map((track) => {
+        const isArmed = track.kind === 'audio' && armedTrackIds.includes(track.id);
+        const visualClip = selectedIds
+          .map((id) => doc.clips.find((clip) => clip.id === id))
+          .find((clip) => clip?.track === track.id && (clip.media === 'video' || clip.media === 'image'));
+        const keyframeRows = visualClip?.media ? Object.values(visualClip.keyframes).filter((frames) => frames.length).length : 0;
+        const laneHeight = Math.max(track.height ?? 96, keyframeRows ? 84 + keyframeRows * 32 : 96);
         return (
           <UIStack
             key={track.id}
@@ -165,7 +187,7 @@ export function Timeline({
               role="group"
               aria-label={t('editor.timeline.lane', { name: track.name })}
               className="min-w-0 shrink-0"
-              style={{ width: `${width}px`, height: `${track.height}px` }}
+              style={{ width: `${width}px`, height: `${laneHeight}px` }}
               onPointerDown={(event) => beginRange(track.id, event)}
               onPointerMove={moveRange}
               onPointerUp={finishRange}
@@ -195,6 +217,41 @@ export function Timeline({
                     onCancelPreview={onCancelPreview}
                   />
                 ))}
+              {doc.transitions
+                .filter((transition) => transition.track === track.id)
+                .map((transition) => {
+                  const nextClip = doc.clips.find((clip) => clip.id === transition.b);
+                  return nextClip ? (
+                    <TransitionZone
+                      key={transition.id}
+                      transition={transition}
+                      left={nextClip.start * zoom}
+                      zoom={zoom}
+                      locked={track.locked}
+                      onResize={(id, nextDuration) => {
+                        const next = resizeTransition(doc, id, nextDuration);
+                        if (next) onPreview(next);
+                      }}
+                      onCommitResize={onCommitPreview}
+                      onCancelResize={onCancelPreview}
+                    />
+                  ) : null;
+                })}
+              {visualClip && keyframeRows ? (
+                <UIStack className="absolute left-0 top-20">
+                  <KeyframeLane
+                    doc={doc}
+                    clipId={visualClip.id}
+                    zoom={zoom}
+                    magnet={magnet}
+                    playhead={playhead}
+                    locked={track.locked}
+                    onPreviewDoc={onPreview}
+                    onCommitPreview={onCommitPreview}
+                    onCancelPreview={onCancelPreview}
+                  />
+                </UIStack>
+              ) : null}
               {range?.trackId === track.id ? (
                 <UIStack
                   role="img"
@@ -212,4 +269,11 @@ export function Timeline({
       })}
     </UIStack>
   );
+}
+
+// cspell:ignore fadeblack fadewhite wipeleft wiperight slideleft slideright circleopen
+function transitionType(value: string): TransitionType | null {
+  return ['fade', 'fadeblack', 'fadewhite', 'wipeleft', 'wiperight', 'slideleft', 'slideright', 'circleopen'].includes(value)
+    ? (value as TransitionType)
+    : null;
 }

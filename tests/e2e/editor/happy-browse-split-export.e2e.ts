@@ -25,6 +25,8 @@ test('AC-7/8: importa un audio, lo divide y encola la exportación', async ({ pa
   await expect.poll(() => (state.project.doc.clips as unknown[]).length).toBe(3);
 
   await page.getByRole('button', { name: 'Exportar…' }).click();
-  await page.getByRole('dialog', { name: 'Exportar audio' }).getByRole('button', { name: 'Iniciar exportación' }).click();
+  const exportDialog = page.getByRole('dialog', { name: 'Exportar proyecto' });
+  await exportDialog.getByRole('checkbox', { name: 'Solo audio' }).check();
+  await exportDialog.getByRole('button', { name: 'Iniciar exportación' }).click();
   await expect.poll(() => requestBodies(calls, '/jobs', 'POST')).toContainEqual(expect.objectContaining({ kind: 'editor.render' }));
 });

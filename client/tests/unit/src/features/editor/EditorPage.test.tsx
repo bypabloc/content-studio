@@ -11,12 +11,14 @@ vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
 
 const PATH = 'D:/out/editor/2026-11-22-demo/project.json';
 const doc: Doc = {
-  version: 1,
+  version: 2,
   name: 'demo',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
   clips: [],
   markers: [],
+  transitions: [],
 };
 const project = { path: PATH, hash: 'hash-1', doc, missing: [] };
 

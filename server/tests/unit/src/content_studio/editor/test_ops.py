@@ -34,6 +34,10 @@ def test_the_operation_gives_the_expected_clips(path):
         assert [track['id'] for track in result['tracks']] == expected['track_ids']
     if 'markers' in expected:
         assert result['markers'] == expected['markers']
+    if 'transitions' in expected:
+        assert result['transitions'] == expected['transitions']
+    for clip_id in expected.get('without_link', []):
+        assert 'link' not in next(clip for clip in result['clips'] if clip['id'] == clip_id)
     assert fixture['doc'] == before
 
 

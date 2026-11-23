@@ -26,6 +26,10 @@ describe('validación del proyecto (AC-1)', () => {
     expect(validate(load('ops-move-sin-pisar.json').doc as Doc)).toEqual([]);
   });
 
+  it('acepta un proyecto visual v2 con keyframes, transición y audio enlazado', () => {
+    expect(validate(load('valid-visual-v2.json').doc as Doc)).toEqual([]);
+  });
+
   it('la duración es el final del clip que más tarde termina; sin clips, 0', () => {
     const doc = load('ops-delete-sin-ripple.json').doc as Doc;
 

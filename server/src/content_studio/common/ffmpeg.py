@@ -57,6 +57,20 @@ def probe_duration(path: Path | str) -> float:
     return float(subprocess.run(probe_command(path), capture_output=True, text=True, check=True).stdout)
 
 
+def has_audio_stream(path: Path | str) -> bool:
+    """Indica si el primer medio de video contiene una pista de audio."""
+    result = subprocess.run(
+        [
+            'ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=index',
+            '-of', 'csv=p=0', str(path),
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )  # fmt: skip
+    return bool(result.stdout.strip())
+
+
 def video_size(path: Path | str) -> tuple[int, int]:
     """Ancho y alto del primer video del archivo, en píxeles."""
     size = subprocess.run(

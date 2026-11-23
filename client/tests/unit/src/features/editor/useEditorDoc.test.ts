@@ -2,7 +2,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useEditorDoc } from '@/features/editor/useEditorDoc';
-import type { Doc } from '@/features/editor/model/types';
+import type { AudioTrack, Doc } from '@/features/editor/model/types';
 
 const { api } = vi.hoisted(() => ({ api: { put: vi.fn() } }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
@@ -11,17 +11,25 @@ const PATH = 'D:/projects/demo/project.json';
 
 function document(): Doc {
   return {
-    version: 1,
+    version: 2,
     name: 'demo',
     sample_rate: 48000,
+    canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
     tracks: [{ id: 't1', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
     clips: [],
     markers: [],
+    transitions: [],
   };
 }
 
 function renderDocument(doc = document()) {
   return renderHook(() => useEditorDoc({ path: PATH, doc, hash: 'hash-1' }));
+}
+
+function audioTrack(doc: Doc): AudioTrack {
+  const track = doc.tracks[0];
+  if (track?.kind !== 'audio') throw new Error('expected_audio_track');
+  return track;
 }
 
 beforeEach(() => {
@@ -43,17 +51,17 @@ describe('useEditorDoc (spec 017, AC-6)', () => {
       result.current.undo();
       result.current.redo();
     });
-    expect(result.current.doc.tracks[0].mute).toBe(false);
+    expect(audioTrack(result.current.doc).mute).toBe(false);
 
     act(() => result.current.applyOp({ type: 'setTrack', id: 't1', changes: { mute: true } }));
-    expect(result.current.doc.tracks[0].mute).toBe(true);
+    expect(audioTrack(result.current.doc).mute).toBe(true);
     expect(result.current.canUndo).toBe(true);
 
     act(() => result.current.undo());
-    expect(result.current.doc.tracks[0].mute).toBe(false);
+    expect(audioTrack(result.current.doc).mute).toBe(false);
 
     act(() => result.current.redo());
-    expect(result.current.doc.tracks[0].mute).toBe(true);
+    expect(audioTrack(result.current.doc).mute).toBe(true);
   });
 
   it('guarda después de 1 s con el hash actual en If-Match', async () => {
@@ -94,7 +102,7 @@ describe('useEditorDoc (spec 017, AC-6)', () => {
 
     await act(async () => vi.advanceTimersByTimeAsync(1000));
 
-    expect(result.current.doc.tracks[0].mute).toBe(true);
+    expect(audioTrack(result.current.doc).mute).toBe(true);
     expect(result.current.saveState).toBe('error');
     expect(result.current.saveError).toBe('project_changed');
   });
@@ -102,26 +110,26 @@ describe('useEditorDoc (spec 017, AC-6)', () => {
   it('agrupa el preview como un paso y lo puede cancelar antes de confirmar', () => {
     const { result } = renderDocument();
     const preview = document();
-    preview.tracks[0].solo = true;
+    audioTrack(preview).solo = true;
 
     act(() => result.current.previewDoc(preview));
-    expect(result.current.doc.tracks[0].solo).toBe(true);
+    expect(audioTrack(result.current.doc).solo).toBe(true);
     expect(result.current.saveState).toBe('saved');
     act(() => result.current.commitPreview());
     expect(result.current.canUndo).toBe(true);
     expect(result.current.saveState).toBe('dirty');
 
     act(() => result.current.undo());
-    expect(result.current.doc.tracks[0].solo).toBe(false);
+    expect(audioTrack(result.current.doc).solo).toBe(false);
     act(() => result.current.redo());
-    expect(result.current.doc.tracks[0].solo).toBe(true);
+    expect(audioTrack(result.current.doc).solo).toBe(true);
 
     const nextPreview = document();
-    nextPreview.tracks[0].mute = true;
+    audioTrack(nextPreview).mute = true;
     act(() => result.current.previewDoc(nextPreview));
     act(() => result.current.cancelPreview());
-    expect(result.current.doc.tracks[0].solo).toBe(true);
-    expect(result.current.doc.tracks[0].mute).toBe(false);
+    expect(audioTrack(result.current.doc).solo).toBe(true);
+    expect(audioTrack(result.current.doc).mute).toBe(false);
     act(() => result.current.cancelPreview());
     act(() => result.current.commitPreview());
   });

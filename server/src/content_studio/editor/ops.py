@@ -20,8 +20,7 @@ class OpError(Exception):
     def __init__(self, code: str, params: dict[str, Any] | None = None) -> None:
         """Guarda el código y sus parámetros."""
         super().__init__(code)
-        self.code = code
-        self.params = params or {}
+        self.code, self.params = code, params or {}
 
 
 def apply(doc: Doc, op: Op) -> Doc:
@@ -44,17 +43,33 @@ def move_clip(doc: Doc, op: Op) -> None:
     """Mueve un clip a otra pista o a otro tiempo. En su pista no puede pisar a otro: queda pegado al hueco libre más
     cercano (el borde de un clip vecino o el inicio). Superponer en otra pista sí está permitido."""
     clip = _find(doc, op['id'])
-    track, requested = op['track'], float(op['start'])
-    others = [other for other in doc['clips'] if other is not clip and other['track'] == track]
-    if not others:
-        clip.update(track=track, start=max(0.0, requested))
-        return
-    length = clip_length(clip)
-    edges = [0.0, requested, max(other['start'] + clip_length(other) for other in others)]
-    edges += [other['start'] + clip_length(other) for other in others]
-    edges += [other['start'] - length for other in others]
-    free = [t for t in edges if t >= 0 and not any(_overlaps(t, length, o) for o in others)]
-    clip.update(track=track, start=min(free, key=lambda t: (abs(t - requested), t)))
+    old_start, requested = clip['start'], float(op['start'])
+    group = _linked(doc, clip)
+    destinations = [(member, op['track'] if member is clip else member['track']) for member in group]
+    obstacles = {
+        track: [other for other in doc['clips'] if other not in group and other['track'] == track]
+        for _, track in destinations
+    }
+    others = [other for items in obstacles.values() for other in items]
+    edges = [0.0, requested]
+    edges.extend(other['start'] + clip_length(other) for other in others)
+    for member, track in destinations:
+        edges.extend(other['start'] - clip_length(member) for other in obstacles[track])
+    free = [
+        t
+        for t in edges
+        if t >= 0
+        and all(
+            not _overlaps(t, clip_length(member), other) for member, track in destinations for other in obstacles[track]
+        )
+    ]
+    end = max((other['start'] + clip_length(other) for other in others), default=0.0)
+    if not free:
+        free = [end]
+    start = min(free, key=lambda t: (abs(t - requested), t))
+    delta = start - old_start
+    for member, track in destinations:
+        member.update(track=track, start=member['start'] + delta)
 
 
 def set_track(doc: Doc, op: Op) -> None:
@@ -97,7 +112,16 @@ def remove_track(doc: Doc, op: Op) -> None:
     if not any(track['id'] == op['id'] for track in doc['tracks']):
         raise OpError('unknown_track', {'id': op['id']})
     doc['tracks'] = [track for track in doc['tracks'] if track['id'] != op['id']]
+    removed = [clip for clip in doc['clips'] if clip['track'] == op['id']]
+    links = {clip.get('link') for clip in removed if clip.get('link')}
     doc['clips'] = [clip for clip in doc['clips'] if clip['track'] != op['id']]
+    for clip in doc['clips']:
+        if clip.get('link') in links:
+            clip.pop('link')
+    removed_ids = {clip['id'] for clip in removed}
+    doc['transitions'] = [
+        transition for transition in doc.get('transitions', []) if not {transition['a'], transition['b']} & removed_ids
+    ]
 
 
 def reorder_tracks(doc: Doc, op: Op) -> None:
@@ -146,24 +170,31 @@ def replace_source(doc: Doc, op: Op) -> None:
 def trim_clip(doc: Doc, op: Op) -> None:
     """Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`."""
     clip = _find(doc, op['id'])
+    group = _linked(doc, clip)
     edge, t = op['edge'], float(op['t'])
     if edge == 'start':
         delta = t - clip['start']
-        if clip['src_in'] + delta < 0:
+        if any(member['src_in'] + delta < 0 for member in group):
             raise OpError('bad_trim', {'id': clip['id']})
-        clip.update(start=t, src_in=clip['src_in'] + delta)
+        for member in group:
+            member.update(start=member['start'] + delta, src_in=member['src_in'] + delta)
     elif edge == 'end':
         length = t - clip['start']
         if length <= 0:
             raise OpError('bad_trim', {'id': clip['id']})
-        clip['src_out'] = clip['src_in'] + length
+        for member in group:
+            member['src_out'] = member['src_in'] + length
     else:
         raise OpError('unknown_edge', {'edge': edge})
 
 
 def split_at(doc: Doc, op: Op) -> None:
     """Corta en `t` cada clip que lo cruza (o solo los de `ids`). La mitad derecha se llama `<id>-r`."""
-    t, only = float(op['t']), op.get('ids')
+    t, only = float(op['t']), set(op['ids']) if op.get('ids') is not None else None
+    if only is not None:
+        for clip in doc['clips']:
+            if clip['id'] in only and clip.get('link'):
+                only.update(member['id'] for member in doc['clips'] if member.get('link') == clip['link'])
     for clip in list(doc['clips']):
         if only is not None and clip['id'] not in only:
             continue
@@ -177,8 +208,17 @@ def split_at(doc: Doc, op: Op) -> None:
 
 def delete_clips(doc: Doc, op: Op) -> None:
     """Borra los clips de `ids`. Con `ripple`, los clips que venían después en su pista se corren hacia atrás."""
-    gone = [clip for clip in doc['clips'] if clip['id'] in op['ids']]
-    doc['clips'] = [clip for clip in doc['clips'] if clip['id'] not in op['ids']]
+    ids = set(op['ids'])
+    for clip in doc['clips']:
+        if clip['id'] in ids and clip.get('link'):
+            ids.update(member['id'] for member in doc['clips'] if member.get('link') == clip['link'])
+    gone = [clip for clip in doc['clips'] if clip['id'] in ids]
+    doc['clips'] = [clip for clip in doc['clips'] if clip['id'] not in ids]
+    doc['transitions'] = [
+        transition
+        for transition in doc.get('transitions', [])
+        if transition['a'] not in ids and transition['b'] not in ids
+    ]
     if not op.get('ripple', False):
         return
     for removed in sorted(gone, key=lambda clip: clip['start'], reverse=True):
@@ -195,12 +235,41 @@ def crossfade(doc: Doc, op: Op) -> None:
     a['fade_out'] = d
 
 
+def link_clips(doc: Doc, op: Op) -> None:
+    """Enlaza dos o más clips bajo el identificador indicado, limpiando los grupos anteriores."""
+    ids = list(dict.fromkeys(op['ids']))
+    if len(ids) < 2 or not op.get('link'):
+        raise OpError('bad_link')
+    selected = [_find(doc, clip_id) for clip_id in ids]
+    old_links = {clip.get('link') for clip in selected if clip.get('link')}
+    for clip in doc['clips']:
+        if clip.get('link') in old_links:
+            clip.pop('link')
+    for clip in selected:
+        clip['link'] = op['link']
+
+
+def unlink_clips(doc: Doc, op: Op) -> None:
+    """Desenlaza los grupos de los clips elegidos completos, para no dejar parejas huérfanas."""
+    selected = [_find(doc, clip_id) for clip_id in op['ids']]
+    links = {clip.get('link') for clip in selected if clip.get('link')}
+    for clip in doc['clips']:
+        if clip.get('link') in links:
+            clip.pop('link')
+
+
 def _find(doc: Doc, clip_id: str) -> Doc:
     """El clip con ese id; si no existe, un error del catálogo."""
     for clip in doc['clips']:
         if clip['id'] == clip_id:
             return clip
     raise OpError('unknown_clip', {'id': clip_id})
+
+
+def _linked(doc: Doc, clip: Doc) -> list[Doc]:
+    """Devuelve el clip y los otros que comparten su enlace, si existe."""
+    link = clip.get('link')
+    return [item for item in doc['clips'] if item.get('link') == link] if link else [clip]
 
 
 def _overlaps(start: float, length: float, other: Doc) -> bool:
@@ -226,4 +295,6 @@ HANDLERS: dict[str, Callable[[Doc, Op], None]] = {
     'splitAt': split_at,
     'deleteClips': delete_clips,
     'crossfade': crossfade,
+    'linkClips': link_clips,
+    'unlinkClips': unlink_clips,
 }

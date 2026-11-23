@@ -16,6 +16,19 @@ def test_the_service_runs_on_the_cpu_not_the_gpu_lock():
 def test_validate_accepts_a_project_and_a_known_format():
     """Con un `project.json` y un formato de audio conocido no hay errores."""
     assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'wav'}) == []
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'mp4-h264'}) == []
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'mp4-h264', 'quality': 19}) == []
+
+
+def test_validate_rejects_video_quality_outside_the_crf_and_cq_range():
+    """CRF/CQ es un entero de 0 a 51 y solo aplica a formatos de video."""
+    for quality in (-1, 52, 19.5, True):
+        assert editor_render.validate({'doc': 'x/project.json', 'format': 'mp4-h264', 'quality': quality}) == [
+            {'code': 'invalid_video_quality', 'params': {'quality': quality}}
+        ]
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'quality': 19}) == [
+        {'code': 'invalid_video_quality', 'params': {'quality': 19}}
+    ]
 
 
 def test_validate_rejects_a_missing_project_and_an_unknown_format():
@@ -82,6 +95,25 @@ def test_build_command_passes_marker_range_and_export_name(tmp_path: Path):
         '5',
         '--name',
         'demo-01',
+        '--out-dir',
+        str(tmp_path),
+    ]
+
+
+def test_build_command_passes_video_quality(tmp_path: Path):
+    """La calidad elegida llega al proceso real del renderer."""
+    command = editor_render.build_command({'doc': 'x/project.json', 'format': 'mp4-h264', 'quality': 21}, tmp_path)
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.editor.render_main',
+        '--project',
+        'x/project.json',
+        '--format',
+        'mp4-h264',
+        '--quality',
+        '21',
         '--out-dir',
         str(tmp_path),
     ]

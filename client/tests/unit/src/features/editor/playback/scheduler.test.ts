@@ -1,29 +1,39 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { activeClips, audibleClips, gainAt, gainRamps, positionAt, shouldCorrectDrift, sourceTimeAt } from '@/features/editor/playback/scheduler';
-import type { Clip, Doc, Track } from '@/features/editor/model/types';
+import type { AudioClip, AudioTrack, Doc } from '@/features/editor/model/types';
 
-function clip(id: string, track: string, start: number, srcIn = 0, srcOut = 4): Clip {
+function clip(id: string, track: string, start: number, srcIn = 0, srcOut = 4): AudioClip {
   return { id, track, src: `${id}.wav`, src_in: srcIn, src_out: srcOut, start, gain_db: 0, fade_in: 0, fade_out: 0 };
 }
 
-function makeTrack(id: string, values: Partial<Track> = {}): Track {
+function makeTrack(id: string, values: Partial<AudioTrack> = {}): AudioTrack {
   return { id, kind: 'audio', name: id, volume_db: 0, mute: false, solo: false, locked: false, height: 80, ...values };
 }
 
-function doc(clips: Clip[] = [clip('a', 'voice', 0), clip('b', 'music', 2)]): Doc {
-  return { version: 1, name: 'preview', sample_rate: 48000, tracks: [makeTrack('voice'), makeTrack('music')], clips, markers: [] };
+function doc(clips: AudioClip[] = [clip('a', 'voice', 0), clip('b', 'music', 2)]): Doc {
+  return {
+    version: 2,
+    name: 'preview',
+    sample_rate: 48000,
+    canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
+    tracks: [makeTrack('voice'), makeTrack('music')],
+    clips,
+    markers: [],
+    transitions: [],
+  };
 }
 
 describe('scheduler de vista previa', () => {
   it('selecciona solo los clips activos y excluye mute/solo igual que el render', () => {
     const value = doc();
+    const voice = value.tracks[0] as AudioTrack;
     expect(audibleClips(value).map(({ clip: item }) => item.id)).toEqual(['a', 'b']);
-    value.tracks[0].solo = true;
+    voice.solo = true;
     expect(audibleClips(value).map(({ clip: item }) => item.id)).toEqual(['a']);
     expect(activeClips(value, 2).map(({ clip: item }) => item.id)).toEqual(['a']);
 
-    value.tracks[0].mute = true;
+    voice.mute = true;
     expect(activeClips(value, 2)).toEqual([]);
   });
 

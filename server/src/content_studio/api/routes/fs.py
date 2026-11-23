@@ -11,10 +11,11 @@ import sqlite3
 import string
 import subprocess
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
@@ -23,6 +24,16 @@ from content_studio.db import settings
 from content_studio.media import formats
 
 router = APIRouter(prefix='/fs')
+
+
+class MediaInfo(BaseModel):
+    """Metadatos que necesita el editor para crear clips de audio y video."""
+
+    duration: float
+    kind: Literal['audio', 'video', 'image']
+    has_audio: bool
+
+
 KIND_EXTENSIONS = {
     'audio': formats.AUDIO_EXTENSIONS,
     'video': formats.VIDEO_EXTENSIONS,
@@ -101,12 +112,16 @@ def preview_media(path: str) -> FileResponse:
 
 
 @router.get('/info')
-def media_info(path: str) -> dict[str, float]:
-    """Mide la duración de un medio elegido para crear el clip, incluso si está fuera de `out/`."""
+def media_info(path: str) -> MediaInfo:
+    """Describe una fuente elegida para crear su clip, incluso si está fuera de `out/`."""
     source = Path(path)
-    if not formats.is_supported(source) or not source.is_file():
+    if not source.is_file() or not (formats.is_supported(source) or source.suffix.lower() in formats.IMAGE_EXTENSIONS):
         raise ApiError(404, 'fs_media_not_found', path=path)
+    if source.suffix.lower() in formats.IMAGE_EXTENSIONS:
+        return MediaInfo(duration=5.0, kind='image', has_audio=False)
+    kind: Literal['audio', 'video'] = 'audio' if formats.is_audio(source) else 'video'
     try:
-        return {'duration': ffmpeg.probe_duration(source)}
+        has_audio = kind == 'audio' or ffmpeg.has_audio_stream(source)
+        return MediaInfo(duration=ffmpeg.probe_duration(source), kind=kind, has_audio=has_audio)
     except (subprocess.CalledProcessError, ValueError) as error:
         raise ApiError(422, 'unreadable_media') from error

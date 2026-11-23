@@ -27,15 +27,17 @@ const clip = (id: string, track: string, start: number, length: number): Clip =>
 });
 
 const doc = (clips: Clip[]): Doc => ({
-  version: 1,
+  version: 2,
   name: 'demo',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [
     { id: 't1', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
     { id: 't2', kind: 'audio', name: 'Música', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
   ],
   clips,
   markers: [{ id: 'm1', t: 9, label: 'corte', color: '#f00' }],
+  transitions: [],
 });
 
 describe('zoom de la línea de tiempo (AC-7)', () => {

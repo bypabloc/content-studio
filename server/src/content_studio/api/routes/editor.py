@@ -5,12 +5,18 @@ Un proyecto solo se abre o se guarda dentro de esa carpeta (403 si no). `missing
 
 from __future__ import annotations
 
+import hashlib
+import mimetypes
+import os
 import sqlite3
+import subprocess
 from datetime import date
 from pathlib import Path
+from secrets import token_hex
 from typing import Annotated, Any, cast
 
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Header, Query, Request
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from content_studio import paths
@@ -20,6 +26,7 @@ from content_studio.db import settings
 from content_studio.editor import store
 
 router = APIRouter(prefix='/editor')
+preview_router = APIRouter(prefix='/editor')
 RECENT = 'editor.recent'
 RECENT_MAX = 20
 
@@ -93,6 +100,91 @@ def save_project(
     except store.ProjectChanged as error:
         raise ApiError(409, 'project_changed') from error
     return {'hash': digest, 'missing': store.missing(file.parent, body)}
+
+
+@router.get('/projects/frame')
+def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
+    """Devuelve como PNG el fotograma exacto del lienzo en `t`, con caché por revisión del proyecto."""
+    file = _project_file(path)
+    doc, digest = store.read(file)
+    if not _finite_time(t):
+        raise ApiError(422, 'unreadable_media')
+    key = _frame_cache_key(file, doc, digest, t)
+    frame = paths.outputs_dir() / 'tmp' / 'editor-frames' / f'{key}.png'
+    if not frame.is_file() or not frame.stat().st_size:
+        frame.parent.mkdir(parents=True, exist_ok=True)
+        temporary = frame.with_name(f'{frame.stem}.{token_hex(6)}.png')
+        try:
+            from content_studio.editor import render_video
+
+            render_video.render_frame(doc, file.parent, t, temporary)
+            if not temporary.is_file() or not temporary.stat().st_size:
+                raise ValueError('unreadable_media')
+            os.replace(temporary, frame)
+        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+            raise ApiError(422, 'unreadable_media') from error
+        finally:
+            temporary.unlink(missing_ok=True)
+    return FileResponse(frame, media_type='image/png')
+
+
+@preview_router.get('/projects/media')
+def project_media(path: str, source: str) -> FileResponse:
+    """Sirve una fuente visual del proyecto; los videos usan su proxy y la ruta acepta token de consulta."""
+    file = _project_file(path)
+    doc, _ = store.read(file)
+    clip = next(
+        (
+            item
+            for item in doc.get('clips', [])
+            if item.get('media') in {'video', 'image'} and item.get('src') == source
+        ),
+        None,
+    )
+    if clip is None:
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    original = Path(source)
+    original = (original if original.is_absolute() else file.parent / original).resolve()
+    if not original.is_file():
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    if clip['media'] == 'image':
+        from content_studio.media.formats import IMAGE_EXTENSIONS
+
+        if original.suffix.lower() not in IMAGE_EXTENSIONS:
+            raise ApiError(422, 'unreadable_media')
+        target = original
+    else:
+        from content_studio.editor import proxy
+
+        try:
+            target = proxy.create(original, file.parent)
+        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+            raise ApiError(422, 'unreadable_media') from error
+    media_type = mimetypes.guess_type(target.name)[0] or 'application/octet-stream'
+    return FileResponse(target, media_type=media_type)
+
+
+def _finite_time(value: float) -> bool:
+    """El fotograma no acepta `NaN` ni infinitos."""
+    return value == value and value not in (float('inf'), float('-inf'))
+
+
+def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) -> str:
+    """Incluye en la caché la revisión del proyecto y el estado de cada fuente visual."""
+    stat = file.stat()
+    sources: list[tuple[str, int | None, int | None]] = []
+    for clip in doc.get('clips', []):
+        if clip.get('media') not in {'video', 'image'}:
+            continue
+        source = Path(clip['src'])
+        source = (source if source.is_absolute() else file.parent / source).resolve()
+        try:
+            media_stat = source.stat()
+            sources.append((str(source), media_stat.st_mtime_ns, media_stat.st_size))
+        except OSError:
+            sources.append((str(source), None, None))
+    identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources))
+    return hashlib.sha256(repr(identity).encode('utf-8')).hexdigest()
 
 
 @router.post('/projects/media', status_code=201)

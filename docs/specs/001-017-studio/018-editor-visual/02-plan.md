@@ -34,7 +34,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 #### Ciclo 5: compositor [AC-5]
 
-- **RED**: `preview/compositor.test.ts` (matrices y orden de capas con un contexto WebGL simulado) y el e2e `editor/parity-preview-export.e2e.ts` contra `fixtures/editor/parity-*.json`.
+- **RED**: `preview/compositor.test.ts` (matrices y orden de capas con un contexto WebGL simulado). El e2e `editor/parity-preview-export.e2e.ts` contra `fixtures/editor/parity-*.json` se integra en T6, cuando exista el visor, y se ejecuta antes de cerrar T7.
 - **GREEN**: `preview/{compositor,shaders,transitions,useLayerSources}.ts`.
 - **REFACTOR**: ninguno.
 
@@ -66,14 +66,14 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Esquema v2 y keyframes | AC-1 | — | `unit`, `client-unit` | [ ] |
-| T2 | Proxies y fotograma exacto | AC-4 | T1 | `unit` | [ ] |
-| T3 | Render de capas y keyframes | AC-2 | T1 | `unit` | [ ] |
-| T4 | Transiciones y escala | AC-3, AC-6 | T3 | `unit`, `-m local` | [ ] |
-| T5 | Compositor | AC-5 | T1, T2 | `client-unit`, `e2e` | [ ] |
-| T6 | Visor, inspector y línea de tiempo | AC-7 | T5 | `client-unit` | [ ] |
-| T7 | e2e y docs | — | T4, T6 | `e2e` | [ ] |
-| T8 | Corrida real | AC-6 | T7 | verificación final | [ ] |
+| T1 | Esquema v2 y keyframes | AC-1 | — | `unit`, `client-unit` | [x] |
+| T2 | Proxies y fotograma exacto | AC-4 | T1 | `unit` | [x] |
+| T3 | Render de capas y keyframes | AC-2 | T1 | `unit` | [x] |
+| T4 | Transiciones y escala | AC-3, AC-6 | T3 | `unit`, `-m local` | [x] |
+| T5 | Compositor | AC-5 | T1, T2 | `client-unit`, `e2e` | [x] |
+| T6 | Visor, inspector y línea de tiempo | AC-7 | T5 | `client-unit` | [x] |
+| T7 | e2e y docs | — | T4, T6 | `e2e` | [x] |
+| T8 | Corrida real | AC-6 | T7 | verificación final | [x] |
 
 ## 4. Commits
 

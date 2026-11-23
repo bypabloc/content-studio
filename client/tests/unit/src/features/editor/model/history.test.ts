@@ -4,7 +4,16 @@ import { describe, expect, it } from 'vitest';
 import { canRedo, canUndo, createHistory, preview, record, redo, undo, MAX_STEPS } from '@/features/editor/model/history';
 import type { Doc } from '@/features/editor/model/types';
 
-const doc = (name: string): Doc => ({ version: 1, name, sample_rate: 48000, tracks: [], clips: [], markers: [] });
+const doc = (name: string): Doc => ({
+  version: 2,
+  name,
+  sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
+  tracks: [],
+  clips: [],
+  markers: [],
+  transitions: [],
+});
 
 describe('historial del editor (D-7)', () => {
   it('deshace y rehace a la instantánea anterior y siguiente', () => {

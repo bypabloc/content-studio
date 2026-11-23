@@ -139,4 +139,5 @@ def create_app(
     app.include_router(events.router, dependencies=query_ok)
     app.include_router(files.router, dependencies=query_ok)
     app.include_router(media.router, dependencies=query_ok)
+    app.include_router(editor.preview_router, dependencies=query_ok)
     return app

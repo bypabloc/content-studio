@@ -1,0 +1,14 @@
+{
+  "doc": {
+    "version": 2,
+    "name": "Link",
+    "sample_rate": 48000,
+    "canvas": {"width": 1920, "height": 1080, "fps": 30, "background": "#000000"},
+    "tracks": [{"id": "a", "kind": "audio", "name": "Audio", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}, {"id": "v", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false}],
+    "clips": [{"id": "audio-1", "track": "a", "src": "voice.wav", "src_in": 0, "src_out": 2, "start": 0, "gain_db": 0, "fade_in": 0, "fade_out": 0}, {"id": "video-1", "track": "v", "src": "take.mp4", "src_in": 0, "src_out": 2, "start": 0, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {}, "keyframes": {}}],
+    "markers": [],
+    "transitions": []
+  },
+  "op": {"type": "linkClips", "ids": ["audio-1", "video-1"], "link": "take-1"},
+  "expected": {"ids": ["audio-1", "video-1"], "clips": {"audio-1": {"link": "take-1"}, "video-1": {"link": "take-1"}}}
+}

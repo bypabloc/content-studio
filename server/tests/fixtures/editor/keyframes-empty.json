@@ -1,0 +1,10 @@
+{
+  "default": 7,
+  "clip_duration": 3,
+  "keyframes": [],
+  "samples": [
+    {"t": 0, "expected": 7},
+    {"t": 2, "expected": 7}
+  ],
+  "segments": []
+}

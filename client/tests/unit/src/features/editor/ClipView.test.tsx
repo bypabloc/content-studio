@@ -5,6 +5,9 @@ import { ClipView } from '@/features/editor/ClipView';
 import type { Clip, Doc } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
+const queryUrl = vi.hoisted(() => vi.fn((_path: string, query: Record<string, string>) => `/frame?t=${query.t}`));
+vi.mock('@/shared/api/context', () => ({ useApi: () => ({ queryUrl }) }));
+
 afterEach(cleanup);
 
 const clip: Clip = {
@@ -20,12 +23,14 @@ const clip: Clip = {
 };
 
 const doc: Doc = {
-  version: 1,
+  version: 2,
   name: 'demo',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
   clips: [clip],
   markers: [],
+  transitions: [],
 };
 
 describe('ClipView', () => {
@@ -185,5 +190,36 @@ describe('ClipView', () => {
     fireEvent.keyDown(start, { key: 'ArrowLeft' });
     expect(onPreview).not.toHaveBeenCalled();
     expect(onCommitPreview).not.toHaveBeenCalled();
+  });
+
+  it('genera miniaturas de video según el zoom de la línea de tiempo', () => {
+    const video: Clip = {
+      id: 'video-1', track: 'video', src: 'D:/media/video.mp4', src_in: 2, src_out: 4, start: 1,
+      fade_in: 0, fade_out: 0, media: 'video',
+      transform: {
+        x: 0, y: 0, scale_x: 1, scale_y: 1, rotation: 0, opacity: 1,
+        crop: { l: 0, t: 0, r: 0, b: 0 }, anchor_x: 0.5, anchor_y: 0.5,
+      },
+      keyframes: {},
+    };
+    const { container } = render(
+      <ClipView
+        clip={video}
+        doc={doc}
+        selected={false}
+        selectedIds={[]}
+        zoom={80}
+        magnet
+        playhead={0}
+        locked={false}
+        onSelect={vi.fn()}
+        onPreview={vi.fn()}
+        onCommitPreview={vi.fn()}
+        onCancelPreview={vi.fn()}
+      />,
+    );
+
+    expect(container.querySelectorAll('img')).toHaveLength(2);
+    expect(queryUrl).toHaveBeenCalledWith('/media/frame', { path: 'D:/media/video.mp4', t: '2' });
   });
 });

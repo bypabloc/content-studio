@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { duration } from '../model/validate';
-import type { Doc } from '../model/types';
+import type { AudioClip, Doc } from '../model/types';
 import { activeClips, gainAt, gainRamps, positionAt, shouldCorrectDrift, sourceTimeAt } from './scheduler';
 
 type MediaEntry = {
@@ -11,11 +11,11 @@ type MediaEntry = {
   signature: string;
 };
 
-function signature(clip: Doc['clips'][number], volume: number): string {
+function signature(clip: AudioClip, volume: number): string {
   return [clip.src, clip.src_in, clip.src_out, clip.start, clip.gain_db, clip.fade_in, clip.fade_out, volume].join(':');
 }
 
-function scheduleGain(entry: MediaEntry, clip: Doc['clips'][number], volume: number, position: number, clock: number): void {
+function scheduleGain(entry: MediaEntry, clip: AudioClip, volume: number, position: number, clock: number): void {
   const track = { volume_db: volume };
   entry.gain.gain.cancelScheduledValues(clock);
   entry.gain.gain.setValueAtTime(gainAt(clip, track, position), clock);

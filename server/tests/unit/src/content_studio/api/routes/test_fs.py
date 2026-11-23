@@ -98,7 +98,31 @@ def test_media_info_returns_the_duration_of_a_selected_source(api, monkeypatch):
     response = api.client.get('/fs/info', params={'path': str(source)}, headers=api.headers)
 
     assert response.status_code == 200
-    assert response.json() == {'duration': 3.5}
+    assert response.json() == {'duration': 3.5, 'kind': 'audio', 'has_audio': True}
+
+
+def test_media_info_assigns_default_duration_to_images(api):
+    """Las imágenes se importan como clips visuales de cinco segundos por defecto."""
+    source = api.tmp / 'logo.png'
+    source.write_bytes(b'image')
+
+    response = api.client.get('/fs/info', params={'path': str(source)}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.json() == {'duration': 5.0, 'kind': 'image', 'has_audio': False}
+
+
+def test_media_info_reports_video_audio_stream_for_linked_import(api, monkeypatch):
+    """El cliente sabe cuándo debe enlazar el clip de audio con el video importado."""
+    source = api.tmp / 'scene.mp4'
+    source.write_bytes(b'video')
+    monkeypatch.setattr(ffmpeg, 'probe_duration', lambda _path: 3.5)
+    monkeypatch.setattr(ffmpeg, 'has_audio_stream', lambda _path: True)
+
+    response = api.client.get('/fs/info', params={'path': str(source)}, headers=api.headers)
+
+    assert response.status_code == 200
+    assert response.json() == {'duration': 3.5, 'kind': 'video', 'has_audio': True}
 
 
 def test_media_info_rejects_missing_or_unsupported_sources(api):

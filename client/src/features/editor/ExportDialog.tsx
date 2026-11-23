@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { openPath } from '@tauri-apps/plugin-opener';
 
 import { useApi } from '@/shared/api/context';
+import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
 import { UIMedia } from '@/shared/components/atoms/UIMedia';
 import { UICard } from '@/shared/components/atoms/UICard';
 import { UIProgress } from '@/shared/components/atoms/UIProgress';
@@ -17,8 +18,13 @@ import type { Marker } from './model/types';
 type Job = { id: number; status: string; progress: number; error_code: string | null; error_detail: string | null };
 type Normalize = '' | 'podcast' | 'youtube';
 type Segment = { start?: number; end?: number; name: string };
+type PlayMedia = { path: string; kind: 'audio' | 'video' };
 
-const FORMATS = ['wav', 'mp3', 'flac', 'm4a', 'ogg-opus'].map((value) => ({ value, label: value.toUpperCase() }));
+const AUDIO_FORMATS = ['wav', 'mp3', 'flac', 'm4a', 'ogg-opus'].map((value) => ({ value, label: value.toUpperCase() }));
+const VIDEO_FORMATS = [
+  { value: 'mp4-h264', label: t('editor.export.format.mp4_recommended') },
+  { value: 'webm-vp9', label: t('convert.format.webm-vp9') },
+];
 const NORMALIZATIONS = [
   { value: '', label: t('editor.export.normalize_none') },
   { value: 'podcast', label: t('editor.export.normalize_podcast') },
@@ -57,14 +63,18 @@ function missingSourcePaths(job: Job): string[] {
 export function ExportDialog({ path, duration, markers }: { path: string; duration: number; markers: Marker[] }): React.JSX.Element {
   const api = useApi();
   const [open, setOpen] = useState(false);
-  const [format, setFormat] = useState('wav');
+  const [audioOnly, setAudioOnly] = useState(false);
+  const [audioFormat, setAudioFormat] = useState('wav');
+  const [videoFormat, setVideoFormat] = useState('mp4-h264');
+  const [quality, setQuality] = useState(19);
   const [normalize, setNormalize] = useState<Normalize>('');
   const [name, setName] = useState(() => projectName(path));
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState(false);
-  const [playPath, setPlayPath] = useState('');
+  const [playMedia, setPlayMedia] = useState<PlayMedia | null>(null);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const jobIds = jobs.map((job) => job.id);
+  const format = audioOnly ? audioFormat : videoFormat;
 
   useEffect(() => {
     if (!jobIds.length) return;
@@ -93,11 +103,11 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
   }, [api, jobIds.join(',')]);
 
   useEffect(() => {
-    if (playPath && mediaRef.current) {
+    if (playMedia && mediaRef.current) {
       mediaRef.current.currentTime = 0;
       void mediaRef.current.play().catch(() => undefined);
     }
-  }, [playPath]);
+  }, [playMedia]);
 
   async function enqueue(segment: Segment): Promise<number> {
     const params = {
@@ -105,6 +115,7 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
       format,
       name: segment.name,
       normalize: normalize || null,
+      ...(!audioOnly ? { quality } : {}),
       ...(segment.start === undefined ? {} : { start: segment.start, end: segment.end }),
     };
     const job = await api.post<Job>('/jobs', { kind: 'editor.render', params });
@@ -125,10 +136,12 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
 
   async function playLatest(): Promise<void> {
     try {
-      const query = new URLSearchParams({ path: exportsPath(path), kinds: 'audio' });
+      const query = new URLSearchParams({ path: exportsPath(path), kinds: 'audio,video' });
       const result = await api.get<{ entries: Array<{ path: string; kind: string; modified: number }> }>(`/fs/list?${query}`);
-      const latest = result.entries.filter((entry) => entry.kind === 'audio').sort((a, b) => b.modified - a.modified)[0];
-      if (latest) setPlayPath(latest.path);
+      const latest = result.entries
+        .filter((entry): entry is typeof entry & PlayMedia => entry.kind === 'audio' || entry.kind === 'video')
+        .sort((a, b) => b.modified - a.modified)[0];
+      setPlayMedia(latest ? { path: latest.path, kind: latest.kind } : null);
     } catch {
       setError(true);
     }
@@ -148,7 +161,24 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
         <UICard role="dialog" aria-label={t('editor.export.dialog')}>
           <UIStack gap="sm">
             <UIField label={t('editor.export.name')} value={name} onChange={(event) => setName(event.target.value)} />
-            <UISelect label={t('editor.export.format')} value={format} options={FORMATS} onChange={setFormat} />
+            <UICheckbox label={t('editor.export.audio_only')} checked={audioOnly} onChange={setAudioOnly} />
+            <UISelect
+              label={t('editor.export.format')}
+              value={format}
+              options={audioOnly ? AUDIO_FORMATS : VIDEO_FORMATS}
+              onChange={(value) => (audioOnly ? setAudioFormat(value) : setVideoFormat(value))}
+            />
+            {!audioOnly ? (
+              <UIField
+                label={t('editor.export.quality')}
+                type="number"
+                min={0}
+                max={51}
+                step={1}
+                value={quality}
+                onChange={(event) => setQuality(Number(event.target.value))}
+              />
+            ) : null}
             <UISelect
               label={t('normalize.submit')}
               value={normalize}
@@ -180,7 +210,9 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
           </UIStack>
         </UICard>
       ) : null}
-      {playPath ? <UIMedia kind="audio" src={api.queryUrl('/fs/media', { path: playPath })} mediaRef={(element) => (mediaRef.current = element)} /> : null}
+      {playMedia ? (
+        <UIMedia kind={playMedia.kind} src={api.queryUrl('/fs/media', { path: playMedia.path })} mediaRef={(element) => (mediaRef.current = element)} />
+      ) : null}
     </UIStack>
   );
 }

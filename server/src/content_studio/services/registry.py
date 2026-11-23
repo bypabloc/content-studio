@@ -3,6 +3,7 @@
 from content_studio.services import (
     clean_analyze,
     clean_render,
+    editor_proxy,
     editor_render,
     engine_install,
     engine_uninstall,
@@ -49,6 +50,7 @@ SERVICES = {
     'subtitles.translate': subtitles_translate,
     'mix.render': mix_render,
     'editor.render': editor_render,
+    'editor.proxy': editor_proxy,
     storage_move.KIND: storage_move,
     system_install_tool.KIND: system_install_tool,
     engine_install.KIND: engine_install,

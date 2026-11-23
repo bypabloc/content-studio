@@ -29,22 +29,37 @@ export function apply(doc: Doc, op: Op): Doc {
  */
 function moveClip(doc: Doc, op: Extract<Op, { type: 'moveClip' }>): void {
   const clip = findClip(doc, op.id);
-  const others = doc.clips.filter((other) => other !== clip && other.track === op.track);
-  if (others.length === 0) {
-    Object.assign(clip, { track: op.track, start: Math.max(0, op.start) });
-    return;
+  const group = linked(doc, clip);
+  const destinations = group.map((member) => [member, member === clip ? op.track : member.track] as const);
+  const others = doc.clips.filter(
+    (other) => !group.includes(other) && destinations.some(([, track]) => other.track === track),
+  );
+  const edges = [0, op.start];
+  for (const [member, track] of destinations) {
+    for (const other of doc.clips) {
+      if (group.includes(other) || other.track !== track) continue;
+      edges.push(other.start + clipLength(other), other.start - clipLength(member));
+    }
   }
-  const length = clipLength(clip);
-  const ends = others.map((other) => other.start + clipLength(other));
-  const edges = [0, op.start, Math.max(...ends), ...ends, ...others.map((other) => other.start - length)];
-  const free = edges.filter((t) => t >= 0 && !others.some((other) => overlaps(t, length, other)));
+  const free = edges.filter(
+    (time) =>
+      time >= 0 &&
+      destinations.every(([member, track]) =>
+        doc.clips
+          .filter((other) => !group.includes(other) && other.track === track)
+          .every((other) => !overlaps(time, clipLength(member), other)),
+      ),
+  );
+  const end = Math.max(0, ...others.map((other) => other.start + clipLength(other)));
+  if (free.length === 0) free.push(end);
   // Igual que `min(key=(abs(t - requested), t))` del espejo en Python: gana el más cercano y, en empate, el menor.
   const best = free.reduce((a, b) => {
     const da = Math.abs(a - op.start);
     const db = Math.abs(b - op.start);
     return db < da || (db === da && b < a) ? b : a;
   });
-  Object.assign(clip, { track: op.track, start: best });
+  const delta = best - clip.start;
+  for (const [member, track] of destinations) Object.assign(member, { track, start: member.start + delta });
 }
 
 /** Actualiza propiedades persistidas de una pista, como espejo del server. */
@@ -82,8 +97,15 @@ function addTrack(doc: Doc, op: Extract<Op, { type: 'addTrack' }>): void {
 function removeTrack(doc: Doc, op: Extract<Op, { type: 'removeTrack' }>): void {
   const exists = doc.tracks.some((track) => track.id === op.id);
   if (!exists) throw new OpError('unknown_track');
+  const removed = doc.clips.filter((clip) => clip.track === op.id);
+  const links = new Set(removed.map((clip) => clip.link).filter((link): link is string => link !== undefined));
+  const removedIds = new Set(removed.map((clip) => clip.id));
   doc.tracks = doc.tracks.filter((track) => track.id !== op.id);
   doc.clips = doc.clips.filter((clip) => clip.track !== op.id);
+  for (const clip of doc.clips) if (clip.link !== undefined && links.has(clip.link)) delete clip.link;
+  doc.transitions = (doc.transitions ?? []).filter(
+    (transition) => !removedIds.has(transition.a) && !removedIds.has(transition.b),
+  );
 }
 
 /** Mueve una pista al índice visual indicado, limitado al rango de pistas. */
@@ -127,21 +149,30 @@ function replaceSource(doc: Doc, op: Extract<Op, { type: 'replaceSource' }>): vo
 /** Recorta un borde del clip hasta el tiempo `t`: el inicio mueve `start` y `src_in`; el final cambia `src_out`. */
 function trimClip(doc: Doc, op: Extract<Op, { type: 'trimClip' }>): void {
   const clip = findClip(doc, op.id);
+  const group = linked(doc, clip);
   if (op.edge === 'start') {
     const delta = op.t - clip.start;
-    if (clip.src_in + delta < 0) throw new OpError('bad_trim');
-    Object.assign(clip, { start: op.t, src_in: clip.src_in + delta });
+    if (group.some((member) => member.src_in + delta < 0)) throw new OpError('bad_trim');
+    for (const member of group) Object.assign(member, { start: member.start + delta, src_in: member.src_in + delta });
   } else {
     const length = op.t - clip.start;
     if (length <= 0) throw new OpError('bad_trim');
-    clip.src_out = clip.src_in + length;
+    for (const member of group) member.src_out = member.src_in + length;
   }
 }
 
 /** Corta en `t` cada clip que lo cruza (o solo los de `ids`). La mitad derecha se llama `<id>-r`. */
 function splitAt(doc: Doc, op: Extract<Op, { type: 'splitAt' }>): void {
+  const ids = op.ids === undefined ? undefined : new Set(op.ids);
+  if (ids !== undefined) {
+    for (const clip of doc.clips) {
+      if (ids.has(clip.id) && clip.link !== undefined) {
+        for (const member of doc.clips) if (member.link === clip.link) ids.add(member.id);
+      }
+    }
+  }
   for (const clip of [...doc.clips]) {
-    if (op.ids !== undefined && !op.ids.includes(clip.id)) continue;
+    if (ids !== undefined && !ids.has(clip.id)) continue;
     if (!(clip.start < op.t && op.t < clip.start + clipLength(clip))) continue;
     const left = op.t - clip.start;
     const right: Clip = { ...clip, id: `${clip.id}-r`, start: op.t, src_in: clip.src_in + left, fade_in: 0 };
@@ -152,8 +183,17 @@ function splitAt(doc: Doc, op: Extract<Op, { type: 'splitAt' }>): void {
 
 /** Borra los clips de `ids`. Con `ripple`, los clips que venían después en su pista se corren hacia atrás. */
 function deleteClips(doc: Doc, op: Extract<Op, { type: 'deleteClips' }>): void {
-  const gone = doc.clips.filter((clip) => op.ids.includes(clip.id));
-  doc.clips = doc.clips.filter((clip) => !op.ids.includes(clip.id));
+  const ids = new Set(op.ids);
+  for (const clip of doc.clips) {
+    if (ids.has(clip.id) && clip.link !== undefined) {
+      for (const member of doc.clips) if (member.link === clip.link) ids.add(member.id);
+    }
+  }
+  const gone = doc.clips.filter((clip) => ids.has(clip.id));
+  doc.clips = doc.clips.filter((clip) => !ids.has(clip.id));
+  doc.transitions = (doc.transitions ?? []).filter(
+    (transition) => !ids.has(transition.a) && !ids.has(transition.b),
+  );
   if (!op.ripple) return;
   // De atrás hacia delante, como en el espejo de Python: cada borrado corre lo que va después de su final.
   for (const removed of [...gone].sort((a, b) => b.start - a.start)) {
@@ -170,6 +210,27 @@ function crossfade(doc: Doc, op: Extract<Op, { type: 'crossfade' }>): void {
   const b = findClip(doc, op.b);
   Object.assign(b, { start: a.start + clipLength(a) - op.d, fade_in: op.d });
   a.fade_out = op.d;
+}
+
+/** Enlaza clips y limpia los grupos previos a los que pertenecían. */
+function linkClips(doc: Doc, op: Extract<Op, { type: 'linkClips' }>): void {
+  const ids = [...new Set(op.ids)];
+  if (ids.length < 2 || !op.link) throw new OpError('bad_link');
+  const selected = ids.map((id) => findClip(doc, id));
+  const oldLinks = new Set(selected.map((clip) => clip.link).filter((link): link is string => link !== undefined));
+  for (const clip of doc.clips) if (clip.link !== undefined && oldLinks.has(clip.link)) delete clip.link;
+  for (const clip of selected) clip.link = op.link;
+}
+
+/** Desenlaza por completo los grupos seleccionados. */
+function unlinkClips(doc: Doc, op: Extract<Op, { type: 'unlinkClips' }>): void {
+  const selected = op.ids.map((id) => findClip(doc, id));
+  const links = new Set(selected.map((clip) => clip.link).filter((link): link is string => link !== undefined));
+  for (const clip of doc.clips) if (clip.link !== undefined && links.has(clip.link)) delete clip.link;
+}
+
+function linked(doc: Doc, clip: Clip): Clip[] {
+  return clip.link === undefined ? [clip] : doc.clips.filter((member) => member.link === clip.link);
 }
 
 function findClip(doc: Doc, id: string): Clip {
@@ -201,4 +262,6 @@ const HANDLERS: { [K in Op['type']]: (doc: Doc, op: Extract<Op, { type: K }>) =>
   splitAt,
   deleteClips,
   crossfade,
+  linkClips,
+  unlinkClips,
 };

@@ -1,18 +1,25 @@
 import { clipLength } from '../model/validate';
-import type { Clip, Doc, Track } from '../model/types';
+import type { AudioClip, AudioTrack, Clip, Doc } from '../model/types';
 
 export const PRELOAD_WINDOW_SEC = 2;
 export const DRIFT_TOLERANCE_SEC = 0.04;
 
-export type PlaybackClip = { clip: Clip; track: Track };
+export type PlaybackClip = { clip: AudioClip; track: AudioTrack };
+
+function isAudioClip(clip: Clip): clip is AudioClip {
+  return 'gain_db' in clip && typeof clip.gain_db === 'number';
+}
 
 /** Clips que se oyen según mute y solo, en el mismo orden que el render del proyecto. */
 export function audibleClips(doc: Doc): PlaybackClip[] {
   const tracks = new Map(doc.tracks.map((track) => [track.id, track]));
-  const soloed = new Set(doc.tracks.filter((track) => track.solo).map((track) => track.id));
+  const audioTracks = doc.tracks.filter((track): track is AudioTrack => track.kind === 'audio');
+  const soloed = new Set(audioTracks.filter((track) => track.solo).map((track) => track.id));
   return doc.clips.flatMap((clip) => {
     const track = tracks.get(clip.track);
-    return track && !track.mute && (soloed.size === 0 || soloed.has(track.id)) ? [{ clip, track }] : [];
+    return track?.kind === 'audio' && isAudioClip(clip) && !track.mute && (soloed.size === 0 || soloed.has(track.id))
+      ? [{ clip, track }]
+      : [];
   });
 }
 
@@ -24,12 +31,12 @@ export function activeClips(doc: Doc, position: number): PlaybackClip[] {
 }
 
 /** Posición esperada dentro de la fuente de un clip mientras suena. */
-export function sourceTimeAt(clip: Clip, position: number): number {
+export function sourceTimeAt(clip: AudioClip, position: number): number {
   return clip.src_in + Math.max(0, position - clip.start);
 }
 
 /** Puntos de rampa lineal en segundos de timeline y ganancia lineal, tras sumar volumen de clip y pista. */
-export function gainRamps(clip: Clip, track: Pick<Track, 'volume_db'>): [number, number][] {
+export function gainRamps(clip: AudioClip, track: Pick<AudioTrack, 'volume_db'>): [number, number][] {
   const peak = 10 ** ((clip.gain_db + track.volume_db) / 20);
   const end = clip.start + clipLength(clip);
   const points: [number, number][] = [];
@@ -39,7 +46,7 @@ export function gainRamps(clip: Clip, track: Pick<Track, 'volume_db'>): [number,
 }
 
 /** Ganancia instantánea del clip, incluida su envolvente y el volumen de pista. */
-export function gainAt(clip: Clip, track: Pick<Track, 'volume_db'>, position: number): number {
+export function gainAt(clip: AudioClip, track: Pick<AudioTrack, 'volume_db'>, position: number): number {
   const end = clip.start + clipLength(clip);
   if (position < clip.start || position >= end) return 0;
   let envelope = 1;

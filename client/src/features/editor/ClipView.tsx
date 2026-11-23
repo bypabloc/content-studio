@@ -1,7 +1,10 @@
 import { useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent, KeyboardEvent } from 'react';
 
+import { useApi } from '@/shared/api/context';
+import type { Api } from '@/shared/api/client';
 import { UIClip } from '@/shared/components/atoms/UIClip';
+import { UIImage } from '@/shared/components/atoms/UIImage';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { t } from '@/shared/i18n/t';
 
@@ -63,11 +66,13 @@ export function ClipView({
   onCommitPreview,
   onCancelPreview,
 }: Props): React.JSX.Element {
+  const api = useApi();
   const dragRef = useRef<Drag | null>(null);
   const length = clipLength(clip);
   const source = sourceName(clip.src);
   const label = t('editor.clip.label', { source, start: clip.start.toFixed(1), end: (clip.start + length).toFixed(1) });
   const width = length * zoom;
+  const thumbnails = videoThumbnails(clip, zoom, api.queryUrl);
 
   function beginDrag(mode: Drag['mode'], event: ReactPointerEvent<HTMLElement>): void {
     event.stopPropagation();
@@ -159,6 +164,16 @@ export function ClipView({
         onPointerUp={finishDrag}
         onPointerCancel={cancelDrag}
       >
+        {thumbnails.map((thumbnail) => (
+          <UIImage
+            key={thumbnail.time}
+            alt=""
+            aria-hidden="true"
+            src={thumbnail.src}
+            className="pointer-events-none absolute top-0 h-full object-cover opacity-50"
+            style={{ left: `${thumbnail.left}%`, width: `${thumbnail.width}%` }}
+          />
+        ))}
         {source}
       </UIClip>
       <UIStack
@@ -191,4 +206,22 @@ export function ClipView({
       />
     </UIStack>
   );
+}
+
+function videoThumbnails(clip: Clip, zoom: number, queryUrl: Api['queryUrl']): Array<{ time: number; left: number; width: number; src: string }> {
+  if (clip.media !== 'video') return [];
+  const length = clipLength(clip);
+  const step = Math.max(0.5, length / 12, 100 / zoom);
+  const count = Math.max(1, Math.ceil(length / step));
+  return Array.from({ length: count }, (_, index) => {
+    const offset = index * step;
+    const segment = Math.min(step, length - offset);
+    const time = clip.src_in + offset;
+    return {
+      time,
+      left: (offset / length) * 100,
+      width: (segment / length) * 100,
+      src: queryUrl('/media/frame', { path: clip.src, t: String(time) }),
+    };
+  });
 }

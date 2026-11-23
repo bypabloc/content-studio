@@ -2,8 +2,11 @@ import { cleanup, createEvent, fireEvent, render, screen } from '@testing-librar
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Timeline } from '@/features/editor/Timeline';
-import type { Clip, Doc } from '@/features/editor/model/types';
+import type { Clip, Doc, VisualClip } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
+
+const queryUrl = vi.hoisted(() => vi.fn(() => '/media/frame'));
+vi.mock('@/shared/api/context', () => ({ useApi: () => ({ queryUrl }) }));
 
 afterEach(cleanup);
 
@@ -13,15 +16,17 @@ function clip(id: string, track: string, src: string, start: number, length: num
 
 function document(): Doc {
   return {
-    version: 1,
+    version: 2,
     name: 'demo',
     sample_rate: 48000,
+    canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
     tracks: [
       { id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
       { id: 'music', kind: 'audio', name: 'Música', volume_db: 0, mute: false, solo: false, locked: false, height: 80 },
     ],
     clips: [clip('voice-clip', 'voice', 'D:/media/voice.wav', 9.9, 2), clip('music-clip', 'music', 'D:/media/music.wav', 0, 2)],
     markers: [{ id: 'marker-1', t: 10, label: 'corte', color: '#f00' }],
+    transitions: [],
   };
 }
 
@@ -112,6 +117,80 @@ describe('Timeline', () => {
     fireEvent(lane, drop);
 
     expect(onDropFiles).toHaveBeenCalledWith(['D:\\media\\take.wav'], 'voice', 1);
+  });
+
+  it('recibe transiciones soltadas en una pista o en el fondo', () => {
+    const onDropTransition = vi.fn();
+    render(
+      <Timeline
+        doc={document()}
+        selectedIds={[]}
+        playhead={4}
+        zoom={80}
+        magnet
+        onSelectionChange={vi.fn()}
+        onPreview={vi.fn()}
+        onCommitPreview={vi.fn()}
+        onCancelPreview={vi.fn()}
+        onDropTransition={onDropTransition}
+      />,
+    );
+    const lane = screen.getByRole('group', { name: t('editor.timeline.lane', { name: 'Voz' }) });
+    const timeline = screen.getByRole('group', { name: t('editor.timeline.label') });
+    const dataTransfer = { getData: (type: string) => type === 'application/x-editor-transition' ? 'wipeleft' : '' };
+    fireEvent.dragOver(lane);
+    const laneDrop = createEvent.drop(lane, { dataTransfer });
+    const timelineDrop = createEvent.drop(timeline, { dataTransfer });
+    Object.defineProperty(laneDrop, 'clientX', { value: 240 });
+    Object.defineProperty(timelineDrop, 'clientX', { value: 240 });
+    fireEvent(lane, laneDrop);
+    fireEvent(timeline, timelineDrop);
+
+    expect(onDropTransition).toHaveBeenNthCalledWith(1, 'wipeleft', 'voice', 3);
+    expect(onDropTransition).toHaveBeenNthCalledWith(2, 'wipeleft', undefined, 4);
+  });
+
+  it('muestra keyframes y transiciones y redimensiona solo las transiciones declaradas', () => {
+    const base = document();
+    const videoTrack = { id: 'video', kind: 'video' as const, name: 'Video', opacity: 1, hidden: false, locked: false };
+    const visual = (id: string, start: number): VisualClip => ({
+      id, track: 'video', src: `${id}.png`, src_in: 0, src_out: 2, start, fade_in: 0, fade_out: 0, media: 'image',
+      transform: { x: 0, y: 0, scale_x: 1, scale_y: 1, rotation: 0, opacity: 1,
+        crop: { l: 0, t: 0, r: 0, b: 0 }, anchor_x: 0.5, anchor_y: 0.5 },
+      keyframes: { x: [{ t: 0, value: 0, ease: 'linear' }, { t: 1, value: 10, ease: 'linear' }] },
+    });
+    base.tracks.unshift(videoTrack);
+    base.clips.push(visual('visual-a', 0), visual('visual-b', 1.5));
+    base.transitions = [
+      { id: 'missing-target', track: 'video', a: 'visual-a', b: 'missing', type: 'fade', duration: 0.5 },
+      { id: 'transition', track: 'video', a: 'visual-a', b: 'visual-b', type: 'fade', duration: 0.5 },
+    ];
+    const onPreview = vi.fn();
+    const onCommitPreview = vi.fn();
+    render(
+      <Timeline
+        doc={base}
+        selectedIds={['visual-a']}
+        playhead={0}
+        zoom={100}
+        magnet={false}
+        onSelectionChange={vi.fn()}
+        onPreview={onPreview}
+        onCommitPreview={onCommitPreview}
+        onCancelPreview={vi.fn()}
+        armedTrackIds={['voice']}
+        recordingLevels={{ rms: -18, peak: -6 }}
+        onArmedChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('group', { name: t('editor.keyframe.label') })).toBeTruthy();
+    const transitionEnd = screen.getByRole('button', { name: t('editor.transition.resize_end') });
+    fireEvent.pointerDown(transitionEnd, { pointerId: 30, clientX: 0, button: 0 });
+    fireEvent.pointerMove(transitionEnd, { pointerId: 30, clientX: 20 });
+    fireEvent.pointerUp(transitionEnd, { pointerId: 30, clientX: 20 });
+    expect(onPreview).toHaveBeenCalled();
+    expect(onCommitPreview).toHaveBeenCalledOnce();
   });
 
   it('ignora payloads vacíos o inválidos y admite rutas soltadas en el fondo', () => {

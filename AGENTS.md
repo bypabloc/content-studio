@@ -10,7 +10,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | `server/data/music/` | Música de fondo instrumental (ACE-Step 1.5, HeartMuLa) | `server/src/content_studio/music/` | [server/data/music/README.md](server/data/music/README.md) · [INVESTIGACION.md](server/data/music/INVESTIGACION.md) |
 | — (`studio clean`) | Limpiador de silencios de audio y video, con revisión en línea de tiempo (faster-whisper) | `server/src/content_studio/clean/` | [docs/process/01-done/cleaner.md](docs/process/01-done/cleaner.md) |
 | — (`studio convert`, `normalize`, `trim`, `concat`, `split`) | Convertir y normalizar la sonoridad (ffmpeg), y recortar, unir y dividir medios | `server/src/content_studio/media/` | [convert.md](docs/process/01-done/convert.md) · [edit.md](docs/process/01-done/edit.md) |
-| — (`studio editor render`) | Editor no destructivo de audio: proyectos, línea de tiempo, grabación y exportación | `server/src/content_studio/editor/` · `client/src/features/editor/` | [editor.md](docs/process/01-done/editor.md) |
+| — (`studio editor render`) | Editor no destructivo de audio y video: pistas visuales, keyframes, transiciones y exportación | `server/src/content_studio/editor/` · `client/src/features/editor/` | [editor.md](docs/process/01-done/editor.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 

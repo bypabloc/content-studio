@@ -20,7 +20,9 @@ test('AC-7/8: exporta tramos consecutivos delimitados por marcadores', async ({ 
   await workspace.press('Space');
 
   await page.getByRole('button', { name: 'Exportar…' }).click();
-  await page.getByRole('dialog', { name: 'Exportar audio' }).getByRole('button', { name: 'Exportar por marcadores' }).click();
+  const exportDialog = page.getByRole('dialog', { name: 'Exportar proyecto' });
+  await exportDialog.getByRole('checkbox', { name: 'Solo audio' }).check();
+  await exportDialog.getByRole('button', { name: 'Exportar por marcadores' }).click();
   await expect.poll(() => requestBodies(calls, '/jobs', 'POST')).toHaveLength(3);
   const renders = requestBodies(calls, '/jobs', 'POST') as Array<{ params: { start?: number; end?: number } }>;
   expect(renders[0].params.start).toBe(0);

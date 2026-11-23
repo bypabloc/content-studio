@@ -122,6 +122,8 @@ def _missing_sources(doc: Doc, folder: Path) -> list[str]:
     """Las rutas ausentes, sin duplicados y en el orden del documento."""
     missing: list[str] = []
     for clip in doc['clips']:
+        if 'media' in clip:
+            continue
         source = Path(clip['src'])
         target = source if source.is_absolute() else folder / source
         if not target.is_file() and clip['src'] not in missing:
@@ -131,12 +133,15 @@ def _missing_sources(doc: Doc, folder: Path) -> list[str]:
 
 def _audible_clips(doc: Doc) -> list[tuple[dict[str, Any], dict[str, Any]]]:
     """Los clips que suenan, con su pista: sin las silenciadas y, si hay solo, solo las que lo tienen."""
-    tracks = {track['id']: track for track in doc['tracks']}
-    soloed = {track['id'] for track in doc['tracks'] if track['solo']}
+    tracks = {track['id']: track for track in doc['tracks'] if track.get('kind', 'audio') == 'audio'}
+    soloed = {track['id'] for track in tracks.values() if track.get('solo', False)}
     return [
         (clip, tracks[clip['track']])
         for clip in doc['clips']
-        if not tracks[clip['track']]['mute'] and (not soloed or clip['track'] in soloed)
+        if 'media' not in clip
+        and clip['track'] in tracks
+        and not tracks[clip['track']].get('mute', False)
+        and (not soloed or clip['track'] in soloed)
     ]
 
 

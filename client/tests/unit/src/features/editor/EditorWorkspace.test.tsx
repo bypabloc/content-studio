@@ -5,33 +5,41 @@ import { EditorWorkspace } from '@/features/editor/EditorWorkspace';
 import type { Doc } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
-const { api, open, playback, recorder } = vi.hoisted(() => ({
+const { api, open, playback, recorder, importedPaths } = vi.hoisted(() => ({
   api: { get: vi.fn(), put: vi.fn(), upload: vi.fn(), queryUrl: vi.fn((path: string) => path), fileUrl: vi.fn() },
   open: vi.fn(),
   playback: { position: 2, playing: false, seek: vi.fn(), setPlaying: vi.fn(), stop: vi.fn() },
   recorder: { recording: false, uploading: false, levels: { rms: -96, peak: -96 }, latencyMs: 0, error: null, start: vi.fn(), stop: vi.fn() },
+  importedPaths: [] as string[],
 }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('@/features/editor/playback/usePlayback', () => ({ usePlayback: () => playback }));
 vi.mock('@/features/editor/useTrackRecorder', () => ({ useTrackRecorder: () => recorder }));
 vi.mock('@/features/editor/useNativeDrop', () => ({
-  useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(['D:/Music/song.wav']) }),
+  useNativeDrop: (onPaths: (paths: string[]) => void) => ({ dragging: false, pick: async () => onPaths(importedPaths) }),
 }));
-vi.mock('@/features/recording/MicrophonePicker', () => ({ MicrophonePicker: () => null }));
+vi.mock('@/features/recording/MicrophonePicker', () => ({
+  MicrophonePicker: ({ onChange }: { onChange: (value: string) => void }) => (
+    <button aria-label="test-microphone" onClick={() => onChange('device-2')} />
+  ),
+}));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
 
 const PATH = 'D:/out/editor/demo/project.json';
 const DOC: Doc = {
-  version: 1,
+  version: 2,
   name: 'demo',
   sample_rate: 48000,
+  canvas: { width: 1920, height: 1080, fps: 30, background: '#000000' },
   tracks: [{ id: 'voice', kind: 'audio', name: 'Voz', volume_db: 0, mute: false, solo: false, locked: false, height: 80 }],
   clips: [{ id: 'clip-1', track: 'voice', src: 'missing.wav', src_in: 0, src_out: 4, start: 0, gain_db: 0, fade_in: 0, fade_out: 0 }],
   markers: [],
+  transitions: [],
 };
 const project = { path: PATH, hash: 'hash-1', doc: DOC, missing: ['missing.wav'] };
 
 beforeEach(() => {
+  importedPaths.splice(0, importedPaths.length, 'D:/Music/song.wav');
   playback.position = 2;
   playback.playing = false;
   api.get.mockImplementation((url: string) => {
@@ -39,7 +47,7 @@ beforeEach(() => {
     if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
     if (url.includes('/settings/')) return Promise.resolve({ value: null });
     if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Music', entries: [] });
-    if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 3 });
+    if (url.startsWith('/fs/info?')) return Promise.resolve({ duration: 3, kind: 'audio', has_audio: true });
     return Promise.reject(new Error('unknown endpoint'));
   });
   api.put.mockResolvedValue({ hash: 'hash-2' });
@@ -77,6 +85,37 @@ describe('EditorWorkspace', () => {
     fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/fs/info?path=D%3A%2FMusic%2Fsong.wav'));
     expect(await screen.findByRole('group', { name: t('editor.timeline.lane', { name: t('editor.track.new_name', { n: 2 }) }) })).toBeTruthy();
+  });
+
+  it('importa imágenes y videos en pistas visuales y enlaza el audio del video', async () => {
+    importedPaths.splice(0, importedPaths.length, 'D:/Media/logo.png', 'D:/Media/scene.mp4');
+    api.get.mockImplementation((url: string) => {
+      if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'Media', path: 'D:/Media' }] });
+      if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+      if (url.includes('/settings/')) return Promise.resolve({ value: null });
+      if (url.startsWith('/fs/list?')) return Promise.resolve({ path: 'D:/Media', entries: [] });
+      if (url.includes('logo.png')) return Promise.resolve({ duration: 5, kind: 'image', has_audio: false });
+      if (url.includes('scene.mp4')) return Promise.resolve({ duration: 3, kind: 'video', has_audio: true });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: t('action.import') }));
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+    const visualTrack = saved.tracks.find((track) => track.kind === 'video');
+    const importedAudioTrack = saved.tracks.find((track) => track.kind === 'audio' && track.id !== 'voice');
+    const image = saved.clips.find((clip) => clip.src === 'D:/Media/logo.png');
+    const video = saved.clips.find((clip) => clip.src === 'D:/Media/scene.mp4' && clip.media === 'video');
+    const linkedAudio = saved.clips.find((clip) => clip.src === 'D:/Media/scene.mp4' && !clip.media);
+
+    expect(visualTrack).toBeTruthy();
+    expect(image).toMatchObject({ media: 'image', track: visualTrack?.id, src_in: 0, src_out: 5, start: 2 });
+    expect(video).toMatchObject({ media: 'video', track: visualTrack?.id, src_in: 0, src_out: 3, start: 7 });
+    expect(linkedAudio).toMatchObject({ track: importedAudioTrack?.id, src_in: 0, src_out: 3, start: 7, gain_db: 0 });
+    expect(video?.link).toBeTruthy();
+    expect(linkedAudio?.link).toBe(video?.link);
   });
 
   it('arma la primera pista y comienza a grabar al crear un proyecto desde Inicio', async () => {
@@ -145,5 +184,22 @@ describe('EditorWorkspace', () => {
     render(<EditorWorkspace project={project} onBack={vi.fn()} autoRecord />);
 
     await waitFor(() => expect(recorder.start).toHaveBeenCalledOnce());
+  });
+
+  it('guarda micrófono y latencia y envía el transporte al inicio', async () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'test-microphone' }));
+    fireEvent.change(screen.getByRole('slider', { name: t('editor.recorder.offset') }), { target: { value: '35' } });
+    fireEvent.click(screen.getByRole('button', { name: t('editor.transport.start') }));
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/editor.record_offset_ms', { value: 35 }));
+    expect(api.put).toHaveBeenCalledWith('/settings/select.recording.microphone', { value: 'device-2' });
+    expect(playback.seek).toHaveBeenCalledWith(0);
+  });
+
+  it('ignora la tecla de transición si el proyecto no tiene pistas visuales', () => {
+    render(<EditorWorkspace project={project} onBack={vi.fn()} />);
+    fireEvent.keyDown(screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) }), { key: 't' });
+    expect(api.put).not.toHaveBeenCalledWith(expect.stringContaining('/projects'), expect.anything());
   });
 });

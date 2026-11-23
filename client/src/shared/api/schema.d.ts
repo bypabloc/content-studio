@@ -783,6 +783,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/editor/projects/frame": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Project Frame
+         * @description Devuelve como PNG el fotograma exacto del lienzo en `t`, con caché por revisión del proyecto.
+         */
+        get: operations["project_frame_editor_projects_frame_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editor/projects/media": {
         parameters: {
             query?: never;
@@ -790,7 +810,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Project Media
+         * @description Sirve una fuente visual del proyecto; los videos usan su proxy y la ruta acepta token de consulta.
+         */
+        get: operations["project_media_editor_projects_media_get"];
         put?: never;
         /**
          * Upload Recording
@@ -872,7 +896,7 @@ export interface paths {
         };
         /**
          * Media Info
-         * @description Mide la duración de un medio elegido para crear el clip, incluso si está fuera de `out/`.
+         * @description Describe una fuente elegida para crear su clip, incluso si está fuera de `out/`.
          */
         get: operations["media_info_fs_info_get"];
         put?: never;
@@ -1468,6 +1492,21 @@ export interface components {
             seconds: number;
             /** Guide */
             guide: string;
+        };
+        /**
+         * MediaInfo
+         * @description Metadatos que necesita el editor para crear clips de audio y video.
+         */
+        MediaInfo: {
+            /** Duration */
+            duration: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "audio" | "video" | "image";
+            /** Has Audio */
+            has_audio: boolean;
         };
         /**
          * Name
@@ -3076,6 +3115,70 @@ export interface operations {
             };
         };
     };
+    project_frame_editor_projects_frame_get: {
+        parameters: {
+            query: {
+                path: string;
+                t?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_media_editor_projects_media_get: {
+        parameters: {
+            query: {
+                path: string;
+                source: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     upload_recording_editor_projects_media_post: {
         parameters: {
             query: {
@@ -3215,9 +3318,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: number;
-                    };
+                    "application/json": components["schemas"]["MediaInfo"];
                 };
             };
             /** @description Validation Error */
