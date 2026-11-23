@@ -73,7 +73,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 | T5 | Compositor | AC-5 | T1, T2 | `client-unit`, `e2e` | [x] |
 | T6 | Visor, inspector y línea de tiempo | AC-7 | T5 | `client-unit` | [x] |
 | T7 | e2e y docs | — | T4, T6 | `e2e` | [x] |
-| T8 | Corrida real | AC-6 | T7 | verificación final | [ ] |
+| T8 | Corrida real | AC-6 | T7 | verificación final | [x] |
 
 ## 4. Commits
 

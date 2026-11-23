@@ -44,5 +44,6 @@ Que el Editor de la 017 sea un NLE de video: pistas ilimitadas de video e imagen
 
 ## WARNING y PENDING
 
+* PENDING: [018-app-check-cdp](../../../process/PENDING/018-app-check-cdp.md) (tres corridas compilaron la app, pero WebView2 no respondió en CDP).
 * WARNING: `018-paridad-preview-export.md` (umbral de SSIM y casos), `018-proxies.md` (resolución, códec y caché), `018-render-video.md` (crop animado y tamaño de transformaciones) y `018-transiciones.md` (lista elegida).
-* PENDING: [018-e2e-runner](../../../process/PENDING/018-e2e-runner.md) (la ejecución no entrega un resultado final; repetir en T8 y 023).
+* PENDING: [018-e2e-runner](../../../process/PENDING/018-e2e-runner.md) (el reintento de T8 quedó sin reporte; repetir antes del cierre de 023).

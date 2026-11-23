@@ -6,3 +6,4 @@
 - **Quién**: agente.
 - **Qué la cierra**: `python -m devtools test-runner --type=e2e` termina con exit 0 y reporte completo, incluidos los cuatro escenarios del Editor.
 - **Impacto**: los tres escenarios de T7 están agregados, pero aún no tienen verificación e2e concluyente.
+- **Reintento T8**: `uv run python -m devtools test-runner --type=e2e` quedó abierto, sin salida, durante varios minutos; se interrumpió con Ctrl+C y no entregó reporte. Repetir en 023.
