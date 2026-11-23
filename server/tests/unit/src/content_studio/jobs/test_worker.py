@@ -85,6 +85,7 @@ def _spans(env) -> dict[str, tuple[float, float]]:
 
 def test_stop_tree_falls_back_to_the_process_handle_when_taskkill_is_denied(monkeypatch):
     """El handle abierto por Popen todavía puede terminar el proceso si taskkill no tiene permiso."""
+    monkeypatch.setattr(sys, 'platform', 'win32')
     process = SimpleNamespace(pid=123, killed=False, waited=False)
     process.kill = lambda: setattr(process, 'killed', True)
     process.wait = lambda: setattr(process, 'waited', True)
