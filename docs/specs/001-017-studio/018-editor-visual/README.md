@@ -30,7 +30,7 @@ Que el Editor de la 017 sea un NLE de video: pistas ilimitadas de video e imagen
 | :--- | :--- | :--- |
 | 1 | Esquema v2 (lienzo, pistas visuales, transformación y keyframes) e interpolación compartida | IMP (`584b402`) |
 | 2 | Proxies y fotograma exacto bajo demanda | IMP (`87edebf`) |
-| 3 | Render de video: capas, keyframes y transiciones en `filter_complex` | PEN |
+| 3 | Render de video: capas, keyframes y transiciones en `filter_complex` | IMP (`5d9394a`, `0a35e9b`) |
 | 4 | Client: compositor WebGL2 de vista previa | PEN |
 | 5 | Client: lienzo, inspector, keyframes y transiciones en la línea de tiempo | PEN |
 

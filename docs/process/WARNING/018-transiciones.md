@@ -8,7 +8,7 @@
   `fadewhite`, `wipeleft`, `wiperight`, `slideleft`, `slideright` y `circleopen`.
 - **Descartadas**: aplicar `xfade` a las fuentes originales, porque no comparten tamaño ni posición; dibujar ambos clips
   por separado, porque el superior taparía al inferior durante el solapamiento.
-- **Cómo revertir**: revertir el commit T4 y retirar `editor/video_transitions.py` y sus pruebas.
+- **Cómo revertir**: `git revert 0a35e9b`; retira el compositor y sus pruebas de transición.
 - **Cómo comprobarla**: `uv run pytest server/tests/unit/src/content_studio/editor/test_render_video.py
   server/tests/unit/src/content_studio/editor/test_video_transitions.py -q`. AC-6: 40 clips, 60 s a 720p/30 fps, NVENC,
   render en 6,18 s y grafo de 26 395 bytes.

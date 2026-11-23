@@ -68,8 +68,8 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | T1 | Esquema v2 y keyframes | AC-1 | — | `unit`, `client-unit` | [x] |
 | T2 | Proxies y fotograma exacto | AC-4 | T1 | `unit` | [x] |
-| T3 | Render de capas y keyframes | AC-2 | T1 | `unit` | [ ] |
-| T4 | Transiciones y escala | AC-3, AC-6 | T3 | `unit`, `-m local` | [ ] |
+| T3 | Render de capas y keyframes | AC-2 | T1 | `unit` | [x] |
+| T4 | Transiciones y escala | AC-3, AC-6 | T3 | `unit`, `-m local` | [x] |
 | T5 | Compositor | AC-5 | T1, T2 | `client-unit`, `e2e` | [ ] |
 | T6 | Visor, inspector y línea de tiempo | AC-7 | T5 | `client-unit` | [ ] |
 | T7 | e2e y docs | — | T4, T6 | `e2e` | [ ] |
