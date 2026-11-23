@@ -43,5 +43,5 @@ Que el Editor de la 017 sea un NLE de video: pistas ilimitadas de video e imagen
 
 ## WARNING y PENDING
 
-* WARNING: `018-paridad-preview-export.md` (umbral de SSIM y casos), `018-proxies.md` (resolución, códec y caché) y `018-transiciones.md` (lista elegida).
+* WARNING: `018-paridad-preview-export.md` (umbral de SSIM y casos), `018-proxies.md` (resolución, códec y caché), `018-render-video.md` (crop animado y tamaño de transformaciones) y `018-transiciones.md` (lista elegida).
 * PENDING: ninguna.

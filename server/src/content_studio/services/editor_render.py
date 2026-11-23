@@ -17,12 +17,12 @@ ERROR_CODES = {3: 'missing_source'}
 
 
 def validate(params: dict[str, Any]) -> list[dict[str, Any]]:
-    """Errores como {'code', 'params'}: sin proyecto, un formato de audio que no existe o un preset que no existe."""
+    """Errores como {'code', 'params'}: sin proyecto, un formato que no existe o un preset inválido."""
     errors: list[dict[str, Any]] = []
     if not params.get('doc'):
         errors.append({'code': 'editor_project_not_found', 'params': {'path': ''}})
     target = formats.TARGETS.get(params.get('format', 'wav'))
-    if target is None or target['kind'] != 'audio':
+    if target is None or target['kind'] not in {'audio', 'video'}:
         errors.append({'code': 'unknown_target', 'params': {'target': params.get('format')}})
     preset = params.get('normalize')
     if preset is not None and preset not in normalize.TARGETS:

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from content_studio.editor import render_main, store
+from content_studio.editor import project, render_main, store
 
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
 
@@ -123,3 +123,161 @@ def test_missing_sources_are_preserved_in_the_job_result(tmp_path: Path, capsys)
         'error': 'missing_source',
         'params': {'paths': ['media/tono-ausente.wav']},
     }
+
+
+@needs_ffmpeg
+def test_video_format_renders_visual_and_audio_to_its_exports_folder(tmp_path: Path, capsys):
+    """El MP4 mezcla la composición visual y el grafo de audio y registra la duración y la ruta."""
+    project_file = store.create(tmp_path / 'editor', 'Logo', date(2026, 11, 22))
+    media = project_file.parent / 'media'
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-v',
+            'error',
+            '-y',
+            '-f',
+            'lavfi',
+            '-i',
+            'color=red:s=16x16:d=1',
+            '-frames:v',
+            '1',
+            '-c:v',
+            'png',
+            str(media / 'logo.png'),
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            'ffmpeg',
+            '-v',
+            'error',
+            '-y',
+            '-f',
+            'lavfi',
+            '-i',
+            'sine=frequency=440:duration=1:sample_rate=48000',
+            str(media / 'tone.wav'),
+        ],
+        check=True,
+    )
+    doc, digest = store.read(project_file)
+    doc['canvas'] = {**project.DEFAULT_CANVAS, 'width': 320, 'height': 240, 'fps': 10}
+    doc['tracks'] = [
+        {'id': 'v1', 'kind': 'video', 'name': 'Video', 'opacity': 1, 'hidden': False, 'locked': False},
+        {'id': 'a1', 'kind': 'audio', 'name': 'Audio', 'volume_db': 0, 'mute': False, 'solo': False, 'locked': False},
+    ]
+    doc['clips'] = [
+        {
+            'id': 'logo',
+            'track': 'v1',
+            'src': 'media/logo.png',
+            'media': 'image',
+            'src_in': 0,
+            'src_out': 0.5,
+            'start': 0,
+            'gain_db': 0,
+            'fade_in': 0,
+            'fade_out': 0,
+            'transform': {
+                'x': 0,
+                'y': 0,
+                'scale_x': 1,
+                'scale_y': 1,
+                'rotation': 0,
+                'opacity': 1,
+                'anchor_x': 0.5,
+                'anchor_y': 0.5,
+                'crop': {'l': 0, 't': 0, 'r': 0, 'b': 0},
+            },
+            'keyframes': {},
+        },
+        {
+            'id': 'tone',
+            'track': 'a1',
+            'src': 'media/tone.wav',
+            'src_in': 0,
+            'src_out': 0.5,
+            'start': 0,
+            'gain_db': 0,
+            'fade_in': 0,
+            'fade_out': 0,
+        },
+    ]
+    store.write(project_file, doc, digest)
+    job = tmp_path / 'jobs' / '2026-11-22-8-editor-video'
+    job.mkdir(parents=True)
+
+    code = render_main.main(['--project', str(project_file), '--format', 'mp4-h264', '--out-dir', str(job)])
+
+    assert code == 0
+    result = json.loads((job / 'result.json').read_text(encoding='utf-8'))
+    assert result['status'] == 'done'
+    assert Path(result['output']) == project_file.parent / 'exports' / '2026-11-22-8-editor-video.mp4'
+    assert result['duration'] == pytest.approx(0.5, abs=0.11)
+    graph = Path(result['output']).with_suffix('.filter')
+    assert graph.is_file() and 'overlay=' in graph.read_text(encoding='utf-8')
+    streams = subprocess.run(
+        ['ffprobe', '-v', 'error', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', result['output']],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+    assert streams == ['video', 'audio']
+    assert json.loads(capsys.readouterr().out) == result
+
+    audio_job = tmp_path / 'jobs' / 'audio-only'
+    audio_job.mkdir(parents=True)
+    audio_code = render_main.main(
+        ['--project', str(project_file), '--format', 'wav', '--name', 'audio-only', '--out-dir', str(audio_job)]
+    )
+    audio_result = json.loads((audio_job / 'result.json').read_text(encoding='utf-8'))
+    assert audio_code == 0
+    assert audio_result['status'] == 'done'
+    assert Path(audio_result['output']).name == 'audio-only.wav'
+    assert audio_result['duration'] == pytest.approx(0.5, abs=0.01)
+    assert json.loads(capsys.readouterr().out) == audio_result
+
+
+def test_missing_visual_source_is_preserved_in_the_job_result(tmp_path: Path, capsys):
+    """Una imagen ausente deja su ruta relativa para que el editor permita encontrarla."""
+    project_file = store.create(tmp_path / 'editor', 'Logo', date(2026, 11, 22))
+    doc, digest = store.read(project_file)
+    doc['tracks'] = [{'id': 'v1', 'kind': 'video', 'name': 'Video', 'opacity': 1, 'hidden': False, 'locked': False}]
+    doc['clips'] = [
+        {
+            'id': 'logo',
+            'track': 'v1',
+            'src': 'media/missing.png',
+            'media': 'image',
+            'src_in': 0,
+            'src_out': 1,
+            'start': 0,
+            'gain_db': 0,
+            'fade_in': 0,
+            'fade_out': 0,
+            'transform': {
+                'x': 0,
+                'y': 0,
+                'scale_x': 1,
+                'scale_y': 1,
+                'rotation': 0,
+                'opacity': 1,
+                'anchor_x': 0.5,
+                'anchor_y': 0.5,
+                'crop': {'l': 0, 't': 0, 'r': 0, 'b': 0},
+            },
+            'keyframes': {},
+        }
+    ]
+    store.write(project_file, doc, digest)
+    job = tmp_path / 'jobs' / 'missing-visual'
+    job.mkdir(parents=True)
+
+    code = render_main.main(['--project', str(project_file), '--format', 'mp4-h264', '--out-dir', str(job)])
+
+    result = {'status': 'failed', 'error': 'missing_source', 'params': {'paths': ['media/missing.png']}}
+    assert code == 3
+    assert json.loads((job / 'result.json').read_text(encoding='utf-8')) == result
+    assert json.loads(capsys.readouterr().out) == result

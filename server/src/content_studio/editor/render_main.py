@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from content_studio.common import ffmpeg as ff
-from content_studio.editor import project, render_audio, store
+from content_studio.editor import project, render_audio, render_video, store
 from content_studio.media import formats
 
 
@@ -40,14 +40,23 @@ def main(argv: list[str] | None = None) -> int:
     if errors:
         print(json.dumps({'status': 'failed', 'errors': errors}, ensure_ascii=False))
         return 2
-    extension = formats.TARGETS[args.format]['ext']
+    target = formats.TARGETS.get(args.format)
+    if target is None or target['kind'] not in {'audio', 'video'}:
+        print(json.dumps({'status': 'failed', 'error': 'unknown_target', 'params': {'target': args.format}}))
+        return 2
+    extension = target['ext']
     exports = project_file.parent / 'exports'
     out = store.unique_export_path(exports, args.name or args.out_dir.name, extension)
     out.parent.mkdir(exist_ok=True)
     try:
-        render_audio.render(
-            doc, project_file.parent, out, args.format, args.normalize, start=args.start or 0, end=args.end
-        )
+        if target['kind'] == 'audio':
+            render_audio.render(
+                doc, project_file.parent, out, args.format, args.normalize, start=args.start or 0, end=args.end
+            )
+        else:
+            render_video.render(
+                doc, project_file.parent, out, args.format, args.normalize, start=args.start or 0, end=args.end
+            )
     except (render_audio.RenderError, subprocess.CalledProcessError) as error:
         failure_result = (
             {'status': 'failed', 'error': error.code, 'params': error.params}

@@ -187,5 +187,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [017-latencia-grabacion](017-latencia-grabacion.md) | Compensación de latencia configurable; falta medir con micrófono y auriculares físicos | antes de `main` |
 | [017-preview-media-elements](017-preview-media-elements.md) | Vista previa transmite clips con elementos HTML y corrige la deriva con WebAudio | `main` |
 | [018-proxies](018-proxies.md) | VP9 con alfa requiere `libvpx-vp9`; la caché de fotogramas incluye el estado de sus fuentes | antes de `main` |
+| [018-render-video](018-render-video.md) | El crop animado usa alfa y la escala va después de rotar para mantener tamaños compatibles con FFmpeg | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

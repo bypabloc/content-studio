@@ -16,6 +16,7 @@ def test_the_service_runs_on_the_cpu_not_the_gpu_lock():
 def test_validate_accepts_a_project_and_a_known_format():
     """Con un `project.json` y un formato de audio conocido no hay errores."""
     assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'wav'}) == []
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'mp4-h264'}) == []
 
 
 def test_validate_rejects_a_missing_project_and_an_unknown_format():
