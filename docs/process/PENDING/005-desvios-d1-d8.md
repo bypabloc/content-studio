@@ -5,3 +5,5 @@
 - **Cuándo**: (2) y (4) antes del instalador (022); (1) y (3) cuando una sección los necesite.
 - **Quién**: agente.
 - **Qué la cierra**: la lista de arriba, cada punto resuelto o reconocido como decisión en su ficha WARNING.
+
+- **Actualización 017**: el selector de archivos del Editor usa `@tauri-apps/plugin-dialog` para importar, abrir y reasignar fuentes. Ese uso queda resuelto; Restablecer elecciones sigue usando `window.confirm` y conserva su decisión pendiente para la 022.
