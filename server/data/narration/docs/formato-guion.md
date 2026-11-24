@@ -87,6 +87,14 @@ El editor de la app comprueba estas reglas de arriba, sin modelo (`server/src/co
 
 Las demás reglas piden criterio o un modelo (la pronunciación, el ritmo o el largo real del audio): el editor no las marca. Se revisan al escuchar la toma o con la evaluación de whisper (`--evaluate`).
 
+## Revisar con IA
+
+En Narración, «Revisar con IA» manda al asistente local (spec 021) los párrafos con avisos del linter, o todos con `studio llm script-review --all`, junto con las reglas 1 a 22 de esta guía. El asistente propone un texto por párrafo y la app muestra el diff, con la regla de cada cambio. Aceptar reemplaza el párrafo en el editor; descartar lo deja como estaba.
+
+* Cubre lo que el linter detecta pero no arregla: cifras en letras (13), `;` y `:` (6), mayúsculas de énfasis (2), signos de apertura (10), oraciones largas (11) y «registras» (19). También las reglas que el linter no ve: siglas deletreadas (14), inglés como se dice (15), «-s» seguida de «s» (17) y la palabra clave al final (18).
+* Una propuesta se descarta sola si el linter da más avisos que antes, si quedan cifras o si las palabras de contenido cambian más de un 30 % (otra idea).
+* El asistente no escucha: las reglas 20 a 25 siguen dependiendo de generar, evaluar y escuchar.
+
 ## Palabras que el modelo pierde
 
 Medido con `--evaluate` y experimentos de 3 a 5 generaciones por variante (las variantes se transcribieron con whisper `medium`):

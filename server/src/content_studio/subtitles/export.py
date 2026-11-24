@@ -14,6 +14,11 @@ from content_studio.subtitles.styles import preset
 FORMATS = ('srt', 'vtt', 'ass')
 
 
+def with_track(document: dict[str, Any], language: str) -> dict[str, Any]:
+    """El documento con los cues de `tracks[language]` (spec 021), para exportarlo; KeyError si no tiene esa pista."""
+    return {**document, 'language': language, 'cues': document.get('tracks', {})[language]}
+
+
 def render(document: dict[str, Any], fmt: str, play_res: tuple[int, int] = (1920, 1080)) -> str:
     """El texto del documento en el formato pedido; un formato que no existe es un ValueError."""
     if fmt == 'srt':

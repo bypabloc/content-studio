@@ -18,6 +18,7 @@ description: Stack de content-studio (Python 3.10+, uv, argparse, FastAPI y uvic
 | Motores TTS | VoxCPM2, Qwen3-TTS, Chatterbox, CosyVoice 3, OmniVoice, IndexTTS (licencias en `AGENTS.md` y `registry.py`) | `server/src/content_studio/narration/engines/registry.py` (`ENGINES`) |
 | Motores de música | ACE-Step 1.5, HeartMuLa | `server/src/content_studio/music/engines/registry.py` (`MODELS`) |
 | Recetas de instalación | Pasos y revisiones fijados por motor; instalación reanudable | `server/src/content_studio/engines/recipes/` |
+| llama.cpp (`llama-server`, CUDA de Windows) | Asistente local: un proceso hijo con API compatible con OpenAI y JSON schema, bajo demanda y con el turno de la GPU (spec 021) | `server/src/content_studio/llm/`, receta `llama-cpp` |
 | ffmpeg / ffprobe | Conversión, loudnorm, recortes, espectrogramas y medición; FFmpeg se detecta en PATH | `common/ffmpeg` |
 | Git y FFmpeg | Detección por PATH; en Windows la app puede ofrecer instalación con `winget --scope user` | `server/src/content_studio/system/tools.py` |
 | whisper | Comparar y revisar la narración contra el guion | `server/data/narration/evaluation/` |

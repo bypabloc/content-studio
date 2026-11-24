@@ -37,9 +37,33 @@ def _failure(error: str) -> dict:
     return {'ok': False, 'error': _summary(error), 'checked_at': _checked_at()}
 
 
+def _verify_assistant(recipe: recipes.Recipe) -> dict:
+    """llama.cpp: `llama-server --version`; un modelo: su GGUF está completo (cabecera GGUF). Sin cargar la GPU."""
+    from content_studio.llm import models
+
+    root = paths.engines_dir()
+    if recipe.engine == models.RUNTIME:
+        server = models.server_path(root)
+        if not server.is_file():
+            return _failure('engine_not_installed')
+        checked = _run([str(server), '--version'])
+        if checked.returncode:
+            return _failure(checked.stderr or checked.stdout)
+        return {'ok': True, 'checked_at': _checked_at(), 'version': _summary(checked.stdout + checked.stderr)}
+    gguf = models.gguf_path(recipe.engine, root)
+    if not gguf.is_file():
+        return _failure('engine_not_installed')
+    with gguf.open('rb') as handle:
+        if handle.read(4) != b'GGUF':
+            return _failure(f'{gguf.name} is not a GGUF file.')
+    return {'ok': True, 'checked_at': _checked_at(), 'size_bytes': gguf.stat().st_size}
+
+
 def verify_engine(engine: str, output_dir: Path) -> dict:
     """Genera audio con el motor y confirma que FFmpeg puede dejarlo en un segundo."""
     recipe = recipes.load(engine)
+    if recipe.family == 'assistant':
+        return _verify_assistant(recipe)
     output_dir.mkdir(parents=True, exist_ok=True)
     python = process.python_de(installer.engine_venv(recipe, paths.engines_dir()))
     if not python.is_file():

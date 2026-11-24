@@ -21,6 +21,7 @@ COMMANDS = {
     'spelling': ('devtools.spelling', '[--staged] [file ...]: cspell over the tracked or staged files'),
     'test-runner': ('devtools.test_runner.main', '--type=<stages> [--git-mode=...] [--files=...]: quality gates'),
     'app-check': ('devtools.app_check.main', 'run [--scenario=<n>] [--data=temp|real]: the real app over CDP'),
+    'llm-eval': ('devtools.llm_eval', '[--models ...]: compare the assistant models in Spanish (needs the GPU)'),
 }
 
 

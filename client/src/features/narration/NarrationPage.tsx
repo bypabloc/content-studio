@@ -10,6 +10,7 @@ import { useShortcut } from '@/shared/hooks/useShortcut';
 import { t } from '@/shared/i18n/t';
 import { NarrationOptions } from './NarrationOptions';
 import { ScriptEditor } from './ScriptEditor';
+import { ScriptReview } from './ScriptReview';
 import { narrationParams, useNarrationChoice } from './useNarrationChoice';
 import { useScriptLint } from './useScriptLint';
 
@@ -68,6 +69,7 @@ export function NarrationPage() {
     <UIStack gap="lg" className="lg:flex-row lg:items-start">
       <UIStack gap="lg" className="min-w-0 lg:flex-1">
         <ScriptEditor value={text} narrationStyle={choice.style} onChange={setText} onImport={importFiles} />
+        <ScriptReview text={text} onChange={setText} />
         {take && (
           <Suspense fallback={null}>
             <NarrationResult job={take} />

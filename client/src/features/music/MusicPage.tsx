@@ -14,6 +14,7 @@ import { Player } from '@/shared/media/Player';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 
 import { DurationField } from './DurationField';
+import { DescribeMusic } from './DescribeMusic';
 import { FreeTextStyle, type FreeText, freeTextComplete } from './FreeTextStyle';
 import { musicDraft } from './fromJob';
 import { MusicCompare } from './MusicCompare';
@@ -186,7 +187,10 @@ export function MusicPage(): React.JSX.Element {
           onPlay={setSampleKey}
         />
       ) : (
-        <FreeTextStyle value={free} keys={stableKeys} onChange={setFree} />
+        <UIStack gap="md">
+          <DescribeMusic onApply={setFree} />
+          <FreeTextStyle value={free} keys={stableKeys} onChange={setFree} />
+        </UIStack>
       )}
       {sample ? <SamplePlayer path={sample} /> : null}
       <MusicOptions

@@ -13,6 +13,7 @@ import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 import { ItemActions } from './ItemActions';
 import { ItemOrganize } from './ItemOrganize';
 import { ItemOrigin } from './ItemOrigin';
+import { PublishTab } from './PublishTab';
 import { formatDate, formatDuration, formatSize, kindLabel } from './query';
 import type { ItemDetailData, LibraryItem } from './types';
 
@@ -53,6 +54,7 @@ export function ItemDetail({ id, onOpen, onClose }: Props): React.JSX.Element {
           <ItemOrigin detail={detail.data} onOpen={onOpen} onClose={onClose} />
           <ItemOrganize item={item} />
           <ItemActions item={item} hasJob={detail.data.job !== null} onDone={onClose} />
+          {item.media_type === 'video' || item.media_type === 'audio' ? <PublishTab item={item} /> : null}
         </UIStack>
       ) : (
         <UISkeleton className="h-64 w-full rounded-xl" />

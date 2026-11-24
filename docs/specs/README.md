@@ -16,7 +16,7 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | ↳ [018-editor-visual](001-017-studio/018-editor-visual/README.md) | feature | Large | `feature/018-editor-visual` | PEN |
 | ↳ [019-editor-effects](001-017-studio/019-editor-effects/README.md) | feature | Large | `feature/019-editor-effects` | PEN |
 | ↳ [020-library](001-017-studio/020-library/README.md) | feature | Large | `feature/020-library` | PEN |
-| ↳ [021-local-llm-assist](001-017-studio/021-local-llm-assist/README.md) | feature | Large | `feature/021-local-llm-assist` | PEN |
+| ↳ [021-local-llm-assist](001-017-studio/021-local-llm-assist/README.md) | feature | Large | `feature/021-local-llm-assist` | DON |
 | ↳ [022-installer](001-017-studio/022-installer/README.md) | feature | Large | `feature/022-installer` | PEN |
 | ↳ [023-integral-verification](001-017-studio/023-integral-verification/README.md) | chore | Micro | `chore/023-integral-verification` | PEN |
 

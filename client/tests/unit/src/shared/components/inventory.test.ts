@@ -3,7 +3,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 // AC-1 (spec 008): el inventario de D-3 más los componentes que llegaron después (los átomos de la gráfica, `UIFieldFrame`,
-// `UIQrCode`, `UIDiffText`, `UIImage`, `UITime` y los átomos de timeline y canvas de las specs 017 y 018). Cambiar esta lista es decidir que entra o sale un componente.
+// `UIQrCode`, `UIDiffText`, `UIImage`, `UITime`, los átomos de timeline y canvas de las specs 017 y 018, y `UILlmModelSelect`
+// y `UITextDiff` de la 021). Cambiar esta lista es decidir que entra o sale un componente.
 const INVENTORY = {
   atoms: [
     'UIAvatar', 'UIBadge', 'UIBox', 'UIButton', 'UICanvas', 'UICard', 'UIChartMarker', 'UIChartPlaceholder', 'UICheckbox', 'UIClip',
@@ -13,9 +14,9 @@ const INVENTORY = {
   ],
   molecules: [
     'UIAlert', 'UICheckboxGroup', 'UICollapsible', 'UICombobox', 'UIDateParts', 'UIDateRangeFilter', 'UIDescriptionList',
-    'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIJobPicker', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
+    'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIJobPicker', 'UILlmModelSelect', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
     'UIPopover', 'UIRadioGroup', 'UIRecommendedSelect', 'UIRemoteImage', 'UIRowActions', 'UISearchField', 'UISearchSelect',
-    'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
+    'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextDiff', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
     'UIVirtualList',
     'UIWhisperModelSelect',
   ],

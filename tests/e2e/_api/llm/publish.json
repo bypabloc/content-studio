@@ -1,0 +1,30 @@
+{
+  "platforms": {
+    "youtube": {
+      "titles": [
+        "Cómo crear una cita en tres pasos",
+        "Agenda sin errores",
+        "Tu clínica al día"
+      ],
+      "description": "Un tutorial corto para crear citas.",
+      "hashtags": [
+        "#agenda",
+        "#clinica"
+      ],
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Inicio"
+        },
+        {
+          "t": 20,
+          "title": "Nueva cita"
+        },
+        {
+          "t": 40,
+          "title": "Recordatorios"
+        }
+      ]
+    }
+  }
+}

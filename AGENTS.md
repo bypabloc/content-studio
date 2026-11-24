@@ -11,6 +11,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | — (`studio clean`) | Limpiador de silencios de audio y video, con revisión en línea de tiempo (faster-whisper) | `server/src/content_studio/clean/` | [docs/process/01-done/cleaner.md](docs/process/01-done/cleaner.md) |
 | — (`studio convert`, `normalize`, `trim`, `concat`, `split`) | Convertir y normalizar la sonoridad (ffmpeg), y recortar, unir y dividir medios | `server/src/content_studio/media/` | [convert.md](docs/process/01-done/convert.md) · [edit.md](docs/process/01-done/edit.md) |
 | — (`studio editor render`) | Editor no destructivo: títulos, velocidad, color/LUT, chroma, fusión, subtítulos, keyframes y exportación | `server/src/content_studio/editor/` · `client/src/features/editor/` | [editor.md](docs/process/01-done/editor.md) |
+| — (`studio llm`) | Asistente con un LLM local (llama.cpp con Gemma 4 E4B o Qwen3.5-9B): sugerencias para el guion, los subtítulos, la música y la publicación | `server/src/content_studio/llm/` | [llm.md](docs/process/01-done/llm.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 
@@ -101,7 +102,7 @@ python -m devtools test-runner --type=e2e   # Playwright sobre la app construida
 2. **Un modelo a la vez en la GPU.** Narración y música juntas no caben en 8 GB. Entre sesiones, con `gpu-turn run` ([turno-gpu](.agents/rules/turno-gpu.md)); `studio` y el worker toman el candado solos.
 3. **La música es siempre instrumental**: nada de voz ni de letra.
 4. **Verificar antes de decir "listo"**: correr el script real y revisar la duración, el volumen y el espectrograma (ver los README). La UI se verifica con `python -m devtools app-check run`; **Computer Use está prohibido** y lo bloquea un hook. El gusto lo decide el usuario: entrégale las rutas.
-5. **Licencias**: VoxCPM2, Qwen3-TTS y HeartMuLa (Apache 2.0), y Chatterbox y ACE-Step (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial.
+5. **Licencias**: VoxCPM2, Qwen3-TTS, HeartMuLa, Gemma 4 y Qwen3.5 (Apache 2.0), y Chatterbox, ACE-Step y llama.cpp (MIT) permiten uso comercial. CosyVoice 3 es Apache 2.0, pero su tarjeta dice "academic purposes": revísalo antes de un uso comercial.
    OmniVoice (CC-BY-NC) e IndexTTS (bilibili Model Use License) **no** son comerciales. La lista vigente está en `server/src/content_studio/narration/engines/registry.py`. Clona solo voces con permiso de su dueño.
 6. Idioma de trabajo: español, en respuestas concisas y sin adulación. Narración en español neutro latinoamericano, salvo que se pida otro idioma.
 7. Los archivos se crean y editan con las herramientas de edición del agente. Bash se usa solo para ejecutar los scripts y ffmpeg. Muestra los resultados con rutas clicables a `out/`.

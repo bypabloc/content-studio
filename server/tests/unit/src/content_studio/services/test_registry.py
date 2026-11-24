@@ -64,7 +64,9 @@ def test_every_kind_exposes_validate_and_build_command():
         'editor.proxy': editor_proxy,
         'library.scan': library_scan,
     }
-    assert expected == SERVICES
+    assert expected == {
+        kind: service for kind, service in SERVICES.items() if not kind.startswith('llm.')
+    }  # test_llm_task
     for service in SERVICES.values():
         assert callable(service.validate)
         assert callable(service.build_command)

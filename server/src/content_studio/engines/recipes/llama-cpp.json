@@ -1,0 +1,38 @@
+{
+  "engine": "llama-cpp",
+  "family": "assistant",
+  "size_gb": 2,
+  "vram_gb": 0,
+  "cpu": false,
+  "license": "MIT",
+  "steps": [
+    {
+      "kind": "python",
+      "version": "3.12"
+    },
+    {
+      "kind": "venv",
+      "path": ".venv-llm"
+    },
+    {
+      "kind": "download",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12676/llama-b12676-bin-win-cuda-12.4-x64.zip",
+      "sha256": "1d5692d90213a39aa01ef7da8d2c662ee815e0c6e4ad63b6f56473cc5b8ddb84",
+      "extract": "bin"
+    },
+    {
+      "kind": "download",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12676/cudart-llama-bin-win-cuda-12.4-x64.zip",
+      "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6",
+      "extract": "bin"
+    },
+    {
+      "kind": "verify",
+      "import": "json",
+      "run": [
+        "bin/llama-server.exe",
+        "--version"
+      ]
+    }
+  ]
+}

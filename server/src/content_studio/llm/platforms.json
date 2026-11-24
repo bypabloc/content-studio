@@ -1,0 +1,23 @@
+{
+  "youtube": {
+    "label": "YouTube",
+    "title": 100,
+    "description": 5000,
+    "hashtags": 15,
+    "chapters": true
+  },
+  "reels": {
+    "label": "Instagram Reels",
+    "title": 125,
+    "description": 2200,
+    "hashtags": 30,
+    "chapters": false
+  },
+  "tiktok": {
+    "label": "TikTok",
+    "title": 150,
+    "description": 4000,
+    "hashtags": 10,
+    "chapters": false
+  }
+}

@@ -86,3 +86,11 @@ def test_from_import_reads_an_srt_or_a_vtt_by_its_header():
 
     assert [cue['text'] for cue in from_import(srt, source_path='a.srt', language='es')['cues']] == ['Hola']
     assert [cue['text'] for cue in from_import(vtt, source_path='b.vtt', language='es')['cues']] == ['adiós']
+
+
+def test_from_words_strips_the_leading_space_that_faster_whisper_puts_on_each_word():
+    """faster-whisper da « hola»: el cue no queda con dobles espacios y las palabras quedan sin espacios (spec 021)."""
+    doc = from_words([_w(' hola', 0.0, 0.4), _w(' mundo', 0.5, 0.9)], source_path='a.mp4', kind='file', language='es')
+
+    assert doc['cues'][0]['text'] == 'hola mundo'
+    assert [word['text'] for word in doc['cues'][0]['words']] == ['hola', 'mundo']

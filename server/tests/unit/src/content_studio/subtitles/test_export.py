@@ -43,3 +43,25 @@ def test_render_refuses_an_unknown_format():
     """Un formato que no es srt, vtt ni ass es un ValueError con el nombre en el mensaje."""
     with pytest.raises(ValueError, match='mp3'):
         export.render(from_cleaner(WORDS, source_path='clean.mp4', language='es'), 'mp3')
+
+
+def test_with_track_swaps_the_cues_for_the_translated_track_and_keeps_the_style():
+    """Exportar una pista (spec 021): los cues pasan a ser los de `tracks[<idioma>]`; el estilo se queda."""
+    document = from_cleaner(WORDS, source_path='clean.mp4', language='es')
+    document['style'] = {'font': 'Geist'}
+    document['tracks'] = {'pt': [{'id': 1, 'start': 0.0, 'end': 0.9, 'text': 'olá mundo'}]}
+
+    translated = export.with_track(document, 'pt')
+
+    assert [cue['text'] for cue in translated['cues']] == ['olá mundo']
+    assert translated['language'] == 'pt' and translated['style'] == {'font': 'Geist'}
+    assert 'olá mundo' in export.render(translated, 'srt')
+    assert document['cues'][0]['text'] == 'hola mundo'
+
+
+def test_with_track_rejects_a_language_without_a_track():
+    """Una pista que el documento no tiene es un KeyError."""
+    document = from_cleaner(WORDS, source_path='clean.mp4', language='es')
+
+    with pytest.raises(KeyError):
+        export.with_track(document, 'fr')
