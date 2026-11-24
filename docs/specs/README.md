@@ -20,5 +20,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 | ↳ [022-installer](001-017-studio/022-installer/README.md) | feature | Large | `feature/022-installer` | PEN |
 | ↳ [023-integral-verification](001-017-studio/023-integral-verification/README.md) | chore | Micro | `chore/023-integral-verification` | PEN |
 | [025-033-integraciones](025-033-integraciones/README.md) (lote 025–033) | chore · feature | Large | una por spec | las 9 redactadas, PEN |
+| [034-039-hablantes](034-039-hablantes/README.md) (lote 034–039) | feature · chore | Large | una por spec | las 6 redactadas, PEN |
 
-El próximo número libre es **034**. Los números no se reutilizan: una spec cerrada deja su número en el historial de git.
+El próximo número libre es **040**. Los números no se reutilizan: una spec cerrada deja su número en el historial de git.
