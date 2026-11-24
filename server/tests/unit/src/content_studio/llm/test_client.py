@@ -90,6 +90,7 @@ def test_ac3_two_invalid_answers_fail_with_llm_invalid_output(fake_server):
         client.chat(fake_server['url'], [{'role': 'user', 'content': 'x'}], SCHEMA, {})
 
     assert error.value.code == 'llm_invalid_output'
+    assert error.value.problems and '$.bpm' in error.value.problems[0]  # lo que falló en el último intento
     assert len(fake_server['requests']) == 2
 
 

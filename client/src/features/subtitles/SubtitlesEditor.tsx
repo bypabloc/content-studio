@@ -13,13 +13,15 @@ import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
 import { type StyleIn, toAss } from './ass';
 import { AssistantTools } from './AssistantTools';
 import { CueList } from './CueList';
-import { type DocEdit, mergeCues, splitCue } from './cues';
+import { type DocEdit, mergeCues, splitCue, trackDoc } from './cues';
 import { BUILTIN_PRESETS, recommendedPreset } from './presets';
 import { StylePanel } from './StylePanel';
 import { SubtitlesPreview } from './SubtitlesPreview';
 import type { ZoneName } from './SafeZones';
 
 const SAVE_DELAY_MS = 1000; // D-9: el guardado espera 1 s sin cambios
+
+const ORIGINAL = 'original'; // valor del selector de pistas para los cues del documento
 
 const ZONE_NAMES: Record<string, ZoneName | null> = { none: null, reels: 'reels', tiktok: 'tiktok', shorts: 'shorts' };
 
@@ -44,6 +46,7 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
   const [aspect, setAspect] = useState(16 / 9);
   const [zoneKey, setZoneKey] = useState('none');
   const [burnJobId, setBurnJobId] = useState<number | null>(null);
+  const [track, setTrack] = useState(ORIGINAL);
   const doc = draft ?? query.data ?? null;
 
   const burnJob = useQuery({
@@ -76,9 +79,14 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
     return () => window.removeEventListener('keydown', onKey);
   }, [doc, focus]);
 
-  // Exportar (D-3): el documento como SRT, VTT o ASS en `out/subtitles/`; la ruta vuelve para mostrarla.
+  // Exportar (D-3): el documento como SRT, VTT o ASS en `out/subtitles/`; la ruta vuelve para mostrarla. Con una pista
+  // traducida elegida (spec 021), se exporta esa pista como `<id>-<nombre>.<idioma>.<formato>`.
   const exported = useMutation({
-    mutationFn: (format: 'srt' | 'vtt' | 'ass') => api.post<{ path: string }>(`/subtitles/${projectId}/export`, { format }),
+    mutationFn: (format: 'srt' | 'vtt' | 'ass') =>
+      api.post<{ path: string }>(
+        `/subtitles/${projectId}/export`,
+        track === ORIGINAL ? { format } : { format, language: track },
+      ),
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -98,7 +106,8 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
   if (!doc) return <UIText variant="caption">{t('subtitles.editor.loading')}</UIText>;
   const style = Object.keys(doc.style).length > 0 ? (doc.style as unknown as StyleIn) : BUILTIN_PRESETS[recommendedPreset(aspect)];
   const playRes: [number, number] = aspect <= 1 ? [1080, 1920] : [1920, 1080];
-  const ass = toAss(doc, style, playRes);
+  const languages = Object.keys(doc.tracks);
+  const ass = toAss(track === ORIGINAL ? doc : trackDoc(doc, track), style, playRes);
 
   return (
     <UIStack gap="md">
@@ -113,6 +122,17 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
         ]}
         onChange={setZoneKey}
       />
+      {languages.length > 0 ? (
+        <UISelect
+          label={t('subtitles.editor.track')}
+          value={track}
+          options={[
+            { value: ORIGINAL, label: t('subtitles.editor.track_original') },
+            ...languages.map((code) => ({ value: code, label: code.toUpperCase() })),
+          ]}
+          onChange={setTrack}
+        />
+      ) : null}
       <SubtitlesPreview src={api.fileUrl(doc.source.path)} ass={ass} zone={ZONE_NAMES[zoneKey] ?? null} onAspect={setAspect} />
       <UIStack direction="row" gap="sm">
         <UIButton variant="secondary" onClick={() => void enqueue('subtitles.burn')}>

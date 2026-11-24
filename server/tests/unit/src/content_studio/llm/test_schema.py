@@ -53,3 +53,10 @@ def test_min_items_and_min_length():
     rule = {'type': 'array', 'minItems': 1, 'items': {'type': 'string', 'minLength': 1}}
     assert schema.validate([], rule) == ['$: fewer than 1 items']
     assert schema.validate([''], rule) == ['$[0]: shorter than 1']
+
+
+def test_pattern():
+    """pattern (los capítulos en `m:ss`, spec 021): un texto que no lo cumple es un error con su ruta."""
+    rule = {'type': 'string', 'pattern': '^[0-9]+:[0-5][0-9]$'}
+    assert schema.validate('1:39', rule) == []
+    assert schema.validate('0.51', rule) == ['$: does not match ^[0-9]+:[0-5][0-9]$']

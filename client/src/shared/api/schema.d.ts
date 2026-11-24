@@ -1911,11 +1911,13 @@ export interface components {
         };
         /**
          * ExportIn
-         * @description El formato de la exportación: `srt`, `vtt` o `ass`.
+         * @description El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida.
          */
         ExportIn: {
             /** Format */
             format: string;
+            /** Language */
+            language?: string | null;
         };
         /**
          * FolderIn

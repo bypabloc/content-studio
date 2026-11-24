@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SubtitlesEditor } from '@/features/subtitles/SubtitlesEditor';
@@ -204,5 +205,31 @@ describe('SubtitlesEditor', () => {
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Este ffmpeg no trae libass'));
     expect(screen.getByDisplayValue('hola a todos')).toBeTruthy();
+  });
+
+  it('exporta la pista traducida que se elige en el selector de pistas', async () => {
+    api.get.mockImplementation(async (path: string) =>
+      path === '/subtitles/7'
+        ? { ...structuredClone(doc), tracks: { pt: [{ id: 1, start: 0, end: 2, text: 'olá a todos' }] } }
+        : { key: 'x', value: undefined },
+    );
+    api.post.mockResolvedValue({ path: 'C:/out/subtitles/7-charla.pt.srt' });
+    renderEditor();
+    await screen.findByDisplayValue('hola a todos');
+
+    await userEvent.click(screen.getByRole('combobox', { name: t('subtitles.editor.track') }));
+    await userEvent.click(await screen.findByRole('option', { name: 'PT' }));
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.export.srt') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/subtitles/7/export', { format: 'srt', language: 'pt' }),
+    );
+  });
+
+  it('sin pistas traducidas no muestra el selector de pistas', async () => {
+    renderEditor();
+    await screen.findByDisplayValue('hola a todos');
+
+    expect(screen.queryByRole('combobox', { name: t('subtitles.editor.track') })).toBeNull();
   });
 });

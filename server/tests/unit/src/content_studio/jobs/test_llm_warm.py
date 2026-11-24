@@ -13,6 +13,7 @@ from content_studio.db import connection, jobs, schema, settings
 from content_studio.jobs import queue
 from content_studio.jobs.llm_warm import LlmWarm
 from content_studio.jobs.worker import Worker
+from content_studio.llm import models
 from content_studio.llm.client import LlmError
 
 
@@ -95,7 +96,7 @@ def test_ac2_the_llm_stops_before_another_gpu_job(env):
     assert _wait_for(lambda: _done(env, llm_id) and _done(env, narration_id))
     assert jobs.get(env.conn, narration_id)['status'] == 'done'
     assert env.events == [
-        'load gemma-4-e4b',
+        f'load {models.RECOMMENDED}',
         'run llm.music_caption llm_loaded=True url=http://fake-llm',
         'stop',
         'run narration llm_loaded=False url=None',
@@ -111,7 +112,7 @@ def test_ac2_consecutive_llm_jobs_reuse_the_warm_server_and_keep_the_turn(env):
     second = queue.enqueue(env.conn, 'llm.music_caption', {'description': 'b'}, env.services)
 
     assert _wait_for(lambda: _done(env, second))
-    assert env.events.count('load gemma-4-e4b') == 1
+    assert env.events.count(f'load {models.RECOMMENDED}') == 1
     assert 'stop' not in env.events
 
 

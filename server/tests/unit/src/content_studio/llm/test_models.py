@@ -40,7 +40,7 @@ def test_status_reports_which_models_are_installed(tmp_path):
     assert status[models.RECOMMENDED]['recommended'] is True
 
 
-def test_thinking_is_off_for_both_models():
-    """D-4: Qwen lo apaga con chat_template_kwargs; Gemma no lleva el token de thinking."""
-    assert models.MODELS['qwen3.5-9b'].extra == {'chat_template_kwargs': {'enable_thinking': False}}
-    assert models.MODELS['gemma-4-e4b'].extra == {}
+def test_every_model_turns_thinking_off():
+    """D-4: Gemma 4 E4B pensaba ~700 tokens por pedido aunque el sistema no lleve <|think|>; los dos lo apagan."""
+    for spec in models.MODELS.values():
+        assert spec.extra == {'chat_template_kwargs': {'enable_thinking': False}}

@@ -1,6 +1,7 @@
 """Sugerir palabras clave (spec 021, D-4): una por cue, con un emoji opcional, para el estilo de redes de la 014.
 
-El índice debe existir en el cue y el emoji ser un solo grafema. Al aceptarlas, la palabra lleva `keyword`, que el ASS
+El modelo nombra la palabra y su posición; manda la palabra, porque los modelos cuentan mal las posiciones. El emoji
+debe ser un solo grafema. Al aceptarlas, la palabra lleva `keyword`, que el ASS
 resalta con el color del estilo y el emoji al lado.
 """
 
@@ -15,6 +16,8 @@ from pathlib import Path
 from content_studio.llm.tasks import cues
 from content_studio.subtitles.document import load
 
+NON_WORD = re.compile(r'\W')
+MIN_LETTERS = 4  # «la», «por» o «vas» no sirven de palabra clave si el cue tiene otra mejor
 REGIONAL_PAIR = re.compile('[\U0001f1e6-\U0001f1ff]{2}')
 MODIFIERS = re.compile('[\ufe0f\u20e3\U0001f3fb-\U0001f3ff]')
 SCHEMA = {
@@ -27,9 +30,10 @@ SCHEMA = {
                 'properties': {
                     'id': {'type': 'integer'},
                     'keyword_index': {'type': 'integer', 'minimum': 0},
+                    'word': {'type': 'string', 'minLength': 1},
                     'emoji': {'type': 'string', 'maxLength': 16},
                 },
-                'required': ['id', 'keyword_index'],
+                'required': ['id', 'keyword_index', 'word'],
             },
         }
     },
@@ -48,14 +52,32 @@ def single_grapheme(text: str) -> bool:
     return bool(text) and all(len(part) == 1 and unicodedata.category(part) == 'So' for part in parts)
 
 
-def checker(word_counts: dict[int, int]) -> Callable[[dict], list[str]]:
-    """El índice existe en su cue y el emoji, si viene, es uno solo."""
+def _plain(word: str) -> str:
+    return NON_WORD.sub('', word.lower())
+
+
+def resolve(item: dict, words: list[str]) -> int | None:
+    """La posición de la palabra que nombra el modelo: la que dio si coincide, o la primera igual; None si falta."""
+    wanted = _plain(item['word'])
+    index = item['keyword_index']
+    if 0 <= index < len(words) and _plain(words[index]) == wanted:
+        return index
+    return next((position for position, word in enumerate(words) if _plain(word) == wanted), None)
+
+
+def checker(words_by_id: dict[int, list[str]]) -> Callable[[dict], list[str]]:
+    """La palabra está en su cue, tiene contenido (si el cue lo permite) y el emoji, si viene, es uno solo."""
 
     def check(answer: dict) -> list[str]:
         found = []
         for item in answer['cues']:
-            if not 0 <= item['keyword_index'] < word_counts.get(item['id'], 0):
-                found.append(f'$.cues: cue {item["id"]} has no word {item["keyword_index"]}')
+            words = words_by_id.get(item['id'], [])
+            if resolve(item, words) is None:
+                found.append(f'$.cues: cue {item["id"]} has no word {item["word"]!r}')
+            elif len(_plain(item['word'])) < MIN_LETTERS and any(len(_plain(word)) >= MIN_LETTERS for word in words):
+                found.append(
+                    f'$.cues: cue {item["id"]} needs a content word of {MIN_LETTERS}+ letters, not {item["word"]!r}'
+                )
             if 'emoji' in item and item['emoji'] and not single_grapheme(item['emoji']):
                 found.append(f'$.cues: cue {item["id"]} needs a single emoji')
         return found
@@ -70,11 +92,13 @@ def run(params: dict, ask: Ask) -> dict:
     suggestions = []
     for batch, _ in cues.batches(doc['cues']):
         items = [{'id': cue['id'], 'words': [word['text'] for word in cue['words']]} for cue in batch]
-        counts = {cue['id']: len(cue['words']) for cue in batch}
-        answer = ask(cues.message('subtitles_keywords', items), SCHEMA, check=checker(counts))
+        words = {item['id']: item['words'] for item in items}
+        answer = ask(cues.message('subtitles_keywords', items), SCHEMA, check=checker(words))
         for item in answer['cues']:
-            word = by_id[item['id']]['words'][item['keyword_index']]['text']
-            index, emoji = item['keyword_index'], item.get('emoji') or None
+            index = resolve(item, words[item['id']])
+            if index is None:  # el check ya lo pidió de nuevo; un modelo falso puede saltárselo
+                continue
+            word, emoji = by_id[item['id']]['words'][index]['text'], item.get('emoji') or None
             suggestions.append({'id': item['id'], 'keyword_index': index, 'word': word, 'emoji': emoji})
     return {'cues': suggestions}
 

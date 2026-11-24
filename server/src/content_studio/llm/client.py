@@ -19,10 +19,11 @@ ATTEMPTS = 2
 class LlmError(RuntimeError):
     """Error del asistente con código para la cola y la API."""
 
-    def __init__(self, code: str) -> None:
-        """Conserva el código para localizarlo."""
+    def __init__(self, code: str, problems: list[str] | None = None) -> None:
+        """Conserva el código para localizarlo y, si la respuesta no cumplía, lo que falló en el último intento."""
         super().__init__(code)
         self.code = code
+        self.problems = problems or []
 
 
 def _post(url: str, body: dict, timeout: float) -> dict:
@@ -93,4 +94,4 @@ def chat(
                 'content': 'The answer is invalid: ' + '; '.join(problems) + '. Reply again with JSON that fixes it.',
             },
         ]
-    raise LlmError('llm_invalid_output')
+    raise LlmError('llm_invalid_output', problems)

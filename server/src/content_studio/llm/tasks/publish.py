@@ -58,12 +58,37 @@ def wants_chapters(platform: str, segments: list[dict], duration: float) -> bool
     return bool(PLATFORMS[platform]['chapters']) and duration >= MIN_CHAPTERS * CHAPTER_GAP and len(starts) >= 3
 
 
+CHAPTERS_RULE = (
+    'Incluye capítulos con `at` en minutos y segundos (m:ss, como en la transcripción): '
+    'el primero en 0:00, al menos 3, separados por 10 s o más.'
+)
+
+
+def fit(text: str, limit: int) -> str:
+    """El texto dentro del límite, cortado en la última oración o línea que cabe (o en el límite si no hay ninguna)."""
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    end = max(cut.rfind('. '), cut.rfind('.\n'), cut.rfind('\n'))
+    return cut[: end + 1].rstrip() if end > 0 else cut
+
+
+def seconds(at: str) -> float:
+    """`m:ss` a segundos: el modelo escribe los tiempos como la transcripción (`0.51` por 0:51 era su error).
+
+    >>> seconds('1:39')
+    99.0
+    """
+    minutes, rest = at.split(':')
+    return float(int(minutes) * 60 + int(rest))
+
+
 def snap(chapters: list[dict], segments: list[dict]) -> list[dict]:
-    """Cada `t` al inicio de segmento más cercano (el anterior si empata), el primero en 0 y sin repetidos."""
+    """Cada `at` al inicio de segmento más cercano (el anterior si empata), el primero en 0 y sin repetidos."""
     starts = sorted({float(segment['start']) for segment in segments})
     snapped: list[dict] = []
-    for chapter in sorted(chapters, key=lambda item: item['t']):
-        t = min(starts, key=lambda start: (abs(start - chapter['t']), start))
+    for chapter in sorted(chapters, key=lambda item: seconds(item['at'])):
+        t = min(starts, key=lambda start: (abs(start - seconds(chapter['at'])), start))
         t = 0.0 if not snapped else t
         if not snapped or t > snapped[-1]['t']:
             snapped.append({'t': t, 'title': chapter['title'].strip()})
@@ -79,15 +104,18 @@ def _schema(platform: str, chapters: bool) -> dict:
             'minItems': 3,
             'maxItems': 3,
         },
-        'description': {'type': 'string', 'minLength': 1, 'maxLength': limits['description']},
+        'description': {'type': 'string', 'minLength': 1},  # el largo lo ajusta fit(), sin hacer fallar el trabajo
         'hashtags': {'type': 'array', 'items': {'type': 'string'}, 'maxItems': limits['hashtags']},
     }
     if chapters:
         chapter = {
             'type': 'object',
-            'properties': {'t': {'type': 'number'}, 'title': {'type': 'string', 'maxLength': 100}},
+            'properties': {
+                'at': {'type': 'string', 'pattern': '^[0-9]+:[0-5][0-9]$'},
+                'title': {'type': 'string', 'maxLength': 100},
+            },
         }
-        properties['chapters'] = {'type': 'array', 'items': {**chapter, 'required': ['t', 'title']}}
+        properties['chapters'] = {'type': 'array', 'items': {**chapter, 'required': ['at', 'title']}}
     return {'type': 'object', 'properties': properties, 'required': ['titles', 'description', 'hashtags']}
 
 
@@ -134,7 +162,7 @@ def run(params: dict, ask: Ask) -> dict:
             title=limits['title'],
             description=limits['description'],
             hashtags=limits['hashtags'],
-            chapters='Incluye capítulos: el primero en 0:00, al menos 3, separados por 10 s o más.' if chapters else '',
+            chapters=CHAPTERS_RULE if chapters else '',
             transcript=_transcript(segments),
         )
         answer = ask(
@@ -143,6 +171,7 @@ def run(params: dict, ask: Ask) -> dict:
             check=checker(platform, segments, duration),
         )
         answer.pop('chapters', None) if not chapters else answer.update(chapters=snap(answer['chapters'], segments))
+        answer['description'] = fit(answer['description'], limits['description'])
         result[platform] = answer
     return {'platforms': result}
 

@@ -7,6 +7,7 @@ from contextlib import closing
 from types import SimpleNamespace
 
 from content_studio.db import connection, jobs, settings, subtitle_projects
+from content_studio.llm import models
 from content_studio.subtitles.document import load, new_document, save
 
 
@@ -38,7 +39,7 @@ def test_status_reports_the_choice_and_nothing_loaded(api, monkeypatch):
 
     assert body['enabled'] is False
     assert body['runtime_installed'] is False
-    assert body['selected'] == 'gemma-4-e4b'
+    assert body['selected'] == models.RECOMMENDED
     assert {model['model'] for model in body['models']} == {'gemma-4-e4b', 'qwen3.5-9b'}
     assert (body['loaded'], body['release_in']) == (None, None)
 

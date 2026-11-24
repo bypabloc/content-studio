@@ -22,7 +22,9 @@ def add_subcommand(sub: argparse._SubParsersAction, db_flag: argparse.ArgumentPa
     parser = sub.add_parser('llm', help='local assistant (llama.cpp): suggestions as JSON, never applied')
     cmds = parser.add_subparsers(dest='llm_action', required=True, metavar='action')
     model = argparse.ArgumentParser(add_help=False)
-    model.add_argument('--model', choices=sorted(models.MODELS), help='LLM model; default: the chosen one or the ★')
+    model.add_argument(
+        '--model', choices=sorted(models.MODELS), help='LLM model; default: the chosen one or the recommended one'
+    )
     review = cmds.add_parser('script-review', parents=[db_flag, model], help='review a narration script (runs here)')
     source = review.add_mutually_exclusive_group(required=True)
     source.add_argument('--text', help='script text')

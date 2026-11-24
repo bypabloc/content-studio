@@ -31,11 +31,12 @@ def test_an_llm_error_exits_with_its_code(tmp_path, monkeypatch, capsys):
     (tmp_path / 'params.json').write_text(json.dumps({'description': 'piano'}), encoding='utf-8')
 
     def fail(*args, **kwargs):
-        raise LlmError('llm_invalid_output')
+        raise LlmError('llm_invalid_output', ['$.titles: longer than 100'])
 
     monkeypatch.setattr(task_main.client, 'chat', fail)
 
     code = task_main.main(['music_caption', str(tmp_path), '--url', 'http://llm', '--model', 'gemma-4-e4b'])
 
     assert code == task_main.EXIT_CODES['llm_invalid_output']
-    assert 'llm_invalid_output' in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert 'llm_invalid_output' in err and '$.titles: longer than 100' in err

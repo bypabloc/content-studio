@@ -25,9 +25,10 @@ class LlmSpec(NamedTuple):
     extra: dict
 
 
-RECOMMENDED = 'gemma-4-e4b'
+RECOMMENDED = 'qwen3.5-9b'  # WARNING 021-recomendado: 98,7 % contra 89,3 % de Gemma sin thinking
 MODELS: dict[str, LlmSpec] = {
-    # Gemma 4: sin el token <|think|> en el sistema, el thinking queda apagado.
+    # Gemma 4 E4B piensa aunque el sistema no lleve <|think|> (~700 tokens por pedido, medido el 24/11/2026): se apaga
+    # con enable_thinking, como en Qwen.
     'gemma-4-e4b': LlmSpec(
         'unsloth/gemma-4-E4B-it-GGUF',
         'gemma-4-E4B-it-Q4_K_M.gguf',
@@ -35,7 +36,7 @@ MODELS: dict[str, LlmSpec] = {
         6.0,
         8192,
         {'temperature': 1.0, 'top_p': 0.95, 'top_k': 64},
-        {},
+        {'chat_template_kwargs': {'enable_thinking': False}},
     ),
     'qwen3.5-9b': LlmSpec(
         'unsloth/Qwen3.5-9B-GGUF',

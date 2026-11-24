@@ -68,6 +68,10 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [017-app-check-y-flujo-real](017-app-check-y-flujo-real.md) | Tres corridas compilaron, pero app-check no obtuvo CDP; faltan grabación física, arrastre desde Windows, latencia y capturas | Cuando WebView2 responda a CDP; no bloquea el merge | Agente |
 | [017-pytest-temp](017-pytest-temp.md) | Dos temporales de pytest en la raíz del worktree; Synapse bloquea borrarlos sin aprobación manual | Tras aprobación puntual de Synapse, antes de cerrar el worktree | Usuario |
 | [021-vision-miniaturas](021-vision-miniaturas.md) | Usar la visión de Gemma 4 para miniaturas o cuadros (fuera de alcance de la 021) | Si el usuario lo pide | Usuario |
+| [021-escucha-y-revision](021-escucha-y-revision.md) | Escuchar la narración revisada con el asistente y puntuar sus traducciones | Antes de publicar el lote | Usuario |
+| [021-glosario-sobreaplicado](021-glosario-sobreaplicado.md) | «Corregir transcripción» inserta términos del glosario donde no hay error | Con transcripciones reales | Agente y usuario |
+| [021-cli-salida-cp1252](021-cli-salida-cp1252.md) | El JSON de `studio` sale en cp1252 cuando la salida va a un pipe | Antes de publicar, o en la 022 | Agente |
+| [021-estilo-none-en-txt](021-estilo-none-en-txt.md) | `narration tts --file x.txt` sin `--style` falla con «No existe el estilo None» | Antes de publicar | Agente |
 | [021-capitulos-al-reproductor](021-capitulos-al-reproductor.md) | Los capítulos de Publicar se copian, pero no saltan al reproductor del detalle | Con la próxima spec de la Biblioteca; no bloquea el merge | Agente |
 | [020-tipos-de-trabajo-en-cola](020-tipos-de-trabajo-en-cola.md) | La cola solo traduce `music` y `narration`; los demás tipos se ven crudos (`library.scan`) | En la 023 o una spec de la cola; no bloquea el merge | Agente |
 | [024-aprobar-hooks-codex](024-aprobar-hooks-codex.md) | Aprobar en Codex (`/hooks`) `shell_guard.py` y `computer_use_guard.py`, y probar que bloquea `sky.list_apps()` | Después del merge de 024 y tras cada cambio de un hook | Usuario |

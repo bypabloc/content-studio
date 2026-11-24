@@ -50,7 +50,7 @@ def run(params: dict, ask: Ask) -> dict:
         answer = ask(request, cues.SCHEMA, check=cues.ids_check([cue['id'] for cue in batch]))
         for item in answer['cues']:
             cue, text = by_id[item['id']], ' '.join(item['text'].split())
-            if text == cue['text']:
+            if text == ' '.join(cue['text'].split()):  # solo cambian espacios: no es una corrección
                 continue
             review = abs(len(text.split()) - len(cue['text'].split())) > MAX_WORD_CHANGE
             words = None if review else _timed(text, cue['words'])

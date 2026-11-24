@@ -23,7 +23,7 @@ Un asistente con un LLM local que mejora la salida de cuatro funciones del estud
 3. **Música**: pasar una descripción en español al caption en inglés de ACE-Step, con tonalidad, BPM y compás.
 4. **Publicar**: títulos, descripción, hashtags y capítulos por plataforma a partir de la transcripción.
 
-Los modelos (Gemma 4 E4B ★ y Qwen3.5-9B) y llama.cpp se descargan bajo demanda desde Motores. El ★ se fija con una prueba propia en español.
+Los modelos (Qwen3.5-9B y Gemma 4 E4B) y llama.cpp se descargan bajo demanda desde Motores. El ★ se fijó con una prueba propia en español: quedó en Qwen3.5-9B (WARNING `021-recomendado`).
 
 ## Índice
 
@@ -38,17 +38,18 @@ Los modelos (Gemma 4 E4B ★ y Qwen3.5-9B) y llama.cpp se descargan bajo demanda
 | 1 | Runtime: receta de llama.cpp, catálogo de modelos y `llama-server` bajo demanda con el turno de la GPU | IMP |
 | 2 | Tareas: prompts, JSON schema y validación posterior | IMP |
 | 3 | Client: Revisar guion, Traducir y corregir subtítulos, Describir música y Publicar | IMP |
-| 4 | Prueba de modelos en español y ★ con datos propios | PEN |
+| 4 | Prueba de modelos en español y ★ con datos propios | IMP |
 
 ## Decisiones clave
 
 * D-1: `llama-server` (llama.cpp CUDA de Windows) como proceso hijo, con API compatible con OpenAI y JSON schema. Arranca con la primera petición, toma el turno de la GPU y se apaga a los 2 minutos sin uso.
 * D-2: cada tarea es un prompt (en `.md`), un JSON schema y una validación en Python que rechaza o reintenta lo que no cumple. La regla no se le confía al modelo.
 * D-3: las peticiones del LLM son trabajos `llm.*` de la cola (recurso `gpu`), y el worker mantiene el servidor caliente entre trabajos `llm.*` seguidos.
-* D-4: thinking apagado en los dos modelos, con el muestreo recomendado por cada card.
+* D-4: thinking apagado en los dos modelos (`enable_thinking: false`; Gemma 4 E4B también lo necesita, WARNING `021-recomendado`), con el muestreo recomendado por cada card.
 * D-5: `devtools llm-eval` corre unos 50 segmentos reales con los modelos instalados y deja un informe. El ★ se actualiza con ese resultado.
 
 ## WARNING y PENDING
 
 * WARNING: `021-llama-cpp-version.md` (build CUDA fijado y su sha256) y `021-recomendado.md` (resultado de la prueba y el ★ elegido).
-* PENDING: `021-vision-miniaturas.md` (usar la visión de Gemma 4 para elegir miniaturas, si el usuario lo pide).
+* PENDING: `021-vision-miniaturas.md` (usar la visión de Gemma 4 para elegir miniaturas, si el usuario lo pide), `021-escucha-y-revision.md`, `021-glosario-sobreaplicado.md`, `021-cli-salida-cp1252.md` y `021-estilo-none-en-txt.md`.
+* WARNING: `021-recomendado.md` (★ Qwen3.5 9B con cifras).

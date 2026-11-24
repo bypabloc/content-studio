@@ -79,7 +79,16 @@ export function AssistantTools({ projectId, onBeforeRun, onApplied }: Props): Re
           title={t('llm.button.translate')}
           selectable={false}
           busy={apply.isPending}
-          rows={translate.result.cues.map((cue) => ({ id: cue.id, content: <UIText variant="body">{cue.text}</UIText>, flag: cue.flag }))}
+          rows={translate.result.cues.map((cue) => ({
+            id: cue.id,
+            content: (
+              <UIStack gap="xs">
+                <UIText variant="caption">{cue.original}</UIText>
+                <UIText variant="body">{cue.text}</UIText>
+              </UIStack>
+            ),
+            flag: cue.flag,
+          }))}
           onApply={applyFor(translate)}
         />
       ) : null}

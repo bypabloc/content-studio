@@ -104,7 +104,11 @@ def _document(cues: Sequence[dict], *, source_path: str, kind: str, language: st
 
 
 def from_words(words: Sequence[dict], *, source_path: str, kind: str, language: str) -> dict[str, Any]:
-    """Documento con los cues de `segment` a partir de palabras `{word, start, end}`."""
+    """Documento con los cues de `segment` a partir de palabras `{word, start, end}`.
+
+    faster-whisper pone un espacio delante de cada palabra (« hola»): se quita para que el cue no tenga dobles espacios.
+    """
+    words = [{**word, 'word': word['word'].strip()} for word in words]
     cues = [
         {
             'start': cue['start'],

@@ -49,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         result = TASKS[args.task].run(params, lambda messages, rule, check=None: ask(messages, rule, check=check))
     except client.LlmError as error:
-        print(error.code, file=sys.stderr)
+        print(error.code, *error.problems, sep='\n', file=sys.stderr)  # el log del trabajo dice qué falló
         return EXIT_CODES[error.code]
     (args.out_dir / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     finish = getattr(TASKS[args.task], 'finish', None)

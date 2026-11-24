@@ -25,4 +25,9 @@ describe('UITextDiff (spec 021, D-5)', () => {
     expect(container.querySelector('ins')?.textContent).toBe('veinticuatro');
     expect(container.textContent).toContain('Tienes');
   });
+
+  it('deja un espacio después de un tramo cambiado, sin pegarlo a la palabra siguiente', () => {
+    const { container } = render(<UITextDiff before="Son 3 pasos; nada más." after="Son 3 pasos. Nada más." />);
+    expect(container.textContent).toContain('Nada más.');
+  });
 });

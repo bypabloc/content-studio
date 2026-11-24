@@ -112,3 +112,21 @@ export function toggleKeyword(doc: DocEdit, index: number, wordIndex: number, ke
   });
   return { ...doc, cues };
 }
+
+interface TrackCue {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
+/**
+ * El documento con los cues de una pista traducida (spec 021), para la vista previa: cada palabra reparte el tiempo
+ * del cue, porque la traducción no tiene tiempos por palabra. Sin esa pista, el documento queda igual.
+ */
+export function trackDoc(doc: DocEdit, language: string): DocEdit {
+  const track = doc.tracks[language] as TrackCue[] | undefined;
+  if (!track) return doc;
+  const cues = track.map((cue) => ({ ...cue, words: spread(cue.start, cue.end, cue.text.split(' ').filter(Boolean)) }));
+  return { ...doc, language, cues };
+}

@@ -78,6 +78,28 @@ def test_export_writes_the_format_to_the_outputs_folder_and_returns_the_path(api
     assert unknown.status_code == 422
 
 
+def test_export_a_translated_track_names_the_file_with_its_language(api, monkeypatch):
+    """Con `language`, se exporta la pista traducida como `<id>-<nombre>.<idioma>.srt`; sin esa pista, 404."""
+    project_id = _project(api)
+    edited = api.client.get(f'/subtitles/{project_id}', headers=api.headers).json()
+    edited['tracks'] = {'pt': [{'id': 1, 'start': 0.0, 'end': 0.9, 'text': 'olá mundo'}]}
+    api.client.put(f'/subtitles/{project_id}', json=edited, headers=api.headers)
+    out = api.tmp / 'out'
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: out)
+
+    body = {'format': 'srt', 'language': 'pt'}
+    response = api.client.post(f'/subtitles/{project_id}/export', json=body, headers=api.headers)
+
+    assert response.status_code == 200
+    target = Path(response.json()['path'])
+    assert target == out / 'subtitles' / f'{project_id}-clean.pt.srt'
+    assert 'olá mundo' in target.read_text(encoding='utf-8')
+    body = {'format': 'srt', 'language': 'fr'}
+    missing = api.client.post(f'/subtitles/{project_id}/export', json=body, headers=api.headers)
+    assert missing.status_code == 404
+    assert missing.json()['code'] == 'unknown_track'
+
+
 def test_put_rejects_a_body_without_cues(api):
     """Un documento sin lista de cues no se guarda: es un error de validación."""
     project_id = _project(api)
@@ -166,6 +188,27 @@ def test_ac6_creates_an_editor_subtitle_project_from_a_done_transcription(api, m
     assert created.json()['source_path'] == 'editor-mix.wav'
     document = api.client.get(f'/subtitles/{created.json()["id"]}', headers=api.headers).json()
     assert [cue['text'] for cue in document['cues']] == ['hola mundo']
+
+
+def test_a_project_from_a_transcript_leaves_the_transcript_for_publish(api, monkeypatch):
+    """Spec 021: el proyecto creado desde un `transcribe` deja su JSON en la caché, así Publicar encuentra el texto."""
+    source = api.tmp / 'charla.mp4'
+    source.write_bytes(b'video')
+    body = {'kind': 'transcribe', 'params': {'input': str(source), 'model': 'large-v3-turbo', 'language': 'es'}}
+    job_id = api.client.post('/jobs', json=body, headers=api.headers).json()['id']
+    conn = connect(api.tmp / 'base.db')
+    output_dir = api.tmp / 'out' / 'transcribe-job'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    words = {'language': 'es', 'segments': [{'words': [{'word': ' hola', 'start': 0.0, 'end': 0.4}]}]}
+    (output_dir / 'words.json').write_text(json.dumps(words), encoding='utf-8')
+    jobs_store.update(conn, job_id, status='done', output_dir=str(output_dir))
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: api.tmp / 'out')
+
+    created = api.client.post('/subtitles/from-transcript', json={'job_id': job_id}, headers=api.headers)
+
+    assert created.status_code == 201
+    row = conn.execute('SELECT json_path FROM transcripts WHERE source_path = ?', (str(source),)).fetchone()
+    assert row is not None and row[0] == str(output_dir / 'words.json')
 
 
 def test_post_with_an_unknown_origin_is_refused(api):

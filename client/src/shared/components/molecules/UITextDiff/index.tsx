@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import { UIDiffText } from '../../atoms/UIDiffText';
 import { UIText } from '../../atoms/UIText';
 
@@ -49,7 +51,13 @@ export function UITextDiff({ before, after }: { before: string; after: string })
   return (
     <UIText variant="body">
       {wordDiff(before, after).map((part, index) =>
-        'same' in part ? `${part.same} ` : <UIDiffText key={index} label="" expected={part.removed} said={part.added} />,
+        'same' in part ? (
+          `${part.same} `
+        ) : (
+          <Fragment key={index}>
+            <UIDiffText label="" expected={part.removed} said={part.added} />{' '}
+          </Fragment>
+        ),
       )}
     </UIText>
   );

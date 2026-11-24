@@ -1,21 +1,21 @@
 {
   "enabled": true,
   "runtime_installed": true,
-  "selected": "gemma-4-e4b",
+  "selected": "qwen3.5-9b",
   "models": [
     {
       "model": "gemma-4-e4b",
       "size_gb": 5,
       "vram_gb": 6,
-      "recommended": true,
+      "recommended": false,
       "installed": true
     },
     {
       "model": "qwen3.5-9b",
       "size_gb": 5.7,
       "vram_gb": 7,
-      "recommended": false,
-      "installed": false
+      "recommended": true,
+      "installed": true
     }
   ],
   "loaded": null,

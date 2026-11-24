@@ -42,10 +42,10 @@ def _answer(platform):
     }
     if platform == 'youtube':
         answer['chapters'] = [
-            {'t': 5, 'title': 'Inicio'},
-            {'t': 70, 'title': 'Primera idea'},
-            {'t': 131.5, 'title': 'Segunda idea'},
-            {'t': 205, 'title': 'Cierre'},
+            {'at': '0:05', 'title': 'Inicio'},
+            {'at': '1:10', 'title': 'Primera idea'},
+            {'at': '2:11', 'title': 'Segunda idea'},
+            {'at': '3:25', 'title': 'Cierre'},
         ]
     return answer
 
@@ -89,7 +89,7 @@ def test_ac8_the_check_rejects_titles_over_the_limit_and_bad_hashtags():
     assert check(_answer('youtube')) == []
     assert check({**_answer('youtube'), 'titles': ['x' * 101, 'a', 'b']})
     assert check({**_answer('youtube'), 'hashtags': ['#dos palabras']})
-    assert check({**_answer('youtube'), 'chapters': [{'t': 0, 'title': 'a'}, {'t': 100, 'title': 'b'}]})
+    assert check({**_answer('youtube'), 'chapters': [{'at': '0:00', 'title': 'a'}, {'at': '1:40', 'title': 'b'}]})
 
 
 def test_ac8_finish_writes_publish_json_and_the_base_keeps_only_the_path(tmp_path, monkeypatch):
@@ -105,6 +105,24 @@ def test_ac8_finish_writes_publish_json_and_the_base_keeps_only_the_path(tmp_pat
     with closing(connection.connect(db)) as conn:
         row = conn.execute('SELECT publish_path FROM library_items WHERE id = 1').fetchone()
     assert row[0] == str(out / 'publish.json')
+
+
+def test_a_long_description_is_cut_at_the_last_sentence_that_fits():
+    """Reels pide 2200: el modelo se pasaba en los dos intentos y el trabajo fallaba; ahora se corta en una oración."""
+    text = 'Primera idea. Segunda idea más larga. Tercera.'
+
+    assert publish.fit(text, 100) == text
+    assert publish.fit(text, 30) == 'Primera idea.'
+    assert publish.fit('sinpuntosnada' * 5, 20) == ('sinpuntosnada' * 5)[:20]
+    assert 'maxLength' not in publish._schema('reels', False)['properties']['description']
+
+
+def test_chapter_times_come_as_minutes_and_seconds():
+    """El modelo escribía 0.51 por 0:51: los tiempos se piden en `m:ss` y se pasan a segundos."""
+    chapters = [{'at': '0:00', 'title': 'a'}, {'at': '0:51', 'title': 'b'}, {'at': '1:39', 'title': 'c'}]
+
+    assert [chapter['t'] for chapter in publish.snap(chapters, SEGMENTS)] == [0.0, 60.0, 100.0]
+    assert publish._schema('youtube', True)['properties']['chapters']['items']['properties']['at']['pattern']
 
 
 @pytest.mark.parametrize(('duration', 'expected'), [(300, True), (25, False)])

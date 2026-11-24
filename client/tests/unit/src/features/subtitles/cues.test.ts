@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deleteCue, mergeCues, setCueText, splitCue, toggleKeyword, type DocEdit } from '@/features/subtitles/cues';
+import { deleteCue, mergeCues, setCueText, splitCue, toggleKeyword, type DocEdit, trackDoc } from '@/features/subtitles/cues';
 
 const word = (start: number, end: number, text: string) => ({ start, end, text, keyword: null });
 
@@ -59,5 +59,19 @@ describe('cues', () => {
 
     expect(flagged.cues[0].words[1].keyword).toEqual({ color: '#FF5555' });
     expect(toggleKeyword(flagged, 0, 1, { color: '#FF5555' }).cues[0].words[1].keyword).toBeNull();
+  });
+});
+
+describe('trackDoc', () => {
+  it('uses the cues of a translated track and spreads each cue time over its words', () => {
+    const base = { version: 1, source: { path: 'a.mp4', kind: 'file' }, language: 'es', style: {}, cues: [] };
+    const doc = { ...base, tracks: { pt: [{ id: 1, start: 0, end: 2, text: 'olá  mundo' }] } };
+
+    const shown = trackDoc(doc, 'pt');
+
+    expect(shown.language).toBe('pt');
+    expect(shown.cues[0].words.map((word) => word.text)).toEqual(['olá', 'mundo']);
+    expect(shown.cues[0].words.at(-1)?.end).toBe(2);
+    expect(trackDoc(doc, 'fr')).toBe(doc);
   });
 });

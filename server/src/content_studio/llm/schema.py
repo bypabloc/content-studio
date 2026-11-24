@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -38,6 +39,8 @@ def validate(value: Any, rule: dict, path: str = '$') -> list[str]:
             errors.append(f'{path}: longer than {rule["maxLength"]}')
         if len(value) < rule.get('minLength', 0):
             errors.append(f'{path}: shorter than {rule["minLength"]}')
+        if 'pattern' in rule and not re.search(rule['pattern'], value):
+            errors.append(f'{path}: does not match {rule["pattern"]}')
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         if 'maximum' in rule and value > rule['maximum']:
             errors.append(f'{path}: above {rule["maximum"]}')

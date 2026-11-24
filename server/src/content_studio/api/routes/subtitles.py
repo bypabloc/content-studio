@@ -24,6 +24,7 @@ from content_studio.db import subtitle_projects
 from content_studio.jobs import queue
 from content_studio.subtitles import export, fonts, sources
 from content_studio.subtitles.document import load, save
+from content_studio.transcription import cache
 
 router = APIRouter()
 
@@ -114,14 +115,20 @@ def create_from_transcript(
     folder.mkdir(parents=True, exist_ok=True)
     doc_path = folder / 'subtitles.json'
     save(document, doc_path)
+    if Path(source).is_file():  # Publicar (spec 021) busca la transcripción del archivo en la caché de la 013
+        stat = Path(source).stat()
+        params = job['params']
+        key = (source, stat.st_mtime, stat.st_size, params['model'], params.get('language', 'auto'))
+        cache.store(conn, *key, str(words_file))
     project_id = subtitle_projects.insert(conn, name, source, str(doc_path))
     return subtitle_projects.get(conn, project_id) or {}
 
 
 class ExportIn(BaseModel):
-    """El formato de la exportación: `srt`, `vtt` o `ass`."""
+    """El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida."""
 
     format: str
+    language: str | None = None
 
 
 @router.post('/subtitles/{project_id}/export')
@@ -132,7 +139,12 @@ def export_project(
     if body.format not in export.FORMATS:
         raise ApiError(422, 'unknown_format', format=body.format)
     document = load(_doc_path(conn, project_id))
-    target = paths.outputs_dir() / 'subtitles' / f'{project_id}-{Path(document["source"]["path"]).stem}.{body.format}'
+    suffix = body.format
+    if body.language:
+        if body.language not in document.get('tracks', {}):
+            raise ApiError(404, 'unknown_track', language=body.language)
+        document, suffix = export.with_track(document, body.language), f'{body.language}.{body.format}'
+    target = paths.outputs_dir() / 'subtitles' / f'{project_id}-{Path(document["source"]["path"]).stem}.{suffix}'
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(export.render(document, body.format), encoding='utf-8')
     return {'path': str(target)}

@@ -82,3 +82,16 @@ def test_validate_checks_the_glossary():
     """El glosario es una lista corta de textos."""
     assert subtitles_correct.validate({'doc': 'x.json', 'glossary': ['Klinikae']}) == []
     assert subtitles_correct.validate({'doc': 'x.json', 'glossary': 'Klinikae'})[0]['code'] == 'invalid_glossary'
+
+
+def test_a_cue_that_only_changes_its_spaces_is_not_proposed(tmp_path):
+    """Un documento viejo con dobles espacios (« hola  mundo») no se propone entero como corrección."""
+    path = tmp_path / 'subtitles.json'
+    spaced = {**CUE_2, 'text': ' todo  bien'}
+    save(new_document(source_path='demo.mp4', kind='cleaner', language='es', cues=[spaced]), path)
+
+    result = subtitles_correct.run(
+        {'doc': str(path)}, lambda messages, rule, check=None: {'cues': [{'id': 2, 'text': 'todo bien'}]}
+    )
+
+    assert result == {'cues': []}
