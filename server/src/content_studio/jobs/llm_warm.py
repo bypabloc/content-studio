@@ -46,7 +46,7 @@ class LlmWarm:
                 self.stop()
             return job['params']
         model = job['params'].get('model') or models.selected(conn)
-        return {**job['params'], 'llm_url': self.runtime.ensure_running(model)}
+        return {**job['params'], 'llm_url': self.runtime.ensure_running(model), 'llm_model': model}
 
     def hold(
         self, conn: sqlite3.Connection, run_next: Callable[[dict], None], stop: threading.Event, poll: float

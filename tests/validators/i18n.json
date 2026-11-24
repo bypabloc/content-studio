@@ -4,6 +4,7 @@
     "engines.size.",
     "error.http.",
     "error.checksum_mismatch",
+    "error.llm_",
     "error.disk_full",
     "lint.rule_",
     "label.narration.style.",

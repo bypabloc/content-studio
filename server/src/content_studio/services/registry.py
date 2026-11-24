@@ -9,6 +9,7 @@ from content_studio.services import (
     engine_uninstall,
     engine_verify,
     library_scan,
+    llm_task,
     media_concat,
     media_convert,
     media_normalize,
@@ -58,4 +59,5 @@ SERVICES = {
     engine_uninstall.KIND: engine_uninstall,
     engine_verify.KIND: engine_verify,
     library_scan.KIND: library_scan,
+    **{f'llm.{task}': llm_task.service(task) for task in llm_task.TASKS},
 }
