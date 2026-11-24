@@ -196,5 +196,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [019-lut-paridad](019-lut-paridad.md) | Las muestras `.cube` usan rojo como eje más rápido, igual que FFmpeg y la textura WebGL | antes de `main` |
 | [019-pista-subtitulos](019-pista-subtitulos.md) | La pista guarda el ID decimal del proyecto 014; renderiza ASS o crea una transcripción por la cola | antes de `main` |
 | [019-texto-rasterizado](019-texto-rasterizado.md) | Un PNG con alfa se comparte entre el visor y FFmpeg; hash por texto y presets de título | antes de `main` |
+| [020-indice-inicial](020-indice-inicial.md) | Los trabajos `done` anteriores a la biblioteca se indexan una vez al abrir la base, no en el SQL de la migración | antes de `main` |
+| [020-busqueda-en-disco](020-busqueda-en-disco.md) | La búsqueda en el contenido lee de disco los guiones y transcripciones, con un límite de 2 s; un índice FTS queda para decidirlo con el usuario | antes de `main` |
+| [020-send2trash](020-send2trash.md) | Dependencia nueva `send2trash` (BSD) para mandar a la papelera de Windows desde la Biblioteca | antes de `main` |
+| [020-editar-y-repetir](020-editar-y-repetir.md) | «Editar y repetir» precarga lo que cada sección puede tomar de `params`; Voces y Catálogo pasan a carga diferida por el presupuesto | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -11,14 +11,29 @@ def _tables(conn) -> set[str]:
     return {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
 
 
-def test_ac1_migrate_twice_sets_version_6_and_creates_tables(tmp_path):
-    """La versión 6 suma `mix_projects` (spec 016, D-3); la 5, `subtitle_projects` (014); la 4, la caché (013)."""
+def test_ac1_migrate_twice_sets_version_7_and_creates_tables(tmp_path):
+    """La 7 suma la biblioteca (020); la 6, `mix_projects` (016); la 5, `subtitle_projects` (014); la 4, la caché."""
     with closing(connection.connect(tmp_path / 'base.db')) as conn:
         schema.migrate(conn)
         schema.migrate(conn)
 
-        assert conn.execute('PRAGMA user_version').fetchone()[0] == 6
+        assert conn.execute('PRAGMA user_version').fetchone()[0] == 7
         assert {'jobs', 'settings', 'transcripts', 'subtitle_projects', 'mix_projects'} <= _tables(conn)
+        library = {'library_items', 'library_folders', 'tags', 'item_tags', 'projects', 'project_items'}
+        assert library <= _tables(conn)
+
+
+def test_library_items_have_indexes_for_path_kind_and_mtime(tmp_path):
+    """AC-9 (spec 020): la búsqueda por nombre, tipo y fecha usa índices SQL."""
+    with closing(connection.connect(tmp_path / 'base.db')) as conn:
+        schema.migrate(conn)
+        indexed = {
+            row[2]
+            for name in ('library_items_kind', 'library_items_mtime')
+            for row in conn.execute(f'PRAGMA index_info({name})')
+        }
+
+    assert indexed == {'kind', 'mtime'}
 
 
 def test_no_blob_columns(tmp_path):

@@ -232,4 +232,16 @@ describe('ConvertPage', () => {
     expect(await screen.findByText(t('convert.social.preset'))).toBeTruthy();
     expect(await screen.findByRole('combobox', { name: t('convert.reframe.label') })).toBeTruthy();
   });
+
+  it('spec 020: «Editar y repetir» (?from_job=) precarga el archivo de origen', async () => {
+    window.location.hash = '#/convert?from_job=3';
+    const fallback = api.get.getMockImplementation();
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/3' ? { id: 3, kind: 'media.convert', params: { input: '/media/e.wav', target: 'mp3' } } : fallback?.(path),
+    );
+    renderPage();
+
+    expect(await screen.findByText(/e\.wav/)).toBeTruthy();
+  });
+
 });

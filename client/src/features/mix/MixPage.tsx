@@ -10,6 +10,7 @@ import { UISelect } from '@/shared/components/molecules/UISelect';
 import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 import { isVideoPath } from '@/shared/media/formats';
+import { useFromJob } from '@/shared/hooks/useFromJob';
 import { hashParams, openSection } from '@/shared/navigation/hash';
 
 import { MixEditor } from './MixEditor';
@@ -37,6 +38,13 @@ export function MixPage(): React.JSX.Element {
   });
   const [videoMode, setVideoMode] = useState<'replace' | 'under'>('replace');
   const [projectId, setProjectId] = useState<number | null>(null);
+  // «Editar y repetir» (spec 020): un render de mezcla abre su proyecto en el editor, una vez.
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    if (typeof source.params.mix_id === 'number') setProjectId(source.params.mix_id);
+  }
   const ready = picked.voice !== null && picked.music !== null;
 
   const create = useMutation({

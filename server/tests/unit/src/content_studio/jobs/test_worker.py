@@ -250,6 +250,22 @@ def test_a_done_subtitles_job_registers_its_project(env):
     assert project['doc_path'] == str(Path(jobs.get(env.conn, job)['output_dir']) / 'subtitles.json')
 
 
+def test_a_done_job_registers_its_outputs_in_the_library(env):
+    """Spec 020, AC-1: al terminar, el worker deja las salidas del trabajo en `library_items`."""
+    script = "import pathlib, sys; pathlib.Path(sys.argv[1], 'cut.srt').write_text('', encoding='utf-8')"
+    env.services['media.trim'] = SimpleNamespace(
+        RESOURCE='cpu',
+        validate=lambda params: [],
+        build_command=lambda params, out_dir: [sys.executable, '-c', script, str(out_dir)],
+    )
+    job = queue.enqueue(env.conn, 'media.trim', {'input': 'a.wav'}, env.services)
+
+    assert env.worker.run_now(job) == 'done'
+
+    [row] = env.conn.execute('SELECT kind, origin, job_id FROM library_items').fetchall()
+    assert tuple(row) == ('trim', 'job', job)
+
+
 def test_a_cancel_written_only_to_the_database_stops_a_running_process(env):
     job = _enqueue(env, 'long', sleep=60)
     env.worker.start()

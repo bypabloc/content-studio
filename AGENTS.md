@@ -27,6 +27,7 @@ uv run studio narration voices --build all   # voces libres aprobadas en los 12 
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
+uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
 uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)
 ```
 
@@ -53,6 +54,7 @@ server/src/content_studio/
 ├── music/                    parser (liviano), music_main (main), styles, evaluation
     └── engines/              MusicSpec + MusicEngine y registry.py con MODELS
 ├── engines/                  recetas versionadas, instalación y mantenimiento de venvs/modelos
+├── library/                  biblioteca: índice, carpetas vigiladas, búsqueda, acciones y espacio
 ├── storage/                  reubicación segura de motores y salidas
 └── system/                   detección e instalación de FFmpeg/Git y detección de GPU
 ```

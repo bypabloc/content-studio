@@ -12,8 +12,10 @@ import { UIAlert } from '@/shared/components/molecules/UIAlert';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
 import { UIWhisperModelSelect } from '@/shared/components/molecules/UIWhisperModelSelect';
+import { useFromJob } from '@/shared/hooks/useFromJob';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
+import { hashParams } from '@/shared/navigation/hash';
 
 import { CleanReview } from './CleanReview';
 
@@ -66,10 +68,21 @@ export function CleanerPage(): React.JSX.Element {
   const queryClient = useQueryClient();
   const [model] = useSetting<string>('select.whisper.model', 'large-v3-turbo');
   const [language] = useSetting<string>('select.cleaner.language', 'es');
-  const [files, setFiles] = useState<string[]>([]);
+  // «Mandar a Limpiador» llega con `?path=`; «Editar y repetir», con `?from_job=` (spec 020).
+  const [files, setFiles] = useState<string[]>(() => hashParams().getAll('path').filter(Boolean));
   const [minGap, setMinGap] = useState(500);
   const [padding, setPadding] = useState(150);
   const [edges, setEdges] = useState(true);
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    const { input, min_gap: gap, padding: pad, edges: keepEdges } = source.params;
+    if (typeof input === 'string') setFiles([input]);
+    if (typeof gap === 'number') setMinGap(Math.round(gap * 1000));
+    if (typeof pad === 'number') setPadding(Math.round(pad * 1000));
+    if (typeof keepEdges === 'boolean') setEdges(keepEdges);
+  }
   const [review, setReview] = useState<number | null>(null);
   const analyses = useQuery({
     queryKey: ['jobs', 'clean.analyze'],

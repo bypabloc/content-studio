@@ -196,4 +196,25 @@ describe('CleanerPage (spec 013, D-6)', () => {
       expect.objectContaining({ params: expect.objectContaining({ min_gap: 0.8, padding: 0.2, edges: false }) }),
     );
   });
+
+  it('spec 020: llega con ?path= (Mandar a Limpiador) o con ?from_job= (Editar y repetir)', async () => {
+    window.location.hash = '#/cleaner?path=/media/d.wav';
+    const { unmount } = renderPage();
+    expect(await screen.findByText('d.wav')).toBeTruthy();
+    unmount();
+
+    window.location.hash = '#/cleaner?from_job=4';
+    const fallback = api.get.getMockImplementation();
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/4'
+        ? { id: 4, kind: 'clean.analyze', params: { input: '/media/c.mp4', min_gap: 0.8, padding: 0.2, edges: false } }
+        : fallback?.(path),
+    );
+    renderPage();
+
+    expect(await screen.findByText('c.mp4')).toBeTruthy();
+    expect(await screen.findByDisplayValue('800')).toBeTruthy();
+    window.location.hash = '';
+  });
+
 });

@@ -10,6 +10,7 @@ from content_studio.services import (
     engine_install,
     engine_uninstall,
     engine_verify,
+    library_scan,
     media_concat,
     media_convert,
     media_normalize,
@@ -61,6 +62,7 @@ def test_every_kind_exposes_validate_and_build_command():
         'mix.render': mix_render,
         'editor.render': editor_render,
         'editor.proxy': editor_proxy,
+        'library.scan': library_scan,
     }
     assert expected == SERVICES
     for service in SERVICES.values():

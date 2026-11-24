@@ -14,6 +14,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Recortar, unir y dividir | Recortes, uniones con fundido cruzado y divisiones de audio y video, por CLI y API | [edit.md](edit.md) |
 | Mezcla | Música bajo la voz con ducking, LUFS final y video opcional | [mix.md](mix.md) |
 | Editor | Edición no destructiva de audio con proyectos, pistas, marcadores, grabación y exportación | [editor.md](editor.md) |
+| Biblioteca | Salidas y carpetas vigiladas con búsqueda, etiquetas, proyectos, acciones y espacio | [library.md](library.md) |
 
 ## Plantilla
 

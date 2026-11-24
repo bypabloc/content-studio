@@ -164,4 +164,15 @@ describe('MixPage', () => {
     await waitFor(() => expect(api.post).toHaveBeenCalled());
     expect(screen.getByRole('button', { name: t('mix.create') })).toBeTruthy();
   });
+
+  it('spec 020: «Editar y repetir» de un render abre su proyecto de mezcla', async () => {
+    window.location.hash = '#/mix?from_job=9';
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/9' ? { id: 9, kind: 'mix.render', params: { mix_id: 7 } } : serverGet(path),
+    );
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: t('mix.back') })).toBeTruthy();
+  });
+
 });

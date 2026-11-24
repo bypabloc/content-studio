@@ -7,6 +7,7 @@ import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIRecommendedSelect } from '@/shared/components/molecules/UIRecommendedSelect';
+import { useFromJob } from '@/shared/hooks/useFromJob';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { label, t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
@@ -14,6 +15,7 @@ import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 
 import { DurationField } from './DurationField';
 import { FreeTextStyle, type FreeText, freeTextComplete } from './FreeTextStyle';
+import { musicDraft } from './fromJob';
 import { MusicCompare } from './MusicCompare';
 import { MusicOptions } from './MusicOptions';
 import { StyleBrowser } from './StyleBrowser';
@@ -91,6 +93,24 @@ export function MusicPage(): React.JSX.Element {
     },
   });
   const { mutate } = generate;
+
+  // «Editar y repetir» de la Biblioteca (`?from_job=`): los estilos, la duración y las opciones del trabajo, una vez.
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    const draft = musicDraft(source);
+    setSelected(draft.styles);
+    if (draft.free) {
+      setMode('free');
+      setFree(draft.free);
+    }
+    if (draft.duration !== null) setDuration(draft.duration);
+    if (draft.variants !== null) setVariants(draft.variants);
+    if (draft.noLm !== null) setNoLm(draft.noLm);
+    if (draft.evaluate !== null) setEvaluate(draft.evaluate);
+    if (draft.retries !== null) setRetries(draft.retries);
+  }
 
   // Con `?match=` (Mezcla), la duración es la de la voz más la cola: se fija una vez al llegar.
   const [appliedMatch, setAppliedMatch] = useState<number | null>(null);

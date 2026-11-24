@@ -26,6 +26,9 @@ from content_studio.api.routes import (
     fs,
     health,
     jobs,
+    library,
+    library_actions,
+    library_organize,
     media,
     mix,
     music,
@@ -41,6 +44,7 @@ from content_studio.api.routes import (
 )
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
+from content_studio.library import index as library_index
 from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
 from content_studio.subtitles import fonts
@@ -89,6 +93,7 @@ def create_app(
     `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
     with closing(connection.connect(db_path)) as conn:
         schema.migrate(conn)
+        library_index.backfill(conn)  # una sola vez: los trabajos anteriores a la biblioteca (spec 020, AC-1)
     app = FastAPI(title='content-studio', version='0.1.0')
     app.add_middleware(
         CORSMiddleware,
@@ -127,6 +132,9 @@ def create_app(
     app.include_router(clean.router, dependencies=header_only)
     app.include_router(subtitles.router, dependencies=header_only)
     app.include_router(mix.router, dependencies=header_only)
+    app.include_router(library.router, dependencies=header_only)
+    app.include_router(library_organize.router, dependencies=header_only)
+    app.include_router(library_actions.router, dependencies=header_only)  # después: /library/{id} no tapa las fijas
     app.include_router(editor.router, dependencies=header_only)
     app.include_router(fs.router, dependencies=header_only)
     app.include_router(music.router, dependencies=header_only)
@@ -140,4 +148,5 @@ def create_app(
     app.include_router(files.router, dependencies=query_ok)
     app.include_router(media.router, dependencies=query_ok)
     app.include_router(editor.preview_router, dependencies=query_ok)
+    app.include_router(library.media_router, dependencies=query_ok)
     return app

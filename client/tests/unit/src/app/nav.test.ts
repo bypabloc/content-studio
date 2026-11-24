@@ -14,6 +14,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['normalize', 'volume'],
       ['mix', 'mix'],
       ['editor', 'editor'],
+      ['library', 'library'],
       ['voices', 'voices'],
       ['catalog', 'layers'],
       ['engines', 'server'],

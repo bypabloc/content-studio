@@ -5,6 +5,7 @@ import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
+import { textParam, useFromJob } from '@/shared/hooks/useFromJob';
 import { useShortcut } from '@/shared/hooks/useShortcut';
 import { t } from '@/shared/i18n/t';
 import { NarrationOptions } from './NarrationOptions';
@@ -34,6 +35,13 @@ export function NarrationPage() {
   const queryClient = useQueryClient();
   const choice = useNarrationChoice();
   const [text, setText] = useState('');
+  // «Editar y repetir» (spec 020): el guion del trabajo de origen, una vez; motor, voz y estilo siguen en sus selectores.
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    setText(textParam(source, 'text'));
+  }
   const issues = useScriptLint(text, choice.style).data?.issues.length ?? 0;
   const jobs = useQuery({ queryKey: ['jobs'], queryFn: () => api.get<Job[]>('/jobs') });
   const take = latestTake(jobs.data ?? []);

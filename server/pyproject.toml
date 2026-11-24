@@ -6,6 +6,7 @@ requires-python = ">=3.10"
 # La CLI `studio` usa argparse (sin dependencias).
 dependencies = [
     "fastapi>=0.162.5",
+    "send2trash>=2.2.0",
     "uvicorn>=0.54.0",
 ]
 

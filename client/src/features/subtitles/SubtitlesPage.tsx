@@ -12,6 +12,7 @@ import { UIEmpty } from '@/shared/components/molecules/UIEmpty';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
+import { textParam, useFromJob } from '@/shared/hooks/useFromJob';
 import { hashParams } from '@/shared/navigation/hash';
 
 import { SubtitlesEditor } from './SubtitlesEditor';
@@ -50,6 +51,13 @@ export function SubtitlesPage(): React.JSX.Element {
     import: t('subtitles.origin.import'),
   };
   const [input, setInput] = useState(() => hashParams().get('path') ?? '');
+  // «Editar y repetir» (spec 020): el archivo de origen del trabajo, una vez.
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    setInput(textParam(source, 'input', input));
+  }
   const projects = useQuery({ queryKey: ['subtitles'], queryFn: () => api.get<ProjectRow[]>('/subtitles') });
   const create = useMutation({
     mutationFn: () => api.post('/jobs', { kind: 'subtitles.create', params: { origin, input } }),

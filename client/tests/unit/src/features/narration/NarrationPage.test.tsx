@@ -168,4 +168,18 @@ describe('NarrationPage', () => {
     fireEvent.click(screen.getByRole('button', { name: t('narration.generate') }));
     await waitFor(() => expect(jobsPosted()).toHaveLength(1));
   });
+
+  it('spec 020: «Editar y repetir» (?from_job=) precarga el guion del trabajo', async () => {
+    window.location.hash = '#/narration?from_job=5';
+    const fallback = api.get.getMockImplementation();
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/5' ? { id: 5, kind: 'narration', params: { text: 'hola de nuevo' } } : fallback?.(path),
+    );
+
+    const textarea = await renderPage();
+
+    await waitFor(() => expect(textarea.value).toBe('hola de nuevo'));
+    window.location.hash = '';
+  });
+
 });

@@ -16,6 +16,7 @@ const INVENTORY = {
     'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIJobPicker', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
     'UIPopover', 'UIRadioGroup', 'UIRecommendedSelect', 'UIRemoteImage', 'UIRowActions', 'UISearchField', 'UISearchSelect',
     'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
+    'UIVirtualList',
     'UIWhisperModelSelect',
   ],
   organisms: [

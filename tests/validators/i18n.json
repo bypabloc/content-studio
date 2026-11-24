@@ -19,7 +19,9 @@
     "convert.rate.",
     "convert.reframe.",
     "convert.resolution.",
-    "normalize.preset."
+    "normalize.preset.",
+    "library.kind.",
+    "library.send."
   ],
   "allowed": ["Bearer "],
   "python": {

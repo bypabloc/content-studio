@@ -17,6 +17,7 @@ import { useFilePaths } from '@/shared/hooks/useFilePaths';
 import { t } from '@/shared/i18n/t';
 import { MEDIA_EXTENSIONS, baseName, isVideoPath, jobErrorMessage } from '@/shared/media/formats';
 import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
+import { textParam, useFromJob } from '@/shared/hooks/useFromJob';
 import { hashParams } from '@/shared/navigation/hash';
 
 import { FormatPicker } from './FormatPicker';
@@ -46,6 +47,14 @@ export function ConvertPage(): React.JSX.Element {
   const api = useApi();
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<string[]>(() => hashParams().getAll('path').filter(Boolean));
+  // «Editar y repetir» (spec 020): el archivo de origen del trabajo, una vez; el formato se vuelve a elegir.
+  const source = useFromJob();
+  const [appliedJob, setAppliedJob] = useState<number | null>(null);
+  if (source !== null && source.id !== appliedJob) {
+    setAppliedJob(source.id);
+    const input = textParam(source, 'input');
+    if (input) setFiles([input]);
+  }
   const [choice, setChoice] = useState<FormatChoice | null>(null);
   const [reframe, setReframe] = useState<Reframe | null>(null);
   const [failed, setFailed] = useState<Job | null>(null);

@@ -27,6 +27,8 @@ function server(settings: Record<string, unknown>) {
       }
       return reply({ key, value: settings[key] ?? null })
     }
+    if (url.includes('/library?')) return reply({ items: [], total: 0 })
+    if (url.endsWith('/library/folders') || url.endsWith('/projects') || url.endsWith('/tags')) return reply([])
     if (url.endsWith('/engines')) return reply(settings.mockEngines ?? [])
     if (url.endsWith('/voices/catalog')) return reply({ voices: [] })
     if (url.endsWith('/system')) return reply(settings.mockSystem ?? { ffmpeg: { path: 'ffmpeg.exe', version: '9.1' }, git: null, gpu: null })
@@ -202,3 +204,12 @@ describe('Shell [AC-7]', () => {
     expect(await screen.findByRole('button', { name: t('normalize.submit') })).toBeTruthy()
   })
 })
+  it('spec 020: WHEN se abre la Biblioteca THEN muestra su panel y el vacío', async () => {
+    window.location.hash = '#/library'
+    renderShell()
+
+    expect(await screen.findByRole('navigation', { name: t('library.sidebar') })).toBeTruthy()
+    expect(await screen.findByText(t('library.empty'))).toBeTruthy()
+  })
+
+
