@@ -71,6 +71,41 @@ MIGRATIONS = [
       updated_at TEXT NOT NULL
     );
     """,
+    # Spec 020 (D-1): la biblioteca. Solo rutas, metadatos numéricos, etiquetas y relaciones; nada de contenido. Es la
+    # 7: la 6 ya es mezcla (016). Las miniaturas van en una caché de disco y el texto se lee de los JSON en disco.
+    """
+    CREATE TABLE library_folders (id INTEGER PRIMARY KEY, path TEXT NOT NULL UNIQUE, name TEXT, added_at TEXT NOT NULL);
+    CREATE TABLE library_items (
+      id INTEGER PRIMARY KEY,
+      path TEXT NOT NULL UNIQUE,
+      kind TEXT NOT NULL,
+      origin TEXT NOT NULL CHECK (origin IN ('job', 'watched')),
+      job_id INTEGER REFERENCES jobs(id) ON DELETE SET NULL,
+      folder_id INTEGER REFERENCES library_folders(id) ON DELETE CASCADE,
+      size INTEGER NOT NULL,
+      mtime REAL NOT NULL,
+      duration REAL,
+      width INTEGER,
+      height INTEGER,
+      media_type TEXT NOT NULL CHECK (media_type IN ('audio', 'video', 'subtitle', 'other')),
+      missing INTEGER NOT NULL DEFAULT 0,
+      indexed_at TEXT NOT NULL
+    );
+    CREATE INDEX library_items_kind ON library_items (kind);
+    CREATE INDEX library_items_mtime ON library_items (mtime);
+    CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE);
+    CREATE TABLE item_tags (
+      item_id INTEGER REFERENCES library_items(id) ON DELETE CASCADE,
+      tag_id INTEGER REFERENCES tags(id) ON DELETE CASCADE,
+      PRIMARY KEY (item_id, tag_id)
+    );
+    CREATE TABLE projects (id INTEGER PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL);
+    CREATE TABLE project_items (
+      project_id INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+      item_id INTEGER REFERENCES library_items(id) ON DELETE CASCADE,
+      PRIMARY KEY (project_id, item_id)
+    );
+    """,
 ]
 
 

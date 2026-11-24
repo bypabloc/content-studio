@@ -28,6 +28,7 @@ from content_studio import gpu_lock, paths
 from content_studio.db import connection, jobs, subtitle_projects
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
+from content_studio.library import index as library_index
 from content_studio.services.registry import SERVICES
 from content_studio.services.storage_move import KIND as STORAGE_MOVE
 from content_studio.subtitles import translate
@@ -225,6 +226,9 @@ class Worker:
         if code == 0:
             jobs.update(conn, job['id'], status='done', finished_at=utc_now())
             self._chain(conn, job, out_dir)
+            # La biblioteca (spec 020, AC-1) registra las salidas; si falla, el trabajo sigue terminado.
+            with contextlib.suppress(OSError, sqlite3.Error):
+                library_index.register_job(conn, {**job, 'output_dir': str(out_dir)})
         else:
             errors = getattr(self.services[job['kind']], 'ERROR_CODES', {})
             jobs.update(

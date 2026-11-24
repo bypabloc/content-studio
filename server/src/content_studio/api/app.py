@@ -41,6 +41,7 @@ from content_studio.api.routes import (
 )
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
+from content_studio.library import index as library_index
 from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
 from content_studio.subtitles import fonts
@@ -89,6 +90,7 @@ def create_app(
     `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
     with closing(connection.connect(db_path)) as conn:
         schema.migrate(conn)
+        library_index.backfill(conn)  # una sola vez: los trabajos anteriores a la biblioteca (spec 020, AC-1)
     app = FastAPI(title='content-studio', version='0.1.0')
     app.add_middleware(
         CORSMiddleware,
