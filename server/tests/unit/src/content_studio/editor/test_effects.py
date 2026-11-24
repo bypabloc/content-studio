@@ -15,6 +15,8 @@ import pytest
 from content_studio.editor import effects, project, render_video
 from content_studio.subtitles.burn import filter_path
 
+# cspell:ignore despills
+
 FIXTURES = Path(__file__).resolve().parents[4] / 'fixtures' / 'editor'
 
 
@@ -37,6 +39,42 @@ def test_clip_filters_follow_color_lut_and_chroma_order(tmp_path: Path):
         'chromakey=0x00ff00:similarity=0.2:blend=0.1',
         'despill=type=green',
     ]
+
+
+@pytest.mark.parametrize('clip', [{'color': {}}, {'chroma': {}}, {'chroma': {'despill': 'yes'}}])
+def test_clip_filters_reject_invalid_effects(tmp_path: Path, clip: dict):
+    """Los valores de color y chroma se validan antes de construir filtros FFmpeg."""
+    with pytest.raises(ValueError, match='editor_effect_invalid'):
+        effects.clip_filters(clip, tmp_path)
+
+
+def test_clip_filters_reject_a_missing_lut_file(tmp_path: Path):
+    """Una ruta LUT declarada pero inexistente no genera un filtro roto."""
+    clip = {
+        'color': {
+            'brightness': 0,
+            'contrast': 1,
+            'saturation': 1,
+            'gamma': 1,
+            'lut': 'media/luts/lut-' + 'a' * 64 + '.cube',
+        }
+    }
+
+    with pytest.raises(ValueError, match='editor_lut_invalid'):
+        effects.clip_filters(clip, tmp_path)
+
+
+def test_clip_filters_despills_blue_without_touching_red(tmp_path: Path):
+    """El despill corrige azul dominante y no altera un chroma rojo."""
+    blue = effects.clip_filters(
+        {'chroma': {'color': '#0000ff', 'similarity': 0.2, 'blend': 0.1, 'despill': True}}, tmp_path
+    )
+    red = effects.clip_filters(
+        {'chroma': {'color': '#ff0000', 'similarity': 0.2, 'blend': 0.1, 'despill': True}}, tmp_path
+    )
+
+    assert 'despill=type=blue' in blue
+    assert not any(item.startswith('despill=') for item in red)
 
 
 def test_blend_graph_uses_the_layer_alpha_mask():
@@ -72,9 +110,36 @@ def test_save_lut_validates_cube_and_uses_a_content_hash(tmp_path: Path):
     assert (tmp_path / relative).read_bytes() == data
 
 
+def test_save_lut_reuses_identical_content(tmp_path: Path):
+    """La segunda carga con el mismo hash conserva el LUT ya guardado."""
+    data = b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 8
+    (tmp_path / 'media').mkdir()
+
+    first = effects.save_lut(tmp_path, data)
+    second = effects.save_lut(tmp_path, data)
+
+    assert first == second
+
+
+def test_save_lut_requires_the_project_media_folder(tmp_path: Path):
+    """No se crea una carpeta media fuera de la estructura existente del proyecto."""
+    with pytest.raises(ValueError, match='editor_lut_invalid'):
+        effects.save_lut(tmp_path, b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 8)
+
+
 @pytest.mark.parametrize(
     'data',
-    [b'', b'LUT_1D_SIZE 2\n', b'LUT_3D_SIZE 2\n0 0 0\n', b'LUT_3D_SIZE 2\n' + b'2 0 0\n' * 8],
+    [
+        b'',
+        b'\xff',
+        b'LUT_1D_SIZE 2\n',
+        b'LUT_3D_SIZE invalid\n',
+        b'LUT_3D_SIZE 1\n',
+        b'LUT_3D_SIZE 2\n0 0 0\n',
+        b'LUT_3D_SIZE 2\n' + b'2 0 0\n' * 8,
+        b'LUT_3D_SIZE 2\nDOMAIN_MIN NaN 0 0\n' + b'0 0 0\n' * 8,
+        b'LUT_3D_SIZE 2\n' + b'0 0 0\n' * 9,
+    ],
 )
 def test_save_lut_rejects_invalid_cube(tmp_path: Path, data: bytes):
     """No se guarda un archivo vacío ni una LUT con declaración o cantidad de puntos inválida."""
@@ -82,6 +147,15 @@ def test_save_lut_rejects_invalid_cube(tmp_path: Path, data: bytes):
 
     with pytest.raises(ValueError, match='editor_lut_invalid'):
         effects.save_lut(tmp_path, data)
+
+
+@pytest.mark.parametrize(
+    'value', ['../outside.cube', 'media/luts/lut-short.cube', 'media/luts/lut-' + 'g' * 64 + '.cube']
+)
+def test_resolve_lut_rejects_paths_outside_the_generated_catalog(tmp_path: Path, value: str):
+    """Una LUT resuelta solo puede usar el prefijo y SHA-256 generados por el proyecto."""
+    with pytest.raises(ValueError, match='editor_lut_invalid'):
+        effects.resolve_lut(tmp_path, value)
 
 
 @pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')

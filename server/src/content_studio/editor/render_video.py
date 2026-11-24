@@ -16,7 +16,7 @@ from content_studio.subtitles import burn as subtitle_burn
 from content_studio.subtitles import export as subtitle_export
 from content_studio.system import tools
 
-# cspell:ignore lavfi vout libvpx: nombres de filtros, etiquetas y codecs de FFmpeg.
+# cspell:ignore lavfi vout libvpx setpts: nombres de filtros, etiquetas y codecs de FFmpeg.
 
 
 def render_frame(
@@ -46,7 +46,7 @@ def render_frame(
     with tempfile.TemporaryDirectory(prefix='editor-frame-', dir=output.parent) as temporary:
         graph = Path(temporary) / 'frame.filter'
         filters = _subtitle_filters(doc, subtitle_documents, Path(temporary), plan.canvas)
-        graph.write_text(_append_subtitle_filters(plan.script, filters), encoding='utf-8')
+        graph.write_text(_append_subtitle_filters(plan.script, filters, time), encoding='utf-8')
         ffmpeg.ffmpeg(
             *_input_args(plan),
             '-/filter_complex',
@@ -151,7 +151,7 @@ def _subtitle_filters(
     return filters
 
 
-def _append_subtitle_filters(script: str, filters: list[str]) -> str:
+def _append_subtitle_filters(script: str, filters: list[str], time_offset: float = 0) -> str:
     """Agrega las pistas ASS luego de la composición de todas las capas visuales."""
     if not filters:
         return script
@@ -160,6 +160,10 @@ def _append_subtitle_filters(script: str, filters: list[str]) -> str:
         raise ValueError('unreadable_media')
     current = 'subtitle_input'
     result = f'{prefix}[{current}]{suffix.rstrip()}'
+    if time_offset:
+        timed = 'subtitle_timed_input'
+        result += f';\n[{current}]setpts=PTS+{_num(time_offset)}/TB[{timed}]'
+        current = timed
     for index, filter_value in enumerate(filters):
         output = 'vout' if index == len(filters) - 1 else f'subtitle_{index}'
         result += f';\n[{current}]{filter_value}[{output}]'

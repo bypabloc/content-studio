@@ -41,6 +41,15 @@ Permite organizar y editar audio, video e imágenes sin modificar los archivos d
 - La caché global de Chromium no contenía la revisión requerida; las corridas usaron `PLAYWRIGHT_BROWSERS_PATH` de `017-editor-core`.
 - Playwright siguió activo unos nueve minutos sin resumen agregado ni archivos de resultados; se registra en [017-e2e-runner](../PENDING/017-e2e-runner.md).
 
+## Verificación 019 (2026-11-24)
+
+- T8: render MP4 de 12 s con transcripción por la cola y dos subtítulos quemados; fuentes intactas por SHA-256.
+- Cinco cuadros de vista previa y exportación: SSIM 0,9867–0,9915; sin halo verde y título sin solapar subtítulos.
+- Sonoridad -21,5 LUFS y -5,2 dBTP; tono 439→440 Hz en los tramos a 2× y 0,5×.
+- 190 pruebas unitarias del editor, 3 de integración con libass y 1 local pasan.
+- Vitest: el `Picker` diferido de los selectores se precarga en `tests/unit/setup.ts`; el p99 bajó de 2,8 s a 0,65 s.
+- «Mandar a Normalizar» se cubre con pruebas de cliente; app-check y e2e siguen en PENDING (CDP y runner).
+
 ## Verificación (2026-11-23)
 
 - T8 usó medios sintéticos: video de 4 s, imagen con referencias geométricas y PNG RGBA con alfa transparente. El proyecto validó sin errores y las tres fuentes conservaron su SHA-256.

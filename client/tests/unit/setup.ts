@@ -9,6 +9,11 @@ afterEach(() => {
   cleanup();
 });
 
+// `UISelect` y `UISearchSelect` cargan su Picker con `lazy()`: si no se importa antes, el primer test de cada archivo que abre un
+// selector paga la importación (transformación y cobertura) dentro de su margen de 5 s y bajo carga lo vence (PENDING 019).
+// En el setup ese tiempo cuenta como preparación del archivo, no del test.
+await import('@/shared/components/molecules/UISearchSelect/Picker');
+
 // jsdom no trae EventSource: la conexión de eventos se prueba con su propio fake; aquí solo evita el error.
 if (typeof EventSource === 'undefined') {
   globalThis.EventSource = class {

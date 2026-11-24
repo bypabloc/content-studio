@@ -68,7 +68,7 @@ def build(
         source = source.resolve()
         if source not in indexes:
             indexes[source] = len(inputs) + 1
-            inputs.append(RenderInput(source, clip['media'] == 'image', clip['src']))
+            inputs.append(RenderInput(source, clip['media'] in {'image', 'text'}, clip['src']))
     lines = ['[0:v]format=rgba[base]']
     current = 'base'
     layer_index = 0

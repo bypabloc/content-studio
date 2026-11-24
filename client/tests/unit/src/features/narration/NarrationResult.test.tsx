@@ -73,7 +73,7 @@ describe('NarrationResult', () => {
     renderResult();
     await screen.findByText('Adiós.');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abrir en Editor' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir en Editor' }));
 
     expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
       `${DIR}/voxcpm2-expert.wav`,

@@ -14,3 +14,9 @@
 - El test-runner integral quedó activo unos nueve minutos, sin reporte ni archivos de resultados; se interrumpió.
 - Node y Playwright quedaron sin actividad de CPU durante la espera; no se confirmó el resultado agregado.
 - La ficha sigue abierta hasta que `python -m devtools test-runner --type=e2e` termine con exit 0 y reporte completo.
+
+## Repetición T8 de 019
+
+- `python -m devtools test-runner --type=e2e` permaneció nueve minutos sin reporte ni archivos de resultados.
+- Node siguió con CPU casi nula al final de la espera; la ejecución se interrumpió con Ctrl+C.
+- La ficha sigue abierta hasta que el runner termine por sí solo con exit 0 y reporte completo.
