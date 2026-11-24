@@ -1,0 +1,50 @@
+{"id":"script-01","task":"script_review","text":"Tienes 24 horas para probar la DEMO gratis."}
+{"id":"script-02","task":"script_review","text":"El plan cuesta 49 dólares al mes; incluye 3 usuarios."}
+{"id":"script-03","task":"script_review","text":"Con el PDF listo, lo envías por WhatsApp en 2 minutos."}
+{"id":"script-04","task":"script_review","text":"Si registras a un paciente nuevo, el sistema crea su ficha en 1 segundo."}
+{"id":"script-05","task":"script_review","text":"La clínica atiende de 8 a 20 horas, de lunes a sábado."}
+{"id":"script-06","task":"script_review","text":"Nuestro equipo de 12 personas responde cada consulta en menos de 30 minutos, incluso los fines de semana y los días feriados, sin costo adicional para ti."}
+{"id":"script-07","task":"script_review","text":"Descarga la app en tu celular y escanea el código QR."}
+{"id":"script-08","task":"script_review","text":"El 85 % de los usuarios ahorra 5 horas por semana."}
+{"id":"script-09","task":"script_review","text":"Comenta DEMO y te enviamos el enlace"}
+{"id":"script-10","task":"script_review","text":"¿Sabías que puedes exportar tus datos a Excel"}
+{"id":"script-11","task":"script_review","text":"Escribes su nombre, eliges el horario y listo."}
+{"id":"script-12","task":"script_review","text":"La versión 2.0 trae 15 mejoras: más velocidad, menos errores y un diseño nuevo"}
+{"id":"script-13","task":"script_review","text":"Configura el SMS de recordatorio para 24 horas antes de la cita."}
+{"id":"script-14","task":"script_review","text":"Con un clic, la receta queda firmada y lista para imprimir."}
+{"id":"script-15","task":"script_review","text":"El inventario se actualiza solo cada vez que vendes un producto, así que nunca te quedas sin stock y sabes exactamente qué pedir a tu proveedor la próxima semana."}
+{"id":"script-16","task":"script_review","text":"Más de 1.500 clínicas ya usan Klinikae en 7 países."}
+{"id":"script-17","task":"script_review","text":"Abre la agenda, busca el día 15 y arrastra la cita al 16."}
+{"id":"script-18","task":"script_review","text":"El reporte mensual llega a tu correo el día 1 de cada mes"}
+{"id":"script-19","task":"script_review","text":"¡Prueba ahora!"}
+{"id":"script-20","task":"script_review","text":"Tu historial completo; consultas, antecedentes y recetas."}
+{"id":"script-21","task":"script_review","text":"La API permite conectar tu sistema contable en 10 minutos."}
+{"id":"script-22","task":"script_review","text":"Recepción ve cuáles están listas y avisa al paciente."}
+{"id":"script-23","task":"script_review","text":"Activa la factura electrónica y olvídate del papel."}
+{"id":"script-24","task":"script_review","text":"Cada mes sumamos funciones nuevas, y todas están incluidas en tu plan sin pagar nada más, porque creemos que una buena herramienta tiene que crecer contigo."}
+{"id":"script-25","task":"script_review","text":"Agenda 3 demos esta semana y gana un mes GRATIS."}
+{"id":"cue-01","task":"subtitles_translate","text":"Hola, bienvenidos a este tutorial.","languages":["en","pt"]}
+{"id":"cue-02","task":"subtitles_translate","text":"Hoy vamos a ver cómo crear una cita en la agenda.","languages":["en","pt"]}
+{"id":"cue-03","task":"subtitles_translate","text":"Primero, abre el menú de la izquierda.","languages":["en","pt"]}
+{"id":"cue-04","task":"subtitles_translate","text":"Haz clic en el botón azul que dice Nueva cita.","languages":["en","pt"]}
+{"id":"cue-05","task":"subtitles_translate","text":"Ahora elige al paciente de la lista.","languages":["en","pt"]}
+{"id":"cue-06","task":"subtitles_translate","text":"Si no aparece, puedes crearlo desde aquí.","languages":["en","pt"]}
+{"id":"cue-07","task":"subtitles_translate","text":"Después, selecciona el día y la hora.","languages":["en","pt"]}
+{"id":"cue-08","task":"subtitles_translate","text":"El sistema te avisa si el horario ya está ocupado.","languages":["en","pt"]}
+{"id":"cue-09","task":"subtitles_translate","text":"Agrega una nota si quieres recordar algo.","languages":["en","pt"]}
+{"id":"cue-10","task":"subtitles_translate","text":"Por ejemplo, que el paciente viene en ayunas.","languages":["en","pt"]}
+{"id":"cue-11","task":"subtitles_translate","text":"Guarda la cita con el botón verde.","languages":["en","pt"]}
+{"id":"cue-12","task":"subtitles_translate","text":"Listo, ya aparece en tu calendario.","languages":["en","pt"]}
+{"id":"cue-13","task":"subtitles_translate","text":"El paciente recibe un mensaje de confirmación.","languages":["en","pt"]}
+{"id":"cue-14","task":"subtitles_translate","text":"Un día antes, le llega un recordatorio.","languages":["en","pt"]}
+{"id":"cue-15","task":"subtitles_translate","text":"Si necesita cambiarla, puede responder el mensaje.","languages":["en","pt"]}
+{"id":"cue-16","task":"subtitles_translate","text":"Tú ves el cambio al instante en la agenda.","languages":["en","pt"]}
+{"id":"cue-17","task":"subtitles_translate","text":"También puedes mover la cita arrastrándola.","languages":["en","pt"]}
+{"id":"cue-18","task":"subtitles_translate","text":"Y si se cancela, el espacio queda libre.","languages":["en","pt"]}
+{"id":"cue-19","task":"subtitles_translate","text":"Así nadie pierde tiempo esperando.","languages":["en","pt"]}
+{"id":"cue-20","task":"subtitles_translate","text":"En el próximo video veremos las recetas.","languages":["en","pt"]}
+{"id":"cue-21","task":"subtitles_translate","text":"Si te sirvió, deja tu comentario.","languages":["en","pt"]}
+{"id":"cue-22","task":"subtitles_translate","text":"Y cuéntanos qué otra función quieres aprender.","languages":["en","pt"]}
+{"id":"cue-23","task":"subtitles_translate","text":"Gracias por ver este tutorial.","languages":["en","pt"]}
+{"id":"cue-24","task":"subtitles_translate","text":"Nos vemos en el siguiente.","languages":["en","pt"]}
+{"id":"cue-25","task":"subtitles_translate","text":"Hasta pronto.","languages":["en","pt"]}

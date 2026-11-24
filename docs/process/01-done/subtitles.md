@@ -1,6 +1,6 @@
 ---
 modulo: subtitulos
-actualizada: 2026-11-22
+actualizada: 2026-11-24
 ---
 
 # Subtítulos
@@ -26,4 +26,5 @@ Crea subtítulos desde un archivo transcrito, el limpiador o una narración (con
 
 ## Historial
 
+- 2026-11-24: traducir a cualquier idioma, corregir con un glosario y sugerir palabras clave con el asistente local; la pista va a `tracks[<idioma>]` (spec 021).
 - 2026-11-22: spec 014 cerrada (PR #87, merge `f86b829`).

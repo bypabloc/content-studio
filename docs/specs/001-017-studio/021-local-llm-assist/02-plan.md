@@ -73,15 +73,15 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo. Ningún test de C
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Receta y modelos | AC-1 | — | `unit` | [ ] |
-| T2 | Cliente y validador | AC-3 | — | `unit` | [ ] |
-| T3 | Runtime y worker | AC-2 | T1, T2 | `unit` | [ ] |
-| T4 | Tareas de texto | AC-4, AC-7 | T2 | `unit` | [ ] |
-| T5 | Tareas de subtítulos | AC-5, AC-6 | T2 | `unit` | [ ] |
-| T6 | Publicar | AC-8 | T2 | `unit` | [ ] |
-| T7 | Client | AC-9 | T3–T6 | `client-unit` | [ ] |
-| T8 | Prueba de modelos, e2e y docs | AC-10 | T7 | `e2e`, `devtools` | [ ] |
-| T9 | Corridas reales y ★ | AC-10, AC-11 | T8 | verificación final | [ ] |
+| T1 | Receta y modelos | AC-1 | — | `unit` | [x] |
+| T2 | Cliente y validador | AC-3 | — | `unit` | [x] |
+| T3 | Runtime y worker | AC-2 | T1, T2 | `unit` | [x] |
+| T4 | Tareas de texto | AC-4, AC-7 | T2 | `unit` | [x] |
+| T5 | Tareas de subtítulos | AC-5, AC-6 | T2 | `unit` | [x] |
+| T6 | Publicar | AC-8 | T2 | `unit` | [x] |
+| T7 | Client | AC-9 | T3–T6 | `client-unit` | [x] |
+| T8 | Prueba de modelos, e2e y docs | AC-10 | T7 | `e2e`, `devtools` | [x] |
+| T9 | Corridas reales y ★ | AC-10, AC-11 | T8 | verificación final | [x] |
 
 ## 4. Commits
 

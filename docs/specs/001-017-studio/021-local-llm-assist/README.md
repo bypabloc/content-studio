@@ -35,9 +35,9 @@ Los modelos (Gemma 4 E4B ★ y Qwen3.5-9B) y llama.cpp se descargan bajo demanda
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Runtime: receta de llama.cpp, catálogo de modelos y `llama-server` bajo demanda con el turno de la GPU | PEN |
-| 2 | Tareas: prompts, JSON schema y validación posterior | PEN |
-| 3 | Client: Revisar guion, Traducir y corregir subtítulos, Describir música y Publicar | PEN |
+| 1 | Runtime: receta de llama.cpp, catálogo de modelos y `llama-server` bajo demanda con el turno de la GPU | IMP |
+| 2 | Tareas: prompts, JSON schema y validación posterior | IMP |
+| 3 | Client: Revisar guion, Traducir y corregir subtítulos, Describir música y Publicar | IMP |
 | 4 | Prueba de modelos en español y ★ con datos propios | PEN |
 
 ## Decisiones clave

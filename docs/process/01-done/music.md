@@ -1,6 +1,6 @@
 ---
 modulo: music
-actualizada: 2026-11-22
+actualizada: 2026-11-24
 ---
 
 # Música
@@ -26,6 +26,7 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 
 ## Historial
 
+- 2026-11-24: «Describir en español» sugiere caption, tonalidad, BPM y compás para el texto libre (spec 021).
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
 - 2026-11-19: CLI `studio` (004): `python cli.py music` pasa a `uv run studio music`; la salida va a `out/music/<fecha>-<id>-<slug>/`.
 - 2026-11-20: spec 011 (música completa): duración exacta, categorías, reintentos, muestras de 10 s, sección Música y comparación de pistas.

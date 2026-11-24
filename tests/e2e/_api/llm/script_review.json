@@ -1,0 +1,29 @@
+{
+  "paragraphs": [
+    {
+      "index": 0,
+      "original": "Tienes 24 horas; es DEMO.",
+      "revised": "Tienes veinticuatro horas. Es demo.",
+      "changes": [
+        {
+          "rule": 13,
+          "before": "24",
+          "after": "veinticuatro"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "original": "Son 3 pasos; nada más.",
+      "revised": "Son tres pasos. Nada más.",
+      "changes": [
+        {
+          "rule": 6,
+          "before": ";",
+          "after": "."
+        }
+      ]
+    }
+  ],
+  "discarded": []
+}

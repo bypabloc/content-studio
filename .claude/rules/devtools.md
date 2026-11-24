@@ -17,6 +17,7 @@ python -m devtools <comando> [args]
 | `gpu-turn run --job=<t> -- <cmd>` | Corre `<cmd>` con el turno tomado y lo suelta al terminar (`turno-gpu.md`) |
 | `agent-context` | Mide lo que cargan Claude Code, Codex y Antigravity; exit 1 si algo pasa su límite. Lo corre el `pre-commit` |
 | `app-check run [--scenario=<n>] [--data=temp\|real]` | Compila y abre la app del worktree aislada y corre escenarios de Playwright por CDP; capturas en `tmp/app-check/<run>/` (`verify-before-claiming-done.md` §3) |
+| `llm-eval [--models ...]` | Corre los 50 casos en español de `tests/llm_eval/cases.jsonl` con cada modelo del asistente instalado (con el turno de la GPU) y deja `tmp/llm-eval/<fecha>/report.md` |
 | `rules [--sync]` | Comprueba que cada regla y skill de `.claude/` tenga el mismo cuerpo que su fuente en `.agents/`; `--sync` reescribe las copias conservando el frontmatter de Claude (`agent-config-testing.md`) |
 
 ## 2. Estándar de un comando

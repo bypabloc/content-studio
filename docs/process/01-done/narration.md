@@ -1,6 +1,6 @@
 ---
 modulo: narration
-actualizada: 2026-11-21
+actualizada: 2026-11-24
 ---
 
 # Narración
@@ -32,6 +32,7 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 
 ## Historial
 
+- 2026-11-24: «Revisar con IA» propone cambios por párrafo con el asistente local (spec 021).
 - 2026-11-21: spec 013 (limpiador y faster-whisper): `--evaluate` y el chequeo de tomas usan el servicio de faster-whisper, no el comando `whisper` (AC-10). Ver [WARNING 013-evaluacion-faster-whisper](../WARNING/013-evaluacion-faster-whisper.md).
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
 - 2026-11-20: spec 010 (voces y grabación): perfiles de voz con tomas y referencia elegida, grabación guiada con prueba de sala y chequeo, importar tramos de audio o video y favoritas en el catálogo (PR #80).
