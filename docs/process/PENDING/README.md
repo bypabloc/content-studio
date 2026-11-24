@@ -69,5 +69,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [017-e2e-runner](017-e2e-runner.md) | Los escenarios pasan, pero Playwright y test-runner no terminan con resumen tras tres corridas | Antes de la publicación final; no bloquea el merge | Agente |
 | [017-pytest-temp](017-pytest-temp.md) | Dos temporales de pytest en la raíz del worktree; Synapse bloquea borrarlos sin aprobación manual | Tras aprobación puntual de Synapse, antes de cerrar el worktree | Usuario |
 | [018-app-check-cdp](018-app-check-cdp.md) | Tres corridas compilaron la app, pero WebView2 no respondió en CDP | Cuando app-check consiga abrir la ventana y responder a CDP | Agente |
+| [019-client-unit-timeouts](019-client-unit-timeouts.md) | Tres fallos del gate client-unit por timeouts bajo carga; revisar antes de cerrar 019 | Antes de cerrar 019 | Agente |
 | [024-aprobar-hooks-codex](024-aprobar-hooks-codex.md) | Aprobar en Codex (`/hooks`) `shell_guard.py` y `computer_use_guard.py`, y probar que bloquea `sky.list_apps()` | Después del merge de 024 y tras cada cambio de un hook | Usuario |
 | [024-peaks-403-catalogo](024-peaks-403-catalogo.md) | `/media/peaks` da 403 a las muestras del catálogo de voces (hallado por `app-check`) | Con la próxima spec de voces o `/media` | Agente |

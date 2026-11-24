@@ -14,12 +14,12 @@ from content_studio.subtitles.styles import preset
 FORMATS = ('srt', 'vtt', 'ass')
 
 
-def render(document: dict[str, Any], fmt: str) -> str:
+def render(document: dict[str, Any], fmt: str, play_res: tuple[int, int] = (1920, 1080)) -> str:
     """El texto del documento en el formato pedido; un formato que no existe es un ValueError."""
     if fmt == 'srt':
         return to_srt(document)
     if fmt == 'vtt':
         return to_vtt(document)
     if fmt == 'ass':
-        return to_ass(document, {**preset('classic'), **document.get('style', {})}, (1920, 1080))
+        return to_ass(document, {**preset('classic'), **document.get('style', {})}, play_res)
     raise ValueError(f'unknown export format: {fmt}')

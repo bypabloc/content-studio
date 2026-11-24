@@ -443,7 +443,7 @@ def test_editor_frame_returns_a_png_for_the_requested_project(api, root, monkeyp
     """La ruta devuelve el fotograma exacto del proyecto y reutiliza su caché."""
     from content_studio.editor import render_video
 
-    def write_png(_doc, _folder, _time, output):
+    def write_png(_doc, _folder, _time, output, **_kwargs):
         output.write_bytes(b'\x89PNG\r\n\x1a\nmock-frame')
 
     monkeypatch.setattr(render_video, 'render_frame', write_png)

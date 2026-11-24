@@ -14,6 +14,7 @@ import type { Doc, VisualClip } from '../model/types';
 import { clipProperty } from './compositor';
 import { useLayerSources } from './useLayerSources';
 import { createCompositor } from './webgl';
+import { SubtitleTrack } from '../SubtitleTrack';
 
 type Mode = 'move' | 'scale' | 'rotate' | 'crop';
 type Props = {
@@ -207,6 +208,15 @@ export function Viewer({
           className="absolute inset-0 size-full"
           style={{ background: doc.canvas.background }}
         />
+        {doc.tracks.filter((track) => track.kind === 'subtitles').map((track) => (
+          <SubtitleTrack
+            key={track.id}
+            track={track}
+            time={time}
+            width={doc.canvas.width}
+            height={doc.canvas.height}
+          />
+        ))}
         <UIStack role="img" aria-label={t('editor.viewer.safe_area')} className="pointer-events-none absolute inset-[5%] border border-white/60">
           <UIStack className="absolute inset-[5%] border border-white/40" />
           <UIStack className="absolute inset-[15%] border-y border-white/30" />

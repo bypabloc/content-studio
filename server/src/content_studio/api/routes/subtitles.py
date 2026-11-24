@@ -5,6 +5,7 @@ Un proyecto nace al terminar su trabajo `subtitles.create` (`jobs/worker.py`). P
 
 from __future__ import annotations
 
+import json
 import shutil
 import sqlite3
 from pathlib import Path
@@ -21,7 +22,7 @@ from content_studio.api.schemas import Job
 from content_studio.db import jobs as store
 from content_studio.db import subtitle_projects
 from content_studio.jobs import queue
-from content_studio.subtitles import export, fonts
+from content_studio.subtitles import export, fonts, sources
 from content_studio.subtitles.document import load, save
 
 router = APIRouter()
@@ -72,6 +73,49 @@ def create_project(
     if created is None:  # no pasa: el trabajo acaba de encolarse en la misma conexión
         raise ApiError(404, 'job_not_found', job_id=job_id)
     return created
+
+
+class TranscriptIn(BaseModel):
+    """El trabajo `transcribe` ya terminado cuya transcripción se convertirá en un proyecto editable."""
+
+    job_id: int
+
+
+@router.post('/subtitles/from-transcript', status_code=201)
+def create_from_transcript(
+    body: TranscriptIn, conn: Annotated[sqlite3.Connection, Depends(get_conn)]
+) -> dict[str, Any]:
+    """Crea un proyecto 014 con `words.json` de un trabajo `transcribe` terminado."""
+    job = store.get(conn, body.job_id)
+    if job is None:
+        raise ApiError(404, 'job_not_found', job_id=body.job_id)
+    if job['kind'] != 'transcribe' or job['status'] != 'done':
+        raise ApiError(409, 'source_not_done')
+    output_dir = Path(job['output_dir'] or '')
+    words_file = output_dir / 'words.json'
+    if not words_file.is_file():
+        raise ApiError(409, 'source_not_done')
+    try:
+        result = json.loads(words_file.read_text(encoding='utf-8'))
+        words = [
+            {'word': word['word'], 'start': word['start'], 'end': word['end']}
+            for segment in result['segments']
+            for word in segment.get('words', [])
+        ]
+        if not words:
+            raise ValueError('empty_transcript')
+        source = str(job['params']['input'])
+        language = str(result.get('language') or 'es')
+        document = sources.from_words(words, source_path=source, kind='file', language=language)
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise ApiError(422, 'empty_transcript') from error
+    name = Path(source).stem or f'editor-{body.job_id}'
+    folder = paths.outputs_dir() / 'subtitles' / f'editor-{body.job_id}'
+    folder.mkdir(parents=True, exist_ok=True)
+    doc_path = folder / 'subtitles.json'
+    save(document, doc_path)
+    project_id = subtitle_projects.insert(conn, name, source, str(doc_path))
+    return subtitle_projects.get(conn, project_id) or {}
 
 
 class ExportIn(BaseModel):

@@ -22,10 +22,16 @@ const doc: Doc = {
 };
 const project = { path: PATH, hash: 'hash-1', doc, missing: [] };
 
+function mockEditorGets(recentPaths: string[] = [], projectResponse: unknown = project): void {
+  api.get.mockImplementation((url: string) => {
+    if (url === '/editor/projects/recent') return Promise.resolve({ paths: recentPaths });
+    if (url === '/subtitles') return Promise.resolve([]);
+    return projectResponse instanceof Error ? Promise.reject(projectResponse) : Promise.resolve(projectResponse);
+  });
+}
+
 beforeEach(() => {
-  api.get.mockImplementation((url: string) =>
-    url === '/editor/projects/recent' ? Promise.resolve({ paths: [] }) : Promise.resolve(project),
-  );
+  mockEditorGets();
   api.post.mockResolvedValue(project);
   api.put.mockResolvedValue({ hash: 'hash-2', missing: [] });
   open.mockResolvedValue(null);
@@ -64,9 +70,7 @@ describe('EditorPage', () => {
   });
 
   it('abre un proyecto reciente y carga su hash para el siguiente guardado', async () => {
-    api.get.mockImplementation((url: string) =>
-      url === '/editor/projects/recent' ? Promise.resolve({ paths: [PATH] }) : Promise.resolve(project),
-    );
+    mockEditorGets([PATH]);
     render(<EditorPage />);
 
     fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open', { name: '2026-11-22-demo' }) }));
@@ -134,9 +138,7 @@ describe('EditorPage', () => {
   });
 
   it('muestra un error localizado si falla la apertura o creación', async () => {
-    api.get.mockImplementation((url: string) =>
-      url === '/editor/projects/recent' ? Promise.resolve({ paths: [PATH] }) : Promise.reject(new Error('offline')),
-    );
+    mockEditorGets([PATH], new Error('offline'));
     render(<EditorPage />);
     fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open', { name: '2026-11-22-demo' }) }));
     expect(await screen.findByText(t('editor.project.load_error'))).toBeTruthy();
@@ -150,9 +152,7 @@ describe('EditorPage', () => {
   });
 
   it('usa la ruta completa cuando una entrada reciente no tiene carpeta contenedora', async () => {
-    api.get.mockImplementation((url: string) =>
-      url === '/editor/projects/recent' ? Promise.resolve({ paths: ['project.json'] }) : Promise.resolve(project),
-    );
+    mockEditorGets(['project.json']);
     render(<EditorPage />);
     fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open', { name: 'project.json' }) }));
     expect(await screen.findByRole('toolbar', { name: t('editor.transport.label') })).toBeTruthy();
@@ -166,9 +166,7 @@ describe('EditorPage', () => {
 
     cleanup();
     open.mockResolvedValueOnce('/home/pablo/editor/');
-    api.get.mockImplementation((url: string) =>
-      url === '/editor/projects/recent' ? Promise.resolve({ paths: [] }) : Promise.resolve(project),
-    );
+    mockEditorGets();
     render(<EditorPage />);
     fireEvent.click(await screen.findByRole('button', { name: t('editor.project.open_file') }));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(

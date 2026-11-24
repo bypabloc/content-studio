@@ -194,6 +194,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [019-control-velocidad](019-control-velocidad.md) | El Inspector cambia la velocidad de clips de audio y video; guarda el valor en el proyecto | antes de `main` |
 | [019-fusion-con-alfa](019-fusion-con-alfa.md) | FFmpeg divide el compuesto actual antes de mezclar para conservar las capas inferiores | antes de `main` |
 | [019-lut-paridad](019-lut-paridad.md) | Las muestras `.cube` usan rojo como eje más rápido, igual que FFmpeg y la textura WebGL | antes de `main` |
+| [019-pista-subtitulos](019-pista-subtitulos.md) | La pista guarda el ID decimal del proyecto 014; renderiza ASS o crea una transcripción por la cola | antes de `main` |
 | [019-texto-rasterizado](019-texto-rasterizado.md) | Un PNG con alfa se comparte entre el visor y FFmpeg; hash por texto y presets de título | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

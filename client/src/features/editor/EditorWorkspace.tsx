@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -15,6 +14,7 @@ import { ClipMissing } from './browser/ClipMissing';
 import { FileBrowser } from './browser/FileBrowser';
 import { EditorVisualPanel } from './EditorVisualPanel';
 import { ExportDialog } from './ExportDialog';
+import { SubtitleTracksPanel } from './SubtitleTracksPanel';
 import { buildImportOperations } from './importMedia';
 import { Timeline } from './Timeline';
 import { Transport } from './Transport';
@@ -234,12 +234,11 @@ export function EditorWorkspace({
       <UIStack direction="row" align="center" gap="xs">
         <UIIconButton icon="history" label={t('editor.history.undo')} shortcut="Ctrl+Z" aria-keyshortcuts="Control+Z" disabled={!editor.canUndo} onClick={editor.undo} />
         <UIIconButton icon="regenerate" label={t('editor.history.redo')} shortcut="Ctrl+Y" aria-keyshortcuts="Control+Y" disabled={!editor.canRedo} onClick={editor.redo} />
-        <Transport
-          playing={playback.playing} recording={recording || uploading} magnet={magnet} zoom={zoom}
+        <Transport playing={playback.playing} recording={recording || uploading} magnet={magnet} zoom={zoom}
           onStart={() => playback.seek(0)} onPlayingChange={playback.setPlaying} onStop={playback.stop}
-          onRecordingChange={recordChange} onMagnetChange={setMagnet} onZoomChange={setZoom}
-        />
-        <ExportDialog path={project.path} duration={duration(editor.doc)} markers={editor.doc.markers} />
+          onRecordingChange={recordChange} onMagnetChange={setMagnet} onZoomChange={setZoom} />
+        <ExportDialog path={project.path} duration={duration(editor.doc)} markers={editor.doc.markers}
+          hasSubtitles={editor.doc.tracks.some((track) => track.kind === 'subtitles')} />
       </UIStack>
       {missing.map((source) => <ClipMissing key={source} src={source} onRelink={relink} />)}
       {recorderErrorText ? <UIText variant="caption">{recorderErrorText}</UIText> : null}
@@ -248,6 +247,8 @@ export function EditorWorkspace({
       <UIStack direction="row" className="flex-col items-start gap-4 lg:flex-row">
         <UIStack className="w-full shrink-0 lg:w-80" gap="sm">
           <FileBrowser onImport={(paths) => void addFiles(paths, armedTrackId ?? undefined, playback.position)} />
+          <SubtitleTracksPanel doc={editor.doc} path={project.path}
+            onAdd={(track) => applyOp({ type: 'addTrack', track })} />
           <MicrophonePicker
             value={deviceId}
             onChange={(value) => {

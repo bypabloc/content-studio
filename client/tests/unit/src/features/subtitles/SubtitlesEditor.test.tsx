@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SubtitlesEditor } from '@/features/subtitles/SubtitlesEditor';
@@ -43,15 +43,21 @@ describe('SubtitlesEditor', () => {
   });
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
   it('saves the edited document once, one second after the last change', async () => {
     renderEditor();
-    fireEvent.change(await screen.findByDisplayValue('hola a todos'), { target: { value: 'hola a amigos' } });
+    const field = await screen.findByDisplayValue('hola a todos');
+    vi.useFakeTimers();
+    fireEvent.change(field, { target: { value: 'hola a amigos' } });
 
     expect(api.put).not.toHaveBeenCalled();
-    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1), { timeout: 3000 });
+    await act(async () => vi.advanceTimersByTimeAsync(999));
+    expect(api.put).not.toHaveBeenCalled();
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    expect(api.put).toHaveBeenCalledTimes(1);
 
     expect(api.put.mock.calls[0][0]).toBe('/subtitles/7');
     expect(api.put.mock.calls[0][1].cues[0].text).toBe('hola a amigos');

@@ -1,18 +1,17 @@
-import { createRef } from 'react';
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { UICanvas } from '@/shared/components/atoms/UICanvas';
 
 describe('UICanvas', () => {
-  it('expone un canvas accesible y reenvia su referencia', () => {
-    const canvasRef = createRef<HTMLCanvasElement>();
-    render(<UICanvas ref={canvasRef} aria-label="Vista previa" width={640} height={360} />);
+  it('renders a canvas with its dimensions and ref', () => {
+    const ref = vi.fn();
+    const { container } = render(<UICanvas ref={ref} width={320} height={180} aria-hidden="true" />);
+    const canvas = container.querySelector('canvas');
 
-    const canvas = screen.getByLabelText('Vista previa');
-    expect(canvas.tagName).toBe('CANVAS');
-    expect(canvasRef.current).toBe(canvas);
-    expect(canvas.getAttribute('width')).toBe('640');
-    expect(canvas.getAttribute('height')).toBe('360');
+    expect(canvas).not.toBeNull();
+    expect(canvas?.width).toBe(320);
+    expect(canvas?.height).toBe(180);
+    expect(ref).toHaveBeenCalledWith(canvas);
   });
 });

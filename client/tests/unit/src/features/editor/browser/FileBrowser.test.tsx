@@ -173,4 +173,19 @@ describe('FileBrowser', () => {
     const favorite = screen.getAllByRole('button').find((button) => button.getAttribute('aria-label')?.includes('favoritas'));
     expect(favorite?.hasAttribute('disabled')).toBe(true);
   });
+
+  it('muestra las rutas de navegación de un directorio POSIX', async () => {
+    api.get.mockImplementation((url: string) => {
+      if (url === '/fs/roots') return Promise.resolve({ roots: [{ name: 'pablo', path: '/home/pablo' }] });
+      if (url === '/settings/editor.favorites') return Promise.resolve({ value: [] });
+      if (url.startsWith('/fs/list?')) return Promise.resolve({ path: '/home/pablo', entries: [] });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    render(<FileBrowser onImport={vi.fn()} />);
+
+    const breadcrumb = await screen.findByRole('navigation', { name: t('editor.browser.breadcrumb') });
+
+    expect(within(breadcrumb).getByRole('button', { name: 'home' })).toBeTruthy();
+    expect(within(breadcrumb).getByRole('button', { name: 'pablo' })).toBeTruthy();
+  });
 });

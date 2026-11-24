@@ -603,6 +603,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/subtitles/from-transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Transcript
+         * @description Crea un proyecto 014 con `words.json` de un trabajo `transcribe` terminado.
+         */
+        post: operations["create_from_transcript_subtitles_from_transcript_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/subtitles/{project_id}/export": {
         parameters: {
             query?: never;
@@ -1715,6 +1735,16 @@ export interface components {
             ffmpeg: components["schemas"]["BinaryInfo"] | null;
             git: components["schemas"]["BinaryInfo"] | null;
             gpu: components["schemas"]["GpuInfo"] | null;
+            /** Subtitles Filter */
+            subtitles_filter: boolean;
+        };
+        /**
+         * TranscriptIn
+         * @description El trabajo `transcribe` ya terminado cuya transcripción se convertirá en un proyecto editable.
+         */
+        TranscriptIn: {
+            /** Job Id */
+            job_id: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -2699,6 +2729,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_from_transcript_subtitles_from_transcript_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranscriptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */

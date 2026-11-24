@@ -23,7 +23,7 @@ from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.db import settings
-from content_studio.editor import effects, store
+from content_studio.editor import effects, store, subtitle_projects
 
 router = APIRouter(prefix='/editor')
 preview_router = APIRouter(prefix='/editor')
@@ -103,13 +103,21 @@ def save_project(
 
 
 @router.get('/projects/frame')
-def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
+def project_frame(
+    path: str,
+    conn: Annotated[sqlite3.Connection, Depends(get_conn)],
+    t: float = Query(0, ge=0),
+) -> FileResponse:
     """Devuelve como PNG el fotograma exacto del lienzo en `t`, con caché por revisión del proyecto."""
     file = _project_file(path)
     doc, digest = store.read(file)
     if not _finite_time(t):
         raise ApiError(422, 'unreadable_media')
-    key = _frame_cache_key(file, doc, digest, t)
+    try:
+        subtitle_documents = subtitle_projects.load_documents(doc, conn) if conn is not None else {}
+    except subtitle_projects.MissingSubtitleProject as error:
+        raise ApiError(404, 'subtitle_project_not_found', project_id=error.project_id) from error
+    key = _frame_cache_key(file, doc, digest, t, subtitle_documents)
     frame = paths.outputs_dir() / 'tmp' / 'editor-frames' / f'{key}.png'
     if not frame.is_file() or not frame.stat().st_size:
         frame.parent.mkdir(parents=True, exist_ok=True)
@@ -117,11 +125,13 @@ def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
         try:
             from content_studio.editor import render_video
 
-            render_video.render_frame(doc, file.parent, t, temporary)
+            render_video.render_frame(doc, file.parent, t, temporary, subtitle_documents=subtitle_documents)
             if not temporary.is_file() or not temporary.stat().st_size:
                 raise ValueError('unreadable_media')
             os.replace(temporary, frame)
-        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        except (OSError, ValueError, render_video.render_audio.RenderError, subprocess.CalledProcessError) as error:
+            if isinstance(error, render_video.render_audio.RenderError):
+                raise ApiError(422, error.code, **error.params) from error
             raise ApiError(422, 'unreadable_media') from error
         finally:
             temporary.unlink(missing_ok=True)
@@ -195,7 +205,13 @@ def _finite_time(value: float) -> bool:
     return value == value and value not in (float('inf'), float('-inf'))
 
 
-def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) -> str:
+def _frame_cache_key(
+    file: Path,
+    doc: dict[str, Any],
+    digest: str,
+    time: float,
+    subtitle_documents: dict[str, dict[str, Any]] | None = None,
+) -> str:
     """Incluye en la caché la revisión del proyecto y el estado de cada fuente visual."""
     stat = file.stat()
     sources: list[tuple[str, int | None, int | None]] = []
@@ -218,7 +234,8 @@ def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) 
                 sources.append((str(source), stat.st_mtime_ns, stat.st_size))
             except (OSError, ValueError):
                 sources.append((lut, None, None))
-    identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources))
+    subtitle_hash = hashlib.sha256(repr(sorted((subtitle_documents or {}).items())).encode('utf-8')).hexdigest()
+    identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources), subtitle_hash)
     return hashlib.sha256(repr(identity).encode('utf-8')).hexdigest()
 
 

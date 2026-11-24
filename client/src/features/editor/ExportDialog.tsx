@@ -17,6 +17,7 @@ import type { Marker } from './model/types';
 
 type Job = { id: number; status: string; progress: number; error_code: string | null; error_detail: string | null };
 type Normalize = '' | 'podcast' | 'youtube';
+type SubtitleMode = 'none' | 'burn' | 'srt' | 'vtt';
 type Segment = { start?: number; end?: number; name: string };
 type PlayMedia = { path: string; kind: 'audio' | 'video' };
 
@@ -60,7 +61,17 @@ function missingSourcePaths(job: Job): string[] {
 }
 
 /** Encola el render, muestra el progreso y abre o reproduce la última salida. */
-export function ExportDialog({ path, duration, markers }: { path: string; duration: number; markers: Marker[] }): React.JSX.Element {
+export function ExportDialog({
+  path,
+  duration,
+  markers,
+  hasSubtitles = false,
+}: {
+  path: string;
+  duration: number;
+  markers: Marker[];
+  hasSubtitles?: boolean;
+}): React.JSX.Element {
   const api = useApi();
   const [open, setOpen] = useState(false);
   const [audioOnly, setAudioOnly] = useState(false);
@@ -68,6 +79,8 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
   const [videoFormat, setVideoFormat] = useState('mp4-h264');
   const [quality, setQuality] = useState(19);
   const [normalize, setNormalize] = useState<Normalize>('');
+  const [subtitleMode, setSubtitleMode] = useState<SubtitleMode>('none');
+  const [hasLibass, setHasLibass] = useState(false);
   const [name, setName] = useState(() => projectName(path));
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState(false);
@@ -75,6 +88,18 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const jobIds = jobs.map((job) => job.id);
   const format = audioOnly ? audioFormat : videoFormat;
+
+  useEffect(() => {
+    let active = true;
+    void api.get<{ subtitles_filter: boolean }>('/system').then((system) => {
+      if (active) setHasLibass(system.subtitles_filter);
+    }).catch(() => {
+      if (active) setHasLibass(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [api]);
 
   useEffect(() => {
     if (!jobIds.length) return;
@@ -115,6 +140,7 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
       format,
       name: segment.name,
       normalize: normalize || null,
+      ...(hasSubtitles && !audioOnly ? { subtitle_mode: subtitleMode } : {}),
       ...(!audioOnly ? { quality } : {}),
       ...(segment.start === undefined ? {} : { start: segment.start, end: segment.end }),
     };
@@ -185,6 +211,22 @@ export function ExportDialog({ path, duration, markers }: { path: string; durati
               options={NORMALIZATIONS}
               onChange={(value) => setNormalize(value as Normalize)}
             />
+            {hasSubtitles && !audioOnly ? (
+              <UIStack gap="xs">
+                <UISelect
+                  label={t('editor.export.subtitles')}
+                  value={subtitleMode}
+                  options={[
+                    { value: 'none', label: t('editor.export.subtitles.none') },
+                    { value: 'burn', label: t('editor.export.subtitles.burn'), disabled: !hasLibass },
+                    { value: 'srt', label: t('editor.export.subtitles.srt') },
+                    { value: 'vtt', label: t('editor.export.subtitles.vtt') },
+                  ]}
+                  onChange={(value) => setSubtitleMode(value as SubtitleMode)}
+                />
+                {!hasLibass ? <UIText variant="caption">{t('editor.export.no_libass')}</UIText> : null}
+              </UIStack>
+            ) : null}
             <UIStack direction="row" gap="sm">
               <UIButton onClick={() => void start([{ name: name || projectName(path) }])}>{t('editor.export.start')}</UIButton>
               {markers.length > 0 ? (
