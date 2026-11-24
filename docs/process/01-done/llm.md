@@ -43,3 +43,4 @@ Cargar el modelo tarda unos 2 s. VRAM pico 7,8 GB con el escritorio abierto; tra
 ## Historial
 
 - 2026-11-24: asistente local con cuatro funciones y prueba de modelos; ★ Qwen3.5 9B tras apagar el thinking de Gemma (spec 021).
+- 2026-11-24: verificación integral (023): «Revisar con IA» descarta los párrafos que quitan tildes.

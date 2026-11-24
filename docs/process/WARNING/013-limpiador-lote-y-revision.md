@@ -17,4 +17,4 @@
   - Conservar `limpio.*`: mezcla idiomas en los nombres de archivo y cspell los marcaba.
 - **Cómo revertir**: quitar `services/clean_*`, `api/routes/clean.py`, `features/cleaner/`, `_chain` del worker y el subcomando `clean` de `cli/main.py`. Las claves `cleaner.*`, `whisper.*` y `nav.*` salen de los tres catálogos.
 - **Cómo comprobarla**: `uv run pytest server/tests/unit/src/content_studio/{cli,jobs,clean,services,api,transcription}`; en `client/`, `bun x vitest run tests/unit/src/features/cleaner`; `uv run studio clean --help` y `uv run studio clean no-existe.mp4` (sale con 2 y el mensaje del catálogo).
-- **Pendiente**: la corrida real con video de 3 a 5 minutos y large-v3-turbo (AC-11), la medición de VRAM y la escucha del usuario: [03-verificacion-final.md](../../specs/001-017-studio/013-whisper-cleaner/03-verificacion-final.md).
+- **Pendiente**: la corrida real con video de 3 a 5 minutos y large-v3-turbo (AC-11), la medición de VRAM y la escucha del usuario: `docs/specs/001-017-studio/013-whisper-cleaner/03-verificacion-final.md` (borrada por la 023; en el historial de git).

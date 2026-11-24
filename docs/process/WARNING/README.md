@@ -43,7 +43,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [005-jsx-literales](005-jsx-literales.md) | AC-8 se comprueba con `react/jsx-no-literals` de oxlint, como error | el merge a `dev` |
 | [005-cors-tauri](005-cors-tauri.md) | La API acepta solo los orígenes de la ventana de Tauri (CORS): sin esto la app no carga datos | el merge a `dev` |
 | [005-opener-abrir-carpeta](005-opener-abrir-carpeta.md) | «Abrir carpeta» de los avisos usa `opener:allow-open-path` sin alcance | antes de main (alcance con la 022) |
-| [lote-renumeracion-007-021](lote-renumeracion-007-021.md) | Specs renumeradas tres veces de la 007 en adelante (iconos y editor; i18n; componentes); la carpeta del lote conserva `001-017-studio` | la 023 (cierre del lote) |
 | [005-desvios-de-diseno](005-desvios-de-diseno.md) | Desvíos de D-1 (sin shadcn), D-2 (CSP amplia), D-4 (theme-init y Geist) y D-8 (confirm nativo) | el merge a `dev` no depende de ellos |
 | [006-bun-hoisted-worktree](006-bun-hoisted-worktree.md) | El worktree instala con el enlazador hoisted: el límite de rutas de Windows rompe el enlazador por defecto | el merge a `dev` de la 006 |
 | [006-linter-ejemplo-ac1](006-linter-ejemplo-ac1.md) | El ejemplo del AC-1 lleva punto final: sin él, la regla 3 lo marca también | el merge a `dev` |
@@ -182,6 +181,12 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [024-dialogo-por-webview](024-dialogo-por-webview.md) | El diálogo nativo se simula redefiniendo `chrome.webview.postMessage`; `confirm` se responde sin mostrarlo | `main` |
 | [016-render-y-sendcmd](016-render-y-sendcmd.md) | El ducking del audio va con `asendcmd` y objetivo `volume@duck`; escape de la ruta entre comillas; fades y `apad` del sidechain | `main` |
 | [016-proyectos-y-migracion-6](016-proyectos-y-migracion-6.md) | `mix_projects` es la migración 6 (la 5 es de 014); los tramos llegan con la caché o al consultar, sin hook en el worker | `main` |
+| [014-fuentes-ofl](014-fuentes-ofl.md) | Fuentes incluidas con licencia OFL y su listado | `main` |
+| [014-proyectos-y-migracion-5](014-proyectos-y-migracion-5.md) | Proyectos de subtítulos y migración 5 de la base | `main` |
+| [014-quemar](014-quemar.md) | Quemar subtítulos con libass | `main` |
+| [014-traducir](014-traducir.md) | Traducir subtítulos al inglés con whisper | `main` |
+| [016-mezcla-cliente](016-mezcla-cliente.md) | Cliente de Mezcla | `main` |
+| [016-valores-ducking](016-valores-ducking.md) | Valores del ducking, salida a 48 kHz y mediciones reales | `main` |
 | [017-presupuesto-js](017-presupuesto-js.md) | Presupuesto inicial sube de 236 a 237 kB gzip por las claves en español del Editor | `main` |
 | [017-proyecto-json](017-proyecto-json.md) | Proyecto v1 portable en JSON, con hash para evitar sobrescrituras y sin migraciones silenciosas | `main` |
 | [017-latencia-grabacion](017-latencia-grabacion.md) | Compensación de latencia configurable; falta medir con micrófono y auriculares físicos | antes de `main` |
@@ -211,3 +216,5 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [022-updater](022-updater.md) | Updater solo en la app instalada; clave sin contraseña; faltan los secrets | el primer Release (usuario) |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
+| [023-recorrido-por-api](023-recorrido-por-api.md) | El recorrido integral se hizo sobre la API del server instalado | `main` |
+| [023-sin-pr-a-main](023-sin-pr-a-main.md) | El PR `dev → main` no se abre: lo pide el usuario (git-workflow.md manda sobre la spec) | `main` |
