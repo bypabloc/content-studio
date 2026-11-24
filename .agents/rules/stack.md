@@ -9,7 +9,7 @@ description: Stack de content-studio (Python 3.10+, uv, argparse, FastAPI y uvic
 
 | Pieza | Rol | Dónde |
 | :--- | :--- | :--- |
-| Python ≥ 3.10 (CI en 3.10 y 3.12) | Todo el código; 3.10 por el venv de CosyVoice | `server/src/content_studio/` |
+| Python ≥ 3.10 (la CI en 3.10 y 3.12 solo corre en PR ajenos) | Todo el código; 3.10 por el venv de CosyVoice | `server/src/content_studio/` |
 | uv | Venv de desarrollo (`uv sync`), `uv run ruff/pytest` y el CLI `uv run studio <comando>` | `pyproject.toml`, `uv.lock` |
 | argparse | CLI `studio` (`serve`, `narration`, `music`, `jobs`), solo stdlib | `server/src/content_studio/cli/` |
 | FastAPI + uvicorn | API local en 127.0.0.1 con token Bearer y `/events` por SSE; `studio serve` la levanta junto con el worker de la cola | `server/src/content_studio/api/` |

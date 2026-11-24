@@ -4,9 +4,10 @@
 #
 # Nunca push ni borrado de main o dev (todo entra por PR); el destino tiene que ser una rama de trabajo.
 # Los rulesets de GitHub ya lo rechazan: esto avisa antes de esperar al remoto.
-# Después, test-runner sobre lo que sube (spec 003, D-6): guard-tdd (no quedan tests efímeros en tdd/) y typecheck
-# sobre el changeset `unmerged`. `unit` (pytest completo) va en la CI: los tests de hooks hacen push y, dentro del pre-push,
-# se recursaría.
+# Después, test-runner sobre lo que sube (spec 003, D-6): guard-tdd (no quedan tests efímeros en tdd/), typecheck, unit
+# (pytest completo con cobertura y espejo) y tdd sobre el changeset `unmerged`; si cambia client/ o tests/e2e/, también
+# budget, e2e y tauri-check. Es lo que corría la CI (calidad.yml), que ya no corre en los PR de bypabloc.
+# Los tests de hooks hacen push: CS_PRE_PUSH_INNER evita que ese push interno vuelva a correr unit y se recursaría.
 
 set -euo pipefail
 HOOKS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -28,5 +29,13 @@ while read -r _local_ref local_sha remote_ref _remote_sha; do
 done
 
 cd "$(git rev-parse --show-toplevel)"
-echo "[pre-push] test-runner: guard-tdd, typecheck (unmerged)"
-PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=guard-tdd,typecheck --git-mode=unmerged
+STAGES='guard-tdd,typecheck'
+if [ -z "${CS_PRE_PUSH_INNER:-}" ]; then
+  STAGES="$STAGES,unit,tdd"
+  BASE="$(git merge-base origin/dev HEAD 2>/dev/null || true)"
+  if [ -n "$BASE" ] && git diff --name-only "$BASE" HEAD | grep -Eq '^(client|tests/e2e)/'; then
+    STAGES="$STAGES,budget,e2e,tauri-check"
+  fi
+fi
+echo "[pre-push] test-runner: ${STAGES//,/, } (unmerged)"
+CS_PRE_PUSH_INNER=1 PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type="$STAGES" --git-mode=unmerged

@@ -14,7 +14,7 @@ description: Dónde vive el código, 300 líneas por .py, Python 3.10, dos capas
 ## Reglas
 
 - **Tamaño por categoría** (`tests/validators/file-size.json`): fuente 300 líneas, tests 800. Si un archivo se acerca, se divide por responsabilidad. La etapa `validators` lo exige sin excepciones; el baseline solo puede bajar. `test_structure.py` vigila que no haya `.py` sueltos en la raíz ni en `server/data/`.
-- **Python 3.10 como mínimo** (el venv de CosyVoice es 3.10), con `from __future__ import annotations` para escribir `X | None`. Nada de `tomllib`, `Self`, `ExceptionGroup`, `datetime.UTC` ni `match` con sintaxis nueva. CI corre en 3.10 y 3.12.
+- **Python 3.10 como mínimo** (el venv de CosyVoice es 3.10), con `from __future__ import annotations` para escribir `X | None`. Nada de `tomllib`, `Self`, `ExceptionGroup`, `datetime.UTC` ni `match` con sintaxis nueva. El pre-push corre las pruebas con la Python del venv; la CI (3.10 y 3.12) solo en los PR de otras personas.
 - **Dos capas.** En el nivel superior de un módulo solo va stdlib, salvo en `api/` y el comando `serve` (fastapi y uvicorn). torch, numpy, soundfile y las librerías de cada motor se importan dentro de funciones, así `--help`, los parsers y el catálogo funcionan sin el venv del motor.
 - **Factory Method solo con dos o más productos**: motores TTS, motores de música y tipos de trabajo (`services/`, con `SERVICES`: narración y música). Lo que tiene un solo producto (referencia, catálogo de voces, fuentes, grabar) es una función o un módulo. SOLID y KISS: nada de interfaces, configuración ni autodescubrimiento que hoy no se usen.
 - Type hints en las firmas de src (ruff ANN001/ANN201 lo exige; los tests quedan fuera). Comillas simples y 120 columnas (`ruff format`).

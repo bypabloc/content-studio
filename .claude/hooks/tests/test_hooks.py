@@ -5,6 +5,7 @@ from __future__ import annotations
 import doctest
 import importlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -116,16 +117,18 @@ def test_prepare_commit_msg_removes_attribution_and_pre_push_protects_main(repo,
     remote = tmp_path_factory.mktemp('remote')
     subprocess.run(['git', 'init', '-q', '--bare', str(remote)], check=True)
     push = [*GIT, 'push', '-q', str(remote)]
-    assert subprocess.run([*push, 'docs/a:main'], cwd=repo, capture_output=True).returncode == 1
-    assert subprocess.run([*push, 'docs/a:sinprefijo'], cwd=repo, capture_output=True).returncode == 1
-    assert subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True).returncode == 0
+    # Como el push de un test dentro del pre-push real: sin unit, que correría el pytest de content-studio aquí.
+    inner = {**os.environ, 'CS_PRE_PUSH_INNER': '1'}
+    assert subprocess.run([*push, 'docs/a:main'], cwd=repo, capture_output=True, env=inner).returncode == 1
+    assert subprocess.run([*push, 'docs/a:sinprefijo'], cwd=repo, capture_output=True, env=inner).returncode == 1
+    assert subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, env=inner).returncode == 0
 
     (repo / 'server/tests/tdd').mkdir(parents=True)
     (repo / 'server/tests/tdd/test_x.py').write_text('')
     subprocess.run(['git', 'add', 'server'], cwd=repo, check=True)
     # Sin los hooks del repo: el pre-commit correría ruff y pytest de content-studio en este repo vacío.
     subprocess.run([*GIT[:5], 'commit', '-qm', 'test: tdd'], cwd=repo, check=True)
-    tdd = subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, text=True)
+    tdd = subprocess.run([*push, 'docs/a'], cwd=repo, capture_output=True, text=True, env=inner)
     assert tdd.returncode == 1 and 'server/tests/tdd/test_x.py' in tdd.stderr
 
 

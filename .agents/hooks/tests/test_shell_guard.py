@@ -48,6 +48,23 @@ def test_blocks_wsl_even_in_the_background(tool_input, code):
     assert ('WSL' in result.stderr) == (code == 2)
 
 
+@pytest.mark.parametrize(
+    ('command', 'code'),
+    [
+        ('git add -A && git commit --no-verify -m "fix: x"', 2),
+        ('git push --no-verify -u origin feature/x', 2),
+        ('git commit -n -m "fix: x"', 2),
+        ('git -c core.hooksPath=/dev/null push origin feature/x', 2),
+        ('git commit -m "docs: nunca --no-verify"', 0),
+        ('git push -u origin feature/x', 0),
+    ],
+)
+def test_blocks_skipping_the_git_hooks(command, code):
+    result = run({'command': command})
+    assert result.returncode == code
+    assert ('--no-verify' in result.stderr) == (code == 2)
+
+
 def test_bad_input_does_not_block():
     assert subprocess.run([sys.executable, str(HOOK)], input='no json', capture_output=True, text=True).returncode == 0
 
@@ -61,7 +78,7 @@ def test_antigravity_gets_a_json_deny_on_stdout():
     assert result.stdout == ''
 
 
-@pytest.mark.parametrize('command', ['sleep 60', 'wsl -l -v'])
+@pytest.mark.parametrize('command', ['sleep 60', 'wsl -l -v', 'git commit --no-verify -m x'])
 def test_the_message_says_what_why_and_instead(command):
     stderr = run({'command': command}).stderr
     assert all(part in stderr for part in ('Blocked by', 'Why:', 'Instead:'))
