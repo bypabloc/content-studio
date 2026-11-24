@@ -74,7 +74,15 @@ export function ItemActions({ item, hasJob, onDone }: Props): React.JSX.Element 
     <UIStack gap="md">
       <UIStack role="group" aria-label={t('library.send_to')} direction="row" gap="sm" className="flex-wrap">
         {(DESTINATIONS[item.media_type] ?? []).map((section) => (
-          <UIButton key={section} variant="secondary" icon="send" onClick={() => sendTo(section, item.path)}>
+          <UIButton
+            key={section}
+            variant="secondary"
+            icon="send"
+            onClick={() => {
+              onDone();
+              sendTo(section, item.path);
+            }}
+          >
             {sendLabel(section)}
           </UIButton>
         ))}
