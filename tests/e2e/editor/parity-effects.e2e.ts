@@ -92,6 +92,8 @@ async function previewSsim(page: import('@playwright/test').Page, label: string,
 }
 
 test('AC-3 y AC-5: el visor conserva color, LUT, chroma y fusión en tres tiempos', async ({ page }) => {
+  // Calcula el SSIM de tres cuadros por cada efecto: solo ya tarda unos 29 s y con 12 workers pasaba los 30 s (spec 023).
+  test.setTimeout(90_000);
   const state = editorState();
   state.project.doc = fixture.doc;
   const fallback = editorReplies(state);

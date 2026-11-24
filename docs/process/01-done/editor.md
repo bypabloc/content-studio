@@ -1,6 +1,6 @@
 ---
 modulo: editor
-actualizada: 2026-11-23
+actualizada: 2026-11-24
 ---
 
 # Editor
@@ -63,3 +63,4 @@ Permite organizar y editar audio, video e imágenes sin modificar los archivos d
 - El CLI encoló render WAV y MP3 con el worker desde un proyecto de prueba de 5 s. Ambos salieron a 48 kHz estéreo y 5,000 s; el WAV midió -21,8 LUFS/-21,1 dBTP y MP3 podcast -16,2 LUFS/-15,5 dBTP.
 - El SHA-256 de la entrada coincide antes y después. Los espectrogramas `tmp/spec-017/export-1.png` y `export-2.png` muestran el tono continuo sin cortes.
 - Los cuatro e2e del Editor pasan y Playwright listó 61 pruebas como aprobadas; el runner no terminó ni mostró exit 0, registrado entonces como pendiente; en la 020 el runner terminó con exit 0.
+- 2026-11-24: verificación integral (023): el render guarda su resultado en el trabajo y la exportación entra en la biblioteca.

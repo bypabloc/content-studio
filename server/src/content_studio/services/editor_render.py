@@ -5,6 +5,7 @@ El trabajo corre `content_studio.editor.render_main` y deja el archivo en `expor
 
 from __future__ import annotations
 
+import json
 import math
 import sys
 from pathlib import Path
@@ -81,3 +82,14 @@ def build_command(params: dict[str, Any], output_dir: Path) -> list[str]:
     if params.get('subtitle_mode'):
         command += ['--subtitle-mode', str(params['subtitle_mode'])]
     return [*command, '--out-dir', str(output_dir)]
+
+
+def result(output_dir: Path) -> str | None:
+    """Lo que el worker guarda en `jobs.result` al terminar (spec 023): el `result.json` del render, con la ruta del
+    archivo exportado que lee el Editor; None si falta o no es JSON."""
+    try:
+        text = (output_dir / 'result.json').read_text(encoding='utf-8')
+        json.loads(text)
+    except (OSError, ValueError):
+        return None
+    return text

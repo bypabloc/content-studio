@@ -41,3 +41,4 @@ Un solo lugar para lo que genera el estudio y lo que hay en las carpetas que el 
 
 - 2026-11-24: «Publicar» en el detalle: títulos, descripción, hashtags y capítulos por plataforma (spec 021).
 - 2026-11-24: spec 020, Biblioteca de medios.
+- 2026-11-24: verificación integral (023): las exportaciones del Editor se indexan desde su `result.json`.

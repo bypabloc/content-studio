@@ -78,3 +78,12 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [024-peaks-403-catalogo](024-peaks-403-catalogo.md) | `/media/peaks` da 403 a las muestras del catálogo de voces (hallado por `app-check`) | Con la próxima spec de voces o `/media` | Agente |
 | [022-rutas-largas-hf](022-rutas-largas-hf.md) | La descarga de Hugging Face pasa `MAX_PATH` si la carpeta de motores es muy profunda | Después del lote | Agente |
 | [022-firma-de-codigo](022-firma-de-codigo.md) | Firmar el instalador (Azure Trusted Signing, OV o EV): tiene costo | Antes de difundir el instalador | Usuario |
+| [016-lufs-real-fuera-de-ac3](016-lufs-real-fuera-de-ac3.md) | Sonoridad de mezclas con picos fuera de AC-3 | Después del merge de 016; no bloquea | Agente |
+| [016-escucha-y-capturas](016-escucha-y-capturas.md) | Escucha del usuario, capturas, medición del ducking y corrida de la UI de Mezcla | Después del merge de 016; no bloquea | Agente |
+| [016-arrastrar-a-ranura](016-arrastrar-a-ranura.md) | Arrastrar a la ranura y arrastrar regiones de la Mezcla | Después del merge de 016; no bloquea | Agente |
+| [023-llm-tildes](023-llm-tildes.md) | El asistente (Qwen3.5-9B) a veces quita tildes y comas al revisar un guion | Antes de publicar; con el próximo ajuste del asistente | Agente |
+| [023-transcripcion-por-ruta](023-transcripcion-por-ruta.md) | Publicar busca la transcripción por la ruta escrita igual, no por el archivo | Después del lote | Agente |
+| [023-quemar-antes-de-vertical](023-quemar-antes-de-vertical.md) | Quemar subtítulos y después convertir a vertical los corta en los bordes | Con la próxima spec de Convertir o Subtítulos | Agente |
+| [023-recorrido-en-la-ui](023-recorrido-en-la-ui.md) | El recorrido encadenado no se hizo con la UI de la app instalada | Antes de publicar la v0.1.0 | Usuario y agente |
+| [023-detalles-del-recorrido](023-detalles-del-recorrido.md) | Detalles menores del recorrido: palabra clave con coma y origen viejo en la quema | Después del lote | Agente |
+| [022-release-dispatch](022-release-dispatch.md) | AC-10 real: correr `release.yml` en `workflow_dispatch` dry-run cuando esté en `main` | Al pasar el lote a main | Agente |

@@ -7,6 +7,7 @@ indexan una vez con `backfill`.
 
 from __future__ import annotations
 
+import json
 import sqlite3
 import subprocess
 from pathlib import Path
@@ -89,12 +90,23 @@ def job_outputs(output_dir: str | None) -> list[Path]:
     return sorted(path for path in folder.iterdir() if path.is_file() and media_type(path) is not None)
 
 
+def result_output(output_dir: str | None) -> list[Path]:
+    """El medio que un trabajo deja fuera de su carpeta y anota en `result.json` (el render del Editor, spec 023)."""
+    try:
+        output = json.loads((Path(output_dir or '') / 'result.json').read_text(encoding='utf-8')).get('output')
+    except (OSError, ValueError, AttributeError):
+        return []
+    path = Path(output) if output_dir and isinstance(output, str) else None
+    return [path] if path is not None and path.is_file() and media_type(path) else []
+
+
 def register_job(conn: sqlite3.Connection, job: dict) -> list[int]:
     """Registra las salidas de un trabajo terminado y devuelve los ids de sus ítems."""
     kind = item_kind(job['kind'])
     if kind is None:
         return []
-    ids = [upsert(conn, path, kind, 'job', job_id=job['id']) for path in job_outputs(job['output_dir'])]
+    found = [*job_outputs(job['output_dir']), *result_output(job['output_dir'])]
+    ids = [upsert(conn, path, kind, 'job', job_id=job['id']) for path in found]
     return [item for item in ids if item is not None]
 
 

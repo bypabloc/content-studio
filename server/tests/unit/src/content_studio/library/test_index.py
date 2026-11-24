@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from contextlib import closing
@@ -112,3 +113,29 @@ def test_a_job_without_output_folder_registers_nothing(tmp_path):
         jobs.update(conn, job_id, status='done', output_dir=str(tmp_path / 'gone'))
 
         assert index.register_job(conn, jobs.get(conn, job_id)) == []
+
+
+@needs_ffmpeg
+def test_an_editor_export_outside_the_job_folder_is_registered_from_its_result(tmp_path):
+    """Spec 023: el render del Editor deja el archivo en `exports/` del proyecto y su ruta en `result.json`."""
+    conn = _db(tmp_path)
+    job = _done_job(conn, tmp_path, 'editor.render', 'render')
+    export = _wav(tmp_path / 'proyecto' / 'exports' / 'final.wav')
+    (Path(job['output_dir']) / 'result.json').write_text(
+        json.dumps({'status': 'done', 'output': str(export)}), encoding='utf-8'
+    )
+
+    [item] = index.register_job(conn, job)
+
+    row = conn.execute('SELECT path, kind, job_id FROM library_items WHERE id = ?', (item,)).fetchone()
+    assert tuple(row) == (str(export), 'editor', job['id'])
+
+
+def test_a_result_without_a_media_output_adds_nothing(tmp_path):
+    """Un `result.json` sin `output`, roto o que apunta a algo que no es un medio no agrega ítems."""
+    conn = _db(tmp_path)
+    job = _done_job(conn, tmp_path, 'editor.render', 'render')
+    result = Path(job['output_dir']) / 'result.json'
+    for text in ('{"status": "done"}', 'roto', json.dumps({'output': str(tmp_path / 'nada.wav')})):
+        result.write_text(text, encoding='utf-8')
+        assert index.register_job(conn, job) == []

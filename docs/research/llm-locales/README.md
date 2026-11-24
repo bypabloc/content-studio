@@ -1,6 +1,6 @@
 # LLM locales para content-studio: Gemma 4 y Qwen (noviembre de 2026)
 
-Investigación del 2026-11-18 para la spec [019](../../specs/001-017-studio/019-local-llm-assist/README.md). El equipo es una RTX 4060 Laptop con 8 GB de VRAM y unos 32 GB de RAM, que corre un modelo a la vez en la GPU y trabaja en español neutro latinoamericano.
+Investigación del 2026-11-18 para la spec 019 (hoy la 021, `local-llm-assist`; su carpeta la borró la 023 y está en el historial de git). El equipo es una RTX 4060 Laptop con 8 GB de VRAM y unos 32 GB de RAM, que corre un modelo a la vez en la GPU y trabaja en español neutro latinoamericano.
 
 **Cómo leer este documento**: los benchmarks, tamaños y licencias son datos del fabricante. Las pruebas de traducción y de offload las midieron terceros. Los tok/s son estimaciones. **No hay ningún benchmark de español específico**, así que el modelo por defecto se decide con una prueba propia (spec 017, AC-10).
 

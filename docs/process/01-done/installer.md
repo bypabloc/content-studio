@@ -29,3 +29,4 @@ Instalar Content Studio en Windows sin un checkout ni permisos de administrador,
 ## Historial
 
 - 2026-11-24: spec 022.
+- 2026-11-24: verificación integral (023): instalación, motores recomendados y recorrido completo sobre la app instalada.

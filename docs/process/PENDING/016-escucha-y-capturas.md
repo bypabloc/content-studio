@@ -10,4 +10,4 @@
 
 **Cómo cerrarlo.** Abrir la app (`bun run --cwd client tauri dev`), seguir el flujo de `03-verificacion-final.md` y guardar las capturas en `tmp/spec-016/`.
 
-**Dónde.** `docs/specs/001-017-studio/016-mix-ducking/03-verificacion-final.md`, secciones 2 y 3.
+**Dónde.** `docs/specs/001-017-studio/016-mix-ducking/03-verificacion-final.md`, secciones 2 y 3 (la carpeta la borró la 023: está en el historial de git, `git log --all -- docs/specs/001-017-studio/016-mix-ducking`).

@@ -234,7 +234,10 @@ class Worker:
         if _status(conn, job['id']) == 'cancelled':
             return
         if code == 0:
-            jobs.update(conn, job['id'], status='done', finished_at=utc_now())
+            outcome = getattr(
+                self.services[job['kind']], 'result', None
+            )  # p. ej. la ruta exportada del Editor (spec 023)
+            jobs.update(conn, job['id'], status='done', finished_at=utc_now(), result=outcome and outcome(out_dir))
             self._chain(conn, job, out_dir)
             # La biblioteca (spec 020, AC-1) registra las salidas; si falla, el trabajo sigue terminado.
             with contextlib.suppress(OSError, sqlite3.Error):

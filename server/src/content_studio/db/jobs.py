@@ -24,6 +24,7 @@ EDITABLE = {
 def _decode(row: sqlite3.Row) -> dict:
     job = dict(row)
     job['params'] = json.loads(job['params'])
+    job['result'] = json.loads(job['result']) if job.get('result') else None
     job['starred'] = bool(job['starred'])
     return job
 

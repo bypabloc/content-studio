@@ -106,3 +106,24 @@ def test_validate_requires_a_text():
     """El trabajo necesita un guion de texto."""
     assert script_review.validate({'text': ''})[0]['code'] == 'invalid_text'
     assert script_review.validate({'text': 'Hola.'}) == []
+
+
+def test_a_revision_that_removes_accents_is_discarded():
+    """Spec 023: Qwen3.5-9B devolvió «como» y «aplicacion» por «cómo» y «aplicación». La regla 12 pide las tildes
+    (sin ellas el motor cambia la sílaba tónica): el párrafo se descarta y el motivo nombra las palabras."""
+    text = 'Hoy te muestro cómo armo un video, sin salir de una aplicación.'
+    revised = 'Hoy te muestro como armo un video, sin salir de una aplicacion.'
+    ask, _ = _fake({'paragraphs': [{'index': 0, 'revised': revised, 'changes': []}]})
+
+    result = script_review.run({'text': text, 'all': True}, ask)
+
+    assert result['paragraphs'] == []
+    [discarded] = result['discarded']
+    assert discarded['reasons'] == ['accents removed: aplicación, cómo']
+
+
+def test_adding_an_accent_or_keeping_them_is_not_a_removal():
+    """Poner una tilde que faltaba («asi» → «así») o dejar las que había no cuenta como quitar tildes."""
+    assert script_review.lost_accents('Así ahorro tiempo despues.', 'Así ahorro tiempo después.') == []
+    assert script_review.lost_accents('asi ahorro', 'así ahorro') == []
+    assert script_review.lost_accents('Una canción', 'Una cancion nueva') == ['canción']
