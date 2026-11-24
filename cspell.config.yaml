@@ -68,6 +68,9 @@ overrides:
   # Tareas del asistente (spec 021): números en letras y pistas de idioma en español, como el linter del guion.
   - filename: 'server/src/content_studio/llm/tasks/**'
     language: en,es
+  # Idiomas de traducción (spec 021): cada nombre va en su idioma.
+  - filename: 'server/src/content_studio/subtitles/languages.py'
+    words: [español, português, français, italiano, deutsch, nederlands, polski]
   # Cliente (spec 005, D-1): el catálogo y los comentarios van en español; los identificadores, en inglés.
   # «Masterización» (spec 006, D-2) es la opción de voz de «Avanzado»: el diccionario es-es no la trae; va por palabra.
   - filename: 'client/**'

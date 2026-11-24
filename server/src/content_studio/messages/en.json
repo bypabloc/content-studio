@@ -417,6 +417,7 @@
   "error.invalid_engine_action": "The requested engine action is not valid.",
   "error.invalid_folder": "The folder is not valid: choose a folder that exists.",
   "error.invalid_gap": "The minimum gap and the padding cannot be negative.",
+  "error.invalid_glossary": "The glossary must be a list of names of up to 80 characters.",
   "error.invalid_library_query": "The sort order or a filter date is not valid.",
   "error.invalid_name": "The name cannot be empty.",
   "error.invalid_prefix": "Only selector choices are reset; {prefix} is not one of them.",

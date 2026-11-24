@@ -417,6 +417,7 @@
   "error.invalid_engine_action": "La acción solicitada para el motor no es válida.",
   "error.invalid_folder": "La carpeta no es válida: elige una carpeta que exista.",
   "error.invalid_gap": "El hueco mínimo y el margen no pueden ser negativos.",
+  "error.invalid_glossary": "El glosario debe ser una lista de nombres de 80 caracteres como máximo.",
   "error.invalid_library_query": "El orden o una fecha del filtro no son válidos.",
   "error.invalid_name": "El nombre no puede quedar vacío.",
   "error.invalid_prefix": "Solo se restablecen las elecciones de los selectores; {prefix} no lo es.",

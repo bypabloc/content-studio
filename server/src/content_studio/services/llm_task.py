@@ -32,5 +32,9 @@ def service(task: str) -> SimpleNamespace:
         ]
 
     return SimpleNamespace(
-        RESOURCE=RESOURCE, ERROR_CODES=ERROR_CODES, validate=TASKS[task].validate, build_command=build_command
+        RESOURCE=RESOURCE,
+        ERROR_CODES=ERROR_CODES,
+        prepare=getattr(TASKS[task], 'prepare', None),  # las de subtítulos resuelven el proyecto
+        validate=TASKS[task].validate,
+        build_command=build_command,
     )

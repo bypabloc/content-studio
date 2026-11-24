@@ -14,9 +14,21 @@ from pathlib import Path
 
 from content_studio.common import progress
 from content_studio.llm import client, models
-from content_studio.llm.tasks import music_caption, script_review
+from content_studio.llm.tasks import (
+    music_caption,
+    script_review,
+    subtitles_correct,
+    subtitles_keywords,
+    subtitles_translate,
+)
 
-TASKS = {'script_review': script_review, 'music_caption': music_caption}
+TASKS = {
+    'script_review': script_review,
+    'music_caption': music_caption,
+    'subtitles_translate': subtitles_translate,
+    'subtitles_correct': subtitles_correct,
+    'subtitles_keywords': subtitles_keywords,
+}
 EXIT_CODES = {'llm_invalid_output': 30, 'llm_timeout': 31, 'llm_unavailable': 32, 'llm_not_installed': 33}
 
 
