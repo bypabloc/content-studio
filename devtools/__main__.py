@@ -23,6 +23,7 @@ COMMANDS = {
     'app-check': ('devtools.app_check.main', 'run [--scenario=<n>] [--data=temp|real]: the real app over CDP'),
     'llm-eval': ('devtools.llm_eval', '[--models ...]: compare the assistant models in Spanish (needs the GPU)'),
     'bundle': ('devtools.bundle', 'stage the installer resources in client/src-tauri/bundle/ (uv, server, seed)'),
+    'release': ('devtools.release', 'stage a GitHub Release in tmp/release/: installer, signature, latest.json, notes'),
     'version': ('devtools.version', '<x.y.z> | --check [--expect x.y.z]: the app version in every manifest'),
 }
 

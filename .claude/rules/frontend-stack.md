@@ -57,7 +57,13 @@ Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Ca
 | geist (fuentes) | 1.9.2, declarado sin importar (`WARNING/005-desvios-de-diseno.md`) |
 | Base UI (`@base-ui/react`, raíz) · shadcn (CLI, raíz) | 1.9.0 · 4.22.0 |
 | Tauri (crate) · tauri-build | 2.12.7 · 2.7.6 |
-| Plugins de Tauri (crate) | dialog 2.8.4 · opener 2.7.3 · notification 2.8.1 · window-state 2.5.0 |
+| Plugins de Tauri (crate) | dialog 2.8.4 · opener 2.7.3 · notification 2.8.1 · window-state 2.5.0 · updater 2.14.1 · process 2.4.0 |
+| Plugins de Tauri (JS) para actualizar | plugin-updater 2.14.1 · plugin-process 2.4.0 |
+
+## Instalador y actualizaciones (spec 022)
+
+* El instalador es NSIS por usuario, en español (`bundle.windows.nsis` de `tauri.conf.json`). Sus recursos (`uv.exe`, el server en `app/` y `seed/`) los arma `python -m devtools bundle` y solo los suma `tauri build --config src-tauri/tauri.bundle.json`: `tauri dev` y `cargo check` no los necesitan.
+* El updater (`tauri-plugin-updater`) solo se registra en la app instalada; el client lo usa desde `shared/update/useUpdater.ts` (aviso al abrir y Ajustes > Acerca de). Publicar: [release.md](../../docs/operations/release.md).
 
 ## Reglas
 

@@ -206,5 +206,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [021-traduccion-en-bloque](021-traduccion-en-bloque.md) | La traducción se revisa por cue y se acepta como pista entera; Corregir y Palabras clave, por cue | antes de `main` |
 | [021-limites-de-plataformas](021-limites-de-plataformas.md) | Límites de títulos, descripción, hashtags y capítulos de YouTube, Reels y TikTok en `platforms.json` | antes de `main` |
 | [021-recomendado](021-recomendado.md) | El ★ del asistente es Qwen3.5 9B (98,7 % contra 89,3 %) y el thinking va apagado en los dos modelos | antes de `main` |
+| [022-datos-al-desinstalar](022-datos-al-desinstalar.md) | Borrar los datos al desinstalar usa la casilla de Tauri más una confirmación | `main` (AC-8) |
+| [022-recursos-del-bundle](022-recursos-del-bundle.md) | Recursos del instalador en `tauri.bundle.json`; el server en `app/` con el lock | `main` |
+| [022-updater](022-updater.md) | Updater solo en la app instalada; clave sin contraseña; faltan los secrets | el primer Release (usuario) |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
