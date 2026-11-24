@@ -3,6 +3,12 @@
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
+mod prepare;
+mod runner;
+
+pub use prepare::{prepare, Layout, Progress};
+pub use runner::CommandRunner;
+
 /// Dónde corre la app: en un checkout (desarrollo) o instalada, con sus recursos empaquetados.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Mode {

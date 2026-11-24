@@ -14,6 +14,8 @@ pub enum ServerError {
     Spawn,
     Timeout,
     Exited,
+    /// Un paso de la preparación de la app instalada (spec 022), con su código.
+    Bootstrap(&'static str),
 }
 
 impl ServerError {
@@ -22,6 +24,7 @@ impl ServerError {
             ServerError::Spawn => "server_spawn_failed",
             ServerError::Timeout => "server_timeout",
             ServerError::Exited => "server_exited",
+            ServerError::Bootstrap(code) => code,
         }
     }
 }
@@ -60,15 +63,20 @@ pub fn wait_for_ready(
     }
 }
 
-/// `uv run --project <raíz> studio serve --port 0 --token <t>`, sin consola en Windows y suspendido hasta `job::resume`.
+/// `<programa> <antes…> serve --port 0 --token <t>`, sin consola en Windows y suspendido hasta `job::resume`. En un checkout el
+/// programa es `uv run --project <raíz> studio`; en la app instalada, el `studio` de su venv (spec 022).
 /// shortcut: stderr va a null, así que el motivo de un fallo es el código de ServerError y no el log; subir cuando haya pantalla de log.
-pub fn spawn(project: &Path, token: &str, env: &[(&str, OsString)]) -> Result<Child, ServerError> {
-    let mut command = Command::new("uv");
+pub fn spawn(
+    program: &Path,
+    before: &[OsString],
+    token: &str,
+    env: &[(&str, OsString)],
+) -> Result<Child, ServerError> {
+    let mut command = Command::new(program);
     command
         .envs(env.iter().map(|(key, value)| (*key, value)))
-        .args(["run", "--project"])
-        .arg(project)
-        .args(["studio", "serve", "--port", "0", "--token", token])
+        .args(before)
+        .args(["serve", "--port", "0", "--token", token])
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
@@ -87,92 +95,11 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 #[cfg(windows)]
 const CREATE_SUSPENDED: u32 = 0x0000_0004;
 
-// cspell:ignore Toolhelp SNAPTHREAD THREADENTRY ascii
 /// Un Job Object con KILL_ON_JOB_CLOSE: el server muere con la ventana aunque la app se cierre mal (D-2).
 #[cfg(windows)]
-pub mod job {
-    use std::os::windows::io::AsRawHandle;
-    use std::process::Child;
+pub mod job;
 
-    use windows::Win32::Foundation::{CloseHandle, HANDLE};
-    use windows::Win32::System::Diagnostics::ToolHelp::{
-        CreateToolhelp32Snapshot, Thread32First, Thread32Next, TH32CS_SNAPTHREAD, THREADENTRY32,
-    };
-    use windows::Win32::System::JobObjects::{
-        AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
-        SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
-        JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
-    };
-    use windows::Win32::System::Threading::{OpenThread, ResumeThread, THREAD_SUSPEND_RESUME};
-
-    pub struct KillOnClose(HANDLE);
-
-    // El HANDLE solo se usa para cerrarlo en Drop; el Job no se comparte entre hilos.
-    unsafe impl Send for KillOnClose {}
-    unsafe impl Sync for KillOnClose {}
-
-    impl KillOnClose {
-        pub fn assign(child: &Child) -> windows::core::Result<Self> {
-            let mut info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION::default();
-            info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
-            unsafe {
-                let job = CreateJobObjectW(None, None)?;
-                // Desde aquí, el Drop cierra el handle si un `?` de abajo sale antes del Ok.
-                let owned = Self(job);
-                let size = std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32;
-                SetInformationJobObject(
-                    job,
-                    JobObjectExtendedLimitInformation,
-                    &info as *const _ as *const _,
-                    size,
-                )?;
-                AssignProcessToJobObject(job, HANDLE(child.as_raw_handle()))?;
-                Ok(owned)
-            }
-        }
-    }
-
-    /// Pone en marcha los hilos de un proceso que arrancó suspendido, ya dentro del Job.
-    pub fn resume(child: &Child) -> windows::core::Result<()> {
-        let pid = child.id();
-        unsafe {
-            let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0)?;
-            let result = resume_threads(snapshot, pid);
-            CloseHandle(snapshot)?;
-            result
-        }
-    }
-
-    /// Reanuda cada hilo de `pid` que aparece en la instantánea de hilos.
-    unsafe fn resume_threads(snapshot: HANDLE, pid: u32) -> windows::core::Result<()> {
-        let mut entry = THREADENTRY32 {
-            dwSize: std::mem::size_of::<THREADENTRY32>() as u32,
-            ..Default::default()
-        };
-        let mut more = Thread32First(snapshot, &mut entry).is_ok();
-        while more {
-            if entry.th32OwnerProcessID == pid {
-                let thread = OpenThread(THREAD_SUSPEND_RESUME, false, entry.th32ThreadID)?;
-                let previous = ResumeThread(thread);
-                let _ = CloseHandle(thread);
-                if previous == u32::MAX {
-                    return Err(windows::core::Error::from_thread());
-                }
-            }
-            more = Thread32Next(snapshot, &mut entry).is_ok();
-        }
-        Ok(())
-    }
-
-    impl Drop for KillOnClose {
-        fn drop(&mut self) {
-            unsafe {
-                let _ = CloseHandle(self.0);
-            }
-        }
-    }
-}
-
+// cspell:ignore ascii
 #[cfg(test)]
 mod tests {
     use super::*;

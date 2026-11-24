@@ -14,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[3]
 SERVER = ROOT / 'server'
 SRC = SERVER / 'src'
 DATA = SERVER / 'data'
-LOGS = ROOT / 'logs'
 NARRATION = DATA / 'narration'
 MUSIC = DATA / 'music'
 REFERENCE = NARRATION / 'reference'
@@ -32,6 +31,14 @@ def data_dir() -> Path:
         local = os.environ.get('LOCALAPPDATA')
         return (Path(local) if local else Path.home() / 'AppData' / 'Local') / 'Content Studio'
     return Path.home() / '.local' / 'share' / 'content-studio'
+
+
+def logs_dir() -> Path:
+    """Logs de la app: `logs/` del checkout, o la carpeta de datos si está instalada (spec 022)."""
+    return data_dir() / 'logs' if os.environ.get('CONTENT_STUDIO_MODE') == 'installed' else ROOT / 'logs'
+
+
+LOGS = logs_dir()
 
 
 def resources_dir() -> Path | None:

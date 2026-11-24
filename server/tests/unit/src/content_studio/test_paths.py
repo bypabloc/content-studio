@@ -79,3 +79,12 @@ def test_ac1_resources_env(monkeypatch, tmp_path):
     assert paths.resources_dir() is None
     monkeypatch.setenv('CONTENT_STUDIO_RESOURCES', str(tmp_path))
     assert paths.resources_dir() == tmp_path.resolve()
+
+
+def test_logs_go_to_the_data_folder_of_the_installed_app(monkeypatch, tmp_path):
+    """Spec 022: los logs de la app instalada van a su carpeta de datos, no a la de programas."""
+    monkeypatch.delenv('CONTENT_STUDIO_MODE', raising=False)
+    assert paths.logs_dir() == paths.ROOT / 'logs'
+    monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
+    monkeypatch.setenv('CONTENT_STUDIO_HOME', str(tmp_path))
+    assert paths.logs_dir() == tmp_path.resolve() / 'logs'
