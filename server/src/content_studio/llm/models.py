@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import os
+import sqlite3
 from pathlib import Path
 from typing import NamedTuple
+
+from content_studio.db import settings
 
 RUNTIME = 'llama-cpp'
 FAMILY = 'assistant'
@@ -59,6 +62,12 @@ def server_path(root: Path) -> Path:
 def installed(model: str, root: Path) -> bool:
     """¿Está el GGUF del modelo en disco?"""
     return gguf_path(model, root).is_file()
+
+
+def selected(conn: sqlite3.Connection) -> str:
+    """El modelo que el usuario eligió en el selector (`select.llm.model`), o el ★ si no eligió uno válido."""
+    value = settings.get(conn, 'select.llm.model', RECOMMENDED)
+    return value if isinstance(value, str) and value in MODELS else RECOMMENDED
 
 
 def status(root: Path) -> list[dict]:

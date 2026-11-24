@@ -195,3 +195,5 @@ llama
 cudart
 ggml
 unsloth
+webui
+ngl

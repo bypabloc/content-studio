@@ -28,7 +28,9 @@ from content_studio import gpu_lock, paths
 from content_studio.db import connection, jobs, subtitle_projects
 from content_studio.db.connection import utc_now
 from content_studio.jobs import queue, runner
+from content_studio.jobs.llm_warm import LlmWarm, is_llm
 from content_studio.library import index as library_index
+from content_studio.llm.client import LlmError
 from content_studio.services.registry import SERVICES
 from content_studio.services.storage_move import KIND as STORAGE_MOVE
 from content_studio.subtitles import translate
@@ -97,6 +99,7 @@ class Worker:
         cpu_slots: int | None = None,
         poll: float = 0.2,
         publish: Callable[[dict], None] | None = None,
+        llm: LlmWarm | None = None,
     ) -> None:
         """Worker sobre la base `db_path`; `main` es el checkout principal (dueño del candado de la GPU)."""
         self.db_path = db_path
@@ -110,6 +113,7 @@ class Worker:
         self._gpu_busy = False
         self._processes: dict[int, subprocess.Popen] = {}
         self._stop = threading.Event()
+        self._llm = llm or LlmWarm()  # el asistente caliente entre trabajos llm.* (spec 021, D-2)
 
     def start(self) -> None:
         """Recupera los `running` de una caída (AC-11) y arranca el despachador en segundo plano."""
@@ -143,6 +147,8 @@ class Worker:
                     time.sleep(self.poll)  # otra sesión tiene la GPU: se espera
                 try:
                     self._claim_and_run(conn, job)
+                    if is_llm(job['kind']):
+                        self._llm.stop()  # desde el CLI no queda caliente
                 finally:
                     gpu_lock.release(self.main)
             else:
@@ -195,6 +201,8 @@ class Worker:
                         return
                 try:
                     self._claim_and_run(conn, job)
+                    if is_llm(job['kind']):
+                        self._llm.hold(conn, lambda waiting: self._claim_and_run(conn, waiting), self._stop, self.poll)
                 finally:
                     gpu_lock.release(self.main)
         finally:
@@ -205,9 +213,9 @@ class Worker:
         jobs.update(conn, job['id'], output_dir=str(out_dir))
         finished = threading.Event()
         threading.Thread(target=self._watch_cancel, args=(job['id'], finished), daemon=True).start()
-        detail = ''
+        detail, llm_code = '', None
         try:
-            command = self.services[job['kind']].build_command(job['params'], out_dir)
+            command = self.services[job['kind']].build_command(self._llm.prepare(conn, job), out_dir)
             code = runner.run(
                 conn,
                 job['id'],
@@ -218,6 +226,8 @@ class Worker:
             )
         except OSError as error:  # el proceso no arrancó (p. ej. falta el venv del motor)
             code, detail = -1, str(error)
+        except LlmError as error:  # el asistente no está instalado o no cargó
+            code, llm_code = -1, error.code
         finally:
             finished.set()
             self._processes.pop(job['id'], None)
@@ -235,7 +245,7 @@ class Worker:
                 conn,
                 job['id'],
                 status='error',
-                error_code=errors.get(code, 'process_failed'),
+                error_code=llm_code or errors.get(code, 'process_failed'),
                 error_detail=_error_detail(job['kind'], out_dir, detail, code),
                 finished_at=utc_now(),
             )
