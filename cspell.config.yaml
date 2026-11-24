@@ -27,6 +27,11 @@ ignoreRegExpList:
   # Rutas del repo en español (docs, datos, devtools): son nombres de archivo, no palabras.
   - '(?:server|docs|devtools)/[\w/.-]+'
 overrides:
+  # Hooks del instalador NSIS (spec 022): comentarios con ; y el texto del diálogo en español.
+  - filename: '**/*.nsh'
+    language: en,es
+    ignoreRegExpList:
+      - '/;.*$/gm'
   # Los strings de los tests pueden estar en español (son datos de prueba, no identificadores).
   - filename: '**/tests/**'
     ignoreRegExpList:

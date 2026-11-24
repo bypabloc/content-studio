@@ -42,6 +42,12 @@ def read(root: Path = paths.ROOT) -> dict[str, str | None]:
     return found
 
 
+def current(root: Path = paths.ROOT) -> str | None:
+    """La versión de la app: la de `tauri.conf.json`."""
+    match = re.search(MANIFESTS[REFERENCE], _text(root, REFERENCE))
+    return match.group(2) if match else None
+
+
 def write(new: str, root: Path = paths.ROOT) -> None:
     """Escribe `new` en cada manifiesto; el resto del archivo (y sus fines de línea) queda igual."""
     for rel, pattern in MANIFESTS.items():
