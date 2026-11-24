@@ -755,6 +755,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/library/{item_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Publish Suggestions
+         * @description Lo último que generó «Publicar» para el ítem (publish.json en disco), o 404 `publish_not_found`.
+         */
+        get: operations["publish_suggestions_library__item_id__publish_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/library": {
         parameters: {
             query?: never;
@@ -1105,6 +1125,86 @@ export interface paths {
          * @description Manda varios ítems a la papelera; se detiene en el primero protegido o que no existe.
          */
         post: operations["trash_library_trash_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/llm/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Status
+         * @description El estado del asistente para los botones de IA, Ajustes y la cola.
+         */
+        get: operations["status_llm_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/llm/languages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Translation Languages
+         * @description Los idiomas a los que se traducen los subtítulos, con ★ en el inglés.
+         */
+        get: operations["translation_languages_llm_languages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/llm/jobs/{job_id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Result
+         * @description La propuesta de una tarea terminada (result.json de su carpeta).
+         */
+        get: operations["result_llm_jobs__job_id__result_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/llm/subtitles/{project_id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply
+         * @description Aplica lo aceptado de una traducción, una corrección o unas palabras clave, y devuelve el documento.
+         */
+        post: operations["apply_llm_subtitles__project_id__apply_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1677,6 +1777,16 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * ApplyIn
+         * @description El trabajo cuya propuesta se aplica y los cues aceptados (todos si no se dice).
+         */
+        ApplyIn: {
+            /** Job Id */
+            job_id: number;
+            /** Accepted */
+            accepted?: number[] | null;
+        };
+        /**
          * BinaryInfo
          * @description Ruta al ejecutable y versión que informa.
          */
@@ -1939,6 +2049,18 @@ export interface components {
             group_key?: string | null;
         };
         /**
+         * Language
+         * @description Un idioma de traducción, con su nombre en su idioma.
+         */
+        Language: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Recommended */
+            recommended: boolean;
+        };
+        /**
          * LintOut
          * @description Lo que devuelve el lint: los avisos, las palabras, los segundos estimados y la guía de formato.
          */
@@ -1951,6 +2073,40 @@ export interface components {
             seconds: number;
             /** Guide */
             guide: string;
+        };
+        /**
+         * LlmModel
+         * @description Un modelo del asistente: tamaño, VRAM, si es el ★ y si está instalado.
+         */
+        LlmModel: {
+            /** Model */
+            model: string;
+            /** Size Gb */
+            size_gb: number;
+            /** Vram Gb */
+            vram_gb: number;
+            /** Recommended */
+            recommended: boolean;
+            /** Installed */
+            installed: boolean;
+        };
+        /**
+         * LlmStatus
+         * @description Si el asistente está activo e instalado, el modelo elegido y el que está cargado (y en cuánto se libera).
+         */
+        LlmStatus: {
+            /** Enabled */
+            enabled: boolean;
+            /** Runtime Installed */
+            runtime_installed: boolean;
+            /** Selected */
+            selected: string;
+            /** Models */
+            models: components["schemas"]["LlmModel"][];
+            /** Loaded */
+            loaded: string | null;
+            /** Release In */
+            release_in: number | null;
         };
         /**
          * MediaInfo
@@ -3528,6 +3684,39 @@ export interface operations {
             };
         };
     };
+    publish_suggestions_library__item_id__publish_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     search_library_get: {
         parameters: {
             query?: {
@@ -4178,6 +4367,116 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TrashIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status_llm_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LlmStatus"];
+                };
+            };
+        };
+    };
+    translation_languages_llm_languages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Language"][];
+                };
+            };
+        };
+    };
+    result_llm_jobs__job_id__result_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_llm_subtitles__project_id__apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyIn"];
             };
         };
         responses: {

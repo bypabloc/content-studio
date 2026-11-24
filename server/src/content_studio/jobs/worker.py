@@ -113,7 +113,7 @@ class Worker:
         self._gpu_busy = False
         self._processes: dict[int, subprocess.Popen] = {}
         self._stop = threading.Event()
-        self._llm = llm or LlmWarm()  # el asistente caliente entre trabajos llm.* (spec 021, D-2)
+        self.llm = llm or LlmWarm()  # el asistente caliente entre trabajos llm.* (spec 021, D-2)
 
     def start(self) -> None:
         """Recupera los `running` de una caída (AC-11) y arranca el despachador en segundo plano."""
@@ -148,7 +148,7 @@ class Worker:
                 try:
                     self._claim_and_run(conn, job)
                     if is_llm(job['kind']):
-                        self._llm.stop()  # desde el CLI no queda caliente
+                        self.llm.stop()  # desde el CLI no queda caliente
                 finally:
                     gpu_lock.release(self.main)
             else:
@@ -202,7 +202,7 @@ class Worker:
                 try:
                     self._claim_and_run(conn, job)
                     if is_llm(job['kind']):
-                        self._llm.hold(conn, lambda waiting: self._claim_and_run(conn, waiting), self._stop, self.poll)
+                        self.llm.hold(conn, lambda waiting: self._claim_and_run(conn, waiting), self._stop, self.poll)
                 finally:
                     gpu_lock.release(self.main)
         finally:
@@ -215,7 +215,7 @@ class Worker:
         threading.Thread(target=self._watch_cancel, args=(job['id'], finished), daemon=True).start()
         detail, llm_code = '', None
         try:
-            command = self.services[job['kind']].build_command(self._llm.prepare(conn, job), out_dir)
+            command = self.services[job['kind']].build_command(self.llm.prepare(conn, job), out_dir)
             code = runner.run(
                 conn,
                 job['id'],

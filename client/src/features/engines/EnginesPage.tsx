@@ -15,6 +15,7 @@ const GROUPS = [
   ['narration', 'engines.group.narration'],
   ['music', 'engines.group.music'],
   ['transcription', 'engines.group.transcription'],
+  ['assistant', 'engines.group.assistant'],
 ] as const;
 
 function requestedEngine(): string | null {

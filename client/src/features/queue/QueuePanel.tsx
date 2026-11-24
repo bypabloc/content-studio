@@ -5,6 +5,7 @@ import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { t } from '@/shared/i18n/t';
+import { AssistantIndicator } from '@/features/assistant/AssistantIndicator';
 import { reorderAccessibility } from './announce';
 import { JobRow } from './JobRow';
 import { dropOrder } from './order';
@@ -50,6 +51,7 @@ export function QueuePanel() {
           />
         </UIStack>
       </UIStack>
+      <AssistantIndicator />
       {open ? (
         <>
           {visible.length === 0 ? <UIText variant="caption">{t('queue.empty')}</UIText> : null}

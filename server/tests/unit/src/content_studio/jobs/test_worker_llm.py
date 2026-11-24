@@ -115,6 +115,17 @@ def test_ac2_consecutive_llm_jobs_reuse_the_warm_server_and_keep_the_turn(env):
     assert 'stop' not in env.events
 
 
+def test_release_in_counts_down_while_warm(env):
+    """Mientras está caliente, release_in dice cuánto falta para liberar la GPU; sin modelo, None."""
+    job = queue.enqueue(env.conn, 'llm.music_caption', {'description': 'a'}, env.services)
+    env.worker.start()
+    assert _wait_for(lambda: _done(env, job))
+    assert _wait_for(lambda: env.worker.llm.release_in() is not None)
+
+    assert 0 < env.worker.llm.release_in() <= 0.6
+    assert _wait_for(lambda: env.worker.llm.release_in() is None)
+
+
 def test_ac2_an_idle_server_stops_and_releases_the_turn(env):
     """Sin otro trabajo, a los idle_seconds se apaga el servidor y se suelta el candado de la GPU."""
     job = queue.enqueue(env.conn, 'llm.music_caption', {'description': 'a'}, env.services)

@@ -11,6 +11,7 @@ import { t } from '@/shared/i18n/t';
 import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
 
 import { type StyleIn, toAss } from './ass';
+import { AssistantTools } from './AssistantTools';
 import { CueList } from './CueList';
 import { type DocEdit, mergeCues, splitCue } from './cues';
 import { BUILTIN_PRESETS, recommendedPreset } from './presets';
@@ -149,6 +150,16 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
           />
         </UIStack>
       </UIStack>
+      <AssistantTools
+        projectId={projectId}
+        onBeforeRun={async () => {
+          if (draft) await api.put(`/subtitles/${projectId}`, draft);
+        }}
+        onApplied={(saved) => {
+          setDraft(null);
+          queryClient.setQueryData(['subtitles', projectId], saved);
+        }}
+      />
     </UIStack>
   );
 }

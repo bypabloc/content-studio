@@ -203,6 +203,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [021-llama-cpp-version](021-llama-cpp-version.md) | llama.cpp `b12676` CUDA 12.4 x64 con sha256 fijado (paso `download` nuevo) | antes de `main` |
 | [021-recetas-del-asistente](021-recetas-del-asistente.md) | Tres recetas de la familia `assistant`: runtime y un GGUF por modelo | antes de `main` |
 | [021-publish-en-out](021-publish-en-out.md) | `publish.json` en la carpeta del trabajo, no junto al video; migración 8 con solo la ruta | antes de `main` |
+| [021-traduccion-en-bloque](021-traduccion-en-bloque.md) | La traducción se revisa por cue y se acepta como pista entera; Corregir y Palabras clave, por cue | antes de `main` |
 | [021-limites-de-plataformas](021-limites-de-plataformas.md) | Límites de títulos, descripción, hashtags y capítulos de YouTube, Reels y TikTok en `platforms.json` | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

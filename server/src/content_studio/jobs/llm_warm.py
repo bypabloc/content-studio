@@ -33,6 +33,7 @@ class LlmWarm:
     def __init__(self, runtime: Runtime | None = None) -> None:
         """`runtime` se reemplaza en las pruebas por uno simulado."""
         self.runtime = runtime or Runtime()
+        self.idle_until: float | None = None  # reloj monotónico: cuándo se apaga si nadie lo usa
 
     @property
     def running(self) -> bool:
@@ -53,20 +54,27 @@ class LlmWarm:
     ) -> None:
         """Mantiene el servidor (y el turno del llamador) hasta el tiempo de espera o un trabajo de GPU distinto."""
         idle = float(settings.get(conn, 'llm.idle_seconds', IDLE_SECONDS))  # type: ignore[arg-type]
-        deadline = time.monotonic() + idle
+        self.idle_until = time.monotonic() + idle
         while self.running and not stop.is_set():
             waiting = None if queue.paused(conn) else jobs.next_queued(conn, 'gpu')
             if waiting is not None:
                 if not is_llm(waiting['kind']):
                     break
                 run_next(waiting)
-                deadline = time.monotonic() + idle
+                self.idle_until = time.monotonic() + idle
                 continue
-            if time.monotonic() >= deadline:
+            if time.monotonic() >= self.idle_until:
                 break
             stop.wait(poll)
         self.stop()
 
+    def release_in(self) -> float | None:
+        """Segundos hasta que se libere la GPU, o None si no hay un modelo caliente."""
+        if not self.running or self.idle_until is None:
+            return None
+        return max(0.0, round(self.idle_until - time.monotonic(), 1))
+
     def stop(self) -> None:
         """Apaga el servidor si corre."""
         self.runtime.stop()
+        self.idle_until = None
