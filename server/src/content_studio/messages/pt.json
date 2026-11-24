@@ -416,6 +416,7 @@
   "error.invalid_engine_action": "A ação solicitada para o motor não é válida.",
   "error.invalid_folder": "A pasta não é válida: escolha uma pasta que exista.",
   "error.invalid_gap": "O intervalo mínimo e a margem não podem ser negativos.",
+  "error.invalid_library_query": "A ordem ou uma data do filtro não são válidas.",
   "error.invalid_prefix": "Só se redefinem as escolhas dos seletores; {prefix} não é um deles.",
   "error.invalid_profile_name": "O nome do perfil precisa de letras ou números.",
   "error.invalid_span": "O trecho deve durar entre {low} e {high} segundos.",

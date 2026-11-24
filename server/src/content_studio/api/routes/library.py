@@ -9,7 +9,7 @@ import sqlite3
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -18,7 +18,7 @@ from content_studio.api.errors import ApiError
 from content_studio.api.schemas import Job
 from content_studio.db import jobs as job_store
 from content_studio.jobs import queue
-from content_studio.library import scan, thumbs
+from content_studio.library import query, scan, thumbs
 from content_studio.services import library_scan
 
 router = APIRouter()
@@ -45,6 +45,37 @@ def item_or_404(conn: sqlite3.Connection, item_id: int) -> dict:
     if row is None:
         raise ApiError(404, 'item_not_found', item_id=item_id)
     return dict(row)
+
+
+@router.get('/library')
+def search(
+    conn: Conn,
+    q: str | None = None,
+    content: bool = False,
+    kind: str | None = None,
+    media_type: str | None = None,
+    tag: str | None = None,
+    project: int | None = None,
+    folder: int | None = None,
+    origin: str | None = None,
+    starred: bool | None = None,
+    date_from: Annotated[str | None, Query(alias='from')] = None,
+    date_to: Annotated[str | None, Query(alias='to')] = None,
+    min_dur: float | None = None,
+    max_dur: float | None = None,
+    sort: str = 'date',
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=500)] = query.PAGE_SIZE,
+) -> dict:
+    """Ítems de la biblioteca con sus filtros; `content` busca también en guiones y transcripciones en disco."""
+    try:
+        return query.search(
+            conn, q=q, content=content, kind=kind, media_type=media_type, tag=tag, project=project, folder=folder,
+            origin=origin, starred=starred, date_from=date_from, date_to=date_to, min_dur=min_dur, max_dur=max_dur,
+            sort=sort, page=page, page_size=page_size,
+        )  # fmt: skip
+    except ValueError as error:
+        raise ApiError(422, 'invalid_library_query') from error
 
 
 @router.get('/library/folders')

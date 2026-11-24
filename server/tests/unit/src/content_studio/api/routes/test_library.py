@@ -14,6 +14,23 @@ from content_studio.library import index
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
 
 
+def test_search_returns_the_page_and_rejects_a_bad_sort(api):
+    """GET /library devuelve `{items, total}` con los filtros; un orden que no existe da 422."""
+    (api.tmp / 'out').mkdir()
+    (api.tmp / 'out' / 'a.srt').write_text('', encoding='utf-8')
+    with closing(connection.connect(api.tmp / 'base.db')) as conn:
+        job_id = jobs.insert(conn, 'media.convert', 'cpu', {})
+        jobs.update(conn, job_id, status='done', output_dir=str(api.tmp / 'out'))
+        index.register_job(conn, jobs.get(conn, job_id))
+
+    found = api.client.get('/library?kind=convert&from=2000-01-01&media_type=subtitle', headers=api.headers)
+    bad = api.client.get('/library?sort=random', headers=api.headers)
+
+    assert found.status_code == 200
+    assert (found.json()['total'], found.json()['items'][0]['name']) == (1, 'a.srt')
+    assert (bad.status_code, bad.json()['code']) == (422, 'invalid_library_query')
+
+
 def test_folders_can_be_added_listed_and_removed(api):
     """POST, GET y DELETE de /library/folders; una ruta que no es carpeta da 422 `invalid_folder`."""
     folder = api.tmp / 'videos'
