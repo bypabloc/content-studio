@@ -28,10 +28,10 @@ Que Content Studio se instale en cualquier Windows con un instalador NSIS por us
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Modo instalado: resolución de rutas, recursos empaquetados y siembra de datos | PEN |
-| 2 | Primer arranque en Rust: uv python, uv sync y pantalla de progreso | PEN |
-| 3 | NSIS: por usuario, en español, accesos y desinstalar conservando datos | PEN |
-| 4 | Updater, versión y workflow de release | PEN |
+| 1 | Modo instalado: resolución de rutas, recursos empaquetados y siembra de datos | IMP (3b99e2b, 30f6512, b350147) |
+| 2 | Primer arranque en Rust: uv python, uv sync y pantalla de progreso | IMP (11547b8) |
+| 3 | NSIS: por usuario, en español, accesos y desinstalar conservando datos | IMP (29c933c) |
+| 4 | Updater, versión y workflow de release | IMP (5d2470f, bbcd9f3, 65417a7) |
 
 ## Decisiones clave
 

@@ -129,12 +129,14 @@ def samples_dir() -> Path:
 
 
 def outputs_dir(database: Path | None = None) -> Path:
-    """Carpeta de resultados, en Documentos si la app está instalada."""
+    """Carpeta de resultados: en Documentos si la app está instalada, o en la aislada de CONTENT_STUDIO_HOME."""
     _, configured = _storage_paths(database)
     if isinstance(configured, str) and configured:
         return Path(configured).expanduser().resolve()
     if os.environ.get('CONTENT_STUDIO_MODE') == 'installed':
-        return Path.home() / 'Documents' / 'Content Studio'
+        # Con CONTENT_STUDIO_HOME (una instalación aislada, spec 022) las salidas tampoco van a Documentos.
+        isolated = os.environ.get('CONTENT_STUDIO_HOME')
+        return data_dir() / 'outputs' if isolated else Path.home() / 'Documents' / 'Content Studio'
     return ROOT / 'out'
 
 

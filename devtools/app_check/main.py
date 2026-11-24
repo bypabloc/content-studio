@@ -69,6 +69,7 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument(
         '--data', choices=env.MODES, default='temp', help="temp (default) or the user's real data, read-only"
     )
+    run.add_argument('--binary', type=Path, help='an installed content-studio.exe to open instead of building one')
     return top
 
 
@@ -78,8 +79,10 @@ def emit(result: dict, code: int) -> int:
     return code
 
 
-def run(names: list[str], data: str) -> int:
-    """Una corrida completa; los procesos que abre mueren al cerrar el Job."""
+def run(names: list[str], data: str, binary: Path | None = None) -> int:
+    """Una corrida completa; los procesos que abre mueren al cerrar el Job. Con `binary` (la app instalada, spec 022)
+    no compila: abre ese ejecutable con el mismo entorno aislado.
+    """
     if os.name != 'nt':
         return emit({'error': 'app-check needs Windows and WebView2'}, 2)
     try:
@@ -98,10 +101,11 @@ def run(names: list[str], data: str) -> int:
         'log': log.relative_to(ROOT).as_posix(),
     }
     merged = {**os.environ, **run_.env}
-    print(f'app-check: building {result["commit"][:7]} ({result["log"]})', file=sys.stderr)
-    if launch.build(ROOT, run_.env, log) != 0:
-        return emit({**result, 'error': build_error(log)}, 2)
-    exe = launch.binary(run_.env)
+    if binary is None:
+        print(f'app-check: building {result["commit"][:7]} ({result["log"]})', file=sys.stderr)
+        if launch.build(ROOT, run_.env, log) != 0:
+            return emit({**result, 'error': build_error(log)}, 2)
+    exe = binary if binary is not None else launch.binary(run_.env)
     if not exe.is_file():
         return emit({**result, 'error': f'binary not found at {exe}'}, 2)
     result['binary'] = exe.relative_to(ROOT).as_posix() if exe.is_relative_to(ROOT) else str(exe)
@@ -121,9 +125,9 @@ def run(names: list[str], data: str) -> int:
 
 
 def main(argv: list[str]) -> int:
-    """Entrada del comando: `run [--scenario=<n>]... [--data=temp|real]`."""
+    """Entrada del comando: `run [--scenario=<n>]... [--data=temp|real] [--binary=<exe>]`."""
     options = parser().parse_args(argv)
     if options.command != 'run':
         parser().print_help(sys.stderr)
         return 2
-    return run(options.scenario or ['smoke'], options.data)
+    return run(options.scenario or ['smoke'], options.data, options.binary)

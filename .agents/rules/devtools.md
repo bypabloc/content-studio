@@ -21,7 +21,7 @@ python -m devtools <comando> [args]
 | `gpu-turn status` | Quién tiene la GPU, VRAM en uso y sesiones abiertas del proyecto (exit 0 libre, 1 ocupada) |
 | `gpu-turn run --job=<t> -- <cmd>` | Corre `<cmd>` con el turno tomado y lo suelta al terminar (`turno-gpu.md`) |
 | `agent-context` | Mide lo que cargan Claude Code, Codex y Antigravity; exit 1 si algo pasa su límite. Lo corre el `pre-commit` |
-| `app-check run [--scenario=<n>] [--data=temp\|real]` | Compila y abre la app del worktree aislada y corre escenarios de Playwright por CDP; capturas en `tmp/app-check/<run>/` (`verify-before-claiming-done.md` §3) |
+| `app-check run [--scenario=<n>] [--data=temp\|real] [--binary=<exe>]` | Compila y abre la app del worktree aislada y corre escenarios de Playwright por CDP; capturas en `tmp/app-check/<run>/` (`verify-before-claiming-done.md` §3). `--binary` abre una app instalada sin compilar (`installed`, `updater`) |
 | `llm-eval [--models ...]` | Corre los 50 casos en español de `tests/llm_eval/cases.jsonl` con cada modelo del asistente instalado (con el turno de la GPU) y deja `tmp/llm-eval/<fecha>/report.md` |
 | `version <x.y.z>` · `version --check [--expect x.y.z]` | Escribe la versión de la app en los manifiestos y los locks, o falla si alguno difiere (el pre-commit lo corre en `validators`) |
 | `bundle` | Arma los recursos del instalador en `client/src-tauri/bundle/`: `uv.exe` verificado, el server versionado con el lock y los datos que se siembran |

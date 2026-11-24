@@ -31,8 +31,18 @@ def test_ac1_home_and_installed_mode(monkeypatch, tmp_path):
     monkeypatch.setattr(Path, 'home', lambda: tmp_path)
     assert paths.engines_dir() == tmp_path / 'app/engines'
     assert paths.models_cache() == tmp_path / 'app/engines/hf'
-    assert paths.outputs_dir() == tmp_path / 'Documents/Content Studio'
+    assert paths.outputs_dir() == tmp_path / 'app/outputs'  # aislada: nada en Documentos (spec 022)
     assert paths.db_path() == tmp_path / 'app/content-studio.db'
+
+
+def test_the_installed_app_without_home_keeps_its_outputs_in_documents(monkeypatch, tmp_path):
+    """Sin CONTENT_STUDIO_HOME, la app instalada guarda las salidas en Documentos\\Content Studio."""
+    monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
+    monkeypatch.delenv('CONTENT_STUDIO_HOME', raising=False)
+    monkeypatch.setenv('LOCALAPPDATA', str(tmp_path / 'local'))
+    monkeypatch.setattr(Path, 'home', lambda: tmp_path)
+    monkeypatch.setattr(paths, '_storage_paths', lambda database=None: (None, None))
+    assert paths.outputs_dir() == tmp_path / 'Documents/Content Studio'
 
 
 def test_ac1_settings_override_storage(monkeypatch, tmp_path):

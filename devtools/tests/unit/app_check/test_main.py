@@ -96,6 +96,21 @@ def test_ac4_env_errors_are_exit_2(fake, capsys, monkeypatch):
     assert '--data' in line(capsys)['error']
 
 
+def test_binary_opens_the_installed_app_without_building(fake, capsys, tmp_path):
+    """--binary (spec 022): no compila (un build roto no importa) y abre ese ejecutable; si no existe, exit 2."""
+    fake.build = 1
+    installed = tmp_path / 'Programs/Content Studio/content-studio.exe'
+    installed.parent.mkdir(parents=True)
+    installed.write_text('')
+
+    assert main.main(['run', '--scenario=installed', f'--binary={installed}']) == 0
+    assert fake.started[-1] == [str(installed)]
+    assert line(capsys)['scenarios'] == ['installed']
+
+    assert main.main(['run', f'--binary={tmp_path / "missing.exe"}']) == 2
+    assert 'binary not found' in line(capsys)['error']
+
+
 def test_bad_arguments_and_help(fake, capsys):
     with pytest.raises(SystemExit) as bad:
         main.main(['run', '--data=prod'])

@@ -26,6 +26,17 @@ bun run --cwd client tauri build --config src-tauri/tauri.bundle.json   # con TA
 uv run --no-project python -m devtools release --installer <target>/release/bundle/nsis/<exe> [--dry-run]
 ```
 
+## Probar la app instalada
+
+Instala fuera del checkout (en un checkout, la app arranca en modo desarrollo) y ábrela aislada con `app-check`:
+
+```bash
+"<instalador>.exe" /S /D=<carpeta fuera del repo>\app
+python -m devtools app-check run --scenario=installed --binary=<carpeta>/app/content-studio.exe
+```
+
+`installed` exige la pantalla de preparación y la bienvenida; `updater` acepta una versión nueva servida desde un `latest.json` local (un build de prueba con `--config` que cambia `version` y `plugins.updater.endpoints`). Con `CONTENT_STUDIO_HOME`, la app, sus salidas y el borrado al desinstalar quedan en esa carpeta.
+
 ## Windows protegió tu PC
 
 El instalador no tiene firma de código ([PENDING/022-firma-de-codigo](../process/PENDING/022-firma-de-codigo.md)): SmartScreen muestra «Windows protegió tu PC». Se sigue con **Más información** > **Ejecutar de todas formas**. Las notas de cada Release lo explican.

@@ -76,4 +76,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [020-tipos-de-trabajo-en-cola](020-tipos-de-trabajo-en-cola.md) | La cola solo traduce `music` y `narration`; los demás tipos se ven crudos (`library.scan`) | En la 023 o una spec de la cola; no bloquea el merge | Agente |
 | [024-aprobar-hooks-codex](024-aprobar-hooks-codex.md) | Aprobar en Codex (`/hooks`) `shell_guard.py` y `computer_use_guard.py`, y probar que bloquea `sky.list_apps()` | Después del merge de 024 y tras cada cambio de un hook | Usuario |
 | [024-peaks-403-catalogo](024-peaks-403-catalogo.md) | `/media/peaks` da 403 a las muestras del catálogo de voces (hallado por `app-check`) | Con la próxima spec de voces o `/media` | Agente |
+| [022-rutas-largas-hf](022-rutas-largas-hf.md) | La descarga de Hugging Face pasa `MAX_PATH` si la carpeta de motores es muy profunda | Después del lote | Agente |
 | [022-firma-de-codigo](022-firma-de-codigo.md) | Firmar el instalador (Azure Trusted Signing, OV o EV): tiene costo | Antes de difundir el instalador | Usuario |
