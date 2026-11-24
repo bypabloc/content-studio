@@ -13,6 +13,16 @@ from content_studio.db import connection
 from content_studio.services.storage_move import follow_output_move
 
 
+def _indexed(request: Request, path: str, target: Path) -> bool:
+    """¿Es un archivo de la biblioteca (spec 020)? Las carpetas vigiladas están fuera de las raíces fijas."""
+    database = getattr(request.app.state, 'db_path', None)
+    if database is None:
+        return False
+    with closing(connection.connect(database)) as conn:
+        row = conn.execute('SELECT 1 FROM library_items WHERE path IN (?, ?)', (path, str(target))).fetchone()
+    return row is not None
+
+
 def allowed_file(request: Request, path: str) -> Path:
     """Ruta absoluta de un archivo permitido. Una relativa se cuenta desde la raíz; fuera de las carpetas permitidas
     (también con `..`) da 403, y un archivo que no existe, 404."""
@@ -27,7 +37,7 @@ def allowed_file(request: Request, path: str) -> Path:
         if not any(target.is_relative_to(root) for root in roots):
             with closing(connection.connect(database)) as conn:
                 target = follow_output_move(target, conn).resolve()
-    if not any(target.is_relative_to(root) for root in roots):
+    if not any(target.is_relative_to(root) for root in roots) and not _indexed(request, path, target):
         raise ApiError(403, 'forbidden_path')
     if not target.is_file():
         raise ApiError(404, 'not_found')

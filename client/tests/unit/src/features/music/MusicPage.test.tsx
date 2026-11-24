@@ -199,4 +199,28 @@ describe('MusicPage (spec 011, D-6, AC-8)', () => {
 
     expect(window.location.hash).toBe('#/engines?engine=acestep');
   });
+
+  it('spec 020, AC-7: «Editar y repetir» (?from_job=) abre con los mismos estilos, duración y opciones', async () => {
+    window.location.hash = '#/music?from_job=31';
+    const fallback = api.get.getMockImplementation();
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/31'
+        ? { id: 31, kind: 'music', params: { style: ['corporate-clean'], duration: 45, variants: 2, no_lm: true, evaluate: false, retries: 3 } }
+        : fallback?.(path),
+    );
+    renderPage();
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/jobs/31'));
+    const generate = await screen.findByRole('button', { name: t('music.generate') });
+    await waitFor(() => expect(generate).toHaveProperty('disabled', false));
+    fireEvent.click(generate);
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/jobs', {
+        kind: 'music',
+        params: expect.objectContaining({ style: ['corporate-clean'], duration: 45, variants: 2, no_lm: true, evaluate: false, retries: 3 }),
+      }),
+    );
+  });
+
 });

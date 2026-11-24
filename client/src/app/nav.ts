@@ -22,6 +22,7 @@ export function navItems(): NavItem[] {
     { id: 'normalize', group: t('nav.group.edit'), label: t('nav.normalize'), icon: 'volume' },
     { id: 'mix', group: t('nav.group.edit'), label: t('nav.mix'), icon: 'mix' },
     { id: 'editor', group: t('nav.group.edit'), label: t('nav.editor'), icon: 'editor' },
+    { id: 'library', group: t('nav.group.edit'), label: t('nav.library'), icon: 'library' },
     { id: 'voices', group: t('nav.group.voices'), label: t('nav.voices'), icon: 'voices' },
     { id: 'catalog', group: t('nav.group.voices'), label: t('nav.catalog'), icon: 'layers' },
     { id: 'engines', group: t('nav.group.settings'), label: t('nav.engines'), icon: 'server' },

@@ -42,7 +42,7 @@ def test_untag_rename_remove_and_delete(api):
     project = api.client.post('/projects', json={'name': 'Curso'}, headers=h).json()
     api.client.post(f'/projects/{project["id"]}/items', json={'items': [item]}, headers=h)
 
-    untagged = api.client.request('DELETE', f'/library/{item}/tags', json={'name': 'reel'}, headers=h)
+    untagged = api.client.delete(f'/library/{item}/tags?name=reel', headers=h)
     renamed = api.client.patch(f'/projects/{project["id"]}', json={'name': 'Curso 2'}, headers=h)
     removed = api.client.delete(f'/projects/{project["id"]}/items/{item}', headers=h)
     deleted = api.client.delete(f'/projects/{project["id"]}', headers=h)

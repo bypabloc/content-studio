@@ -37,6 +37,32 @@ def test_a_path_outside_the_roots_is_403_even_with_dot_dot(tmp_path):
     assert escape.value.status_code == 403
 
 
+def test_a_file_indexed_by_the_library_is_served_outside_the_roots(tmp_path):
+    """Spec 020: un archivo de una carpeta vigilada (indexado) se sirve; uno de la misma carpeta sin indexar, no."""
+    from contextlib import closing
+
+    from content_studio.db import connection, schema
+    from content_studio.library import scan
+
+    root = (tmp_path / 'out').resolve()
+    root.mkdir()
+    watched = (tmp_path / 'videos').resolve()
+    watched.mkdir()
+    (watched / 'a.srt').write_text('', encoding='utf-8')
+    with closing(connection.connect(tmp_path / 'base.db')) as conn:
+        schema.migrate(conn)
+        scan.add_folder(conn, watched)
+        scan.scan(conn)
+    (watched / 'b.wav').write_bytes(b'x')
+    request = request_with([root])
+    request.app.state.db_path = tmp_path / 'base.db'
+
+    assert allowed_file(request, str(watched / 'a.srt')) == watched / 'a.srt'
+    with pytest.raises(ApiError) as other:
+        allowed_file(request, str(watched / 'b.wav'))
+    assert other.value.status_code == 403
+
+
 def test_a_missing_file_inside_the_roots_is_404(tmp_path):
     root = (tmp_path / 'out').resolve()
     root.mkdir()

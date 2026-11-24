@@ -98,4 +98,16 @@ describe('SubtitlesPage', () => {
 
     window.location.hash = '';
   });
+
+  it('spec 020: «Editar y repetir» (?from_job=) precarga el archivo de origen', async () => {
+    window.location.hash = '#/subtitles?from_job=8';
+    api.get.mockImplementation(async (path: string) =>
+      path === '/jobs/8' ? { id: 8, kind: 'subtitles.create', params: { origin: 'file', input: '/media/s.mp4' } } : [],
+    );
+    renderPage();
+
+    expect(await screen.findByDisplayValue('/media/s.mp4')).toBeTruthy();
+    window.location.hash = '';
+  });
+
 });

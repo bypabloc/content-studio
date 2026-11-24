@@ -103,7 +103,7 @@ def add_folder(body: FolderIn, conn: Conn) -> dict:
 
 @router.delete('/library/folders/{folder_id}', status_code=204)
 def remove_folder(folder_id: int, conn: Conn) -> Response:
-    """Deja de vigilarla y quita sus ítems del índice; los archivos quedan en disco."""
+    """Quita la carpeta vigilada y sus ítems del índice; los archivos quedan en disco."""
     if not scan.remove_folder(conn, folder_id):
         raise ApiError(404, 'folder_not_found', folder_id=folder_id)
     return Response(status_code=204)

@@ -47,10 +47,10 @@ def tag_item(item_id: int, body: NameIn, conn: Conn) -> list[str]:
 
 
 @router.delete('/library/{item_id}/tags')
-def untag_item(item_id: int, body: NameIn, conn: Conn) -> list[str]:
-    """Quita la etiqueta y devuelve las que quedan."""
+def untag_item(item_id: int, name: str, conn: Conn) -> list[str]:
+    """Quita la etiqueta `?name=` y devuelve las que quedan (un DELETE no lleva cuerpo)."""
     try:
-        return tags.remove(conn, item_id, body.name)
+        return tags.remove(conn, item_id, name)
     except LookupError as error:
         raise ApiError(404, 'item_not_found', item_id=item_id) from error
 

@@ -1,8 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { NarrationPage } from '@/features/narration/NarrationPage';
 import { QueuePanel } from '@/features/queue/QueuePanel';
-import { CatalogPage } from '@/features/voices/CatalogPage';
-import { MyVoicesPage } from '@/features/voices/MyVoicesPage';
 import { UISkeleton } from '@/shared/components/atoms/UISkeleton';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { nextTheme, UIThemeToggle } from '@/shared/components/molecules/UIThemeToggle';
@@ -26,6 +24,9 @@ const ConvertPage = lazy(() => import('@/features/convert/ConvertPage').then((mo
 const NormalizePage = lazy(() => import('@/features/normalize/NormalizePage').then((module) => ({ default: module.NormalizePage })));
 const MixPage = lazy(() => import('@/features/mix/MixPage').then((module) => ({ default: module.MixPage })));
 const EditorPage = lazy(() => import('@/features/editor/EditorPage').then((module) => ({ default: module.EditorPage })));
+const MyVoicesPage = lazy(() => import('@/features/voices/MyVoicesPage').then((module) => ({ default: module.MyVoicesPage })));
+const CatalogPage = lazy(() => import('@/features/voices/CatalogPage').then((module) => ({ default: module.CatalogPage })));
+const LibraryPage = lazy(() => import('@/features/library/LibraryPage').then((module) => ({ default: module.LibraryPage })));
 const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((module) => ({ default: module.WelcomeGate })));
 
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
@@ -77,8 +78,16 @@ export function Shell({ version }: { version: string }) {
             <EnginesPage />
           </Suspense>
         )}
-        {section?.id === 'voices' && <MyVoicesPage />}
-        {section?.id === 'catalog' && <CatalogPage />}
+        {section?.id === 'voices' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <MyVoicesPage />
+          </Suspense>
+        )}
+        {section?.id === 'catalog' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <CatalogPage />
+          </Suspense>
+        )}
         {section?.id === 'subtitles' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <SubtitlesPage />
@@ -102,6 +111,11 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'editor' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <EditorPage />
+          </Suspense>
+        )}
+        {section?.id === 'library' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <LibraryPage />
           </Suspense>
         )}
         {section?.id === 'settings' && (

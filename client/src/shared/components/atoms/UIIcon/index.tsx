@@ -110,6 +110,11 @@ import {
   Layers,
   Diamond,
   SlidersHorizontal,
+  LibraryBig,
+  LayoutGrid,
+  List,
+  FolderPlus,
+  HardDrive,
 } from 'lucide-react'
 
 // Íconos de lucide-react (SVG inline, sin red ni icon fonts) por nombre estable.
@@ -236,6 +241,11 @@ const ICONS = {
   magnet: Magnet,
   layers: Layers,
   keyframe: Diamond,
+  library: LibraryBig,
+  'layout-grid': LayoutGrid,
+  list: List,
+  'folder-plus': FolderPlus,
+  'hard-drive': HardDrive,
 } satisfies Record<string, LucideIcon>
 
 /** Nombre de un ícono del set. */
