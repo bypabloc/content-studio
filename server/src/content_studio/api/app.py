@@ -93,7 +93,8 @@ def create_app(
     `roots` son las carpetas que /files puede servir (por defecto out/, las referencias y el catálogo de voces);
     `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
     with closing(connection.connect(db_path)) as conn:
-        schema.migrate(conn)
+        backups = None if db_path == Path(':memory:') else db_path.parent / 'backups'  # spec 022, D-4
+        schema.migrate(conn, backups)
         library_index.backfill(conn)  # una sola vez: los trabajos anteriores a la biblioteca (spec 020, AC-1)
     app = FastAPI(title='content-studio', version='0.1.0')
     app.add_middleware(
