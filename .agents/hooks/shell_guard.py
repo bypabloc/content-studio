@@ -1,9 +1,12 @@
-"""PreToolUse de la shell (Claude Code, Codex y Antigravity): bloquea `sleep` en primer plano y todo uso de WSL.
+"""PreToolUse de la shell (Claude Code, Codex y Antigravity): bloquea `sleep` en primer plano, todo uso de WSL y
+saltar los hooks de git.
 
 * `sleep` (command-output.md): congela al agente sin avanzar. Se espera en segundo plano, con un comando que bloquea
   hasta la señal real (`gh pr checks --watch`) o con Monitor.
 * `wsl` (command-output.md): WSL es otra instancia que al usuario no le interesa. Un fallo que solo da la CI (Linux) se
   diagnostica con `gh run view <id> --log-failed` y se valida con el push, nunca instalando ni corriendo nada en WSL.
+* `--no-verify`, `git commit -n` o `git -c core.hooksPath=…` (git-workflow.md): los hooks de git son la única
+  verificación de los PR de bypabloc, porque la CI de calidad no corre en ellos. Si un hook falla, se corrige.
 
 Lee el JSON del evento por stdin. Claude Code y Codex (`tool_input.command`) bloquean con exit 2 y el motivo en
 stderr; Antigravity (`toolCall.args.CommandLine`) no documenta exit codes y bloquea con `{"decision": "deny"}` en
@@ -22,6 +25,9 @@ import sys
 START = r'(?:^|[;&|\n(]|\b(?:do|then|else)\b)\s*(?:\w+=\S*\s+)*'
 # El comando solo, no un nombre que empieza igual (`wsl=0`, `sleep_x`): lo sigue un espacio o el fin.
 END = r'(?=\s|$)'
+# cspell:ignore aemqs
+# Una cadena entre comillas simples o dobles: su texto no es un comando.
+QUOTED = re.compile(r"'[^']*'|\"[^\"]*\"")
 # Cada mensaje dice qué se bloqueó, por qué y qué hacer en su lugar.
 RULES = [
     (
@@ -30,6 +36,20 @@ RULES = [
         'and the real wait is already signalled by the harness or by the command itself (command-output.md). '
         'Instead: run the long command in the background (run_in_background) and keep working until its notification, '
         'block on the real signal (`gh pr checks <n> --watch`, the command itself) or watch a condition with Monitor.',
+    ),
+    (
+        # Sin las cadenas entre comillas (ver reason): un mensaje de commit puede nombrar --no-verify.
+        re.compile(
+            START
+            + r'git\b[^;&|\n]*?(?:\s--no-verify\b|\s-c\s*core\.hooksPath\b|\scommit\b[^;&|\n]*?\s-[aemqsSv]*n[aemqsSv]*'
+            + END
+            + ')',
+            re.IGNORECASE,
+        ),
+        'Blocked by .agents/hooks/shell_guard.py: skipping the git hooks (`--no-verify`, `git commit -n` or '
+        '`git -c core.hooksPath`). Why: the hooks are the only quality gate of the pull requests by bypabloc; the CI '
+        'no longer runs it (git-workflow.md). Instead: fix what the hook reports (skill fix-hooks) and commit or push '
+        'again.',
     ),
     (
         re.compile(START + r'wsl(?:\.exe)?' + END, re.IGNORECASE),
@@ -58,8 +78,17 @@ def reason(command: str) -> str | None:
     False
     >>> [bool(reason(c)) for c in ('out=[]; wsl=0; n=1', 'sleep_x=1 python a.py', 'ls; sleep', 'x && wsl')]
     [False, False, True, True]
+    >>> [bool(reason(c)) for c in ('git commit --no-verify -m x', 'git push --no-verify origin a', 'git commit -nm x')]
+    [True, True, True]
+    >>> [bool(reason(c)) for c in ('git -c core.hooksPath=/dev/null commit -m x', 'cd a && git commit -n -m x')]
+    [True, True]
+    >>> [bool(reason(c)) for c in ('git commit -m "docs: no --no-verify"', 'git push -n origin a', 'git commit -am x')]
+    [False, False, False]
+    >>> [bool(reason(c)) for c in ('git config core.hooksPath .git-hooks', 'git commit --amend --no-edit')]
+    [False, False]
     """
-    return next((text for pattern, text in RULES if pattern.search(command)), None)
+    unquoted = QUOTED.sub("''", command)
+    return next((text for pattern, text in RULES if pattern.search(unquoted)), None)
 
 
 def check(event: dict) -> str | None:

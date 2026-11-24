@@ -56,6 +56,15 @@
         ]
       },
       {
+        "matcher": "^PowerShell$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.agents/hooks/shell_guard.py\""
+          }
+        ]
+      },
+      {
         "matcher": "^Grep$",
         "hooks": [
           {

@@ -23,7 +23,7 @@ Reproduce el gate, corrige y repite hasta exit 0. Qué corre cada hook: `.agents
 | `pytest` | Corre el test que falla solo (`uv run pytest <archivo>::<test> -q`), corrige el código; si el cambio de salida es intencional, regenera las fixtures en un commit aparte |
 | `test-runner` (tamaño, espejo, cobertura, D1, mypy) | Divide el archivo por responsabilidad; sintaxis 3.10; `python -m devtools rules --sync` tras editar `.agents/` |
 | `agent-context` | Recorta la regla que pasa el límite y mueve el detalle a `docs/` |
-| `guard-tdd` (pre-push y CI) | Convierte `server/tests/tdd/*` y `devtools/tests/tdd/*` en tests permanentes de su área o bórralos |
+| `guard-tdd` (pre-push) | Convierte `server/tests/tdd/*` y `devtools/tests/tdd/*` en tests permanentes de su área o bórralos |
 | `pre-push`: destino protegido o sin prefijo | Empuja una rama de trabajo y abre un PR |
 
 ## Reglas

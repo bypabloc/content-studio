@@ -70,8 +70,8 @@ Un cambio chico de una sola sesión puede hacerse en una rama del checkout princ
 - **Git hooks locales [.git-hooks/](../../.git-hooks/)** (se activan una vez por clon: `git config core.hooksPath .git-hooks`; el hook `SessionStart` avisa si faltan):
   - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, `test-runner` (lint, spelling, validators) sobre lo staged, y `agent-context` + `reglas` si hay instrucciones de agentes staged.
   - `prepare-commit-msg`: borra las líneas de atribución de IA.
-  - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo, y `guard-tdd` (tests efímeros en `*/tests/tdd/`) y `typecheck` sobre lo que sube.
-  - Si un hook falla, se corrige la causa (skill `fix-hooks`): **nunca** `--no-verify`. La lista de prefijos está también en estos hooks.
+  - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo; corre `guard-tdd`, `typecheck`, `unit` y `tdd` (y `e2e` si cambia el client). `calidad.yml` no corre en PR de `bypabloc`.
+  - Si un hook falla, se corrige (skill `fix-hooks`): **nunca** `--no-verify` ni `commit -n`; `shell_guard.py` los bloquea.
 
 ## Commits y PRs
 
