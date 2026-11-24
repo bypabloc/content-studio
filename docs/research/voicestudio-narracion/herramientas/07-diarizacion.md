@@ -4,6 +4,8 @@
 
 Clon local consultado: commit `80b4594` (2026-11-16).
 
+> **Investigación principal de diarización**: [diarizacion-pyannote](../../diarizacion-pyannote/README.md) (2026-11-24), con pyannote 4.x y community-1 sobre faster-whisper. Esta nota queda como referencia de cómo lo resuelve VoiceStudio.
+
 ---
 
 ## 1. Qué Es

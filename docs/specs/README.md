@@ -6,5 +6,6 @@ El estado del proyecto y lo ya implementado viven en [`docs/process/`](../proces
 
 | Spec | Tipo | Escala | Rama | Estado |
 | :--- | :--- | :--- | :--- | :--- |
+| [025-033-integraciones](025-033-integraciones/README.md) (lote 025–033) | chore · feature | Large | una por spec | las 9 redactadas, PEN |
 
-El próximo número libre es **025**. Los números no se reutilizan: una spec cerrada deja su número en el historial de git.
+El próximo número libre es **034**. Los números no se reutilizan: una spec cerrada deja su número en el historial de git.
