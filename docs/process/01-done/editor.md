@@ -12,24 +12,34 @@ Permite organizar y editar audio, video e imágenes sin modificar los archivos d
 ## Qué hace hoy
 
 - `uv run studio editor render --project <project.json>` encola `editor.render`; cada proyecto vive en `out/editor/<fecha>-<slug>/` con `project.json`, `media/` y `exports/`.
-- La app permite editar pistas de audio y video, imágenes con alfa, transformaciones con keyframes y transiciones. El visor usa WebGL2 y la exportación compone video y audio desde el proyecto.
+- La app permite editar audio, video e imágenes con alfa, transformar clips con keyframes y transiciones, y crear títulos rasterizados con presets. El visor WebGL2 y FFmpeg comparten el PNG del texto.
+- El modelo v3 guarda velocidad de audio y video, corrección de color, LUT `.cube`, chroma key, modos de fusión y pistas de subtítulos vinculadas a proyectos de la 014.
+- El Inspector ofrece velocidad, color, LUT, chroma y fusión; los subtítulos se previsualizan con JASSUB y se pueden quemar en video o exportar como SRT/VTT.
+- Narración, Música, Limpiador, Subtítulos, Convertir, Mezcla y la cola permiten «Abrir en Editor». Las exportaciones del Editor se pueden mandar a Convertir, Normalizar, Subtítulos o Mezcla.
 - Exporta WAV, MP3, FLAC, M4A y Opus; para video, MP4 H.264 o WebM VP9. La normalización y los tramos por marcadores son opcionales.
 - El explorador local es de solo lectura. La grabación crea WAV mono de 24 bits y 48 kHz dentro del proyecto; los videos generan proxies en `.cache/proxies/`. Las fuentes originales no se modifican.
-- Los proyectos v1 se migran a v2 al abrirse; los proyectos son JSON, no filas ni blobs de SQLite.
+- Los proyectos v1 y v2 se migran a v3 al abrirse; los proyectos son JSON, no filas ni blobs de SQLite.
 
 ## Dónde vive
 
-- Código: `server/src/content_studio/editor/` (proyecto, keyframes, proxies y render de video), `services/editor_render.py`, `api/routes/editor.py`, `api/routes/fs.py` y `cli/editor.py`.
-- Cliente: `client/src/features/editor/` (timeline, inspector, visor y compositor) y átomos en `client/src/shared/components/atoms/`.
+- Código: `server/src/content_studio/editor/` (proyecto, tiempos, efectos, proxies y render), `services/editor_render.py`, `api/routes/editor.py`, `api/routes/fs.py` y `cli/editor.py`.
+- Cliente: `client/src/features/editor/` (timeline, inspector, títulos, subtítulos, visor y compositor) y `client/src/shared/navigation/` para «Abrir en Editor» y «Mandar a…».
 - Pruebas: `server/tests/unit/src/content_studio/editor/`, `client/tests/unit/src/features/editor/` y `tests/e2e/editor/`.
-- Decisiones: [017-proyecto-json](../WARNING/017-proyecto-json.md), [017-latencia-grabacion](../WARNING/017-latencia-grabacion.md), [017-preview-media-elements](../WARNING/017-preview-media-elements.md), [017-presupuesto-js](../WARNING/017-presupuesto-js.md), [018-proxies](../WARNING/018-proxies.md), [018-render-video](../WARNING/018-render-video.md), [018-transiciones](../WARNING/018-transiciones.md) y [018-paridad-preview-export](../WARNING/018-paridad-preview-export.md).
+- Decisiones: [017-proyecto-json](../WARNING/017-proyecto-json.md), [017-latencia-grabacion](../WARNING/017-latencia-grabacion.md), [017-preview-media-elements](../WARNING/017-preview-media-elements.md), [017-presupuesto-js](../WARNING/017-presupuesto-js.md), [018-proxies](../WARNING/018-proxies.md), [018-render-video](../WARNING/018-render-video.md), [018-transiciones](../WARNING/018-transiciones.md), [018-paridad-preview-export](../WARNING/018-paridad-preview-export.md), [019-texto-rasterizado](../WARNING/019-texto-rasterizado.md), [019-control-velocidad](../WARNING/019-control-velocidad.md), [019-lut-paridad](../WARNING/019-lut-paridad.md), [019-chroma-paridad](../WARNING/019-chroma-paridad.md), [019-fusion-con-alfa](../WARNING/019-fusion-con-alfa.md) y [019-pista-subtitulos](../WARNING/019-pista-subtitulos.md).
 - Pendiente: [017-app-check-y-flujo-real](../PENDING/017-app-check-y-flujo-real.md) (CDP de WebView2 y toma física).
-- Pendiente 018: [018-e2e-runner](../PENDING/018-e2e-runner.md) (el runner no entrega su resultado final) y [018-app-check-cdp](../PENDING/018-app-check-cdp.md) (WebView2 no respondió a CDP en tres corridas).
+- Pendiente de verificación: [017-e2e-runner](../PENDING/017-e2e-runner.md) (Playwright queda abierto después de imprimir los resultados) y [018-app-check-cdp](../PENDING/018-app-check-cdp.md) (WebView2 no respondió a CDP en tres corridas).
 
 ## Historial
 
 - 2026-11-22: spec 017, editor de audio con timeline, preview, grabación, explorador y exportación.
 - 2026-11-23: spec 018, edición visual con compositor WebGL2, keyframes, transiciones y exportación de video.
+- 2026-11-23: spec 019, proyecto v3, texto rasterizado, velocidad, color, LUT, chroma, fusión, subtítulos e integración con secciones.
+
+## Verificación 019 (2026-11-23)
+
+- Los cuatro e2e nuevos de títulos, chroma/fusión, abrir desde Narración y ausencia de libass imprimieron PASS en corridas enfocadas.
+- La caché global de Chromium no contenía la revisión requerida; las corridas usaron `PLAYWRIGHT_BROWSERS_PATH` de `017-editor-core`.
+- Playwright siguió activo unos nueve minutos sin resumen agregado ni archivos de resultados; se registra en [017-e2e-runner](../PENDING/017-e2e-runner.md).
 
 ## Verificación (2026-11-23)
 
