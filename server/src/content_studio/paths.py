@@ -34,6 +34,12 @@ def data_dir() -> Path:
     return Path.home() / '.local' / 'share' / 'content-studio'
 
 
+def resources_dir() -> Path | None:
+    """Recursos empaquetados de la app instalada (spec 022), que Tauri pasa en `CONTENT_STUDIO_RESOURCES`; o None."""
+    value = os.environ.get('CONTENT_STUDIO_RESOURCES')
+    return Path(value).expanduser().resolve() if value else None
+
+
 def db_path() -> Path:
     """Base de preferencias y trabajos, independiente de los settings de almacenamiento."""
     override = os.environ.get('CONTENT_STUDIO_DB')

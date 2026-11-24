@@ -1,5 +1,6 @@
 //! Arranque del server local (spec 005, D-2): `studio serve --port 0 --token <t>` y la línea `ready` con el puerto.
 
+use std::ffi::OsString;
 use std::io::BufRead;
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
@@ -61,9 +62,10 @@ pub fn wait_for_ready(
 
 /// `uv run --project <raíz> studio serve --port 0 --token <t>`, sin consola en Windows y suspendido hasta `job::resume`.
 /// shortcut: stderr va a null, así que el motivo de un fallo es el código de ServerError y no el log; subir cuando haya pantalla de log.
-pub fn spawn(project: &Path, token: &str) -> Result<Child, ServerError> {
+pub fn spawn(project: &Path, token: &str, env: &[(&str, OsString)]) -> Result<Child, ServerError> {
     let mut command = Command::new("uv");
     command
+        .envs(env.iter().map(|(key, value)| (*key, value)))
         .args(["run", "--project"])
         .arg(project)
         .args(["studio", "serve", "--port", "0", "--token", token])
@@ -241,7 +243,8 @@ mod tests {
             .expect("cmd debe arrancar");
         let job = job::KillOnClose::assign(&child).expect("el Job recibe el proceso suspendido");
         job::resume(&child).expect("el proceso se reanuda dentro del Job");
-        let ping = poll_until(|| child_named(child.id(), "ping.exe")).expect("cmd debe lanzar su ping");
+        let ping =
+            poll_until(|| child_named(child.id(), "ping.exe")).expect("cmd debe lanzar su ping");
         drop(job);
         // Sondeo acotado: si el Job no mata a cmd, la prueba falla en 10 s en vez de esperar los 300 de ping.
         poll_until(|| child.try_wait().ok().flatten()).expect("cmd termina al cerrar el Job");
@@ -280,12 +283,17 @@ mod tests {
     /// Si el proceso `pid` sigue vivo. Un fallo de PowerShell corta la prueba: no puede contar como "muerto".
     #[cfg(windows)]
     fn is_alive(pid: u32) -> bool {
-        let script = format!("if (Get-Process -Id {pid} -ErrorAction SilentlyContinue) {{ 'vivo' }}");
+        let script =
+            format!("if (Get-Process -Id {pid} -ErrorAction SilentlyContinue) {{ 'vivo' }}");
         let out = std::process::Command::new("powershell")
             .args(["-NoProfile", "-Command", &script])
             .output()
             .expect("PowerShell debe arrancar para consultar el proceso");
-        assert!(out.status.success(), "PowerShell falló: {}", String::from_utf8_lossy(&out.stderr));
+        assert!(
+            out.status.success(),
+            "PowerShell falló: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
         String::from_utf8_lossy(&out.stdout).contains("vivo")
     }
 }

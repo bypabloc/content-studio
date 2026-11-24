@@ -71,3 +71,11 @@ def test_ac1_managed_venv_has_priority_over_external_venv(monkeypatch, tmp_path)
     managed.rmdir()
     monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
     assert engine.path_venv() == managed
+
+
+def test_ac1_resources_env(monkeypatch, tmp_path):
+    """Spec 022, AC-1: la app instalada pasa sus recursos en CONTENT_STUDIO_RESOURCES; en un checkout no hay."""
+    monkeypatch.delenv('CONTENT_STUDIO_RESOURCES', raising=False)
+    assert paths.resources_dir() is None
+    monkeypatch.setenv('CONTENT_STUDIO_RESOURCES', str(tmp_path))
+    assert paths.resources_dir() == tmp_path.resolve()

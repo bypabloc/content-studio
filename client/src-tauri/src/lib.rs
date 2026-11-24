@@ -1,5 +1,6 @@
 //! Content Studio (spec 005, D-2): la ventana de Tauri, el server local y el comando `get_connection`.
 
+mod bootstrap;
 mod server;
 
 use std::io::BufReader;
@@ -30,9 +31,9 @@ struct Running {
     _job: server::job::KillOnClose,
 }
 
-/// El server de la sesión: uno solo, que se reutiliza mientras siga vivo.
-#[derive(Clone, Default)]
-pub struct ServerState(Arc<Mutex<Option<Running>>>);
+/// El server de la sesión: uno solo, que se reutiliza mientras siga vivo, y el modo de la app (spec 022).
+#[derive(Clone)]
+pub struct ServerState(Arc<Mutex<Option<Running>>>, Arc<bootstrap::Mode>);
 
 impl ServerState {
     fn connect(&self) -> Result<Connection, ServerError> {
@@ -48,7 +49,7 @@ impl ServerState {
         *slot = None;
 
         let token = new_token();
-        let mut child = server::spawn(&project_root(), &token)?;
+        let mut child = server::spawn(&project_root(), &token, &self.1.server_env())?;
         // En Windows el proceso nace suspendido: el Job lo recibe y solo después corre, así sus hijos quedan en el Job.
         #[cfg(windows)]
         let job = match server::job::KillOnClose::assign(&child)
@@ -129,7 +130,12 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .manage(ServerState::default())
+        .setup(|app| {
+            let resources = app.path().resource_dir().unwrap_or_default();
+            let mode = bootstrap::current_mode(resources);
+            app.manage(ServerState(Arc::default(), Arc::new(mode)));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![get_connection])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")
