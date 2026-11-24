@@ -98,9 +98,14 @@ def _nvidia_used() -> int | None:
     if not shutil.which('nvidia-smi'):
         return None
     done = subprocess.run(
-        ['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'], capture_output=True, text=True
+        ['nvidia-smi', '--query-gpu=memory.used,memory.total', '--format=csv,noheader,nounits'],
+        capture_output=True,
+        text=True,
     )
-    return int(done.stdout.split()[0]) if done.returncode == 0 and done.stdout.strip() else None
+    if done.returncode != 0 or not done.stdout.strip():
+        return None
+    used, total = (int(value) for value in done.stdout.split(',')[:2])
+    return used if used <= total else None
 
 
 def evaluate(model: str, cases: list[dict], ask: Callable[..., dict], stats: list[dict], work: Path) -> dict:

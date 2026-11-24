@@ -132,3 +132,16 @@ def test_main_runs_each_model_with_the_turn_and_writes_the_report(tmp_path, monk
 
     assert events == ['take', 'load gemma-4-e4b', 'stop', 'release', 'take', 'load qwen3.5-9b', 'stop', 'release']
     assert Path(json.loads(capsys.readouterr().out)['report']).is_file()
+
+
+def test_nvidia_used_drops_a_reading_above_the_total(monkeypatch):
+    """nvidia-smi a veces devuelve un used absurdo (~2^44 MiB) en Windows: se descarta en vez de ser el pico."""
+    import subprocess
+
+    answers = iter(['17592181858150, 8188\n', '6100, 8188\n'])
+    monkeypatch.setattr(llm_eval.shutil, 'which', lambda name: 'nvidia-smi')
+    monkeypatch.setattr(
+        llm_eval.subprocess, 'run', lambda *a, **k: subprocess.CompletedProcess(a, 0, stdout=next(answers), stderr='')
+    )
+    assert llm_eval._nvidia_used() is None
+    assert llm_eval._nvidia_used() == 6100

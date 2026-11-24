@@ -107,3 +107,29 @@ def test_a_server_that_dies_before_health_is_llm_unavailable(tmp_path):
         server.ensure_running('gemma-4-e4b')
     assert error.value.code == 'llm_unavailable'
     assert server.model is None
+
+
+@pytest.mark.local
+def test_local_llama_server_answers_a_json_with_the_recommended_model():
+    """-m local (spec 021): llama-server real con el ★ y el turno de la GPU; responde un JSON simple y se apaga."""
+    from content_studio import gpu_lock, paths
+    from content_studio.common.checkout import main_checkout
+    from content_studio.llm import client
+
+    root = paths.engines_dir()
+    if not models.installed(models.RECOMMENDED, root) or not models.server_path(root).is_file():
+        pytest.skip('install llama-cpp and the recommended model from Engines')
+    main = main_checkout(paths.ROOT)
+    assert gpu_lock.acquire(main, 'pytest-local-llm', ['pytest', '-m', 'local'], wait=True, poll=5)
+    server = runtime.Runtime(root)
+    try:
+        spec = models.MODELS[models.RECOMMENDED]
+        url = server.ensure_running(models.RECOMMENDED)
+        rule = {'type': 'object', 'properties': {'legs': {'type': 'integer'}}, 'required': ['legs']}
+        message = [{'role': 'user', 'content': 'Responde en JSON: ¿cuántas patas tiene un perro? Campo legs.'}]
+        assert client.chat(url, message, rule, spec.sampling, spec.extra, timeout=180) == {'legs': 4}
+        process = server.process
+    finally:
+        server.stop()
+        gpu_lock.release(main)
+    assert process is not None and process.poll() is not None
