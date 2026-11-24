@@ -385,6 +385,7 @@
   "error.bad_transform": "A transformação do clipe visual não é válida.",
   "error.bad_transition": "A transição não corresponde à sobreposição de dois clipes visuais na mesma faixa.",
   "error.burn_needs_video": "Queimar legendas precisa de um vídeo: um projeto só de áudio só pode ser exportado.",
+  "error.checksum_mismatch": "O arquivo baixado não corresponde ao sha256 fixado; foi descartado. Instale novamente.",
   "error.codec_unavailable": "Este ffmpeg não tem o codificador {codec}: instale o build completo ou escolha outro formato.",
   "error.consent_required": "Para importar um trecho é preciso confirmar a permissão do dono da voz.",
   "error.disk_full": "Não há espaço em disco suficiente para instalar este motor.",

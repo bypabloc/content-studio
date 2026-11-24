@@ -407,3 +407,63 @@ def test_force_does_not_bypass_manifest_path_ownership(tmp_path):
         installer.uninstall('qwen-0.6b', tmp_path, force=True)
 
     assert (user_data / 'keep').read_bytes() == b'protected'
+
+
+def _zip_bytes():
+    import io
+    import zipfile
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w') as archive:
+        archive.writestr('llama-server.exe', b'binary')
+    return buffer.getvalue()
+
+
+def _serve_bytes(monkeypatch, payload):
+    import io
+
+    from content_studio.engines import steps
+
+    class Response(io.BytesIO):
+        headers = {'Content-Length': str(len(payload))}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            self.close()
+
+    monkeypatch.setattr(steps.urllib.request, 'urlopen', lambda url, timeout: Response(payload))
+
+
+def _download_recipe(sha256):
+    step = {'kind': 'download', 'url': 'https://example.com/llama.zip', 'sha256': sha256, 'extract': 'bin'}
+    return Recipe('fake', 'assistant', 0.1, 0, False, 'MIT', (step,))
+
+
+def test_ac1_checksum_mismatch_aborts_without_extracting(tmp_path, monkeypatch):
+    """Spec 021 AC-1: un sha256 distinto aborta con checksum_mismatch y no deja el zip ni lo extraído."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    _serve_bytes(monkeypatch, _zip_bytes())
+
+    with pytest.raises(installer.InstallError) as error:
+        installer.install(_download_recipe('0' * 64), tmp_path)
+
+    assert error.value.code == 'checksum_mismatch'
+    assert installer.EXIT_CODES['checksum_mismatch']
+    assert not (tmp_path / 'fake' / 'assistant' / 'bin').exists()
+    assert not list((tmp_path / 'hf').rglob('*.zip'))
+
+
+def test_ac1_matching_checksum_extracts_into_the_engine_folder(tmp_path, monkeypatch):
+    """Con el sha256 correcto, el zip se extrae en la carpeta del motor y no queda en la caché."""
+    import hashlib
+
+    payload = _zip_bytes()
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    _serve_bytes(monkeypatch, payload)
+
+    installer.install(_download_recipe(hashlib.sha256(payload).hexdigest()), tmp_path)
+
+    assert (tmp_path / 'fake' / 'assistant' / 'bin' / 'llama-server.exe').read_bytes() == b'binary'
+    assert not list((tmp_path / 'hf').rglob('*.zip'))

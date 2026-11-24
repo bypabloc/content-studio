@@ -200,5 +200,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [020-busqueda-en-disco](020-busqueda-en-disco.md) | La búsqueda en el contenido lee de disco los guiones y transcripciones, con un límite de 2 s; un índice FTS queda para decidirlo con el usuario | antes de `main` |
 | [020-send2trash](020-send2trash.md) | Dependencia nueva `send2trash` (BSD) para mandar a la papelera de Windows desde la Biblioteca | antes de `main` |
 | [020-editar-y-repetir](020-editar-y-repetir.md) | «Editar y repetir» precarga lo que cada sección puede tomar de `params`; Voces y Catálogo pasan a carga diferida por el presupuesto | antes de `main` |
+| [021-llama-cpp-version](021-llama-cpp-version.md) | llama.cpp `b12676` CUDA 12.4 x64 con sha256 fijado (paso `download` nuevo) | antes de `main` |
+| [021-recetas-del-asistente](021-recetas-del-asistente.md) | Tres recetas de la familia `assistant`: runtime y un GGUF por modelo | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).

@@ -98,3 +98,41 @@ def test_every_recipe_that_downloads_from_hugging_face_pins_huggingface_hub():
         if any(step['kind'] == 'hf' for step in recipe.steps):
             packages = [package for step in recipe.steps if step['kind'] == 'pip' for package in step['packages']]
             assert any(re.fullmatch(r'huggingface-hub==[\w.]+', package) for package in packages), recipe.engine
+
+
+def test_ac1_llama_cpp_recipe_downloads_pinned_release_zips():
+    """Spec 021 AC-1: el runtime baja dos zips del release fijado, con sha256, y verifica llama-server."""
+    recipe = recipes.load('llama-cpp')
+    downloads = [step for step in recipe.steps if step['kind'] == 'download']
+    assert recipe.family == 'assistant'
+    assert len(downloads) == 2
+    for step in downloads:
+        assert step['url'].startswith('https://github.com/ggml-org/llama.cpp/releases/download/')
+        assert re.fullmatch(r'[0-9a-f]{64}', step['sha256'])
+        assert step['extract'] == 'bin'
+    assert recipe.steps[-1]['run'] == ['bin/llama-server.exe', '--version']
+
+
+def _download(**changes):
+    step = {'kind': 'download', 'url': 'https://example.com/a.zip', 'sha256': '0' * 64, 'extract': 'bin'}
+    return {**step, **changes}
+
+
+@pytest.mark.parametrize(
+    ('step', 'message'),
+    [
+        (_download(sha256='abc'), 'sha256'),
+        (_download(url='http://example.com/a.zip'), 'url'),
+        (_download(extract='../out'), 'extract'),
+        ({'kind': 'verify', 'import': 'json', 'run': ['../llama-server.exe']}, 'run'),
+    ],
+)
+def test_ac1_rejects_an_invalid_download_or_run(step, message):
+    """Una descarga sin sha256 completo, sin https o fuera de la carpeta del motor no se acepta."""
+    data = _valid_recipe()
+    data['steps'][2] = step
+    if step['kind'] == 'verify':
+        data['steps'][3] = step
+        del data['steps'][2]
+    with pytest.raises(ValueError, match=message):
+        recipes.validate(data)

@@ -16,6 +16,7 @@ COMMIT = re.compile(r'[0-9a-f]{40}')
 PYTHON = re.compile(r'3\.(?:10|11|12)(?:\.\d+)?')
 MODULE = re.compile(r'[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*')
 HF_REPO = re.compile(r'[\w.-]+/[\w.-]+')
+SHA256 = re.compile(r'[0-9a-f]{64}')
 TORCH = re.compile(r'^(torch|torchaudio|torchvision)(?:[<>=~!\[; ]|$)', re.IGNORECASE)
 TORCH_PIN = re.compile(r'^(torch|torchaudio|torchvision)==[0-9][\w.+-]*(?:\s*;.*)?$', re.IGNORECASE)
 
@@ -71,6 +72,7 @@ STEP_FIELDS: dict[str, dict[str, Callable[[object], bool]]] = {
     'pip': {'packages': _strings},
     'git': {'url': _https, 'commit': _matches(COMMIT), 'into': _relative},
     'hf': {'repo': _matches(HF_REPO), 'revision': _matches(COMMIT), 'into': _relative},
+    'download': {'url': _https, 'sha256': _matches(SHA256), 'extract': _relative},
     'verify': {'import': _matches(MODULE)},
 }
 OPTIONAL: dict[str, dict[str, Callable[[object], bool]]] = {
@@ -85,7 +87,10 @@ OPTIONAL: dict[str, dict[str, Callable[[object], bool]]] = {
     },
     'git': {'recursive': _boolean},
     'hf': {'allow_patterns': _strings, 'ignore_patterns': _strings},
-    'verify': {'paths': lambda value: isinstance(value, list) and all(_relative(path) for path in value)},
+    'verify': {
+        'paths': lambda value: isinstance(value, list) and all(_relative(path) for path in value),
+        'run': lambda value: isinstance(value, list) and bool(value) and _relative(value[0]) and _strings(value),
+    },
 }
 
 
@@ -124,7 +129,7 @@ def validate(document: object) -> Recipe:
     engine, family = document.get('engine'), document.get('family')
     if not isinstance(engine, str) or not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    if family not in ('narration', 'music', 'system', 'transcription', 'vision'):
+    if family not in ('narration', 'music', 'system', 'transcription', 'vision', 'assistant'):
         raise ValueError('Invalid engine family')
     cpu, license_name = document.get('cpu'), document.get('license')
     if not isinstance(cpu, bool) or not isinstance(license_name, str) or not _text(license_name):

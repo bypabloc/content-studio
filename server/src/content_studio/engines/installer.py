@@ -17,9 +17,15 @@ from content_studio.db import jobs, settings
 from content_studio.db.connection import utc_now
 from content_studio.engines import recipes
 from content_studio.engines.recipes import Recipe
-from content_studio.engines.steps import _file_bytes, execute_step
+from content_studio.engines.steps import ChecksumMismatch, _file_bytes, execute_step
 
-EXIT_CODES = {'disk_full': 20, 'engine_external': 21, 'engine_license_required': 22, 'engine_not_installed': 23}
+EXIT_CODES = {
+    'disk_full': 20,
+    'engine_external': 21,
+    'engine_license_required': 22,
+    'engine_not_installed': 23,
+    'checksum_mismatch': 24,
+}
 
 
 class InstallError(ValueError):
@@ -157,7 +163,10 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
             start = index / len(recipe.steps)
             end = (index + 1) / len(recipe.steps)
             progress.emit(start, step['kind'])
-            execute_step(step, recipe, family, cache, (start, end))
+            try:
+                execute_step(step, recipe, family, cache, (start, end))
+            except ChecksumMismatch as error:
+                raise InstallError('checksum_mismatch') from error
             done.touch()
     result = {
         'owner': 'app',

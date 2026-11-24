@@ -385,6 +385,7 @@
   "error.bad_transform": "The visual clip's transform is not valid.",
   "error.bad_transition": "The transition does not match the overlap of two visual clips on the same track.",
   "error.burn_needs_video": "Burning subtitles needs a video: an audio-only project can only be exported.",
+  "error.checksum_mismatch": "The downloaded file does not match its pinned sha256; it was discarded. Install again.",
   "error.codec_unavailable": "This ffmpeg has no {codec} codec: install the full build or pick another format.",
   "error.consent_required": "To import a span you must confirm the owner's permission for the voice.",
   "error.disk_full": "There is not enough disk space to install this engine.",

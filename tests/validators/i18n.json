@@ -3,6 +3,7 @@
     "engines.group.",
     "engines.size.",
     "error.http.",
+    "error.checksum_mismatch",
     "error.disk_full",
     "lint.rule_",
     "label.narration.style.",

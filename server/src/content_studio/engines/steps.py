@@ -3,16 +3,49 @@
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import threading
+import urllib.request
+import zipfile
 from pathlib import Path
 from typing import Any
 
 from content_studio.common import process, progress
 from content_studio.engines.recipes import Recipe
+
+
+class ChecksumMismatch(ValueError):
+    """El archivo descargado no coincide con el sha256 de la receta."""
+
+
+def _fetch(step: dict, home: Path, cache: Path, span: tuple[float, float]) -> None:
+    """Baja un zip fijado, comprueba su sha256 y lo extrae; el zip nunca queda en disco."""
+    url = step['url']
+    archive = cache / 'downloads' / url.rsplit('/', 1)[-1]
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    digest = hashlib.sha256()
+    start, end = span
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response, archive.open('wb') as out:
+            total, done, shown = int(response.headers.get('Content-Length') or 0), 0, -1.0
+            while chunk := response.read(1 << 20):
+                out.write(chunk)
+                digest.update(chunk)
+                done += len(chunk)
+                fraction = min(done / total, 0.99) if total else 0.0
+                if fraction - shown >= 0.01:
+                    shown = fraction
+                    progress.emit(round(start + (end - start) * fraction, 4), f'{done}/{total} bytes')
+        if digest.hexdigest() != step['sha256']:
+            raise ChecksumMismatch(url)
+        with zipfile.ZipFile(archive) as bundle:
+            bundle.extractall(home / step['extract'])
+    finally:
+        archive.unlink(missing_ok=True)
 
 
 def _run(command: list[str], env: dict[str, str], cwd: Path) -> None:
@@ -60,6 +93,9 @@ def execute_step(
     step: dict[str, Any], recipe: Recipe, home: Path, cache: Path, progress_span: tuple[float, float]
 ) -> None:
     """Ejecuta un paso en el venv y caché del motor, con avance para cada descarga."""
+    if step['kind'] == 'download':
+        _fetch(step, home, cache, progress_span)
+        return
     venv = home / recipe.venv
     python = process.python_de(venv)
     env = process.env_src(
@@ -92,6 +128,8 @@ def execute_step(
             env,
             home,
         )
+        if step.get('run'):
+            _run([str(home / step['run'][0]), *step['run'][1:]], env, home)
     elif kind == 'hf':
         _run([str(python), '-m', __name__, json.dumps(step)], env, home)
 
