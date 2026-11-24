@@ -18,7 +18,7 @@ from content_studio.media.formats import AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, VID
 
 SUBTITLE_EXTENSIONS = frozenset({'.srt', '.vtt', '.ass'})
 BACKFILLED = 'library.backfilled'  # setting: el índice inicial de los trabajos anteriores ya corrió
-SKIPPED_PREFIXES = ('engine.', 'system.', 'storage.', 'voice.')  # mantenimiento: no deja medios del usuario
+SKIPPED_PREFIXES = ('engine.', 'system.', 'storage.', 'voice.', 'library.')  # mantenimiento: no deja medios del usuario
 SKIPPED_KINDS = frozenset({'editor.proxy', 'music.samples', 'transcribe', 'clean.analyze'})
 
 

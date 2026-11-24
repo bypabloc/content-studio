@@ -8,6 +8,7 @@ from content_studio.services import (
     engine_install,
     engine_uninstall,
     engine_verify,
+    library_scan,
     media_concat,
     media_convert,
     media_normalize,
@@ -56,4 +57,5 @@ SERVICES = {
     engine_install.KIND: engine_install,
     engine_uninstall.KIND: engine_uninstall,
     engine_verify.KIND: engine_verify,
+    library_scan.KIND: library_scan,
 }
