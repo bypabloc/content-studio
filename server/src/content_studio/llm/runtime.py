@@ -53,7 +53,7 @@ def command(model: str, root: Path, port: int) -> list[str]:
 
 
 def _launch(arguments: list[str], log: IO[bytes]) -> subprocess.Popen:
-    flags = subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+    flags = getattr(subprocess, 'CREATE_NO_WINDOW', 0)  # solo existe en Windows
     return subprocess.Popen(
         arguments, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, creationflags=flags
     )
@@ -64,7 +64,6 @@ def _bind_to_job(process: subprocess.Popen) -> None:
     if sys.platform != 'win32':
         return
     import ctypes
-    from ctypes import wintypes
 
     global _JOB
     kernel = ctypes.windll.kernel32
@@ -74,13 +73,13 @@ def _bind_to_job(process: subprocess.Popen) -> None:
             _fields_ = [
                 ('user_time', ctypes.c_int64),
                 ('job_time', ctypes.c_int64),
-                ('flags', wintypes.DWORD),
+                ('flags', ctypes.c_uint32),
                 ('min_set', ctypes.c_size_t),
                 ('max_set', ctypes.c_size_t),
-                ('processes', wintypes.DWORD),
+                ('processes', ctypes.c_uint32),
                 ('affinity', ctypes.c_size_t),
-                ('priority', wintypes.DWORD),
-                ('scheduling', wintypes.DWORD),
+                ('priority', ctypes.c_uint32),
+                ('scheduling', ctypes.c_uint32),
             ]
 
         class Extended(ctypes.Structure):

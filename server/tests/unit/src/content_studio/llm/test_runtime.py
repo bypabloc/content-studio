@@ -109,6 +109,36 @@ def test_a_server_that_dies_before_health_is_llm_unavailable(tmp_path):
     assert server.model is None
 
 
+def test_bind_to_job_puts_each_process_in_one_kill_on_close_job(monkeypatch):
+    """Windows, con un kernel32 falso en cualquier sistema: un solo job con KILL_ON_JOB_CLOSE y cada proceso adentro."""
+    import ctypes
+    from types import SimpleNamespace
+
+    calls = []
+
+    class Kernel:
+        def CreateJobObjectW(self, attributes, name):
+            calls.append('create')
+            return 7
+
+        def SetInformationJobObject(self, job, kind, info, size):
+            calls.append(('set', job, kind, info._obj.basic.flags))
+            return 1
+
+        def AssignProcessToJobObject(self, job, handle):
+            calls.append(('assign', job, handle))
+            return 1
+
+    monkeypatch.setattr(runtime.sys, 'platform', 'win32')
+    monkeypatch.setattr(ctypes, 'windll', SimpleNamespace(kernel32=Kernel()), raising=False)
+    monkeypatch.setattr(runtime, '_JOB', None)
+
+    runtime._bind_to_job(SimpleNamespace(_handle=42))
+    runtime._bind_to_job(SimpleNamespace(_handle=43))
+
+    assert calls == ['create', ('set', 7, 9, 0x2000), ('assign', 7, 42), ('assign', 7, 43)]
+
+
 @pytest.mark.local
 def test_local_llama_server_answers_a_json_with_the_recommended_model():
     """-m local (spec 021): llama-server real con el ★ y el turno de la GPU; responde un JSON simple y se apaga."""
