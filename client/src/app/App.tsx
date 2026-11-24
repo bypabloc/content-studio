@@ -9,10 +9,12 @@ import { UIPage } from '@/shared/components/atoms/UIPage';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { useLocale } from '@/shared/i18n/locale';
+import packageJson from '../../package.json';
 import { Providers } from './Providers';
 import { Shell } from './Shell';
 
-export const APP_VERSION = '0.1.0';
+// La versión la escribe `python -m devtools version` en package.json (spec 022, D-7): aquí no se repite.
+export const APP_VERSION = packageJson.version;
 
 type Status = { kind: 'starting' } | { kind: 'ready'; connection: Connection } | { kind: 'failed'; code: string };
 
