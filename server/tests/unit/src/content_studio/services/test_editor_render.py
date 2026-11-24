@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -117,3 +118,12 @@ def test_build_command_passes_video_quality(tmp_path: Path):
         '--out-dir',
         str(tmp_path),
     ]
+
+
+def test_result_is_the_render_result_json_or_none(tmp_path):
+    """`result` devuelve el `result.json` del render (texto JSON) o None si falta o no es JSON (spec 023)."""
+    assert editor_render.result(tmp_path) is None
+    (tmp_path / 'result.json').write_text('{"status": "done", "output": "a.mp4"}', encoding='utf-8')
+    assert json.loads(editor_render.result(tmp_path)) == {'status': 'done', 'output': 'a.mp4'}
+    (tmp_path / 'result.json').write_text('roto', encoding='utf-8')
+    assert editor_render.result(tmp_path) is None

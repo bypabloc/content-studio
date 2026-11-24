@@ -86,7 +86,7 @@ def test_ac4_rename_updates_the_disk_the_index_and_the_job_result(env):
 
     target = path.parent / 'final.srt'
     assert (renamed['path'], target.is_file(), path.exists()) == (str(target), True, False)
-    assert json.loads(jobs.get(conn, job_id)['result'])['output'] == str(target)
+    assert jobs.get(conn, job_id)['result']['output'] == str(target)  # jobs.get decodifica el JSON (spec 023)
 
 
 @pytest.mark.parametrize('name', ['', '  ', '../fuera.srt', 'a/b.srt', 'a\\b.srt'])

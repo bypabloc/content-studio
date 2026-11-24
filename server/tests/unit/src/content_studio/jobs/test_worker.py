@@ -205,6 +205,23 @@ def test_editor_render_failure_keeps_structured_missing_source_paths(env):
     assert json.loads(row['error_detail']) == payload
 
 
+def test_a_done_editor_render_keeps_its_result_for_the_client(env):
+    """Spec 023: el panel de subtítulos del Editor lee `job.result.output`: el worker guarda lo que da el servicio."""
+    payload = {'status': 'done', 'output': 'exports/mix.wav', 'duration': 3.0}
+    script = 'import pathlib, sys; pathlib.Path(sys.argv[1], "result.json").write_text(sys.argv[2], encoding="utf-8")'
+    env.services['editor.render'] = SimpleNamespace(
+        RESOURCE='cpu',
+        validate=lambda params: [],
+        build_command=lambda params, out_dir: [sys.executable, '-c', script, str(out_dir), json.dumps(payload)],
+        result=lambda out_dir: (out_dir / 'result.json').read_text(encoding='utf-8'),
+    )
+    job = queue.enqueue(env.conn, 'editor.render', {'doc': 'project.json'}, env.services)
+
+    assert env.worker.run_now(job) == 'done'
+
+    assert jobs.get(env.conn, job)['result'] == payload
+
+
 def test_auto_render_queues_the_render_when_the_analysis_ends(env):
     env.services['clean.analyze'] = _service('cpu')
     env.services['clean.render'] = _service('cpu')
