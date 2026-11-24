@@ -34,6 +34,8 @@ uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ 
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).
 
+**Instalador**: cada tag `vX.Y.Z` en `main` publica en GitHub Releases un instalador NSIS por usuario (sin admin) que se actualiza solo; el primer arranque prepara Python y el venv con el `uv.exe` incluido. Cómo publicar: [docs/operations/release.md](docs/operations/release.md).
+
 `studio` es el script de `server/pyproject.toml`. Los motores se relanzan solos en el venv de cada uno (`common/process.py`); `studio engines` lista, instala, verifica, repara y desinstala motores. Las recetas fijan paquetes, versiones y revisiones. Los módulos directos siguen con `PYTHONPATH=server/src python -m content_studio.narration.tts ...`.
 
 ## Arquitectura

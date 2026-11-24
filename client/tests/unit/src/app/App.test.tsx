@@ -5,6 +5,7 @@ import { App, APP_VERSION } from '@/app/App';
 import { t } from '@/shared/i18n/t';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
+vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn(async () => () => {}) }));
 const invokeMock = vi.mocked(invoke);
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
 
@@ -69,6 +70,19 @@ describe('App', () => {
     render(<App />);
     expect(await screen.findByText(t('server.timeout'))).toBeTruthy();
 
+    fireEvent.click(screen.getByRole('button', { name: t('server.retry') }));
+
+    expect(await screen.findByRole('heading', { name: 'Content Studio' })).toBeTruthy();
+    expect(invokeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('si falla la preparación de la app instalada muestra el paso y Reintentar vuelve a prepararla', async () => {
+    invokeMock.mockRejectedValueOnce('bootstrap_sync_failed');
+    invokeMock.mockResolvedValueOnce(connection);
+
+    render(<App />);
+    expect(await screen.findByText(t('bootstrap.error.sync'))).toBeTruthy();
+    expect(screen.getByRole('heading', { name: t('bootstrap.title') })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t('server.retry') }));
 
     expect(await screen.findByRole('heading', { name: 'Content Studio' })).toBeTruthy();

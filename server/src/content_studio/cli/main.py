@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from contextlib import closing
 from pathlib import Path
 
-from content_studio import gpu_lock, paths
+from content_studio import gpu_lock, paths, seed
 from content_studio.cli import editor as editor_cli
 from content_studio.cli import library as library_cli
 from content_studio.cli import llm as llm_cli
@@ -42,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument('--db', type=Path, default=paths.db_path(), help='job queue database')
     sub = ap.add_subparsers(dest='command', required=True, metavar='command')
 
+    sub.add_parser('seed', help="copy the data of the installed app to its data folder, keeping the user's changes")
     serve_p = sub.add_parser('serve', help='local API on 127.0.0.1 with the job worker')
     serve_p.add_argument('--port', type=int, default=0, help='0 picks a free port')
     serve_p.add_argument('--token', help='Bearer token; if omitted, one is generated and printed in the ready line')
@@ -229,6 +230,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'openapi':
         return _openapi()
+    if args.command == 'seed':
+        return seed.cli()
     if args.command == 'engines':
         return _engines(args)
     if args.command == 'clean':

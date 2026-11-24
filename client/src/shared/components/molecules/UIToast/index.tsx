@@ -29,7 +29,11 @@ const TOAST_MS = 6000
 /** Un botón del aviso: `onClick` corre al pulsarlo (p. ej. «Abrir carpeta»). */
 type ToastAction = { label: string; onClick: () => void }
 
-type ToastOptions = { action?: ToastAction }
+/** `persistent`: queda hasta que se pulse su botón o se cierre (una actualización lista, spec 022). */
+type ToastOptions = { action?: ToastAction; persistent?: boolean }
+
+const sonnerOptions = ({ action, persistent }: ToastOptions) =>
+  persistent ? { action, duration: Infinity, closeButton: true } : { action }
 
 /**
  * Avisos tipados: éxito, error o información (siempre con texto ya traducido). Éxito y error pueden llevar un botón.
@@ -37,14 +41,15 @@ type ToastOptions = { action?: ToastAction }
  */
 export const toast = {
   success: (message: string, options?: ToastOptions): void => {
-    if (options) sonner.success(message, options)
+    if (options) sonner.success(message, sonnerOptions(options))
     else sonner.success(message)
   },
   error: (message: string, options?: ToastOptions): void => {
-    if (options) sonner.error(message, options)
+    if (options) sonner.error(message, sonnerOptions(options))
     else sonner.error(message)
   },
-  info: (message: string): void => {
-    sonner.info(message)
+  info: (message: string, options?: ToastOptions): void => {
+    if (options) sonner.info(message, sonnerOptions(options))
+    else sonner.info(message)
   },
 }

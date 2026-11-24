@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
+from datetime import datetime
+from pathlib import Path
+
+KEEP_BACKUPS = 5
 
 MIGRATIONS = [
     """
@@ -111,8 +116,34 @@ MIGRATIONS = [
 ]
 
 
-def migrate(conn: sqlite3.Connection) -> None:
-    """Aplica las migraciones que faltan; cada una y su versión van en una sola transacción."""
+def migrate(conn: sqlite3.Connection, backups: Path | None = None) -> None:
+    """Aplica las migraciones que faltan; cada una y su versión van en una sola transacción.
+
+    Con `backups` (spec 022, D-4), una base con datos se respalda antes en `<backups>/<fecha>-v<anterior>.db` (quedan
+    los 5 últimos); si una migración falla, la base vuelve a ese respaldo y el error sigue.
+    """
     current = conn.execute('PRAGMA user_version').fetchone()[0]
-    for version, sql in enumerate(MIGRATIONS[current:], start=current + 1):
-        conn.executescript(f'BEGIN;\n{sql}\nPRAGMA user_version = {version};\nCOMMIT;')
+    if current >= len(MIGRATIONS):
+        return
+    saved = _backup(conn, backups, current) if backups is not None and current else None
+    try:
+        for version, sql in enumerate(MIGRATIONS[current:], start=current + 1):
+            conn.executescript(f'BEGIN;\n{sql}\nPRAGMA user_version = {version};\nCOMMIT;')
+    except sqlite3.Error:
+        if saved is not None:
+            if conn.in_transaction:
+                conn.rollback()
+            with closing(sqlite3.connect(saved)) as copy:
+                copy.backup(conn)
+        raise
+
+
+def _backup(conn: sqlite3.Connection, folder: Path, version: int) -> Path:
+    """Copia la base con la API de respaldo de SQLite y borra los respaldos más viejos que los 5 últimos."""
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f'{datetime.now():%Y-%m-%d-%H%M%S}-v{version}.db'
+    with closing(sqlite3.connect(target)) as copy:
+        conn.backup(copy)
+    for old in sorted(folder.glob('*.db'))[:-KEEP_BACKUPS]:
+        old.unlink()
+    return target

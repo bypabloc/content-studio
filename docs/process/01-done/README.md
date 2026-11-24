@@ -16,6 +16,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Editor | Edición no destructiva de audio con proyectos, pistas, marcadores, grabación y exportación | [editor.md](editor.md) |
 | Biblioteca | Salidas y carpetas vigiladas con búsqueda, etiquetas, proyectos, acciones y espacio | [library.md](library.md) |
 | Asistente | Sugerencias con un LLM local para el guion, los subtítulos, la música y la publicación | [llm.md](llm.md) |
+| Instalador | Instalador NSIS por usuario, primer arranque con uv y actualizaciones desde Releases | [installer.md](installer.md) |
 
 ## Plantilla
 

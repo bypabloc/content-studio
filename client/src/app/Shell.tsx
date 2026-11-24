@@ -12,6 +12,7 @@ import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 import { useLanguage } from '@/shared/i18n/useLanguage';
 import { useTheme } from '@/shared/theme/useTheme';
+import { useUpdateNotice } from '@/shared/update/useUpdateNotice';
 import { navItems } from './nav';
 
 // La página de Música solo se carga al abrirla: así el JS de arranque queda bajo el presupuesto de client/budget.json.
@@ -32,6 +33,7 @@ const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((mo
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
 export function Shell({ version }: { version: string }) {
   useLanguage(); // aplica al idioma activo la preferencia del server (ui.language), una vez por la vida de la ventana
+  useUpdateNotice();
   const [theme, setTheme] = useTheme();
   const [collapsed, setCollapsed] = useSetting<boolean>('ui.sidebar.collapsed', false);
   const sectionId = useSectionId();

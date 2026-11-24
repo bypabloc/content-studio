@@ -40,6 +40,21 @@ describe('UIToaster [AC-8]', () => {
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
+  it('WHEN an info is persistent THEN it shows its action and a close button (spec 022, D-6)', async () => {
+    const onClick = vi.fn()
+    render(<UIToaster label="Avisos" />)
+
+    act(() => {
+      toast.info('Hay una versión nueva', { action: { label: 'Actualizar', onClick }, persistent: true })
+      toast.info('Con botón', { action: { label: 'Ver', onClick } })
+    })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Actualizar' }))
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(await screen.findByText('Con botón')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /close/i }).length).toBeGreaterThan(0)
+  })
+
   it('WHEN the toaster renders THEN it receives mobileOffset top 5rem [AC-8]', () => {
     render(<UIToaster label="Avisos" />)
 

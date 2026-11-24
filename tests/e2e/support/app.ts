@@ -48,12 +48,17 @@ function fixture(name: string): Record<string, unknown> {
  */
 export async function openApp(
   page: Page,
-  options: { connect?: 'ok' | 'spawn_failed'; settings?: Record<string, unknown>; replies?: Replies } = {},
+  options: {
+    connect?: 'ok' | 'spawn_failed' | 'bootstrap_sync_failed';
+    settings?: Record<string, unknown>;
+    replies?: Replies;
+  } = {},
 ): Promise<{ calls: Call[] }> {
   await page.addInitScript((connect) => {
     // Los eventos de Tauri (soltar archivos) se registran aquí; `__emitEvent` los dispara como lo haría el sistema.
     const listeners: Record<string, number> = {};
     let nextId = 1;
+    let tries = 0;
     Object.defineProperty(window, '__TAURI_INTERNALS__', {
       value: {
         metadata: { currentWindow: { label: 'main' }, currentWebview: { label: 'main', windowLabel: 'main' } },
@@ -64,7 +69,10 @@ export async function openApp(
         },
         invoke: async (command: string, args: { event?: string; handler?: number; options?: { multiple?: boolean } } = {}) => {
           if (command === 'get_connection') {
+            tries += 1;
             if (connect === 'spawn_failed') throw 'server_spawn_failed';
+            // La preparación de la app instalada (spec 022) falla la primera vez y sale bien al reintentar.
+            if (connect === 'bootstrap_sync_failed' && tries === 1) throw 'bootstrap_sync_failed';
             return { baseUrl: 'http://127.0.0.1:9999', token: 'tok' };
           }
           if (command === 'plugin:dialog|open') {

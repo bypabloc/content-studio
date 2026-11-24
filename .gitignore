@@ -49,3 +49,5 @@ client/src-tauri/gen/
 # Muestras de 10 s por preset del buscador de Música (spec 011, D-3): se generan con la cola, no se versionan.
 # Sin `/` final: el enlace de `prepare` es un symlink en POSIX y con `/` no lo cubre (ver arriba).
 server/data/music/samples
+# Recursos del instalador que arma `python -m devtools bundle` (spec 022)
+client/src-tauri/bundle/

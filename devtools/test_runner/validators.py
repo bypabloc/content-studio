@@ -1,4 +1,4 @@
-"""Etapa `validators`: tamaño por categoría con baseline (spec 003, D-2).
+"""Etapa `validators`: tamaño por categoría con baseline (spec 003, D-2) y la misma versión en los manifiestos (022).
 
 Mide líneas, bytes y columna más larga de cada archivo del changeset. Gana la primera categoría que casa. Un archivo del
 baseline puede quedar igual o bajar, nunca crecer; cuando baja del límite, el detalle pide sacarlo del baseline.
@@ -10,7 +10,7 @@ import fnmatch
 import json
 from pathlib import Path
 
-from .. import paths
+from .. import paths, version
 
 CONFIG = 'tests/validators/file-size.json'
 BASELINE = 'tests/validators/file-size.baseline.json'
@@ -71,6 +71,7 @@ def run(files: list[Path], root: Path = paths.ROOT) -> dict:
                 notes.append(f'{rel}: under the limit, remove it from {BASELINE}')
         elif broken := over_limit(measured, cat['limits']):
             problems.append(f'{rel} ({cat["name"]}): {", ".join(broken)}')
+    problems += [f'version mismatch: {line}' for line in version.problems(root)]  # spec 022, D-7
     return {
         'stage': 'validators',
         'status': 'fail' if problems else 'pass',

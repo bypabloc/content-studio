@@ -1,7 +1,9 @@
 //! Content Studio (spec 005, D-2): la ventana de Tauri, el server local y el comando `get_connection`.
 
+mod bootstrap;
 mod server;
 
+use std::ffi::OsString;
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::process::Child;
@@ -10,7 +12,7 @@ use std::time::Duration;
 
 use serde::Serialize;
 use tauri::webview::{PermissionKind, PermissionResponse};
-use tauri::{AppHandle, Manager, RunEvent};
+use tauri::{AppHandle, Emitter, Manager, RunEvent};
 
 use server::ServerError;
 
@@ -30,12 +32,16 @@ struct Running {
     _job: server::job::KillOnClose,
 }
 
-/// El server de la sesión: uno solo, que se reutiliza mientras siga vivo.
-#[derive(Clone, Default)]
-pub struct ServerState(Arc<Mutex<Option<Running>>>);
+/// El server de la sesión: uno solo, que se reutiliza mientras siga vivo, el modo de la app y la versión (spec 022).
+#[derive(Clone)]
+pub struct ServerState(Arc<Mutex<Option<Running>>>, Arc<bootstrap::Mode>, String);
 
 impl ServerState {
-    fn connect(&self) -> Result<Connection, ServerError> {
+    /// En la app instalada, antes de arrancar el server prepara Python, el venv y los datos (`emit` avisa cada paso).
+    fn connect(
+        &self,
+        mut emit: impl FnMut(bootstrap::Progress),
+    ) -> Result<Connection, ServerError> {
         let mut slot = self
             .0
             .lock()
@@ -47,8 +53,23 @@ impl ServerState {
         }
         *slot = None;
 
+        let (program, before) = match self.1.as_ref() {
+            bootstrap::Mode::Dev { .. } => {
+                let mut before: Vec<OsString> = vec!["run".into(), "--project".into()];
+                before.push(project_root().into_os_string());
+                before.push("studio".into());
+                (PathBuf::from("uv"), before)
+            }
+            bootstrap::Mode::Installed { resources } => {
+                let layout = bootstrap::Layout::from_env(resources.clone(), &self.2);
+                let mut runner = bootstrap::CommandRunner { log: layout.log() };
+                bootstrap::prepare(&layout, &mut runner, &mut emit)
+                    .map_err(ServerError::Bootstrap)?;
+                (layout.studio(), Vec::new())
+            }
+        };
         let token = new_token();
-        let mut child = server::spawn(&project_root(), &token)?;
+        let mut child = server::spawn(&program, &before, &token, &self.1.server_env())?;
         // En Windows el proceso nace suspendido: el Job lo recibe y solo después corre, así sus hijos quedan en el Job.
         #[cfg(windows)]
         let job = match server::job::KillOnClose::assign(&child)
@@ -111,10 +132,14 @@ fn project_root() -> PathBuf {
 #[tauri::command]
 async fn get_connection(app: AppHandle) -> Result<Connection, String> {
     let state = app.state::<ServerState>().inner().clone();
-    tauri::async_runtime::spawn_blocking(move || state.connect())
-        .await
-        .map_err(|error| error.to_string())?
-        .map_err(|error| error.code().to_string())
+    tauri::async_runtime::spawn_blocking(move || {
+        state.connect(|progress| {
+            let _ = app.emit("bootstrap", progress);
+        })
+    })
+    .await
+    .map_err(|error| error.to_string())?
+    .map_err(|error| error.code().to_string())
 }
 
 pub fn run() {
@@ -129,7 +154,19 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .manage(ServerState::default())
+        .plugin(tauri_plugin_process::init())
+        .setup(|app| {
+            let resources = app.path().resource_dir().unwrap_or_default();
+            let mode = bootstrap::current_mode(resources);
+            // Solo la app instalada se actualiza (spec 022, D-6): en un checkout, `check()` del client falla y no ofrece nada.
+            if matches!(mode, bootstrap::Mode::Installed { .. }) {
+                app.handle()
+                    .plugin(tauri_plugin_updater::Builder::new().build())?;
+            }
+            let version = app.package_info().version.to_string();
+            app.manage(ServerState(Arc::default(), Arc::new(mode), version));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![get_connection])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")

@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { BootstrapPage } from '@/bootstrap/BootstrapPage';
+import { useBootstrapProgress } from '@/bootstrap/useBootstrapProgress';
 import { ApiProvider } from '@/shared/api/context';
 import type { Connection } from '@/shared/api/client';
 import { UIButton } from '@/shared/components/atoms/UIButton';
@@ -9,8 +11,9 @@ import { t } from '@/shared/i18n/t';
 import { useLocale } from '@/shared/i18n/locale';
 import { Providers } from './Providers';
 import { Shell } from './Shell';
+import { APP_VERSION } from '@/shared/version';
 
-export const APP_VERSION = '0.1.0';
+export { APP_VERSION };
 
 type Status = { kind: 'starting' } | { kind: 'ready'; connection: Connection } | { kind: 'failed'; code: string };
 
@@ -27,9 +30,13 @@ export function App() {
   );
 }
 
-/** Muestra el motivo si el server no arranca, con Reintentar (AC-10); con el server arriba, la app. */
+/**
+ * Muestra el motivo si el server no arranca, con Reintentar (AC-10); con el server arriba, la app. En la app instalada,
+ * `get_connection` prepara antes Python y el venv: mientras tanto, y si falla, la pantalla de preparación (spec 022).
+ */
 function Connected() {
   const [status, setStatus] = useState<Status>({ kind: 'starting' });
+  const progress = useBootstrapProgress();
 
   const connect = useCallback(() => {
     invoke<Connection>('get_connection')
@@ -53,6 +60,9 @@ function Connected() {
       </ApiProvider>
     );
   }
+  if (status.kind === 'failed' && status.code.startsWith('bootstrap_')) {
+    return <BootstrapPage {...progress} failed={status.code} onRetry={retry} />;
+  }
   if (status.kind === 'failed') {
     return (
       <Screen>
@@ -63,6 +73,9 @@ function Connected() {
         </UIButton>
       </Screen>
     );
+  }
+  if (Object.keys(progress.steps).length > 0) {
+    return <BootstrapPage {...progress} failed={null} onRetry={retry} />;
   }
   return <Screen>{t('server.starting')}</Screen>;
 }

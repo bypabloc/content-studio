@@ -45,11 +45,11 @@ python -m devtools worktree prepare <nombre>
 # ... commits en el worktree ...
 git push -u origin feature/<nombre>
 gh pr create --base dev --title "feat: ..." --body "..."      # o /push-pr-verify
-gh pr checks <n> --watch && gh pr merge <n> --merge           # cuando los checks pasen
+gh pr checks <n> --watch && gh pr merge <n> --merge  # cuando los checks pasen
 git switch dev && git pull                                     # en el checkout principal
 python -m devtools worktree close <nombre>     # cierre obligatorio tras el merge
 
-# Publicar: PR de dev a main (SOLO cuando el usuario lo pide explícitamente)
+# Publicar si se pide: PR de dev a main; tag vX.Y.Z (docs/operations/release.md)
 gh pr create --base main --head dev --title "release: ..." --body "..."
 
 # Hotfix: fix/* desde main → PR a main. La sincronización a dev es automática (ver abajo)
