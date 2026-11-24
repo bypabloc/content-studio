@@ -5,6 +5,7 @@ La miniatura va en `media_router` porque la pide un <img>, que no manda headers:
 
 from __future__ import annotations
 
+import json
 import sqlite3
 from pathlib import Path
 from typing import Annotated
@@ -38,6 +39,16 @@ class ScanIn(BaseModel):
     """Escaneo de una carpeta (o de todas, sin `folder_id`)."""
 
     folder_id: int | None = None
+
+
+@router.get('/library/{item_id}/publish')
+def publish_suggestions(conn: Conn, item_id: int) -> dict:
+    """Lo último que generó «Publicar» para el ítem (publish.json en disco), o 404 `publish_not_found`."""
+    item = item_or_404(conn, item_id)
+    path = item.get('publish_path')
+    if not path or not Path(path).is_file():
+        raise ApiError(404, 'publish_not_found')
+    return json.loads(Path(path).read_text(encoding='utf-8'))
 
 
 def item_or_404(conn: sqlite3.Connection, item_id: int) -> dict:

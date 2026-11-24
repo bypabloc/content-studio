@@ -89,3 +89,28 @@ def test_thumb_of_a_video_is_a_jpeg_and_accepts_the_query_token(api, monkeypatch
     assert (thumb.status_code, thumb.headers['content-type']) == (200, 'image/jpeg')
     assert (other.status_code, other.json()['code']) == (422, 'no_thumbnail')
     assert (missing.status_code, missing.json()['code']) == (404, 'item_not_found')
+
+
+def test_publish_returns_the_saved_suggestions_or_404(api):
+    """GET /library/{id}/publish lee publish.json de la ruta guardada (spec 021, AC-8); sin él, 404."""
+    video = api.tmp / 'demo.mp4'
+    video.write_bytes(b'v')
+    saved = api.tmp / 'publish.json'
+    saved.write_text('{"platforms": {"youtube": {"titles": ["a", "b", "c"]}}}', encoding='utf-8')
+    with closing(connection.connect(api.tmp / 'base.db')) as conn:
+        conn.execute(
+            'INSERT INTO library_items (path, kind, origin, size, mtime, media_type, indexed_at, publish_path) '
+            "VALUES (?, 'watched', 'watched', 1, 0, 'video', '2026-11-24', ?)",
+            (str(video), str(saved)),
+        )
+        conn.execute(
+            'INSERT INTO library_items (path, kind, origin, size, mtime, media_type, indexed_at) '
+            "VALUES (?, 'watched', 'watched', 1, 0, 'video', '2026-11-24')",
+            (str(api.tmp / 'otro.mp4'),),
+        )
+
+    found = api.client.get('/library/1/publish', headers=api.headers)
+    missing = api.client.get('/library/2/publish', headers=api.headers)
+
+    assert found.json()['platforms']['youtube']['titles'] == ['a', 'b', 'c']
+    assert (missing.status_code, missing.json()['code']) == (404, 'publish_not_found')

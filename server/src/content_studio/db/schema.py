@@ -106,6 +106,8 @@ MIGRATIONS = [
       PRIMARY KEY (project_id, item_id)
     );
     """,
+    # 8 (spec 021, D-4): la ruta de publish.json del ítem; el contenido queda en disco.
+    'ALTER TABLE library_items ADD COLUMN publish_path TEXT;',
 ]
 
 

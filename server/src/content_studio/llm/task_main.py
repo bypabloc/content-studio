@@ -16,6 +16,7 @@ from content_studio.common import progress
 from content_studio.llm import client, models
 from content_studio.llm.tasks import (
     music_caption,
+    publish,
     script_review,
     subtitles_correct,
     subtitles_keywords,
@@ -28,6 +29,7 @@ TASKS = {
     'subtitles_translate': subtitles_translate,
     'subtitles_correct': subtitles_correct,
     'subtitles_keywords': subtitles_keywords,
+    'publish': publish,
 }
 EXIT_CODES = {'llm_invalid_output': 30, 'llm_timeout': 31, 'llm_unavailable': 32, 'llm_not_installed': 33}
 
@@ -50,6 +52,9 @@ def main(argv: list[str] | None = None) -> int:
         print(error.code, file=sys.stderr)
         return EXIT_CODES[error.code]
     (args.out_dir / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+    finish = getattr(TASKS[args.task], 'finish', None)
+    if finish is not None:  # publicar deja además publish.json y su ruta en la biblioteca
+        finish(params, args.out_dir, result)
     progress.emit(1, 'done')
     return 0
 
