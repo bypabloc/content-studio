@@ -8,7 +8,8 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { Player } from '@/shared/media/Player';
-import { openSection } from '@/shared/navigation/hash';
+import { OpenInEditorButton } from '@/shared/navigation/OpenInEditorButton';
+import { sendTo } from '@/shared/navigation/sendTo';
 import { CompareTakes } from './CompareTakes';
 import { type Job, useTake } from './useTake';
 
@@ -96,10 +97,11 @@ export function NarrationResult({ job }: { job: Job }) {
       </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
       <UIStack direction="row" gap="sm">
+        <OpenInEditorButton paths={wav ? [wav] : []} />
         <UIButton variant="secondary" disabled={subtitle.isPending} onClick={() => subtitle.mutate()}>
           {t('narration.result.subtitle')}
         </UIButton>
-        <UIButton variant="secondary" disabled={!wav} onClick={() => openSection('mix', { voice: wav })}>
+        <UIButton variant="secondary" disabled={!wav} onClick={() => sendTo('mix', wav)}>
           {t('mix.send')}
         </UIButton>
       </UIStack>

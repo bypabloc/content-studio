@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
@@ -7,6 +7,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
+import { useEditorAdd } from './useEditorAdd';
 
 import { EditorWorkspace } from './EditorWorkspace';
 import type { Doc } from './model/types';
@@ -26,6 +27,7 @@ function projectFile(folder: string): string {
 /** Inicio del editor: proyectos recientes y opciones para crear, abrir o grabar. */
 export function EditorPage(): React.JSX.Element {
   const api = useApi();
+  const pendingAdd = useEditorAdd();
   const [recent, setRecent] = useState<string[] | null>(null);
   const [project, setProject] = useState<Project | null>(null);
   const [autoRecord, setAutoRecord] = useState(false);
@@ -72,9 +74,7 @@ export function EditorPage(): React.JSX.Element {
     }
   }
 
-  async function create(record = false): Promise<void> {
-    setBusy(true);
-    setError(null);
+  const create = useCallback(async (record = false): Promise<void> => {
     try {
       const created = await api.post<Project>('/editor/projects', { name: t('editor.project.default_name') });
       setRecent((paths) => [created.path, ...(paths ?? []).filter((path) => path !== created.path)]);
@@ -85,7 +85,26 @@ export function EditorPage(): React.JSX.Element {
     } finally {
       setBusy(false);
     }
+  }, [api]);
+
+  function startCreate(record = false): void {
+    setBusy(true);
+    setError(null);
+    void create(record);
   }
+
+  useEffect(() => {
+    if (!pendingAdd.paths.length || project) return;
+    let active = true;
+    void Promise.resolve().then(() => {
+      if (active) void create();
+    });
+    return () => {
+      active = false;
+    };
+  }, [create, pendingAdd.paths, project]);
+
+  const creatingFromAdd = pendingAdd.paths.length > 0 && project === null;
 
   if (project) {
     return (
@@ -95,6 +114,8 @@ export function EditorPage(): React.JSX.Element {
         onBack={() => setProject(null)}
         autoRecord={autoRecord}
         onAutoRecordComplete={() => setAutoRecord(false)}
+        pendingAdd={pendingAdd.paths}
+        onAddHandled={pendingAdd.clear}
       />
     );
   }
@@ -102,13 +123,19 @@ export function EditorPage(): React.JSX.Element {
   return (
     <UIStack gap="md">
       <UIStack direction="row" gap="sm">
-        <UIButton onClick={() => void create()} disabled={busy} loading={busy}>
+        <UIButton onClick={() => startCreate()} disabled={busy || creatingFromAdd} loading={busy || creatingFromAdd}>
           {t('mix.create')}
         </UIButton>
         <UIButton variant="secondary" icon="open-folder" onClick={() => void openFolder()} disabled={busy}>
           {t('editor.project.open_file')}
         </UIButton>
-        <UIButton variant="secondary" icon="record" onClick={() => void create(true)} disabled={busy} loading={busy}>
+        <UIButton
+          variant="secondary"
+          icon="record"
+          onClick={() => startCreate(true)}
+          disabled={busy || creatingFromAdd}
+          loading={busy || creatingFromAdd}
+        >
           {t('voices.record.start')}
         </UIButton>
       </UIStack>

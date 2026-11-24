@@ -40,11 +40,13 @@ describe('SubtitlesEditor', () => {
   beforeEach(() => {
     api.get.mockImplementation(async (path: string) => (path === '/subtitles/7' ? structuredClone(doc) : { key: 'x', value: undefined }));
     api.put.mockImplementation(async (_path: string, body: unknown) => body);
+    api.post.mockResolvedValue({ id: 42 });
   });
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
     vi.clearAllMocks();
+    window.location.hash = '';
   });
 
   it('saves the edited document once, one second after the last change', async () => {
@@ -98,6 +100,25 @@ describe('SubtitlesEditor', () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith('/jobs', { kind: 'subtitles.translate', params: { project_id: 7 } }),
     );
+  });
+
+  it('opens a burned video in the Editor after the burn job completes', async () => {
+    api.post.mockResolvedValue({ id: 42 });
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/subtitles/7') return structuredClone(doc);
+      if (path === '/jobs/42') return { id: 42, status: 'done', output_dir: 'out/subtitles/7' };
+      if (path.startsWith('/fs/list?')) return { entries: [{ kind: 'video', path: 'out/subtitles/7/burned.mp4' }] };
+      return { key: 'x', value: undefined };
+    });
+    renderEditor();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('subtitles.editor.burn') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('action.open_editor') }));
+
+    await waitFor(() => {
+      const query = new URLSearchParams(window.location.hash.split('?')[1]);
+      expect(query.getAll('add')).toEqual(['out/subtitles/7/burned.mp4']);
+    });
   });
 
   it('keeps a style change from the panel in the saved document', async () => {

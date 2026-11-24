@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -15,7 +15,6 @@ import { FileBrowser } from './browser/FileBrowser';
 import { EditorVisualPanel } from './EditorVisualPanel';
 import { ExportDialog } from './ExportDialog';
 import { SubtitleTracksPanel } from './SubtitleTracksPanel';
-import { buildImportOperations } from './importMedia';
 import { Timeline } from './Timeline';
 import { Transport } from './Transport';
 import { createTextStyle, type TextPresetName } from './text/presets';
@@ -24,6 +23,7 @@ import { addTransitionAtCut } from './model/visual';
 import type { Doc, TextClip, TransitionType } from './model/types';
 import { usePlayback } from './playback/usePlayback';
 import { useEditorDoc } from './useEditorDoc';
+import { useEditorMediaImport } from './useEditorMediaImport';
 import { useTrackRecorder } from './useTrackRecorder';
 import { zoomIn, zoomOut } from './model/timeline';
 
@@ -36,11 +36,15 @@ export function EditorWorkspace({
   onBack,
   autoRecord = false,
   onAutoRecordComplete = () => undefined,
+  pendingAdd = [],
+  onAddHandled,
 }: {
   project: Project;
   onBack: () => void;
   autoRecord?: boolean;
   onAutoRecordComplete?: () => void;
+  pendingAdd?: string[];
+  onAddHandled?: () => void;
 }): React.JSX.Element {
   const api = useApi();
   const editor = useEditorDoc(project);
@@ -55,7 +59,6 @@ export function EditorWorkspace({
   const [zoom, setZoom] = useState(80);
   const [deviceId, setDeviceId] = useState('');
   const [recordOffsetMs, setRecordOffsetMs] = useState(0);
-  const [importError, setImportError] = useState(false);
   const armedTrackId = armedTrackIds[0] ?? null;
   const { recording, uploading, levels, error: recorderError, start: startRecording, stop: stopRecording } = useTrackRecorder({
     path: project.path,
@@ -67,6 +70,14 @@ export function EditorWorkspace({
   });
   const applyOp = editor.applyOp;
   const trackCount = editor.doc.tracks.length;
+  const { addFiles, importError } = useEditorMediaImport({
+    tracks: editor.doc.tracks,
+    trackCount,
+    applyOp,
+    pendingAdd,
+    position: playback.position,
+    onAddHandled,
+  });
   const saveLabel =
     editor.saveState === 'saved'
       ? t('editor.save.saved')
@@ -109,29 +120,6 @@ export function EditorWorkspace({
   }, [armedTrackId, autoRecord, onAutoRecordComplete, startRecording]);
 
   const setTrackArmed = (trackId: string, armed: boolean) => setArmedTrackIds(armed ? [trackId] : []);
-
-  const addFiles = useCallback(
-    async (paths: string[], targetTrack: string | undefined, start: number) => {
-      setImportError(false);
-      try {
-        const files = await Promise.all(paths.map(async (source) => {
-          const info = await api.get<{
-            duration: number;
-            kind: 'audio' | 'video' | 'image';
-            has_audio: boolean;
-          }>(`/fs/info?path=${encodeURIComponent(source)}`);
-          if (!Number.isFinite(info.duration) || info.duration <= 0) throw new Error('invalid duration');
-          return { source, ...info };
-        }));
-        for (const operation of buildImportOperations(files, editor.doc.tracks, trackCount, targetTrack, start)) {
-          applyOp(operation);
-        }
-      } catch {
-        setImportError(true);
-      }
-    },
-    [api, applyOp, editor.doc.tracks, trackCount],
-  );
 
   function recordChange(next: boolean): void {
     if (next) void startRecording();

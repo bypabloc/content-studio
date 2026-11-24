@@ -12,6 +12,7 @@ import { UIEmpty } from '@/shared/components/molecules/UIEmpty';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
+import { hashParams } from '@/shared/navigation/hash';
 
 import { SubtitlesEditor } from './SubtitlesEditor';
 
@@ -48,7 +49,7 @@ export function SubtitlesPage(): React.JSX.Element {
     narration: t('subtitles.origin.narration'),
     import: t('subtitles.origin.import'),
   };
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => hashParams().get('path') ?? '');
   const projects = useQuery({ queryKey: ['subtitles'], queryFn: () => api.get<ProjectRow[]>('/subtitles') });
   const create = useMutation({
     mutationFn: () => api.post('/jobs', { kind: 'subtitles.create', params: { origin, input } }),

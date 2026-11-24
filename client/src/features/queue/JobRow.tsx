@@ -7,6 +7,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import type { Job } from '@/shared/api/events';
 import { t } from '@/shared/i18n/t';
+import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
 
 interface Props {
   job: Job;
@@ -51,6 +52,7 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
         </UIStack>
       ) : null}
       <UIStack direction="row" align="center" gap="sm">
+        {job.status === 'done' && job.output_dir ? <OpenJobOutputButton outputDir={job.output_dir} /> : null}
         {job.status === 'queued' ? (
           <UIIconButton
             ref={setActivatorNodeRef}
@@ -84,6 +86,8 @@ function statusLabel(status: Job['status']): string {
       return t('queue.status.queued');
     case 'running':
       return t('queue.status.running');
+    case 'done':
+      return t('queue.status.done');
     case 'error':
       return t('queue.status.error');
     default:

@@ -146,6 +146,17 @@ describe('EditorWorkspace', () => {
     expect(linkedAudio?.link).toBe(video?.link);
   });
 
+  it('importa las rutas solicitadas en el cabezal y avisa cuando termina', async () => {
+    const onAddHandled = vi.fn();
+    render(<EditorWorkspace project={project} onBack={vi.fn()} pendingAdd={['D:/Music/song.wav']} onAddHandled={onAddHandled} />);
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+
+    expect(saved.clips).toEqual(expect.arrayContaining([expect.objectContaining({ src: 'D:/Music/song.wav', start: 2 })]));
+    expect(onAddHandled).toHaveBeenCalledTimes(1);
+  });
+
   it('arma la primera pista y comienza a grabar al crear un proyecto desde Inicio', async () => {
     const onAutoRecordComplete = vi.fn();
     render(<EditorWorkspace project={project} onBack={vi.fn()} autoRecord onAutoRecordComplete={onAutoRecordComplete} />);

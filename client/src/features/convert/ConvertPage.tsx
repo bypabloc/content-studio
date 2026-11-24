@@ -16,6 +16,8 @@ import { UITable, type UITableColumn } from '@/shared/components/organisms/UITab
 import { useFilePaths } from '@/shared/hooks/useFilePaths';
 import { t } from '@/shared/i18n/t';
 import { MEDIA_EXTENSIONS, baseName, isVideoPath, jobErrorMessage } from '@/shared/media/formats';
+import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
+import { hashParams } from '@/shared/navigation/hash';
 
 import { FormatPicker } from './FormatPicker';
 import { type Catalog, type FormatChoice, type Reframe, SOCIAL, convertJob } from './convertOptions';
@@ -43,7 +45,7 @@ function statusText(job: Job): string {
 export function ConvertPage(): React.JSX.Element {
   const api = useApi();
   const queryClient = useQueryClient();
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<string[]>(() => hashParams().getAll('path').filter(Boolean));
   const [choice, setChoice] = useState<FormatChoice | null>(null);
   const [reframe, setReframe] = useState<Reframe | null>(null);
   const [failed, setFailed] = useState<Job | null>(null);
@@ -127,9 +129,12 @@ export function ConvertPage(): React.JSX.Element {
             </>
           ) : null}
           {job.status === 'done' && job.output_dir ? (
-            <UIButton variant="secondary" onClick={() => void openPath(job.output_dir ?? '')}>
-              {t('media.action.folder')}
-            </UIButton>
+            <>
+              <OpenJobOutputButton outputDir={job.output_dir} />
+              <UIButton variant="secondary" onClick={() => void openPath(job.output_dir ?? '')}>
+                {t('media.action.folder')}
+              </UIButton>
+            </>
           ) : null}
         </UIStack>
       ),

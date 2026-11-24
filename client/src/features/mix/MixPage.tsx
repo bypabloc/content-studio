@@ -9,6 +9,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
+import { isVideoPath } from '@/shared/media/formats';
 import { hashParams, openSection } from '@/shared/navigation/hash';
 
 import { MixEditor } from './MixEditor';
@@ -26,7 +27,13 @@ export function MixPage(): React.JSX.Element {
   const [picked, setPicked] = useState<Record<SlotKey, string | null>>(() => {
     // «Mandar a Mezclar» (narración o música) llega con la ruta en el hash: `#/mix?voice=…` o `#/mix?music=…`.
     const params = hashParams();
-    return { voice: params.get('voice'), music: params.get('music'), video: params.get('video') };
+    const path = params.get('path');
+    const video = path !== null && isVideoPath(path);
+    return {
+      voice: params.get('voice') ?? (path && !video ? path : null),
+      music: params.get('music'),
+      video: params.get('video') ?? (video ? path : null),
+    };
   });
   const [videoMode, setVideoMode] = useState<'replace' | 'under'>('replace');
   const [projectId, setProjectId] = useState<number | null>(null);

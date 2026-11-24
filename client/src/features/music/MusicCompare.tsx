@@ -8,7 +8,8 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { label, t } from '@/shared/i18n/t';
 import { Player } from '@/shared/media/Player';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
-import { openSection } from '@/shared/navigation/hash';
+import { OpenInEditorButton } from '@/shared/navigation/OpenInEditorButton';
+import { sendTo } from '@/shared/navigation/sendTo';
 
 type Job = components['schemas']['Job'];
 
@@ -106,6 +107,7 @@ export function MusicCompare({ groupKey }: { groupKey: string }): React.JSX.Elem
             >
               {t('music.compare.choose')}
             </UIButton>
+            <OpenInEditorButton paths={[`${row.job.output_dir ?? ''}/${row.track.file}`]} />
           </UIStack>
           <TrackPlayer path={`${row.job.output_dir ?? ''}/${row.track.file}`} />
         </UIStack>
@@ -114,7 +116,7 @@ export function MusicCompare({ groupKey }: { groupKey: string }): React.JSX.Elem
         variant="secondary"
         disabled={!chosen}
         onClick={() => {
-          if (chosen) openSection('mix', { music: `${chosen.job.output_dir ?? ''}/${chosen.track.file}` });
+          if (chosen) sendTo('mix', `${chosen.job.output_dir ?? ''}/${chosen.track.file}`);
         }}
       >
         {t('mix.send')}

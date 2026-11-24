@@ -98,9 +98,17 @@ afterEach(() => {
   api.get.mockReset();
   api.put.mockReset();
   api.post.mockReset();
+  window.location.hash = '';
 });
 
 describe('NormalizePage', () => {
+  it('carga en la lista el archivo recibido por el parámetro path', async () => {
+    window.location.hash = '#/normalize?path=%2Fmedia%2Fvoz.wav';
+    renderPage();
+
+    expect(await screen.findByText('voz.wav')).toBeTruthy();
+  });
+
   it('con audio, el preset ★ es podcast y se encola un trabajo por archivo', async () => {
     renderPage();
     await drop(['/media/a.wav', '/media/b.wav']);

@@ -29,9 +29,18 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 describe('MixPage', () => {
+  it('carga el medio enviado por path en la ranura compatible', async () => {
+    window.location.hash = '#/mix?path=D%3A%2Fmedia%2Fclip.mp4';
+    renderPage();
+
+    expect(await screen.findByText('D:/media/clip.mp4')).toBeTruthy();
+    expect(screen.getByRole('group', { name: t('mix.slot.video') }).textContent).toContain('D:/media/clip.mp4');
+  });
+
   it('muestra tres ranuras (voz, música y video), cada una con su origen de archivo', async () => {
     renderPage();
 

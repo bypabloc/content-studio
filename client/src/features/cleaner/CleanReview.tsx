@@ -13,6 +13,7 @@ import { UISwitch } from '@/shared/components/atoms/UISwitch';
 import { t } from '@/shared/i18n/t';
 import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 import { useSyncedMedia } from '@/shared/media/useSyncedMedia';
+import { OpenInEditorButton } from '@/shared/navigation/OpenInEditorButton';
 
 import { ReviewWave } from './ReviewWave';
 import { type Cut, clock, keepDuration, moveSelection, skipTarget, toggleCut } from './cuts';
@@ -220,6 +221,7 @@ export function CleanReview({ jobId, onBack }: { jobId: number; onBack?: () => v
         <UIButton variant="secondary" disabled={!cleanSource || subtitle.isPending} onClick={() => subtitle.mutate()}>
           {t('cleaner.review.subtitle')}
         </UIButton>
+        {cleanSource ? <OpenInEditorButton paths={[cleanSource]} /> : null}
       </UIStack>
       <UIStack direction="row" align="end" gap="sm">
         <UIField

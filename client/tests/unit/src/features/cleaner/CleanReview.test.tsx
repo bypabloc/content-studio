@@ -72,6 +72,7 @@ describe('CleanReview (spec 013, D-6, AC-7)', () => {
     cleanup();
     vi.clearAllMocks();
     review.props = null;
+  window.location.hash = '';
   });
 
   it('AC-7: cambiar el hueco mínimo llama a /plan, reemplaza los cortes sin editar y conserva el editado', async () => {
@@ -162,6 +163,20 @@ describe('CleanReview (spec 013, D-6, AC-7)', () => {
         return routes(input)(path);
       });
     }
+
+    it('abre en el Editor con el archivo renderizado de este análisis', async () => {
+      withRenders('/media/charla.mp4', [
+        { id: 9, status: 'done', output_dir: 'D:/out/clean/9', params: { analysis: 'D:/out/clean/7' } },
+      ]);
+      renderReview();
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Abrir en Editor' })).toBeTruthy());
+
+      fireEvent.click(screen.getByRole('button', { name: 'Abrir en Editor' }));
+
+      expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
+        'D:/out/clean/9/clean.mp4',
+      ]);
+    });
 
     it('sin una render de este análisis, el botón espera', async () => {
       withRenders('/media/charla.mp4', []);

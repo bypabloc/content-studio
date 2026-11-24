@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { openPath } from '@tauri-apps/plugin-opener';
 
@@ -13,6 +13,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
+import { SendToActions } from '@/shared/navigation/SendToActions';
 import type { Marker } from './model/types';
 
 type Job = { id: number; status: string; progress: number; error_code: string | null; error_detail: string | null };
@@ -85,6 +86,7 @@ export function ExportDialog({
   const [jobs, setJobs] = useState<Job[]>([]);
   const [error, setError] = useState(false);
   const [playMedia, setPlayMedia] = useState<PlayMedia | null>(null);
+  const [latestMedia, setLatestMedia] = useState<PlayMedia | null>(null);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
   const jobIds = jobs.map((job) => job.id);
   const format = audioOnly ? audioFormat : videoFormat;
@@ -151,6 +153,7 @@ export function ExportDialog({
   async function start(segments: Segment[]): Promise<void> {
     setError(false);
     setJobs([]);
+    setLatestMedia(null);
     try {
       const ids: number[] = [];
       for (const segment of segments) ids.push(await enqueue(segment));
@@ -160,20 +163,40 @@ export function ExportDialog({
     }
   }
 
+  const findLatest = useCallback(async (): Promise<PlayMedia | null> => {
+    const query = new URLSearchParams({ path: exportsPath(path), kinds: 'audio,video' });
+    const result = await api.get<{ entries: Array<{ path: string; kind: string; modified: number }> }>(`/fs/list?${query}`);
+    const latest = result.entries
+      .filter((entry): entry is typeof entry & PlayMedia => entry.kind === 'audio' || entry.kind === 'video')
+      .sort((a, b) => b.modified - a.modified)[0];
+    return latest ? { path: latest.path, kind: latest.kind } : null;
+  }, [api, path]);
+
   async function playLatest(): Promise<void> {
     try {
-      const query = new URLSearchParams({ path: exportsPath(path), kinds: 'audio,video' });
-      const result = await api.get<{ entries: Array<{ path: string; kind: string; modified: number }> }>(`/fs/list?${query}`);
-      const latest = result.entries
-        .filter((entry): entry is typeof entry & PlayMedia => entry.kind === 'audio' || entry.kind === 'video')
-        .sort((a, b) => b.modified - a.modified)[0];
-      setPlayMedia(latest ? { path: latest.path, kind: latest.kind } : null);
+      const latest = await findLatest();
+      setLatestMedia(latest);
+      setPlayMedia(latest);
     } catch {
       setError(true);
     }
   }
 
   const completed = jobs.length > 0 && jobs.every((job) => job.status === 'done');
+  useEffect(() => {
+    if (!completed) return;
+    let active = true;
+    void findLatest()
+      .then((latest) => {
+        if (active) setLatestMedia(latest);
+      })
+      .catch(() => {
+        if (active) setError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [completed, findLatest]);
   const failed = jobs.some((job) => job.status === 'error');
   const missingSources = [...new Set(jobs.flatMap(missingSourcePaths))];
   const progress = jobs.length ? jobs.reduce((sum, job) => sum + job.progress, 0) / jobs.length : 0;
@@ -244,9 +267,12 @@ export function ExportDialog({
               </UIText>
             ) : null}
             {completed ? (
-              <UIStack direction="row" gap="sm">
-                <UIButton variant="secondary" onClick={() => void openPath(exportsPath(path))}>{t('media.action.folder')}</UIButton>
-                <UIButton variant="secondary" onClick={() => void playLatest()}>{t('editor.export.play')}</UIButton>
+              <UIStack gap="sm">
+                <UIStack direction="row" gap="sm">
+                  <UIButton variant="secondary" onClick={() => void openPath(exportsPath(path))}>{t('media.action.folder')}</UIButton>
+                  <UIButton variant="secondary" onClick={() => void playLatest()}>{t('editor.export.play')}</UIButton>
+                </UIStack>
+                {latestMedia ? <SendToActions path={latestMedia.path} type={latestMedia.kind} /> : null}
               </UIStack>
             ) : null}
           </UIStack>

@@ -32,6 +32,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 describe('ExportDialog', () => {
@@ -148,5 +149,19 @@ describe('ExportDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
 
     expect(await screen.findByText(t('editor.export.failed'))).toBeTruthy();
+  });
+
+  it('manda la última salida de audio a Normalizar con su ruta', async () => {
+    render(<ExportDialog path={PATH} duration={10} markers={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
+
+    const actions = await screen.findByRole('group', { name: t('editor.send_to') });
+    fireEvent.click(screen.getByRole('button', { name: t('normalize.submit') }));
+
+    expect(window.location.hash).toBe(
+      '#/normalize?path=D%3A%2Fout%2Feditor%2Fdemo%2Fexports%2Fdemo.wav',
+    );
+    expect(actions).toBeTruthy();
   });
 });

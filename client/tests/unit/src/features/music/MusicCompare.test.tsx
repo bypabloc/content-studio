@@ -26,6 +26,7 @@ const manifest = {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 function renderCompare() {
@@ -37,6 +38,22 @@ function renderCompare() {
 }
 
 describe('MusicCompare (spec 011, D-6, AC-8)', () => {
+  it('abre en el Editor con la ruta de una pista', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path.startsWith('/jobs?group_key=')) return [job];
+      if (path.includes('tracks.json')) return manifest;
+      return { peaks: [] };
+    });
+
+    renderCompare();
+    await waitFor(() => expect(document.querySelectorAll('[data-track]')).toHaveLength(4));
+    await userEvent.click(screen.getAllByRole('button', { name: 'Abrir en Editor' })[0]);
+
+    expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
+      'out/music/x/acestep-lofi-chill-v1.wav',
+    ]);
+  });
+
   it('WHEN se eligen 2 estilos y 2 variantes THEN compara las 4 pistas con su duración real y su voz', async () => {
     api.get.mockImplementation(async (path: string) => {
       if (path.startsWith('/jobs?group_key=')) return [job];
@@ -79,7 +96,7 @@ describe('MusicCompare (spec 011, D-6, AC-8)', () => {
     await waitFor(() => expect(document.querySelectorAll('[data-track]')).toHaveLength(4));
     await userEvent.click(screen.getByRole('button', { name: t('mix.send') }));
 
-    expect(decodeURIComponent(window.location.hash)).toBe('#/mix?music=out/music/x/acestep-corporate-v2.wav');
+    expect(window.location.hash).toBe('#/mix?path=out%2Fmusic%2Fx%2Facestep-corporate-v2.wav');
     window.location.hash = '';
   });
 

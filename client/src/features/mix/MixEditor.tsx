@@ -8,6 +8,7 @@ import { toast } from '@/shared/components/molecules/UIToast';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
 import { jobErrorMessage } from '@/shared/media/formats';
+import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
 
 import { MixTimeline } from './MixTimeline';
 import { useMixPreview } from './useMixPreview';
@@ -39,10 +40,11 @@ export function MixEditor({ projectId }: { projectId: number }): React.JSX.Eleme
   // El último render de este proyecto que falló: su código dice qué corregir (AC-4). Los trabajos llegan en arreglo.
   const renders = useQuery({
     queryKey: ['jobs', 'mix.render'],
-    queryFn: () => api.get<{ id: number; status: string; error_code: string | null; params: { mix_id?: number } }[]>('/jobs?kind=mix.render'),
+    queryFn: () => api.get<{ id: number; status: string; output_dir?: string | null; error_code: string | null; params: { mix_id?: number } }[]>('/jobs?kind=mix.render'),
     refetchInterval: 3000,
   });
   const failed = (renders.data ?? []).find((job) => job.status === 'failed' && job.params.mix_id === projectId);
+  const completed = (renders.data ?? []).find((job) => job.status === 'done' && job.params.mix_id === projectId && job.output_dir);
   const curve = useQuery({
     queryKey: ['mix', projectId, 'curve', project.data?.regions, project.data?.params],
     queryFn: () => api.get<CurveOut>(`/mix/${projectId}/curve`),
@@ -142,6 +144,7 @@ export function MixEditor({ projectId }: { projectId: number }): React.JSX.Eleme
           </UIText>
         </UIStack>
       ) : null}
+      {completed ? <OpenJobOutputButton outputDir={completed.output_dir} /> : null}
       <UIButton onClick={() => render.mutate()}>{t('mix.render')}</UIButton>
     </UIStack>
   );
