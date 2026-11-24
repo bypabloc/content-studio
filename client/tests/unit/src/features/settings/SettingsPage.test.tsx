@@ -41,7 +41,11 @@ describe('SettingsPage', () => {
     localStorage.clear();
     localStorage.setItem('ui.language', 'es');
     fetchMock = vi.fn(async (_url: string, init?: RequestInit) =>
-      init?.method === 'DELETE' ? reply({ deleted: 2 }) : reply({ key: 'x', value: null }),
+      init?.method === 'DELETE'
+        ? reply({ deleted: 2 })
+        : _url.endsWith('/jobs')
+          ? reply([])
+          : reply({ key: 'x', value: null }),
     );
   });
 

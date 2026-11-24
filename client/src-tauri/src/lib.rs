@@ -154,9 +154,15 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             let resources = app.path().resource_dir().unwrap_or_default();
             let mode = bootstrap::current_mode(resources);
+            // Solo la app instalada se actualiza (spec 022, D-6): en un checkout, `check()` del client falla y no ofrece nada.
+            if matches!(mode, bootstrap::Mode::Installed { .. }) {
+                app.handle()
+                    .plugin(tauri_plugin_updater::Builder::new().build())?;
+            }
             let version = app.package_info().version.to_string();
             app.manage(ServerState(Arc::default(), Arc::new(mode), version));
             Ok(())

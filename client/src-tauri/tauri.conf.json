@@ -47,5 +47,16 @@
         "installerHooks": "installer/nsis/hooks.nsh"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNEMzdBNkYwQkNBNjlFRTgKUldUb25xYTg4S1kzUFE0S0d2SHQzWnp2VEpQMFZkRFkvTjBJcGl0Uk9Ydy85aG4zc3Y0RmVmQnUK",
+      "endpoints": [
+        "https://github.com/bypabloc/content-studio/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
