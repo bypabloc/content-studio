@@ -27,6 +27,7 @@ from content_studio.api.routes import (
     health,
     jobs,
     library,
+    library_organize,
     media,
     mix,
     music,
@@ -131,6 +132,7 @@ def create_app(
     app.include_router(subtitles.router, dependencies=header_only)
     app.include_router(mix.router, dependencies=header_only)
     app.include_router(library.router, dependencies=header_only)
+    app.include_router(library_organize.router, dependencies=header_only)
     app.include_router(editor.router, dependencies=header_only)
     app.include_router(fs.router, dependencies=header_only)
     app.include_router(music.router, dependencies=header_only)
