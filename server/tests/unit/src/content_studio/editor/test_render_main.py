@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from content_studio.editor import project, render_main, store
+from content_studio.subtitles.sources import from_cleaner
 
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
 
@@ -134,7 +135,13 @@ def test_video_quality_reaches_the_renderer(tmp_path: Path, monkeypatch: pytest.
     )
 
     assert code == 0
-    assert calls[0][-1] == {'start': 0, 'end': None, 'quality': 21}
+    assert calls[0][-1] == {
+        'start': 0,
+        'end': None,
+        'quality': 21,
+        'subtitle_documents': {},
+        'burn_subtitles': False,
+    }
 
 
 @needs_ffmpeg
@@ -293,3 +300,28 @@ def test_missing_visual_source_is_preserved_in_the_job_result(tmp_path: Path, ca
     assert code == 3
     assert json.loads((job / 'result.json').read_text(encoding='utf-8')) == result
     assert json.loads(capsys.readouterr().out) == result
+
+
+def test_ac6_export_writes_srt_and_vtt_sidecars_for_subtitle_tracks(tmp_path: Path):
+    """AC-6: SRT y VTT quedan junto al video con el texto del proyecto enlazado."""
+    document = from_cleaner(
+        [{'word': 'PRUEBA', 'start': 0.0, 'end': 0.9}],
+        source_path='mezcla.wav',
+        language='es',
+    )
+    doc = {
+        'canvas': {'width': 320, 'height': 180},
+        'tracks': [{'kind': 'subtitles', 'subtitles_project': '7'}],
+    }
+    video = tmp_path / 'exports' / 'demo.mp4'
+    video.parent.mkdir()
+
+    srt_paths = render_main._write_subtitle_sidecars(doc, {'7': document}, video, 'srt')
+    vtt_paths = render_main._write_subtitle_sidecars(doc, {'7': document}, video, 'vtt')
+
+    srt = Path(srt_paths[0])
+    vtt = Path(vtt_paths[0])
+    assert srt == video.with_suffix('.srt')
+    assert vtt == video.with_suffix('.vtt')
+    assert 'PRUEBA' in srt.read_text(encoding='utf-8')
+    assert vtt.read_text(encoding='utf-8').startswith('WEBVTT')

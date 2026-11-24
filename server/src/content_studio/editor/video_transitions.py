@@ -97,12 +97,16 @@ def compose(
         source = Path(clip['src'])
         source = source if source.is_absolute() else folder / source
         source = source.resolve()
+        speed = clip.get('speed', 1) if clip['media'] == 'video' else 1
         source_start = 0 if clip['media'] == 'image' else clip['src_in']
         length = project.clip_length(clip)
+        source_length = length * speed
         source_label = f'{namespace}_src{index}'
+        setpts = f'setpts=(PTS-STARTPTS)/{_num(speed)}' if speed != 1 else 'setpts=PTS-STARTPTS'
         lines.append(
-            f'[{indexes[source]}:v]trim=start={_num(source_start)}:duration={_num(length)},'
-            f'setpts=PTS-STARTPTS,fps={_num(canvas["fps"])},format=rgba[{source_label}]'
+            f'[{indexes[source]}:v]trim=start={_num(source_start)}:duration={_num(source_length)},'
+            f'{setpts},'
+            f'fps={_num(canvas["fps"])},format=rgba[{source_label}]'
         )
         transformed = transform(
             clip, track, source_label, clip['start'], source_sizes[source], f'{namespace}_c{index}_'

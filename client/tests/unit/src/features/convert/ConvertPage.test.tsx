@@ -101,6 +101,7 @@ afterEach(() => {
   api.get.mockReset();
   api.put.mockReset();
   api.post.mockReset();
+  window.location.hash = '';
 });
 
 describe('ConvertPage', () => {
@@ -195,6 +196,19 @@ describe('ConvertPage', () => {
     await userEvent.click(screen.getByRole('button', { name: t('media.action.folder') }));
 
     expect(openPath).toHaveBeenCalledWith('out/convert/4');
+  });
+
+  it('abre en el Editor con los medios de salida del trabajo convertido', async () => {
+    jobs = [job({ id: 4, status: 'done', output_dir: 'out/convert/4' })];
+    renderPage();
+    await screen.findByText(t('media.status.done'));
+    api.get.mockResolvedValueOnce({ entries: [{ path: 'out/convert/4/converted.mp3', kind: 'audio', modified: 1 }] });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir en Editor' }));
+
+    await waitFor(() => expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
+      'out/convert/4/converted.mp3',
+    ]));
   });
 
   it('cerrar el diálogo del error lo quita de la pantalla', async () => {

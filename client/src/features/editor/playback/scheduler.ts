@@ -32,7 +32,7 @@ export function activeClips(doc: Doc, position: number): PlaybackClip[] {
 
 /** Posición esperada dentro de la fuente de un clip mientras suena. */
 export function sourceTimeAt(clip: AudioClip, position: number): number {
-  return clip.src_in + Math.max(0, position - clip.start);
+  return clip.src_in + Math.max(0, position - clip.start) * (clip.speed ?? 1);
 }
 
 /** Puntos de rampa lineal en segundos de timeline y ganancia lineal, tras sumar volumen de clip y pista. */

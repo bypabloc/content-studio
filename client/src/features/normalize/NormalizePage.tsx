@@ -21,6 +21,8 @@ import { useRecommendedValue } from '@/shared/hooks/useRecommendedValue';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { type MessageKey, t } from '@/shared/i18n/t';
 import { MEDIA_EXTENSIONS, baseName, isVideoPath, jobErrorMessage } from '@/shared/media/formats';
+import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
+import { hashParams } from '@/shared/navigation/hash';
 
 import { NormalizeListen } from './NormalizeListen';
 
@@ -83,7 +85,7 @@ function MeasureCells({ job, side }: { job: Job; side: 'before' | 'after' }): Re
 export function NormalizePage(): React.JSX.Element {
   const api = useApi();
   const queryClient = useQueryClient();
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<string[]>(() => hashParams().getAll('path').filter(Boolean));
   const [failed, setFailed] = useState<Job | null>(null);
   const [listening, setListening] = useState<Job | null>(null);
   const [customTarget, setCustomTarget] = useState(-16);
@@ -142,6 +144,7 @@ export function NormalizePage(): React.JSX.Element {
         <UIStack direction="row" gap="xs" justify="end">
           {job.status === 'done' ? (
             <>
+              <OpenJobOutputButton outputDir={job.output_dir} />
               <UIButton variant="secondary" onClick={() => setListening(job)}>
                 {t('media.action.listen')}
               </UIButton>

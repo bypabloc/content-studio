@@ -21,15 +21,19 @@ def filter_path(path: str | Path) -> str:
     return f"'{escaped}'"
 
 
+def filter_value(ass: Path, fonts_dir: Path) -> str:
+    """La expresión `subtitles` que comparte la quema directa y el Editor."""
+    return f'subtitles=filename={filter_path(ass)}:fontsdir={filter_path(fonts_dir)}'
+
+
 def burn_args(video: Path, ass: Path, fonts_dir: Path, destination: Path, *, nvenc: bool) -> list[str]:
     """Argumentos de ffmpeg: el filtro `subtitles` con sus fuentes, el codificador del equipo y el audio copiado."""
-    subtitles = f'subtitles=filename={filter_path(ass)}:fontsdir={filter_path(fonts_dir)}'
     return [
         '-y',
         '-i',
         str(video),
         '-vf',
-        subtitles,
+        filter_value(ass, fonts_dir),
         *video_codec(nvenc),
         '-pix_fmt',
         'yuv420p',

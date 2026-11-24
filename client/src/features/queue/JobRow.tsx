@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { UIIcon, type IconName } from '@/shared/components/atoms/UIIcon';
@@ -7,6 +8,10 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import type { Job } from '@/shared/api/events';
 import { t } from '@/shared/i18n/t';
+
+const OpenJobOutputButton = lazy(() =>
+  import('@/shared/navigation/OpenJobOutputButton').then((module) => ({ default: module.OpenJobOutputButton })),
+);
 
 interface Props {
   job: Job;
@@ -51,6 +56,11 @@ export function JobRow({ job, onCancel, onRetry }: Props) {
         </UIStack>
       ) : null}
       <UIStack direction="row" align="center" gap="sm">
+        {job.status === 'done' && job.output_dir ? (
+          <Suspense fallback={null}>
+            <OpenJobOutputButton outputDir={job.output_dir} />
+          </Suspense>
+        ) : null}
         {job.status === 'queued' ? (
           <UIIconButton
             ref={setActivatorNodeRef}
@@ -84,6 +94,8 @@ function statusLabel(status: Job['status']): string {
       return t('queue.status.queued');
     case 'running':
       return t('queue.status.running');
+    case 'done':
+      return t('queue.status.done');
     case 'error':
       return t('queue.status.error');
     default:

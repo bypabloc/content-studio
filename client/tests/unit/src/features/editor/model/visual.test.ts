@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { addTransitionAtCut, moveKeyframe, resizeTransition, setKeyframeEase, toggleKeyframe, writeVisualValue } from '@/features/editor/model/visual';
-import type { Doc, VisualClip } from '@/features/editor/model/types';
+import type { Doc, TextClip, VisualClip } from '@/features/editor/model/types';
 
 function clip(id: string, start: number, src: string): VisualClip {
   return {
@@ -22,6 +22,24 @@ function document(): Doc {
 }
 
 describe('edicion de clips visuales', () => {
+  it('permite animar la transformación de un clip de texto rasterizado', () => {
+    const source = document();
+    const text = {
+      ...clip('title', 0, 'media/text-title-hash.png'),
+      media: 'text', raster: 'media/text-title-hash.png',
+      text: {
+        content: 'Hola', font: 'Arial', weight: 700, size: 48, color: '#ffffff',
+        stroke: { width: 2, color: '#000000' }, shadow: { x: 0, y: 2, blur: 4, color: '#000000' },
+        align: 'center', line_height: 1.2, max_width: 800,
+      },
+    } as TextClip;
+    source.clips = [text];
+
+    const next = writeVisualValue(source, 'title', 'y', 1, 240);
+
+    expect((next.clips[0] as TextClip).transform.y).toBe(240);
+  });
+
   it('actualiza el valor base de una propiedad sin keyframes', () => {
     const source = document();
 

@@ -24,6 +24,11 @@ def validate(params: dict[str, Any]) -> list[dict[str, Any]]:
     target = formats.TARGETS.get(params.get('format', 'wav'))
     if target is None or target['kind'] not in {'audio', 'video'}:
         errors.append({'code': 'unknown_target', 'params': {'target': params.get('format')}})
+    subtitle_mode = params.get('subtitle_mode', 'none')
+    if subtitle_mode not in {'none', 'burn', 'srt', 'vtt'}:
+        errors.append({'code': 'unknown_subtitle_mode', 'params': {'mode': subtitle_mode}})
+    elif subtitle_mode != 'none' and target is not None and target['kind'] != 'video':
+        errors.append({'code': 'subtitle_mode_requires_video', 'params': {}})
     quality = params.get('quality')
     if 'quality' in params and (
         target is None
@@ -73,4 +78,6 @@ def build_command(params: dict[str, Any], output_dir: Path) -> list[str]:
         command += ['--end', str(params['end'])]
     if params.get('name'):
         command += ['--name', str(params['name'])]
+    if params.get('subtitle_mode'):
+        command += ['--subtitle-mode', str(params['subtitle_mode'])]
     return [*command, '--out-dir', str(output_dir)]

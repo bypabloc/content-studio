@@ -2,7 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorWorkspace } from '@/features/editor/EditorWorkspace';
-import type { Doc } from '@/features/editor/model/types';
+import type { Doc, TextClip, VideoClip } from '@/features/editor/model/types';
+import type { TextPresetName } from '@/features/editor/text/presets';
 import { t } from '@/shared/i18n/t';
 
 const { api, open, playback, recorder, importedPaths } = vi.hoisted(() => ({
@@ -24,6 +25,15 @@ vi.mock('@/features/recording/MicrophonePicker', () => ({
   ),
 }));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
+vi.mock('@/features/editor/TextInspector', () => ({
+  TextInspector: ({ onAdd }: { onAdd: (preset: TextPresetName) => void }) => (
+    <div>
+      <button type="button" onClick={() => onAdd('lower-third')}>add-text-lower-third</button>
+      <button type="button" onClick={() => onAdd('title-center')}>add-text-title-center</button>
+      <button type="button" onClick={() => onAdd('caption-bold')}>add-text-caption-bold</button>
+    </div>
+  ),
+}));
 
 const PATH = 'D:/out/editor/demo/project.json';
 const DOC: Doc = {
@@ -37,6 +47,24 @@ const DOC: Doc = {
   transitions: [],
 };
 const project = { path: PATH, hash: 'hash-1', doc: DOC, missing: ['missing.wav'] };
+
+function videoClip(id: string, start: number): VideoClip {
+  return {
+    id, track: 'video', src: `${id}.mp4`, media: 'video', src_in: 0, src_out: 2, start, fade_in: 0, fade_out: 0,
+    speed: 1, transform: {
+      x: 0, y: 0, scale_x: 1, scale_y: 1, rotation: 0, opacity: 1,
+      crop: { l: 0, t: 0, r: 0, b: 0 }, anchor_x: 0.5, anchor_y: 0.5,
+    }, keyframes: {}, color: { brightness: 0, contrast: 1, saturation: 1, gamma: 1 }, blend_mode: 'normal',
+  };
+}
+
+function version3Project(videoTrack = false): typeof project {
+  const doc = structuredClone(DOC);
+  doc.version = 3;
+  doc.clips = doc.clips.map((clip) => ({ ...clip, speed: 1 }));
+  if (videoTrack) doc.tracks.push({ id: 'video', kind: 'video', name: 'Video', opacity: 1, hidden: false, locked: false });
+  return { ...project, doc, missing: [] };
+}
 
 beforeEach(() => {
   importedPaths.splice(0, importedPaths.length, 'D:/Music/song.wav');
@@ -116,6 +144,17 @@ describe('EditorWorkspace', () => {
     expect(linkedAudio).toMatchObject({ track: importedAudioTrack?.id, src_in: 0, src_out: 3, start: 7, gain_db: 0 });
     expect(video?.link).toBeTruthy();
     expect(linkedAudio?.link).toBe(video?.link);
+  });
+
+  it('importa las rutas solicitadas en el cabezal y avisa cuando termina', async () => {
+    const onAddHandled = vi.fn();
+    render(<EditorWorkspace project={project} onBack={vi.fn()} pendingAdd={['D:/Music/song.wav']} onAddHandled={onAddHandled} />);
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+
+    expect(saved.clips).toEqual(expect.arrayContaining([expect.objectContaining({ src: 'D:/Music/song.wav', start: 2 })]));
+    expect(onAddHandled).toHaveBeenCalledTimes(1);
   });
 
   it('arma la primera pista y comienza a grabar al crear un proyecto desde Inicio', async () => {
@@ -201,5 +240,51 @@ describe('EditorWorkspace', () => {
     render(<EditorWorkspace project={project} onBack={vi.fn()} />);
     fireEvent.keyDown(screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) }), { key: 't' });
     expect(api.put).not.toHaveBeenCalledWith(expect.stringContaining('/projects'), expect.anything());
+  });
+
+  it('agrega texto en un proyecto de solo audio y crea una pista visual con efectos neutrales', async () => {
+    render(<EditorWorkspace project={version3Project()} onBack={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'add-text-lower-third' }));
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+    const track = saved.tracks.find((item) => item.kind === 'video');
+    const title = saved.clips.find((clip): clip is TextClip => 'media' in clip && clip.media === 'text');
+    expect(track).toMatchObject({ kind: 'video', name: t('editor.text.track_name'), locked: false });
+    expect(title).toMatchObject({
+      media: 'text', track: track?.id, start: 2, speed: 1, blend_mode: 'normal',
+      color: { brightness: 0, contrast: 1, saturation: 1, gamma: 1 },
+    });
+    expect(title?.transform.y).toBe(324);
+  });
+
+  it.each([
+    ['title-center', 0],
+    ['caption-bold', 367.2],
+  ] as const)('reutiliza la pista visual para el preset %s', async (preset, y) => {
+    render(<EditorWorkspace project={version3Project(true)} onBack={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: `add-text-${preset}` }));
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+    const title = saved.clips.find((clip): clip is TextClip => 'media' in clip && clip.media === 'text');
+    expect(saved.tracks.filter((track) => track.kind === 'video')).toHaveLength(1);
+    expect(title?.transform.y).toBeCloseTo(y);
+  });
+
+  it('agrega una transición al corte visual bajo el cabezal', async () => {
+    const transitionProject = version3Project(true);
+    transitionProject.doc.clips = [videoClip('first', 0), videoClip('second', 2)];
+    render(<EditorWorkspace project={transitionProject} onBack={vi.fn()} />);
+    const workspace = screen.getByRole('region', { name: t('editor.project.workspace', { name: 'demo' }) });
+
+    fireEvent.keyDown(workspace, { key: 't' });
+    await waitFor(() => expect(api.put).toHaveBeenCalled());
+
+    const saved = api.put.mock.calls.at(-1)?.[1] as Doc;
+    expect(saved.transitions).toHaveLength(1);
+    expect(saved.transitions[0]).toMatchObject({ track: 'video', a: 'first', b: 'second', type: 'fade', duration: 0.5 });
   });
 });

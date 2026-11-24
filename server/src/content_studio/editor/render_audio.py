@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from content_studio.common import ffmpeg as ff
-from content_studio.editor import project
+from content_studio.editor import project, timing
 from content_studio.editor.project import Doc
 from content_studio.media import formats, normalize
 
@@ -59,10 +59,11 @@ def build(doc: Doc, folder: Path, *, start: float = 0, end: float | None = None)
         if left >= right:
             continue
         leading, trailing = left - clip_start, clip_end - right
+        speed = original.get('speed', 1)
         clip = {
             **original,
-            'src_in': original['src_in'] + leading,
-            'src_out': original['src_out'] - trailing,
+            'src_in': original['src_in'] + leading * speed,
+            'src_out': original['src_out'] - trailing * speed,
             'start': left - start,
             'fade_in': max(0, original['fade_in'] - leading),
             'fade_out': max(0, original['fade_out'] - trailing),
@@ -153,6 +154,7 @@ def _chain(clip: dict[str, Any], track: dict[str, Any], number: int, index: int)
         f'aresample={project.SAMPLE_RATE}',
         'aformat=sample_fmts=fltp:channel_layouts=stereo',
     ]
+    steps.extend(timing.atempo_filters(clip.get('speed', 1)))
     if clip['fade_in'] > 0:
         steps.append(f'afade=t=in:st=0:d={_num(clip["fade_in"])}')
     if clip['fade_out'] > 0:

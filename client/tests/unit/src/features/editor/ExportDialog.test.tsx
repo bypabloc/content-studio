@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ExportDialog } from '@/features/editor/ExportDialog';
@@ -31,6 +32,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 describe('ExportDialog', () => {
@@ -61,6 +63,29 @@ describe('ExportDialog', () => {
       kind: 'editor.render',
       params: { doc: PATH, format: 'mp4-h264', name: 'demo', normalize: null, quality: 19 },
     }));
+  });
+
+  it('deshabilita quemar sin libass y deja exportar SRT aparte', async () => {
+    const user = userEvent.setup();
+    api.get.mockImplementation((url: string) => {
+      if (url === '/system') return Promise.resolve({ subtitles_filter: false });
+      if (url === '/jobs/7') return Promise.resolve({ id: 7, status: 'done', progress: 1, error_code: null });
+      return Promise.reject(new Error('unknown endpoint'));
+    });
+    render(<ExportDialog path={PATH} duration={10} markers={[]} hasSubtitles />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+    const select = await screen.findByRole('combobox', { name: t('editor.export.subtitles') });
+    await user.click(select);
+    const burn = await screen.findByRole('option', { name: t('editor.export.subtitles.burn') });
+    expect(burn.getAttribute('aria-disabled') === 'true' || burn.hasAttribute('disabled')).toBe(true);
+    await user.click(await screen.findByRole('option', { name: t('editor.export.subtitles.srt') }));
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/jobs', {
+      kind: 'editor.render',
+      params: { doc: PATH, format: 'mp4-h264', name: 'demo', normalize: null, subtitle_mode: 'srt', quality: 19 },
+    }));
+    expect(screen.getByText(t('editor.export.no_libass'))).toBeTruthy();
   });
 
   it('reproduce el video exportado más reciente', async () => {
@@ -124,5 +149,19 @@ describe('ExportDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
 
     expect(await screen.findByText(t('editor.export.failed'))).toBeTruthy();
+  });
+
+  it('manda la última salida de audio a Normalizar con su ruta', async () => {
+    render(<ExportDialog path={PATH} duration={10} markers={[]} />);
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.open') }));
+    fireEvent.click(screen.getByRole('button', { name: t('editor.export.start') }));
+
+    const actions = await screen.findByRole('group', { name: t('editor.send_to') });
+    fireEvent.click(screen.getByRole('button', { name: t('normalize.submit') }));
+
+    expect(window.location.hash).toBe(
+      '#/normalize?path=D%3A%2Fout%2Feditor%2Fdemo%2Fexports%2Fdemo.wav',
+    );
+    expect(actions).toBeTruthy();
   });
 });

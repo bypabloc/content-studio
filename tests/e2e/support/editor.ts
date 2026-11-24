@@ -15,6 +15,7 @@ export function editorState(missing = false): EditorState {
 
 export function editorReplies(state: EditorState): Replies {
   return ({ method, path, search, body }) => {
+    if (method === 'GET' && path === '/subtitles') return [];
     if (method === 'GET' && path === '/editor/projects/recent') return apiFixture('editor/recent');
     if (method === 'GET' && path === '/editor/projects') return state.project;
     if (method === 'PUT' && path === '/editor/projects') {

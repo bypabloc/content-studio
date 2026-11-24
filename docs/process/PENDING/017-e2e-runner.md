@@ -6,3 +6,17 @@
 - **Quién**: agente.
 - **Qué la cierra**: `python -m devtools test-runner --type=e2e` termina con exit 0 y reporte completo.
 - **Impacto**: los cuatro flujos del Editor sí pasaron individualmente; queda sin confirmar el exit 0 agregado de las 61 pruebas.
+
+## Repetición en 019
+
+- Los cuatro escenarios nuevos de 019 imprimieron `PASS` en ejecuciones enfocadas con Chromium de la caché local.
+- La corrida enfocada conjunta de los cuatro también imprimió `PASS`, pero no entregó exit ni resumen.
+- El test-runner integral quedó activo unos nueve minutos, sin reporte ni archivos de resultados; se interrumpió.
+- Node y Playwright quedaron sin actividad de CPU durante la espera; no se confirmó el resultado agregado.
+- La ficha sigue abierta hasta que `python -m devtools test-runner --type=e2e` termine con exit 0 y reporte completo.
+
+## Repetición T8 de 019
+
+- `python -m devtools test-runner --type=e2e` permaneció nueve minutos sin reporte ni archivos de resultados.
+- Node siguió con CPU casi nula al final de la espera; la ejecución se interrumpió con Ctrl+C.
+- La ficha sigue abierta hasta que el runner termine por sí solo con exit 0 y reporte completo.

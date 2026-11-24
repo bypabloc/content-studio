@@ -1,0 +1,21 @@
+{
+  "doc": {
+    "version": 3,
+    "name": "Proyecto inválido v3",
+    "sample_rate": 48000,
+    "canvas": {"width": 1280, "height": 720, "fps": 30, "background": "#000000"},
+    "tracks": [
+      {"id": "audio", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80},
+      {"id": "video", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false},
+      {"id": "subs", "kind": "subtitles", "name": "Subtítulos", "locked": false},
+      {"id": "unknown", "kind": "effects", "name": "Inválida"}
+    ],
+    "clips": [
+      {"id": "voice", "track": "audio", "src": "voice.wav", "src_in": 0, "src_out": 4, "start": 0, "fade_in": 0, "fade_out": 0, "gain_db": 0, "speed": 0.1},
+      {"id": "title", "track": "video", "src": "title.png", "src_in": 0, "src_out": 4, "start": 0, "fade_in": 0, "fade_out": 0, "media": "text", "speed": 1, "raster": "../media/title.png", "text": {}, "color": {"brightness": 0, "contrast": 1, "saturation": 1, "gamma": 99}, "blend_mode": "unknown", "chroma": {"color": "green", "similarity": 0.2, "blend": 0.1}, "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}}
+    ],
+    "markers": [],
+    "transitions": []
+  },
+  "errors": ["bad_blend_mode", "bad_chroma", "bad_color", "bad_speed", "bad_subtitles_track", "bad_text", "bad_track_kind"]
+}

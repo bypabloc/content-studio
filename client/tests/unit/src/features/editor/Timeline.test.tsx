@@ -150,6 +150,32 @@ describe('Timeline', () => {
     expect(onDropTransition).toHaveBeenNthCalledWith(2, 'wipeleft', undefined, 4);
   });
 
+  it('recibe presets de texto soltados en la pista o en el fondo', () => {
+    const onDropText = vi.fn();
+    const doc = document();
+    doc.tracks.unshift({ id: 'video', kind: 'video', name: 'Video', opacity: 1, hidden: false, locked: false });
+    render(
+      <Timeline
+        doc={doc} selectedIds={[]} playhead={4} zoom={80} magnet
+        onSelectionChange={vi.fn()} onPreview={vi.fn()} onCommitPreview={vi.fn()} onCancelPreview={vi.fn()}
+        onDropText={onDropText}
+      />,
+    );
+    const lane = screen.getByRole('group', { name: t('editor.timeline.lane', { name: 'Video' }) });
+    const timeline = screen.getByRole('group', { name: t('editor.timeline.label') });
+    const dataTransfer = {
+      getData: (type: string) => type === 'application/x-editor-text-preset' ? 'lower-third' : '',
+    };
+    const laneDrop = createEvent.drop(lane, { dataTransfer });
+    const timelineDrop = createEvent.drop(timeline, { dataTransfer });
+    Object.defineProperty(laneDrop, 'clientX', { value: 240 });
+    fireEvent(lane, laneDrop);
+    fireEvent(timeline, timelineDrop);
+
+    expect(onDropText).toHaveBeenNthCalledWith(1, 'lower-third', 'video', 3);
+    expect(onDropText).toHaveBeenNthCalledWith(2, 'lower-third', undefined, 4);
+  });
+
   it('muestra keyframes y transiciones y redimensiona solo las transiciones declaradas', () => {
     const base = document();
     const videoTrack = { id: 'video', kind: 'video' as const, name: 'Video', opacity: 1, hidden: false, locked: false };

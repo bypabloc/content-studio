@@ -7,16 +7,26 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from content_studio import paths
 from content_studio.common import encode, ffmpeg
 from content_studio.editor import project, render_audio
 from content_studio.editor.video_graph import Plan, RenderInput, build, timeline_end, visible_clips
 from content_studio.media import convert, formats, normalize
+from content_studio.subtitles import burn as subtitle_burn
+from content_studio.subtitles import export as subtitle_export
 from content_studio.system import tools
 
-# cspell:ignore lavfi vout libvpx: nombres de filtros, etiquetas y codecs de FFmpeg.
+# cspell:ignore lavfi vout libvpx setpts: nombres de filtros, etiquetas y codecs de FFmpeg.
 
 
-def render_frame(doc: dict[str, Any], folder: Path, time: float, output: Path) -> Path:
+def render_frame(
+    doc: dict[str, Any],
+    folder: Path,
+    time: float,
+    output: Path,
+    *,
+    subtitle_documents: dict[str, dict[str, Any]] | None = None,
+) -> Path:
     """Escribe un PNG con el mismo grafo y composición que la exportación de video."""
     duration = _duration(doc)
     if time < 0 or time > duration:
@@ -35,7 +45,8 @@ def render_frame(doc: dict[str, Any], folder: Path, time: float, output: Path) -
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='editor-frame-', dir=output.parent) as temporary:
         graph = Path(temporary) / 'frame.filter'
-        graph.write_text(plan.script, encoding='utf-8')
+        filters = _subtitle_filters(doc, subtitle_documents, Path(temporary), plan.canvas)
+        graph.write_text(_append_subtitle_filters(plan.script, filters, time), encoding='utf-8')
         ffmpeg.ffmpeg(
             *_input_args(plan),
             '-/filter_complex',
@@ -65,6 +76,8 @@ def render(
     start: float = 0,
     end: float | None = None,
     quality: int | None = None,
+    subtitle_documents: dict[str, dict[str, Any]] | None = None,
+    burn_subtitles: bool = False,
 ) -> Path:
     """Exporta el lienzo y, si existe, el grafo de audio de la 017 en el mismo trabajo de FFmpeg."""
     target = formats.TARGETS.get(format)
@@ -97,8 +110,9 @@ def render(
     args += ['-pix_fmt', 'yuv420p', '-r', _num(plan.canvas['fps']), str(out)]
     out.parent.mkdir(parents=True, exist_ok=True)
     graph = _graph_path(out)
-    graph.write_text(script, encoding='utf-8')
     with tempfile.TemporaryDirectory(prefix='editor-render-', dir=out.parent) as temporary:
+        filters = _subtitle_filters(doc, subtitle_documents, Path(temporary), plan.canvas) if burn_subtitles else []
+        graph.write_text(_append_subtitle_filters(script, filters), encoding='utf-8')
         args[graph_option_index] = str(graph)
         if normalize_preset:
             raw = Path(temporary) / f'render{out.suffix}'
@@ -108,6 +122,53 @@ def render(
         else:
             ffmpeg.ffmpeg('-y', *args)
     return out
+
+
+def _subtitle_filters(
+    doc: dict[str, Any],
+    subtitle_documents: dict[str, dict[str, Any]] | None,
+    temporary: Path,
+    canvas: dict[str, Any],
+) -> list[str]:
+    """Escribe los ASS usados por las pistas; la quema requiere libass y un proyecto registrado por cada ID."""
+    tracks = [track for track in doc.get('tracks', []) if track.get('kind') == 'subtitles']
+    if not tracks:
+        return []
+    if not tools.detect()['subtitles_filter']:
+        raise render_audio.RenderError('ffmpeg_no_libass')
+    filters = []
+    for index, track in enumerate(tracks):
+        project_id = track.get('subtitles_project')
+        document = (subtitle_documents or {}).get(str(project_id))
+        if document is None:
+            raise render_audio.RenderError('subtitle_project_not_found', {'project_id': project_id})
+        ass = temporary / f'subtitles-{index}.ass'
+        ass.write_text(
+            subtitle_export.render(document, 'ass', (canvas['width'], canvas['height'])),
+            encoding='utf-8',
+        )
+        filters.append(subtitle_burn.filter_value(ass, paths.DATA / 'fonts'))
+    return filters
+
+
+def _append_subtitle_filters(script: str, filters: list[str], time_offset: float = 0) -> str:
+    """Agrega las pistas ASS luego de la composición de todas las capas visuales."""
+    if not filters:
+        return script
+    prefix, separator, suffix = script.rpartition('[vout]')
+    if not separator:
+        raise ValueError('unreadable_media')
+    current = 'subtitle_input'
+    result = f'{prefix}[{current}]{suffix.rstrip()}'
+    if time_offset:
+        timed = 'subtitle_timed_input'
+        result += f';\n[{current}]setpts=PTS+{_num(time_offset)}/TB[{timed}]'
+        current = timed
+    for index, filter_value in enumerate(filters):
+        output = 'vout' if index == len(filters) - 1 else f'subtitle_{index}'
+        result += f';\n[{current}]{filter_value}[{output}]'
+        current = output
+    return result + '\n'
 
 
 def _duration(doc: dict[str, Any]) -> float:
@@ -180,7 +241,7 @@ def _visual_inputs(doc: dict[str, Any], folder: Path, start: float, end: float) 
         source = Path(clip['src'])
         source = source if source.is_absolute() else folder / source
         source = source.resolve()
-        inputs.setdefault(source, RenderInput(source, clip['media'] == 'image', clip['src']))
+        inputs.setdefault(source, RenderInput(source, clip['media'] in {'image', 'text'}, clip['src']))
     return list(inputs.values())
 
 

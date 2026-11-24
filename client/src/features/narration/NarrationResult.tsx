@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import { UIDiffText } from '@/shared/components/atoms/UIDiffText';
 import { UIButton } from '@/shared/components/atoms/UIButton';
@@ -8,9 +8,13 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
 import { Player } from '@/shared/media/Player';
-import { openSection } from '@/shared/navigation/hash';
+import { sendTo } from '@/shared/navigation/sendTo';
 import { CompareTakes } from './CompareTakes';
 import { type Job, useTake } from './useTake';
+
+const OpenInEditorButton = lazy(() =>
+  import('@/shared/navigation/OpenInEditorButton').then((module) => ({ default: module.OpenInEditorButton })),
+);
 
 type DiffKind = 'change' | 'missing' | 'extra';
 
@@ -96,10 +100,13 @@ export function NarrationResult({ job }: { job: Job }) {
       </UIStack>
       {peaks.data && <Player src={api.fileUrl(wav)} peaks={peaks.data.peaks} />}
       <UIStack direction="row" gap="sm">
+        <Suspense fallback={null}>
+          <OpenInEditorButton paths={wav ? [wav] : []} />
+        </Suspense>
         <UIButton variant="secondary" disabled={subtitle.isPending} onClick={() => subtitle.mutate()}>
           {t('narration.result.subtitle')}
         </UIButton>
-        <UIButton variant="secondary" disabled={!wav} onClick={() => openSection('mix', { voice: wav })}>
+        <UIButton variant="secondary" disabled={!wav} onClick={() => sendTo('mix', wav)}>
           {t('mix.send')}
         </UIButton>
       </UIStack>

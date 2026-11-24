@@ -22,7 +22,7 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 #### Ciclo 3: velocidad [AC-4]
 
-- **RED**: `editor/test_render_speed.py` (duración, tono con FFT y cadena de `atempo`).
+- **RED**: `editor/test_render_audio.py`, `editor/test_render_video.py` y `editor/test_video_transitions.py` (speed y audio con FFT).
 - **GREEN**: `setpts` y `atempo` en `render_video.py` y `render_audio.py`; `playbackRate` en `playback/` y `preview/`.
 - **REFACTOR**: ninguno.
 
@@ -66,14 +66,14 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Esquema v3 y tiempos | AC-1 | — | `unit`, `client-unit` | [ ] |
-| T2 | Texto | AC-2 | T1 | `client-unit` | [ ] |
-| T3 | Velocidad | AC-4 | T1 | `unit` | [ ] |
-| T4 | Color, LUT, chroma y fusión | AC-3, AC-5 | T1 | `unit`, `e2e` | [ ] |
-| T5 | Subtítulos | AC-6 | T1 | `unit` | [ ] |
-| T6 | Abrir en Editor y Mandar a | AC-7 | — | `client-unit` | [ ] |
-| T7 | e2e y docs | — | T2–T6 | `e2e` | [ ] |
-| T8 | Corrida real | — | T7 | verificación final | [ ] |
+| T1 | Esquema v3 y tiempos | AC-1 | — | `unit`, `client-unit` | [x] |
+| T2 | Texto | AC-2 | T1 | `client-unit` | [x] |
+| T3 | Velocidad | AC-4 | T1 | `unit` | [x] |
+| T4 | Color, LUT, chroma y fusión | AC-3, AC-5 | T1 | `unit`, `e2e` | [x] |
+| T5 | Subtítulos | AC-6 | T1 | `unit` | [x] |
+| T6 | Abrir en Editor y Mandar a | AC-7 | — | `client-unit` | [x] |
+| T7 | e2e y docs | — | T2–T6 | `e2e` | [x] |
+| T8 | Corrida real | — | T7 | verificación final | [x] |
 
 ## 4. Commits
 

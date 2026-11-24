@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from content_studio.api.routes import subtitles as subtitles_routes
+from content_studio.db import jobs as jobs_store
 from content_studio.db import subtitle_projects
 from content_studio.db.connection import connect
 from content_studio.subtitles.document import new_document, save
@@ -125,6 +126,46 @@ def test_post_queues_a_subtitles_job(api):
     assert response.status_code == 201
     assert response.json()['kind'] == 'subtitles.create'
     assert response.json()['status'] == 'queued'
+
+
+def test_ac6_creates_an_editor_subtitle_project_from_a_done_transcription(api, monkeypatch):
+    """AC-6: una transcripción terminada de la mezcla se convierte en un proyecto 014 reutilizable por el Editor."""
+    queued = api.client.post(
+        '/jobs',
+        json={'kind': 'transcribe', 'params': {'input': 'editor-mix.wav', 'model': 'large-v3-turbo', 'language': 'es'}},
+        headers=api.headers,
+    )
+    assert queued.status_code == 201
+    job_id = queued.json()['id']
+    conn = connect(api.tmp / 'base.db')
+    output_dir = api.tmp / 'out' / 'transcribe-job'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / 'words.json').write_text(
+        json.dumps(
+            {
+                'language': 'es',
+                'segments': [
+                    {
+                        'words': [
+                            {'word': 'hola', 'start': 0.0, 'end': 0.4},
+                            {'word': 'mundo', 'start': 0.5, 'end': 0.9},
+                        ]
+                    }
+                ],
+            }
+        ),
+        encoding='utf-8',
+    )
+    jobs_store.update(conn, job_id, status='done', output_dir=str(output_dir))
+    out = api.tmp / 'out'
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: out)
+
+    created = api.client.post('/subtitles/from-transcript', json={'job_id': job_id}, headers=api.headers)
+
+    assert created.status_code == 201
+    assert created.json()['source_path'] == 'editor-mix.wav'
+    document = api.client.get(f'/subtitles/{created.json()["id"]}', headers=api.headers).json()
+    assert [cue['text'] for cue in document['cues']] == ['hola mundo']
 
 
 def test_post_with_an_unknown_origin_is_refused(api):

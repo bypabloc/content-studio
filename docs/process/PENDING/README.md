@@ -54,7 +54,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [011-caida-agudos-corporate](011-caida-agudos-corporate.md) | La pista corporate-minimal v2 pierde los agudos desde ~19.5 s (escucha del usuario) | Antes de usarla en un video | Usuario |
 | [012-instalar-motor-real](012-instalar-motor-real.md) | Revisión visual de la UI con datos temporales (bienvenida, winget, traslado) y capturas; la e2e y el CLI ya pasan | Después del merge a dev; no bloquea | Usuario |
 | [012-grafo-server](012-grafo-server.md) | Reconstruir el índice de graphify cuando se pueda leer la exclusión global de Git | Antes de una búsqueda nueva del server | Agente |
-| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 10 carpetas huérfanas en `content-studio-worktrees/`; la de 016 requiere aprobación manual de Synapse | Cuando el usuario lo autorice; no bloquea | Usuario |
+| [lote-huerfanas-bloqueadas](lote-huerfanos-bloqueadas.md) | 11 carpetas huérfanas y dos temporales; Synapse requiere aprobación puntual | Cuando el usuario lo autorice; no bloquea | Usuario |
 | [014-escucha-y-revision](014-escucha-y-revision.md) | Escuchar la narración alineada, revisar la sincronía, la UI real y los presets incluidos (gusto) | Después del merge a dev; no bloquea | Usuario |
 | [014-audio-quemar-copia](014-audio-quemar-copia.md) | Al quemar, el audio PCM de un MOV no se ha probado: la copia del audio puede fallar en MP4 | En la verificación final (T9) | Agente |
 | [014-traduccion-real](014-traduccion-real.md) | Falta la prueba `-m local` automatizada de la traducción con `small`; la corrida real y el cierre ya están verificados a mano | Después del merge a dev; no bloquea | Agente |
@@ -68,7 +68,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [017-app-check-y-flujo-real](017-app-check-y-flujo-real.md) | Tres corridas compilaron, pero app-check no obtuvo CDP; faltan grabación física, arrastre desde Windows, latencia y capturas | Cuando WebView2 responda a CDP; no bloquea el merge | Agente |
 | [017-e2e-runner](017-e2e-runner.md) | Los escenarios pasan, pero Playwright y test-runner no terminan con resumen tras tres corridas | Antes de la publicación final; no bloquea el merge | Agente |
 | [017-pytest-temp](017-pytest-temp.md) | Dos temporales de pytest en la raíz del worktree; Synapse bloquea borrarlos sin aprobación manual | Tras aprobación puntual de Synapse, antes de cerrar el worktree | Usuario |
-| [018-e2e-runner](018-e2e-runner.md) | El runner e2e del Editor visual sigue sin entregar un resultado final | Repetir antes del cierre de 023 | Agente |
-| [018-app-check-cdp](018-app-check-cdp.md) | Tres corridas compilaron la app, pero WebView2 no respondió en CDP | Cuando app-check consiga abrir la ventana y responder a CDP | Agente |
+| [018-app-check-cdp](018-app-check-cdp.md) | Cuatro corridas compilaron Tauri, pero WebView2 no respondió en CDP | Cuando app-check consiga abrir la ventana y responder a CDP | Agente |
 | [024-aprobar-hooks-codex](024-aprobar-hooks-codex.md) | Aprobar en Codex (`/hooks`) `shell_guard.py` y `computer_use_guard.py`, y probar que bloquea `sky.list_apps()` | Después del merge de 024 y tras cada cambio de un hook | Usuario |
 | [024-peaks-403-catalogo](024-peaks-403-catalogo.md) | `/media/peaks` da 403 a las muestras del catálogo de voces (hallado por `app-check`) | Con la próxima spec de voces o `/media` | Agente |

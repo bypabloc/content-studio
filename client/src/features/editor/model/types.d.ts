@@ -1,4 +1,4 @@
-/** Modelo v2 del proyecto del editor. Espejo de server/src/content_studio/editor/project.py. */
+/** Modelo v3 del proyecto del editor. Espejo de server/src/content_studio/editor/project.py. */
 
 export interface AudioTrack {
   id: string;
@@ -21,7 +21,16 @@ export interface VideoTrack {
   height?: number;
 }
 
-export type Track = AudioTrack | VideoTrack;
+export interface SubtitleTrack {
+  id: string;
+  kind: 'subtitles';
+  name: string;
+  subtitles_project: string;
+  locked: boolean;
+  height?: number;
+}
+
+export type Track = AudioTrack | VideoTrack | SubtitleTrack;
 
 export interface Canvas {
   width: number;
@@ -48,6 +57,37 @@ export interface Keyframe {
   ease: 'linear' | 'ease-in-out' | 'hold';
 }
 
+export interface ColorEffects {
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  gamma: number;
+  lut?: string;
+}
+
+export interface ChromaKey {
+  color: string;
+  similarity: number;
+  blend: number;
+  despill?: boolean;
+}
+
+export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'add' | 'difference';
+
+export interface TextStyle {
+  content: string;
+  font: string;
+  weight: number;
+  size: number;
+  color: string;
+  stroke: { width: number; color: string };
+  shadow: { x: number; y: number; blur: number; color: string };
+  box?: { color: string; padding: number; radius: number };
+  align: 'left' | 'center' | 'right';
+  line_height: number;
+  max_width: number;
+}
+
 interface ClipBase {
   id: string;
   track: string;
@@ -57,6 +97,7 @@ interface ClipBase {
   start: number;
   fade_in: number;
   fade_out: number;
+  speed?: number;
   link?: string;
 }
 
@@ -67,14 +108,32 @@ export interface AudioClip extends ClipBase {
   keyframes?: never;
 }
 
-export interface VisualClip extends ClipBase {
-  media: 'video' | 'image';
+interface VisualClipBase extends ClipBase {
   transform: Transform;
   keyframes: Record<string, Keyframe[]>;
+  color?: ColorEffects;
+  chroma?: ChromaKey;
+  blend_mode?: BlendMode;
   gain_db?: never;
 }
 
-export type Clip = AudioClip | VisualClip;
+export interface VideoClip extends VisualClipBase {
+  media: 'video';
+}
+
+export interface ImageClip extends VisualClipBase {
+  media: 'image';
+}
+
+export interface TextClip extends VisualClipBase {
+  media: 'text';
+  raster: string;
+  text: TextStyle;
+}
+
+export type VisualClip = VideoClip | ImageClip | TextClip;
+
+export type Clip = AudioClip | VideoClip | ImageClip | TextClip;
 
 export interface Marker {
   id: string;
@@ -96,7 +155,7 @@ export interface Transition {
 }
 
 export interface Doc {
-  version: 2;
+  version: 2 | 3;
   name: string;
   sample_rate: 48000;
   canvas: Canvas;

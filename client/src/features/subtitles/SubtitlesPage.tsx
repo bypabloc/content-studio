@@ -12,6 +12,7 @@ import { UIEmpty } from '@/shared/components/molecules/UIEmpty';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
+import { hashParams } from '@/shared/navigation/hash';
 
 import { SubtitlesEditor } from './SubtitlesEditor';
 
@@ -27,6 +28,12 @@ type Origin = 'file' | 'cleaner' | 'narration' | 'import';
 const ORIGINS: Origin[] = ['file', 'cleaner', 'narration', 'import'];
 const MEDIA = ['wav', 'mp3', 'm4a', 'flac', 'ogg', 'aac', 'mp4', 'mov', 'mkv', 'webm', 'avi', 'm4v', 'srt', 'vtt'];
 
+function requestedProject(): number | null {
+  const query = window.location.hash.split('?')[1] ?? '';
+  const project = Number(new URLSearchParams(query).get('project'));
+  return Number.isSafeInteger(project) && project > 0 ? project : null;
+}
+
 /**
  * La sección Subtítulos (D-9): los proyectos guardados y «Nuevo», que encola `subtitles.create` con su origen. Abrir un
  * proyecto muestra su editor.
@@ -34,7 +41,7 @@ const MEDIA = ['wav', 'mp3', 'm4a', 'flac', 'ogg', 'aac', 'mp4', 'mov', 'mkv', '
 export function SubtitlesPage(): React.JSX.Element {
   const api = useApi();
   const queryClient = useQueryClient();
-  const [openId, setOpenId] = useState<number | null>(null);
+  const [openId, setOpenId] = useState<number | null>(requestedProject);
   const [origin, setOrigin] = useState<Origin>('file');
   const originLabels: Record<Origin, string> = {
     file: t('subtitles.origin.file'),
@@ -42,7 +49,7 @@ export function SubtitlesPage(): React.JSX.Element {
     narration: t('subtitles.origin.narration'),
     import: t('subtitles.origin.import'),
   };
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(() => hashParams().get('path') ?? '');
   const projects = useQuery({ queryKey: ['subtitles'], queryFn: () => api.get<ProjectRow[]>('/subtitles') });
   const create = useMutation({
     mutationFn: () => api.post('/jobs', { kind: 'subtitles.create', params: { origin, input } }),

@@ -1,0 +1,17 @@
+{
+  "doc": {
+    "version": 3,
+    "name": "Velocidad",
+    "sample_rate": 48000,
+    "canvas": {"width": 1920, "height": 1080, "fps": 30, "background": "#000000"},
+    "tracks": [{"id": "audio", "kind": "audio", "name": "Audio", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}],
+    "clips": [
+      {"id": "fast", "track": "audio", "src": "fast.wav", "src_in": 4, "src_out": 12, "start": 0, "speed": 2, "gain_db": 0, "fade_in": 0, "fade_out": 0},
+      {"id": "later", "track": "audio", "src": "later.wav", "src_in": 0, "src_out": 2, "start": 6, "speed": 1, "gain_db": 0, "fade_in": 0, "fade_out": 0}
+    ],
+    "markers": [],
+    "transitions": []
+  },
+  "op": {"type": "deleteClips", "ids": ["fast"], "ripple": true},
+  "expected": {"ids": ["later"], "clips": {"later": {"start": 2}}}
+}

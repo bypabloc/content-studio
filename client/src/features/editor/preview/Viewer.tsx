@@ -14,6 +14,7 @@ import type { Doc, VisualClip } from '../model/types';
 import { clipProperty } from './compositor';
 import { useLayerSources } from './useLayerSources';
 import { createCompositor } from './webgl';
+import { SubtitleTrack } from '../SubtitleTrack';
 
 type Mode = 'move' | 'scale' | 'rotate' | 'crop';
 type Props = {
@@ -45,7 +46,7 @@ const PROPERTIES: VisualProperty[] = [
 
 function selectedClip(doc: Doc, id: string | null): VisualClip | null {
   const clip = doc.clips.find((item) => item.id === id);
-  return clip && (clip.media === 'image' || clip.media === 'video') ? clip : null;
+  return clip && (clip.media === 'image' || clip.media === 'video' || clip.media === 'text') ? clip : null;
 }
 
 function cropValue(clip: VisualClip, edge: 'l' | 't' | 'r' | 'b'): number {
@@ -73,7 +74,7 @@ export function Viewer({
   const sourceSignature = JSON.stringify([
     path,
     doc.clips.flatMap((item) =>
-      item.media === 'image' || item.media === 'video' ? [[item.id, item.media, item.src]] : [],
+      item.media === 'image' || item.media === 'video' || item.media === 'text' ? [[item.id, item.media, item.src]] : [],
     ),
   ]);
   const clip = selectedClip(doc, selectedClipId);
@@ -105,7 +106,7 @@ export function Viewer({
     const refresh = () => {
       if (active) setSourceRevision((revision) => revision + 1);
     };
-    const [, descriptors] = JSON.parse(sourceSignature) as [string, Array<[string, 'image' | 'video', string]>];
+    const [, descriptors] = JSON.parse(sourceSignature) as [string, Array<[string, 'image' | 'video' | 'text', string]>];
     for (const [id] of descriptors) {
       const source = sources.get(id);
       if (!source) continue;
@@ -207,6 +208,15 @@ export function Viewer({
           className="absolute inset-0 size-full"
           style={{ background: doc.canvas.background }}
         />
+        {doc.tracks.filter((track) => track.kind === 'subtitles').map((track) => (
+          <SubtitleTrack
+            key={track.id}
+            track={track}
+            time={time}
+            width={doc.canvas.width}
+            height={doc.canvas.height}
+          />
+        ))}
         <UIStack role="img" aria-label={t('editor.viewer.safe_area')} className="pointer-events-none absolute inset-[5%] border border-white/60">
           <UIStack className="absolute inset-[5%] border border-white/40" />
           <UIStack className="absolute inset-[15%] border-y border-white/30" />

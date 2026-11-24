@@ -44,6 +44,12 @@ describe('scheduler de vista previa', () => {
     expect(activeClips(doc([item]), 9.01)).toEqual([]);
   });
 
+  it('escala el tiempo de fuente según la velocidad', () => {
+    const item = { ...clip('a', 'voice', 3, 5, 9), speed: 2 };
+
+    expect(sourceTimeAt(item, 3.5)).toBe(6);
+  });
+
   it('programa rampas lineales de fade en ganancia con el volumen combinado', () => {
     const item = { ...clip('a', 'voice', 2, 0, 4), gain_db: -6, fade_in: 0.5, fade_out: 0.5 };
     const voice = makeTrack('voice', { volume_db: -6 });

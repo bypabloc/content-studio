@@ -603,6 +603,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/subtitles/from-transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create From Transcript
+         * @description Crea un proyecto 014 con `words.json` de un trabajo `transcribe` terminado.
+         */
+        post: operations["create_from_transcript_subtitles_from_transcript_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/subtitles/{project_id}/export": {
         parameters: {
             query?: never;
@@ -818,9 +838,33 @@ export interface paths {
         put?: never;
         /**
          * Upload Recording
-         * @description Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones.
+         * @description Guarda una toma WAV o una imagen PNG dentro de la carpeta de medios del proyecto.
          */
         post: operations["upload_recording_editor_projects_media_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editor/projects/luts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Project Lut
+         * @description Sirve una LUT 3D declarada por un clip y dentro de los medios del proyecto.
+         */
+        get: operations["project_lut_editor_projects_luts_get"];
+        put?: never;
+        /**
+         * Upload Lut
+         * @description Valida una LUT 3D `.cube` y la guarda dentro de los medios del proyecto.
+         */
+        post: operations["upload_lut_editor_projects_luts_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1691,6 +1735,16 @@ export interface components {
             ffmpeg: components["schemas"]["BinaryInfo"] | null;
             git: components["schemas"]["BinaryInfo"] | null;
             gpu: components["schemas"]["GpuInfo"] | null;
+            /** Subtitles Filter */
+            subtitles_filter: boolean;
+        };
+        /**
+         * TranscriptIn
+         * @description El trabajo `transcribe` ya terminado cuya transcripción se convertirá en un proyecto editable.
+         */
+        TranscriptIn: {
+            /** Job Id */
+            job_id: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -2688,6 +2742,41 @@ export interface operations {
             };
         };
     };
+    create_from_transcript_subtitles_from_transcript_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranscriptIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     export_project_subtitles__project_id__export_post: {
         parameters: {
             query?: never;
@@ -3198,6 +3287,71 @@ export interface operations {
                 content: {
                     "application/json": {
                         [key: string]: string | number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_lut_editor_projects_luts_get: {
+        parameters: {
+            query: {
+                path: string;
+                source: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_lut_editor_projects_luts_post: {
+        parameters: {
+            query: {
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
                     };
                 };
             };

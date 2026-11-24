@@ -56,6 +56,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  window.location.hash = '';
 });
 
 function renderResult(job: Job = JOB) {
@@ -68,6 +69,26 @@ function renderResult(job: Job = JOB) {
 }
 
 describe('NarrationResult', () => {
+  it('abre en el Editor con la ruta de la toma', async () => {
+    renderResult();
+    await screen.findByText('Adiós.');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Abrir en Editor' }));
+
+    expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
+      `${DIR}/voxcpm2-expert.wav`,
+    ]);
+  });
+
+  it('manda la toma a Mezcla con el parámetro común path', async () => {
+    renderResult();
+    await screen.findByText('Adiós.');
+
+    fireEvent.click(screen.getByRole('button', { name: t('mix.send') }));
+
+    expect(window.location.hash).toBe(`#/mix?path=${encodeURIComponent(`${DIR}/voxcpm2-expert.wav`)}`);
+  });
+
   it('muestra la toma con su forma de onda, su LUFS y su pico real', async () => {
     renderResult();
 

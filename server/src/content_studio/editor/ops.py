@@ -174,16 +174,16 @@ def trim_clip(doc: Doc, op: Op) -> None:
     edge, t = op['edge'], float(op['t'])
     if edge == 'start':
         delta = t - clip['start']
-        if any(member['src_in'] + delta < 0 for member in group):
+        if any(member['src_in'] + delta * member.get('speed', 1) < 0 for member in group):
             raise OpError('bad_trim', {'id': clip['id']})
         for member in group:
-            member.update(start=member['start'] + delta, src_in=member['src_in'] + delta)
+            member.update(start=member['start'] + delta, src_in=member['src_in'] + delta * member.get('speed', 1))
     elif edge == 'end':
         length = t - clip['start']
         if length <= 0:
             raise OpError('bad_trim', {'id': clip['id']})
         for member in group:
-            member['src_out'] = member['src_in'] + length
+            member['src_out'] = member['src_in'] + length * member.get('speed', 1)
     else:
         raise OpError('unknown_edge', {'edge': edge})
 
@@ -200,9 +200,9 @@ def split_at(doc: Doc, op: Op) -> None:
             continue
         if not clip['start'] < t < clip['start'] + clip_length(clip):
             continue
-        left = t - clip['start']
-        right = {**clip, 'id': f'{clip["id"]}-r', 'start': t, 'src_in': clip['src_in'] + left, 'fade_in': 0}
-        clip.update(src_out=clip['src_in'] + left, fade_out=0)
+        source_left = (t - clip['start']) * clip.get('speed', 1)
+        right = {**clip, 'id': f'{clip["id"]}-r', 'start': t, 'src_in': clip['src_in'] + source_left, 'fade_in': 0}
+        clip.update(src_out=clip['src_in'] + source_left, fade_out=0)
         doc['clips'].append(right)
 
 

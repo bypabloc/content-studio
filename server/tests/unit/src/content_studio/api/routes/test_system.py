@@ -5,7 +5,7 @@ from content_studio.system import tools
 
 def test_ac6_get_system_reports_the_detected_tools(api, monkeypatch):
     """El estado mostrado por la app viene de la detección actual."""
-    status = {'ffmpeg': {'path': 'ffmpeg', 'version': '8.0'}, 'git': None, 'gpu': None}
+    status = {'ffmpeg': {'path': 'ffmpeg', 'version': '8.0'}, 'git': None, 'gpu': None, 'subtitles_filter': True}
     monkeypatch.setattr(tools, 'detect', lambda: status)
 
     response = api.client.get('/system', headers=api.headers)

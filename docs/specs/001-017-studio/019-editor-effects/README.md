@@ -28,12 +28,12 @@ Cerrar el Editor como NLE: clips de texto con estilo y animación, cambio de vel
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Esquema v3 (texto, velocidad, efectos y fusión) y sus fixtures | PEN |
-| 2 | Texto rasterizado en el client como imagen con alfa | PEN |
-| 3 | Velocidad en audio y video | PEN |
-| 4 | Color, LUT, chroma y fusión: filtros de ffmpeg y shaders con paridad | PEN |
-| 5 | Pista de subtítulos (014) | PEN |
-| 6 | «Abrir en Editor» y «Mandar a…» | PEN |
+| 1 | Esquema v3 (texto, velocidad, efectos y fusión) y sus fixtures | IMP |
+| 2 | Texto rasterizado en el client como imagen con alfa | IMP |
+| 3 | Velocidad en audio y video | IMP |
+| 4 | Color, LUT, chroma y fusión: filtros de ffmpeg y shaders con paridad | IMP |
+| 5 | Pista de subtítulos (014) | IMP |
+| 6 | «Abrir en Editor» y «Mandar a…» | IMP |
 
 ## Decisiones clave
 
@@ -44,5 +44,5 @@ Cerrar el Editor como NLE: clips de texto con estilo y animación, cambio de vel
 
 ## WARNING y PENDING
 
-* WARNING: `019-texto-rasterizado.md` (por qué no `drawtext`), `019-fusion-con-alfa.md` (cadena de filtros) y `019-chroma-paridad.md` (fórmula y umbral).
-* PENDING: ninguna.
+* WARNING: `019-texto-rasterizado.md` (por qué no `drawtext`), `019-control-velocidad.md` (control en el Inspector), `019-fusion-con-alfa.md` (cadena de filtros) y `019-chroma-paridad.md` (fórmula y umbral).
+* PENDING: [017-e2e-runner](../../../process/PENDING/017-e2e-runner.md) (el runner no terminó en T7 ni T8) y [018-app-check-cdp](../../../process/PENDING/018-app-check-cdp.md) (WebView2 sin CDP).

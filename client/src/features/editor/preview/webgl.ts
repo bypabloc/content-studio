@@ -1,44 +1,18 @@
 import { clipLength } from '../model/validate';
 import type { Canvas, Doc, TransitionType, VideoTrack, VisualClip } from '../model/types';
 import { buildLayerMatrix, clipCrop, clipProperty, hasAnimatedCrop, orderedLayers } from './compositor';
-import { FRAGMENT_SHADER, VERTEX_SHADER } from './shaders';
+import { createProgram, getUniforms } from './shaders';
 import { transitionMode } from './transitions';
+import { createPreviewEffects } from './effects';
 import type { Compositor, TransitionLayer } from './compositor';
+import type { Lut3D } from './lut';
 import type { LayerSource, LayerSourceLookup } from './useLayerSources';
 
 // cspell:ignore fadeblack fadewhite slideleft slideright: FFmpeg transition names.
 
-type Uniforms = Record<string, WebGLUniformLocation | null>;
 type TextureEntry = { texture: WebGLTexture; source: LayerSource; uploaded: boolean };
 
 const IDENTITY = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]);
-
-function compile(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error('WebGL2 shader allocation failed');
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader) || 'WebGL2 shader compilation failed'); // i18n-ignore: mensaje interno de WebGL sin salida directa en la interfaz
-  return shader;
-}
-
-function createProgram(gl: WebGL2RenderingContext): WebGLProgram {
-  const program = gl.createProgram();
-  if (!program) throw new Error('WebGL2 program allocation failed');
-  gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX_SHADER));
-  gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) || 'WebGL2 program link failed'); // i18n-ignore: mensaje interno de WebGL sin salida directa en la interfaz
-  return program;
-}
-
-function getUniforms(gl: WebGL2RenderingContext, program: WebGLProgram): Uniforms {
-  const names = [
-    'u_matrix', 'u_shift', 'u_texture', 'u_crop', 'u_opacity', 'u_progress', 'u_transition',
-    'u_role', 'u_cropMask', 'u_solid', 'u_solidColor', 'u_premultiplied',
-  ];
-  return Object.fromEntries(names.map((name) => [name, gl.getUniformLocation(program, name)]));
-}
 
 function rgba(hex: string): [number, number, number, number] {
   const raw = hex.replace('#', '');
@@ -116,6 +90,7 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.uniform1i(uniform.u_texture, 0);
+  const previewEffects = createPreviewEffects(gl, uniform);
 
   function geometry(data: Float32Array, matrix: Float32Array, shift: [number, number] = [0, 0]): void {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -161,6 +136,7 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
     time: number,
     canvasSize: Canvas,
     source: LayerSource | undefined,
+    lut: Lut3D | undefined,
     type: TransitionType | null = null,
     progress = 0,
     role = 0,
@@ -171,7 +147,10 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
     const size = dimensions(source);
     if (isVideo) {
       const video = source as HTMLVideoElement;
-      const sourceTime = clip.src_in + Math.max(0, time - clip.start);
+      const speed = clip.speed ?? 1;
+      video.playbackRate = speed;
+      video.preservesPitch = true;
+      const sourceTime = clip.src_in + Math.max(0, time - clip.start) * speed;
       if (Number.isFinite(sourceTime) && Math.abs(video.currentTime - sourceTime) > 0.05 &&
         (!Number.isFinite(video.duration) || sourceTime < video.duration)) video.currentTime = sourceTime;
       if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
@@ -190,8 +169,11 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
     gl.uniform1i(uniform.u_cropMask, hasAnimatedCrop(clip) ? 1 : 0);
     gl.uniform1i(uniform.u_solid, 0);
     gl.uniform1i(uniform.u_premultiplied, 0);
+    const blendMode = previewEffects.prepare(clip, lut);
     transition(type, progress, role);
     geometry(quad(clip, size.width, size.height, time), buildLayerMatrix(clip, track, canvasSize, size, time), shift);
+    previewEffects.finish(blendMode);
+    if (type !== null) gl.blendFunc(gl.ONE, gl.ONE);
   }
 
   function fill(type: TransitionType, progress: number, white: boolean): void {
@@ -262,11 +244,15 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
       fromShift = [2 * layer.progress, 0];
       toShift = [-2 * (1 - layer.progress), 0];
     }
-    drawClip(layer.from, layer.track, time, doc.canvas, sources.get(layer.from.id), layer.transition.type, layer.progress, 1, fromShift);
-    drawClip(layer.to, layer.track, time, doc.canvas, sources.get(layer.to.id), layer.transition.type, layer.progress, 2, toShift);
-    if (layer.transition.type === 'fadeblack' || layer.transition.type === 'fadewhite') {
-      fill(layer.transition.type, layer.progress, layer.transition.type === 'fadewhite');
-    }
+    drawClip(
+      layer.from, layer.track, time, doc.canvas, sources.get(layer.from.id),
+      sources.getLut?.(layer.from.color?.lut ?? ''), layer.transition.type, layer.progress, 1, fromShift,
+    );
+    drawClip(
+      layer.to, layer.track, time, doc.canvas, sources.get(layer.to.id),
+      sources.getLut?.(layer.to.color?.lut ?? ''), layer.transition.type, layer.progress, 2, toShift,
+    );
+    if (layer.transition.type === 'fadeblack' || layer.transition.type === 'fadewhite') fill(layer.transition.type, layer.progress, layer.transition.type === 'fadewhite');
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     compositeTarget(width, height);
   }
@@ -281,7 +267,9 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
       gl.clearColor(...rgba(doc.canvas.background));
       gl.clear(gl.COLOR_BUFFER_BIT);
       for (const layer of orderedLayers(doc, time)) {
-        if (layer.kind === 'clip') drawClip(layer.clip, layer.track, time, doc.canvas, sources.get(layer.clipId));
+        if (layer.kind === 'clip') {
+          drawClip(layer.clip, layer.track, time, doc.canvas, sources.get(layer.clipId), sources.getLut?.(layer.clip.color?.lut ?? ''));
+        }
         else drawTransition(layer, time, doc, sources, size);
       }
     },
@@ -292,6 +280,7 @@ export function createCompositor(canvas: HTMLCanvasElement): Compositor {
       textures.clear();
       if (targetTexture) gl.deleteTexture(targetTexture);
       if (targetFramebuffer) gl.deleteFramebuffer(targetFramebuffer);
+      previewEffects.destroy();
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
     },

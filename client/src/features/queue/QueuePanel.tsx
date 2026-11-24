@@ -14,7 +14,10 @@ import { useQueue } from './useQueue';
 export function QueuePanel() {
   const queue = useQueue();
   const [open, setOpen] = useState(true);
-  const visible = queue.jobs.filter((job) => job.status !== 'done');
+  const latestCompleted = queue.jobs
+    .filter((job) => job.status === 'done' && job.output_dir)
+    .sort((a, b) => (b.finished_at ?? b.created_at).localeCompare(a.finished_at ?? a.created_at))[0];
+  const visible = [...queue.jobs.filter((job) => job.status !== 'done'), ...(latestCompleted ? [latestCompleted] : [])];
   const waiting = visible.filter((job) => job.status === 'queued').map((job) => job.id);
   // El teclado pasa a la fila vecina; con las coordenadas por defecto (25 px) el `over` no cambia y no reordena.
   const sensors = useSensors(

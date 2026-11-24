@@ -26,7 +26,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | [016](016-mix-ducking/README.md) | Mezcla narración + música con ducking | feature | 015 | DON |
 | [017](017-editor-core/README.md) | Editor (núcleo): proyecto, línea de tiempo multipista, explorador de carpetas, importar, grabar, deshacer, imán, marcadores y exportar audio | feature | 016 | PEN |
 | [018](018-editor-visual/README.md) | Editor (visual): pistas de video e imagen con alfa, transformar con keyframes, transiciones, vista previa WebGL y exportar video | feature | 017 | DON |
-| [019](019-editor-effects/README.md) | Editor (efectos): texto, velocidad, color y LUT, chroma, fusión, subtítulos y «Abrir en Editor» / «Mandar a…» | feature | 018 | PEN |
+| [019](019-editor-effects/README.md) | Editor (efectos): texto, velocidad, color y LUT, chroma, fusión, subtítulos y «Abrir en Editor» / «Mandar a…» | feature | 018 | DON |
 | [020](020-library/README.md) | Biblioteca de medios | feature | 019 | PEN |
 | [021](021-local-llm-assist/README.md) | Asistente con LLM local (Gemma 4 E4B ★ y Qwen3.5-9B bajo demanda): revisar guion, traducir y corregir subtítulos, caption de música y publicar | feature | 020 | PEN |
 | [022](022-installer/README.md) | Instalador NSIS (uv incluido, carpeta de datos elegible, primer arranque) | feature | 021 | PEN |

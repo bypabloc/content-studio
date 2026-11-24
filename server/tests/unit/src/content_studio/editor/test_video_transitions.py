@@ -74,6 +74,33 @@ def test_compose_uses_source_in_for_video_clips(tmp_path: Path):
     assert '[1:v]trim=start=1:duration=3' in layer.lines[0]
 
 
+def test_compose_applies_video_speed_before_the_transition(tmp_path: Path):
+    """La velocidad cambia los fotogramas de fuente, pero el cruce sigue en tiempo de timeline."""
+    items = _items(2, media='video')
+    for clip, _ in items:
+        clip['speed'] = 2
+    items[1][0]['start'] = 0.5
+    transition = _transition('a', 'b')
+    group = video_transitions.groups(items, [transition], 0, 2)[0]
+    indexes = {(tmp_path / f'{clip["id"]}.mp4').resolve(): i + 1 for i, (clip, _) in enumerate(items)}
+    sizes = {path: (32, 32) for path in indexes}
+
+    layer = video_transitions.compose(
+        group,
+        tmp_path,
+        indexes,
+        sizes,
+        {'width': 256, 'height': 256, 'fps': 10},
+        0,
+        2,
+        't2',
+        _transform,
+    )
+
+    assert sum('trim=start=1:duration=3,setpts=(PTS-STARTPTS)/2' in line for line in layer.lines) == 2
+    assert 'xfade=transition=fade:duration=1:offset=0.5' in ';'.join(layer.lines)
+
+
 def test_compose_rejects_a_group_without_one_transition_per_cut():
     group = video_transitions.Group(_items(2), [])
 

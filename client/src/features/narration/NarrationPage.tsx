@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
@@ -8,10 +8,11 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { useShortcut } from '@/shared/hooks/useShortcut';
 import { t } from '@/shared/i18n/t';
 import { NarrationOptions } from './NarrationOptions';
-import { NarrationResult } from './NarrationResult';
 import { ScriptEditor } from './ScriptEditor';
 import { narrationParams, useNarrationChoice } from './useNarrationChoice';
 import { useScriptLint } from './useScriptLint';
+
+const NarrationResult = lazy(() => import('./NarrationResult').then((module) => ({ default: module.NarrationResult })));
 
 type Job = components['schemas']['Job'];
 
@@ -59,7 +60,11 @@ export function NarrationPage() {
     <UIStack gap="lg" className="lg:flex-row lg:items-start">
       <UIStack gap="lg" className="min-w-0 lg:flex-1">
         <ScriptEditor value={text} narrationStyle={choice.style} onChange={setText} onImport={importFiles} />
-        {take && <NarrationResult job={take} />}
+        {take && (
+          <Suspense fallback={null}>
+            <NarrationResult job={take} />
+          </Suspense>
+        )}
       </UIStack>
       <UIStack role="complementary" gap="lg" className="lg:w-80 lg:shrink-0">
         <NarrationOptions />

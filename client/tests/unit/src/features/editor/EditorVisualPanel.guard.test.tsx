@@ -61,6 +61,7 @@ describe('EditorVisualPanel: selección que cambia durante una acción', () => {
         onCancelPreview={vi.fn()}
         onSeek={vi.fn()}
         onAddTransition={vi.fn()}
+        onAddText={vi.fn()}
       />,
     );
 

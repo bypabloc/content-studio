@@ -152,12 +152,14 @@ function trimClip(doc: Doc, op: Extract<Op, { type: 'trimClip' }>): void {
   const group = linked(doc, clip);
   if (op.edge === 'start') {
     const delta = op.t - clip.start;
-    if (group.some((member) => member.src_in + delta < 0)) throw new OpError('bad_trim');
-    for (const member of group) Object.assign(member, { start: member.start + delta, src_in: member.src_in + delta });
+    if (group.some((member) => member.src_in + delta * (member.speed ?? 1) < 0)) throw new OpError('bad_trim');
+    for (const member of group) {
+      Object.assign(member, { start: member.start + delta, src_in: member.src_in + delta * (member.speed ?? 1) });
+    }
   } else {
     const length = op.t - clip.start;
     if (length <= 0) throw new OpError('bad_trim');
-    for (const member of group) member.src_out = member.src_in + length;
+    for (const member of group) member.src_out = member.src_in + length * (member.speed ?? 1);
   }
 }
 
@@ -175,8 +177,9 @@ function splitAt(doc: Doc, op: Extract<Op, { type: 'splitAt' }>): void {
     if (ids !== undefined && !ids.has(clip.id)) continue;
     if (!(clip.start < op.t && op.t < clip.start + clipLength(clip))) continue;
     const left = op.t - clip.start;
-    const right: Clip = { ...clip, id: `${clip.id}-r`, start: op.t, src_in: clip.src_in + left, fade_in: 0 };
-    Object.assign(clip, { src_out: clip.src_in + left, fade_out: 0 });
+    const sourceLeft = left * (clip.speed ?? 1);
+    const right: Clip = { ...clip, id: `${clip.id}-r`, start: op.t, src_in: clip.src_in + sourceLeft, fade_in: 0 };
+    Object.assign(clip, { src_out: clip.src_in + sourceLeft, fade_out: 0 });
     doc.clips.push(right);
   }
 }

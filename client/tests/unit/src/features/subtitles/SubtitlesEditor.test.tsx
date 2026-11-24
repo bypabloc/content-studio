@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SubtitlesEditor } from '@/features/subtitles/SubtitlesEditor';
@@ -40,18 +40,26 @@ describe('SubtitlesEditor', () => {
   beforeEach(() => {
     api.get.mockImplementation(async (path: string) => (path === '/subtitles/7' ? structuredClone(doc) : { key: 'x', value: undefined }));
     api.put.mockImplementation(async (_path: string, body: unknown) => body);
+    api.post.mockResolvedValue({ id: 42 });
   });
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.clearAllMocks();
+    window.location.hash = '';
   });
 
   it('saves the edited document once, one second after the last change', async () => {
     renderEditor();
-    fireEvent.change(await screen.findByDisplayValue('hola a todos'), { target: { value: 'hola a amigos' } });
+    const field = await screen.findByDisplayValue('hola a todos');
+    vi.useFakeTimers();
+    fireEvent.change(field, { target: { value: 'hola a amigos' } });
 
     expect(api.put).not.toHaveBeenCalled();
-    await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1), { timeout: 3000 });
+    await act(async () => vi.advanceTimersByTimeAsync(999));
+    expect(api.put).not.toHaveBeenCalled();
+    await act(async () => vi.advanceTimersByTimeAsync(1));
+    expect(api.put).toHaveBeenCalledTimes(1);
 
     expect(api.put.mock.calls[0][0]).toBe('/subtitles/7');
     expect(api.put.mock.calls[0][1].cues[0].text).toBe('hola a amigos');
@@ -92,6 +100,25 @@ describe('SubtitlesEditor', () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith('/jobs', { kind: 'subtitles.translate', params: { project_id: 7 } }),
     );
+  });
+
+  it('opens a burned video in the Editor after the burn job completes', async () => {
+    api.post.mockResolvedValue({ id: 42 });
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/subtitles/7') return structuredClone(doc);
+      if (path === '/jobs/42') return { id: 42, status: 'done', output_dir: 'out/subtitles/7' };
+      if (path.startsWith('/fs/list?')) return { entries: [{ kind: 'video', path: 'out/subtitles/7/burned.mp4' }] };
+      return { key: 'x', value: undefined };
+    });
+    renderEditor();
+
+    fireEvent.click(await screen.findByRole('button', { name: t('subtitles.editor.burn') }));
+    fireEvent.click(await screen.findByRole('button', { name: t('action.open_editor') }));
+
+    await waitFor(() => {
+      const query = new URLSearchParams(window.location.hash.split('?')[1]);
+      expect(query.getAll('add')).toEqual(['out/subtitles/7/burned.mp4']);
+    });
   });
 
   it('keeps a style change from the panel in the saved document', async () => {

@@ -46,7 +46,7 @@ class FakeEvents {
   }
 }
 
-function job(id: number, status: 'queued' | 'running' | 'error', patch: Record<string, unknown> = {}) {
+function job(id: number, status: 'queued' | 'running' | 'done' | 'error', patch: Record<string, unknown> = {}) {
   return {
     id,
     kind: 'music',
@@ -116,6 +116,30 @@ describe('QueuePanel', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+    window.location.hash = '';
+  });
+
+  it('muestra el trabajo terminado más reciente y abre sus medios en el Editor', async () => {
+    fetchMock = routes({
+      'GET /jobs': [
+        job(4, 'done', { output_dir: 'out/narration/4', finished_at: '2026-11-22T10:00:00Z' }),
+        job(5, 'done', { output_dir: 'out/narration/5', finished_at: '2026-11-23T10:00:00Z' }),
+      ],
+      'GET /queue': { paused: false },
+      'GET /fs/list': { entries: [{ path: 'out/narration/5/take.wav', kind: 'audio' }] },
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    renderPanel();
+    const row = await rowOf(5);
+
+    expect(screen.queryByText(t('queue.status.done'))).toBeTruthy();
+    expect(document.querySelector('[data-job="4"]')).toBeNull();
+    await within(row).findByRole('button', { name: 'Abrir en Editor' });
+    fireEvent.click(within(row).getByRole('button', { name: 'Abrir en Editor' }));
+
+    await waitFor(() => expect(new URLSearchParams(window.location.hash.split('?')[1]).getAll('add')).toEqual([
+      'out/narration/5/take.wav',
+    ]));
   });
 
   it('el trabajo en curso muestra su progreso y su etapa', async () => {

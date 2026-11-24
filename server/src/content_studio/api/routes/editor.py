@@ -23,7 +23,7 @@ from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.db import settings
-from content_studio.editor import store
+from content_studio.editor import effects, store, subtitle_projects
 
 router = APIRouter(prefix='/editor')
 preview_router = APIRouter(prefix='/editor')
@@ -103,13 +103,21 @@ def save_project(
 
 
 @router.get('/projects/frame')
-def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
+def project_frame(
+    path: str,
+    conn: Annotated[sqlite3.Connection, Depends(get_conn)],
+    t: float = Query(0, ge=0),
+) -> FileResponse:
     """Devuelve como PNG el fotograma exacto del lienzo en `t`, con caché por revisión del proyecto."""
     file = _project_file(path)
     doc, digest = store.read(file)
     if not _finite_time(t):
         raise ApiError(422, 'unreadable_media')
-    key = _frame_cache_key(file, doc, digest, t)
+    try:
+        subtitle_documents = subtitle_projects.load_documents(doc, conn) if conn is not None else {}
+    except subtitle_projects.MissingSubtitleProject as error:
+        raise ApiError(404, 'subtitle_project_not_found', project_id=error.project_id) from error
+    key = _frame_cache_key(file, doc, digest, t, subtitle_documents)
     frame = paths.outputs_dir() / 'tmp' / 'editor-frames' / f'{key}.png'
     if not frame.is_file() or not frame.stat().st_size:
         frame.parent.mkdir(parents=True, exist_ok=True)
@@ -117,11 +125,13 @@ def project_frame(path: str, t: float = Query(0, ge=0)) -> FileResponse:
         try:
             from content_studio.editor import render_video
 
-            render_video.render_frame(doc, file.parent, t, temporary)
+            render_video.render_frame(doc, file.parent, t, temporary, subtitle_documents=subtitle_documents)
             if not temporary.is_file() or not temporary.stat().st_size:
                 raise ValueError('unreadable_media')
             os.replace(temporary, frame)
-        except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        except (OSError, ValueError, render_video.render_audio.RenderError, subprocess.CalledProcessError) as error:
+            if isinstance(error, render_video.render_audio.RenderError):
+                raise ApiError(422, error.code, **error.params) from error
             raise ApiError(422, 'unreadable_media') from error
         finally:
             temporary.unlink(missing_ok=True)
@@ -137,7 +147,7 @@ def project_media(path: str, source: str) -> FileResponse:
         (
             item
             for item in doc.get('clips', [])
-            if item.get('media') in {'video', 'image'} and item.get('src') == source
+            if item.get('media') in {'video', 'image', 'text'} and item.get('src') == source
         ),
         None,
     )
@@ -153,6 +163,11 @@ def project_media(path: str, source: str) -> FileResponse:
         if original.suffix.lower() not in IMAGE_EXTENSIONS:
             raise ApiError(422, 'unreadable_media')
         target = original
+    elif clip['media'] == 'text':
+        media_root = (file.parent / 'media').resolve()
+        if source != clip.get('raster') or Path(source).is_absolute() or not original.is_relative_to(media_root):
+            raise ApiError(404, 'fs_media_not_found', path=source)
+        target = original
     else:
         from content_studio.editor import proxy
 
@@ -164,17 +179,44 @@ def project_media(path: str, source: str) -> FileResponse:
     return FileResponse(target, media_type=media_type)
 
 
+@preview_router.get('/projects/luts')
+def project_lut(path: str, source: str) -> FileResponse:
+    """Sirve una LUT 3D declarada por un clip y dentro de los medios del proyecto."""
+    file = _project_file(path)
+    doc, _ = store.read(file)
+    if not any(
+        isinstance(clip.get('color'), dict) and clip['color'].get('lut') == source for clip in doc.get('clips', [])
+    ):
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    try:
+        target = effects.resolve_lut(file.parent, source)
+    except ValueError as error:
+        raise ApiError(404, 'fs_media_not_found', path=source) from error
+    if not target.is_file():
+        raise ApiError(404, 'fs_media_not_found', path=source)
+    return FileResponse(
+        target,
+        media_type='text/plain; charset=utf-8',  # i18n-ignore: tipo MIME de un LUT, no es texto de interfaz
+    )
+
+
 def _finite_time(value: float) -> bool:
     """El fotograma no acepta `NaN` ni infinitos."""
     return value == value and value not in (float('inf'), float('-inf'))
 
 
-def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) -> str:
+def _frame_cache_key(
+    file: Path,
+    doc: dict[str, Any],
+    digest: str,
+    time: float,
+    subtitle_documents: dict[str, dict[str, Any]] | None = None,
+) -> str:
     """Incluye en la caché la revisión del proyecto y el estado de cada fuente visual."""
     stat = file.stat()
     sources: list[tuple[str, int | None, int | None]] = []
     for clip in doc.get('clips', []):
-        if clip.get('media') not in {'video', 'image'}:
+        if clip.get('media') not in {'video', 'image', 'text'}:
             continue
         source = Path(clip['src'])
         source = (source if source.is_absolute() else file.parent / source).resolve()
@@ -183,18 +225,53 @@ def _frame_cache_key(file: Path, doc: dict[str, Any], digest: str, time: float) 
             sources.append((str(source), media_stat.st_mtime_ns, media_stat.st_size))
         except OSError:
             sources.append((str(source), None, None))
-    identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources))
+        color = clip.get('color')
+        lut = color.get('lut') if isinstance(color, dict) else None
+        if lut:
+            try:
+                source = effects.resolve_lut(file.parent, lut)
+                stat = source.stat()
+                sources.append((str(source), stat.st_mtime_ns, stat.st_size))
+            except (OSError, ValueError):
+                sources.append((lut, None, None))
+    subtitle_hash = hashlib.sha256(repr(sorted((subtitle_documents or {}).items())).encode('utf-8')).hexdigest()
+    identity = (str(file.resolve()), stat.st_mtime_ns, stat.st_size, digest, time, tuple(sources), subtitle_hash)
     return hashlib.sha256(repr(identity).encode('utf-8')).hexdigest()
 
 
 @router.post('/projects/media', status_code=201)
 async def upload_recording(path: str, request: Request) -> dict[str, str | float]:
-    """Guarda una toma WAV mono de 24 bits y 48 kHz como `media/rec-<n>.wav` sin sobrescribir grabaciones."""
+    """Guarda una toma WAV o una imagen PNG dentro de la carpeta de medios del proyecto."""
     file = _project_file(path)
-    if request.headers.get('content-type', '').split(';', maxsplit=1)[0].strip().lower() != 'audio/wav':
+    content_type = request.headers.get('content-type', '').split(';', maxsplit=1)[0].strip().lower()
+    if content_type == 'image/png':
+        clip_id = request.query_params.get('clip_id', '')
+        digest = request.query_params.get('sha256', '')
+        try:
+            src = store.save_text_raster(file.parent, await request.body(), clip_id, digest)
+        except ValueError as error:
+            raise ApiError(422, 'editor_text_raster_invalid') from error
+        return {'src': src}
+    if content_type != 'audio/wav':
         raise ApiError(422, 'editor_recording_invalid')
     try:
         src, duration = store.save_recording(file.parent, await request.body())
     except ValueError as error:
         raise ApiError(422, 'editor_recording_invalid') from error
     return {'src': src, 'duration': duration}
+
+
+@router.post('/projects/luts', status_code=201)
+async def upload_lut(path: str, request: Request) -> dict[str, str]:
+    """Valida una LUT 3D `.cube` y la guarda dentro de los medios del proyecto."""
+    file = _project_file(path)
+    data = bytearray()
+    async for chunk in request.stream():
+        if len(data) + len(chunk) > effects.LUT_LIMIT:
+            raise ApiError(422, 'editor_lut_invalid')
+        data.extend(chunk)
+    try:
+        src = effects.save_lut(file.parent, bytes(data))
+    except ValueError as error:
+        raise ApiError(422, 'editor_lut_invalid') from error
+    return {'src': src}

@@ -38,6 +38,7 @@ class SystemInfo(BaseModel):
     ffmpeg: BinaryInfo | None
     git: BinaryInfo | None
     gpu: GpuInfo | None
+    subtitles_filter: bool
 
 
 @router.get('/system', response_model=SystemInfo)

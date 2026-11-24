@@ -8,6 +8,7 @@ import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
+import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
 
 import { type StyleIn, toAss } from './ass';
 import { CueList } from './CueList';
@@ -41,7 +42,18 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
   const [focus, setFocus] = useState(0);
   const [aspect, setAspect] = useState(16 / 9);
   const [zoneKey, setZoneKey] = useState('none');
+  const [burnJobId, setBurnJobId] = useState<number | null>(null);
   const doc = draft ?? query.data ?? null;
+
+  const burnJob = useQuery({
+    queryKey: ['jobs', 'subtitles.burn', projectId, burnJobId],
+    queryFn: () => api.get<{ status: string; output_dir?: string | null }>(`/jobs/${burnJobId}`),
+    enabled: burnJobId !== null,
+    refetchInterval: (current) => {
+      const status = current.state.data?.status;
+      return status === 'done' || status === 'error' || status === 'cancelled' ? false : 1000;
+    },
+  });
 
   useEffect(() => {
     if (!draft) return;
@@ -73,7 +85,8 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
     // El trabajo lee el documento al arrancar: se guarda antes lo que aún espera el guardado.
     try {
       if (draft) await api.put(`/subtitles/${projectId}`, draft);
-      await api.post('/jobs', { kind, params: { project_id: projectId } });
+      const job = await api.post<{ id: number }>('/jobs', { kind, params: { project_id: projectId } });
+      if (kind === 'subtitles.burn') setBurnJobId(job.id);
       void queryClient.invalidateQueries({ queryKey: ['jobs'] });
     } catch (error) {
       // Sin libass, el server rechaza la quema con `ffmpeg_no_libass`: el aviso dice cómo instalarlo.
@@ -108,6 +121,9 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
           {t('subtitles.editor.translate')}
         </UIButton>
       </UIStack>
+      {burnJob.data?.status === 'done' && burnJob.data.output_dir ? (
+        <OpenJobOutputButton outputDir={burnJob.data.output_dir} />
+      ) : null}
       <UIStack direction="row" gap="sm" align="center">
         <UIText variant="caption">{t('subtitles.export.label')}</UIText>
         <UIButton variant="secondary" disabled={exported.isPending} onClick={() => exported.mutate('srt')}>

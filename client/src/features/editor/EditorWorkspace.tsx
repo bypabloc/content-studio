@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent } from 'react';
+import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -15,14 +14,16 @@ import { ClipMissing } from './browser/ClipMissing';
 import { FileBrowser } from './browser/FileBrowser';
 import { EditorVisualPanel } from './EditorVisualPanel';
 import { ExportDialog } from './ExportDialog';
-import { buildImportOperations } from './importMedia';
+import { SubtitleTracksPanel } from './SubtitleTracksPanel';
 import { Timeline } from './Timeline';
 import { Transport } from './Transport';
+import { createTextStyle, type TextPresetName } from './text/presets';
 import { duration } from './model/validate';
 import { addTransitionAtCut } from './model/visual';
-import type { Doc, TransitionType } from './model/types';
+import type { Doc, TextClip, TransitionType } from './model/types';
 import { usePlayback } from './playback/usePlayback';
 import { useEditorDoc } from './useEditorDoc';
+import { useEditorMediaImport } from './useEditorMediaImport';
 import { useTrackRecorder } from './useTrackRecorder';
 import { zoomIn, zoomOut } from './model/timeline';
 
@@ -35,11 +36,15 @@ export function EditorWorkspace({
   onBack,
   autoRecord = false,
   onAutoRecordComplete = () => undefined,
+  pendingAdd = [],
+  onAddHandled,
 }: {
   project: Project;
   onBack: () => void;
   autoRecord?: boolean;
   onAutoRecordComplete?: () => void;
+  pendingAdd?: string[];
+  onAddHandled?: () => void;
 }): React.JSX.Element {
   const api = useApi();
   const editor = useEditorDoc(project);
@@ -54,7 +59,6 @@ export function EditorWorkspace({
   const [zoom, setZoom] = useState(80);
   const [deviceId, setDeviceId] = useState('');
   const [recordOffsetMs, setRecordOffsetMs] = useState(0);
-  const [importError, setImportError] = useState(false);
   const armedTrackId = armedTrackIds[0] ?? null;
   const { recording, uploading, levels, error: recorderError, start: startRecording, stop: stopRecording } = useTrackRecorder({
     path: project.path,
@@ -66,6 +70,14 @@ export function EditorWorkspace({
   });
   const applyOp = editor.applyOp;
   const trackCount = editor.doc.tracks.length;
+  const { addFiles, importError } = useEditorMediaImport({
+    tracks: editor.doc.tracks,
+    trackCount,
+    applyOp,
+    pendingAdd,
+    position: playback.position,
+    onAddHandled,
+  });
   const saveLabel =
     editor.saveState === 'saved'
       ? t('editor.save.saved')
@@ -109,29 +121,6 @@ export function EditorWorkspace({
 
   const setTrackArmed = (trackId: string, armed: boolean) => setArmedTrackIds(armed ? [trackId] : []);
 
-  const addFiles = useCallback(
-    async (paths: string[], targetTrack: string | undefined, start: number) => {
-      setImportError(false);
-      try {
-        const files = await Promise.all(paths.map(async (source) => {
-          const info = await api.get<{
-            duration: number;
-            kind: 'audio' | 'video' | 'image';
-            has_audio: boolean;
-          }>(`/fs/info?path=${encodeURIComponent(source)}`);
-          if (!Number.isFinite(info.duration) || info.duration <= 0) throw new Error('invalid duration');
-          return { source, ...info };
-        }));
-        for (const operation of buildImportOperations(files, editor.doc.tracks, trackCount, targetTrack, start)) {
-          applyOp(operation);
-        }
-      } catch {
-        setImportError(true);
-      }
-    },
-    [api, applyOp, editor.doc.tracks, trackCount],
-  );
-
   function recordChange(next: boolean): void {
     if (next) void startRecording();
     else void stopRecording();
@@ -145,6 +134,34 @@ export function EditorWorkspace({
     if (!next) return;
     editor.previewDoc(next);
     editor.commitPreview();
+  }
+
+  function addText(preset: TextPresetName, time = playback.position, targetTrackId?: string): void {
+    let track = editor.doc.tracks.find((item) => item.id === targetTrackId && item.kind === 'video' && !item.locked)
+      ?? editor.doc.tracks.find((item) => item.kind === 'video' && !item.locked);
+    if (!track) {
+      track = {
+        id: crypto.randomUUID(), kind: 'video', name: t('editor.text.track_name'),
+        opacity: 1, hidden: false, locked: false, height: 80,
+      };
+      applyOp({ type: 'addTrack', track });
+    }
+    const id = crypto.randomUUID();
+    const src = `media/text-${id}-pending.png`;
+    const text: TextClip = {
+      id, track: track.id, src, raster: src, media: 'text', text: createTextStyle(preset),
+      src_in: 0, src_out: 5, start: Math.max(0, Number.isFinite(time) ? time : playback.position), fade_in: 0, fade_out: 0, speed: 1,
+      color: { brightness: 0, contrast: 1, saturation: 1, gamma: 1 }, blend_mode: 'normal',
+      transform: {
+        x: 0,
+        y: preset === 'lower-third' ? editor.doc.canvas.height * 0.3 : preset === 'caption-bold' ? editor.doc.canvas.height * 0.34 : 0,
+        scale_x: 1, scale_y: 1, rotation: 0, opacity: 1,
+        crop: { l: 0, t: 0, r: 0, b: 0 }, anchor_x: 0.5, anchor_y: 0.5,
+      },
+      keyframes: {},
+    };
+    applyOp({ type: 'addClip', clip: text });
+    setSelectedIds([id]);
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>): void {
@@ -205,12 +222,11 @@ export function EditorWorkspace({
       <UIStack direction="row" align="center" gap="xs">
         <UIIconButton icon="history" label={t('editor.history.undo')} shortcut="Ctrl+Z" aria-keyshortcuts="Control+Z" disabled={!editor.canUndo} onClick={editor.undo} />
         <UIIconButton icon="regenerate" label={t('editor.history.redo')} shortcut="Ctrl+Y" aria-keyshortcuts="Control+Y" disabled={!editor.canRedo} onClick={editor.redo} />
-        <Transport
-          playing={playback.playing} recording={recording || uploading} magnet={magnet} zoom={zoom}
+        <Transport playing={playback.playing} recording={recording || uploading} magnet={magnet} zoom={zoom}
           onStart={() => playback.seek(0)} onPlayingChange={playback.setPlaying} onStop={playback.stop}
-          onRecordingChange={recordChange} onMagnetChange={setMagnet} onZoomChange={setZoom}
-        />
-        <ExportDialog path={project.path} duration={duration(editor.doc)} markers={editor.doc.markers} />
+          onRecordingChange={recordChange} onMagnetChange={setMagnet} onZoomChange={setZoom} />
+        <ExportDialog path={project.path} duration={duration(editor.doc)} markers={editor.doc.markers}
+          hasSubtitles={editor.doc.tracks.some((track) => track.kind === 'subtitles')} />
       </UIStack>
       {missing.map((source) => <ClipMissing key={source} src={source} onRelink={relink} />)}
       {recorderErrorText ? <UIText variant="caption">{recorderErrorText}</UIText> : null}
@@ -219,6 +235,8 @@ export function EditorWorkspace({
       <UIStack direction="row" className="flex-col items-start gap-4 lg:flex-row">
         <UIStack className="w-full shrink-0 lg:w-80" gap="sm">
           <FileBrowser onImport={(paths) => void addFiles(paths, armedTrackId ?? undefined, playback.position)} />
+          <SubtitleTracksPanel doc={editor.doc} path={project.path}
+            onAdd={(track) => applyOp({ type: 'addTrack', track })} />
           <MicrophonePicker
             value={deviceId}
             onChange={(value) => {
@@ -244,6 +262,7 @@ export function EditorWorkspace({
             doc={editor.doc} path={project.path} time={playback.position} selectedIds={selectedIds}
             onPreviewDoc={editor.previewDoc} onCommitPreview={editor.commitPreview}
             onCancelPreview={editor.cancelPreview} onSeek={playback.seek} onAddTransition={addTransition}
+            onAddText={addText}
           />
           <Timeline
             doc={editor.doc} selectedIds={selectedIds} playhead={playback.position} zoom={zoom} magnet={magnet}
@@ -251,6 +270,7 @@ export function EditorWorkspace({
             onCancelPreview={editor.cancelPreview} onOperation={editor.applyOp}
             onDropFiles={(paths, track, start) => void addFiles(paths, track, start)}
             onDropTransition={(type, track, time) => addTransition(type, time, track)}
+            onDropText={(preset, track, time) => addText(preset, time, track)}
             armedTrackIds={armedTrackIds} onArmedChange={setTrackArmed} onMarkerSelect={setSelectedMarker}
             onMarkerRename={(id, label) => applyOp({ type: 'renameMarker', id, label })}
             selectedMarker={selectedMarker} recordingLevels={levels}

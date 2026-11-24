@@ -86,4 +86,16 @@ describe('SubtitlesPage', () => {
 
     expect(await screen.findByText('charla')).toBeTruthy();
   });
+
+  it('abre el proyecto indicado por el hash que usa «Editar subtítulos» en el Editor', async () => {
+    window.location.hash = '#/subtitles?project=3';
+    const project = { id: 3, name: 'charla', source_path: 'charla.mp4', updated_at: '2026-11-22' };
+    const doc = { version: 1, source: { path: 'charla.mp4', kind: 'file' }, language: 'es', style: {}, tracks: {}, cues: [] };
+    api.get.mockImplementation(async (path: string) => (path === '/subtitles' ? [project] : doc));
+    renderPage();
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/subtitles/3'));
+
+    window.location.hash = '';
+  });
 });

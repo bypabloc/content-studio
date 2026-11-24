@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { Inspector } from '@/features/editor/Inspector';
-import type { Doc, VisualClip } from '@/features/editor/model/types';
+import type { Doc, VideoClip, VisualClip } from '@/features/editor/model/types';
 import { t } from '@/shared/i18n/t';
 
 afterEach(cleanup);
@@ -40,6 +40,7 @@ describe('Inspector', () => {
         clipId="logo"
         time={4}
         onChange={onChange}
+        onSpeedChange={vi.fn()}
         onToggleKeyframe={onToggleKeyframe}
         onEaseChange={vi.fn()}
         onSeek={onSeek}
@@ -70,6 +71,7 @@ describe('Inspector', () => {
         clipId={null}
         time={0}
         onChange={vi.fn()}
+        onSpeedChange={vi.fn()}
         onToggleKeyframe={vi.fn()}
         onEaseChange={vi.fn()}
         onSeek={vi.fn()}
@@ -80,5 +82,26 @@ describe('Inspector', () => {
     expect(screen.getByText(t('editor.inspector.no_selection'))).toBeTruthy();
     fireEvent.change(screen.getByLabelText(t('editor.inspector.canvas_width')), { target: { value: '2048' } });
     expect(onCanvasChange).toHaveBeenCalledWith({ width: 2048 });
+  });
+
+  it('permite cambiar la velocidad de un clip de video entre 0.25× y 4×', () => {
+    const onSpeedChange = vi.fn();
+    const video: VideoClip = { ...clip, media: 'video', speed: 1 };
+    render(
+      <Inspector
+        doc={{ ...doc, version: 3, clips: [video] }}
+        clipId="logo"
+        time={0}
+        onChange={vi.fn()}
+        onSpeedChange={onSpeedChange}
+        onToggleKeyframe={vi.fn()}
+        onEaseChange={vi.fn()}
+        onSeek={vi.fn()}
+        onCanvasChange={vi.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(t('editor.inspector.speed')), { target: { value: '2' } });
+    expect(onSpeedChange).toHaveBeenCalledWith('logo', 2);
   });
 });

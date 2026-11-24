@@ -1,0 +1,14 @@
+{
+  "doc": {
+    "version": 3,
+    "name": "Velocidad",
+    "sample_rate": 48000,
+    "canvas": {"width": 1920, "height": 1080, "fps": 30, "background": "#000000"},
+    "tracks": [{"id": "audio", "kind": "audio", "name": "Audio", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}],
+    "clips": [{"id": "fast", "track": "audio", "src": "fast.wav", "src_in": 4, "src_out": 12, "start": 2, "speed": 2, "gain_db": 0, "fade_in": 0, "fade_out": 0}],
+    "markers": [],
+    "transitions": []
+  },
+  "op": {"type": "trimClip", "id": "fast", "edge": "start", "t": 3.5},
+  "expected": {"ids": ["fast"], "clips": {"fast": {"start": 3.5, "src_in": 7}}}
+}
