@@ -13,12 +13,13 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from content_studio import paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.api.schemas import Job
 from content_studio.db import jobs as job_store
 from content_studio.jobs import queue
-from content_studio.library import query, scan, thumbs
+from content_studio.library import query, scan, storage, thumbs
 from content_studio.services import library_scan
 
 router = APIRouter()
@@ -76,6 +77,12 @@ def search(
         )  # fmt: skip
     except ValueError as error:
         raise ApiError(422, 'invalid_library_query') from error
+
+
+@router.get('/library/storage')
+def storage_summary(request: Request, conn: Conn) -> dict:
+    """Espacio por tipo, lo más pesado, las tomas no elegidas y los totales en disco (spec 020, D-5)."""
+    return storage.summary(conn, paths.outputs_dir(request.app.state.db_path))
 
 
 @router.get('/library/folders')

@@ -31,6 +31,14 @@ def test_search_returns_the_page_and_rejects_a_bad_sort(api):
     assert (bad.status_code, bad.json()['code']) == (422, 'invalid_library_query')
 
 
+def test_storage_is_not_mistaken_for_an_item_id(api):
+    """GET /library/storage responde el resumen (no lo toma `/library/{id}`)."""
+    response = api.client.get('/library/storage', headers=api.headers)
+
+    assert response.status_code == 200
+    assert {'by_kind', 'heaviest', 'unchosen', 'outputs', 'folders'} <= set(response.json())
+
+
 def test_folders_can_be_added_listed_and_removed(api):
     """POST, GET y DELETE de /library/folders; una ruta que no es carpeta da 422 `invalid_folder`."""
     folder = api.tmp / 'videos'
