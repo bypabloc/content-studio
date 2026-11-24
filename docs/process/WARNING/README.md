@@ -198,5 +198,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [019-texto-rasterizado](019-texto-rasterizado.md) | Un PNG con alfa se comparte entre el visor y FFmpeg; hash por texto y presets de título | antes de `main` |
 | [020-indice-inicial](020-indice-inicial.md) | Los trabajos `done` anteriores a la biblioteca se indexan una vez al abrir la base, no en el SQL de la migración | antes de `main` |
 | [020-busqueda-en-disco](020-busqueda-en-disco.md) | La búsqueda en el contenido lee de disco los guiones y transcripciones, con un límite de 2 s; un índice FTS queda para decidirlo con el usuario | antes de `main` |
+| [020-send2trash](020-send2trash.md) | Dependencia nueva `send2trash` (BSD) para mandar a la papelera de Windows desde la Biblioteca | antes de `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
