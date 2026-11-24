@@ -1,0 +1,16 @@
+{
+  "engine": "voxcpm2",
+  "family": "narration",
+  "size_gb": 8,
+  "vram_gb": 6.1,
+  "cpu": true,
+  "license": "Apache-2.0",
+  "steps": [
+    {"kind": "python", "version": "3.12"},
+    {"kind": "venv", "path": ".venv-voxcpm"},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["voxcpm==2.0.3", "soundfile==0.14.0", "huggingface-hub==1.33.0"]},
+    {"kind": "hf", "repo": "openbmb/VoxCPM2", "revision": "7936080b41163874f38610f46f438e2c0757f9fd", "into": "hf"},
+    {"kind": "verify", "import": "voxcpm"}
+  ]
+}

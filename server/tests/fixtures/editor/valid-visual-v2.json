@@ -1,0 +1,20 @@
+{
+  "doc": {
+    "version": 2,
+    "name": "Proyecto visual",
+    "sample_rate": 48000,
+    "canvas": {"width": 1280, "height": 720, "fps": 30, "background": "#000000"},
+    "tracks": [
+      {"id": "audio", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80},
+      {"id": "video", "kind": "video", "name": "Imagen", "opacity": 1, "hidden": false, "locked": false}
+    ],
+    "clips": [
+      {"id": "voice", "track": "audio", "src": "voice.wav", "src_in": 0, "src_out": 3, "start": 0, "gain_db": 0, "fade_in": 0, "fade_out": 0, "link": "take-1"},
+      {"id": "shot-a", "track": "video", "src": "shot-a.mp4", "src_in": 0, "src_out": 3, "start": 0, "fade_in": 0, "fade_out": 0, "media": "video", "link": "take-1", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {"x": [{"t": 0, "value": 0, "ease": "linear"}, {"t": 2, "value": 200, "ease": "ease-in-out"}]}},
+      {"id": "shot-b", "track": "video", "src": "shot-b.mp4", "src_in": 0, "src_out": 3, "start": 2, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}}
+    ],
+    "markers": [],
+    "transitions": [{"id": "fade-1", "track": "video", "a": "shot-a", "b": "shot-b", "type": "fade", "duration": 1}]
+  },
+  "errors": []
+}

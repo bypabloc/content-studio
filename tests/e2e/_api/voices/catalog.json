@@ -1,0 +1,22 @@
+{
+  "voices": [
+    {
+      "id": "yesid",
+      "language": "es",
+      "license": "CC0",
+      "description": "Voz masculina",
+      "favorite": false,
+      "state": "not_built",
+      "styles": [{ "style": "neutral", "approved": false, "path": null }]
+    },
+    {
+      "id": "maria",
+      "language": "es",
+      "license": "CC-BY",
+      "description": "Voz femenina",
+      "favorite": false,
+      "state": "approved",
+      "styles": [{ "style": "neutral", "approved": true, "path": "server/data/narration/voices/maria/neutral.wav" }]
+    }
+  ]
+}

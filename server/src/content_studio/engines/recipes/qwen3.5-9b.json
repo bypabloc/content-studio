@@ -1,0 +1,37 @@
+{
+  "engine": "qwen3.5-9b",
+  "family": "assistant",
+  "size_gb": 5.7,
+  "vram_gb": 7,
+  "cpu": false,
+  "license": "Apache-2.0",
+  "steps": [
+    {
+      "kind": "python",
+      "version": "3.12"
+    },
+    {
+      "kind": "venv",
+      "path": ".venv-llm"
+    },
+    {
+      "kind": "pip",
+      "packages": [
+        "huggingface-hub==0.36.2"
+      ]
+    },
+    {
+      "kind": "hf",
+      "repo": "unsloth/Qwen3.5-9B-GGUF",
+      "revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+      "into": "models",
+      "allow_patterns": [
+        "Qwen3.5-9B-Q4_K_M.gguf"
+      ]
+    },
+    {
+      "kind": "verify",
+      "import": "huggingface_hub"
+    }
+  ]
+}

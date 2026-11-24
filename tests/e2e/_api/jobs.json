@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "kind": "music",
+    "resource": "gpu",
+    "status": "running",
+    "position": 1,
+    "params": {},
+    "progress": 0.4,
+    "stage": "mezcla",
+    "created_at": "2026-11-19T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "kind": "music",
+    "resource": "gpu",
+    "status": "queued",
+    "position": 2,
+    "params": {},
+    "progress": 0,
+    "created_at": "2026-11-19T10:01:00Z"
+  },
+  {
+    "id": 3,
+    "kind": "music",
+    "resource": "gpu",
+    "status": "queued",
+    "position": 3,
+    "params": {},
+    "progress": 0,
+    "created_at": "2026-11-19T10:02:00Z"
+  },
+  {
+    "id": 4,
+    "kind": "music",
+    "resource": "gpu",
+    "status": "error",
+    "position": 4,
+    "params": {},
+    "progress": 0.2,
+    "error_code": "engine_failed",
+    "created_at": "2026-11-19T09:50:00Z"
+  }
+]

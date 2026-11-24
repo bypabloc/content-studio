@@ -1,0 +1,71 @@
+# cspell:ignore dtolnay swatinem
+name: release
+
+# Publica el instalador (spec 022, D-7): en el push de un tag vX.Y.Z creado en main, o a mano con workflow_dispatch.
+# El primer paso falla si el tag no es la versión de los manifiestos (AC-10). Con dry-run compila sin publicar y sin
+# los secrets del updater: sirve para probar el workflow en una rama (docs/operations/release.md).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (vX.Y.Z)'
+        required: true
+      dry-run:
+        description: 'Build without publishing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: the tag matches the app version
+        run: uv run --no-project python -m devtools version --check --expect "${TAG#v}"
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: client/src-tauri
+      - run: bun install --frozen-lockfile
+      # uv.exe con su sha256, el server versionado con el lock y los datos que se siembran.
+      - run: uv run --no-project python -m devtools bundle
+      - name: tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          args=(--config src-tauri/tauri.bundle.json)
+          if [ "$DRY_RUN" = "true" ]; then args+=(--config '{"bundle":{"createUpdaterArtifacts":false}}'); fi
+          bun run --cwd client tauri build "${args[@]}"
+      - name: stage the release files
+        run: |
+          installer=$(ls client/src-tauri/target/release/bundle/nsis/*-setup.exe)
+          flag=$([ "$DRY_RUN" = "true" ] && echo --dry-run || true)
+          uv run --no-project python -m devtools release --installer "$installer" $flag
+      - name: publish the release
+        if: env.DRY_RUN != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$TAG" tmp/release/*.exe tmp/release/*.sig tmp/release/latest.json --title "Content Studio ${TAG#v}" --notes-file tmp/release/notes.md --verify-tag
+      - name: upload the dry-run installer
+        if: env.DRY_RUN == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-dry-run
+          path: tmp/release/

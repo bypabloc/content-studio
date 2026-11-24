@@ -1,0 +1,29 @@
+[project]
+name = "content-studio"
+version = "0.1.0"
+description = "Local narration (TTS with voice cloning) and background music for videos, on an 8 GB GPU."
+requires-python = ">=3.10"
+# La CLI `studio` usa argparse (sin dependencias).
+dependencies = [
+    "fastapi>=0.162.5",
+    "send2trash>=2.2.0",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+studio = "content_studio.cli.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/content_studio"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+]

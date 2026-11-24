@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "source": { "path": "C:/fake/in/charla.mp4", "kind": "file" },
+  "language": "es",
+  "style": {},
+  "tracks": {},
+  "cues": [
+    {
+      "id": 1,
+      "start": 0.0,
+      "end": 2.0,
+      "text": "hola a todos",
+      "words": [
+        { "start": 0.0, "end": 0.5, "text": "hola", "keyword": null },
+        { "start": 0.5, "end": 1.0, "text": "a", "keyword": null },
+        { "start": 1.0, "end": 2.0, "text": "todos", "keyword": null }
+      ]
+    },
+    {
+      "id": 2,
+      "start": 2.5,
+      "end": 4.0,
+      "text": "buenas tardes",
+      "words": [
+        { "start": 2.5, "end": 3.0, "text": "buenas", "keyword": null },
+        { "start": 3.0, "end": 4.0, "text": "tardes", "keyword": null }
+      ]
+    }
+  ]
+}

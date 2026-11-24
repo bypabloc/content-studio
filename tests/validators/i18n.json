@@ -1,0 +1,43 @@
+{
+  "dynamicPrefixes": [
+    "engines.group.",
+    "engines.size.",
+    "error.http.",
+    "error.checksum_mismatch",
+    "error.llm_",
+    "error.process_failed",
+    "llm.platform.",
+    "llm.subtitles.flag.",
+    "error.disk_full",
+    "lint.rule_",
+    "label.narration.style.",
+    "label.narration.engine.",
+    "label.music.style.",
+    "label.music.model.",
+    "label.music.category.",
+    "convert.channels.",
+    "convert.format.",
+    "convert.fps.",
+    "convert.group.",
+    "convert.preset.",
+    "convert.quality.",
+    "convert.rate.",
+    "convert.reframe.",
+    "convert.resolution.",
+    "normalize.preset.",
+    "library.kind.",
+    "library.send."
+  ],
+  "allowed": ["Bearer "],
+  "python": {
+    "include": [
+      "server/src/content_studio/api",
+      "server/src/content_studio/services",
+      "server/src/content_studio/jobs",
+      "server/src/content_studio/messages.py"
+    ]
+  },
+  "ts": {
+    "exclude": ["client/src/components/ui/"]
+  }
+}

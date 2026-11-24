@@ -1,0 +1,8 @@
+# 015: NVENC solo si el equipo tiene GPU, no solo si el ffmpeg lo trae
+
+- **Contexto**: la CI (Linux, sin GPU NVIDIA) falló en `test_ac2` para MP4, MOV y MKV con H.264 (`ffmpeg_failed`). Causa probable: el conversor elegía `h264_nvenc` en cuanto el ffmpeg listaba ese encoder (`_video_args`, con `nvenc` por defecto `True`). El log de CI no trae el stderr de ffmpeg, así que no está confirmado hasta que la CI corra de nuevo. En este equipo pasaba porque la RTX 4060 sí codifica. El mismo defecto afectaría a un equipo sin NVIDIA con el ffmpeg completo que instala la app.
+- **Elegida**: `build` deja NVENC apagado por defecto (`options.get('nvenc', False)`). `main` lo pide solo si `tools.detect()['gpu']` encuentra una GPU, la misma regla que `subtitles.burn` (`burn_main.py`). Así NVENC se usa donde la GPU está, y en lo demás, libx264.
+- **Descartadas**: (a) cambiar el test para pasar `nvenc: False`: tapa el defecto y deja que un equipo sin NVIDIA falle al convertir a MP4. (b) Reintentar con libx264 si NVENC falla: más código, y el fallo llega tarde, después de codificar.
+- **Cómo revertir**: el commit `fix:` de esta ficha (dos líneas en `_video_args` y `main`, y su import de `tools`).
+- **Cómo comprobarla**: `uv run pytest server/tests/unit/src/content_studio/media/test_convert.py -k nvenc` (el defecto da rojo: `h264_nvenc` sin pedirlo). En la CI, el job `calidad` en Linux pasa `test_ac2` para mp4-h264, mov y mkv. En este equipo, `tools.detect()['gpu']` es verdadero: las corridas reales no cambian.
+- **Pendiente**: ninguno. La causa de CI se confirma solo con la corrida de la CI, porque el log no trae el stderr de ffmpeg.

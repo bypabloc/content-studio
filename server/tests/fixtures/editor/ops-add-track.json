@@ -1,0 +1,5 @@
+{
+  "doc": {"version": 1, "name": "demo", "sample_rate": 48000, "tracks": [{"id": "t1", "kind": "audio", "name": "Voz", "volume_db": 0, "mute": false, "solo": false, "locked": false, "height": 80}], "clips": [], "markers": []},
+  "op": {"type": "addTrack", "track": {"id": "t2", "kind": "audio", "name": "Música", "volume_db": -6, "mute": false, "solo": false, "locked": false, "height": 80}, "index": 1},
+  "expected": {"ids": [], "clips": {}, "track_ids": ["t1", "t2"], "tracks": {"t2": {"name": "Música", "volume_db": -6}}, "markers": []}
+}

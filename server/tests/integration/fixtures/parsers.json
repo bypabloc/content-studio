@@ -1,0 +1,591 @@
+{
+  "narration tts": {
+    "script": "content_studio.narration.parser",
+    "docstring": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
+    "description": "TTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n",
+    "acciones": [
+      {
+        "option_strings": [
+          "-h",
+          "--help"
+        ],
+        "dest": "help",
+        "action": "_HelpAction",
+        "choices": null,
+        "default": "==SUPPRESS==",
+        "required": false,
+        "nargs": 0,
+        "const": null,
+        "type": null,
+        "help": "show this help message and exit",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--model"
+        ],
+        "dest": "model",
+        "action": "_StoreAction",
+        "choices": [
+          "voxcpm2",
+          "cosyvoice3",
+          "qwen-1.7b",
+          "qwen-0.6b",
+          "chatterbox",
+          "omnivoice",
+          "indextts"
+        ],
+        "default": "voxcpm2",
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "TTS engine (default voxcpm2; see server/data/narration/README.md)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--profile"
+        ],
+        "dest": "profile",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": "default",
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "own voice profile: a folder under server/data/narration/reference/ (default: default, \"Mi voz\")",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--voice"
+        ],
+        "dest": "voice",
+        "action": "_StoreAction",
+        "choices": [
+          "karen-savage",
+          "mpinedag",
+          "yesid",
+          "andrea",
+          "hannah",
+          "colombia-m",
+          "peru-f",
+          "venezuela-f",
+          "vctk-p345"
+        ],
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "free voice from the catalog, approved in every style (studio narration voices); replaces --profile",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--style"
+        ],
+        "dest": "style",
+        "action": "_StoreAction",
+        "choices": [
+          "friendly",
+          "soft",
+          "expert",
+          "clear",
+          "steady",
+          "neutral",
+          "energetic",
+          "dramatic",
+          "sad",
+          "intimate",
+          "whisper",
+          "neutral-en"
+        ],
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "default: the \"style\" in the JSON, or expert",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--text"
+        ],
+        "dest": "text",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "text to narrate, in quotes",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--file"
+        ],
+        "dest": "file",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": "+",
+        "const": null,
+        "type": "Path",
+        "help": "one or more .txt or .json files; the model loads once",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--from-script"
+        ],
+        "dest": "from_script",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "Path",
+        "help": "==SUPPRESS==",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--only"
+        ],
+        "dest": "only",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "==SUPPRESS==",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--output"
+        ],
+        "dest": "output",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "Path",
+        "help": "with one script, the .wav; with several, the folder. Default out/narration/",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--batch"
+        ],
+        "dest": "batch",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "sentences per pass in Qwen; default based on free VRAM",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--seed"
+        ],
+        "dest": "seed",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "base seed; default random. It is printed and saved in the .json",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--master"
+        ],
+        "dest": "master",
+        "action": "_StoreAction",
+        "choices": [
+          "voice",
+          "no"
+        ],
+        "default": "voice",
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "voice: --lufs loudness with a 70 Hz high-pass, no compression unless the peak requires it; no: unprocessed",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--lufs"
+        ],
+        "dest": "lufs",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": -16.0,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "float",
+        "help": "target loudness for --master voice (default -16)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--language"
+        ],
+        "dest": "language",
+        "action": "_StoreAction",
+        "choices": [
+          "es",
+          "en"
+        ],
+        "default": "es",
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "engine and whisper language; with en, the default style is neutral-en",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--evaluate"
+        ],
+        "dest": "evaluate",
+        "action": "_StoreTrueAction",
+        "choices": null,
+        "default": false,
+        "required": false,
+        "nargs": 0,
+        "const": true,
+        "type": null,
+        "help": "at the end transcribes each output with whisper and compares it, paragraph by paragraph, with the requested text",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--retries"
+        ],
+        "dest": "retries",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": 0,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "with --evaluate: rounds in which only paragraphs with observations are regenerated",
+        "metavar": null
+      }
+    ],
+    "excluyentes": [
+      {
+        "required": true,
+        "dests": [
+          "text",
+          "file",
+          "from_script"
+        ]
+      }
+    ],
+    "help": "usage: generar.py [-h] [--model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}]\n                  [--profile PROFILE]\n                  [--voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}]\n                  [--style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}]\n                  (--text TEXT | --file FILE [FILE ...]) [--output OUTPUT] [--batch BATCH] [--seed SEED]\n                  [--master {voice,no}] [--lufs LUFS] [--language {es,en}] [--evaluate] [--retries RETRIES]\n\nTTS local con clonación de voz: Qwen3-TTS, Chatterbox V3, OmniVoice, VoxCPM2, IndexTTS 2.5 y CosyVoice 3.\n\nUso (ver server/data/narration/README.md):\n    studio narration tts --model qwen-0.6b --style friendly --text \"Hola, bienvenidos al canal.\"\n    studio narration tts --model chatterbox --profile spec-010 \\\n        --style clear --file guion.txt\n    studio narration tts --model qwen-0.6b --style expert --file guiones/*.json\n    studio narration tts --model omnivoice --style expert --file guion.txt --seed 7 --evaluate\n\nCon `studio` cada trabajo sale en out/narration/<fecha>-<id>-<slug>/ (no se usa --output).\n--profile elige la voz propia: una carpeta de server/data/narration/reference/ (por defecto default, «Mi voz»).\n--voice usa una voz libre del catálogo (studio narration voices), solo si está aprobada en todos los estilos.\nLa transcripción va al lado con el mismo nombre y extensión .txt.\nCada motor corre en su propio venv (ver engines/registry.py). Cada toma deja un .json con sus metadatos.\n\nPausas en el texto: una línea en blanco agrega 0.6 s; [pausa 1.5] agrega 1.5 s.\nEstilo y emoción por párrafo: [estilo: dramatica], [emocion: triste 0.4]. Gestos: [risa], [suspiro],\n[respiro]; énfasis: [enfasis]palabra[/enfasis]. Cada motor recibe su traducción (ver texto/traducir.py).\nOtras marcas ([breath], <break>, **) se leen en voz alta. Ver server/data/narration/docs/formato-guion.md.\nUn .json trae \"texto\" (lista de párrafos), \"estilo\" e \"id\" (nombre de la salida).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {voxcpm2,cosyvoice3,qwen-1.7b,qwen-0.6b,chatterbox,omnivoice,indextts}\n                        TTS engine (default voxcpm2; see server/data/narration/README.md)\n  --profile PROFILE     own voice profile: a folder under server/data/narration/reference/ (default: default, \"Mi\n                        voz\")\n  --voice {karen-savage,mpinedag,yesid,andrea,hannah,colombia-m,peru-f,venezuela-f,vctk-p345}\n                        free voice from the catalog, approved in every style (studio narration voices); replaces\n                        --profile\n  --style {friendly,soft,expert,clear,steady,neutral,energetic,dramatic,sad,intimate,whisper,neutral-en}\n                        default: the \"style\" in the JSON, or expert\n  --text TEXT           text to narrate, in quotes\n  --file FILE [FILE ...]\n                        one or more .txt or .json files; the model loads once\n  --output OUTPUT       with one script, the .wav; with several, the folder. Default out/narration/\n  --batch BATCH         sentences per pass in Qwen; default based on free VRAM\n  --seed SEED           base seed; default random. It is printed and saved in the .json\n  --master {voice,no}   voice: --lufs loudness with a 70 Hz high-pass, no compression unless the peak requires it; no:\n                        unprocessed\n  --lufs LUFS           target loudness for --master voice (default -16)\n  --language {es,en}    engine and whisper language; with en, the default style is neutral-en\n  --evaluate            at the end transcribes each output with whisper and compares it, paragraph by paragraph, with\n                        the requested text\n  --retries RETRIES     with --evaluate: rounds in which only paragraphs with observations are regenerated\n"
+  },
+  "narration voces": {
+    "script": "content_studio.narration.voices.main",
+    "docstring": "Catálogo de voces libres para narrar sin grabarse: construye y aprueba cada voz.\n\nUso:\n    uv run studio narration voices --list                # catálogo, licencia y estado de cada voz\n    uv run studio narration voices --build yesid         # descarga, genera los 12 estilos y los aprueba\n    uv run studio narration voices --build all --force\n\nCada voz del catálogo (server/data/narration/voices/catalog.json) parte de un clip real\nde 8-12 s (o de varios clips cortos\ndel mismo hablante, unidos) con licencia de uso comercial: CC0 o dominio público, o una que pide MENCIÓN\n(CC BY, CC BY-SA, Jenny). Mención = atribución: al publicar algo hecho con esa voz hay que dar crédito a su\nautor, con el texto `atribucion` del catálogo (mencion(); docs/research/voces-libres-clonacion/12).\nEse clip, normalizado, es el estilo `neutral`. El resto de ESTILOS se genera con CosyVoice 3\n(la misma voz leyendo el texto del kit de grabación, dirigido con una instrucción en inglés) y cada clip se\naprueba si conserva la voz (similitud de hablante con la base), se entiende (WER con whisper) y cumple los\ncriterios de referencia de docs/scripts/README.md. Una voz entra en `narration tts --voice` solo si aprueba TODOS los\nestilos. Resultado: server/data/narration/voices/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).\nInvestigación y mediciones: docs/research/voces-libres-clonacion/.\n",
+    "description": "Catálogo de voces libres para narrar sin grabarse: construye y aprueba cada voz.\n\nUso:\n    uv run studio narration voices --list                # catálogo, licencia y estado de cada voz\n    uv run studio narration voices --build yesid         # descarga, genera los 12 estilos y los aprueba\n    uv run studio narration voices --build all --force\n\nCada voz del catálogo (server/data/narration/voices/catalog.json) parte de un clip real\nde 8-12 s (o de varios clips cortos\ndel mismo hablante, unidos) con licencia de uso comercial: CC0 o dominio público, o una que pide MENCIÓN\n(CC BY, CC BY-SA, Jenny). Mención = atribución: al publicar algo hecho con esa voz hay que dar crédito a su\nautor, con el texto `atribucion` del catálogo (mencion(); docs/research/voces-libres-clonacion/12).\nEse clip, normalizado, es el estilo `neutral`. El resto de ESTILOS se genera con CosyVoice 3\n(la misma voz leyendo el texto del kit de grabación, dirigido con una instrucción en inglés) y cada clip se\naprueba si conserva la voz (similitud de hablante con la base), se entiende (WER con whisper) y cumple los\ncriterios de referencia de docs/scripts/README.md. Una voz entra en `narration tts --voice` solo si aprueba TODOS los\nestilos. Resultado: server/data/narration/voices/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).\nInvestigación y mediciones: docs/research/voces-libres-clonacion/.\n",
+    "acciones": [
+      {
+        "option_strings": [
+          "-h",
+          "--help"
+        ],
+        "dest": "help",
+        "action": "_HelpAction",
+        "choices": null,
+        "default": "==SUPPRESS==",
+        "required": false,
+        "nargs": 0,
+        "const": null,
+        "type": null,
+        "help": "show this help message and exit",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--list"
+        ],
+        "dest": "list",
+        "action": "_StoreTrueAction",
+        "choices": null,
+        "default": false,
+        "required": false,
+        "nargs": 0,
+        "const": true,
+        "type": null,
+        "help": "shows the catalog and the status of each voice (default)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--build"
+        ],
+        "dest": "build",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": "+",
+        "const": null,
+        "type": null,
+        "help": "voices to build and approve, or \"all\"",
+        "metavar": "REFERENCE"
+      },
+      {
+        "option_strings": [
+          "--force"
+        ],
+        "dest": "force",
+        "action": "_StoreTrueAction",
+        "choices": null,
+        "default": false,
+        "required": false,
+        "nargs": 0,
+        "const": true,
+        "type": null,
+        "help": "regenerate everything even if it exists",
+        "metavar": null
+      }
+    ],
+    "excluyentes": [
+      {
+        "required": false,
+        "dests": [
+          "list",
+          "build"
+        ]
+      }
+    ],
+    "help": "usage: generar.py [-h] [--list | --build REFERENCE [REFERENCE ...]] [--force]\n\nCatálogo de voces libres para narrar sin grabarse: construye y aprueba cada voz.\n\nUso:\n    uv run studio narration voices --list                # catálogo, licencia y estado de cada voz\n    uv run studio narration voices --build yesid         # descarga, genera los 12 estilos y los aprueba\n    uv run studio narration voices --build all --force\n\nCada voz del catálogo (server/data/narration/voices/catalog.json) parte de un clip real\nde 8-12 s (o de varios clips cortos\ndel mismo hablante, unidos) con licencia de uso comercial: CC0 o dominio público, o una que pide MENCIÓN\n(CC BY, CC BY-SA, Jenny). Mención = atribución: al publicar algo hecho con esa voz hay que dar crédito a su\nautor, con el texto `atribucion` del catálogo (mencion(); docs/research/voces-libres-clonacion/12).\nEse clip, normalizado, es el estilo `neutral`. El resto de ESTILOS se genera con CosyVoice 3\n(la misma voz leyendo el texto del kit de grabación, dirigido con una instrucción en inglés) y cada clip se\naprueba si conserva la voz (similitud de hablante con la base), se entiende (WER con whisper) y cumple los\ncriterios de referencia de docs/scripts/README.md. Una voz entra en `narration tts --voice` solo si aprueba TODOS los\nestilos. Resultado: server/data/narration/voices/<voz>/<estilo>.wav + .txt y aprobacion.json (gitignoreados).\nInvestigación y mediciones: docs/research/voces-libres-clonacion/.\n\noptions:\n  -h, --help            show this help message and exit\n  --list                shows the catalog and the status of each voice (default)\n  --build REFERENCE [REFERENCE ...]\n                        voices to build and approve, or \"all\"\n  --force               regenerate everything even if it exists\n"
+  },
+  "music": {
+    "script": "content_studio.music.parser",
+    "docstring": "Música instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.\n\nUso:\n    studio music --model acestep --style lofi-chill --duration 60\n    studio music --model acestep --duration 30 --style corporate future-bass\n    studio music --model acestep --duration 30 --key \"E Minor\" --bpm 105         --style \"synthwave, retro 80s, driving arpeggios\"\n\n--style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa\ntal cual como descripción. Cada preset define tonalidad, BPM y compás; el texto\nlibre los exige con --key y --bpm. Estos flags también pisan los del preset.\nEl modelo se carga una vez y sale un .wav por estilo en --folder (out/music/\npor defecto), con el silencio final ya recortado. Siempre instrumental. Los\npesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en\nsu propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).\n",
+    "description": "Música instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.\n\nUso:\n    studio music --model acestep --style lofi-chill --duration 60\n    studio music --model acestep --duration 30 --style corporate future-bass\n    studio music --model acestep --duration 30 --key \"E Minor\" --bpm 105         --style \"synthwave, retro 80s, driving arpeggios\"\n\n--style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa\ntal cual como descripción. Cada preset define tonalidad, BPM y compás; el texto\nlibre los exige con --key y --bpm. Estos flags también pisan los del preset.\nEl modelo se carga una vez y sale un .wav por estilo en --folder (out/music/\npor defecto), con el silencio final ya recortado. Siempre instrumental. Los\npesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en\nsu propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).\n",
+    "acciones": [
+      {
+        "option_strings": [
+          "-h",
+          "--help"
+        ],
+        "dest": "help",
+        "action": "_HelpAction",
+        "choices": null,
+        "default": "==SUPPRESS==",
+        "required": false,
+        "nargs": 0,
+        "const": null,
+        "type": null,
+        "help": "show this help message and exit",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--model"
+        ],
+        "dest": "model",
+        "action": "_StoreAction",
+        "choices": [
+          "acestep",
+          "heartmula"
+        ],
+        "default": null,
+        "required": true,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "acestep (recommended) or heartmula (slow)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--style"
+        ],
+        "dest": "style",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": [
+          "lofi-chill"
+        ],
+        "required": false,
+        "nargs": "+",
+        "const": null,
+        "type": null,
+        "help": "one or more of the 126 presets (server/data/music/ESTILOS.md), or free text in quotes",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--duration"
+        ],
+        "dest": "duration",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": 60,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "float",
+        "help": "seconds before trimming (ACE ≤600, HeartMuLa ≤240)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--key"
+        ],
+        "dest": "key",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "key, e.g. \"C Major\", \"A Minor\" (required with free text)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--bpm"
+        ],
+        "dest": "bpm",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "tempo 30–300 (required with free text)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--time-signature"
+        ],
+        "dest": "time_signature",
+        "action": "_StoreAction",
+        "choices": [
+          "2",
+          "3",
+          "4",
+          "6"
+        ],
+        "default": null,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": null,
+        "help": "2/4, 3/4, 4/4 or 6/8 (default 4/4)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--no-lm"
+        ],
+        "dest": "no_lm",
+        "action": "_StoreTrueAction",
+        "choices": null,
+        "default": false,
+        "required": false,
+        "nargs": 0,
+        "const": true,
+        "type": null,
+        "help": "ACE-Step without the LM 0.6B planner: ~3x faster",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--folder"
+        ],
+        "dest": "folder",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": "out/music",
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "Path",
+        "help": "default out/music/",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--variants"
+        ],
+        "dest": "variants",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": 1,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "tracks per style (<model>-<style>-v1.wav ...); the melody changes in each one",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--evaluate"
+        ],
+        "dest": "evaluate",
+        "action": "_StoreTrueAction",
+        "choices": null,
+        "default": false,
+        "required": false,
+        "nargs": 0,
+        "const": true,
+        "type": null,
+        "help": "at the end, measures with demucs how much voice each track has and flags the ones that sing (only music is wanted)",
+        "metavar": null
+      },
+      {
+        "option_strings": [
+          "--retries"
+        ],
+        "dest": "retries",
+        "action": "_StoreAction",
+        "choices": null,
+        "default": 0,
+        "required": false,
+        "nargs": null,
+        "const": null,
+        "type": "int",
+        "help": "with --evaluate: rounds in which only tracks with voice are regenerated",
+        "metavar": null
+      }
+    ],
+    "excluyentes": [],
+    "help": "usage: generar.py [-h] --model {acestep,heartmula} [--style STYLE [STYLE ...]] [--duration DURATION] [--key KEY]\n                  [--bpm BPM] [--time-signature {2,3,4,6}] [--no-lm] [--folder FOLDER] [--variants VARIANTS]\n                  [--evaluate] [--retries RETRIES]\n\nMúsica instrumental local con ACE-Step 1.5 o HeartMuLa 3B, para GPU de 8 GB.\n\nUso:\n    studio music --model acestep --style lofi-chill --duration 60\n    studio music --model acestep --duration 30 --style corporate future-bass\n    studio music --model acestep --duration 30 --key \"E Minor\" --bpm 105         --style \"synthwave, retro 80s, driving arpeggios\"\n\n--style acepta varios valores: un preset (ver ESTILOS) o texto libre, que se usa\ntal cual como descripción. Cada preset define tonalidad, BPM y compás; el texto\nlibre los exige con --key y --bpm. Estos flags también pisan los del preset.\nEl modelo se carga una vez y sale un .wav por estilo en --folder (out/music/\npor defecto), con el silencio final ya recortado. Siempre instrumental. Los\npesos se descargan solos la primera vez a server/data/music/models/. Cada modelo corre en\nsu propio venv: server/data/music/.venv-acestep / server/data/music/.venv-heartmula (ver server/data/music/README.md).\n\noptions:\n  -h, --help            show this help message and exit\n  --model {acestep,heartmula}\n                        acestep (recommended) or heartmula (slow)\n  --style STYLE [STYLE ...]\n                        one or more of the 126 presets (server/data/music/ESTILOS.md), or free text in quotes\n  --duration DURATION   seconds before trimming (ACE ≤600, HeartMuLa ≤240)\n  --key KEY             key, e.g. \"C Major\", \"A Minor\" (required with free text)\n  --bpm BPM             tempo 30–300 (required with free text)\n  --time-signature {2,3,4,6}\n                        2/4, 3/4, 4/4 or 6/8 (default 4/4)\n  --no-lm               ACE-Step without the LM 0.6B planner: ~3x faster\n  --folder FOLDER       default out/music/\n  --variants VARIANTS   tracks per style (<model>-<style>-v1.wav ...); the melody changes in each one\n  --evaluate            at the end, measures with demucs how much voice each track has and flags the ones that sing\n                        (only music is wanted)\n  --retries RETRIES     with --evaluate: rounds in which only tracks with voice are regenerated\n"
+  }
+}

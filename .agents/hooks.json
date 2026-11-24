@@ -1,0 +1,30 @@
+{
+  "shell-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$(git rev-parse --show-toplevel)/.agents/hooks/shell_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "computer-use-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "computer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --no-project python \"$(git rev-parse --show-toplevel)/.agents/hooks/computer_use_guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

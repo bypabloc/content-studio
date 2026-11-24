@@ -1,0 +1,13 @@
+{
+  "doc": {
+    "version": 2,
+    "name": "Inválido",
+    "sample_rate": 48000,
+    "canvas": {"width": 1280, "height": 720, "fps": 30, "background": "#000000"},
+    "tracks": [{"id": "v", "kind": "video", "name": "Video", "opacity": 1, "hidden": false, "locked": false}],
+    "clips": [{"id": "a", "track": "v", "src": "a.mp4", "src_in": 0, "src_out": 1, "start": 0, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}}, {"id": "b", "track": "v", "src": "b.mp4", "src_in": 0, "src_out": 1, "start": 2, "fade_in": 0, "fade_out": 0, "media": "video", "transform": {"x": 0, "y": 0, "scale_x": 1, "scale_y": 1, "rotation": 0, "opacity": 1, "crop": {"l": 0, "t": 0, "r": 0, "b": 0}, "anchor_x": 0.5, "anchor_y": 0.5}, "keyframes": {}}],
+    "markers": [],
+    "transitions": [{"id": "x", "track": "v", "a": "a", "b": "b", "type": "fade", "duration": 1}]
+  },
+  "errors": ["bad_transition"]
+}

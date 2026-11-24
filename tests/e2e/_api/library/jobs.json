@@ -1,0 +1,29 @@
+{
+  "1": {
+    "id": 1,
+    "kind": "narration",
+    "params": {
+      "text": "Hola, esto quedó registrado.",
+      "style": "expert"
+    },
+    "created_at": "2026-11-20T10:00:00+00:00",
+    "elapsed": 31.2
+  },
+  "2": {
+    "id": 2,
+    "kind": "music",
+    "params": {
+      "model": "acestep",
+      "style": [
+        "lofi-chill"
+      ],
+      "duration": 45,
+      "variants": 2,
+      "no_lm": false,
+      "evaluate": true,
+      "retries": 1
+    },
+    "created_at": "2026-11-20T11:00:00+00:00",
+    "elapsed": 122
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "react",
+    "typescript",
+    "import"
+  ],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": "off",
+    "react/jsx-no-literals": "error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "tests/**"
+      ],
+      "rules": {
+        "react/jsx-no-literals": "off"
+      }
+    },
+    {
+      "files": [
+        "src/shared/components/atoms/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/molecules/**",
+                  "**/organisms/**",
+                  "**/features/**",
+                  "**/app/**"
+                ],
+                "message": "Atoms import only atoms and shadcn (D-4): no molecules, organisms, features or app."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/shared/components/molecules/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/organisms/**",
+                  "**/features/**",
+                  "**/app/**"
+                ],
+                "message": "Molecules import atoms and molecules, never organisms, features or app (D-4)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/shared/components/**"
+      ],
+      "excludeFiles": [
+        "src/shared/components/atoms/**",
+        "src/shared/components/molecules/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/features/**",
+                  "**/app/**"
+                ],
+                "message": "Organisms and shadcn never import features or app (D-4)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/shared/**"
+      ],
+      "excludeFiles": [
+        "src/shared/components/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/features/**",
+                  "**/app/**"
+                ],
+                "message": "shared/ does not import features/ or app/ (D-4)."
+              },
+              {
+                "group": [
+                  "**/shadcn/**",
+                  "@base-ui/react",
+                  "@base-ui/react/**",
+                  "lucide-react",
+                  "recharts",
+                  "sonner"
+                ],
+                "message": "Only shared/components imports shadcn/, @base-ui/react, lucide-react, recharts or sonner (D-4)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/features/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/app/**"
+                ],
+                "message": "features/ does not import app/ (D-4)."
+              },
+              {
+                "group": [
+                  "**/atoms/UIBox"
+                ],
+                "message": "features/ does not import UIBox: lay out with UIStack, UIGrid, UICard, UIPage or UIText (D-4)."
+              },
+              {
+                "group": [
+                  "**/shadcn/**",
+                  "@base-ui/react",
+                  "@base-ui/react/**",
+                  "lucide-react",
+                  "recharts",
+                  "sonner"
+                ],
+                "message": "features/ does not import shadcn/ or npm UI packages: use the components of shared/components (D-4)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/app/**",
+        "src/main.tsx"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "**/atoms/UIBox"
+                ],
+                "message": "app/ does not import UIBox: lay out with UIStack, UIGrid, UICard, UIPage or UIText (D-4)."
+              },
+              {
+                "group": [
+                  "**/shadcn/**",
+                  "@base-ui/react",
+                  "@base-ui/react/**",
+                  "lucide-react",
+                  "recharts",
+                  "sonner"
+                ],
+                "message": "app/ does not import shadcn/ or npm UI packages: use the components of shared/components (D-4)."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

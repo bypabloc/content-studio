@@ -1,0 +1,129 @@
+"""Servicio `editor.render` (spec 017, D-4): trabajo de ffmpeg en la cola, sin candado de la GPU."""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+from content_studio.services import editor_render
+
+
+def test_the_service_runs_on_the_cpu_not_the_gpu_lock():
+    """Es ffmpeg: no carga modelos, así que no toma el candado de la GPU."""
+    assert editor_render.RESOURCE == 'cpu'
+
+
+def test_validate_accepts_a_project_and_a_known_format():
+    """Con un `project.json` y un formato de audio conocido no hay errores."""
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'wav'}) == []
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'mp4-h264'}) == []
+    assert editor_render.validate({'doc': 'out/editor/x/project.json', 'format': 'mp4-h264', 'quality': 19}) == []
+
+
+def test_validate_rejects_video_quality_outside_the_crf_and_cq_range():
+    """CRF/CQ es un entero de 0 a 51 y solo aplica a formatos de video."""
+    for quality in (-1, 52, 19.5, True):
+        assert editor_render.validate({'doc': 'x/project.json', 'format': 'mp4-h264', 'quality': quality}) == [
+            {'code': 'invalid_video_quality', 'params': {'quality': quality}}
+        ]
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'quality': 19}) == [
+        {'code': 'invalid_video_quality', 'params': {'quality': 19}}
+    ]
+
+
+def test_validate_rejects_a_missing_project_and_an_unknown_format():
+    """Sin proyecto, `editor_project_not_found`; con un formato que no existe, `unknown_target`."""
+    assert editor_render.validate({'format': 'wav'})[0]['code'] == 'editor_project_not_found'
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'exe'}) == [
+        {'code': 'unknown_target', 'params': {'target': 'exe'}}
+    ]
+
+
+def test_validate_rejects_an_unknown_loudness_preset():
+    """Un preset de sonoridad que no existe, `unknown_preset`."""
+    errors = editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'normalize': 'radio'})
+
+    assert errors == [{'code': 'unknown_preset', 'params': {'preset': 'radio'}}]
+
+
+def test_validate_rejects_an_incomplete_or_reversed_marker_range():
+    """Un tramo debe tener inicio y fin válidos antes de encolarse."""
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'start': 3, 'end': 2}) == [
+        {'code': 'bad_render_range', 'params': {'start': 3, 'end': 2}}
+    ]
+    assert editor_render.validate({'doc': 'x/project.json', 'format': 'wav', 'start': 2}) == [
+        {'code': 'bad_render_range', 'params': {'start': 2, 'end': None}}
+    ]
+
+
+def test_build_command_runs_the_render_main_with_the_project_format_and_folder(tmp_path: Path):
+    """El comando es `render_main` con el `project.json`, el formato, la sonoridad (si la hay) y la carpeta."""
+    command = editor_render.build_command({'doc': 'x/project.json', 'format': 'wav', 'normalize': 'podcast'}, tmp_path)
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.editor.render_main',
+        '--project',
+        'x/project.json',
+        '--format',
+        'wav',
+        '--normalize',
+        'podcast',
+        '--out-dir',
+        str(tmp_path),
+    ]
+
+
+def test_build_command_passes_marker_range_and_export_name(tmp_path: Path):
+    """El worker conserva el tramo y el nombre elegidos por el diálogo de exportación."""
+    command = editor_render.build_command(
+        {'doc': 'x/project.json', 'format': 'mp3', 'start': 2, 'end': 5, 'name': 'demo-01'}, tmp_path
+    )
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.editor.render_main',
+        '--project',
+        'x/project.json',
+        '--format',
+        'mp3',
+        '--start',
+        '2',
+        '--end',
+        '5',
+        '--name',
+        'demo-01',
+        '--out-dir',
+        str(tmp_path),
+    ]
+
+
+def test_build_command_passes_video_quality(tmp_path: Path):
+    """La calidad elegida llega al proceso real del renderer."""
+    command = editor_render.build_command({'doc': 'x/project.json', 'format': 'mp4-h264', 'quality': 21}, tmp_path)
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.editor.render_main',
+        '--project',
+        'x/project.json',
+        '--format',
+        'mp4-h264',
+        '--quality',
+        '21',
+        '--out-dir',
+        str(tmp_path),
+    ]
+
+
+def test_result_is_the_render_result_json_or_none(tmp_path):
+    """`result` devuelve el `result.json` del render (texto JSON) o None si falta o no es JSON (spec 023)."""
+    assert editor_render.result(tmp_path) is None
+    (tmp_path / 'result.json').write_text('{"status": "done", "output": "a.mp4"}', encoding='utf-8')
+    assert json.loads(editor_render.result(tmp_path)) == {'status': 'done', 'output': 'a.mp4'}
+    (tmp_path / 'result.json').write_text('roto', encoding='utf-8')
+    assert editor_render.result(tmp_path) is None

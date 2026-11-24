@@ -1,0 +1,21 @@
+# 008: adaptaciones de los organismos: sin etiquetas nativas, asa y barra partidas, y el helper de `matchMedia`
+
+- **Contexto**: los organismos de klinikae traen `button`, `label`, `input`, `h2`, `h3`, `section` y `svg` sueltos. D-4 prohíbe etiquetas nativas fuera de átomos y `shadcn/`, y `UIBox` solo admite `div`, `span`, `section`, `header`, `nav`, `aside`, `main` y `footer`. `UIFloatingToolbar` tiene 431 líneas (el límite es 300).
+- **Elegida**:
+  - `UIBottomSheet`: el botón de cierre es un `UIButton` ghost con `icon="x"` y `aria-label`, sin tooltip. Un `UIIconButton` añade un `UITooltip`, y el tooltip cierra con Escape antes que la hoja (el test de Escape falló por eso).
+  - `UIChartCard`: el título es `UIBox role="heading" aria-level={3}` con los estilos de subtítulo. Su test exige nivel 3, y `UIText subtitle` daría `h2`. Es la misma técnica que el título de `UIFloatingToolbar`.
+  - `UIFloatingToolbar`: tipos a `types.ts`, constantes a `constants.ts` y el asa a `Handle.tsx` (`FloatingToolbarHandle`, con `UIButton`). El título es `UIBox role="heading" aria-level={2}`. El test de foco cambia el selector de `h2` a `[role="heading"][aria-level="2"]`; comprueba lo mismo.
+  - `UIDateRangePicker`: cada día es un `UIButton` ghost con `size-10 min-h-10 px-0 font-normal`, para conservar la celda de 40 px y el peso de la fuente.
+  - `UIFileDrop`: la etiqueta es el `Label` de shadcn y el input de archivo, el `Input` de shadcn con `sr-only`, igual que `UIFileField` (T3).
+  - `UIRepeatGroup`: `UIBox as="section"`.
+  - `UIChart` y `UIChartCard`: ver `008-graficas-carga-perezosa`.
+  - `UICommandPalette` se mueve a `organisms/` con los ítems y las etiquetas por props. `app/CommandPalette` sigue hasta T5, que lo borra.
+  - `useForm` queda en `shared/forms/` sin cambios de código.
+  - Helper `preferReducedMotion` del test de `UIChart`: el setup global define `matchMedia` como función simple, y el helper la espiaba sobre sí misma en la segunda llamada (recursión infinita). Ahora guarda la función base antes de espiarla y restaura los espías tras cada test.
+- **Descartadas**:
+  - `UIIconButton` para el cierre: su tooltip consume el Escape.
+  - `UIText` para el título de `UIChartCard` y de `UIFloatingToolbar`: cambia el nivel del encabezado y no reenvía `ref`, que el foco inicial necesita.
+  - `style={{ height }}` en el hueco de la gráfica: klinikae evita la prop `style` a propósito (ver `008-graficas-carga-perezosa`).
+- **Cómo revertir**: el commit de T4 (un commit por spec). Para una pieza, su archivo en `organisms/` y su test.
+- **Cómo comprobarla**: `bun run --cwd client test -- components/organisms forms` (17 archivos y 165 casos, con los átomos de gráfica) y `grep` de etiquetas nativas en `client/src/shared/components/organisms` (sin JSX).
+- **Pendiente**: la revisión visual de las celdas y del asa, en `docs/process/PENDING/008-revision-visual-organismos.md`.

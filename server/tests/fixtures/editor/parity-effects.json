@@ -1,0 +1,390 @@
+{
+  "sample_times": [
+    0.5,
+    1.5,
+    2.5
+  ],
+  "blend_modes": [
+    [
+      "normal",
+      "Normal"
+    ],
+    [
+      "multiply",
+      "Multiplicar"
+    ],
+    [
+      "screen",
+      "Trama"
+    ],
+    [
+      "overlay",
+      "Superponer"
+    ],
+    [
+      "darken",
+      "Oscurecer"
+    ],
+    [
+      "lighten",
+      "Aclarar"
+    ],
+    [
+      "add",
+      "Añadir"
+    ],
+    [
+      "difference",
+      "Diferencia"
+    ]
+  ],
+  "lut_paths": [
+    "media/luts/lut-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.cube",
+    "media/luts/lut-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cube"
+  ],
+  "doc": {
+    "version": 3,
+    "name": "Paridad de efectos",
+    "sample_rate": 48000,
+    "canvas": {
+      "width": 800,
+      "height": 450,
+      "fps": 24,
+      "background": "#101820"
+    },
+    "tracks": [
+      {
+        "id": "base",
+        "kind": "video",
+        "name": "Base",
+        "opacity": 1,
+        "hidden": false,
+        "locked": false
+      },
+      {
+        "id": "key",
+        "kind": "video",
+        "name": "Chroma",
+        "opacity": 1,
+        "hidden": false,
+        "locked": false
+      },
+      {
+        "id": "identity",
+        "kind": "video",
+        "name": "LUT de identidad",
+        "opacity": 1,
+        "hidden": false,
+        "locked": false
+      },
+      {
+        "id": "contrast",
+        "kind": "video",
+        "name": "LUT de contraste",
+        "opacity": 1,
+        "hidden": false,
+        "locked": false
+      },
+      {
+        "id": "blend",
+        "kind": "video",
+        "name": "Fusión",
+        "opacity": 1,
+        "hidden": false,
+        "locked": false
+      }
+    ],
+    "clips": [
+      {
+        "id": "base",
+        "track": "base",
+        "src": "parity-effects-base.png",
+        "src_in": 0,
+        "src_out": 24,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "speed": 1,
+        "media": "image",
+        "transform": {
+          "x": 0,
+          "y": 0,
+          "scale_x": 1,
+          "scale_y": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {}
+      },
+      {
+        "id": "key",
+        "track": "key",
+        "src": "parity-effects-chroma.png",
+        "src_in": 0,
+        "src_out": 24,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "speed": 1,
+        "media": "image",
+        "transform": {
+          "x": 0,
+          "y": 0,
+          "scale_x": 1,
+          "scale_y": 1,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {},
+        "chroma": {
+          "color": "#00ff00",
+          "similarity": 0.2,
+          "blend": 0.1
+        }
+      },
+      {
+        "id": "identity",
+        "track": "identity",
+        "src": "parity-red-alpha.png",
+        "src_in": 0,
+        "src_out": 24,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "speed": 1,
+        "media": "image",
+        "transform": {
+          "x": -220,
+          "y": -75,
+          "scale_x": 0.34,
+          "scale_y": 0.34,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {},
+        "color": {
+          "brightness": 0.03,
+          "contrast": 1.12,
+          "saturation": 1.15,
+          "gamma": 1,
+          "lut": "media/luts/lut-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.cube"
+        }
+      },
+      {
+        "id": "contrast",
+        "track": "contrast",
+        "src": "parity-red-alpha.png",
+        "src_in": 0,
+        "src_out": 24,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "speed": 1,
+        "media": "image",
+        "transform": {
+          "x": 220,
+          "y": -75,
+          "scale_x": 0.34,
+          "scale_y": 0.34,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {},
+        "color": {
+          "brightness": 0,
+          "contrast": 1,
+          "saturation": 1,
+          "gamma": 1,
+          "lut": "media/luts/lut-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cube"
+        }
+      },
+      {
+        "id": "blend",
+        "track": "blend",
+        "src": "parity-red-alpha.png",
+        "src_in": 0,
+        "src_out": 24,
+        "start": 0,
+        "fade_in": 0,
+        "fade_out": 0,
+        "speed": 1,
+        "media": "image",
+        "transform": {
+          "x": 0,
+          "y": 145,
+          "scale_x": 0.2,
+          "scale_y": 0.2,
+          "rotation": 0,
+          "opacity": 1,
+          "crop": {
+            "l": 0,
+            "t": 0,
+            "r": 0,
+            "b": 0
+          },
+          "anchor_x": 0.5,
+          "anchor_y": 0.5
+        },
+        "keyframes": {
+          "x": [
+            {
+              "t": 0.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 1.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 2.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 3.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 4.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 5.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 6.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 7.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 8.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 9.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 10.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 11.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 12.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 13.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 14.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 15.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 16.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 17.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 18.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 19.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 20.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 21.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 22.5,
+              "value": 0,
+              "ease": "linear"
+            },
+            {
+              "t": 23.5,
+              "value": 0,
+              "ease": "linear"
+            }
+          ]
+        },
+        "blend_mode": "normal"
+      }
+    ],
+    "markers": [],
+    "transitions": []
+  }
+}

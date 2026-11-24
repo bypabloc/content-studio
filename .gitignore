@@ -1,8 +1,53 @@
-.venv-*/
+# Sin `/` final en lo que `devtools worktree prepare` enlaza (venvs, modelos, motores): en POSIX el enlace es un
+# symlink, que git no trata como carpeta, y con `/` quedaría sin ignorar.
+.venv-*
 out/
 logs/
-models/
+var/
+models
 __pycache__/
 .vscode/
-narration/voz/prueba/
+# Rutas de datos del usuario, nuevas (spec 002, D-4): grabaciones, tomas, voces construidas y repos de motores.
+server/data/narration/reference/prueba/
+# Grabaciones de voz: nunca al repo (es público). Los .txt sí se versionan.
+server/data/narration/reference/**/*.wav
+server/data/narration/reference/**/*.m4a
+server/data/narration/reference/**/*.mp3
+server/data/narration/reference/**/*.flac
+# Ficha de cada perfil de voz (nombre y fecha): la escribe la app o move-data, no se versiona (spec 010, T9).
+server/data/narration/reference/**/profile.json
+# Voces libres construidas por `cli.py narration voces`: se regeneran desde catalog.json (el único que se versiona).
+server/data/narration/voices/*
+!server/data/narration/voices/catalog.json
+# Repos de motores que no son paquetes pip (código, venv y pesos). Ver server/data/narration/README.md §2.
+server/data/narration/engines
+# Rutas viejas, vigentes hasta que `move-data --apply` mueva los datos del checkout principal (spec 002, T9).
+# Sin estas reglas, git añadiría grabaciones, voces construidas y repos de motores al repo público.
+server/data/narration/voz/prueba/
+server/data/narration/voz/**/*.wav
+server/data/narration/voz/**/*.m4a
+server/data/narration/voz/**/*.mp3
+server/data/narration/voces/*
+!server/data/narration/voces/catalogo.json
+server/data/narration/motores
 tmp/
+# Grafo local de graphify (cada equipo lo genera con `graphify update .`) y worktrees que crea Claude Code.
+graphify-out/
+.claude/worktrees/
+.venv/
+.pytest_cache/
+.ruff_cache/
+# Datos de cobertura de cada corrida de pytest: sin esto, `worktree close` ve el árbol sucio.
+.coverage
+node_modules/
+
+# spec 005: client
+client/dist/
+client/coverage/
+client/src-tauri/target
+client/src-tauri/gen/
+# Muestras de 10 s por preset del buscador de Música (spec 011, D-3): se generan con la cola, no se versionan.
+# Sin `/` final: el enlace de `prepare` es un symlink en POSIX y con `/` no lo cubre (ver arriba).
+server/data/music/samples
+# Recursos del instalador que arma `python -m devtools bundle` (spec 022)
+client/src-tauri/bundle/

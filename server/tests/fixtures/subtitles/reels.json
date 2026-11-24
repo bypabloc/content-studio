@@ -1,0 +1,28 @@
+{
+  "play_res": [1080, 1920],
+  "style": {"font": "Montserrat ExtraBold", "size": 72, "bold": true, "color": "#FFFFFF", "outline_color": "#000000", "outline": 3, "shadow": 0, "back_box": null, "position": "middle", "margin_v": 0, "uppercase": true, "mode": "social", "words_per_cue": 2, "highlight_color": "#FFD400", "pop": true},
+  "doc": {
+    "version": 1,
+    "source": {"path": "vertical.mp4", "kind": "file"},
+    "language": "es",
+    "cues": [
+      {"id": 1, "start": 0.5, "end": 2.25, "text": "Hola a todos, bienvenidos al canal",
+       "words": [
+         {"start": 0.5, "end": 0.8, "text": "Hola", "keyword": null},
+         {"start": 0.8, "end": 1.0, "text": "a", "keyword": null},
+         {"start": 1.0, "end": 1.4, "text": "todos,", "keyword": null},
+         {"start": 1.4, "end": 1.7, "text": "bienvenidos", "keyword": {"color": "#FF5555", "emoji": "🔥"}},
+         {"start": 1.7, "end": 1.95, "text": "al", "keyword": null},
+         {"start": 1.95, "end": 2.25, "text": "canal", "keyword": null}
+       ]},
+      {"id": 2, "start": 2.5, "end": 4.0, "text": "Hoy {cosas} nuevas",
+       "words": [
+         {"start": 2.5, "end": 2.9, "text": "Hoy", "keyword": null},
+         {"start": 2.9, "end": 3.3, "text": "{cosas}", "keyword": null},
+         {"start": 3.3, "end": 4.0, "text": "nuevas", "keyword": null}
+       ]}
+    ],
+    "style": {},
+    "tracks": {}
+  }
+}

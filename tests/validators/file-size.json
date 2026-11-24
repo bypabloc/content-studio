@@ -1,0 +1,31 @@
+{
+  "exclude": [
+    "**/node_modules/**",
+    "server/data/**",
+    "**/*.lock",
+    "uv.lock",
+    "bun.lock",
+    "client/src/shared/api/schema.d.ts",
+    "client/src/shared/components/shadcn/**"
+  ],
+  "categories": [
+    {
+      "name": "instructions",
+      "include": [".agents/rules/**", ".claude/rules/**", "**/AGENTS.md"],
+      "extensions": [".md"],
+      "limits": {"lines": 300, "bytes": 25000, "lineLength": 400}
+    },
+    {
+      "name": "tests",
+      "include": ["**/tests/**", "**/test_*.py", "**/*.test.ts", "**/*.test.tsx", "**/*.e2e.ts"],
+      "extensions": [".py", ".ts", ".tsx", ".js"],
+      "limits": {"lines": 800, "bytes": 60000, "lineLength": 300}
+    },
+    {
+      "name": "source",
+      "include": ["**"],
+      "extensions": [".py", ".ts", ".tsx", ".js", ".mjs", ".rs", ".css", ".sh", ".sql"],
+      "limits": {"lines": 300, "bytes": 40000, "lineLength": 300}
+    }
+  ]
+}

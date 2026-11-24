@@ -1,0 +1,22 @@
+[
+  "devtools/agent_context.py",
+  "devtools/app_check/launch.py",
+  "devtools/gpu_turn.py",
+  "devtools/rules.py",
+  "devtools/spelling.py",
+  "server/src/content_studio/__main__.py",
+  "server/src/content_studio/common/ffmpeg.py",
+  "server/src/content_studio/common/process.py",
+  "server/src/content_studio/gpu_lock.py",
+  "server/src/content_studio/music/evaluation.py",
+  "server/src/content_studio/music/music_main.py",
+  "server/src/content_studio/narration/audio.py",
+  "server/src/content_studio/narration/evaluation/review.py",
+  "server/src/content_studio/narration/metadata.py",
+  "server/src/content_studio/narration/pipeline.py",
+  "server/src/content_studio/narration/reference.py",
+  "server/src/content_studio/narration/tts.py",
+  "server/src/content_studio/narration/voices/build.py",
+  "server/src/content_studio/narration/voices/main.py",
+  "server/src/content_studio/narration/voices/sources.py"
+]

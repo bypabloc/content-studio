@@ -1,0 +1,5 @@
+{
+  "take": 1,
+  "path": "server/data/narration/reference/ana/takes/neutral/1.wav",
+  "check": { "verdict": "ok", "reasons": [], "notes": [], "messages": [], "measures": {} }
+}

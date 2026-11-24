@@ -1,0 +1,9 @@
+{
+  "cases": [
+    {"id": "quarter", "clip": {"src_in": 1, "src_out": 5, "start": 3, "speed": 0.25}, "duration": 16, "timeline_time": 3.5, "source_time": 1.125, "atempo": ["atempo=0.5", "atempo=0.5"]},
+    {"id": "half", "clip": {"src_in": 1, "src_out": 5, "start": 3, "speed": 0.5}, "duration": 8, "timeline_time": 3.5, "source_time": 1.25, "atempo": ["atempo=0.5"]},
+    {"id": "normal", "clip": {"src_in": 1, "src_out": 5, "start": 3, "speed": 1}, "duration": 4, "timeline_time": 3.5, "source_time": 1.5, "atempo": []},
+    {"id": "double", "clip": {"src_in": 1, "src_out": 5, "start": 3, "speed": 2}, "duration": 2, "timeline_time": 3.5, "source_time": 2, "atempo": ["atempo=2"]},
+    {"id": "quadruple", "clip": {"src_in": 1, "src_out": 5, "start": 3, "speed": 4}, "duration": 1, "timeline_time": 3.5, "source_time": 3, "atempo": ["atempo=2", "atempo=2"]}
+  ]
+}

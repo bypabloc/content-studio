@@ -1,0 +1,4 @@
+1
+00:00:00,000 --> 00:00:03,550
+word00 word01 word02 word03 word04 word05
+word06 word07 word08 word09 word10 word11

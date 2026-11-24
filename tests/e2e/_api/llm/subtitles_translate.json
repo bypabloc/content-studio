@@ -1,0 +1,21 @@
+{
+  "language": "pt",
+  "cues": [
+    {
+      "id": 1,
+      "start": 0,
+      "end": 1.2,
+      "text": "olá a todos",
+      "original": "hola a todos",
+      "flag": null
+    },
+    {
+      "id": 2,
+      "start": 1.4,
+      "end": 2.4,
+      "text": "boa tarde",
+      "original": "buenas tardes",
+      "flag": null
+    }
+  ]
+}

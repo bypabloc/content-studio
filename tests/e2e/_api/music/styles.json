@@ -1,0 +1,24 @@
+{
+  "styles": [
+    {
+      "key": "lofi-chill",
+      "category": "lofi",
+      "musical_key": "C Major",
+      "bpm": 80,
+      "time_signature": "4",
+      "caption": "lo-fi hip hop, chill",
+      "has_sample": true,
+      "sample": "C:/fake/out/music/samples/lofi-chill.wav"
+    },
+    {
+      "key": "corporate-minimal",
+      "category": "corporate",
+      "musical_key": "G Major",
+      "bpm": 100,
+      "time_signature": "4",
+      "caption": "minimal corporate, soft piano, subtle strings, clean, trustworthy, background, no vocals",
+      "has_sample": false,
+      "sample": null
+    }
+  ]
+}

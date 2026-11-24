@@ -1,0 +1,779 @@
+{
+  "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [enfasis]importante[/enfasis] para todos.\n\n[pausa 1.2]\nPensé que era fácil… pero no lo era. [risa] Y aun así seguimos adelante.\n\n[estilo: dramatica] La noche cayó sobre el pueblo y nadie dijo nada.\n[emocion: miedo 0.4] Algo se movía entre los árboles — y se acercaba despacio.\n\n[emocion: alegre] Al final todo salió bien, y volvimos a casa con una sonrisa.\n",
+  "style": "expert",
+  "segments": [
+    {
+      "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+      "pause": 1.2,
+      "style": "expert",
+      "emotion": null,
+      "notices": []
+    },
+    {
+      "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+      "pause": 0.6,
+      "style": "expert",
+      "emotion": null,
+      "notices": []
+    },
+    {
+      "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+      "pause": 0.25,
+      "style": "dramatic",
+      "emotion": null,
+      "notices": []
+    },
+    {
+      "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+      "pause": 0.6,
+      "style": "dramatic",
+      "emotion": [
+        "fear",
+        0.4
+      ],
+      "notices": []
+    },
+    {
+      "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+      "pause": 0.0,
+      "style": "dramatic",
+      "emotion": [
+        "happy",
+        0.6
+      ],
+      "notices": []
+    }
+  ],
+  "tags": [],
+  "models": {
+    "voxcpm2": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "hifi",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "hifi",
+          "notices": [
+            "voxcpm2 does not support [laugh]; removed"
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "hifi",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "(tense and fearful)Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": null,
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "controllable",
+          "notices": [
+            "voxcpm2 does not control emotion intensity; ignored"
+          ]
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "(cheerful and energetic)Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "dramatic.wav",
+          "text_ref": null,
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "controllable",
+          "notices": []
+        }
+      ],
+      "stdout": "",
+      "engine_params": {
+        "cfg_value": 2.0,
+        "inference_timesteps": 10,
+        "retry_badcase_max_times": 1
+      }
+    },
+    "cosyvoice3": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo <strong>importante</strong> para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "zero_shot",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. [laughter] Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "zero_shot",
+          "notices": []
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "zero_shot",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": {
+            "instruction": "Please speak in a fearful tone."
+          },
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "instruct2",
+          "notices": [
+            "cosyvoice3 does not control emotion intensity; ignored"
+          ]
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": {
+            "instruction": "Please speak in a cheerful and energetic tone."
+          },
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "instruct2",
+          "notices": []
+        }
+      ],
+      "stdout": "",
+      "engine_params": {}
+    },
+    "qwen-1.7b": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": [
+            "qwen-1.7b does not support [laugh]; removed"
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "reference",
+          "notices": []
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "energetic.wav",
+          "text_ref": "Transcripción de energetic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "reference",
+          "notices": []
+        }
+      ],
+      "stdout": "",
+      "engine_params": {}
+    },
+    "qwen-0.6b": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": [
+            "qwen-0.6b does not support [laugh]; removed"
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "reference",
+          "notices": []
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "energetic.wav",
+          "text_ref": "Transcripción de energetic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "reference",
+          "notices": []
+        }
+      ],
+      "stdout": "",
+      "engine_params": {}
+    },
+    "chatterbox": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": [
+            "chatterbox does not support [laugh]; removed"
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.567,
+            "cfg_weight": 0.367
+          },
+          "emo": null,
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4,
+            "exaggeration": 0.567,
+            "cfg_weight": 0.367
+          },
+          "mode": "params",
+          "notices": []
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.7,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6,
+            "exaggeration": 0.7,
+            "cfg_weight": 0.3
+          },
+          "mode": "params",
+          "notices": []
+        }
+      ],
+      "stdout": "Notice: expert.wav lasts 12.0 s; for chatterbox use up to 10 s.\nNotice: dramatic.wav lasts 12.0 s; for chatterbox use up to 10 s.\n",
+      "engine_params": {}
+    },
+    "omnivoice": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil, pero no lo era. [laughter] Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": [
+            "omnivoice: \"…\" mid-sentence changed to \",\""
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "reference",
+          "notices": []
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "energetic.wav",
+          "text_ref": "Transcripción de energetic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "reference",
+          "notices": []
+        }
+      ],
+      "stdout": "Notice: expert.wav lasts 12.0 s; for omnivoice use up to 10 s.\nNotice: dramatic.wav lasts 12.0 s; for omnivoice use up to 10 s.\nNotice: energetic.wav lasts 12.0 s; for omnivoice use up to 10 s.\n",
+      "engine_params": {
+        "num_step": 32,
+        "guidance_scale": 2.0
+      }
+    },
+    "indextts": {
+      "blocks": [
+        {
+          "text": "Hola, bienvenidos al canal. Hoy vamos a ver algo [emphasis]importante[/emphasis] para todos.",
+          "style": "expert",
+          "send": "Hola, bienvenidos al canal. Hoy vamos a ver algo importante para todos.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Pensé que era fácil… pero no lo era. [laugh] Y aun así seguimos adelante.",
+          "style": "expert",
+          "send": "Pensé que era fácil… pero no lo era. Y aun así seguimos adelante.",
+          "ref": "expert.wav",
+          "text_ref": "Transcripción de expert.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.5,
+            "cfg_weight": 0.5
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": [
+            "indextts does not support [laugh]; removed"
+          ]
+        },
+        {
+          "text": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "style": "dramatic",
+          "send": "La noche cayó sobre el pueblo y nadie dijo nada.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": null,
+          "emotion": null,
+          "mode": "cloning",
+          "notices": []
+        },
+        {
+          "text": "Algo se movía entre los árboles — y se acercaba despacio.",
+          "style": "dramatic",
+          "send": "Algo se movía entre los árboles, y se acercaba despacio.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": {
+            "clip": "emotions/fear.wav",
+            "alpha": 0.4
+          },
+          "emotion": {
+            "name": "fear",
+            "intensity": 0.4
+          },
+          "mode": "clip",
+          "notices": [
+            "indextts: \"—\" changed to \",\" (the model reads it as \"minus\")"
+          ]
+        },
+        {
+          "text": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "style": "dramatic",
+          "send": "Al final todo salió bien, y volvimos a casa con una sonrisa.",
+          "ref": "dramatic.wav",
+          "text_ref": "Transcripción de dramatic.",
+          "p": {
+            "speed": 1.0,
+            "temperature": 0.7,
+            "exaggeration": 0.6,
+            "cfg_weight": 0.3
+          },
+          "emo": {
+            "vector": [
+              0.75,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "alpha": 0.6
+          },
+          "emotion": {
+            "name": "happy",
+            "intensity": 0.6
+          },
+          "mode": "vector",
+          "notices": []
+        }
+      ],
+      "stdout": "",
+      "engine_params": {
+        "max_text_tokens_per_segment": 60
+      }
+    }
+  }
+}

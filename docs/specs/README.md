@@ -1,0 +1,12 @@
+# Specs (planes de implementación)
+
+Planes efímeros: cada spec vive aquí mientras se implementa y su último commit borra la carpeta y su fila. Formato: [`.agents/rules/plan-format.md`](../../.agents/rules/plan-format.md). Plantilla: [`_plantilla/`](_plantilla/README.md) (`cp -r docs/specs/_plantilla docs/specs/<NN>-<slug>`; no lleva fila en esta tabla). Redactar: skill `crear-spec`; implementar: `execute-spec`; varias en secuencia: `run-specs`.
+
+El estado del proyecto y lo ya implementado viven en [`docs/process/`](../process/README.md).
+
+| Spec | Tipo | Escala | Rama | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| [025-033-integraciones](025-033-integraciones/README.md) (lote 025–033) | chore · feature | Large | una por spec | las 9 redactadas, PEN |
+| [034-039-hablantes](034-039-hablantes/README.md) (lote 034–039) | feature · chore | Large | una por spec | las 6 redactadas, PEN |
+
+El próximo número libre es **040**. Los números no se reutilizan: una spec cerrada deja su número en el historial de git.

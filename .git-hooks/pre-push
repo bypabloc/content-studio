@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+#
+# pre-push - content-studio (adaptado de klinikae)
+#
+# Nunca push ni borrado de main o dev (todo entra por PR); el destino tiene que ser una rama de trabajo.
+# Los rulesets de GitHub ya lo rechazan: esto avisa antes de esperar al remoto.
+# Después, test-runner sobre lo que sube (spec 003, D-6): guard-tdd (no quedan tests efímeros en tdd/) y typecheck
+# sobre el changeset `unmerged`. `unit` (pytest completo) va en la CI: los tests de hooks hacen push y, dentro del pre-push,
+# se recursaría.
+
+set -euo pipefail
+HOOKS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+PREFIXES='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
+ZERO=0000000000000000000000000000000000000000
+while read -r _local_ref local_sha remote_ref _remote_sha; do
+  target="${remote_ref#refs/heads/}"
+  case "$target" in
+    main|dev)
+      echo "[pre-push] Direct push or delete of '$target' is forbidden: it must go through a pull request." >&2
+      exit 1
+      ;;
+  esac
+  if [ "$local_sha" != "$ZERO" ] && ! [[ "$target" =~ ^($PREFIXES)/[a-z0-9][a-z0-9-]*$ ]]; then
+    echo "[pre-push] '$target' is not a valid work branch (prefixes: ${PREFIXES//|/, })." >&2
+    exit 1
+  fi
+done
+
+cd "$(git rev-parse --show-toplevel)"
+echo "[pre-push] test-runner: guard-tdd, typecheck (unmerged)"
+PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=guard-tdd,typecheck --git-mode=unmerged

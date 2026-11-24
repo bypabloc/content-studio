@@ -1,0 +1,91 @@
+"""main() de narration tts: valida en el python del usuario, se relanza en el venv del motor y narra cada guion.
+
+Directo: PYTHONPATH=server/src python -m content_studio.narration.tts --model voxcpm2 --voice karen-savage --text "..."
+Flags y formato del guion: content_studio/narration/parser.py.
+"""
+
+from __future__ import annotations
+
+import argparse
+import random
+
+from content_studio import paths
+from content_studio.common import process, progress
+from content_studio.narration import profiles
+from content_studio.narration.metadata import notices_voice, save_metadata
+from content_studio.narration.parser import ENGINES, STYLES, approved_voices, build_parser
+from content_studio.narration.pipeline import batch_auto, evaluate, narrate
+from content_studio.narration.script import plan, scripts, warn_overwrite
+from content_studio.narration.takes import regenerate_take
+
+
+def regenerate_main(a: argparse.Namespace) -> None:
+    """`--from-script`: rehace el bloque --only de la toma y la escribe como toma nueva en --output."""
+    e = ENGINES[a.model]
+    process.use_venv(e.path_venv(), 'server/data/narration/README.md', module='content_studio.narration.tts')
+    progress.emit(0, 'loading model')
+    engine = e.create()
+    seed = a.seed if a.seed is not None else random.randrange(2**31)
+    print(f'Seed: {seed}')
+    save_metadata(engine, regenerate_take(engine, a.from_script, a.only, seed, a.output))
+
+
+def main() -> None:
+    """Entrada de `python -m content_studio.narration.tts`."""
+    ap = build_parser()
+    a = ap.parse_args()
+    if a.retries and not a.evaluate:
+        ap.error('--retries needs --evaluate')
+    if a.from_script:
+        if a.output is None or a.only is None:
+            ap.error('--from-script needs --only and --output (the job folder)')
+        return regenerate_main(a)
+    if a.voice:
+        sheet = approved_voices(STYLES)[a.voice]
+        if sheet['language'] != a.language:
+            ap.error(f'la voz {a.voice} es en "{sheet["language"]}": usa --language {sheet["language"]}')
+        ref = paths.voices_dir() / a.voice
+    elif profiles.exists(a.profile):
+        ref = profiles.folder(a.profile)
+    else:
+        ap.error(f'the profile {a.profile} does not exist in server/data/narration/reference/')
+
+    jobs = plan(a, scripts(a))  # valida estilos y rutas antes de relanzar y de cargar el modelo
+
+    e = ENGINES[a.model]
+    # Desde aquí corre en el venv del motor: los avisos se imprimen una sola vez.
+    process.use_venv(e.path_venv(), 'server/data/narration/README.md', module='content_studio.narration.tts')
+    if a.voice:
+        notices_voice(a.voice, approved_voices(STYLES)[a.voice])
+    warn_overwrite(jobs)
+
+    import torch
+
+    progress.emit(0, 'loading model')
+    engine = e.create()
+    batch = a.batch or (batch_auto(torch.cuda.mem_get_info()[0] / 2**30, e.weights) if e.batch else 1)
+    seed = a.seed if a.seed is not None else random.randrange(2**31)
+    print(f'Seed: {seed}')
+    if not e.commercial:
+        print(f'Notice: {a.model} has a non-commercial license ({e.license}). Personal use only.')
+    elif 'academic' in e.license:
+        print(
+            f'Notice: {a.model} is Apache-2.0, but its model card says "for academic purposes only" (unclear). '
+            'Ver docs/research/voicestudio-narracion/07.'
+        )
+
+    results = [
+        narrate(engine, text, style, ref, output, batch, seed, language=a.language, master=a.master, lufs=a.lufs)
+        for text, style, output in jobs
+    ]
+
+    if a.evaluate:
+        evaluate(engine, results, batch, seed, a.retries, a.language)
+    elif engine.suggest_evaluate:
+        print(f'Tip: use --evaluate with {a.model}')
+    for g in results:
+        save_metadata(engine, g)
+
+
+if __name__ == '__main__':
+    main()

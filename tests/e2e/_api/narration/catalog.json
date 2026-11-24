@@ -1,0 +1,11 @@
+{
+  "engines": [
+    { "id": "voxcpm2", "license": "Apache-2.0", "commercial": true, "installed": true, "recommended": true, "note": "", "batch": false },
+    { "id": "omnivoice", "license": "CC-BY-NC-4.0", "commercial": false, "installed": true, "recommended": false, "note": "", "batch": true }
+  ],
+  "styles": [
+    { "id": "expert", "recommended": true },
+    { "id": "dramatic", "recommended": false }
+  ],
+  "voices": [{ "id": "yesid", "language": "es" }]
+}

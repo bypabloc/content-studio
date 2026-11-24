@@ -1,0 +1,16 @@
+[
+  {
+    "engine": "qwen-0.6b",
+    "family": "narration",
+    "size_gb": 2,
+    "vram_gb": 3.5,
+    "cpu": true,
+    "license": "Apache-2.0",
+    "commercial": true,
+    "status": "missing",
+    "owner": null,
+    "size_bytes": 0,
+    "job_id": null,
+    "verification": null
+  }
+]

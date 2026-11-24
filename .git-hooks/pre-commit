@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# pre-commit - content-studio (adaptado de klinikae)
+#
+# 1. Rama de trabajo con prefijo válido: nunca commits en main ni dev.
+# 2. Nada de salidas, modelos, venvs ni audio en el staging (el repo es público: las voces no se suben).
+# 3. test-runner sobre lo staged (spec 003, D-6): lint (ruff), spelling (cspell) y validators (tamaño). `unit` (pytest
+#    completo con cobertura) va en pre-push y en la CI: los tests del espejo ejecutan este hook, y dentro del pre-commit
+#    se recursaría.
+# 4. Si hay instrucciones de agentes staged: agent-context y rules (devtools).
+#
+# Activación: git config core.hooksPath .git-hooks. Si falla, NO uses --no-verify: corrige.
+
+set -euo pipefail
+# devtools sale del checkout de este hook, no del repo del commit (los tests de hooks commitean en repos temporales).
+HOOKS_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$(git rev-parse --show-toplevel)"
+
+# Misma lista que DEV_PREFIXES en .github/workflows/origen-pr.yml y .claude/rules/git-workflow.md.
+PREFIXES='feature|fix|refactor|docs|test|chore|ci|perf|style|experiment|release'
+BRANCH="$(git branch --show-current 2>/dev/null || true)"
+if ! [[ "$BRANCH" =~ ^($PREFIXES)/[a-z0-9][a-z0-9-]*$ ]]; then
+  echo "[pre-commit] Branch '$BRANCH' cannot take commits. Create one from dev: git switch -c feature/<kebab-name>" >&2
+  echo "[pre-commit] Prefixes: ${PREFIXES//|/, }" >&2
+  exit 1
+fi
+
+STAGED="$(git diff --cached --name-only --diff-filter=ACMR)"
+FORBIDDEN="$(grep -Ei '^(out|logs|models|tmp)/|^server/data/music/models/|^server/data/narration/engines/|(^|/)\.venv|\.(wav|mp3|m4a|flac|ogg|safetensors|ckpt|pt|bin|onnx)$' <<<"$STAGED" || true)"
+if [ -n "$FORBIDDEN" ]; then
+  echo "[pre-commit] Files that are not versioned (outputs, models, venvs or audio). Unstage them with: git restore --staged <file>" >&2
+  echo "$FORBIDDEN" >&2
+  exit 1
+fi
+
+echo "[pre-commit] test-runner: lint, spelling, validators, i18n (staged)"
+PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=lint,spelling,validators,i18n --git-mode=staged
+
+# Gates del client cuando hay cambios en client/ (spec 005, D-9). budget y e2e corren en la CI (calidad.yml).
+if grep -q '^client/' <<<"$STAGED"; then
+  echo "[pre-commit] test-runner: client-lint, client-typecheck, client-unit, ui-structure"
+  PYTHONPATH="$HOOKS_ROOT" uv run --no-project python -m devtools test-runner --type=client-lint,client-typecheck,client-unit,ui-structure
+fi
+
+# Agent instructions: size of what each agent loads and .agents/ <-> .claude/ sync (agent-config-testing.md).
+if grep -Eq '^AGENTS\.md$|^CLAUDE(\.local)?\.md$|^\.claude/(rules|skills)/|^\.agents/(rules|skills)/' <<<"$STAGED"; then
+  echo "[pre-commit] agent-context + rules"
+  PYTHONPATH=server/src uv run --no-project python -m devtools agent-context >/dev/null
+  PYTHONPATH=server/src uv run --no-project python -m devtools rules >/dev/null
+fi
+
+echo "[pre-commit] OK"

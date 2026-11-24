@@ -29,19 +29,22 @@ es la de otra cuenta y el push falla con "Could not read from remote repository"
 | `experiment/` | Pruebas exploratorias (por ejemplo, un modelo nuevo) |
 | `release/` | Preparar una versión antes de pasar a `main` |
 
-El separador `/` es obligatorio y después del prefijo tiene que venir un nombre en kebab-case: `feature/musica-cinematic`. Una rama sin prefijo válido no puede mergear (el check falla).
+El separador `/` es obligatorio y después del prefijo tiene que venir un nombre en kebab-case: `feature/musica-cinematic` (con spec, `feature/<NN>-<slug>`). Una rama sin prefijo válido no puede mergear (el check falla).
 
 ## Flujo
 
 ```bash
-git switch dev && git pull
-git switch -c feature/<nombre>
-# ... commits ...
+git fetch origin dev
+git worktree add ../content-studio-worktrees/<nombre> -b feature/<nombre> origin/dev   # worktrees.md
+python -m devtools worktree prepare <nombre>
+# ... commits en el worktree ...
 git push -u origin feature/<nombre>
-gh pr create --base dev --title "feat: ..." --body "..."
-gh pr merge --merge --delete-branch          # cuando el check pase
+gh pr create --base dev --title "feat: ..." --body "..."      # o /push-pr-verify
+gh pr checks <n> --watch && gh pr merge <n> --merge  # cuando los checks pasen
+git switch dev && git pull                                     # en el checkout principal
+python -m devtools worktree close <nombre>     # cierre obligatorio tras el merge
 
-# Publicar: PR de dev a main
+# Publicar si se pide: PR de dev a main; tag vX.Y.Z (docs/operations/release.md)
 gh pr create --base main --head dev --title "release: ..." --body "..."
 
 # Hotfix: fix/* desde main → PR a main. La sincronización a dev es automática (ver abajo)
@@ -49,18 +52,27 @@ git switch main && git pull && git switch -c fix/<nombre>
 gh pr create --base main --title "fix: ..." --body "..."
 ```
 
+Un cambio chico de una sola sesión puede hacerse en una rama del checkout principal sin worktree; con varias sesiones en paralelo, cada una en su worktree (`agentes-y-tokens.md` §4).
+
 **Sincronización automática main → dev**: cada push a `main` (el merge de un `fix/*` o de `dev`) dispara el workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml). Si `dev` está atrasada, el workflow abre el PR `main → dev` y lo deja en auto-merge, así que se mergea solo cuando pasa `origen-permitido`. **No abras ese PR a mano.** Si hay conflicto, el PR queda abierto, el workflow comenta en el PR los pasos para resolverlo y su run falla en rojo para avisar. Para resolverlo: crea `fix/resolver-sync-main-dev` desde `dev`, haz `git merge origin/main`, resuelve el conflicto y abre un PR a `dev`. Cuando ese PR entra, el PR automático se cierra solo (verificado con los PR #14 y #15). Usa el secret `SYNC_TOKEN` (token fine-grained con Contents y Pull requests en read/write): si vence, la sincronización falla con un error de autenticación y hay que renovar el token y el secret.
 
 ## Qué lo hace cumplir (en GitHub, no solo esta regla)
 
 - **Ruleset `proteger-main-dev`** (main y dev): exige PR, bloquea force-push y borrado. Sin excepciones, ni siquiera para administradores.
 - **Ruleset `main-solo-desde-dev-o-fix`** (main) y **`dev-solo-desde-prefijos`** (dev): exigen que pase el check `origen-permitido`.
-- **Workflow [.github/workflows/origen-pr.yml](../../.github/workflows/origen-pr.yml)**: es el check `origen-permitido`. Valida la rama de origen según el destino y rechaza los PRs de forks. **Si cambias los prefijos, cambia la lista `PREFIJOS_DEV` en el workflow y la tabla de esta regla.**
+- **Workflow [.github/workflows/origen-pr.yml](../../.github/workflows/origen-pr.yml)**: es el check `origen-permitido`. Valida la rama de origen según el destino y rechaza los PRs de forks. **Si cambias los prefijos, cambia la lista `PREFIJOS_DEV` en el workflow, `PREFIJOS` en `.git-hooks/pre-commit` y `pre-push`, y la tabla de esta regla.**
 - **Workflow [.github/workflows/sync-dev.yml](../../.github/workflows/sync-dev.yml)**: tras cada push a `main`, abre el PR `main → dev` en auto-merge (el repo tiene activado *Allow auto-merge*).
+- **Git hooks locales [.git-hooks/](../../.git-hooks/)** (se activan una vez por clon: `git config core.hooksPath .git-hooks`; el hook `SessionStart` avisa si faltan):
+  - `pre-commit`: rama con prefijo válido (nunca `main` ni `dev`), nada de `out/`, `logs/`, `tmp/`, `models/`, venvs, audio ni pesos en el staging, `test-runner` (lint, spelling, validators) sobre lo staged, y `agent-context` + `reglas` si hay instrucciones de agentes staged.
+  - `prepare-commit-msg`: borra las líneas de atribución de IA.
+  - `pre-push`: rechaza push o borrado de `main`/`dev` y destinos sin prefijo, y `guard-tdd` (tests efímeros en `*/tests/tdd/`) y `typecheck` sobre lo que sube.
+  - Si un hook falla, se corrige la causa (skill `fix-hooks`): **nunca** `--no-verify`. La lista de prefijos está también en estos hooks.
 
 ## Commits y PRs
 
-- Conventional Commits: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `ci:`, `perf:`, `style:`. El tipo coincide con el prefijo de la rama.
+- Conventional Commits en español: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `ci:`, `perf:`, `style:`. El tipo coincide con el prefijo de la rama.
 - **Sin atribución de IA** en commits, PRs ni comentarios (nada de `Co-Authored-By: Claude`, "Generated with…", etc.).
-- Antes de confirmar cambios: correr los doctests (`python3 -m doctest music/musica.py narration/tts.py`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
-- Commit, push y merge solo cuando el usuario lo pida.
+- Antes de confirmar cambios: correr `python -m devtools test-runner --type=all` (lo mismo que `calidad`) y no incluir nada de `out/`, `logs/`, `tmp/`, `models/` ni `.venv-*` (están gitignoreados).
+- El cuerpo del PR enlaza las fichas de `docs/process/WARNING/` y `PENDING/` que dejó el cambio, o dice que no dejó ninguna.
+- Un cambio pedido llega a `dev` sin preguntar: commit, push, PR y merge al pasar los checks.
+- **Todo merge va a `dev`**, con el cierre de la spec (`worktree close`). **Nunca a `main`**: ni PR `dev → main`, ni merge, ni push a `main` (tampoco `release/` ni hotfix `fix/*` a `main`) hasta que el usuario lo pida explícitamente. Cerrar una spec o un lote no lo autoriza.
