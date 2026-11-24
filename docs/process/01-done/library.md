@@ -27,6 +27,16 @@ Un solo lugar para lo que genera el estudio y lo que hay en las carpetas que el 
 - Pruebas: `server/tests/unit/src/content_studio/library/`, `client/tests/unit/src/features/library/` y `tests/e2e/library/`.
 - Decisiones: [020-indice-inicial](../WARNING/020-indice-inicial.md), [020-busqueda-en-disco](../WARNING/020-busqueda-en-disco.md), [020-send2trash](../WARNING/020-send2trash.md) y [020-editar-y-repetir](../WARNING/020-editar-y-repetir.md).
 
+## Verificación (2026-11-24)
+
+- Batería: `test-runner --type=all` (pytest 1944; `client-unit` con cobertura), `e2e` (exit 0), `budget`, `guard-tdd` y `-m local` (papelera real) pasan.
+- `app-check run` (smoke): exit 0, 26 capturas en claro y oscuro, también de la Biblioteca.
+- CLI: `studio library trash` sobre una referencia sale con 1 y `protected_path`; el archivo queda.
+- Real: `out/` del principal como carpeta vigilada, en solo lectura: 293 medios en 13 s, con duración en audio y video.
+- Espacio: el total de la carpeta coincide con `du -sb` (762 774 647 B); lo indexado suma 734 585 369 B (el resto no son medios).
+- `tmp/spec-020/videos`: 3 medios, uno borrado a mano queda faltante; renombrar, mover y papelera real sobre esos archivos.
+- Las salidas reales no tienen `script.json`: la búsqueda en el contenido se verificó con las pruebas de `text_search`.
+
 ## Historial
 
 - 2026-11-24: spec 020, Biblioteca de medios.

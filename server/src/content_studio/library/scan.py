@@ -59,7 +59,8 @@ def _files(folder: Path, ignored: set[str]) -> dict[str, os.stat_result]:
 
 def scan(conn: sqlite3.Connection, folder_id: int | None = None) -> dict[str, int]:
     """Escanea una carpeta o todas; devuelve cuántos ítems se agregaron, actualizaron y quedaron faltantes."""
-    ignored = set(settings.get(conn, IGNORED, []) or [])
+    stored = settings.get(conn, IGNORED, [])
+    ignored = {str(path) for path in stored} if isinstance(stored, list) else set()
     counts = {'added': 0, 'updated': 0, 'missing': 0}
     folders = [f for f in list_folders(conn) if folder_id is None or f['id'] == folder_id]
     for folder in folders:

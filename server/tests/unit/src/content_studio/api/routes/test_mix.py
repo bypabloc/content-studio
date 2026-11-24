@@ -140,6 +140,6 @@ def test_migration_six_creates_the_mix_projects_table(tmp_path):
     finally:
         conn.close()
 
-    assert version == 6
+    assert version == len(schema.MIGRATIONS)  # la 6 es mix_projects; las siguientes no la cambian
     assert set(columns) == {'id', 'name', 'doc_path', 'created_at', 'updated_at'}
     assert 'BLOB' not in columns.values()

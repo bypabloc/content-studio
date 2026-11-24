@@ -28,11 +28,11 @@ Un solo lugar para todo lo generado por el estudio y lo que haya en las carpetas
 
 | Fase | Qué | Estado |
 | :--- | :--- | :--- |
-| 1 | Índice: ítems desde trabajos y carpetas vigiladas, metadatos y miniaturas en caché de disco | PEN |
-| 2 | Búsqueda, filtros, etiquetas y proyectos | PEN |
-| 3 | Acciones: origen y repetir, mandar a…, renombrar, mover y papelera | PEN |
-| 4 | Espacio: resumen, lo más pesado y tomas no elegidas | PEN |
-| 5 | Client: Biblioteca en grilla y lista con detalle | PEN |
+| 1 | Índice: ítems desde trabajos y carpetas vigiladas, metadatos y miniaturas en caché de disco | IMP |
+| 2 | Búsqueda, filtros, etiquetas y proyectos | IMP |
+| 3 | Acciones: origen y repetir, mandar a…, renombrar, mover y papelera | IMP |
+| 4 | Espacio: resumen, lo más pesado y tomas no elegidas | IMP |
+| 5 | Client: Biblioteca en grilla y lista con detalle | IMP |
 
 ## Decisiones clave
 
@@ -43,5 +43,5 @@ Un solo lugar para todo lo generado por el estudio y lo que haya en las carpetas
 
 ## WARNING y PENDING
 
-* WARNING: `020-send2trash.md` (dependencia nueva) y `020-busqueda-en-disco.md` (límite de escala).
-* PENDING: ninguna.
+* WARNING: `020-send2trash.md` (dependencia nueva), `020-busqueda-en-disco.md` (límite de escala), `020-indice-inicial.md` (índice de lo anterior) y `020-editar-y-repetir.md` (qué precarga cada sección).
+* PENDING: [020-tipos-de-trabajo-en-cola](../../../process/PENDING/020-tipos-de-trabajo-en-cola.md). Cerró 017-e2e-runner y 018-app-check-cdp (e2e y app-check smoke con exit 0).

@@ -72,15 +72,15 @@ Tests en las rutas espejo, con cobertura ≥ 80 % por archivo.
 
 | Tarea | Archivos | AC | Depende de | Verify | Done |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| T1 | Índice desde trabajos | AC-1 | — | `unit` | [ ] |
-| T2 | Carpetas y miniaturas | AC-2 | T1 | `unit` | [ ] |
-| T3 | Búsqueda y filtros | AC-3, AC-9 | T1 | `unit` | [ ] |
-| T4 | Etiquetas y proyectos | AC-8 | T1 | `unit` | [ ] |
-| T5 | Acciones | AC-4, AC-5 | T1 | `unit`, `-m local` | [ ] |
-| T6 | Espacio | AC-6 | T1 | `unit` | [ ] |
-| T7 | Client | AC-7, AC-8, AC-9 | T2–T6 | `client-unit`, `budget` | [ ] |
-| T8 | e2e y docs | AC-7, AC-8 | T7 | `e2e` | [ ] |
-| T9 | Corrida real | — | T8 | verificación final | [ ] |
+| T1 | Índice desde trabajos | AC-1 | — | `unit` | [x] |
+| T2 | Carpetas y miniaturas | AC-2 | T1 | `unit` | [x] |
+| T3 | Búsqueda y filtros | AC-3, AC-9 | T1 | `unit` | [x] |
+| T4 | Etiquetas y proyectos | AC-8 | T1 | `unit` | [x] |
+| T5 | Acciones | AC-4, AC-5 | T1 | `unit`, `-m local` | [x] |
+| T6 | Espacio | AC-6 | T1 | `unit` | [x] |
+| T7 | Client | AC-7, AC-8, AC-9 | T2–T6 | `client-unit`, `budget` | [x] |
+| T8 | e2e y docs | AC-7, AC-8 | T7 | `e2e` | [x] |
+| T9 | Corrida real | — | T8 | verificación final | [x] |
 
 ## 4. Commits
 

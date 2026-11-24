@@ -45,4 +45,4 @@ Cerrar el Editor como NLE: clips de texto con estilo y animación, cambio de vel
 ## WARNING y PENDING
 
 * WARNING: `019-texto-rasterizado.md` (por qué no `drawtext`), `019-control-velocidad.md` (control en el Inspector), `019-fusion-con-alfa.md` (cadena de filtros) y `019-chroma-paridad.md` (fórmula y umbral).
-* PENDING: [017-e2e-runner](../../../process/PENDING/017-e2e-runner.md) (el runner no terminó en T7 ni T8) y [018-app-check-cdp](../../../process/PENDING/018-app-check-cdp.md) (WebView2 sin CDP).
+* PENDING: el runner e2e no terminó en T7 ni T8 (se cerró en la 020, con exit 0) y app-check sin CDP (se cerró en la 020).

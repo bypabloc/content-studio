@@ -140,15 +140,17 @@ def delete(conn: sqlite3.Connection, item_id: int, files: bool, whole_job: bool 
     """
     item = _item(conn, item_id)
     folder = None
-    if whole_job and item['job_id']:
-        folder = jobs.get(conn, item['job_id'])['output_dir']
+    job = jobs.get(conn, item['job_id']) if whole_job and item['job_id'] else None
+    if job is not None:
+        folder = job['output_dir']
     if files:
         target = Path(folder) if folder else Path(item['path'])
         check_unprotected(target)
         if target.exists():
             send_to_trash(target)
     if not files and ignore:
-        ignored = list(settings.get(conn, scan.IGNORED, []) or [])
+        stored = settings.get(conn, scan.IGNORED, [])
+        ignored = list(stored) if isinstance(stored, list) else []
         settings.set_value(conn, scan.IGNORED, [*ignored, item['path']])
     if folder:
         return conn.execute('DELETE FROM library_items WHERE job_id = ?', (item['job_id'],)).rowcount
