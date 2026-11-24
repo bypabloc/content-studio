@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from collections.abc import Callable
 
 from content_studio.llm import prompts
@@ -17,6 +18,7 @@ from content_studio.narration import script_lint
 MAX_CHANGE = 0.3
 MAX_TEXT = 50_000
 PARAGRAPH = re.compile(r'\n[ \t]*\n')
+WORD = re.compile(r'[^\W\d_]+')
 CONTENT = re.compile(r'[^\W\d_]{4,}')  # las palabras cortas (artículos, preposiciones, siglas deletreadas) no cuentan
 # Números escritos en letras de cuatro letras o más: no cuentan como palabras de contenido (regla 13).
 NUMBER_WORDS = frozenset(
@@ -121,6 +123,21 @@ def content_words(text: str) -> int:
     return sum(word.lower() not in NUMBER_WORDS for word in CONTENT.findall(text))
 
 
+def _plain(word: str) -> str:
+    return ''.join(c for c in unicodedata.normalize('NFD', word) if not unicodedata.combining(c))
+
+
+def lost_accents(original: str, revised: str) -> list[str]:
+    """Palabras con tilde (o eñe) del original que en la revisión aparecen sin ella (regla 12).
+
+    >>> lost_accents('Hoy te muestro cómo armo', 'Hoy te muestro como armo')
+    ['cómo']
+    """
+    after = {word.lower() for word in WORD.findall(revised)}
+    accented = {word.lower() for word in WORD.findall(original) if _plain(word) != word}
+    return sorted(word for word in accented if word not in after and _plain(word) in after)
+
+
 def problems(original: str, revised: str) -> list[str]:
     """Por qué se descarta un párrafo revisado; vacío si se acepta."""
     found = []
@@ -128,6 +145,9 @@ def problems(original: str, revised: str) -> list[str]:
         found.append('digits remain (rule 13)')
     if len(script_lint.lint(revised)) > len(script_lint.lint(original)):
         found.append('the lint got worse')
+    lost = lost_accents(original, revised)
+    if lost:
+        found.append(f'accents removed: {", ".join(lost)}')
     before, after = content_words(original), content_words(revised)
     if abs(after - before) > MAX_CHANGE * max(before, 1):
         found.append(f'content words changed from {before} to {after}')
