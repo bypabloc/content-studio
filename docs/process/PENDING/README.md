@@ -121,3 +121,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [031-convert-target](031-convert-target.md) | `new/media.convert` no cambia el formato del Conversor (solo rellena el archivo) | Antes de publicar 031 | Agente |
 | [031-inicio-logoff](031-inicio-logoff.md) | AC-8: que el server arranque al cerrar y abrir sesión (el valor `Run` ya se comprobó) | Antes de publicar 031 | Agente |
 | [031-desinstalar-carpeta](031-desinstalar-carpeta.md) | El desinstalador deja vacía la carpeta de instalación | Después de publicar 031 | Agente |
+| [032-033-fuera-del-lote](032-033-fuera-del-lote.md) | 032 (LAN) y 033 (verificación integral) quedan fuera del lote 025-031 según DECISIONS.md | Antes de empezar 032 | Usuario |

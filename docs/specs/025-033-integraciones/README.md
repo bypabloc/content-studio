@@ -4,6 +4,8 @@ Pedido del usuario (2026-11-24): que las apps de la PC, los LLM y agentes locale
 
 Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es una rama desde `origin/dev` y un PR a `dev`, en orden. La 033 hace la verificación integral y borra esta carpeta.
 
+Alcance: este lote cierra en la 031. `DECISIONS.md` (2026-11-24) dice «Lote completo 025-031»; la 032 y la 033 quedan PEN hasta que el usuario confirme que entran (ver [PENDING](../../process/PENDING/032-033-fuera-del-lote.md)).
+
 ## Specs
 
 | Spec | Qué | Tipo | Escala | Depende de | Estado |
