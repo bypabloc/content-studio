@@ -217,3 +217,5 @@ NBLCK
 UNLCK
 reconecta
 reconectar
+deeplink
+unminimize

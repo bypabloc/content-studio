@@ -118,3 +118,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [030-axe-language-intermitente](030-axe-language-intermitente.md) | La prueba de axe en en/pt de happy-language falla a veces en la suite completa | Después de publicar 030 | Agente |
 | [030-unidades-de-red](030-unidades-de-red.md) | Las carpetas de entrada no se probaron en OneDrive ni en una unidad de red | Antes de publicar | Usuario |
 | [030-appcheck-peaks-403](030-appcheck-peaks-403.md) | app-check registra 154 respuestas 403 de /media/peaks de las voces | Después de publicar 030 | Agente |
+| [031-convert-target](031-convert-target.md) | `new/media.convert` no cambia el formato del Conversor (solo rellena el archivo) | Antes de publicar 031 | Agente |

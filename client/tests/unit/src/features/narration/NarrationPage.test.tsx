@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NarrationPage } from '@/features/narration/NarrationPage';
 import { t } from '@/shared/i18n/t';
+import { setPrefill } from '@/shared/navigation/prefill';
 
 const { api } = vi.hoisted(() => ({ api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), del: vi.fn() } }));
 vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
@@ -182,4 +183,21 @@ describe('NarrationPage', () => {
     window.location.hash = '';
   });
 
+});
+
+describe('NarrationPage con un enlace (spec 031, AC-3)', () => {
+  it('WHEN llega new/narration THEN el texto y la voz quedan en la pantalla y no se encola nada', async () => {
+    setPrefill('narration', { text: 'Hola', voice: 'yesid', style: 'expert' });
+    const textarea = await renderPage();
+    await waitFor(() => expect(textarea.value).toBe('Hola'));
+    expect(api.put).toHaveBeenCalledWith(expect.stringContaining('select.narration.voice'), expect.objectContaining({ value: 'yesid' }));
+    expect(api.post).not.toHaveBeenCalledWith('/jobs', expect.anything());
+  });
+
+  it('WHEN el enlace no trae campos THEN la pantalla no cambia', async () => {
+    setPrefill('narration', {});
+    const textarea = await renderPage();
+    expect(textarea.value).toBe('');
+    expect(api.put).not.toHaveBeenCalledWith(expect.stringContaining('select.narration.voice'), expect.anything());
+  });
 });

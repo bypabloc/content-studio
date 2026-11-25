@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useEffect, useState } from 'react';
+import { usePrefillApply } from '@/shared/navigation/prefill';
 
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
@@ -65,6 +66,12 @@ export function MusicPage(): React.JSX.Element {
   const [mode, setMode] = useState<'presets' | 'free'>('presets');
   const [free, setFree] = useState<FreeText>({ caption: '', key: null, bpm: null, timeSignature: '4' });
   const [group, setGroup] = useState<string | null>(null);
+  // Un enlace `new/music` rellena el estilo y la duración; no encola nada (spec 031, AC-3).
+  usePrefillApply('music', (values) => {
+    if (values.style) setSelected([values.style]);
+    const seconds = Number(values.duration);
+    if (values.duration && Number.isFinite(seconds)) setDuration(seconds);
+  });
 
   const max = ENGINES.find((engine) => engine.id === model)?.max ?? 600;
   const selectedEngine = engines.data?.find((engine) => engine.engine === model);

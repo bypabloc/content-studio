@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { lazy, Suspense, useState } from 'react';
+import { useSetting } from '@/shared/hooks/useSetting';
+import { usePrefillApply } from '@/shared/navigation/prefill';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
@@ -36,6 +38,14 @@ export function NarrationPage() {
   const queryClient = useQueryClient();
   const choice = useNarrationChoice();
   const [text, setText] = useState('');
+  const [, setStoredVoice] = useSetting<string>('select.narration.voice', '');
+  const [, setStoredStyle] = useSetting<string>('select.narration.style', '');
+  // Un enlace `new/narration` trae texto, voz y estilo: la voz y el estilo quedan en el selector (spec 031, AC-3).
+  usePrefillApply('narration', (values) => {
+    if (values.text !== undefined) setText(values.text);
+    if (values.voice !== undefined) setStoredVoice(values.voice);
+    if (values.style !== undefined) setStoredStyle(values.style);
+  });
   // «Editar y repetir» (spec 020): el guion del trabajo de origen, una vez; motor, voz y estilo siguen en sus selectores.
   const source = useFromJob();
   const [appliedJob, setAppliedJob] = useState<number | null>(null);

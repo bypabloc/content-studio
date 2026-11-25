@@ -7,6 +7,8 @@ import { t } from '@/shared/i18n/t';
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn(async () => () => {}) }));
 const invokeMock = vi.mocked(invoke);
+/** Las llamadas a get_connection; el arranque en frío añade startup_argv (spec 031). */
+const connectionCalls = () => invokeMock.mock.calls.filter(([command]) => command === 'get_connection');
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
 
 function reply(body: unknown) {
@@ -73,7 +75,7 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: t('server.retry') }));
 
     expect(await screen.findByRole('heading', { name: 'Content Studio' })).toBeTruthy();
-    expect(invokeMock).toHaveBeenCalledTimes(2);
+    expect(connectionCalls()).toHaveLength(2);
   });
 
   it('si falla la preparación de la app instalada muestra el paso y Reintentar vuelve a prepararla', async () => {
@@ -86,6 +88,6 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: t('server.retry') }));
 
     expect(await screen.findByRole('heading', { name: 'Content Studio' })).toBeTruthy();
-    expect(invokeMock).toHaveBeenCalledTimes(2);
+    expect(connectionCalls()).toHaveLength(2);
   });
 });

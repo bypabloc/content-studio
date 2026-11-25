@@ -77,6 +77,8 @@ Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que
 | `tauri-plugin-window-state` | crate | 2.5.0 |  |
 | `tauri-plugin-updater` | crate | 2.14.1 |  |
 | `tauri-plugin-process` | crate | 2.4.0 |  |
+| `tauri-plugin-deep-link` | crate | 2.6.3 | enlaces `content-studio://` (spec 031, WARNING/031-enlaces-y-instancia-unica.md) |
+| `tauri-plugin-single-instance` | crate | 2.5.5 | instancia única con la feature `deep-link` (spec 031, WARNING/031-enlaces-y-instancia-unica.md) |
 
 ## Instalador y actualizaciones (spec 022)
 

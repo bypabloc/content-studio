@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { t } from '@/shared/i18n/t';
+import { setPrefill } from '@/shared/navigation/prefill';
 
 import { libraryItem } from './fixtures';
 
@@ -92,5 +93,21 @@ describe('LibraryPage (spec 020, D-6)', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: t('library.pages.next') }));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(expect.stringContaining('page=2')));
+  });
+});
+
+describe('LibraryPage con un enlace (spec 031, AC-2)', () => {
+  it('WHEN llega library/<id> THEN pide ese elemento para abrir su detalle', async () => {
+    serve();
+    setPrefill('library', { id: '1' });
+    wrap(<LibraryPage />);
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/library/1'));
+  });
+
+  it('WHEN llega job/<id> THEN pide el trabajo a la API', async () => {
+    serve();
+    setPrefill('library', { job: '42' });
+    wrap(<LibraryPage />);
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/jobs/42'));
   });
 });

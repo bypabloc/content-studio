@@ -16,7 +16,7 @@
 
 ## Objetivo
 
-Otra app o un script abre Content Studio en una sección, un trabajo o un formulario prellenado con un enlace `content-studio://`; desde el Explorador, «Enviar a» manda archivos a convertir, normalizar, limpiar o transcribir; y el server puede arrancar al iniciar sesión.
+Otra app o un script abre Content Studio en una sección, un trabajo o un formulario valores iniciales con un enlace `content-studio://`; desde el Explorador, «Enviar a» manda archivos a convertir, normalizar, limpiar o transcribir; y el server puede arrancar al iniciar sesión.
 
 ## Cuándo leer cada archivo
 
@@ -35,7 +35,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Enlaces `content-studio://`](fases/1-enlaces/plan-tdd.md) | C1, C2, C3 | AC-4, AC-5, AC-1, AC-2, AC-3 | - | PEN |
+| F1 | [Enlaces `content-studio://`](fases/1-enlaces/plan-tdd.md) | C1, C2, C3 | AC-4, AC-5, AC-1, AC-2, AC-3 | - | IMP |
 | F2 | [«Enviar a» desde el Explorador](fases/2-enviar-a/plan-tdd.md) | C4, C5 | AC-7, AC-6 | - | PEN |
 | F3 | [Inicio con Windows](fases/3-inicio/plan-tdd.md) | C6 | AC-8 | - | PEN |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
@@ -45,7 +45,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 Una línea por decisión; el motivo y la alternativa descartada van en [01 §3](01-contexto-y-decision.md#3-solución).
 
 1. **D-1**: Esquema `content-studio://` con `tauri-plugin-deep-link` y `tauri-plugin-single-instance` (feature `deep-link`) (agente, 2026-11-24).
-2. **D-2**: Un enlace nunca encola: navega o prellena, y el usuario confirma con el botón de la sección (agente, 2026-11-24).
+2. **D-2**: Un enlace nunca encola: navega o rellena, y el usuario confirma con el botón de la sección (agente, 2026-11-24).
 3. **D-3**: «Enviar a» con accesos directos en la carpeta `SendTo` creados por el hook NSIS; el menú moderno de Windows 11 queda fuera (agente, 2026-11-24).
 4. **D-4**: Inicio con Windows: valor `Run` de HKCU con `pythonw.exe -m content_studio api up`, apagado por defecto (agente, 2026-11-24).
 
