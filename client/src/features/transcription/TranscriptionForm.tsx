@@ -89,7 +89,7 @@ export function TranscriptionForm({ onQueued }: { onQueued: (jobId: number) => v
         onChange={setSpeakers}
       />
       {!speakersAvailable ? (
-        <UILink href="#/engines" variant="inline">
+        <UILink href="#/engines" variant="inline" className="underline">
           {t('transcription.diarize.engines')}
         </UILink>
       ) : null}
