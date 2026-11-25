@@ -14,7 +14,7 @@ from typing import Any
 DIRECTORY = Path(__file__).with_name('recipes')
 ENGINE = re.compile(r'[a-z0-9]+(?:[.-][a-z0-9]+)*')
 COMMIT = re.compile(r'[0-9a-f]{40}')
-PYTHON = re.compile(r'3\.(?:10|11|12)(?:\.\d+)?')
+PYTHON = re.compile(r'3\.(?:1[0-5])(?:\.\d+)?')
 MODULE = re.compile(r'[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*')
 HF_REPO = re.compile(r'[\w.-]+/[\w.-]+')
 SHA256 = re.compile(r'[0-9a-f]{64}')

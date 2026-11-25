@@ -1,0 +1,8 @@
+# 026: cosyvoice3 queda en Python 3.11 (pyworld y grpcio de su requirements no tienen rueda cp312)
+
+- **Contexto**: CosyVoice (commit `074ca6d`) documenta Python 3.10 y su `requirements.txt` fija `pyworld==0.3.4`, `grpcio==1.57.0`, `numpy==1.26.4` y `onnxruntime==1.18.0` (Windows). Para Windows, `pyworld` y `grpcio` solo tienen ruedas hasta `cp311`, así que 3.11 es el techo con esos pines. La receta anterior no instalaba: el `onnxruntime` del requirements chocaba con `onnxruntime==1.23.2` y el import de `transformers` fallaba por la ruta (262 caracteres, límite de 260 en Windows, en la carpeta de prueba).
+- **Elegida**: Python 3.11 con torch 2.11.0+cu128 y torchaudio 2.11.0+cu128; `onnxruntime` se excluye del requirements y se instala 1.23.2 (la versión más nueva); la carpeta de motores de la prueba pasa a `tmp/spec-026/e` (ajuste `storage.engines` de la base aislada). Instalación y salida corta verificadas: 1,94 s, 24 kHz mono, -16,4 LUFS, pico -1,5 dBFS.
+- **Descartadas**: 3.10 (es el piso de CosyVoice, no su techo: 3.11 instala y genera); 3.12 o más (`pyworld` y `grpcio` pinados no tienen rueda); mantener `onnxruntime` 1.18.0 del upstream (choca con la receta y es más viejo).
+- **Cómo revertir**: poner `"version": "3.10"` y volver a incluir `onnxruntime` en el requirements; la instalación con 3.10 sigue sin verificarse después del cambio de ruta.
+- **Cómo comprobarla**: `uv run studio engines install cosyvoice3` y `narration tts --model cosyvoice3`; el log del job no debe mostrar errores de import.
+- **Pendiente**: [026-reintentar-cosyvoice3](../PENDING/026-reintentar-cosyvoice3.md).

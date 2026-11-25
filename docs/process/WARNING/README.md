@@ -17,6 +17,12 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [026-cosyvoice3-version](026-cosyvoice3-version.md) | cosyvoice3 en 3.11: pyworld y grpcio sin rueda cp312; onnxruntime 1.23.2 | `main` |
+| [026-indextts-version](026-indextts-version.md) | indextts en 3.11 sin verificar: licencia bilibili pendiente | `main` |
+| [026-voxcpm2-version](026-voxcpm2-version.md) | voxcpm2 en 3.14: pyahocorasick sin rueda cp315 | `main` |
+| [026-qwen-0.6b-version](026-qwen-0.6b-version.md) | qwen-0.6b en 3.14: qwen-tts exige onnxruntime sin cp315 | `main` |
+| [026-qwen-1.7b-version](026-qwen-1.7b-version.md) | qwen-1.7b en 3.14: mismo caso que qwen-0.6b | `main` |
+| [026-omnivoice-version](026-omnivoice-version.md) | omnivoice en 3.14 sin verificar: falta aceptar la licencia CC-BY-NC | `main` |
 | [003-baselines](003-baselines.md) | Baselines de tamaño, espejo y cobertura: deuda registrada, no reglas nuevas | `main` |
 | [003-hooks-sin-unit](003-hooks-sin-unit.md) | pre-commit y pre-push sin `unit` (recursión con los tests de hooks) | `main` |
 | [003-mypy-overrides](003-mypy-overrides.md) | mypy con `ignore_errors` por módulo heredado | `main` |

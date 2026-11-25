@@ -6,9 +6,9 @@
   "cpu": false,
   "license": "MIT",
   "steps": [
-    {"kind": "python", "version": "3.12"},
+    {"kind": "python", "version": "3.15"},
     {"kind": "venv", "path": ".venv-chatterbox"},
-    {"kind": "pip", "packages": ["torch==2.6.0+cu126", "torchaudio==2.6.0+cu126"], "index": "https://download.pytorch.org/whl/cu126"},
+    {"kind": "pip", "packages": ["torch==2.14.1+cu130"], "index": "https://download.pytorch.org/whl/cu130"},
     {"kind": "pip", "packages": ["chatterbox-tts @ git+https://github.com/resemble-ai/chatterbox.git@ab55923c27757c90cfcc407baa57dc25a7d25217", "soundfile==0.14.0", "huggingface-hub==1.33.0"]},
     {"kind": "hf", "repo": "ResembleAI/chatterbox", "revision": "5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18", "into": "hf"},
     {"kind": "verify", "import": "chatterbox.mtl_tts"}

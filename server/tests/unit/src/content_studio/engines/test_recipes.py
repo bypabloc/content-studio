@@ -1,6 +1,7 @@
 """Recetas reproducibles y validadas, spec 012 AC-2."""
 
 import re
+from pathlib import Path
 
 import pytest
 
@@ -136,3 +137,19 @@ def test_ac1_rejects_an_invalid_download_or_run(step, message):
         del data['steps'][2]
     with pytest.raises(ValueError, match=message):
         recipes.validate(data)
+
+
+def test_ac1_every_engine_below_pinned_python_has_warning():
+    """AC-1 (spec 026): toda receta por debajo de .python-version tiene su ficha 026-<motor>-version."""
+    root = Path(__file__).resolve().parents[6]
+    pinned = tuple(int(part) for part in (root / '.python-version').read_text(encoding='utf-8').strip().split('.')[:2])
+    missing = []
+    for recipe in recipes.load_all():
+        if recipe.family != 'narration':  # F2: solo narración; la F3 quita este filtro
+            continue
+        python = next(step['version'] for step in recipe.steps if step['kind'] == 'python')
+        version = tuple(int(part) for part in python.split('.')[:2])
+        warning_file = root / 'docs/process/WARNING' / f'026-{recipe.engine}-version.md'
+        if version < pinned and not warning_file.is_file():
+            missing.append(recipe.engine)
+    assert missing == [], f'sin ficha 026-<motor>-version: {missing}'
