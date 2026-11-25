@@ -5,4 +5,4 @@
 - **Descartadas**: el menú moderno de Windows 11 (D-3, fuera de alcance); un mapeo en el servidor (una API nueva para cinco atajos); un inbox por acción (crearía carpetas).
 - **Cómo revertir**: quitar los macros `NSIS_HOOK_POSTINSTALL` y los `Delete` de `$SENDTO` en `hooks.nsh`, la rama `--send` de `parseExternal.ts`, `SEND_JOB` y las claves `sendto.*`.
 - **Cómo comprobarla**: `bun run --cwd client vitest run tests/unit/src/app/external` (valores por defecto, editor y el aviso con 2 encolados y 1 saltado). Con el instalador: `python -m devtools app-check run --binary=<exe> --scenario=031-sendto` (AC-6).
-- **Pendiente**: `$SENDTO` y `${MAINBINARYNAME}` se confirman al compilar el instalador, y el `options: {}` de `media.convert` con un trabajo real: ambos en la verificación final.
+- **Verificado**: el instalador compila con `$SENDTO` y `${MAINBINARYNAME}`; tras instalar hay cinco accesos y al desinstalar no queda ninguno (`app-check`, `031-sendto`). Con la app abierta, `--send convert-mp3` con tres WAV encola tres trabajos (`031-send-jobs`).

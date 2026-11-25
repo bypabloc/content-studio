@@ -11,5 +11,4 @@
   líneas de `lib.rs` (plugins, `mod external` y los comandos).
 - **Cómo comprobarla**: `cargo test --manifest-path client/src-tauri/Cargo.toml external` (3 pruebas) y
   `uv run pytest tests/validators/test_pins.py` (la tabla de `frontend-stack.md` coincide con los manifiestos).
-- **Pendiente**: que el instalador registre el esquema `content-studio` en Windows se comprueba en la verificación final
-  (`03-verificacion-final.md`), no aquí.
+- **Verificado**: tras instalar, `HKCU\Software\Classes\content-studio` existe, y con la app abierta un enlace llega a su ventana (`app-check`, escenario `031-deeplink`).

@@ -38,7 +38,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | F1 | [Enlaces `content-studio://`](fases/1-enlaces/plan-tdd.md) | C1, C2, C3 | AC-4, AC-5, AC-1, AC-2, AC-3 | - | IMP |
 | F2 | [«Enviar a» desde el Explorador](fases/2-enviar-a/plan-tdd.md) | C4, C5 | AC-7, AC-6 | - | IMP |
 | F3 | [Inicio con Windows](fases/3-inicio/plan-tdd.md) | C6 | AC-8 | - | IMP |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | IMP |
 
 ## Decisiones cerradas (no reabrir)
 

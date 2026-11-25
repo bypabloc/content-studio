@@ -14,7 +14,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | [028](028-shared-server/README.md) | Server compartido: arranque bajo demanda, descubrimiento, token persistente y apagado por inactividad | feature | Large | 027 | DON |
 | [029](029-mcp/README.md) | Servidor MCP local (`studio mcp`) para LLMs y agentes | feature | Large | 028 | DON |
 | [030](030-hot-folders/README.md) | Carpetas de entrada: soltar un archivo y recibir el resultado | feature | Large | 029 | DON |
-| [031](031-windows-integration/README.md) | Windows: enlaces `content-studio://`, «Enviar a» e inicio con Windows | feature | Medium | 030 | PEN |
+| [031](031-windows-integration/README.md) | Windows: enlaces `content-studio://`, «Enviar a» e inicio con Windows | feature | Medium | 030 | DON |
 | [032](032-lan/README.md) | Red local: emparejar dispositivos, tokens con permisos, subir archivos y MCP por HTTP | feature | Large | 031 | PEN |
 | [033](033-integral-verification/README.md) | Verificación integral y cierre del lote | chore | Micro | 032 | PEN |
 

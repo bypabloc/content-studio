@@ -119,3 +119,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [030-unidades-de-red](030-unidades-de-red.md) | Las carpetas de entrada no se probaron en OneDrive ni en una unidad de red | Antes de publicar | Usuario |
 | [030-appcheck-peaks-403](030-appcheck-peaks-403.md) | app-check registra 154 respuestas 403 de /media/peaks de las voces | Después de publicar 030 | Agente |
 | [031-convert-target](031-convert-target.md) | `new/media.convert` no cambia el formato del Conversor (solo rellena el archivo) | Antes de publicar 031 | Agente |
+| [031-inicio-logoff](031-inicio-logoff.md) | AC-8: que el server arranque al cerrar y abrir sesión (el valor `Run` ya se comprobó) | Antes de publicar 031 | Agente |
+| [031-desinstalar-carpeta](031-desinstalar-carpeta.md) | El desinstalador deja vacía la carpeta de instalación | Después de publicar 031 | Agente |

@@ -26,6 +26,10 @@ con content-studio: piden una narración o una música, esperan el resultado y r
   Un archivo se toma cuando su tamaño y su fecha no cambian entre dos sondeos (cada 2 s). `keep_awake` mantiene el
   server encendido mientras la carpeta esté activa.
 
+- Enlaces `content-studio://` (spec 031): `open/<sección>`, `job/<id>`, `library/<id>` y `new/<tipo>` abren o prellenan una sección, y con la app abierta el enlace llega a su ventana. Nunca encolan: el usuario pulsa el botón de la sección.
+- «Enviar a» del Explorador (spec 031): «Convertir a MP3», «Normalizar», «Limpiar silencios» y «Transcribir» encolan un trabajo por archivo y avisan cuántos entraron y cuántos se saltaron; «Abrir en el Editor» abre los archivos en el Editor.
+- Inicio con Windows (spec 031): Ajustes > Sistema > «Iniciar el servidor con Windows» escribe el valor `Run` de HKCU, apagado por defecto.
+
 ## Dónde vive
 
 - `server/src/content_studio/mcp_server/` (catálogo, herramientas, puente, SDK y configuración por cliente),
@@ -35,3 +39,4 @@ con content-studio: piden una narración o una música, esperan el resultado y r
 ## Historial
 
 - 2026-11-25: spec 029: servidor MCP por stdio y configuración por cliente.
+- 2026-11-25: enlaces `content-studio://`, «Enviar a» e inicio con Windows (spec 031)
