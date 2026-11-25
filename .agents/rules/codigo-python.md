@@ -25,6 +25,7 @@ description: Dónde vive el código, 300 líneas por .py, Python 3.15 (piso de l
 
 - **Un motor TTS o de música**: un archivo en su `engines/`, una línea en el registro, una receta JSON con paquetes, commits y revisiones fijados en `server/src/content_studio/engines/recipes/`, y su librería en `LIBRARIES` de `server/tests/integration/test_venvs.py`.
 - **Un tipo de trabajo**: un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES` (`services/registry.py`). La API y `studio` lo usan solos.
+- **Una herramienta MCP**: una entrada en `mcp_server/catalog.py` (nombre, descripción en inglés y esquemas) y su caso en el test de AC-1; su armado de `params` en `mcp_server/tools.py`.
 - **Un subcomando de `studio`**: una línea en `build_parser` de `cli/main.py`.
 - **Un comando de devtools**: un módulo con `main(argv)` y una línea en `COMMANDS` (`devtools.md`).
 - Algo de más de dos archivos: primero su spec (`plan-format.md`).
