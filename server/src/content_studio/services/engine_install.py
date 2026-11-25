@@ -6,7 +6,7 @@ import sys
 from contextlib import closing
 from pathlib import Path
 
-from content_studio import paths
+from content_studio import credentials, paths
 from content_studio.db import connection
 from content_studio.engines import installer, recipes
 
@@ -37,9 +37,11 @@ def build_command(params: dict, output_dir: Path) -> list[str]:
 def run(engine: str, repair: bool) -> int:
     """Verifica la licencia e instala en la raíz configurada."""
     try:
+        recipe = recipes.load(engine)
         with closing(connection.connect(paths.db_path())) as conn:
             installer.check_license(conn, engine)
-        installer.install(recipes.load(engine), paths.engines_dir(), repair)
+            token = credentials.huggingface_token(conn) if recipe.gated else None
+        installer.install(recipe, paths.engines_dir(), repair, token=token)
     except installer.InstallError as error:
         print(error.code, file=sys.stderr)
         return installer.EXIT_CODES[error.code]

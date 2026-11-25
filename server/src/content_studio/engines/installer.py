@@ -27,6 +27,7 @@ EXIT_CODES = {
     'engine_not_installed': 23,
     'checksum_mismatch': 24,
     'engine_gated': GATED_EXIT,
+    'engine_token_required': 26,
 }
 
 

@@ -47,9 +47,9 @@ describe('WelcomeWizard', () => {
     api.post.mockResolvedValue({ id: 9, status: 'queued' });
     const complete = vi.fn();
     const engines = [
-      { engine: 'voxcpm2', family: 'narration', size_gb: 4.8, vram_gb: 5, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, size_bytes: 0, job_id: null, verification: null },
-      { engine: 'acestep', family: 'music', size_gb: 8, vram_gb: 8, cpu: false, license: 'MIT', commercial: true, status: 'missing', owner: null, size_bytes: 0, job_id: null, verification: null },
-      { engine: 'qwen-0.6b', family: 'narration', size_gb: 7, vram_gb: 3, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, size_bytes: 0, job_id: null, verification: null },
+      { engine: 'voxcpm2', family: 'narration', size_gb: 4.8, vram_gb: 5, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, gated: false, size_bytes: 0, job_id: null, verification: null },
+      { engine: 'acestep', family: 'music', size_gb: 8, vram_gb: 8, cpu: false, license: 'MIT', commercial: true, status: 'missing', owner: null, gated: false, size_bytes: 0, job_id: null, verification: null },
+      { engine: 'qwen-0.6b', family: 'narration', size_gb: 7, vram_gb: 3, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, gated: false, size_bytes: 0, job_id: null, verification: null },
     ];
     const detected = { ...system, ffmpeg: { path: 'ffmpeg.exe', version: '9.1' }, git: { path: 'git.exe', version: '2.47' }, gpu: { name: 'RTX 4060', vram_gb: 8, driver: '1', cuda: '12' } };
     vi.spyOn(window, 'confirm').mockReturnValue(true);
@@ -79,7 +79,7 @@ describe('WelcomeWizard', () => {
     const complete = vi.fn();
     api.post.mockRejectedValueOnce(new Error('offline'));
     const engines = [
-      { engine: 'voxcpm2', family: 'narration', size_gb: 4.8, vram_gb: 5, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, size_bytes: 0, job_id: null, verification: null },
+      { engine: 'voxcpm2', family: 'narration', size_gb: 4.8, vram_gb: 5, cpu: false, license: 'Apache-2.0', commercial: true, status: 'missing', owner: null, gated: false, size_bytes: 0, job_id: null, verification: null },
     ];
     render(<WelcomeWizard open system={system} storage={storage} engines={engines} onComplete={complete} />);
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));

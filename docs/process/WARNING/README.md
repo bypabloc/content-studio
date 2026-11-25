@@ -267,3 +267,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [031-inicio-con-windows](031-inicio-con-windows.md) | Inicio con Windows: valor `Run` de HKCU con `pythonw.exe` del venv de la app, crate `windows` 0.62.2 | `main` |
 | [034-receta-pyannote](034-receta-pyannote.md) | La receta de pyannote va en Python 3.14 (política de la 026), no en 3.12 | `main` |
 | [026-pyannote-version](026-pyannote-version.md) | pyannote va en Python 3.14 por cu128, por debajo de .python-version (3.15) | `main` |
+| [034-token-en-settings](034-token-en-settings.md) | El token de Hugging Face va en settings sin cifrar (la API lo bloquea) | `main` |

@@ -12,6 +12,7 @@ const qwen = {
   commercial: true,
   status: 'installed',
   owner: 'app',
+  gated: false,
   size_bytes: 7_000_000_000,
   job_id: null,
   verification: { ok: true, checked_at: '2026-11-21T00:00:00Z', duration_s: 1 },

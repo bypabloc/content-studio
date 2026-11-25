@@ -151,6 +151,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/credentials/huggingface": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Huggingface
+         * @description Indica si hay un token guardado.
+         */
+        get: operations["read_huggingface_credentials_huggingface_get"];
+        /**
+         * Write Huggingface
+         * @description Guarda el token si tiene la forma de Hugging Face (hf_ seguido de caracteres).
+         */
+        put: operations["write_huggingface_credentials_huggingface_put"];
+        post?: never;
+        /**
+         * Clear Huggingface
+         * @description Borra el token guardado.
+         */
+        delete: operations["clear_huggingface_credentials_huggingface_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/settings/{key}": {
         parameters: {
             query?: never;
@@ -1909,6 +1937,14 @@ export interface components {
             file: string;
         };
         /**
+         * Configured
+         * @description Solo dice si hay un token guardado; nunca su valor.
+         */
+        Configured: {
+            /** Configured */
+            configured: boolean;
+        };
+        /**
          * CreateIn
          * @description El nombre del proyecto nuevo.
          */
@@ -2010,6 +2046,11 @@ export interface components {
             verification: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Gated
+             * @default false
+             */
+            gated: boolean;
             /** Models */
             models?: components["schemas"]["WhisperModel"][] | null;
         };
@@ -2051,6 +2092,14 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HuggingFaceToken
+         * @description Cuerpo de PUT: el token de lectura del usuario.
+         */
+        HuggingFaceToken: {
+            /** Token */
+            token: string;
         };
         /**
          * ImportIn
@@ -2792,6 +2841,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_huggingface_credentials_huggingface_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
+                };
+            };
+        };
+    };
+    write_huggingface_credentials_huggingface_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuggingFaceToken"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_huggingface_credentials_huggingface_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
                 };
             };
         };
