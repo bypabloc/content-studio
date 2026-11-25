@@ -97,3 +97,10 @@ def test_job_id_must_be_integer(tmp_path):
     result = asyncio.run(_bridge(tmp_path, FakeApi()).call('studio_get_job', {'job_id': 'uno'}))
     assert result.is_error
     assert result.structured['error']['code'] == 'job_id_required'
+
+
+def test_capabilities_lists_only_content_kinds(tmp_path):
+    bridge = _bridge(tmp_path, FakeApi(jobs=[{}]))
+    kinds = bridge._capabilities(FakeApi(jobs=[{}]))['job_kinds']
+    assert 'narration' in kinds
+    assert not any(kind.startswith(('engine.', 'storage.', 'system.', 'voice.', 'library.')) for kind in kinds)

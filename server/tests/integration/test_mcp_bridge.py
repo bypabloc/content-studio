@@ -26,7 +26,7 @@ from content_studio.api import events
 from content_studio.api.app import create_app
 from content_studio.cli.serve import pick_free_port
 from content_studio.jobs.worker import Worker
-from content_studio.mcp_server import sdk
+from content_studio.mcp_server import sdk, tools
 from content_studio.mcp_server.bridge import Bridge
 from content_studio.runtime import discovery, instance
 from content_studio.services import registry
@@ -130,6 +130,8 @@ def live(tmp_path, monkeypatch) -> Iterator[tuple[Bridge, Path]]:
     home.mkdir()
     monkeypatch.setenv('CONTENT_STUDIO_HOME', str(home))
     monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
+    # Los servicios falsos de estas pruebas se piden por studio_submit_job: se permiten solo aquí.
+    monkeypatch.setattr(tools, 'MCP_KINDS', tools.MCP_KINDS | {'fake.slow', 'fake.sleep', 'fake.gpu'})
     db = home / 'content-studio.db'
     main = tmp_path / 'checkout'
     main.mkdir()

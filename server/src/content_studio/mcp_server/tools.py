@@ -13,6 +13,29 @@ DEFAULT_NARRATION_MODEL = 'voxcpm2'
 DEFAULT_NARRATION_STYLE = 'expert'
 DEFAULT_MUSIC_MODEL = 'acestep'
 LIST_LIMIT = 10
+# Tipos de trabajo que el MCP puede pedir (spec 029, D-6): contenido, nunca administración (motores, almacenamiento,
+# voces, biblioteca, sistema ni el asistente).
+MCP_KINDS = frozenset(
+    {
+        'narration',
+        'narration.regenerate',
+        'music',
+        'transcribe',
+        'clean.analyze',
+        'clean.render',
+        'media.convert',
+        'media.normalize',
+        'media.trim',
+        'media.concat',
+        'media.split',
+        'media.reframe_track',
+        'subtitles.create',
+        'subtitles.translate',
+        'subtitles.burn',
+        'mix.render',
+        'editor.render',
+    }
+)
 
 
 class ToolError(Exception):
@@ -109,7 +132,10 @@ def _convert(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
 def _submit(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     if not args.get('kind'):
         raise ToolError('missing_kind')
-    return str(args['kind']), dict(args.get('params') or {})
+    kind = str(args['kind'])
+    if kind not in MCP_KINDS:
+        raise ToolError('kind_not_allowed', {'kind': kind})
+    return kind, dict(args.get('params') or {})
 
 
 def job_view(job: dict[str, Any], outputs: list[str], waiting_on: str | None = None) -> dict[str, Any]:

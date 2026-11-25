@@ -456,6 +456,7 @@
   "error.job_not_found": "Job {job_id} does not exist.",
   "error.job_not_music_tracks": "Job {job_id} is not a finished music job with tracks.",
   "error.job_pending": "Job {job_id} cannot be repeated until it finishes.",
+  "error.kind_not_allowed": "This job kind cannot be requested over MCP: {kind}.",
   "error.llm_invalid_output": "The assistant did not return a valid answer in two attempts. Try again or use the other model.",
   "error.llm_not_applicable": "That suggestion does not apply to a subtitle project.",
   "error.llm_not_installed": "Install the assistant and a model in Engines.",

@@ -64,3 +64,22 @@ def test_resource_link_is_a_file_uri(tmp_path):
     link = tools.resource_link(str(wav))
     assert link['uri'] == wav.resolve().as_uri()
     assert link['name'] == 'narracion.wav'
+
+
+def test_submit_job_refuses_administrative_kinds():
+    with pytest.raises(tools.ToolError) as error:
+        tools.build_job('studio_submit_job', {'kind': 'engine.uninstall', 'params': {}})
+    assert error.value.code == 'kind_not_allowed'
+    assert error.value.params == {'kind': 'engine.uninstall'}
+
+
+def test_submit_job_accepts_content_kinds():
+    assert tools.build_job('studio_submit_job', {'kind': 'music', 'params': {'style': ['lofi']}}) == (
+        'music',
+        {'style': ['lofi']},
+    )
+
+
+def test_mcp_kinds_exclude_administration():
+    admin = ('engine.', 'storage.', 'system.', 'voice.', 'library.', 'llm.')
+    assert [kind for kind in tools.MCP_KINDS if kind.startswith(admin)] == []

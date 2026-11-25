@@ -456,6 +456,7 @@
   "error.job_not_found": "No existe el trabajo {job_id}.",
   "error.job_not_music_tracks": "El trabajo {job_id} no es un trabajo de música terminado con pistas.",
   "error.job_pending": "No se puede repetir el trabajo {job_id} hasta que termine.",
+  "error.kind_not_allowed": "Ese tipo de trabajo no se puede pedir por MCP: {kind}.",
   "error.llm_invalid_output": "El asistente no devolvió una respuesta válida en dos intentos. Prueba de nuevo o con el otro modelo.",
   "error.llm_not_applicable": "Esa propuesta no se aplica a un proyecto de subtítulos.",
   "error.llm_not_installed": "Instala el asistente y un modelo en Motores.",

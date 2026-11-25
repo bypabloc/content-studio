@@ -45,7 +45,8 @@ sesión muestra `waiting_gpu` y dice quién tiene la GPU.
 ## Qué no expone
 
 Instalar o desinstalar motores, mover almacenamiento, ajustes, el explorador de archivos (`/fs`), la papelera y borrar
-ítems de la biblioteca. Un guion o un subtítulo puede traer instrucciones escritas para el asistente, así que no hay
+ítems de la biblioteca. `studio_submit_job` pide solo tipos de contenido (narración, música, transcripción, limpieza,
+conversión, subtítulos, mezcla y editor): `studio_capabilities` los lista y los demás responden `kind_not_allowed`. Un guion o un subtítulo puede traer instrucciones escritas para el asistente, así que no hay
 herramientas administrativas a las que esas instrucciones puedan llegar.
 
 ## Entradas

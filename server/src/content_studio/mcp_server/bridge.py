@@ -94,7 +94,7 @@ class Bridge:
             'narration': api.get('/catalog/narration'),
             'music': api.get('/catalog/music'),
             'conversion_targets': sorted(TARGETS),
-            'job_kinds': sorted(SERVICES),
+            'job_kinds': sorted(kind for kind in SERVICES if kind in tools.MCP_KINDS),
         }
 
     def _get_jobs(self, api: Api, args: dict[str, Any]) -> ToolResult:

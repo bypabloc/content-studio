@@ -20,6 +20,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [029-codigos-de-herramienta](029-codigos-de-herramienta.md) | Los códigos de error de las herramientas tienen texto en los tres idiomas; el validador i18n los declara | `main` |
 | [029-formatos-por-cliente](029-formatos-por-cliente.md) | La forma de cada archivo MCP sale de la documentación oficial; Jan y LM Studio sin verificar | `main` |
 | [029-comando-de-arranque](029-comando-de-arranque.md) | El cliente lanza el `studio` de la instalación, o `uv run --project server studio mcp` en un checkout | `main` |
+| [029-tipos-de-trabajo](029-tipos-de-trabajo.md) | `studio_submit_job` solo pide tipos de contenido; los de motores, almacenamiento, voces, biblioteca, sistema y asistente se rechazan | `main` |
 | [029-herramientas](029-herramientas.md) | Diez herramientas por tarea y `studio_submit_job` genérica, no una por motor | `main` |
 | [029-sdk-mcp](029-sdk-mcp.md) | El protocolo MCP usa el SDK oficial `mcp` 2.3.0 (dependencia nueva) | `main` |
 | [028-rotar-token](028-rotar-token.md) | Cambiar el token detiene el server (`api down`), rota con `api token --rotate` y la app se reconecta | `main` |
