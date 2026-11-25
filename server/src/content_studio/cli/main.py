@@ -12,6 +12,7 @@ from pathlib import Path
 
 from content_studio import gpu_lock, paths, seed
 from content_studio.cli import api as api_cli
+from content_studio.cli import diarize as diarize_cli
 from content_studio.cli import editor as editor_cli
 from content_studio.cli import inbox as inbox_cli
 from content_studio.cli import library as library_cli
@@ -118,6 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
         if action == 'uninstall':
             command.add_argument('--force', action='store_true', help='confirm removal of the known external venv')
 
+    diarize_p = sub.add_parser('diarize', parents=[_db_flag()], help='who speaks when: diarize an audio file')
+    diarize_p.add_argument('input', type=Path, help='audio or video to diarize')
+    diarize_p.add_argument('--speakers', type=int, help='exact number of speakers, from 1 to 20')
+    diarize_p.add_argument('--min-speakers', type=int, help='lowest number of speakers, from 1 to 20')
+    diarize_p.add_argument('--max-speakers', type=int, help='highest number of speakers, from 1 to 20')
     sub.add_parser('openapi', help='print the API schema (OpenAPI JSON); no server and no database')
     return ap
 
@@ -238,6 +244,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return submit.run('music.samples', submit.samples_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'music':
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
+    if args.command == 'diarize':
+        return diarize_cli.run(args, main_checkout(paths.ROOT))
     if args.command == 'openapi':
         return _openapi()
     if args.command == 'seed':

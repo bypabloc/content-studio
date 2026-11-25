@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from content_studio.messages import t
+
 PALETTE = ('#2563eb', '#dc2626', '#16a34a', '#d97706', '#9333ea', '#0891b2', '#db2777', '#65a30d')
 
 
@@ -11,8 +13,8 @@ def color(index: int) -> str:
 
 
 def default_name(number: int) -> str:
-    """Nombre inicial de un hablante numerado desde 1."""
-    return f'Hablante {number}'
+    """Nombre inicial de un hablante numerado desde 1, en el idioma por defecto del catálogo."""
+    return t('speakers.default_name', n=number)
 
 
 def build(speaker_ids: list[str]) -> dict[str, dict[str, str]]:

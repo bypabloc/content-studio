@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from content_studio.diarization import speakers
+
 
 def rttm(turns: list[dict[str, Any]], uri: str) -> str:
     """Una línea RTTM por turno exclusivo: inicio y duración con 3 decimales."""
@@ -23,6 +25,16 @@ def csv_text(turns: list[dict[str, Any]], speakers: dict[str, dict[str, str]]) -
         name = speakers.get(turn['speaker'], {}).get('name', turn['speaker'])
         lines.append(f'{turn["start"]:.3f},{turn["end"]:.3f},{turn["speaker"]},{name}')
     return '\n'.join(lines) + '\n'
+
+
+def write_result(folder: Path | str, result: dict[str, Any]) -> None:
+    """Escribe los archivos de una diarización: turns.json, RTTM, CSV, speakers.json y embeddings.json."""
+    target = Path(folder)
+    names = speakers.build(result['speakers'])
+    turns = {key: result[key] for key in ('duration', 'speakers', 'diarization', 'exclusive_diarization')}
+    write_all(target, turns, names)
+    (target / 'speakers.json').write_text(json.dumps(names, ensure_ascii=False), encoding='utf-8')
+    (target / 'embeddings.json').write_text(json.dumps(result.get('embeddings', {})), encoding='utf-8')
 
 
 def write_all(

@@ -5,6 +5,8 @@ from __future__ import annotations
 from content_studio.services import (
     clean_analyze,
     clean_render,
+    diarize,
+    diarize_split,
     editor_proxy,
     editor_render,
     engine_install,
@@ -63,6 +65,8 @@ def test_every_kind_exposes_validate_and_build_command():
         'editor.render': editor_render,
         'editor.proxy': editor_proxy,
         'library.scan': library_scan,
+        'diarize': diarize,
+        'diarize.split': diarize_split,
     }
     assert expected == {
         kind: service for kind, service in SERVICES.items() if not kind.startswith('llm.')

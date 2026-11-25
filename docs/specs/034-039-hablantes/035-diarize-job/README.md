@@ -41,7 +41,7 @@ Dejar listo todo lo de servidor que usan las secciones de la 036 a la 038:
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Unión, bloques y exportaciones](fases/1-nucleo/plan-tdd.md) | C1, C2 | AC-1, AC-2, AC-3 | - | IMP |
 | F2 | [Motor en su venv y audio por hablante](fases/2-motor/plan-tdd.md) | C3, C4, C5 | AC-4, AC-5, AC-6 | - | IMP |
-| F3 | [Trabajos, caché y CLI](fases/3-trabajos/plan-tdd.md) | C6, C7, C8 | AC-7, AC-8, AC-9, AC-10, AC-11 | - | PEN |
+| F3 | [Trabajos, caché y CLI](fases/3-trabajos/plan-tdd.md) | C6, C7, C8 | AC-7, AC-8, AC-9, AC-10, AC-11 | - | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)

@@ -231,3 +231,4 @@ plda
 rttm
 itertracks
 lavfi
+diarizations

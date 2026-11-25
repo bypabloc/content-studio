@@ -6,7 +6,6 @@ Corre en `.venv-diarize`: pyannote, torch y numpy se importan dentro de las func
 from __future__ import annotations
 
 import argparse
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -14,12 +13,13 @@ from typing import Any
 from content_studio import paths
 from content_studio.common import process
 from content_studio.common import progress as progress_protocol
-from content_studio.diarization import exports, speakers
+from content_studio.diarization import exports
 from content_studio.engines import recipes
 
 README = 'server/src/content_studio/engines/recipes/pyannote.json'
 EMBEDDING_BATCH = 4
 STEP_SPANS = {'segmentation': (0.0, 0.5), 'embeddings': (0.5, 0.95)}
+SPEAKER_FLAGS = {'num_speakers': '--speakers', 'min_speakers': '--min-speakers', 'max_speakers': '--max-speakers'}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -43,6 +43,11 @@ def speaker_counts(args: argparse.Namespace) -> dict[str, int]:
     if args.max_speakers is not None:
         counts['max_speakers'] = args.max_speakers
     return counts
+
+
+def available() -> bool:
+    """¿Está instalado el venv de pyannote? Sin él no hay diarización (spec 035, AC-7)."""
+    return _venv().is_dir()
 
 
 def pipeline_input(source: Path) -> tuple[dict[str, Any], float]:
@@ -93,24 +98,22 @@ def turns_of(annotation: Any) -> list[dict[str, Any]]:
     ]
 
 
-def diarize(source: Path, model: Path, out: Path, counts: dict[str, int]) -> None:
-    """Corre pyannote sobre `source` y escribe turns.json, las exportaciones, speakers.json y embeddings.json."""
+def diarize(source: Path, model: Path, out: Path, counts: dict[str, int]) -> dict[str, Any]:
+    """Corre pyannote sobre `source`, escribe la carpeta `out` y devuelve el resultado."""
     audio, duration = pipeline_input(source)
     output = load_pipeline(model)(audio, hook=progress_hook, **counts)
     labels = output.speaker_diarization.labels()
-    names = speakers.build(labels)
-    result = {
+    result: dict[str, Any] = {
         'duration': round(duration, 3),
         'speakers': labels,
         'diarization': turns_of(output.speaker_diarization),
         'exclusive_diarization': turns_of(output.exclusive_speaker_diarization),
+        'embeddings': {},
     }
-    exports.write_all(out, result, names)
-    (out / 'speakers.json').write_text(json.dumps(names, ensure_ascii=False), encoding='utf-8')
-    embeddings = {}
     if output.speaker_embeddings is not None:
-        embeddings = dict(zip(labels, output.speaker_embeddings.tolist(), strict=True))
-    (out / 'embeddings.json').write_text(json.dumps(embeddings), encoding='utf-8')
+        result['embeddings'] = dict(zip(labels, output.speaker_embeddings.tolist(), strict=True))
+    exports.write_result(out, result)
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:

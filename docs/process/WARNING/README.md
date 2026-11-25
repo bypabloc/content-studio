@@ -272,3 +272,5 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [035-asignacion-de-hablante](035-asignacion-de-hablante.md) | Palabra sin fin, empate de solape y distancia al hueco, que AC-1 no fija | `main` |
 | [035-audio-por-hablante](035-audio-por-hablante.md) | Audio por hablante sin rampa en los bordes; filtro largo en archivo | `main` (medir clics en FV) |
 | [035-pyannote-local](035-pyannote-local.md) | pyannote carga community-1 de su carpeta, sin red ni telemetría; la corrida real queda sin probar | `main` (corrida real en FV) |
+| [035-cache-en-archivo](035-cache-en-archivo.md) | Caché de diarización en archivo, sin tabla ni migración | `main` |
+| [035-split-por-carpeta](035-split-por-carpeta.md) | diarize.split recibe la carpeta de turnos y corta por turnos exclusivos | `main` (escucha de solapes en FV) |

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
+from content_studio.diarization import diarize_main
 from content_studio.services import transcribe
 
 
@@ -44,3 +46,42 @@ def test_build_command_passes_input_model_language_and_the_out_file(tmp_path: Pa
         '--language': 'es',
         '--out': str(tmp_path / 'words.json'),
     }
+
+
+def test_ac10_without_diarize_the_command_is_the_same_as_today(tmp_path):
+    command = transcribe.build_command({'input': 'a.mp4', 'model': 'large-v3-turbo', 'language': 'es'}, tmp_path)
+
+    assert command == [
+        sys.executable,
+        '-m',
+        'content_studio.transcription.transcribe_main',
+        '--input',
+        'a.mp4',
+        '--model',
+        'large-v3-turbo',
+        '--language',
+        'es',
+        '--out',
+        str(tmp_path / 'words.json'),
+    ]
+
+
+def test_ac9_with_diarize_the_command_runs_the_speaker_main(tmp_path):
+    params = {'input': 'a.mp4', 'model': 'large-v3-turbo', 'language': 'es', 'diarize': True, 'num_speakers': 2}
+
+    command = transcribe.build_command(params, tmp_path)
+
+    assert command[1:3] == ['-m', 'content_studio.diarization.transcribe_speakers_main']
+    assert command[command.index('--speakers') + 1] == '2'
+    assert command[command.index('--out') + 1] == str(tmp_path / 'words.json')
+
+
+def test_ac9_diarize_needs_the_audio_the_engine_and_valid_speakers(tmp_path, monkeypatch):
+    monkeypatch.setattr(diarize_main, 'available', lambda: False)
+    audio = tmp_path / 'a.mp4'
+    audio.write_bytes(b'RIFF')
+    params = {'input': str(audio), 'model': 'large-v3-turbo', 'language': 'es', 'diarize': True, 'num_speakers': 0}
+
+    codes = [error['code'] for error in transcribe.validate(params)]
+
+    assert codes == ['invalid_speakers', 'engine_not_installed']
