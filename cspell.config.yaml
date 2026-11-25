@@ -70,6 +70,9 @@ overrides:
   # Linter del guion (spec 006, D-1): las reglas, sus palabras y sus patrones están en español (formato-guion.md).
   - filename: 'server/src/content_studio/narration/script_lint.py'
     language: en,es
+  # Nombre inicial de los hablantes (spec 035): «Hablante N» es texto visible en español.
+  - filename: 'server/src/content_studio/diarization/speakers.py'
+    language: en,es
   # Tareas del asistente (spec 021): números en letras y pistas de idioma en español, como el linter del guion.
   - filename: 'server/src/content_studio/llm/tasks/**'
     language: en,es

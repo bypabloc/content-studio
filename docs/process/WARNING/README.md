@@ -269,3 +269,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [026-pyannote-version](026-pyannote-version.md) | pyannote va en Python 3.14 por cu128, por debajo de .python-version (3.15) | `main` |
 | [034-token-en-settings](034-token-en-settings.md) | El token de Hugging Face va en settings sin cifrar (la API lo bloquea) | `main` |
 | [034-pyannote-fuera-de-libraries](034-pyannote-fuera-de-libraries.md) | pyannote sale de LIBRARIES hasta que la 035 le dé su EngineSpec | `main` |
+| [035-asignacion-de-hablante](035-asignacion-de-hablante.md) | Palabra sin fin, empate de solape y distancia al hueco, que AC-1 no fija | `main` |
