@@ -54,3 +54,8 @@ client/src-tauri/gen/
 server/data/music/samples
 # Recursos del instalador que arma `python -m devtools bundle` (spec 022)
 client/src-tauri/bundle/
+
+# Secretos locales: tokens y variables de entorno (nunca se versionan)
+.env
+.env.*
+!.env.example
