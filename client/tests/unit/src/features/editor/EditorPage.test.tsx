@@ -181,4 +181,13 @@ describe('EditorPage', () => {
 
     expect(await screen.findByText(t('editor.project.load_error'))).toBeTruthy();
   });
+
+  it('WHEN the hash names a project THEN the editor opens it (spec 037, AC-6)', async () => {
+    window.location.hash = `#/editor?project=${encodeURIComponent(PATH)}`;
+    render(<EditorPage />);
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/editor/projects?path=${encodeURIComponent(PATH)}`));
+    expect(await screen.findByText('demo')).toBeTruthy();
+    window.location.hash = '';
+  });
 });

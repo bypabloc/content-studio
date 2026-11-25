@@ -38,9 +38,9 @@ Una sección **Hablantes** para diarizar un audio o un video sin transcribir. Of
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [API de diarización y proyecto del Editor](fases/1-api/plan-tdd.md) | C1, C2 | AC-4, AC-6 | - | PEN |
-| F2 | [Sección Hablantes](fases/2-seccion/plan-tdd.md) | C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | - | PEN |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F1 | [API de diarización y proyecto del Editor](fases/1-api/plan-tdd.md) | C1, C2 | AC-4, AC-6 | (ver historial de git) | IMP |
+| F2 | [Sección Hablantes](fases/2-seccion/plan-tdd.md) | C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | (ver historial de git) | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | (ver historial de git) | IMP |
 
 ## Decisiones cerradas (no reabrir)
 

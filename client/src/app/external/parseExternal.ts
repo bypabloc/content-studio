@@ -11,6 +11,7 @@ export const OPEN_SECTIONS = [
   'narration',
   'music',
   'transcription',
+  'speakers',
   'cleaner',
   'subtitles',
   'convert',

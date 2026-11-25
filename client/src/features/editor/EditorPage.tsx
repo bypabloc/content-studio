@@ -7,6 +7,7 @@ import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { t } from '@/shared/i18n/t';
+import { hashParams } from '@/shared/navigation/hash';
 import { useEditorAdd } from './useEditorAdd';
 
 import { EditorWorkspace } from './EditorWorkspace';
@@ -51,6 +52,14 @@ export function EditorPage(): React.JSX.Element {
       active = false;
     };
   }, [api]);
+
+  // Un `?project=` en el hash abre ese proyecto al montar: así llega Hablantes (spec 037, AC-6).
+  useEffect(() => {
+    const requested = hashParams().get('project');
+    if (requested) void open(requested);
+    // Solo al montar: el hash se lee una vez, como el resto de los parámetros de sección.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function open(path: string): Promise<void> {
     setBusy(true);

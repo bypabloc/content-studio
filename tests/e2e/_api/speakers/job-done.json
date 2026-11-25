@@ -1,0 +1,9 @@
+{
+  "id": 7,
+  "kind": "diarize",
+  "status": "done",
+  "progress": 1,
+  "params": {
+    "input": "C:/fake/in/charla.wav"
+  }
+}

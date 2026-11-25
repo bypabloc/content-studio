@@ -21,6 +21,7 @@ from content_studio.api.routes import (
     clean,
     credentials,
     diagnostics,
+    diarizations,
     editor,
     engines,
     files,
@@ -144,6 +145,7 @@ def create_app(
     app.include_router(clean.router, dependencies=header_only)
     app.include_router(subtitles.router, dependencies=header_only)
     app.include_router(speakers.router, dependencies=header_only)
+    app.include_router(diarizations.router, dependencies=header_only)
     app.include_router(mix.router, dependencies=header_only)
     app.include_router(library.router, dependencies=header_only)
     app.include_router(library_organize.router, dependencies=header_only)
