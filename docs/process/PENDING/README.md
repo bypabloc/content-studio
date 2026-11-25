@@ -113,3 +113,8 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [022-release-dispatch](022-release-dispatch.md) | AC-10 real: correr `release.yml` en `workflow_dispatch` dry-run cuando esté en `main` | Al pasar el lote a main | Agente |
 | [025-pytest-local-candado](025-pytest-local-candado.md) | `gpu-turn run -- pytest -m local` se cuelga con el test de llm, que toma el candado por su cuenta | Agente |
 | [025-escucha-salidas](025-escucha-salidas.md) | Escuchar la música y la narración de AC-7 (el espectrograma muestra una caída de energía y un corte de banda en 16 kHz) | Usuario |
+| [030-recibo-mensaje-locale](030-recibo-mensaje-locale.md) | El message de los recibos va en el idioma de la interfaz | Fase 2 | Agente |
+| [030-ajustes-mas-operaciones](030-ajustes-mas-operaciones.md) | Ajustes ofrece solo convertir a MP3; los demás tipos quedan para decidir | Después de publicar 030 | Usuario |
+| [030-axe-language-intermitente](030-axe-language-intermitente.md) | La prueba de axe en en/pt de happy-language falla a veces en la suite completa | Después de publicar 030 | Agente |
+| [030-unidades-de-red](030-unidades-de-red.md) | Las carpetas de entrada no se probaron en OneDrive ni en una unidad de red | Antes de publicar | Usuario |
+| [030-appcheck-peaks-403](030-appcheck-peaks-403.md) | app-check registra 154 respuestas 403 de /media/peaks de las voces | Después de publicar 030 | Agente |

@@ -14,7 +14,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C1: Registrar carpetas [AC-1]
 
-- **RED**: `server/tests/unit/src/content_studio/inbox/test_store.py::test_ac1_registra_y_valida`
+- **RED**: `server/tests/unit/src/content_studio/inbox/test_store.py::test_ac1_registers_a_valid_folder_and_rejects_the_rest`
   - WHEN se registra una carpeta inexistente THEN `folder_not_found`; con `params` inválidos, los errores del servicio.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: migración, `inbox/store.py`, `inbox/inputs.py`. Verify: `uv run pytest server/tests/unit/src/content_studio/inbox -q`.
@@ -22,7 +22,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C2: Archivo estable [AC-2, AC-3]
 
-- **RED**: `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac2_estable_en_dos_sondeos`
+- **RED**: `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac2_takes_a_file_once_it_is_stable_across_two_sweeps`
   - Given un archivo en `tmp_path` When `scan_once` corre dos veces sin cambios Then se mueve a `processing/` y hay un trabajo; si crece entre sondeos, no.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `inbox/scanner.py`. Verify: `uv run pytest server/tests/unit/src/content_studio/inbox -q`.
@@ -30,7 +30,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C3: Recibos [AC-4, AC-5]
 
-- **RED**: `server/tests/unit/src/content_studio/inbox/test_receipts.py::test_ac4_done_con_salidas_y_recibo`
+- **RED**: `server/tests/unit/src/content_studio/inbox/test_receipts.py::test_ac4_done_keeps_the_original_outputs_and_a_result_receipt`
   - Given un trabajo terminado con un `.mp3` en `output_dir` When llega su evento Then `done/<nombre>/` tiene original, salida y recibo.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `inbox/receipts.py` suscrito al `Broker`. Verify: `uv run pytest server/tests/unit/src/content_studio/inbox -q`.
@@ -38,7 +38,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C4: `.job.json` [AC-6]
 
-- **RED**: `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac6_job_json_con_rutas_relativas`
+- **RED**: `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac6_job_file_with_relative_paths_is_queued_or_failed`
   - WHEN se suelta un `.job.json` con `"input": "a.wav"` THEN el trabajo recibe la ruta absoluta dentro de la carpeta; uno inválido va a `failed/`.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: lectura del JSON en `scanner.py`. Verify: `uv run pytest server/tests/unit/src/content_studio/inbox -q`.
@@ -46,7 +46,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C5: Reinicios y `keep_awake` [AC-7, AC-8]
 
-- **RED**: `server/tests/integration/test_inbox.py::test_ac7_no_reprocesa_al_reiniciar`
+- **RED**: `server/tests/integration/test_inbox.py::test_ac7_does_not_reprocess_after_a_restart`
   - Given `inbox_items` con un archivo `done` When el server arranca Then no lo encola; un archivo nuevo sí. Con `keep_awake`, `IdleClock.idle()` es False.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: barrido inicial y `hold`/`release` del `IdleClock`. Verify: `uv run pytest server/tests/integration/test_inbox.py -q`.

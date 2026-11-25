@@ -243,6 +243,14 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 | [022-datos-al-desinstalar](022-datos-al-desinstalar.md) | Borrar los datos al desinstalar usa la casilla de Tauri más una confirmación | `main` (AC-8) |
 | [022-recursos-del-bundle](022-recursos-del-bundle.md) | Recursos del instalador en `tauri.bundle.json`; el server en `app/` con el lock | `main` |
 | [022-updater](022-updater.md) | Updater solo en la app instalada; clave sin contraseña; faltan los secrets | el primer Release (usuario) |
+| [030-sondeo-stdlib](030-sondeo-stdlib.md) | Sondeo con stdlib cada 2 s; estable si tamaño y fecha no cambian entre dos sondeos | `main` |
+| [030-keep-awake](030-keep-awake.md) | Una retención del IdleClock por carpeta con keep_awake | `main` |
+| [030-recibos-por-sondeo](030-recibos-por-sondeo.md) | Los recibos se asientan en el sondeo, no suscritos al Broker | `main` |
+| [030-cancelado-como-fallo](030-cancelado-como-fallo.md) | Un trabajo cancelado va a failed/ con el código cancelled | `main` |
+| [030-validacion-al-registrar](030-validacion-al-registrar.md) | El registro valida con la carpeta como entrada de prueba | `main` |
+| [030-codigos-propios-del-inbox](030-codigos-propios-del-inbox.md) | Los códigos de error del inbox tienen nombre propio (los de 02 ya significan otra cosa en la biblioteca) | `main` |
+| [030-pausa-por-cuerpo](030-pausa-por-cuerpo.md) | La pausa es un POST con `paused`: pausar y reanudar usan la misma ruta | `main` |
+| [030-mcp-por-api](030-mcp-por-api.md) | `studio_watch_folder` registra la carpeta por la API; la CLI escribe la base directa | `main` |
 
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
 | [023-recorrido-por-api](023-recorrido-por-api.md) | El recorrido integral se hizo sobre la API del server instalado | `main` |

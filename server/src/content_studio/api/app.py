@@ -25,6 +25,7 @@ from content_studio.api.routes import (
     files,
     fs,
     health,
+    inbox,
     integrations,
     jobs,
     library,
@@ -126,6 +127,7 @@ def create_app(
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]
     app.include_router(health.router, dependencies=header_only)
+    app.include_router(inbox.router, dependencies=header_only)
     app.include_router(integrations.router, dependencies=header_only)
     app.include_router(server_control.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)

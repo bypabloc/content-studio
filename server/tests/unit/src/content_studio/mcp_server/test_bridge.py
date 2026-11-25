@@ -104,3 +104,28 @@ def test_capabilities_lists_only_content_kinds(tmp_path):
     kinds = bridge._capabilities(FakeApi(jobs=[{}]))['job_kinds']
     assert 'narration' in kinds
     assert not any(kind.startswith(('engine.', 'storage.', 'system.', 'voice.', 'library.')) for kind in kinds)
+
+
+class WatchApi:
+    """La API de prueba de studio_watch_folder: anota cada alta y responde como lo haría el server."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict]] = []
+
+    def post(self, path: str, body: dict | None = None) -> dict:
+        self.calls.append((path, body or {}))
+        return {'id': 3, 'path': body['path'], 'kind': body['kind'], 'keep_awake': body['keep_awake'], 'paused': False}
+
+
+def test_ac10_watch_folder_registers_the_folder_through_the_api(tmp_path):
+    folder = tmp_path / 'entrada'
+    folder.mkdir()
+    fake = WatchApi()
+    bridge = Bridge(tmp_path / 'content-studio.db', api=lambda: fake, main=tmp_path)
+    args = {'path': str(folder), 'kind': 'media.normalize', 'params': {'preset': 'custom'}}
+
+    result = asyncio.run(bridge.call('studio_watch_folder', args))
+
+    assert fake.calls == [('/inbox/folders', {**args, 'keep_awake': True})]
+    assert result.is_error is False
+    assert result.structured['id'] == 3

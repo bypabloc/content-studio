@@ -113,6 +113,28 @@ MIGRATIONS = [
     """,
     # 8 (spec 021, D-4): la ruta de publish.json del ítem; el contenido queda en disco.
     'ALTER TABLE library_items ADD COLUMN publish_path TEXT;',
+    # spec 030 (D-1 a D-3): carpetas de entrada y los archivos que tomaron; solo agrega (02 §3).
+    """
+    CREATE TABLE inbox_folders (
+      id INTEGER PRIMARY KEY,
+      path TEXT NOT NULL UNIQUE,
+      kind TEXT NOT NULL,
+      params TEXT NOT NULL,
+      keep_awake INTEGER NOT NULL DEFAULT 1,
+      paused INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE inbox_items (
+      id INTEGER PRIMARY KEY,
+      folder_id INTEGER NOT NULL REFERENCES inbox_folders(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      mtime REAL NOT NULL,
+      job_id INTEGER,
+      state TEXT NOT NULL CHECK (state IN ('pending', 'processing', 'done', 'failed')),
+      UNIQUE (folder_id, name, size, mtime)
+    );
+    """,
 ]
 
 

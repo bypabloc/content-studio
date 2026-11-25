@@ -54,9 +54,11 @@ test('la opción Sistema lleva la ★ y axe no reporta fallos serios en inglés 
   // La etiqueta del selector cambia con el idioma: en inglés es «Language».
   await pickOption(page, 'Idioma', 'English');
   await expect(page.getByRole('navigation').getByRole('link', { name: 'Narration' })).toBeVisible();
+  await page.addStyleTag({ content: '*, *::before, *::after { animation: none !important; transition: none !important; }' });
   expect(serious((await new AxeBuilder({ page }).analyze()).violations)).toEqual([]);
 
   await pickOption(page, 'Language', 'Português');
   await expect(page.getByRole('navigation').getByRole('link').first()).toBeVisible();
+  await page.addStyleTag({ content: '*, *::before, *::after { animation: none !important; transition: none !important; }' });
   expect(serious((await new AxeBuilder({ page }).analyze()).violations)).toEqual([]);
 });

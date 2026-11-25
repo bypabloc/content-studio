@@ -14,14 +14,15 @@ def _tables(conn) -> set[str]:
     return {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
 
 
-def test_ac1_migrate_twice_sets_version_8_and_creates_tables(tmp_path):
-    """La 8 suma `publish_path` (021); la 7, la biblioteca (020); la 6, `mix_projects` (016); la 5,
+def test_ac1_migrate_twice_sets_version_9_and_creates_tables(tmp_path):
+    """La 9 suma las carpetas de entrada (030).
+    La 8 suma `publish_path` (021); la 7, la biblioteca (020); la 6, `mix_projects` (016); la 5,
     `subtitle_projects` (014); la 4, la caché."""
     with closing(connection.connect(tmp_path / 'base.db')) as conn:
         schema.migrate(conn)
         schema.migrate(conn)
 
-        assert conn.execute('PRAGMA user_version').fetchone()[0] == 8
+        assert conn.execute('PRAGMA user_version').fetchone()[0] == 9
         assert 'publish_path' in {row[1] for row in conn.execute('PRAGMA table_info(library_items)')}
         assert {'jobs', 'settings', 'transcripts', 'subtitle_projects', 'mix_projects'} <= _tables(conn)
         library = {'library_items', 'library_folders', 'tags', 'item_tags', 'projects', 'project_items'}

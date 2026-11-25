@@ -13,11 +13,12 @@ EXPECTED = (
     'studio_get_job',
     'studio_wait_job',
     'studio_cancel_job',
+    'studio_watch_folder',
 )
 ADMIN_WORDS = ('engine', 'storage', 'setting', 'fs', 'trash', 'install', 'uninstall', 'delete', 'remove')
 
 
-def test_ac1_ten_tools_with_schemas_and_no_admin():
+def test_ac1_eleven_tools_with_schemas_and_no_admin():
     assert catalog.TOOL_NAMES == EXPECTED
     for tool in catalog.TOOLS:
         assert tool.input_schema['type'] == 'object'

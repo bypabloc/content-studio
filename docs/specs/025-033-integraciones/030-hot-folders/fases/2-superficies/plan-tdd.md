@@ -14,7 +14,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C6: API, CLI y MCP [AC-1, AC-10]
 
-- **RED**: `server/tests/unit/src/content_studio/api/routes/test_inbox.py::test_ac1_post_get_delete`
+- **RED**: `server/tests/unit/src/content_studio/api/routes/test_inbox.py::test_ac1_post_get_pause_delete`
   - WHEN `POST /inbox/folders` con una carpeta válida THEN 201 y aparece en `GET`; la lista MCP debe tener `studio_watch_folder`.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `api/routes/inbox.py`, `cli/inbox.py`, herramienta en `mcp_server/tools.py`. Verify: `uv run pytest server/tests -k inbox -q`.

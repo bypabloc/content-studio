@@ -8,6 +8,7 @@ import { UIField } from '@/shared/components/molecules/UIField';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 
+import { InboxFolders } from './InboxFolders';
 import { McpConfig } from './McpConfig';
 
 const DEFAULT_PORT = 41830;
@@ -71,6 +72,7 @@ export function IntegrationsPanel() {
       </UIStack>
       {failed && <UIText variant="caption">{t('settings.integrations.rotate_failed')}</UIText>}
       <McpConfig />
+      <InboxFolders />
     </UIStack>
   );
 }
