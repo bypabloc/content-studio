@@ -158,7 +158,7 @@ def test_uninstall_reports_when_the_engine_is_missing(tmp_path, monkeypatch):
 def test_install_is_idempotent_for_an_existing_matching_manifest(tmp_path, monkeypatch):
     home = tmp_path / 'fake'
     home.mkdir()
-    existing = {'owner': 'app', 'recipe_version': 1, 'paths': ['fake']}
+    existing = {'owner': 'app', 'recipe_version': 1, 'recipe_sha256': '', 'paths': ['fake']}
     (home / 'install.json').write_text(json.dumps(existing), encoding='utf-8')
     monkeypatch.setattr(installer, 'execute_step', lambda *args: pytest.fail('idempotent install ran a step'))
 
@@ -212,7 +212,9 @@ def test_repair_rebuilds_the_venv_and_preserves_weights(tmp_path, monkeypatch):
     cache.mkdir(parents=True)
     (venv / 'old').write_text('old', encoding='utf-8')
     (cache / 'weights').write_bytes(b'keep')
-    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_version': 0}), encoding='utf-8')
+    (home / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'recipe_version': 0, 'recipe_sha256': ''}), encoding='utf-8'
+    )
     for index in range(len(recipe.steps)):
         (markers / f'{recipe.version}-{index}.done').touch()
     monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
@@ -334,7 +336,9 @@ def test_list_engines_reports_active_owned_partial_external_and_missing_states(t
     ]
     root = tmp_path / 'engines'
     (root / 'voxcpm2').mkdir(parents=True)
-    (root / 'voxcpm2' / 'install.json').write_text(json.dumps({'owner': 'app', 'size_bytes': 7}), encoding='utf-8')
+    (root / 'voxcpm2' / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'size_bytes': 7, 'recipe_sha256': ''}), encoding='utf-8'
+    )
     (root / 'omnivoice').mkdir(parents=True)
     (root / 'omnivoice' / 'install.json').write_text(json.dumps({'owner': 'app', 'size_bytes': 9}), encoding='utf-8')
     (root / 'cosyvoice3').mkdir(parents=True)
@@ -467,3 +471,46 @@ def test_ac1_matching_checksum_extracts_into_the_engine_folder(tmp_path, monkeyp
 
     assert (tmp_path / 'fake' / 'assistant' / 'bin' / 'llama-server.exe').read_bytes() == b'binary'
     assert not list((tmp_path / 'hf').rglob('*.zip'))
+
+
+def test_ac3_changed_recipe_is_outdated(tmp_path, monkeypatch):
+    """AC-3 (spec 026): un motor instalado con la huella de otra receta sale outdated; con la misma, installed."""
+    recipe = Recipe(
+        'fake', 'narration', 1, 2, True, 'MIT',
+        ({'kind': 'python', 'version': '3.12'}, {'kind': 'venv', 'path': '.venv'}, {'kind': 'verify'}),
+        1, 'b' * 64,
+    )  # fmt: skip
+    home = tmp_path / 'fake'
+    home.mkdir()
+    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_sha256': 'a' * 64}), encoding='utf-8')
+    monkeypatch.setattr(installer.recipes, 'load_all', lambda: [recipe])
+    monkeypatch.setattr(installer.jobs, 'list_jobs', lambda conn, kind: [])
+    monkeypatch.setattr(installer.settings, 'get', lambda conn, key: None)
+    monkeypatch.setattr(installer, 'managed_ready', lambda recipe, base: True)
+
+    assert installer.list_engines(None, tmp_path)[0]['status'] == 'outdated'
+    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_sha256': 'b' * 64}), encoding='utf-8')
+    assert installer.list_engines(None, tmp_path)[0]['status'] == 'installed'
+
+
+def test_ac3_install_of_an_outdated_engine_reruns_every_step(tmp_path, monkeypatch):
+    """AC-3 (spec 026): reinstalar con otra huella vuelve a correr todos los pasos y guarda la nueva."""
+    recipe = Recipe(
+        'fake', 'narration', 1, 2, True, 'MIT',
+        ({'kind': 'python', 'version': '3.12'}, {'kind': 'venv', 'path': '.venv'}, {'kind': 'verify'}),
+        1, 'b' * 64,
+    )  # fmt: skip
+    home = tmp_path / 'fake'
+    (home / 'steps').mkdir(parents=True)
+    (home / 'steps' / '1-0.done').touch()
+    (home / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'recipe_version': 1, 'recipe_sha256': 'a' * 64, 'paths': ['fake']}),
+        encoding='utf-8',
+    )
+    ran = []
+    monkeypatch.setattr(installer, 'execute_step', lambda step, *args: ran.append(step['kind']))
+
+    result = installer.install(recipe, tmp_path)
+
+    assert ran == ['python', 'venv', 'verify']
+    assert result['recipe_sha256'] == 'b' * 64

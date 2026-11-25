@@ -223,3 +223,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [025-nombres-en-ingles](025-nombres-en-ingles.md) | Tests y funciones nuevos de la 025 llevan nombre en inglés (el spell check de pre-commit en inglés) | `main` |
 | [025-venv-vacio-al-recrear](025-venv-vacio-al-recrear.md) | El venv del server se borra y queda vacío al cambiar de Python; `uv sync` lo recrea (AC-6, instalador real pendiente) | `main` |
 | [025-instalador-real](025-instalador-real.md) | AC-6 con el instalador real sobre una instalación previa: requiere permiso del usuario | `main` |
+| [026-huella-receta](026-huella-receta.md) | La huella sha256 de la receta decide `outdated`; «Actualizar» reconstruye el motor y rehace sus descargas | `main` |

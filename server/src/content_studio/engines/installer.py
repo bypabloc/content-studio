@@ -133,9 +133,10 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     current = read_manifest(home)
     pending = home / 'installing.json'
     own = current.get('owner') == 'app'
+    stale = own and current.get('recipe_sha256') != recipe.sha256
     if repair and not own:
         raise InstallError('engine_external')
-    if not repair and own and current.get('recipe_version') == recipe.version and not pending.exists():
+    if not repair and own and not stale and current.get('recipe_version') == recipe.version and not pending.exists():
         return current
     if (home.exists() or cache.exists()) and not own and not pending.is_file():
         raise InstallError('engine_external')
@@ -148,7 +149,7 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     markers.mkdir(exist_ok=True)
     family = home / recipe.family
     family.mkdir(exist_ok=True)
-    if repair:
+    if repair or stale:
         venv = family / recipe.venv
         if venv.exists():
             if not venv.resolve().is_relative_to(family) or venv.resolve() != venv:
@@ -157,6 +158,10 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
         for index, step in enumerate(recipe.steps):
             if step['kind'] in ('python', 'venv', 'pip', 'verify'):
                 (markers / f'{recipe.version}-{index}.done').unlink(missing_ok=True)
+        if stale:
+            # Otra huella puede cambiar también las descargas (revisiones de HF): se rehacen todos los pasos.
+            for done in markers.glob('*.done'):
+                done.unlink()
     for index, step in enumerate(recipe.steps):
         done = markers / f'{recipe.version}-{index}.done'
         if not done.is_file():
@@ -171,6 +176,7 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     result = {
         'owner': 'app',
         'recipe_version': recipe.version,
+        'recipe_sha256': recipe.sha256,
         'installed_at': utc_now(),
         'paths': [path.relative_to(root).as_posix() for path in (home, cache)],
         'size_bytes': _file_bytes(home) + _file_bytes(cache),
@@ -226,6 +232,8 @@ def list_engines(conn: sqlite3.Connection, root: Path) -> list[dict]:
             owner = 'app'
             failed = isinstance(verification, dict) and not verification.get('ok')
             state = 'installed' if managed_ready(recipe, root) and not failed else 'broken'
+            if state == 'installed' and manifest.get('recipe_sha256') != recipe.sha256:
+                state = 'outdated'
         elif venv.is_dir() and not venv.is_relative_to(root):
             owner, state = 'external', 'external'
             size = _external_size(venv, venv.stat().st_mtime_ns)

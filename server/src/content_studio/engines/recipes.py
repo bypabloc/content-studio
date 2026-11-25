@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ class Recipe:
     license: str
     steps: tuple[dict[str, Any], ...]
     version: int = 1
+    sha256: str = ''
 
     @property
     def venv(self) -> str:
@@ -160,10 +162,11 @@ def load(engine: str) -> Recipe:
     """Carga la receta de un motor. El nombre debe coincidir con el archivo."""
     if not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    recipe = validate(json.loads((DIRECTORY / f'{engine}.json').read_text(encoding='utf-8')))
+    raw = (DIRECTORY / f'{engine}.json').read_bytes()
+    recipe = validate(json.loads(raw.decode('utf-8')))
     if recipe.engine != engine:
         raise ValueError(f'Recipe filename mismatch: {engine}')
-    return recipe
+    return replace(recipe, sha256=hashlib.sha256(raw).hexdigest())
 
 
 def load_all() -> list[Recipe]:
