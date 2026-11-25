@@ -37,7 +37,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Runtime del server](fases/1-runtime/plan-tdd.md) | C1, C2, C3, C4 | AC-4, AC-1, AC-2, AC-3, AC-6, AC-5, AC-10 | pendiente | IMP |
 | F2 | [La ventana se adjunta](fases/2-tauri/plan-tdd.md) | C5 | AC-7, AC-9 | pendiente | IMP |
-| F3 | [Reconexión y Ajustes > Integraciones](fases/3-client/plan-tdd.md) | C6, C7 | AC-8, AC-11 | - | PEN |
+| F3 | [Reconexión y Ajustes > Integraciones](fases/3-client/plan-tdd.md) | C6, C7 | AC-8, AC-11 | pendiente | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)

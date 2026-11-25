@@ -213,3 +213,5 @@ versiones
 regla
 NBLCK
 UNLCK
+reconecta
+reconectar

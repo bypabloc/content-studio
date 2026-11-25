@@ -61,6 +61,19 @@ pub fn stop(run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>) -> Result<
     }
 }
 
+/// Cambia el token (spec 028): `api down` primero, que se niega con trabajos activos y entonces el token no cambia;
+/// con el server parado, `api token --rotate` escribe el nuevo. La ventana se reconecta después con `get_connection`.
+pub fn rotate(run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>) -> Result<(), ServerError> {
+    if !run(&["api", "down"])?.success {
+        return Err(ServerError::Exited);
+    }
+    if run(&["api", "token", "--rotate"])?.success {
+        Ok(())
+    } else {
+        Err(ServerError::Exited)
+    }
+}
+
 impl ServerState {
     /// Qué ejecutar para hablar con `studio`: `uv run --project <raíz> studio` en un checkout, el de su venv instalado.
     fn launcher(&self) -> (PathBuf, Vec<OsString>) {
@@ -91,6 +104,13 @@ impl ServerState {
         let (program, before) = self.launcher();
         let env = self.0.server_env();
         attach(&mut |args| server::run_studio(&program, &before, &env, args), &self.1)
+    }
+
+    /// Cambia el token con el server parado (spec 028, AC-11).
+    fn change_token(&self) -> Result<(), ServerError> {
+        let (program, before) = self.launcher();
+        let env = self.0.server_env();
+        rotate(&mut |args| server::run_studio(&program, &before, &env, args))
     }
 
     /// Antes de instalar una actualización, detiene el server aunque tenga trabajos (spec 028, AC-9).
@@ -130,6 +150,16 @@ async fn stop_server_for_update(app: AppHandle) -> Result<(), String> {
         .map_err(|error| error.code().to_string())
 }
 
+/// Lo llama el panel de Integraciones (spec 028, AC-11): cambia el token y el client se reconecta con `get_connection`.
+#[tauri::command]
+async fn rotate_token(app: AppHandle) -> Result<(), String> {
+    let state = app.state::<ServerState>().inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.change_token())
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.code().to_string())
+}
+
 pub fn run() {
     tauri::Builder::default()
         // La app graba con su propio micrófono: WebView2 lo concede sin preguntar. Que se está usando lo muestra el
@@ -155,94 +185,11 @@ pub fn run() {
             app.manage(ServerState(Arc::new(mode), version));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update])
+        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")
         .run(|_, _| {});
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    const READY_0_1_0: &str = r#"{"ready": {"url": "http://127.0.0.1:41830", "port": 41830, "pid": 7, "version": "0.1.0", "token": "t1"}}"#;
-    const READY_0_2_0: &str = r#"{"ready": {"url": "http://127.0.0.1:41830", "port": 41830, "pid": 9, "version": "0.2.0", "token": "t2"}}"#;
-
-    fn answer(stdout: &str) -> server::Run {
-        server::Run {
-            success: true,
-            stdout: stdout.to_string(),
-        }
-    }
-
-    #[test]
-    fn connect_attaches_to_running_server() {
-        let mut calls: Vec<String> = Vec::new();
-        let connection = attach(
-            &mut |args| {
-                calls.push(args.join(" "));
-                Ok(answer(READY_0_1_0))
-            },
-            "0.1.0",
-        )
-        .expect("la ventana se adjunta al server que responde");
-        assert_eq!(connection.base_url, "http://127.0.0.1:41830");
-        assert_eq!(connection.token, "t1");
-        assert_eq!(calls, vec!["api up --with-token"]);
-    }
-
-    #[test]
-    fn restarts_server_of_other_version() {
-        let mut calls: Vec<String> = Vec::new();
-        let mut answers = vec![answer(READY_0_1_0), answer(""), answer(READY_0_2_0)].into_iter();
-        let connection = attach(
-            &mut |args| {
-                calls.push(args.join(" "));
-                Ok(answers.next().expect("una respuesta por llamada"))
-            },
-            "0.2.0",
-        )
-        .expect("el server de otra versión se reemplaza");
-        assert_eq!(
-            calls,
-            vec!["api up --with-token", "api down", "api up --with-token"]
-        );
-        assert_eq!(connection.token, "t2");
-    }
-
-    #[test]
-    fn stop_asks_for_force() {
-        let mut calls: Vec<String> = Vec::new();
-        stop(&mut |args| {
-            calls.push(args.join(" "));
-            Ok(answer(""))
-        })
-        .expect("el server se detiene");
-        assert_eq!(calls, vec!["api down --force"]);
-    }
-
-    #[test]
-    fn stop_fails_when_studio_refuses() {
-        let result = stop(&mut |_| {
-            Ok(server::Run {
-                success: false,
-                stdout: String::new(),
-            })
-        });
-        assert_eq!(result.err(), Some(ServerError::Exited));
-    }
-
-    #[test]
-    fn a_failing_up_is_reported_as_exited() {
-        let result = attach(
-            &mut |_| {
-                Ok(server::Run {
-                    success: false,
-                    stdout: String::new(),
-                })
-            },
-            "0.1.0",
-        );
-        assert_eq!(result.err(), Some(ServerError::Exited));
-    }
-}
+mod tests;

@@ -17,6 +17,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [028-rotar-token](028-rotar-token.md) | Cambiar el token detiene el server (`api down`), rota con `api token --rotate` y la app se reconecta | `main` |
+| [028-reconexion-silenciosa](028-reconexion-silenciosa.md) | La reconexión no muestra «Reactivando el servidor…»; el SSE se reabre al cambiar la conexión | `main` |
 | [028-job-retirado](028-job-retirado.md) | La ventana ya no posee el server: se retira el Job, `windows` y `getrandom` | `main` |
 | [028-serve-sin-token](028-serve-sin-token.md) | `serve` no imprime el token y el token persiste en `api-token` | `main` |
 | [028-apagado-y-guardas](028-apagado-y-guardas.md) | El apagado pasa por `POST /server/stop`; los guards de Host y de actividad se montan en `serve` | `main` |
