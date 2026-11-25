@@ -77,8 +77,6 @@ Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que
 | `tauri-plugin-window-state` | crate | 2.5.0 |  |
 | `tauri-plugin-updater` | crate | 2.14.1 |  |
 | `tauri-plugin-process` | crate | 2.4.0 |  |
-| `getrandom` | crate | 0.4.3 |  |
-| `windows` | crate | 0.62.2 |  |
 
 ## Instalador y actualizaciones (spec 022)
 

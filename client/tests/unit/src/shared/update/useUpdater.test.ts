@@ -21,7 +21,8 @@ function fakeDeps(version: string | null) {
   const downloadAndInstall = vi.fn(async () => {});
   const relaunch = vi.fn(async () => {});
   const check = vi.fn(async () => (version ? { version, downloadAndInstall } : null));
-  return { deps: { check, relaunch }, downloadAndInstall, relaunch, check };
+  const stopServer = vi.fn(async () => {});
+  return { deps: { check, relaunch, stopServer }, downloadAndInstall, relaunch, check };
 }
 
 afterEach(() => {
@@ -54,6 +55,26 @@ describe('useUpdater (spec 022, AC-9)', () => {
 
     await waitFor(() => expect(relaunch).toHaveBeenCalledOnce());
     expect(downloadAndInstall).toHaveBeenCalledOnce();
+  });
+
+  it('AC-9 (spec 028): detiene el server compartido antes de descargar la versión nueva', async () => {
+    const order: string[] = [];
+    const { deps, downloadAndInstall, relaunch } = fakeDeps('0.1.1');
+    deps.stopServer.mockImplementation(async () => {
+      order.push('stop');
+    });
+    downloadAndInstall.mockImplementation(async () => {
+      order.push('download');
+    });
+    const { result } = setup(deps);
+    await act(async () => {
+      await result.current.check();
+    });
+
+    act(() => result.current.install());
+
+    await waitFor(() => expect(relaunch).toHaveBeenCalledOnce());
+    expect(order).toEqual(['stop', 'download']);
   });
 
   it('AC-9: con un trabajo corriendo espera a que termine antes de instalar', async () => {

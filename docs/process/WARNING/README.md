@@ -17,6 +17,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [028-job-retirado](028-job-retirado.md) | La ventana ya no posee el server: se retira el Job, `windows` y `getrandom` | `main` |
 | [028-serve-sin-token](028-serve-sin-token.md) | `serve` no imprime el token y el token persiste en `api-token` | `main` |
 | [028-apagado-y-guardas](028-apagado-y-guardas.md) | El apagado pasa por `POST /server/stop`; los guards de Host y de actividad se montan en `serve` | `main` |
 | [027-csp-ipc](027-csp-ipc.md) | La CSP permite el IPC de Tauri (ipc: y http://ipc.localhost); cierra los errores de consola de app-check | `main` |
