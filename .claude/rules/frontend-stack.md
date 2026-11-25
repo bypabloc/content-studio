@@ -40,7 +40,9 @@ tests/e2e/                  workspace de bun: playwright.config.ts, _api/ (respu
 
 ## Versiones (fijadas, sin rangos)
 
-Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Cargo.toml`. Subirlas es un cambio con su spec. `tests/validators/test_pins.py` comprueba la tabla contra los manifiestos (AC-5).
+Están en `client/package.json`, `tests/e2e/package.json`, `package.json` (raíz) y `client/src-tauri/Cargo.toml`. Subirlas es un cambio con su spec.
+
+Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que una versión exacta no cambia sola, y una versión con `^` tampoco es válida aquí. En Cargo.toml, cada versión lleva `=` (`=2.12.7`), y la edición del crate es 2024. `tests/validators/test_pins.py` comprueba la tabla contra los manifiestos (AC-5).
 
 | Paquete | Origen | Versión | Nota |
 | :--- | :--- | :--- | :--- |

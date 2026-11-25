@@ -1,6 +1,6 @@
 ---
 modulo: cliente
-actualizada: 2026-11-20
+actualizada: 2026-11-25
 ---
 
 # Cliente de escritorio (Tauri)
@@ -35,3 +35,4 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 - 2026-11-20: spec 008 (componentes atómicos): 77 componentes de klinikae en átomos, moléculas y organismos; `UIAppShell`, `useForm` y las etapas `ui-structure` y de jerarquía.
 - 2026-11-20: spec 009 (iconos): mapa de `UIIcon` con los nombres de content-studio, iconos de estado en la cola, selector de tema con íconos y el criterio de solo ícono.
 - 2026-11-20: spec 010 (client): «Mis voces», asistente de grabación con indicador «Micrófono en uso», región de la onda al importar, micrófono y registro en Ajustes, y borrar tomas a la papelera (PR #80).
+- 2026-11-25: spec 027 (dependencias): JavaScript y crates en su última versión estable, exactas; `getrandom` 0.4; TypeScript se queda en 5.9.3 (`WARNING/005`); edición 2024; la CSP permite el IPC de Tauri (`WARNING/027-csp-ipc`).
