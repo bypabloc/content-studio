@@ -206,5 +206,39 @@ TOOLS: tuple[ToolDef, ...] = (
         JOB,
         destructive=True,
     ),
+    ToolDef(
+        'studio_watch_folder',
+        'Watch a folder',
+        'Register a folder. Each file dropped in it is processed with the kind and params given, and its result is '
+        'written to done/ or failed/ inside that folder.',
+        _object(
+            {
+                'path': _text('Absolute path of an existing folder on this computer.'),
+                'kind': {
+                    'type': 'string',
+                    'enum': ['media.convert', 'media.normalize', 'clean.analyze', 'narration'],
+                    'description': 'What to do with each file dropped in the folder.',
+                },
+                'params': {
+                    'type': 'object',
+                    'description': 'Params of that kind, as studio_capabilities describes them.',
+                },
+                'keep_awake': {'type': 'boolean', 'description': 'Keep the server running while the folder is active.'},
+            },
+            ('path', 'kind'),
+        ),
+        _object(
+            {
+                'id': {
+                    'type': 'integer',
+                    'description': 'Id of the folder; use it to unregister it in the app or CLI.',
+                },
+                'path': _text('Absolute path of the folder.'),
+                'kind': _text('Job kind applied to each file.'),
+                'keep_awake': {'type': 'boolean'},
+                'paused': {'type': 'boolean'},
+            },
+        ),
+    ),
 )
 TOOL_NAMES = tuple(tool.name for tool in TOOLS)

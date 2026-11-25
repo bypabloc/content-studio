@@ -42,6 +42,7 @@ EXPECTED_TOOLS = (
     'studio_get_job',
     'studio_wait_job',
     'studio_cancel_job',
+    'studio_watch_folder',
 )
 ADMIN_WORDS = ('engine', 'storage', 'setting', 'fs', 'trash', 'install', 'uninstall', 'delete', 'remove')
 
@@ -165,7 +166,7 @@ def _wait_until(predicate: Any, seconds: float) -> bool:
     return False
 
 
-def test_ac1_protocol_lists_ten_tools(tmp_path):
+def test_ac1_protocol_lists_eleven_tools(tmp_path):
     async def list_tools_call():
         async with _client(Bridge(tmp_path / 'content-studio.db', main=tmp_path)) as session:
             return await session.list_tools()

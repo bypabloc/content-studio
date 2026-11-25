@@ -20,11 +20,11 @@ ITEM_FIELDS = frozenset({'state', 'job_id'})
 class InboxError(ValueError):
     """Un error de carpeta de entrada con su código (`folder_not_found`, `unknown_kind`…) y sus parámetros."""
 
-    def __init__(self, code: str, **params: object) -> None:
+    def __init__(self, code: str, **params: Any) -> None:
         """Guarda el código y los parámetros para el mensaje."""
         super().__init__(code)
         self.code = code
-        self.params = params
+        self.params: dict[str, Any] = params
 
 
 def _folder(row: sqlite3.Row) -> dict[str, Any]:
@@ -47,9 +47,11 @@ def register(
     """Registra una carpeta: debe existir, el tipo tiene que aceptar archivos y los parámetros pasar su validación."""
     folder = Path(path)
     if not folder.is_dir():
-        raise InboxError('folder_not_found', path=path)
-    if kind not in inputs.INPUT_PARAM:
+        raise InboxError('inbox_path_not_found', path=path)
+    if kind not in services:
         raise InboxError('unknown_kind', kind=kind)
+    if kind not in inputs.INPUT_PARAM:
+        raise InboxError('inbox_kind_not_accepted', kind=kind)
     probe = {**params, inputs.INPUT_PARAM[kind]: inputs.input_value(kind, folder)}
     errors = services[kind].validate(probe)
     if errors:
@@ -60,7 +62,7 @@ def register(
             (str(folder.resolve()), kind, json.dumps(params, ensure_ascii=False), int(keep_awake), utc_now()),
         )
     except sqlite3.IntegrityError as error:
-        raise InboxError('folder_already_registered', path=path) from error
+        raise InboxError('inbox_folder_already_registered', path=path) from error
     for name in WORK_FOLDERS:
         (folder / name).mkdir(exist_ok=True)
     folder_id = cursor.lastrowid

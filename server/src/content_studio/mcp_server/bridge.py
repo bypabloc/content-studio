@@ -83,6 +83,14 @@ class Bridge:
             api.post(f'/jobs/{job_id}/cancel')
             view, outputs = self._snapshot(api, job_id)
             return _ok(view, outputs)
+        if name == 'studio_watch_folder':
+            body = {
+                'path': args.get('path', ''),
+                'kind': args.get('kind', ''),
+                'params': args.get('params') or {},
+                'keep_awake': args.get('keep_awake', True),
+            }
+            return _ok(api.post('/inbox/folders', body))
         kind, params = tools.build_job(name, args)
         return _ok(tools.job_view(api.post('/jobs', {'kind': kind, 'params': params}), []))
 

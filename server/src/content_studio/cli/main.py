@@ -13,6 +13,7 @@ from pathlib import Path
 from content_studio import gpu_lock, paths, seed
 from content_studio.cli import api as api_cli
 from content_studio.cli import editor as editor_cli
+from content_studio.cli import inbox as inbox_cli
 from content_studio.cli import library as library_cli
 from content_studio.cli import llm as llm_cli
 from content_studio.cli import mcp as mcp_cli
@@ -90,6 +91,7 @@ def build_parser() -> argparse.ArgumentParser:
     mix_cli.add_subcommand(sub, _db_flag())
     editor_cli.add_subcommand(sub, _db_flag())
     library_cli.add_subcommand(sub, _db_flag())
+    inbox_cli.add_subcommand(sub, _db_flag())
     llm_cli.add_subcommand(sub, _db_flag())
     media_cli.add_parsers(sub, _db_flag)
     api_cli.add_parser(sub, _db_flag)
@@ -248,6 +250,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return mix_cli.run(args)
     if args.command == 'editor':
         return editor_cli.run(args)
+    if args.command == 'inbox':
+        return inbox_cli.run(args)
     if args.command == 'library':
         return library_cli.run(args)
     if args.command == 'llm':

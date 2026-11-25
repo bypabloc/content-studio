@@ -9,7 +9,7 @@ from content_studio.jobs import queue
 def test_ac1_registers_a_valid_folder_and_rejects_the_rest(conn, folder, services):
     with pytest.raises(store.InboxError) as missing:
         store.register(conn, str(folder.parent / 'no-existe'), 'media.convert', {'target': 'mp3'}, services=services)
-    assert missing.value.code == 'folder_not_found'
+    assert missing.value.code == 'inbox_path_not_found'
 
     with pytest.raises(store.InboxError) as unknown:
         store.register(conn, str(folder), 'engine.uninstall', {}, services=services)

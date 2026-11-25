@@ -24,6 +24,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/inbox/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Folders
+         * @description Las carpetas registradas, en orden de alta.
+         */
+        get: operations["list_folders_inbox_folders_get"];
+        put?: never;
+        /**
+         * Create Folder
+         * @description Registra la carpeta. 422 con `code` si la ruta, el tipo o los parámetros no sirven.
+         */
+        post: operations["create_folder_inbox_folders_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inbox/folders/{folder_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pause Folder
+         * @description Pausa la carpeta (o la reanuda con paused en false): mientras está pausada no toma archivos.
+         */
+        post: operations["pause_folder_inbox_folders__folder_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inbox/folders/{folder_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove Folder
+         * @description Quita la carpeta del registro; sus archivos no se tocan. 404 si no existe.
+         */
+        delete: operations["remove_folder_inbox_folders__folder_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/integrations/mcp-config": {
         parameters: {
             query?: never;
@@ -2008,6 +2072,28 @@ export interface components {
             consent: boolean;
         };
         /**
+         * InboxFolder
+         * @description Una carpeta de entrada tal como la devuelve la API.
+         */
+        InboxFolder: {
+            /** Id */
+            id: number;
+            /** Path */
+            path: string;
+            /** Kind */
+            kind: string;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Keep Awake */
+            keep_awake: boolean;
+            /** Paused */
+            paused: boolean;
+            /** Created At */
+            created_at: string;
+        };
+        /**
          * IssueOut
          * @description Un aviso del linter: la regla de formato-guion.md, su posición (1-based) y su texto ya en español.
          */
@@ -2203,6 +2289,28 @@ export interface components {
             name: string;
         };
         /**
+         * NewFolder
+         * @description Cuerpo de POST /inbox/folders: la carpeta, el tipo de trabajo que hace con cada archivo y sus parámetros.
+         */
+        NewFolder: {
+            /** Path */
+            path: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Keep Awake
+             * @default true
+             */
+            keep_awake: boolean;
+        };
+        /**
          * NewJob
          * @description Cuerpo de POST /jobs: el tipo de trabajo y sus parámetros, como los pide su servicio.
          */
@@ -2213,6 +2321,17 @@ export interface components {
             params: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * PauseIn
+         * @description Cuerpo de POST /inbox/folders/{id}/pause: true pausa la carpeta y false la reanuda.
+         */
+        PauseIn: {
+            /**
+             * Paused
+             * @default true
+             */
+            paused: boolean;
         };
         /**
          * PlanIn
@@ -2468,6 +2587,123 @@ export interface operations {
                     "application/json": {
                         [key: string]: boolean;
                     };
+                };
+            };
+        };
+    };
+    list_folders_inbox_folders_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"][];
+                };
+            };
+        };
+    };
+    create_folder_inbox_folders_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewFolder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_folder_inbox_folders__folder_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                folder_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PauseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_folder_inbox_folders__folder_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                folder_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

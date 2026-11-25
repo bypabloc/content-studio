@@ -35,7 +35,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Tablas, sondeo y recibos](fases/1-nucleo/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8 | - | IMP |
-| F2 | [API, CLI, MCP y Ajustes](fases/2-superficies/plan-tdd.md) | C6, C7 | AC-1, AC-10, AC-9 | - | PEN |
+| F2 | [API, CLI, MCP y Ajustes](fases/2-superficies/plan-tdd.md) | C6, C7 | AC-1, AC-10, AC-9 | - | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)
@@ -64,7 +64,7 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 | AC | Fase | Ciclo | Test | Verificación real |
 | :--- | :--- | :--- | :--- | :--- |
 | AC-1 | F1 | C1 | `server/tests/unit/src/content_studio/inbox/test_store.py::test_ac1_registers_a_valid_folder_and_rejects_the_rest` | solo pytest |
-| AC-1 | F2 | C6 | `server/tests/unit/src/content_studio/api/routes/test_inbox.py::test_ac1_post_get_delete` | solo pytest |
+| AC-1 | F2 | C6 | `server/tests/unit/src/content_studio/api/routes/test_inbox.py::test_ac1_post_get_pause_delete` | solo pytest |
 | AC-2 | F1 | C2 | `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac2_takes_a_file_once_it_is_stable_across_two_sweeps` | solo pytest |
 | AC-3 | F1 | C2 | `server/tests/unit/src/content_studio/inbox/test_scanner.py::test_ac3_skips_partial_temporary_and_growing_files` | solo pytest |
 | AC-4 | F1 | C3 | `server/tests/unit/src/content_studio/inbox/test_receipts.py::test_ac4_done_keeps_the_original_outputs_and_a_result_receipt` | 03 §2, paso 1 |
@@ -73,9 +73,10 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 | AC-7 | F1 | C5 | `server/tests/integration/test_inbox.py::test_ac7_does_not_reprocess_after_a_restart` | solo pytest |
 | AC-8 | F1 | C5 | `server/tests/integration/test_inbox.py::test_ac8_keep_awake_holds_the_server_until_released` | solo pytest |
 | AC-9 | F2 | C7 | `client/tests/unit/src/features/settings/InboxFolders.test.tsx` | e2e `happy-inbox-folders` |
-| AC-10 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_tools.py::test_ac1_diez_herramientas_sin_admin (pasa a once)` | solo pytest |
+| AC-10 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_bridge.py::test_ac10_watch_folder_registers_the_folder_through_the_api` | solo pytest |
+| AC-10 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_catalog.py::test_ac1_eleven_tools_with_schemas_and_no_admin` | solo pytest |
 
 ## WARNING y PENDING
 
-- WARNING: `030-sondeo-stdlib` (D-2), `030-keep-awake` (D-4), `030-recibos-por-sondeo`, `030-cancelado-como-fallo`, `030-validacion-al-registrar`.
-- PENDING: `030-unidades-de-red` si no se pudo probar en OneDrive o en una unidad de red; `030-recibo-mensaje-locale`.
+- WARNING: `030-sondeo-stdlib` (D-2), `030-keep-awake` (D-4), `030-recibos-por-sondeo`, `030-cancelado-como-fallo`, `030-validacion-al-registrar`, `030-codigos-propios-del-inbox`, `030-pausa-por-cuerpo`, `030-mcp-por-api`.
+- PENDING: `030-unidades-de-red` si no se pudo probar en OneDrive o en una unidad de red; `030-recibo-mensaje-locale`, `030-ajustes-mas-operaciones`.

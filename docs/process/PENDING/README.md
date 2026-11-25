@@ -114,3 +114,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [025-pytest-local-candado](025-pytest-local-candado.md) | `gpu-turn run -- pytest -m local` se cuelga con el test de llm, que toma el candado por su cuenta | Agente |
 | [025-escucha-salidas](025-escucha-salidas.md) | Escuchar la música y la narración de AC-7 (el espectrograma muestra una caída de energía y un corte de banda en 16 kHz) | Usuario |
 | [030-recibo-mensaje-locale](030-recibo-mensaje-locale.md) | El message de los recibos va en el idioma de la interfaz | Fase 2 | Agente |
+| [030-ajustes-mas-operaciones](030-ajustes-mas-operaciones.md) | Ajustes ofrece solo convertir a MP3; los demás tipos quedan para decidir | Después de publicar 030 | Usuario |
