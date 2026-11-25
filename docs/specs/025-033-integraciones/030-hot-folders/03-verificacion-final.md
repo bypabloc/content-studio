@@ -40,3 +40,27 @@ No aplica: la spec no cambia el audio generado.
 - [ ] `gh pr list --head feature/030-hot-folders`; si no existe, `gh pr create --base dev` con problema, solución, cómo probar (comandos reales), rutas de `out/` y fichas WARNING/PENDING.
 - [ ] `gh pr checks <n> --watch`; con todo verde, `gh pr merge <n> --merge`.
 - [ ] Desde el principal: `git fetch origin dev` y `python -m devtools worktree close 030-hot-folders`.
+
+
+## 5. Resultados (2026-11-25, commit 33576cf)
+
+| Comprobación | Resultado |
+| :--- | :--- |
+| `ruff check` y `ruff format --check` | pasan |
+| `test-runner --type=all` | pasa; la etapa `client-typecheck` estaba roja y se corrigió (tipo del mock) |
+| `studio inbox --help`, alta real, alta con error y `list \| cat` | ayuda en inglés; alta exit 0 con el registro; ruta inexistente exit 2 con `inbox_path_not_found`; sin TTY no pregunta |
+| Soltar `toma.wav` (3,000 s) con el server | `done/toma.wav/` con `converted.mp3` de 3,056 s (±0,06 s) y `toma.wav.result.json`; `processing/` vacío [AC-2, AC-4] |
+| Audio inválido | `failed/lento.wav/` con `lento.wav.error.json` (`process_failed`) [AC-5] |
+| Archivo que cambia cada 0,5 s durante 8 s | no se toma mientras cambia; al quedar completo, se procesa en 6 s [AC-3] |
+| Dos archivos soltados con el server apagado | se procesan al levantarlo; cinco trabajos en total, sin reprocesar [AC-7] |
+| `keep_awake` con un minuto de inactividad | con la carpeta activa sigue encendido a los 80 s; sin `keep_awake` se apaga a los 92 s [AC-8] |
+| `app-check` smoke (run `20261125-071959`) | claro y oscuro pasan; sin errores de consola |
+| `app-check` escenario `carpetas-entrada` (run `20261125-072235`) | claro y oscuro pasan; sin errores ni 4xx |
+| `test-runner --type=e2e` completo | 91 de 92 en una corrida; la prueba de axe en en/pt falló en 2 de 5 corridas (PENDING `030-axe-language-intermitente`); `tests/e2e/settings`, 13 de 13 |
+
+Lo que no se probó aquí: el cliente MCP real con `studio_watch_folder` (AC-10 queda cubierto por la prueba del puente
+con API falsa), el `.job.json` en el flujo real (AC-6, cubierto por la prueba unitaria) y OneDrive o una unidad de red
+(PENDING `030-unidades-de-red`).
+
+Las pruebas de `keep_awake` y de `api up/down` usaron `tmp/spec-030/content-studio.db` con `api.idle_minutes = 1`; la
+base del usuario no se tocó.

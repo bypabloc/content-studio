@@ -31,6 +31,7 @@ uv run studio mcp config --client claude-code   # fragmento MCP para un asistent
 # uv run studio api up                    # server compartido en 127.0.0.1:41830: arranca o reutiliza el que responde; api status|down|token
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
+uv run studio inbox add DIR --kind media.convert --param target=mp3   # lo que se suelte en DIR sale en DIR/done/
 uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)
 ```
 

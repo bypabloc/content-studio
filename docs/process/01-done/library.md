@@ -19,6 +19,8 @@ Un solo lugar para lo que genera el estudio y lo que hay en las carpetas que el 
 - Espacio: barras por tipo, lo más pesado y las tomas no elegidas, con papelera en lote y una sola confirmación.
 - Miniaturas de video en `<datos>/cache/thumbs/`; la onda del audio se dibuja con `/media/peaks`.
 - CLI: `uv run studio library list|scan|tag|trash`.
+- Las carpetas de entrada (spec 030) no son carpetas vigiladas: no indexan nada en la biblioteca. Lo que se suelta en
+  una carpeta de entrada se procesa y su resultado queda en su `done/`, no aquí.
 
 ## Dónde vive
 

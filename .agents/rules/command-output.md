@@ -8,6 +8,7 @@ description: Dónde va la salida de cada comando (out/, logs/, tmp/<comando>/) y
 > En klinikae, los agentes redirigían cada corrida a mano (`> tmp/gate-g1.log`) y la raíz de `tmp/` acumulaba decenas de `.log` sueltos sin decir a qué pertenecían.
 
 * **Audio generado**: `out/narration/` y `out/music/`. Cada trabajo de `studio` sale en `out/<tipo>/<AAAA-MM-DD>-<id>-<slug>/`, con su `params.json`; `studio` no acepta `--output` (narration) ni `--folder` (music). No se limpian.
+* **Carpetas de entrada**: el resultado de cada archivo va a `<carpeta>/done/<nombre>/` o `<carpeta>/failed/<nombre>/`, con su recibo `<nombre>.result.json` o `<nombre>.error.json`. Las salidas siguen en `out/`; la carpeta recibe una copia.
 * **Logs de corridas**: `logs/<herramienta>-<descripción>.log` (`logs/music-heartmula-lofi.log`), en kebab-case; el log de un trabajo de `studio` es `logs/jobs/<id>.log`. Nunca en la raíz de `tmp/` ni de `out/`.
 * **Temporales de un comando o verificación**: `tmp/<comando>/<tema>.<ext>` (`tmp/verificar/spec.png`, `tmp/config-tests/<tema>.json`, `tmp/gpu-turn/`, `tmp/budget/report.json`, y `tmp/e2e/` con las capturas y `results/` de Playwright). Nunca `tmp/<algo>.log` suelto. La salida de Playwright va a `tmp/e2e/results/`, y las etapas `client-*` la devuelven en su detalle si fallan.
 * **Corridas largas** (HeartMuLa ~5 min por pista, un lote de voces): en segundo plano (`run_in_background`), con la salida en `logs/`; el harness avisa al terminar.

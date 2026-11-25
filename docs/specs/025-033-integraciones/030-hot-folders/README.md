@@ -35,8 +35,8 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Tablas, sondeo y recibos](fases/1-nucleo/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7, AC-8 | - | IMP |
-| F2 | [API, CLI, MCP y Ajustes](fases/2-superficies/plan-tdd.md) | C6, C7 | AC-1, AC-10, AC-9 | - | IMP |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F2 | [API, CLI, MCP y Ajustes](fases/2-superficies/plan-tdd.md) | C6, C7 | AC-1, AC-10, AC-9 | 33576cf | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | IMP |
 
 ## Decisiones cerradas (no reabrir)
 
@@ -79,4 +79,4 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 ## WARNING y PENDING
 
 - WARNING: `030-sondeo-stdlib` (D-2), `030-keep-awake` (D-4), `030-recibos-por-sondeo`, `030-cancelado-como-fallo`, `030-validacion-al-registrar`, `030-codigos-propios-del-inbox`, `030-pausa-por-cuerpo`, `030-mcp-por-api`.
-- PENDING: `030-unidades-de-red` si no se pudo probar en OneDrive o en una unidad de red; `030-recibo-mensaje-locale`, `030-ajustes-mas-operaciones`.
+- PENDING: `030-unidades-de-red` si no se pudo probar en OneDrive o en una unidad de red; `030-recibo-mensaje-locale`, `030-ajustes-mas-operaciones`, `030-axe-language-intermitente`, `030-unidades-de-red`, `030-appcheck-peaks-403`.
