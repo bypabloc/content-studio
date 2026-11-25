@@ -274,3 +274,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [035-pyannote-local](035-pyannote-local.md) | pyannote carga community-1 de su carpeta, sin red ni telemetría; la corrida real queda sin probar | `main` (corrida real en FV) |
 | [035-cache-en-archivo](035-cache-en-archivo.md) | Caché de diarización en archivo, sin tabla ni migración | `main` |
 | [035-split-por-carpeta](035-split-por-carpeta.md) | diarize.split recibe la carpeta de turnos y corta por turnos exclusivos | `main` (escucha de solapes en FV) |
+| [036-seccion-transcripcion](036-seccion-transcripcion.md) | Decisiones de la sección Transcripción y de la leyenda de hablantes (fase 2): átomos, claves nuevas y la vía de `shadcn/` | `main` |
