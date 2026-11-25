@@ -38,4 +38,6 @@ def build_command(params: dict, output_dir: Path) -> list[str]:
         '--folder', str(output_dir),
     ]  # fmt: skip
     args.append('--edges' if params.get('edges', True) else '--no-edges')
+    if params.get('diarize'):
+        args.append('--diarize')
     return [sys.executable, '-m', 'content_studio.clean.analyze_main', *args]

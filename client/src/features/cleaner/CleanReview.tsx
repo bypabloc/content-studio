@@ -8,6 +8,7 @@ import { UISkeleton } from '@/shared/components/atoms/UISkeleton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UIIconButton } from '@/shared/components/molecules/UIIconButton';
+import { type SpeakerMap } from '@/shared/components/molecules/UISpeakerLegend';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { UISwitch } from '@/shared/components/atoms/UISwitch';
 import { t } from '@/shared/i18n/t';
@@ -15,6 +16,7 @@ import { useMediaPeaks } from '@/shared/media/useMediaInfo';
 import { useSyncedMedia } from '@/shared/media/useSyncedMedia';
 import { OpenInEditorButton } from '@/shared/navigation/OpenInEditorButton';
 
+import { ReviewSpeakers, speakerUnderline } from './ReviewSpeakers';
 import { ReviewWave } from './ReviewWave';
 import { type Cut, clock, keepDuration, moveSelection, skipTarget, toggleCut } from './cuts';
 
@@ -24,11 +26,14 @@ interface CleanDocument {
   duration: number;
   transcript: string;
   cuts: Cut[];
+  words?: Word[];
+  speakers?: SpeakerMap;
 }
 interface Word {
   start: number;
   end: number;
   word: string;
+  speaker?: string | null;
 }
 interface Transcript {
   segments: Array<{ words: Word[] }>;
@@ -176,7 +181,8 @@ export function CleanReview({ jobId, onBack }: { jobId: number; onBack?: () => v
 
   const data = analysis.data;
   const keep = keepDuration(data.duration, cuts);
-  const words = (transcript.data?.segments ?? []).flatMap((segment) => segment.words);
+  // Con hablantes, la revisión trae sus palabras (AC-8); si no, las de la transcripción.
+  const words: Word[] = analysis.data?.words ?? (transcript.data?.segments ?? []).flatMap((segment) => segment.words);
   const currentWord = words.findIndex((word) => time >= word.start && time < word.end);
 
   return (
@@ -274,10 +280,16 @@ export function CleanReview({ jobId, onBack }: { jobId: number; onBack?: () => v
           </UIButton>
         ))}
       </UIStack>
+      {analysis.data?.speakers ? <ReviewSpeakers speakers={analysis.data.speakers} /> : null}
       <UIText variant="subtitle">{t('cleaner.review.transcript')}</UIText>
       <UIStack direction="row" gap="xs" className="flex-wrap">
         {words.map((word, index) => (
-          <UIButton key={index} variant={index === currentWord ? 'primary' : 'ghost'} onClick={() => seek(word.start)}>
+          <UIButton
+            key={index}
+            variant={index === currentWord ? 'primary' : 'ghost'}
+            style={speakerUnderline(word, analysis.data?.speakers)}
+            onClick={() => seek(word.start)}
+          >
             {word.word}
           </UIButton>
         ))}

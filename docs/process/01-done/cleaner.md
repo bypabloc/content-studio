@@ -1,6 +1,6 @@
 ---
 modulo: cleaner
-actualizada: 2026-11-21
+actualizada: 2026-11-25
 ---
 
 # Limpiador de silencios
@@ -16,8 +16,7 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 - Sección **Limpiador** de la app: lote con «Analizar» y «Aplicar todos sin revisar»; «Revisar» abre el video o solo el audio con su onda, los cortes como regiones arrastrables, márgenes que replanifican sin GPU, «Escuchar sin cortes», atajos (Espacio, ← y →, D) y «Renderizar».
 - Modelo de transcripción: el que se elige en el selector (`select.whisper.model`), large-v3-turbo por defecto (★). La evaluación de narración y el chequeo de tomas usan el mismo servicio: el comando `whisper` ya no se usa.
 - Un envío que el servidor rechaza (por ejemplo, un formato que no acepta) muestra su motivo en la sección.
-
-## Dónde vive
+- Hablantes (spec 038): «Identificar hablantes» en el análisis; la revisión colorea cada palabra con el color de su hablante y muestra la leyenda con los nombres; «Subtitular» lleva los hablantes ubicados en el tiempo del archivo limpio.
 
 - Código: `server/src/content_studio/clean/` (plan de cortes, render, exportaciones y análisis), `server/src/content_studio/transcription/` (servicio de faster-whisper), `server/src/content_studio/api/routes/clean.py` (API de revisión).
 - Cliente: `client/src/features/cleaner/` (sección, revisión y cortes), `client/src/shared/components/molecules/UIWhisperModelSelect/` y `client/src/shared/media/useSyncedMedia.ts`.
@@ -27,8 +26,7 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 ## Historial
 
 - 2026-11-21: spec 013 (limpiador y faster-whisper), tareas T1 a T8: plan de cortes, exportaciones, render de audio y de video, transcripción con caché, trabajos y API, sección del cliente y migración de la evaluación a faster-whisper (AC-10).
-
-## Verificación (2026-11-21)
+- 2026-11-25: spec 038 (hablantes): análisis con hablantes, revisión coloreada y Subtitular con hablantes.
 
 - Gate `test-runner --type=all`: 12 etapas en verde (lint, spelling, validators, unit, typecheck, tdd, client-lint, client-typecheck, client-unit, ui-structure, budget, i18n).
 - e2e en desktop-chromium: 36 de 36 pasan, con los cuatro del limpiador.

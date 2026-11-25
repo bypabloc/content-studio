@@ -219,3 +219,49 @@ def test_ac2_cleaner_keeps_each_words_speaker(tmp_path):
     kept = create_main.clean_words(words, analysis)
 
     assert [(word['word'], word['speaker']) for word in kept] == [('uno', 'SPEAKER_00'), ('tres', 'SPEAKER_01')]
+
+
+def test_ac8_cleaner_keeps_the_speakers_on_the_clean_timeline(tmp_path):
+    """AC-8: «Subtitular» desde el limpiador lleva los hablantes del análisis, en el tiempo del archivo limpio."""
+    cache = tmp_path / 'cache'
+    cache.mkdir()
+    transcript = cache / 'transcript.json'
+    transcript.write_text(json.dumps(WORDS), encoding='utf-8')
+    analysis = tmp_path / 'analysis'
+    analysis.mkdir()
+    turns = analysis / 'diarization' / 'turns.json'
+    turns.parent.mkdir()
+    turns.write_text(
+        json.dumps(
+            {
+                'exclusive_diarization': [
+                    {'start': 0.0, 'end': 0.45, 'speaker': 'SPEAKER_00'},
+                    {'start': 0.45, 'end': 1.0, 'speaker': 'SPEAKER_01'},
+                ]
+            }
+        ),
+        encoding='utf-8',
+    )
+    (turns.parent / 'speakers.json').write_text(
+        json.dumps(
+            {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}, 'SPEAKER_01': {'name': 'Luis', 'color': '#dc2626'}}
+        ),
+        encoding='utf-8',
+    )
+    clean_cuts.save(analysis, {'cuts': [], 'duration': 1.0, 'diarization': str(turns)})
+    folder = _job(
+        tmp_path,
+        {
+            'origin': 'cleaner',
+            'input': str(transcript),
+            'analysis': str(analysis),
+            'source': 'charla.mp4',
+            'language': 'es',
+        },
+    )
+
+    assert create_main.main(['--folder', str(folder)]) == 0
+
+    doc = load(folder / 'subtitles.json')
+    assert doc['speakers']['SPEAKER_01']['name'] == 'Luis'
+    assert [cue['speaker'] for cue in doc['cues']] == ['SPEAKER_00', 'SPEAKER_01']

@@ -1,6 +1,6 @@
 ---
 modulo: editor
-actualizada: 2026-11-24
+actualizada: 2026-11-25
 ---
 
 # Editor
@@ -19,8 +19,7 @@ Permite organizar y editar audio, video e imágenes sin modificar los archivos d
 - Exporta WAV, MP3, FLAC, M4A y Opus; para video, MP4 H.264 o WebM VP9. La normalización y los tramos por marcadores son opcionales.
 - El explorador local es de solo lectura. La grabación crea WAV mono de 24 bits y 48 kHz dentro del proyecto; los videos generan proxies en `.cache/proxies/`. Las fuentes originales no se modifican.
 - Los proyectos v1 y v2 se migran a v3 al abrirse; los proyectos son JSON, no filas ni blobs de SQLite.
-
-## Dónde vive
+- Hablantes (spec 038): «Transcribir la mezcla» con «Identificar hablantes» (con el motor de hablantes instalado) y la pista de subtítulos dibuja un bloque por cue, con el color y el nombre de su hablante.
 
 - Código: `server/src/content_studio/editor/` (proyecto, tiempos, efectos, proxies y render), `services/editor_render.py`, `api/routes/editor.py`, `api/routes/fs.py` y `cli/editor.py`.
 - Cliente: `client/src/features/editor/` (timeline, inspector, títulos, subtítulos, visor y compositor) y `client/src/shared/navigation/` para «Abrir en Editor» y «Mandar a…».
@@ -34,8 +33,7 @@ Permite organizar y editar audio, video e imágenes sin modificar los archivos d
 - 2026-11-22: spec 017, editor de audio con timeline, preview, grabación, explorador y exportación.
 - 2026-11-23: spec 018, edición visual con compositor WebGL2, keyframes, transiciones y exportación de video.
 - 2026-11-23: spec 019, proyecto v3, texto rasterizado, velocidad, color, LUT, chroma, fusión, subtítulos e integración con secciones.
-
-## Verificación 019 (2026-11-23)
+- 2026-11-25: spec 038 (hablantes): la pista de subtítulos dibuja sus cues por hablante y «Transcribir la mezcla» identifica hablantes.
 
 - Los cuatro e2e nuevos de títulos, chroma/fusión, abrir desde Narración y ausencia de libass imprimieron PASS en corridas enfocadas.
 - La caché global de Chromium no contenía la revisión requerida; las corridas usaron `PLAYWRIGHT_BROWSERS_PATH` de `017-editor-core`.

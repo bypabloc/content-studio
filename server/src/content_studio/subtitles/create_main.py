@@ -42,6 +42,19 @@ def clean_words(words: list[dict], folder: Path) -> list[dict]:
     return kept
 
 
+def _cleaner_words(transcript: Path, analysis: Path) -> tuple[list[dict], dict[str, dict] | None]:
+    """Las palabras del análisis en su tiempo original, con su hablante si el análisis identificó hablantes (AC-8), y el
+    mapa de hablantes. Los turnos son del audio original: se asignan antes de quitar los cortes."""
+    words = _words_from_transcript(transcript)
+    document = clean_cuts.load(analysis)
+    if 'diarization' not in document:
+        return words, None
+    turns_file = Path(document['diarization'])
+    turns = json.loads(turns_file.read_text(encoding='utf-8'))['exclusive_diarization']
+    speaker_names = json.loads((turns_file.parent / 'speakers.json').read_text(encoding='utf-8'))
+    return assign.assign_speakers(words, turns), speaker_names
+
+
 def build_document(
     origin: str,
     *,
@@ -138,7 +151,11 @@ def main(argv: list[str] | None = None) -> int:
     else:
         # Los cortes son los de su análisis (`analysis`): el transcript vive en la caché de transcripción (WARNING 014).
         analysis = Path(params.get('analysis', ''))
-        words = clean_words(_words_from_transcript(Path(source)), analysis) if origin == 'cleaner' else []
+        if origin == 'cleaner':
+            words, speakers = _cleaner_words(Path(source), analysis)
+            words = clean_words(words, analysis)
+        else:
+            words = []
     raw = Path(source).read_text(encoding='utf-8') if origin == 'import' else ''
     doc = build_document(
         origin,

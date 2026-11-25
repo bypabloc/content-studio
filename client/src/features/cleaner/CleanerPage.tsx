@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useApi } from '@/shared/api/context';
 import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UILink } from '@/shared/components/atoms/UILink';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISwitch } from '@/shared/components/atoms/UISwitch';
@@ -20,6 +21,7 @@ import { hashParams } from '@/shared/navigation/hash';
 import { CleanReview } from './CleanReview';
 
 type Job = components['schemas']['Job'];
+type EngineInfo = components['schemas']['EngineInfo'];
 
 const MEDIA_EXTENSIONS = ['wav', 'mp3', 'm4a', 'flac', 'ogg', 'aac', 'mp4', 'mov', 'mkv', 'webm', 'avi', 'm4v'];
 
@@ -84,6 +86,10 @@ export function CleanerPage(): React.JSX.Element {
     if (typeof keepEdges === 'boolean') setEdges(keepEdges);
   }
   const [review, setReview] = useState<number | null>(null);
+  // Identificar hablantes (AC-8): solo con el motor de hablantes instalado; si no, el interruptor queda apagado.
+  const [speakers, setSpeakers] = useState(false);
+  const engines = useQuery({ queryKey: ['engines'], queryFn: () => api.get<EngineInfo[]>('/engines') });
+  const speakersAvailable = engines.data?.find((engine) => engine.engine === 'pyannote')?.status === 'installed';
   const analyses = useQuery({
     queryKey: ['jobs', 'clean.analyze'],
     queryFn: () => api.get<Job[]>('/jobs?kind=clean.analyze'),
@@ -109,6 +115,7 @@ export function CleanerPage(): React.JSX.Element {
               padding: padding / 1000,
               edges,
               auto_render: autoRender,
+              ...(speakers && speakersAvailable ? { diarize: true } : {}),
             },
           }),
         ),
@@ -167,6 +174,18 @@ export function CleanerPage(): React.JSX.Element {
           ))}
         </UIStack>
       )}
+      <UISwitch
+        label={t('cleaner.diarize')}
+        description={speakersAvailable ? undefined : t('transcription.diarize.missing')}
+        checked={speakers && speakersAvailable}
+        disabled={!speakersAvailable}
+        onChange={setSpeakers}
+      />
+      {!speakersAvailable ? (
+        <UILink href="#/engines" variant="inline" className="underline">
+          {t('transcription.diarize.engines')}
+        </UILink>
+      ) : null}
       <UIStack direction="row" gap="sm">
         <UIButton disabled={files.length === 0 || submit.isPending} onClick={() => submit.mutate(false)}>
           {t('cleaner.analyze')}
