@@ -17,3 +17,4 @@
 
 - Spec 034: motor pyannote y credencial de Hugging Face (PR #115).
 - Spec 035: unión palabra-hablante, trabajos, caché, CLI y transcripción con hablantes.
+- Spec 037: sección Hablantes (identificar quién habla y cuándo): línea de tiempo, nombres, archivos de turnos, un audio por hablante y «Abrir en el Editor».
