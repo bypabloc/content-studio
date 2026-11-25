@@ -270,3 +270,5 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [034-token-en-settings](034-token-en-settings.md) | El token de Hugging Face va en settings sin cifrar (la API lo bloquea) | `main` |
 | [034-pyannote-fuera-de-libraries](034-pyannote-fuera-de-libraries.md) | pyannote sale de LIBRARIES hasta que la 035 le dé su EngineSpec | `main` |
 | [035-asignacion-de-hablante](035-asignacion-de-hablante.md) | Palabra sin fin, empate de solape y distancia al hueco, que AC-1 no fija | `main` |
+| [035-audio-por-hablante](035-audio-por-hablante.md) | Audio por hablante sin rampa en los bordes; filtro largo en archivo | `main` (medir clics en FV) |
+| [035-pyannote-local](035-pyannote-local.md) | pyannote carga community-1 de su carpeta, sin red ni telemetría; la corrida real queda sin probar | `main` (corrida real en FV) |

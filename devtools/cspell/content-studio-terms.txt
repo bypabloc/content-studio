@@ -229,3 +229,5 @@ pyannote
 torchcodec
 plda
 rttm
+itertracks
+lavfi
