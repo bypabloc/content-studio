@@ -38,6 +38,7 @@ cosyvoice
 creationflags
 crossfade
 cspell
+ctranslate
 cuda
 cumbia
 dbfs

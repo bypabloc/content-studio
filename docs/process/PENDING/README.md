@@ -16,6 +16,11 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [026-llm-casos-fallidos](026-llm-casos-fallidos.md) | asistente: el caso que falla en script_review (1 de 25 en cada modelo) | después de publicar | agente |
+| [026-heartmula-voz](026-heartmula-voz.md) | heartmula: prompt o revisión que no cante, o quitar el motor de la música instrumental | antes de publicar | usuario y agente |
+| [026-reintentar-faster-whisper](026-reintentar-faster-whisper.md) | faster-whisper en 3.15 y av nueva | después de publicar | agente |
+| [026-reintentar-acestep](026-reintentar-acestep.md) | acestep en 3.13 o más cuando su pyproject lo permita | después de publicar | agente |
+| [026-reintentar-heartmula](026-reintentar-heartmula.md) | heartmula en 3.14 o más cuando torchtune deje datasets 2.14.4 | después de publicar | agente |
 | [026-reintentar-cosyvoice3](026-reintentar-cosyvoice3.md) | cosyvoice3 en 3.12 o más, y escucha de onnxruntime 1.23.2 | después de publicar | agente y usuario |
 | [026-reintentar-indextts](026-reintentar-indextts.md) | indextts: aceptar la licencia y verificar 3.11 | antes de publicar | usuario y agente |
 | [026-chatterbox-volumen-y-cangjie](026-chatterbox-volumen-y-cangjie.md) | chatterbox: aviso de LUFS del mastering y mapa Cangjie | antes de publicar | usuario y agente |

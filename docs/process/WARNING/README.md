@@ -17,6 +17,12 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [026-llama-cpp-version](026-llama-cpp-version.md) | llama.cpp b12686 (mejor que b12676 en script_review) | `main` |
+| [026-heartmula-voz](026-heartmula-voz.md) | heartmula canta en ambas revisiones: la música no es instrumental | `main` |
+| [026-faster-whisper-version](026-faster-whisper-version.md) | faster-whisper en 3.14 con av 18.1.1: onnxruntime y metadata_errors | `main` |
+| [026-acestep-version](026-acestep-version.md) | acestep en 3.12: su pyproject exige Python menor que 3.13 y torch 2.7.1 | `main` |
+| [026-heartmula-version](026-heartmula-version.md) | heartmula en 3.13: torchtune fija datasets 2.14.4, que necesita pyarrow 20 | `main` |
+| [026-instalacion-fallida](026-instalacion-fallida.md) | Un intento fallido reutiliza pasos y venv de la receta anterior | `main` |
 | [026-cosyvoice3-version](026-cosyvoice3-version.md) | cosyvoice3 en 3.11: pyworld y grpcio sin rueda cp312; onnxruntime 1.23.2 | `main` |
 | [026-indextts-version](026-indextts-version.md) | indextts en 3.11 sin verificar: licencia bilibili pendiente | `main` |
 | [026-voxcpm2-version](026-voxcpm2-version.md) | voxcpm2 en 3.14: pyahocorasick sin rueda cp315 | `main` |

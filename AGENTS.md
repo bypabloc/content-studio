@@ -66,7 +66,7 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch,
 
 - **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py`, una receta fijada en `server/src/content_studio/engines/recipes/` y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
 - **Agregar un servicio** (un tipo de trabajo): un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES`. La API y `studio` lo usan solos.
-- **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.15 en el server, y el piso de los motores (hoy 3.10) sale de sus recetas. Detalle en [codigo-python](.agents/rules/codigo-python.md).
+- **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.15 en el server, y el piso de los motores (hoy 3.11) sale de sus recetas. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
 ## Forma de trabajo y dónde buscar
 

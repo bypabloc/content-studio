@@ -37,8 +37,8 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Huella de receta y «Actualizar» en Motores](fases/1-huella-receta/plan-tdd.md) | C1, C2 | AC-3, AC-7 | pendiente | IMP |
 | F2 | [Recetas de narración](fases/2-narracion/plan-tdd.md) | C3 | AC-1, AC-2, AC-4 | pendiente | IMP |
-| F3 | [Música, whisper, visión y asistente](fases/3-musica-y-resto/plan-tdd.md) | C4 | AC-1, AC-2, AC-4, AC-6 | - | PEN |
-| F4 | [Piso nuevo](fases/4-piso/plan-tdd.md) | C5 | AC-5 | - | PEN |
+| F3 | [Música, whisper, visión y asistente](fases/3-musica-y-resto/plan-tdd.md) | C4 | AC-1, AC-2, AC-4, AC-6 | pendiente | IMP |
+| F4 | [Piso nuevo](fases/4-piso/plan-tdd.md) | C5 | AC-5 | pendiente | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)

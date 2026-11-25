@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from content_studio import paths
@@ -13,7 +13,7 @@ from content_studio.engines import installer, recipes
 
 
 def _checked_at() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+    return datetime.now(UTC).isoformat(timespec='seconds')
 
 
 def _summary(text: str) -> str:

@@ -88,7 +88,7 @@ def test_ac5_the_vision_recipe_pins_opencv_and_only_the_yunet_model():
 
     assert (recipe.family, recipe.cpu, recipe.venv) == ('vision', True, '.venv-vision')
     pip = next(step for step in recipe.steps if step['kind'] == 'pip')
-    assert pip['packages'] == ['opencv-python==4.13.0.92', 'huggingface-hub==0.36.2']
+    assert pip['packages'] == ['opencv-python==5.1.0.95', 'huggingface-hub==2.4.0']
     hf = next(step for step in recipe.steps if step['kind'] == 'hf')
     assert hf['allow_patterns'] == ['face_detection_yunet_2023mar.onnx']
 
@@ -145,8 +145,6 @@ def test_ac1_every_engine_below_pinned_python_has_warning():
     pinned = tuple(int(part) for part in (root / '.python-version').read_text(encoding='utf-8').strip().split('.')[:2])
     missing = []
     for recipe in recipes.load_all():
-        if recipe.family != 'narration':  # F2: solo narración; la F3 quita este filtro
-            continue
         python = next(step['version'] for step in recipe.steps if step['kind'] == 'python')
         version = tuple(int(part) for part in python.split('.')[:2])
         warning_file = root / 'docs/process/WARNING' / f'026-{recipe.engine}-version.md'
