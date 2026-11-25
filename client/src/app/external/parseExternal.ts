@@ -10,6 +10,7 @@ export const MAX_URL_LENGTH = 4096;
 export const OPEN_SECTIONS = [
   'narration',
   'music',
+  'transcription',
   'cleaner',
   'subtitles',
   'convert',

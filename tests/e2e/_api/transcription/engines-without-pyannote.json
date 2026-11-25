@@ -1,0 +1,21 @@
+[
+  {
+    "engine": "faster-whisper",
+    "family": "transcription",
+    "status": "installed",
+    "models": [
+      {
+        "model": "large-v3-turbo",
+        "size_gb": 1.6,
+        "downloaded": true,
+        "recommended": true
+      }
+    ]
+  },
+  {
+    "engine": "pyannote",
+    "family": "diarization",
+    "status": "missing",
+    "models": []
+  }
+]

@@ -823,6 +823,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/{job_id}/transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Transcript
+         * @description Los segmentos del trabajo con su hablante, y el mapa de nombres y colores.
+         */
+        get: operations["transcript_jobs__job_id__transcript_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/speakers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Speakers
+         * @description El mapa de hablantes; 409 si el trabajo no identificó hablantes.
+         */
+        get: operations["get_speakers_jobs__job_id__speakers_get"];
+        /**
+         * Put Speakers
+         * @description Guarda nombres y colores; 422 si el id no existe, o el nombre o el color no son válidos.
+         */
+        put: operations["put_speakers_jobs__job_id__speakers_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/transcript/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Transcript
+         * @description Escribe transcript.txt en la carpeta del trabajo, con los nombres actuales.
+         */
+        post: operations["export_transcript_jobs__job_id__transcript_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/mix/prepare": {
         parameters: {
             query?: never;
@@ -2055,16 +2119,6 @@ export interface components {
             models?: components["schemas"]["WhisperModel"][] | null;
         };
         /**
-         * ExportIn
-         * @description El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida.
-         */
-        ExportIn: {
-            /** Format */
-            format: string;
-            /** Language */
-            language?: string | null;
-        };
-        /**
          * FolderIn
          * @description Carpeta a vigilar: su ruta y un nombre visible opcional.
          */
@@ -2496,6 +2550,16 @@ export interface components {
             value: unknown;
         };
         /**
+         * SpeakerIn
+         * @description Nombre y color de un hablante, como los guarda speakers.json.
+         */
+        SpeakerIn: {
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
+        };
+        /**
          * StorageMove
          * @description Raíz que se va a mover y su destino.
          */
@@ -2608,6 +2672,27 @@ export interface components {
             recommended: boolean;
             /** Downloaded */
             downloaded: boolean;
+        };
+        /**
+         * ExportIn
+         * @description Cuerpo de la exportación: si el texto lleva la hora de cada bloque.
+         */
+        content_studio__api__routes__speakers__ExportIn: {
+            /**
+             * Timestamps
+             * @default false
+             */
+            timestamps: boolean;
+        };
+        /**
+         * ExportIn
+         * @description El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida.
+         */
+        content_studio__api__routes__subtitles__ExportIn: {
+            /** Format */
+            format: string;
+            /** Language */
+            language?: string | null;
         };
     };
     responses: never;
@@ -3865,7 +3950,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ExportIn"];
+                "application/json": components["schemas"]["content_studio__api__routes__subtitles__ExportIn"];
             };
         };
         responses: {
@@ -4000,6 +4085,148 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transcript_jobs__job_id__transcript_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_speakers_jobs__job_id__speakers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_speakers_jobs__job_id__speakers_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: components["schemas"]["SpeakerIn"];
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_transcript_jobs__job_id__transcript_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["content_studio__api__routes__speakers__ExportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
             };
             /** @description Validation Error */
             422: {

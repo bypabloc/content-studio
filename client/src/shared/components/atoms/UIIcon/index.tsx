@@ -237,6 +237,7 @@ const ICONS = {
   voices: Mic,
   editor: Film,
   scissors: Scissors,
+  transcription: AudioLines,
   subtitles: Captions,
   magnet: Magnet,
   layers: Layers,

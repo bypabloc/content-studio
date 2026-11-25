@@ -124,3 +124,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [032-033-fuera-del-lote](032-033-fuera-del-lote.md) | 032 (LAN) y 033 (verificación integral) quedan fuera del lote 025-031 según DECISIONS.md | Antes de empezar 032 | Usuario |
 | [034-instalacion-real](034-instalacion-real.md) | Instalación real de pyannote con el token del usuario (blocked — user-credential) | Antes de la corrida real de la 035 | Usuario |
 | [035-corrida-real](035-corrida-real.md) | Corrida real de pyannote (VRAM, WDER y escucha): el usuario pone el token de Hugging Face | `main` |
+| [036-corrida-real](036-corrida-real.md) | Corrida real con hablantes (pyannote, con el token del usuario) y revisión de capturas con hablantes | Antes de publicar | Usuario y agente |
+| [036-llm-warm-intermitente](036-llm-warm-intermitente.md) | `test_llm_warm` falló una vez en la etapa unit; pasa aislado y en la pasada siguiente | Después de publicar | Agente |

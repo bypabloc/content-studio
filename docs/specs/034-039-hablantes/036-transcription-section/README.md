@@ -36,8 +36,8 @@ Una sección propia **Transcripción** que:
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [API de transcripción y hablantes](fases/1-api/plan-tdd.md) | C1, C2 | AC-5, AC-6 | - | PEN |
-| F2 | [Sección Transcripción](fases/2-seccion/plan-tdd.md) | C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | - | PEN |
+| F1 | [API de transcripción y hablantes](fases/1-api/plan-tdd.md) | C1, C2 | AC-5, AC-6 | c3d9343 | IMP |
+| F2 | [Sección Transcripción](fases/2-seccion/plan-tdd.md) | C3, C4, C5 | AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7 | (ver historial de git) | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)

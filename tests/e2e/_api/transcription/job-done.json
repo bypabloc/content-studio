@@ -1,0 +1,11 @@
+{
+  "id": 7,
+  "kind": "transcribe",
+  "status": "done",
+  "progress": 1,
+  "params": {
+    "input": "C:/fake/in/charla.wav",
+    "model": "large-v3-turbo",
+    "language": "auto"
+  }
+}

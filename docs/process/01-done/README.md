@@ -12,6 +12,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Cliente | Ventana de escritorio: shell, cola, tema, selectores y ajustes | [client.md](client.md) |
 | Motores y almacenamiento | Instalación de motores con recetas y carpetas elegibles | [engines.md](engines.md) |
 | Subtítulos | Subtítulos desde archivo, limpiador, narración o SRT/VTT, con editor, quemado y traducción | [subtitles.md](subtitles.md) |
+| Transcripción | Transcribir un audio o video con faster-whisper; con «Identificar hablantes», texto por hablante con nombres, exportar TXT y crear subtítulos | [transcription.md](transcription.md) |
 | Convertir y normalizar | Conversión de audio y video, presets de redes, GIF y normalizar la sonoridad (dos pasadas), con su A/B | [convert.md](convert.md) |
 | Recortar, unir y dividir | Recortes, uniones con fundido cruzado y divisiones de audio y video, por CLI y API | [edit.md](edit.md) |
 | Mezcla | Música bajo la voz con ducking, LUFS final y video opcional | [mix.md](mix.md) |

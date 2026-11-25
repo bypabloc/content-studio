@@ -16,7 +16,7 @@ const INVENTORY = {
     'UIAlert', 'UICheckboxGroup', 'UICollapsible', 'UICombobox', 'UIDateParts', 'UIDateRangeFilter', 'UIDescriptionList',
     'UIEmpty', 'UIErrorSummary', 'UIField', 'UIFileField', 'UIIconButton', 'UIJobPicker', 'UILlmModelSelect', 'UIMonthGrid', 'UIPagination', 'UIPasswordField',
     'UIPopover', 'UIRadioGroup', 'UIRecommendedSelect', 'UIRemoteImage', 'UIRowActions', 'UISearchField', 'UISearchSelect',
-    'UISelect', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextDiff', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
+    'UISelect', 'UISpeakerCountField', 'UISpeakerLegend', 'UIStatCard', 'UIStepProgress', 'UITabs', 'UITextDiff', 'UITextarea', 'UIThemeToggle', 'UITimeline', 'UIToast',
     'UIVirtualList',
     'UIWhisperModelSelect',
   ],

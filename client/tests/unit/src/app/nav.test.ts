@@ -8,6 +8,7 @@ describe('navItems (spec 009, AC-3)', () => {
     expect(navItems().map((item) => [item.id, item.icon])).toEqual([
       ['narration', 'narration'],
       ['music', 'music'],
+      ['transcription', 'transcription'],
       ['cleaner', 'scissors'],
       ['subtitles', 'subtitles'],
       ['convert', 'download'],
@@ -52,5 +53,16 @@ describe('navItems (spec 009, AC-3)', () => {
       group: t('nav.group.settings'),
       label: t('nav.engines'),
     })
+  })
+})
+
+describe('navItems (spec 036, D-1)', () => {
+  it('WHEN the sections are listed THEN Transcripción is in Editar, before Limpiador', () => {
+    expect(navItems().find((item) => item.id === 'transcription')).toMatchObject({
+      group: t('nav.group.edit'),
+      label: t('nav.transcription'),
+    })
+    const ids = navItems().map((item) => item.id)
+    expect(ids.indexOf('transcription')).toBe(ids.indexOf('cleaner') - 1)
   })
 })

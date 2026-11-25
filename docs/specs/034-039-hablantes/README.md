@@ -15,7 +15,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | [034](034-diarization-engine/README.md) | Motor `pyannote`: receta, familia `diarization`, token de Hugging Face guardado sin exponerse e instalación de un repositorio restringido | feature | Large | — | IMP |
 | [035](035-diarize-job/README.md) | Trabajo `diarize`, unión palabra-hablante, `transcribe` con hablantes, exportaciones, audio por hablante, caché y `studio diarize` | feature | Large | 034 | PEN |
-| [036](036-transcription-section/README.md) | Sección **Transcripción**: modelo, idioma, «Identificar hablantes», texto por turnos, renombrar y exportar TXT | feature | Large | 035 | PEN |
+| [036](036-transcription-section/README.md) | Sección **Transcripción**: modelo, idioma, «Identificar hablantes», texto por turnos, renombrar y exportar TXT | feature | Large | 035 | IMP |
 | [037](037-speakers-section/README.md) | Sección **Hablantes** (solo diarizar): línea de tiempo con colores, exportar turnos, un audio por hablante y abrir en el Editor | feature | Large | 036 | PEN |
 | [038](038-speakers-everywhere/README.md) | Hablantes en Subtítulos (etiqueta, color, prefijo), en la pista del Editor y en la revisión del Limpiador | feature | Large | 037 | PEN |
 | [039](039-integral-verification/README.md) | Verificación integral con audio real, mediciones de VRAM y calidad, y cierre del lote | chore | Micro | 038 | PEN |
