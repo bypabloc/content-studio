@@ -1082,6 +1082,8 @@
   "queue.status.running": "Running",
   "queue.title": "Queue",
   "select.recommended": "Recommended",
+  "sendto.queued": "{count} files queued.",
+  "sendto.skipped": "{count} files do not exist and were skipped.",
   "server.error.title": "Content Studio could not start",
   "server.exited": "The engine closed while starting.",
   "server.retry": "Retry",

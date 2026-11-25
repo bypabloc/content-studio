@@ -1082,6 +1082,8 @@
   "queue.status.running": "En curso",
   "queue.title": "Cola",
   "select.recommended": "Recomendado",
+  "sendto.queued": "{count} archivos en la cola.",
+  "sendto.skipped": "{count} archivos no existen y se saltaron.",
   "server.error.title": "Content Studio no pudo arrancar",
   "server.exited": "El motor se cerró al arrancar.",
   "server.retry": "Reintentar",

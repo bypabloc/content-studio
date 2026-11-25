@@ -9,6 +9,8 @@ import { t } from '@/shared/i18n/t';
 import { consumePrefill } from '@/shared/navigation/prefill';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
+const { api } = vi.hoisted(() => ({ api: { post: vi.fn() } }));
+vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }));
 vi.mock('@/shared/components/molecules/UIToast', () => ({ toast: { error: vi.fn(), info: vi.fn() } }));
 
@@ -93,5 +95,35 @@ describe('useExternalRequests (spec 031, F1 C3)', () => {
     await emit([EXE, 'content-studio://job/42']);
     expect(window.location.hash).toBe('#/library');
     expect(consumePrefill('library')).toEqual({ job: '42' });
+  });
+
+  it('AC-7: WHEN llegan tres archivos con convert-mp3 y uno no existe THEN encola dos trabajos y avisa de los dos', async () => {
+    vi.mocked(invoke).mockImplementation((async (command: string, args?: { path?: string }) =>
+      command === 'path_exists' ? args?.path !== 'no.wav' : []) as never);
+    api.post.mockResolvedValue({ id: 1 });
+    renderHook(() => useExternalRequests());
+    await emit([EXE, '--send', 'convert-mp3', 'a.wav', 'b.wav', 'no.wav']);
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2));
+    expect(api.post).toHaveBeenCalledWith('/jobs', { kind: 'media.convert', params: { input: 'a.wav', target: 'mp3', options: {} } });
+    expect(toast.info).toHaveBeenCalledWith(t('sendto.queued', { count: '2' }));
+    expect(toast.info).toHaveBeenCalledWith(t('sendto.skipped', { count: '1' }));
+  });
+
+  it.each([
+    ['normalize', { kind: 'media.normalize', params: { input: 'a.wav', preset: 'youtube' } }],
+    ['clean', { kind: 'clean.analyze', params: expect.objectContaining({ input: 'a.wav', auto_render: true }) }],
+    ['transcribe', { kind: 'transcribe', params: { input: 'a.wav', model: 'large-v3-turbo', language: 'auto' } }],
+  ])('AC-7: WHEN llega --send %s THEN encola ese trabajo con su valor por defecto', async (action, job) => {
+    api.post.mockResolvedValue({ id: 1 });
+    renderHook(() => useExternalRequests());
+    await emit([EXE, '--send', action, 'a.wav']);
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/jobs', job));
+  });
+
+  it('AC-6: WHEN llega --send editor THEN abre el Editor con los archivos y no encola nada', async () => {
+    renderHook(() => useExternalRequests());
+    await emit([EXE, '--send', 'editor', 'a.wav']);
+    await waitFor(() => expect(window.location.hash).toBe('#/editor?add=a.wav'));
+    expect(api.post).not.toHaveBeenCalled();
   });
 });

@@ -32,10 +32,15 @@ export const NEW_PARAMS = {
 
 export type NewType = keyof typeof NEW_PARAMS;
 
+/** Las acciones de «Enviar a» del Explorador (spec 031, AC-6, AC-7). */
+export const SEND_ACTIONS = ['convert-mp3', 'normalize', 'clean', 'transcribe', 'editor'] as const;
+export type SendAction = (typeof SEND_ACTIONS)[number];
+
 export type ExternalRequest =
   | { kind: 'open'; section: string }
   | { kind: 'job' | 'library'; id: number }
-  | { kind: 'new'; type: NewType; params: Record<string, string> };
+  | { kind: 'new'; type: NewType; params: Record<string, string> }
+  | { kind: 'send'; action: SendAction; paths: string[] };
 
 /** Por qué un enlace no es válido: un código, nunca un texto (el aviso lo pone el catálogo, `deeplink.invalid`). */
 export type ExternalErrorCode =
@@ -45,7 +50,8 @@ export type ExternalErrorCode =
   | 'unknown_section'
   | 'bad_id'
   | 'unknown_type'
-  | 'unknown_param';
+  | 'unknown_param'
+  | 'no_files';
 
 export interface ExternalError {
   kind: 'error';
@@ -54,6 +60,8 @@ export interface ExternalError {
 
 /** Primer enlace del argv. `null` si no hay ninguno (un arranque normal). */
 export function parseExternal(argv: readonly string[]): ExternalRequest | ExternalError | null {
+  const sendAt = argv.indexOf('--send');
+  if (sendAt >= 0) return parseSend(argv.slice(sendAt + 1));
   const url = argv.find((arg) => arg.startsWith(SCHEME));
   return url === undefined ? null : parseUrl(url);
 }
@@ -106,6 +114,13 @@ function newRequest(parts: string[], query: URLSearchParams): ExternalRequest | 
     params[name] = value;
   }
   return { kind: 'new', type: type as NewType, params };
+}
+
+function parseSend(args: readonly string[]): ExternalRequest | ExternalError {
+  const [action, ...paths] = args;
+  if (!(SEND_ACTIONS as readonly string[]).includes(action)) return failure('unknown_action');
+  if (paths.length === 0) return failure('no_files');
+  return { kind: 'send', action: action as SendAction, paths };
 }
 
 function failure(code: ExternalErrorCode): ExternalError {

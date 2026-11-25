@@ -219,3 +219,5 @@ reconecta
 reconectar
 deeplink
 unminimize
+sendto
+MAINBINARYNAME

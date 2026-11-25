@@ -69,3 +69,21 @@ describe('parseExternal (spec 031, F1 C1)', () => {
     expect([...OPEN_SECTIONS].sort()).toEqual(navItems().map((item) => item.id).sort())
   })
 })
+
+describe('--send (spec 031, F2 C4)', () => {
+  it('AC-7: WHEN llega --send convert-mp3 con archivos THEN pide esa acción sobre cada archivo', () => {
+    expect(parseExternal([EXE, '--send', 'convert-mp3', 'a.wav', 'b.wav'])).toEqual({
+      kind: 'send',
+      action: 'convert-mp3',
+      paths: ['a.wav', 'b.wav'],
+    });
+  });
+
+  it('AC-4: WHEN la acción de --send no existe THEN es un error', () => {
+    expect(parseExternal([EXE, '--send', 'borrar', 'a.wav'])).toMatchObject({ kind: 'error', code: 'unknown_action' });
+  });
+
+  it('AC-4: WHEN --send no trae archivos THEN es un error', () => {
+    expect(parseExternal([EXE, '--send', 'convert-mp3'])).toMatchObject({ kind: 'error', code: 'no_files' });
+  });
+});

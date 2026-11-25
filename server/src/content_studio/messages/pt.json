@@ -1082,6 +1082,8 @@
   "queue.status.running": "Em andamento",
   "queue.title": "Fila",
   "select.recommended": "Recomendado",
+  "sendto.queued": "{count} arquivos na fila.",
+  "sendto.skipped": "{count} arquivos não existem e foram pulados.",
   "server.error.title": "O Content Studio não conseguiu iniciar",
   "server.exited": "O motor foi encerrado ao iniciar.",
   "server.retry": "Tentar novamente",
