@@ -40,3 +40,22 @@ def test_orphan_lock_of_a_dead_process_is_cleared(tmp_path):
 
     assert gpu_lock.acquire(tmp_path, 'job-3', ['cmd']) is True
     gpu_lock.release(tmp_path)
+
+
+def test_release_retries_when_the_lock_file_is_busy(tmp_path, monkeypatch):
+    """Regresión: en Windows, un lector del candado abierto impide borrarlo; release lo reintenta."""
+    assert gpu_lock.acquire(tmp_path, 'job-1', ['cmd']) is True
+    real_unlink = type(tmp_path).unlink
+    busy = [True]
+
+    def unlink_busy_once(self, missing_ok=False):
+        if busy[0]:
+            busy[0] = False
+            raise PermissionError(32, 'El proceso no tiene acceso al archivo')
+        return real_unlink(self, missing_ok=missing_ok)
+
+    monkeypatch.setattr(type(tmp_path), 'unlink', unlink_busy_once)
+
+    gpu_lock.release(tmp_path)
+
+    assert gpu_lock.read(tmp_path) is None
