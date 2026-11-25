@@ -16,6 +16,8 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [026-cosyvoice3-instalacion](026-cosyvoice3-instalacion.md) | cosyvoice3 de la base real queda con installing.json sin terminar («Con errores») | Antes de publicar | Usuario |
+| [026-csp-app-check](026-csp-app-check.md) | app-check en claro falla por la CSP de Tauri (ipc.localhost); las voces dan 403 en /media/peaks | Antes de publicar | Usuario |
 | [026-verificacion-familias](026-verificacion-familias.md) | caso de verificación para transcription y vision | antes de publicar | agente |
 | [026-llm-casos-fallidos](026-llm-casos-fallidos.md) | asistente: el caso que falla en script_review (1 de 25 en cada modelo) | después de publicar | agente |
 | [026-heartmula-voz](026-heartmula-voz.md) | heartmula: prompt o revisión que no cante, o quitar el motor de la música instrumental | antes de publicar | usuario y agente |

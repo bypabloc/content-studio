@@ -5,4 +5,5 @@
 - **Descartadas**: declarar HeartMuLa instrumental sin medirla; quitar el motor de la app (la decisión es del usuario, no del agente).
 - **Cómo revertir**: no aplica hasta que haya un prompt o una revisión que dé voz -25 dB o menos.
 - **Cómo comprobarla**: `tmp/spec-026/checks/voice_check.py` con el Python del venv de ACE-Step sobre la pista (la app solo evalúa con `--evaluate` en el venv de ACE-Step).
+- **Silencio**: en la pista de 30 s (`out/music/2026-11-25-37-lofi-chill/heartmula-lofi-chill.wav`) `silencedetect` (-50 dB) marca un silencio de 3,25 s a 4,45 s; el espectrograma muestra el corte. Las otras seis salidas de audio no tienen silencios de más de 0,4 s.
 - **Pendiente**: [026-heartmula-voz](../PENDING/026-heartmula-voz.md).

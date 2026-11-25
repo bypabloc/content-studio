@@ -39,7 +39,7 @@ Python y torch por motor, con su salida corta de verificación (duración, LUFS 
 | voxcpm2 | 3.14 | 2.11.0+cu128 | 2,06 s, -16,0 LUFS, pico -3,0 dBFS | 3.15: `pyahocorasick` sin rueda cp315 |
 | qwen-0.6b | 3.14 | 2.11.0+cu128 | 1,78 s, -15,9 LUFS, pico -1,7 dBFS | 3.15: `onnxruntime` sin rueda cp315 |
 | qwen-1.7b | 3.14 | 2.11.0+cu128 | 1,92 s, -15,9 LUFS, pico -1,9 dBFS | Igual que qwen-0.6b |
-| chatterbox | 3.15 | 2.14.1+cu130 | 1,98 s, -16,6 LUFS, pico -1,5 dBTP | El mastering avisa -16,6 frente a -16,0 (ficha PENDING) |
+| chatterbox | 3.15 | 2.14.1+cu130 | 1,98 s, -16,6 LUFS, pico -1,5 dBFS | El mastering avisa -16,6 frente a -16,0 (ficha PENDING) |
 | cosyvoice3 | 3.11 | 2.11.0+cu128 | 1,94 s, -16,4 LUFS, pico -1,5 dBFS | `pyworld` y `grpcio` pinados sin rueda cp312; `onnxruntime` 1.23.2 |
 | omnivoice | 3.14 | 2.11.0+cu128 | Sin verificar | Falta aceptar la licencia CC-BY-NC (la aceptación es del usuario) |
 | indextts | 3.11 | 2.8.0+cu128 | Sin verificar | Techo 3.11 del upstream; licencia bilibili pendiente |
