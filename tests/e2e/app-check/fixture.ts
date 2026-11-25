@@ -82,11 +82,20 @@ export const test = base.extend<{ app: Page; shot: Shot; settled: Settled }>({
     const done = (request: unknown) => pending.delete(request);
     app.on('requestfinished', done);
     app.on('requestfailed', done);
+    // Si una petición no termina, el error dice cuál (su URL), no solo cuántas quedan.
+    const drained = async () => {
+      try {
+        await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0);
+      } catch (error) {
+        const urls = [...pending].map((request) => (request as { url(): string }).url());
+        throw new Error(`peticiones a la API sin terminar: ${urls.join(', ')}`, { cause: error });
+      }
+    };
     await use(async () => {
       // Dos lecturas seguidas sin pendientes: una respuesta puede disparar la petición siguiente (la lista, sus detalles).
-      await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0);
+      await drained();
       await app.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve(null))));
-      await expect.poll(() => pending.size, { timeout: 30_000 }).toBe(0);
+      await drained();
     });
   },
   shot: async ({ app }, use) => {

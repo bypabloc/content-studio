@@ -68,6 +68,7 @@ export async function openApp(
           return id;
         },
         invoke: async (command: string, args: { event?: string; handler?: number; options?: { multiple?: boolean } } = {}) => {
+          (window as unknown as { __commands: string[] }).__commands.push(command);
           if (command === 'get_connection') {
             tries += 1;
             if (connect === 'spawn_failed') throw 'server_spawn_failed';
@@ -87,6 +88,8 @@ export async function openApp(
         },
       },
     });
+    // Cada comando que la app invoca (get_connection, rotate_token…), en orden: la prueba cuenta cuántas veces pide la conexión.
+    Object.defineProperty(window, '__commands', { value: [] as string[] });
     Object.defineProperty(window, '__hasListener', { value: (event: string) => event in listeners });
     Object.defineProperty(window, '__emitEvent', {
       value: (event: string, payload: unknown) => {
