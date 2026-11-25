@@ -211,3 +211,5 @@ IDYES
 INSTDIR
 versiones
 regla
+NBLCK
+UNLCK

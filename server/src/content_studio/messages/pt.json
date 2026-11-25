@@ -425,6 +425,7 @@
   "error.fs_forbidden": "Não há permissão para ler {path}.",
   "error.fs_media_not_found": "O arquivo de mídia {path} não existe.",
   "error.fs_path_not_found": "A pasta {path} não existe.",
+  "error.host_not_allowed": "Este endereço não pode usar o servidor local.",
   "error.http.404": "A rota não existe.",
   "error.http.405": "O método não é permitido nesta rota.",
   "error.http.422": "Os dados enviados não são válidos.",

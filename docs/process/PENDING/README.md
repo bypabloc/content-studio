@@ -16,6 +16,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [028-suite-intermitente](028-suite-intermitente.md) | Un fallo intermitente en la suite completa, no reproducido en la pasada siguiente | Después de publicar | Agente |
 | [027-firma-updater](027-firma-updater.md) | El instalador se compila pero no se firma: falta la clave del updater | Antes de publicar | Usuario |
 | [027-capturas-visuales](027-capturas-visuales.md) | image-reader ve toasts sobre controles y tamaños sin formatear en Motores; sin línea base | Antes de publicar | Usuario |
 | [026-escucha-perdida](026-escucha-perdida.md) | Las salidas de escucha de la 026 se perdieron al deshacerse su carpeta | Antes de publicar | Usuario |

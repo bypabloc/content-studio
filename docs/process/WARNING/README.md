@@ -17,6 +17,8 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [028-serve-sin-token](028-serve-sin-token.md) | `serve` no imprime el token y el token persiste en `api-token` | `main` |
+| [028-apagado-y-guardas](028-apagado-y-guardas.md) | El apagado pasa por `POST /server/stop`; los guards de Host y de actividad se montan en `serve` | `main` |
 | [027-csp-ipc](027-csp-ipc.md) | La CSP permite el IPC de Tauri (ipc: y http://ipc.localhost); cierra los errores de consola de app-check | `main` |
 | [027-edicion-2024](027-edicion-2024.md) | El crate de Tauri pasa a la edición 2024; un bloque `unsafe` explícito en `resume_threads` | `main` |
 | [027-getrandom-04](027-getrandom-04.md) | getrandom sube a 0.4.3 (mayor); su único uso compila igual | `main` |
