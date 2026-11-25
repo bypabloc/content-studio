@@ -225,3 +225,6 @@ pythonw
 hkcu
 hkey
 pcwstr
+pyannote
+torchcodec
+plda

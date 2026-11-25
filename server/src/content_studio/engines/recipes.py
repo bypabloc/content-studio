@@ -41,6 +41,11 @@ class Recipe:
         """Ruta del entorno dentro de la familia de la receta."""
         return next(str(step['path']) for step in self.steps if step['kind'] == 'venv')
 
+    @property
+    def gated(self) -> bool:
+        """True si algún paso hf declara un repositorio restringido en Hugging Face."""
+        return any(step.get('gated') for step in self.steps if step['kind'] == 'hf')
+
 
 def _matches(pattern: re.Pattern[str]) -> Callable[[object], bool]:
     return lambda value: isinstance(value, str) and pattern.fullmatch(value) is not None
@@ -88,7 +93,7 @@ OPTIONAL: dict[str, dict[str, Callable[[object], bool]]] = {
         'exclude': _strings,
     },
     'git': {'recursive': _boolean},
-    'hf': {'allow_patterns': _strings, 'ignore_patterns': _strings},
+    'hf': {'allow_patterns': _strings, 'ignore_patterns': _strings, 'gated': _boolean},
     'verify': {
         'paths': lambda value: isinstance(value, list) and all(_relative(path) for path in value),
         'run': lambda value: isinstance(value, list) and bool(value) and _relative(value[0]) and _strings(value),
@@ -131,7 +136,7 @@ def validate(document: object) -> Recipe:
     engine, family = document.get('engine'), document.get('family')
     if not isinstance(engine, str) or not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    if family not in ('narration', 'music', 'system', 'transcription', 'vision', 'assistant'):
+    if family not in ('narration', 'music', 'system', 'transcription', 'vision', 'assistant', 'diarization'):
         raise ValueError('Invalid engine family')
     cpu, license_name = document.get('cpu'), document.get('license')
     if not isinstance(cpu, bool) or not isinstance(license_name, str) or not _text(license_name):

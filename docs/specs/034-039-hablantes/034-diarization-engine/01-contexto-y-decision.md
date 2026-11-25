@@ -33,7 +33,7 @@ La transcripción con faster-whisper ya funciona, pero nada dice quién habla. L
 
 - **El paso `hf` descarga sin token.** `server/src/content_studio/engines/steps.py` (`_download`) llama a `HfApi().model_info` y `snapshot_download` sin `token=`. `HF_HOME` apunta a la caché del motor, así que un `token` guardado por `huggingface-cli` tampoco se usaría.
 - **Un repositorio restringido falla sin un código propio.** `model_info` lanza `GatedRepoError` (401 o 403) y el paso termina en un `CalledProcessError` genérico. `installer.EXIT_CODES` solo tiene del 20 al 24.
-- **La receta no admite campos nuevos.** `recipes.OPTIONAL['hf']` solo acepta `allow_patterns` e `ignore_patterns`, y cualquier otro campo da `ValueError`. `recipes.FAMILIES` no incluye `diarization`. `PYTHON` admite de 3.10 a 3.12.
+- **La receta no admite campos nuevos.** `recipes.OPTIONAL['hf']` solo acepta `allow_patterns` e `ignore_patterns`, y cualquier otro campo da `ValueError`. `recipes.FAMILIES` no incluye `diarization`. `PYTHON` admitía de 3.10 a 3.12 al redactar esta spec; la 026 lo subió a 3.15 y cada receta va a la Python más alta que soporta (fase `0-ajustes`).
 - **No hay almacén de credenciales.** `api/routes/settings.py` (`read_setting`) devuelve cualquier clave, y `write_setting` solo bloquea `storage.*`. No existe `HF_TOKEN` en `server/src` ni en `client/src`.
 - **Motores no muestra familias nuevas.** `client/src/features/engines/EnginesPage.tsx` (`GROUPS`) lista narración, música, transcripción y asistente.
 - **El repositorio de pesos** (medido el 2026-11-24 con la API pública de Hugging Face):
@@ -57,7 +57,7 @@ Decisiones:
 - **D-2: `settings` con la clave `secret.*` bloqueada en la API genérica** — ya existe y es local. Se descarta el llavero del sistema (`keyring` o Tauri) porque sería una dependencia nueva. Se descarta el archivo `$HF_HOME/token` porque viviría dentro de la carpeta de motores, que se mueve y se comparte entre worktrees.
 - **D-3: `HF_TOKEN` en el entorno del paso** — `huggingface_hub` ya lo lee. Se descartan `argv` y el JSON del paso, porque se verían en la lista de procesos y en el log.
 - **D-4: `engine_token_required` y `engine_gated`** — el usuario debe saber qué hacer. Se descarta el error genérico de hoy.
-- **D-5: versiones de la receta** — la 4.1.1 trae los arreglos de VBx y del DER, y torch 2.11 con cu128 ya funciona en este equipo con Qwen. Se descarta 4.0.7 con Python 3.10, que no trae esos arreglos.
+- **D-5: versiones de la receta** — la 4.1.1 trae los arreglos de VBx y del DER, y torch 2.11 con cu128 ya funciona en este equipo con Qwen. Con la 026, la receta va a Python 3.14, la más alta que cu128 soporta. Se descarta 4.0.7 con Python 3.10, que no trae esos arreglos.
 - **D-6: familia `diarization` propia** — es un producto distinto de `transcription` y tiene su venv. Se descarta meterlo en `transcription`, porque ese grupo muestra los modelos de Whisper.
 
 ## 4. Fuera de alcance

@@ -37,10 +37,11 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Receta, familia y token en la instalación](fases/1-receta-y-token/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3 | - | PEN |
-| F2 | [Credenciales y API](fases/2-credenciales/plan-tdd.md) | C4, C5 | AC-3, AC-4 | - | PEN |
-| F3 | [Client: tarjeta, token y atribución](fases/3-client/plan-tdd.md) | C6 | AC-5, AC-6 | - | PEN |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F0 | Ajustes a la 026: receta en Python 3.14 (commit docs) | - | - | c16d7ec | IMP |
+| F1 | [Receta, familia y token en la instalación](fases/1-receta-y-token/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3 | 5f563b9 | IMP |
+| F2 | [Credenciales y API](fases/2-credenciales/plan-tdd.md) | C4, C5 | AC-3, AC-4 | b9a44cf | IMP |
+| F3 | [Client: tarjeta, token y atribución](fases/3-client/plan-tdd.md) | C6 | AC-5, AC-6 | - | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | IMP |
 
 ## Decisiones cerradas (no reabrir)
 
@@ -53,7 +54,7 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 
    Los dos llevan un texto que explica cómo aceptar las condiciones (agente, 2026-11-24).
 5. **D-5**: La receta `pyannote` queda así (agente, 2026-11-24):
-   * Python 3.12, con torch y torchaudio `2.11.0+cu128`, igual que Qwen;
+   * Python 3.14, con torch y torchaudio `2.11.0+cu128`, igual que `qwen-0.6b` (fase `0-ajustes`: la 026 lleva cada receta a la Python más alta que soporta);
    * `pyannote.audio==4.1.1`, `torchcodec==0.17.0` y `huggingface-hub==0.36.2`;
    * los pesos de `pyannote/speaker-diarization-community-1` en la revisión `3533c8cf8e369892e6b79ff1bf80f7b0286a54ee`, descargados a `models/community-1`.
 6. **D-6**: La familia nueva es `diarization`, con su grupo «Diarización» en Motores. La atribución CC-BY-4.0 va en la tarjeta y en Ajustes > Acerca de (agente, 2026-11-24).
@@ -70,11 +71,11 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 
 | AC | Fase | Ciclo | Test | Verificación real |
 | :--- | :--- | :--- | :--- | :--- |
-| AC-1 | F1 | C1 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_receta_pyannote` | solo pytest |
+| AC-1 | F1 | C1 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_pyannote_recipe` | solo pytest |
 | AC-2 | F1 | C2 | `server/tests/unit/src/content_studio/engines/test_steps.py::test_ac2_token_en_env_no_en_argv` | instalación real (FV) |
-| AC-3 | F1 | C3 | `server/tests/unit/src/content_studio/engines/test_steps.py::test_ac3_repo_restringido_sale_25` | solo pytest |
-| AC-3 | F2 | C5 | `server/tests/unit/src/content_studio/api/routes/test_engines.py::test_ac3_sin_token_409` | solo pytest |
-| AC-4 | F2 | C4 | `server/tests/unit/src/content_studio/api/routes/test_credentials.py::test_ac4_nunca_devuelve_el_token` | solo pytest |
+| AC-3 | F1 | C3 | `server/tests/unit/src/content_studio/engines/test_steps.py::test_ac3_gated_repo_exits_25` | solo pytest |
+| AC-3 | F2 | C5 | `server/tests/unit/src/content_studio/api/routes/test_engines.py::test_ac3_without_token_returns_409` | solo pytest |
+| AC-4 | F2 | C4 | `server/tests/unit/src/content_studio/api/routes/test_credentials.py::test_ac4_never_returns_the_token` | solo pytest |
 | AC-5 | F3 | C6 | `client/tests/unit/src/features/engines/HfTokenField.test.tsx` y `tests/e2e/engines/happy-hf-token.e2e.ts` | e2e, app-check |
 | AC-6 | F3 | C6 | `client/tests/unit/src/features/settings/About.test.tsx` | app-check |
 

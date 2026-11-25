@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import sqlite3
+import subprocess
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
@@ -17,7 +18,7 @@ from content_studio.db import jobs, settings
 from content_studio.db.connection import utc_now
 from content_studio.engines import recipes
 from content_studio.engines.recipes import Recipe
-from content_studio.engines.steps import ChecksumMismatch, _file_bytes, execute_step
+from content_studio.engines.steps import GATED_EXIT, ChecksumMismatch, _file_bytes, execute_step
 
 EXIT_CODES = {
     'disk_full': 20,
@@ -25,6 +26,8 @@ EXIT_CODES = {
     'engine_license_required': 22,
     'engine_not_installed': 23,
     'checksum_mismatch': 24,
+    'engine_gated': GATED_EXIT,
+    'engine_token_required': 26,
 }
 
 
@@ -133,7 +136,7 @@ def _pending_recipe(pending: Path) -> str | None:
         return None
 
 
-def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
+def install(recipe: Recipe, root: Path, repair: bool = False, token: str | None = None) -> dict:
     """Instala el motor y registra qué rutas pertenecen a la app."""
     root = root.resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -153,6 +156,8 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     existing = _file_bytes(home) + _file_bytes(cache)
     if shutil.disk_usage(root).free + existing < recipe.size_gb * 1.2 * 10**9:
         raise InstallError('disk_full')
+    if recipe.gated and not token:
+        raise InstallError('engine_token_required')
     home.mkdir(exist_ok=True)
     _write_json(pending, {'owner': 'app', 'recipe_version': recipe.version, 'recipe_sha256': recipe.sha256})
     markers = home / 'steps'
@@ -179,9 +184,13 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
             end = (index + 1) / len(recipe.steps)
             progress.emit(start, step['kind'])
             try:
-                execute_step(step, recipe, family, cache, (start, end))
+                execute_step(step, recipe, family, cache, (start, end), token)
             except ChecksumMismatch as error:
                 raise InstallError('checksum_mismatch') from error
+            except subprocess.CalledProcessError as error:
+                if error.returncode == EXIT_CODES['engine_gated']:
+                    raise InstallError('engine_gated') from error
+                raise
             done.touch()
     result = {
         'owner': 'app',

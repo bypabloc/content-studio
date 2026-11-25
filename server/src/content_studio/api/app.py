@@ -19,6 +19,7 @@ from content_studio.api.errors import ApiError
 from content_studio.api.routes import (
     catalog,
     clean,
+    credentials,
     diagnostics,
     editor,
     engines,
@@ -131,6 +132,7 @@ def create_app(
     app.include_router(integrations.router, dependencies=header_only)
     app.include_router(server_control.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
+    app.include_router(credentials.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
     app.include_router(storage.router, dependencies=header_only)
     app.include_router(system.router, dependencies=header_only)

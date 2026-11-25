@@ -7,6 +7,7 @@ import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { t } from '@/shared/i18n/t';
+import { HfTokenField } from './HfTokenField';
 
 type EngineInfo = components['schemas']['EngineInfo'];
 type GpuInfo = components['schemas']['GpuInfo'];
@@ -18,6 +19,8 @@ type Props = {
   onAction: (action: EngineAction) => void;
   busy?: boolean;
   highlighted?: boolean;
+  /** El token de Hugging Face está guardado; sin él, un motor restringido no se instala. */
+  tokenConfigured?: boolean;
 };
 
 function bytesLabel(gb: number): string {
@@ -51,13 +54,14 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
-export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = false }: Props): React.JSX.Element {
+export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = false, tokenConfigured = true }: Props): React.JSX.Element {
   const [confirmExternal, setConfirmExternal] = useState(false);
   const [typedName, setTypedName] = useState('');
   const external = engine.owner === 'external' || engine.status === 'external';
   const managed = engine.owner === 'app';
   const installed = ['installed', 'outdated', 'external'].includes(engine.status);
   const canInstall = Boolean(gpu) || engine.cpu;
+  const blockedByToken = engine.gated && !tokenConfigured;
   const verification = engine.verification as { ok?: boolean } | null;
 
   const uninstall = () => {
@@ -96,13 +100,14 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
           </UIBadge>
         </UIStack>
 
+        {engine.gated ? <HfTokenField configured={tokenConfigured} /> : null}
         <UIText variant="caption">
           {verification ? (verification.ok ? t('engines.verification.ok') : t('engines.verification.failed')) : t('engines.verification.pending')}
         </UIText>
 
         <UIStack direction="row" gap="sm" className="flex-wrap">
           {engine.status === 'missing' ? (
-            <UIButton disabled={!canInstall || busy} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
+            <UIButton disabled={!canInstall || busy || blockedByToken} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
               {t('engines.action.install')}
             </UIButton>
           ) : null}

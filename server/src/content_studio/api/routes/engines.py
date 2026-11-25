@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
-from content_studio import paths
+from content_studio import credentials, paths
 from content_studio.api.deps import get_conn
 from content_studio.api.errors import ApiError
 from content_studio.api.routes.jobs import NewJob, create_job
@@ -46,6 +46,7 @@ class EngineInfo(BaseModel):
     size_bytes: int
     job_id: int | None
     verification: dict | None
+    gated: bool = False
     models: list[WhisperModel] | None = None
 
 
@@ -66,6 +67,7 @@ def engines(request: Request, conn: Db) -> list[dict]:
     root = _storage(request)
     listed = installer.list_engines(conn, root)
     for entry in listed:
+        entry['gated'] = recipes.load(entry['engine']).gated
         if entry['engine'] == WHISPER_ENGINE:
             entry['models'] = transcription_models.status(root / 'hf')  # la caché de transcribe_main (models_cache)
     return listed
@@ -79,6 +81,8 @@ def install(name: str, request: Request, conn: Db, repair: bool = False) -> dict
         installer.check_license(conn, name)
     except installer.InstallError as error:
         raise ApiError(409, 'engine_license_required') from error
+    if recipe.gated and credentials.huggingface_token(conn) is None:
+        raise ApiError(409, 'engine_token_required')
     if repair and installer.read_manifest(_storage(request) / name).get('owner') != 'app':
         raise ApiError(409, 'engine_external')
     return create_job(

@@ -12,7 +12,7 @@
 
 #### Ciclo C4: credenciales [AC-4]
 
-- **RED**: `server/tests/unit/src/content_studio/api/routes/test_credentials.py::test_ac4_nunca_devuelve_el_token`
+- **RED**: `server/tests/unit/src/content_studio/api/routes/test_credentials.py::test_ac4_never_returns_the_token`
   - WHEN `PUT` con un token válido THEN `GET` devuelve `{"configured": true}` y el cuerpo no contiene el token. `GET /settings/secret.huggingface.token` y su `PUT` responden 403. `DELETE` deja `configured: false`. `"abc"` responde 422.
   - Doctest de `credentials.valid_token`.
 - **GREEN**: `credentials.py`, `api/routes/credentials.py`, `api/routes/settings.py` y el registro de la ruta en `api/app.py`. Verify: `uv run pytest server/tests/unit/src/content_studio/api -q`.
@@ -20,7 +20,7 @@
 
 #### Ciclo C5: instalar sin token [AC-3]
 
-- **RED**: `server/tests/unit/src/content_studio/api/routes/test_engines.py::test_ac3_sin_token_409`
+- **RED**: `server/tests/unit/src/content_studio/api/routes/test_engines.py::test_ac3_without_token_returns_409`
   - Given ningún token When `POST /engines/pyannote/install` Then 409 `error.engine_token_required` y la cola sigue vacía. Con token, 202 y un trabajo `engine.install`. `GET /engines` marca `gated: true`.
   - Un trabajo que sale con 25 termina con el código `engine_gated`.
 - **GREEN**: `api/routes/engines.py` y el mapeo del exit code. Verify: `uv run pytest server/tests/unit/src/content_studio/api/routes/test_engines.py -q`.

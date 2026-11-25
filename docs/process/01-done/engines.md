@@ -1,6 +1,6 @@
 ---
 modulo: Motores y almacenamiento
-actualizada: 2026-11-21
+actualizada: 2026-11-25
 ---
 
 # Motores y almacenamiento
@@ -23,7 +23,9 @@ El código está en `server/src/content_studio/engines/`, `storage/`, `system/` 
 - Un intento de instalación fallido ya no reutiliza pasos ni venv de la receta anterior: si la huella del intento pendiente no coincide, se rehace todo (commit `9d96a1a`).
 - Motores de transcripción (faster-whisper, 3.14) y visión (vision, 3.15) verifican su librería; el caso de «Verificar» en Motores para sus familias falta (ficha `026-verificacion-familias`).
 - Las instalaciones externas del usuario (indextts, omnivoice en el checkout principal) no se tocaron.
+- Motores restringidos (pyannote, spec 034): su tarjeta pide el token de Hugging Face, lo guarda sin mostrarlo y deja Instalar deshabilitado sin él. El token se pasa solo al entorno del paso `hf` restringido; un 401 o 403 de Hugging Face sale con código 25 (`engine_gated`).
 
 ## Historial
 
 - 2026-11-21: Motores, almacenamiento elegible, bienvenida y herramientas del sistema (spec 012; PR pendiente).
+- 2026-11-25: Diarización con pyannote: receta, token de Hugging Face en Motores y atribución en Acerca de (spec 034).
