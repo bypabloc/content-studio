@@ -39,25 +39,44 @@ tests/e2e/                  workspace de bun: playwright.config.ts, _api/ (respu
 
 ## Versiones (fijadas, sin rangos)
 
-Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Cargo.toml`. Subirlas es un cambio con su spec.
+Están en `client/package.json`, `tests/e2e/package.json` y `client/src-tauri/Cargo.toml`. Subirlas es un cambio con su spec. `tests/validators/test_pins.py` comprueba la tabla contra los manifiestos (AC-5).
 
-| Pieza | Versión |
-| :--- | :--- |
-| React y react-dom | 19.3.1 |
-| TypeScript | 5.9.3 (no 7: `WARNING/005-typescript-5.md`) |
-| Vite · @vitejs/plugin-react | 8.3.8 · 6.3.0 |
-| Tailwind (`@tailwindcss/vite`) | 4.3.5 |
-| TanStack Query · @dnd-kit/core · @dnd-kit/sortable | 5.108.1 · 6.3.1 · 10.0.0 |
-| sonner | 2.0.8 |
-| Vitest · Testing Library · jsdom | 5.1.1 · 16.3.3 · 31.0.1 |
-| oxlint · openapi-typescript | 1.94.0 · 7.13.0 |
-| Playwright · @axe-core/playwright | 1.65.1 · 4.14.0 |
-| @tauri-apps/api · plugin-opener (JS) | 2.12.5 · 2.7.3 |
-| geist (fuentes) | 1.9.2, declarado sin importar (`WARNING/005-desvios-de-diseno.md`) |
-| Base UI (`@base-ui/react`, raíz) · shadcn (CLI, raíz) | 1.9.0 · 4.22.0 |
-| Tauri (crate) · tauri-build | 2.12.7 · 2.7.6 |
-| Plugins de Tauri (crate) | dialog 2.8.4 · opener 2.7.3 · notification 2.8.1 · window-state 2.5.0 · updater 2.14.1 · process 2.4.0 |
-| Plugins de Tauri (JS) para actualizar | plugin-updater 2.14.1 · plugin-process 2.4.0 |
+| Paquete | Origen | Versión | Nota |
+| :--- | :--- | :--- | :--- |
+| `react` | npm | 19.3.1 |  |
+| `react-dom` | npm | 19.3.1 |  |
+| `typescript` | npm | 5.9.3 | no 7: `WARNING/005-typescript-5.md` |
+| `vite` | npm | 8.3.8 |  |
+| `@vitejs/plugin-react` | npm | 6.3.0 |  |
+| `@tailwindcss/vite` | npm | 4.3.5 |  |
+| `@tanstack/react-query` | npm | 5.108.4 |  |
+| `@dnd-kit/core` | npm | 6.3.1 |  |
+| `@dnd-kit/sortable` | npm | 10.0.0 |  |
+| `sonner` | npm | 2.0.8 |  |
+| `vitest` | npm | 5.1.1 |  |
+| `@testing-library/react` | npm | 16.3.3 |  |
+| `jsdom` | npm | 31.0.1 |  |
+| `oxlint` | npm | 1.95.0 |  |
+| `openapi-typescript` | npm | 7.13.0 |  |
+| `@playwright/test` | npm | 1.65.1 |  |
+| `@axe-core/playwright` | npm | 4.14.1 |  |
+| `@tauri-apps/api` | npm | 2.12.5 |  |
+| `@tauri-apps/plugin-opener` | npm | 2.7.3 |  |
+| `@tauri-apps/plugin-updater` | npm | 2.14.1 |  |
+| `@tauri-apps/plugin-process` | npm | 2.4.0 |  |
+| `geist` | npm | 1.9.2 | declarado sin importar (`WARNING/005-desvios-de-diseno.md`) |
+| `@base-ui/react` | npm | 1.9.0 | raíz |
+| `shadcn` | npm | 4.23.0 | raíz, CLI |
+| `tauri` | crate | 2.12.7 |  |
+| `tauri-build` | crate | 2.7.6 |  |
+| `tauri-plugin-dialog` | crate | 2.8.4 |  |
+| `tauri-plugin-opener` | crate | 2.7.3 |  |
+| `tauri-plugin-notification` | crate | 2.8.1 |  |
+| `tauri-plugin-window-state` | crate | 2.5.0 |  |
+| `tauri-plugin-updater` | crate | 2.14.1 |  |
+| `tauri-plugin-process` | crate | 2.4.0 |  |
+| `getrandom` | crate | 0.4.3 |  |
+| `windows` | crate | 0.62.2 |  |
 
 ## Instalador y actualizaciones (spec 022)
 

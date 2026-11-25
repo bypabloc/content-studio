@@ -210,3 +210,4 @@ LOCALAPPDATA
 IDYES
 INSTDIR
 versiones
+regla

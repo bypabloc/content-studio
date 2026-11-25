@@ -16,6 +16,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [027-llm-warm-flaky](027-llm-warm-flaky.md) | Test de tiempo del servidor LLM: falló una vez en la suite completa, pasa 3 de 3 aislado | Después de publicar | Agente |
 | [026-cosyvoice3-instalacion](026-cosyvoice3-instalacion.md) | cosyvoice3 de la base real queda con installing.json sin terminar («Con errores») | Antes de publicar | Usuario |
 | [026-csp-app-check](026-csp-app-check.md) | app-check en claro falla por la CSP de Tauri (ipc.localhost); las voces dan 403 en /media/peaks | Antes de publicar | Usuario |
 | [026-verificacion-familias](026-verificacion-familias.md) | caso de verificación para transcription y vision | antes de publicar | agente |
