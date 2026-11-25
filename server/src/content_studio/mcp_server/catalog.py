@@ -42,7 +42,10 @@ JOB_OUTPUT = _object(
     {
         'path': _text('Absolute path of the output file.'),
         'media': _text('audio, video or file.'),
-        'duration_s': {'type': ['number', 'null'], 'description': 'Duration in seconds, when known.'},
+        'duration_s': {
+            'anyOf': [{'type': 'number'}, {'type': 'null'}],
+            'description': 'Duration in seconds, when known.',
+        },
     }
 )
 JOB = _object(
@@ -51,11 +54,14 @@ JOB = _object(
         'kind': _text('Job kind, such as narration or music.'),
         'status': {'type': 'string', 'enum': list(JOB_STATUSES)},
         'progress': {'type': 'number', 'description': 'From 0 to 1.'},
-        'stage': {'type': ['string', 'null']},
-        'waiting_on': {'type': ['string', 'null'], 'description': 'Who holds the GPU while status is waiting_gpu.'},
+        'stage': {'anyOf': [{'type': 'string'}, {'type': 'null'}]},
+        'waiting_on': {
+            'anyOf': [{'type': 'string'}, {'type': 'null'}],
+            'description': 'Who holds the GPU while status is waiting_gpu.',
+        },
         'outputs': {'type': 'array', 'items': JOB_OUTPUT},
-        'output_dir': {'type': ['string', 'null']},
-        'error': {'type': ['object', 'null']},
+        'output_dir': {'anyOf': [{'type': 'string'}, {'type': 'null'}]},
+        'error': {'anyOf': [{'type': 'object'}, {'type': 'null'}]},
         'timed_out': {'type': 'boolean', 'description': 'True when studio_wait_job stopped at timeout_s.'},
     }
 )

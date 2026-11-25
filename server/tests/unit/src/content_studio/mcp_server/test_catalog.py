@@ -32,3 +32,21 @@ def test_read_only_and_destructive_annotations_match_02():
         'studio_wait_job',
     }
     assert {tool.name for tool in catalog.TOOLS if tool.destructive} == {'studio_cancel_job'}
+
+
+def _type_lists(node):
+    """Cada `type` que es una lista (un campo anulable): los clientes de un solo tipo no siempre la aceptan."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key == 'type' and isinstance(value, list):
+                yield value
+            yield from _type_lists(value)
+    elif isinstance(node, list):
+        for item in node:
+            yield from _type_lists(item)
+
+
+def test_schemas_use_one_type_per_branch():
+    for tool in catalog.TOOLS:
+        assert list(_type_lists(tool.input_schema)) == []
+        assert list(_type_lists(tool.output_schema)) == []
