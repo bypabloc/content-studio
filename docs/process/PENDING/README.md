@@ -130,3 +130,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [036-llm-warm-intermitente](036-llm-warm-intermitente.md) | `test_llm_warm` falló una vez en la etapa unit; pasa aislado y en la pasada siguiente | Después de publicar | Agente |
 | [038-idiomas-duplicados](038-idiomas-duplicados.md) | La lista de idiomas está en tres sitios (Subtítulos, Transcripción y Limpiador); unificarla en una constante o en un selector compartido | Después de publicar | Agente |
 | [038-corrida-real](038-corrida-real.md) | Corrida real de la diarización (pyannote, que requiere token de Hugging Face y licencia), del Limpiador con hablantes y de la captura del carril del Editor | Antes de publicar | Usuario y agente |
+| [039-contraste-interruptor-oscuro](039-contraste-interruptor-oscuro.md) | Contraste bajo del interruptor «Identificar hablantes» apagado en tema oscuro (Transcripción, Subtítulos, Limpiador), según image-reader | Antes de publicar en main | Agente |
+| [039-wder](039-wder.md) | WDER de los clips de DER: requiere la transcripción con palabras por la API | Antes de publicar en main | Agente |
