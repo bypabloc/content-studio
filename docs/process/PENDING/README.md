@@ -132,3 +132,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [039-contraste-interruptor-oscuro](039-contraste-interruptor-oscuro.md) | Contraste bajo del interruptor «Identificar hablantes» apagado en tema oscuro (Transcripción, Subtítulos, Limpiador), según image-reader | Antes de publicar en main | Agente |
 
 | [039-carga-una-vez](039-carga-una-vez.md) | El AC-1 de carga del modelo una sola vez no se ve en los logs de los trabajos | Antes de publicar en main | Agente |
+| [039-aviso-motor-en-app-check](039-aviso-motor-en-app-check.md) | app-check muestra «Instala el motor» con pyannote instalado: motores aislados o modo real sin motores | Antes de publicar en main | Agente |
