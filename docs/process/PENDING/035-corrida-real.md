@@ -1,6 +1,6 @@
-# 035: corrida real de pyannote (diarización, VRAM, WDER y escucha)
+# 035: corrida real del trabajo de hablantes
 
-- **Qué**: la verificación final de la 035 pide la corrida real: `studio diarize` con dos clips de 2 a 5 minutos, el pico de VRAM, la transcripción con hablantes (WDER aproximado sobre 50 palabras) y la escucha de `speakers/*.wav`. No se hizo porque el motor pyannote no está instalado y su instalación pide el token de Hugging Face del usuario (`blocked — user-credential`, ver [034-instalacion-real](034-instalacion-real.md)).
-- **Lo que sí se comprobó** (2026-11-25, sin pyannote): el camino del atajo de un solo hablante con `job_main` (los seis archivos de la diarización, `speakers/SPEAKER_00.wav` de 2,500 s a 16 kHz mono, −15,8 LUFS); la transcripción con hablantes con whisper `large-v3-turbo` bajo `gpu-turn` (7 de 7 palabras con hablante); la CLI (`--help` con 0, `--speakers 0` con 2 y su mensaje en inglés); y el espectrograma del corte revisado por `image-reader`.
-- **Cómo cerrarlo**: el usuario acepta las condiciones en https://huggingface.co/pyannote/speaker-diarization-community-1, crea un token de lectura y lo pega en Motores > Diarización. Después se instala `pyannote` y se corre `uv run studio diarize <clip> --speakers 2` (toma el candado de la GPU solo), y se revisan `turns.json`, la VRAM con `nvidia-smi` y los WAV por hablante.
-- **Bloquea**: `main`. Si el WDER o la escucha salen mal, se corrige `embedding_batch_size` o la rampa de los cortes (ver WARNING `035-audio-por-hablante`).
+- **Qué**: falta un clip real de dos personas cortado por hablante con la API (`diarize.split`) y que escuches cada `speakers/*.wav`. Lo demás ya se hizo: `studio diarize` corre con pyannote en dos clips de muestras de voz (50 s) y en montajes de 30 y 60 min; el pico de VRAM (1,1 GB de pyannote sobre la línea base) y el WDER de la transcripción con hablantes (0,0 % en dos voces y en tres) están en `docs/research/diarizacion-pyannote/10-pruebas-en-gpu.md`.
+- **Cómo cerrarlo**: tú escuchas los `speakers/*.wav` de un clip real con dos personas y confirmas que cada archivo tiene solo a su hablante.
+- **Cuándo**: antes de publicar en `main`.
+- **Quién**: el usuario (escucha).

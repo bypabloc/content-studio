@@ -122,7 +122,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [031-inicio-logoff](031-inicio-logoff.md) | AC-8: que el server arranque al cerrar y abrir sesión (el valor `Run` ya se comprobó) | Antes de publicar 031 | Agente |
 | [031-desinstalar-carpeta](031-desinstalar-carpeta.md) | El desinstalador deja vacía la carpeta de instalación | Después de publicar 031 | Agente |
 | [032-033-fuera-del-lote](032-033-fuera-del-lote.md) | 032 (LAN) y 033 (verificación integral) quedan fuera del lote 025-031 según DECISIONS.md | Antes de empezar 032 | Usuario |
-| [034-instalacion-real](034-instalacion-real.md) | Instalación real de pyannote con el token del usuario (blocked — user-credential) | Antes de la corrida real de la 035 | Usuario |
 | [035-corrida-real](035-corrida-real.md) | Corrida real de pyannote (VRAM, WDER y escucha): el usuario pone el token de Hugging Face | `main` |
 | [036-corrida-real](036-corrida-real.md) | Corrida real con hablantes (pyannote, con el token del usuario) y revisión de capturas con hablantes | Antes de publicar | Usuario y agente |
 | [037-corrida-real](037-corrida-real.md) | Corrida real de Hablantes con pyannote, medición de los WAV por hablante y revisión de los proyectos del Editor | Antes de publicar en `main` | Usuario y agente |
@@ -130,3 +129,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [036-llm-warm-intermitente](036-llm-warm-intermitente.md) | `test_llm_warm` falló una vez en la etapa unit; pasa aislado y en la pasada siguiente | Después de publicar | Agente |
 | [038-idiomas-duplicados](038-idiomas-duplicados.md) | La lista de idiomas está en tres sitios (Subtítulos, Transcripción y Limpiador); unificarla en una constante o en un selector compartido | Después de publicar | Agente |
 | [038-corrida-real](038-corrida-real.md) | Corrida real de la diarización (pyannote, que requiere token de Hugging Face y licencia), del Limpiador con hablantes y de la captura del carril del Editor | Antes de publicar | Usuario y agente |
+| [039-contraste-interruptor-oscuro](039-contraste-interruptor-oscuro.md) | Contraste bajo del interruptor «Identificar hablantes» apagado en tema oscuro (Transcripción, Subtítulos, Limpiador), según image-reader | Antes de publicar en main | Agente |
+
+| [039-carga-una-vez](039-carga-una-vez.md) | El AC-1 de carga del modelo una sola vez no se ve en los logs de los trabajos | Antes de publicar en main | Agente |

@@ -37,3 +37,4 @@
 * **Propuesta**: diseño o código escrito para este proyecto que todavía no se ejecutó.
 
 Las versiones y fechas de PyPI, el CHANGELOG, los releases de GitHub, el código de `speaker_diarization.py` y `core/pipeline.py` (rama `develop`), los issues citados y `whisperx/diarize.py` se leyeron directamente el 2026-11-24. La tarjeta del modelo y su `config.yaml` piden sesión en Hugging Face (HTTP 401 sin token): lo que se dice de ellas viene de la tarjeta pública y del README del repositorio.
+- [10-pruebas-en-gpu](10-pruebas-en-gpu.md): VRAM, tiempo por hora y DER medidos en la RTX 4060 (spec 039).

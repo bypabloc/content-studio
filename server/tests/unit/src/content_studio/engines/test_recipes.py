@@ -180,3 +180,23 @@ def test_ac1_gated_is_a_boolean_on_hf_steps():
     data['steps'][2] = {**hf, 'gated': 'yes'}
     with pytest.raises(ValueError, match='gated'):
         recipes.validate(data)
+
+
+def test_ac3_pyannote_pins_torch_after_installing_pyannote_audio():
+    """Regresión: pyannote.audio sin fijar torch sube torch desde PyPI y torchaudio deja de cargar."""
+    steps = recipes.load('pyannote').steps
+    is_audio = [s['kind'] == 'pip' and any(p.startswith('pyannote.audio') for p in s['packages']) for s in steps]
+    audio = is_audio.index(True)
+    later = [
+        s for s in steps[audio + 1 :] if s['kind'] == 'pip' and any(p.startswith('torch==') for p in s['packages'])
+    ]
+    assert later, 'falta fijar torch después de pyannote.audio'
+    assert any(p.startswith('torchaudio==') for p in later[-1]['packages'])
+    assert later[-1].get('index'), 'la fijación de torch necesita su índice de CUDA'
+
+
+def test_ac2_pyannote_vram_measured():
+    """C1 (spec 039): vram_gb es el pico medido (1,1 GB de pyannote sobre la línea base) hacia arriba a 0,5 GB."""
+    recipe = recipes.load('pyannote')
+    assert recipe.vram_gb == 1.5
+    assert recipe.size_gb == 5
