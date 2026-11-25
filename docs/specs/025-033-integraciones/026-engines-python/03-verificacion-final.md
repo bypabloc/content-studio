@@ -32,10 +32,10 @@ Las rutas de `out/` de cada motor (antes y después) van en el PR. El agente eli
 
 ## 4. Cierre, PR y merge
 
-- [ ] Toda decisión con su ficha en `WARNING/` y todo pendiente en `PENDING/`: lo que quede solo en esta carpeta se pierde.
-- [ ] Fichas de `docs/process/01-done/` actualizadas: `engines.md` (huella y «Actualizar»), `narration.md` y `music.md` (versiones de cada motor).
-- [ ] Reglas y docs actualizadas: `stack.md` (tabla de motores y su Python), `codigo-python.md` (piso actual) y `AGENTS.md`; `python -m devtools rules --sync` y `python -m devtools agent-context`.
-- [ ] Spec de lote: deja sus fases en `IMP` y su fila del README del lote en `DON`; la carpeta la borra la 033.
+- [x] Toda decisión con su ficha en `WARNING/` y todo pendiente en `PENDING/`: lo que quede solo en esta carpeta se pierde.
+- [x] Fichas de `docs/process/01-done/` actualizadas: `engines.md` (huella y «Actualizar»), `narration.md` y `music.md` (versiones de cada motor).
+- [x] Reglas y docs actualizadas: `stack.md` (tabla de motores y su Python), `codigo-python.md` (piso actual) y `AGENTS.md`; `python -m devtools rules --sync` y `python -m devtools agent-context`.
+- [x] Spec de lote: deja sus fases en `IMP` y su fila del README del lote en `DON`; la carpeta la borra la 033.
 - [ ] `git fetch origin dev` y merge de `origin/dev` si avanzó; un solo push.
 - [ ] `gh pr list --head chore/026-engines-python`; si no existe, `gh pr create --base dev` con problema, solución, cómo probar (comandos reales), rutas de `out/` y fichas WARNING/PENDING.
 - [ ] `gh pr checks <n> --watch`; con todo verde, `gh pr merge <n> --merge`.

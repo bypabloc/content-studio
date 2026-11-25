@@ -17,6 +17,20 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [026-huella-sin-registro](026-huella-sin-registro.md) | Instalaciones previas a la huella salen outdated una vez: «Actualizar» rehace sus descargas | `main` |
+| [026-piso-f4](026-piso-f4.md) | F4 sin commit: el piso ya es 3.11 desde 9908005 y AC-5 lo cubre el test de la 025 | `main` |
+| [026-verificacion-familias](026-verificacion-familias.md) | Verificar en Motores falla para transcription y vision (sin caso en verification.py) | `main` |
+| [026-llama-cpp-version](026-llama-cpp-version.md) | llama.cpp b12686 (mejor que b12676 en script_review) | `main` |
+| [026-heartmula-voz](026-heartmula-voz.md) | heartmula canta en ambas revisiones: la música no es instrumental | `main` |
+| [026-faster-whisper-version](026-faster-whisper-version.md) | faster-whisper en 3.14 con av 18.1.1: onnxruntime y metadata_errors | `main` |
+| [026-acestep-version](026-acestep-version.md) | acestep en 3.12: su pyproject exige Python menor que 3.13 y torch 2.7.1 | `main` |
+| [026-heartmula-version](026-heartmula-version.md) | heartmula en 3.13: torchtune fija datasets 2.14.4, que necesita pyarrow 20 | `main` |
+| [026-cosyvoice3-version](026-cosyvoice3-version.md) | cosyvoice3 en 3.11: pyworld y grpcio sin rueda cp312; onnxruntime 1.23.2 | `main` |
+| [026-indextts-version](026-indextts-version.md) | indextts en 3.11 sin verificar: licencia bilibili pendiente | `main` |
+| [026-voxcpm2-version](026-voxcpm2-version.md) | voxcpm2 en 3.14: pyahocorasick sin rueda cp315 | `main` |
+| [026-qwen-0.6b-version](026-qwen-0.6b-version.md) | qwen-0.6b en 3.14: qwen-tts exige onnxruntime sin cp315 | `main` |
+| [026-qwen-1.7b-version](026-qwen-1.7b-version.md) | qwen-1.7b en 3.14: mismo caso que qwen-0.6b | `main` |
+| [026-omnivoice-version](026-omnivoice-version.md) | omnivoice en 3.14 sin verificar: falta aceptar la licencia CC-BY-NC | `main` |
 | [003-baselines](003-baselines.md) | Baselines de tamaño, espejo y cobertura: deuda registrada, no reglas nuevas | `main` |
 | [003-hooks-sin-unit](003-hooks-sin-unit.md) | pre-commit y pre-push sin `unit` (recursión con los tests de hooks) | `main` |
 | [003-mypy-overrides](003-mypy-overrides.md) | mypy con `ignore_errors` por módulo heredado | `main` |
@@ -223,3 +237,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [025-nombres-en-ingles](025-nombres-en-ingles.md) | Tests y funciones nuevos de la 025 llevan nombre en inglés (el spell check de pre-commit en inglés) | `main` |
 | [025-venv-vacio-al-recrear](025-venv-vacio-al-recrear.md) | El venv del server se borra y queda vacío al cambiar de Python; `uv sync` lo recrea (AC-6, instalador real pendiente) | `main` |
 | [025-instalador-real](025-instalador-real.md) | AC-6 con el instalador real sobre una instalación previa: requiere permiso del usuario | `main` |
+| [026-huella-receta](026-huella-receta.md) | La huella sha256 de la receta decide `outdated`; «Actualizar» reconstruye el motor y rehace sus descargas | `main` |

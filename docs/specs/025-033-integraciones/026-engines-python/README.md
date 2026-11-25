@@ -35,11 +35,11 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Huella de receta y «Actualizar» en Motores](fases/1-huella-receta/plan-tdd.md) | C1, C2 | AC-3, AC-7 | - | PEN |
-| F2 | [Recetas de narración](fases/2-narracion/plan-tdd.md) | C3 | AC-1, AC-2, AC-4 | - | PEN |
-| F3 | [Música, whisper, visión y asistente](fases/3-musica-y-resto/plan-tdd.md) | C4 | AC-1, AC-2, AC-4, AC-6 | - | PEN |
-| F4 | [Piso nuevo](fases/4-piso/plan-tdd.md) | C5 | AC-5 | - | PEN |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F1 | [Huella de receta y «Actualizar» en Motores](fases/1-huella-receta/plan-tdd.md) | C1, C2 | AC-3, AC-7 | pendiente | IMP |
+| F2 | [Recetas de narración](fases/2-narracion/plan-tdd.md) | C3 | AC-1, AC-2, AC-4 | pendiente | IMP |
+| F3 | [Música, whisper, visión y asistente](fases/3-musica-y-resto/plan-tdd.md) | C4 | AC-1, AC-2, AC-4, AC-6 | pendiente | IMP |
+| F4 | [Piso nuevo](fases/4-piso/plan-tdd.md) | C5 | AC-5 | pendiente | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | IMP |
 
 ## Decisiones cerradas (no reabrir)
 
@@ -66,12 +66,12 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 
 | AC | Fase | Ciclo | Test | Verificación real |
 | :--- | :--- | :--- | :--- | :--- |
-| AC-1 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_cada_motor_por_debajo_tiene_su_ficha` | 03 §2 |
+| AC-1 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_every_engine_below_pinned_python_has_warning` | 03 §2 |
 | AC-1 | F3 | C4 | `server/tests/integration/test_venvs.py (-m local, con la carpeta aislada)` | 03 §2 |
-| AC-2 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_cada_motor_por_debajo_tiene_su_ficha` | 03 §2 |
+| AC-2 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_every_engine_below_pinned_python_has_warning` | 03 §2 |
 | AC-2 | F3 | C4 | `server/tests/integration/test_venvs.py (-m local, con la carpeta aislada)` | 03 §2 |
-| AC-3 | F1 | C1 | `server/tests/unit/src/content_studio/engines/test_installer.py::test_ac3_receta_cambiada_queda_outdated` | solo pytest |
-| AC-4 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_cada_motor_por_debajo_tiene_su_ficha` | 03 §2, paso 2 |
+| AC-3 | F1 | C1 | `server/tests/unit/src/content_studio/engines/test_installer.py::test_ac3_changed_recipe_is_outdated` | solo pytest |
+| AC-4 | F2 | C3 | `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_every_engine_below_pinned_python_has_warning` | 03 §2, paso 2 |
 | AC-4 | F3 | C4 | `server/tests/integration/test_venvs.py (-m local, con la carpeta aislada)` | 03 §2 |
 | AC-5 | F4 | C5 | `tests/validators/test_structure.py::test_ac3_piso_sale_de_las_recetas` | solo pytest |
 | AC-6 | F3 | C4 | `server/tests/integration/test_venvs.py (-m local, con la carpeta aislada)` | 03 §2 |

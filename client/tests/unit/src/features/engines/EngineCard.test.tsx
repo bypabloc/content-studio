@@ -36,6 +36,16 @@ describe('EngineCard', () => {
     expect(screen.getByRole('button', { name: 'Desinstalar' })).toBeTruthy();
   });
 
+  it('AC-7: un motor con otra receta muestra la actualización y Actualizar reinstala', () => {
+    const onAction = vi.fn();
+    render(<EngineCard engine={{ ...qwen, status: 'outdated' }} gpu={gpu} onAction={onAction} />);
+
+    expect(screen.getByText('Actualización disponible')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Verificar' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Actualizar' }));
+    expect(onAction).toHaveBeenCalledWith({ type: 'install', engine: 'qwen-0.6b' });
+  });
+
   it('permite instalar con poca VRAM y muestra la advertencia', () => {
     render(
       <EngineCard

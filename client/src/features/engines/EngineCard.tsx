@@ -45,6 +45,7 @@ function statusLabel(status: string): string {
     installing: t('engines.status.installing'),
     installed: t('engines.status.installed'),
     broken: t('engines.status.broken'),
+    outdated: t('engines.status.outdated'),
     external: t('engines.status.external'),
   };
   return labels[status] ?? status;
@@ -55,7 +56,7 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
   const [typedName, setTypedName] = useState('');
   const external = engine.owner === 'external' || engine.status === 'external';
   const managed = engine.owner === 'app';
-  const installed = engine.status === 'installed' || engine.status === 'external';
+  const installed = ['installed', 'outdated', 'external'].includes(engine.status);
   const canInstall = Boolean(gpu) || engine.cpu;
   const verification = engine.verification as { ok?: boolean } | null;
 
@@ -103,6 +104,11 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
           {engine.status === 'missing' ? (
             <UIButton disabled={!canInstall || busy} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
               {t('engines.action.install')}
+            </UIButton>
+          ) : null}
+          {engine.status === 'outdated' ? (
+            <UIButton disabled={busy} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
+              {t('engines.action.update')}
             </UIButton>
           ) : null}
           {installed ? (

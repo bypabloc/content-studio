@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from devtools.migrations import new, profile_path
@@ -117,7 +117,7 @@ def ensure_default_profile(root: Path) -> list[str]:
     target = folder / 'profile.json'
     if not folder.is_dir() or target.exists():
         return []
-    data = {'name': 'Mi voz', 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds')}
+    data = {'name': 'Mi voz', 'created_at': datetime.now(UTC).isoformat(timespec='seconds')}
     target.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     return [str(target)]
 

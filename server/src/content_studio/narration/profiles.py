@@ -13,7 +13,7 @@ import json
 import re
 import shutil
 import unicodedata
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from content_studio import paths
@@ -80,7 +80,7 @@ def create(name: str) -> str:
     if exists(slug):
         raise ProfileExists(slug)
     folder(slug).mkdir(parents=True)
-    _write(slug, {'name': name, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds')})
+    _write(slug, {'name': name, 'created_at': datetime.now(UTC).isoformat(timespec='seconds')})
     return slug
 
 
@@ -88,7 +88,7 @@ def record_consent(profile: str, text: str) -> None:
     """Guarda el permiso del dueño la primera vez que se importa algo al perfil; las siguientes no lo cambian."""
     data = _read(profile)
     if 'consent' not in data:
-        stamp = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        stamp = datetime.now(UTC).isoformat(timespec='seconds')
         _write(profile, {**data, 'consent': {'accepted_at': stamp, 'text': text}})
 
 

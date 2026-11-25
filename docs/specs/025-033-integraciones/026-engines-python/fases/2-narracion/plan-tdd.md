@@ -14,7 +14,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C3: Recetas TTS al día [AC-1, AC-2, AC-4]
 
-- **RED**: `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_cada_motor_por_debajo_tiene_su_ficha`
+- **RED**: `server/tests/unit/src/content_studio/engines/test_recipes.py::test_ac1_every_engine_below_pinned_python_has_warning`
   - WHEN una receta usa una Python menor que `.python-version` THEN debe existir `docs/process/WARNING/026-<motor>-version.md`; hoy no existe ninguna.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: por motor, en la carpeta aislada: subir, `studio engines install <motor>`, salida corta con `studio narration tts`, medir y escribir la receta o la ficha. Verify: `uv run pytest server/tests/unit/src/content_studio/engines -q`.

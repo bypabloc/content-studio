@@ -16,6 +16,21 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [026-cosyvoice3-instalacion](026-cosyvoice3-instalacion.md) | cosyvoice3 de la base real queda con installing.json sin terminar («Con errores») | Antes de publicar | Usuario |
+| [026-csp-app-check](026-csp-app-check.md) | app-check en claro falla por la CSP de Tauri (ipc.localhost); las voces dan 403 en /media/peaks | Antes de publicar | Usuario |
+| [026-verificacion-familias](026-verificacion-familias.md) | caso de verificación para transcription y vision | antes de publicar | agente |
+| [026-llm-casos-fallidos](026-llm-casos-fallidos.md) | asistente: el caso que falla en script_review (1 de 25 en cada modelo) | después de publicar | agente |
+| [026-heartmula-voz](026-heartmula-voz.md) | heartmula: prompt o revisión que no cante, o quitar el motor de la música instrumental | antes de publicar | usuario y agente |
+| [026-reintentar-faster-whisper](026-reintentar-faster-whisper.md) | faster-whisper en 3.15 y av nueva | después de publicar | agente |
+| [026-reintentar-acestep](026-reintentar-acestep.md) | acestep en 3.13 o más cuando su pyproject lo permita | después de publicar | agente |
+| [026-reintentar-heartmula](026-reintentar-heartmula.md) | heartmula en 3.14 o más cuando torchtune deje datasets 2.14.4 | después de publicar | agente |
+| [026-reintentar-cosyvoice3](026-reintentar-cosyvoice3.md) | cosyvoice3 en 3.12 o más, y escucha de onnxruntime 1.23.2 | después de publicar | agente y usuario |
+| [026-reintentar-indextts](026-reintentar-indextts.md) | indextts: aceptar la licencia y verificar 3.11 | antes de publicar | usuario y agente |
+| [026-chatterbox-volumen-y-cangjie](026-chatterbox-volumen-y-cangjie.md) | chatterbox: aviso de LUFS del mastering y mapa Cangjie | antes de publicar | usuario y agente |
+| [026-reintentar-voxcpm2](026-reintentar-voxcpm2.md) | voxcpm2 en 3.15 con rueda cp315 de pyahocorasick | después de publicar | agente |
+| [026-reintentar-qwen-0.6b](026-reintentar-qwen-0.6b.md) | qwen-0.6b en 3.15 con onnxruntime cp315 | después de publicar | agente |
+| [026-reintentar-qwen-1.7b](026-reintentar-qwen-1.7b.md) | qwen-1.7b en 3.15 con onnxruntime cp315 | después de publicar | agente |
+| [026-reintentar-omnivoice](026-reintentar-omnivoice.md) | omnivoice: aceptar licencia, probar 3.15 y la revisión nueva | antes de publicar | usuario y agente |
 | [001-duracion-de-audio](001-duracion-de-audio.md) | La duración de música y narración no coincide con la pedida (igual en `dev`) | Antes de publicar el lote | Usuario y agente |
 | [002-nombres-en-disco](002-nombres-en-disco.md) | `aprobacion.json` de las voces construidas sigue en español | Antes de publicar, o en la 004 | Usuario y agente |
 | [003-bajar-baselines](003-bajar-baselines.md) | Vaciar los baselines de tamaño, espejo y cobertura, y los overrides de mypy, a medida que se tocan los archivos | En cada spec que toque un módulo de la lista | Agente |

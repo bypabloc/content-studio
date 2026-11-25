@@ -9,8 +9,8 @@
 ## Reglas
 
 - **Tamaño por categoría** (`tests/validators/file-size.json`): fuente 300 líneas, tests 800. Si un archivo se acerca, se divide por responsabilidad. La etapa `validators` lo exige sin excepciones; el baseline solo puede bajar. `test_structure.py` vigila que no haya `.py` sueltos en la raíz ni en `server/data/`.
-- **Python: el server en `.python-version` (3.15, spec 025).** El piso de los motores (hoy 3.10, CosyVoice y HeartMuLa) sale de sus recetas (`devtools/python_floor.py`).
-- El código que corre en los venvs de los motores (`narration/`, `music/`, `common/`) no usa nada más nuevo que el piso: ni `tomllib`, `Self`, `ExceptionGroup`, `datetime.UTC` ni `match` con sintaxis nueva.
+- **Python: el server en `.python-version` (3.15, spec 025).** El piso de los motores (hoy 3.11, CosyVoice e IndexTTS) sale de sus recetas (`devtools/python_floor.py`).
+- El código que corre en los venvs de los motores (`narration/`, `music/`, `common/`) no usa nada más nuevo que el piso (3.11): ni `match` con sintaxis nueva ni sintaxis de 3.12 o más (`type X = …`, genéricos `class A[T]`).
 - Con `from __future__ import annotations` se escribe `X | None`. `test_structure.py` compila con el piso. El pre-push corre las pruebas con la Python del venv; la CI corre solo en los PR de otras personas.
 - **Dos capas.** En el nivel superior de un módulo solo va stdlib, salvo en `api/` y el comando `serve` (fastapi y uvicorn). torch, numpy, soundfile y las librerías de cada motor se importan dentro de funciones, así `--help`, los parsers y el catálogo funcionan sin el venv del motor.
 - **Factory Method solo con dos o más productos**: motores TTS, motores de música y tipos de trabajo (`services/`, con `SERVICES`: narración y música). Lo que tiene un solo producto (referencia, catálogo de voces, fuentes, grabar) es una función o un módulo. SOLID y KISS: nada de interfaces, configuración ni autodescubrimiento que hoy no se usen.
