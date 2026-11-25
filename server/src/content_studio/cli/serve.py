@@ -18,6 +18,7 @@ from content_studio.api.app import create_app
 from content_studio.api.guards import ActivityGuard, HostGuard
 from content_studio.db import connection, jobs, schema, settings
 from content_studio.db.connection import utc_now
+from content_studio.inbox import scanner as inbox
 from content_studio.jobs.worker import Worker
 from content_studio.runtime import discovery, idle, instance
 from content_studio.system import tools
@@ -128,6 +129,8 @@ def _run(db: Path, main: Path, port: int, token: str, folder: Path) -> int:
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     threading.Thread(target=_watch_idle, args=(server, clock, db), daemon=True).start()
+    inbox_stop = threading.Event()
+    threading.Thread(target=inbox.run_forever, args=(db, clock, inbox_stop), daemon=True).start()
     while not server.started and thread.is_alive():
         time.sleep(0.05)
     discovery.write(
@@ -147,5 +150,6 @@ def _run(db: Path, main: Path, port: int, token: str, folder: Path) -> int:
         server.should_exit = True
         thread.join(5)
     discovery.clear(folder)
+    inbox_stop.set()
     worker.stop()
     return 0
