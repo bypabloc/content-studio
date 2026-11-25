@@ -120,3 +120,11 @@ mod tests {
         );
     }
 }
+
+/// El venv de la app instalada, donde está el `pythonw.exe` del inicio con Windows (spec 031, AC-8). En el checkout no hay.
+pub fn installed_venv(mode: &Mode, version: &str) -> Option<PathBuf> {
+    match mode {
+        Mode::Installed { resources } => Some(prepare::Layout::from_env(resources.clone(), version).venv()),
+        Mode::Dev { .. } => None,
+    }
+}

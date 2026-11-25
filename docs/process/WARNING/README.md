@@ -264,3 +264,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [031-enlaces-y-instancia-unica](031-enlaces-y-instancia-unica.md) | Enlaces `content-studio://` con deep-link 2.6.3 y single-instance 2.5.5 (no la línea 3.x alpha); comandos `startup_argv` y `path_exists` | `main` |
 | [031-valores iniciales-y-detalle](031-valores iniciales-y-detalle.md) | Valores iniciales de Narración, Música y Conversor, y detalle de biblioteca y trabajo desde un enlace: estado guardado y consumo al salir | `main` |
 | [031-enviar-a-acciones](031-enviar-a-acciones.md) | «Enviar a»: cinco acciones con sus valores por defecto, accesos directos en `$SENDTO` y su borrado al desinstalar | `main` |
+| [031-inicio-con-windows](031-inicio-con-windows.md) | Inicio con Windows: valor `Run` de HKCU con `pythonw.exe` del venv de la app, crate `windows` 0.62.2 | `main` |
