@@ -221,3 +221,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [025-matriz-ci](025-matriz-ci.md) | La CI corre una sola versión de Python (la de `.python-version`), sin matriz | `main` |
 | [025-argparse-prog](025-argparse-prog.md) | El fixture de parsers fija el `prog` de argparse, que Python 3.15 deriva del lanzador | `main` |
 | [025-nombres-en-ingles](025-nombres-en-ingles.md) | Tests y funciones nuevos de la 025 llevan nombre en inglés (el spell check de pre-commit en inglés) | `main` |
+| [025-venv-vacio-al-recrear](025-venv-vacio-al-recrear.md) | El venv del server se borra y queda vacío al cambiar de Python; `uv sync` lo recrea (AC-6, instalador real pendiente) | `main` |

@@ -35,8 +35,8 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Versión única y piso de los motores](fases/1-version-unica/plan-tdd.md) | C1, C2 | AC-1, AC-2, AC-3, AC-7 | bd95ff2 | IMP |
-| F2 | [Dependencias de Python al día](fases/2-dependencias/plan-tdd.md) | C3 | AC-4, AC-5 | pendiente | IMP |
-| F3 | [Instalador con la Python nueva](fases/3-instalador/plan-tdd.md) | C4 | AC-6 | - | PEN |
+| F2 | [Dependencias de Python al día](fases/2-dependencias/plan-tdd.md) | C3 | AC-4, AC-5 | 4331f9f | IMP |
+| F3 | [Instalador con la Python nueva](fases/3-instalador/plan-tdd.md) | C4 | AC-6 | pendiente | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)
