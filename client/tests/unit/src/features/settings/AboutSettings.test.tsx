@@ -4,10 +4,13 @@ import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { APP_VERSION } from '@/shared/version';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { AboutSettings } from '@/features/settings/AboutSettings';
 import { ApiProvider } from '@/shared/api/context';
 import { t } from '@/shared/i18n/t';
 import type { UpdaterDeps } from '@/shared/update/useUpdater';
+
+vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: vi.fn() }));
 
 const connection = { baseUrl: 'http://127.0.0.1:9000', token: 'tok' };
 
@@ -55,5 +58,20 @@ describe('AboutSettings (spec 022, D-6)', () => {
     await userEvent.click(screen.getByRole('button', { name: t('update.check') }));
 
     expect(await screen.findByText(t('update.failed'))).toBeTruthy();
+  });
+
+  it('AC-6: Acerca de muestra la atribución de community-1 con su enlace', () => {
+    renderAbout({ check: vi.fn(async () => null), relaunch: vi.fn() });
+
+    expect(screen.getByText(/CC BY 4\.0/)).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Modelo en Hugging Face' })).toBeTruthy();
+  });
+
+  it('AC-6: el enlace de Acerca de abre el modelo en el navegador', async () => {
+    renderAbout({ check: vi.fn(async () => null), relaunch: vi.fn() });
+
+    await userEvent.click(screen.getByRole('link', { name: 'Modelo en Hugging Face' }));
+
+    expect(openUrl).toHaveBeenCalledWith('https://huggingface.co/pyannote/speaker-diarization-community-1');
   });
 });

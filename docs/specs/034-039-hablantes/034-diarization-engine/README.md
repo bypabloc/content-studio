@@ -39,8 +39,8 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F0 | Ajustes a la 026: receta en Python 3.14 (commit docs) | - | - | c16d7ec | IMP |
 | F1 | [Receta, familia y token en la instalación](fases/1-receta-y-token/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3 | 5f563b9 | IMP |
-| F2 | [Credenciales y API](fases/2-credenciales/plan-tdd.md) | C4, C5 | AC-3, AC-4 | - | IMP |
-| F3 | [Client: tarjeta, token y atribución](fases/3-client/plan-tdd.md) | C6 | AC-5, AC-6 | - | PEN |
+| F2 | [Credenciales y API](fases/2-credenciales/plan-tdd.md) | C4, C5 | AC-3, AC-4 | b9a44cf | IMP |
+| F3 | [Client: tarjeta, token y atribución](fases/3-client/plan-tdd.md) | C6 | AC-5, AC-6 | - | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)
