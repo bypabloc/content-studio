@@ -10,9 +10,11 @@ import { toast } from '@/shared/components/molecules/UIToast';
 import { UIConfirmDialog } from '@/shared/components/organisms/UIConfirmDialog';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
+import { usePrefillApply } from '@/shared/navigation/prefill';
 
 import { FolderSidebar } from './FolderSidebar';
 import { ItemDetail } from './ItemDetail';
+import { JobDetail } from './JobDetail';
 import { LibraryGrid } from './LibraryGrid';
 import { LibraryList } from './LibraryList';
 import { LibraryToolbar } from './LibraryToolbar';
@@ -36,6 +38,12 @@ export function LibraryPage(): React.JSX.Element {
   const [page, setPage] = useState(1);
   const [view, setView] = useSetting<'grid' | 'list'>('library.view', 'grid');
   const [openId, setOpenId] = useState<number | null>(null);
+  const [jobId, setJobId] = useState<number | null>(null);
+  // Un enlace `library/<id>` o `job/<id>` abre el detalle (spec 031, AC-2).
+  usePrefillApply('library', (values) => {
+    if (values.id) setOpenId(Number(values.id));
+    if (values.job) setJobId(Number(values.job));
+  });
   const [selected, setSelected] = useState<number[]>([]);
   const scan = useScan();
   useAutoScan(scan.refresh);
@@ -116,6 +124,7 @@ export function LibraryPage(): React.JSX.Element {
         )}
       </UIStack>
       {openId !== null ? <ItemDetail id={openId} onOpen={setOpenId} onClose={() => setOpenId(null)} /> : null}
+      {jobId !== null ? <JobDetail id={jobId} onClose={() => setJobId(null)} /> : null}
     </UIStack>
   );
 }

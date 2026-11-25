@@ -217,3 +217,11 @@ NBLCK
 UNLCK
 reconecta
 reconectar
+deeplink
+unminimize
+sendto
+MAINBINARYNAME
+pythonw
+hkcu
+hkey
+pcwstr

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { openPath } from '@tauri-apps/plugin-opener';
 import { useState } from 'react';
+import { usePrefillApply } from '@/shared/navigation/prefill';
 
 import { useApi } from '@/shared/api/context';
 import type { Job } from '@/shared/api/events';
@@ -58,6 +59,10 @@ export function ConvertPage(): React.JSX.Element {
   const [choice, setChoice] = useState<FormatChoice | null>(null);
   const [reframe, setReframe] = useState<Reframe | null>(null);
   const [failed, setFailed] = useState<Job | null>(null);
+  // Un enlace `new/media.convert` rellena el archivo; el formato se elige en la pantalla (spec 031, AC-3).
+  usePrefillApply('convert', (values) => {
+    if (values.path) setFiles([values.path]);
+  });
 
   const videoFile = files.find(isVideoPath);
   const info = useQuery({

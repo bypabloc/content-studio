@@ -1,7 +1,9 @@
 //! Content Studio (spec 005, D-2; spec 028): la ventana de Tauri, el server compartido y el comando `get_connection`.
 
 mod bootstrap;
+mod external;
 mod server;
+mod startup;
 
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -127,6 +129,16 @@ fn project_root() -> PathBuf {
 }
 
 /// Async: el arranque del server bloquea hasta que responde, así que va en un hilo aparte y no congela la ventana.
+/// «Iniciar el servidor con Windows» (spec 031, AC-8): activa o quita el valor `Run` de HKCU. Quitarlo no necesita venv.
+#[tauri::command]
+fn set_start_at_login(enabled: bool, state: tauri::State<'_, ServerState>) -> Result<(), String> {
+    if !enabled {
+        return startup::apply(&mut startup::CurrentUserRun, false, "");
+    }
+    let venv = bootstrap::installed_venv(&state.0, &state.1).ok_or("solo en la app instalada")?;
+    startup::apply(&mut startup::CurrentUserRun, true, &startup::server_command(&venv))
+}
+
 #[tauri::command]
 async fn get_connection(app: AppHandle) -> Result<Connection, String> {
     let state = app.state::<ServerState>().inner().clone();
@@ -162,6 +174,17 @@ async fn rotate_token(app: AppHandle) -> Result<(), String> {
 
 pub fn run() {
     tauri::Builder::default()
+        // Instancia única primero (AC-5): un segundo arranque por enlace o «Enviar a» le pasa su argv a esta ventana.
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            external::forward_argv(&argv, |payload| {
+                let _ = app.emit(external::EVENT, payload);
+            });
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
+        .plugin(tauri_plugin_deep_link::init())
         // La app graba con su propio micrófono: WebView2 lo concede sin preguntar. Que se está usando lo muestra el
         // indicador «Micrófono en uso» de la grabación (spec 010, D-2). Lo demás sigue la decisión por defecto.
         .on_permission_request(|_, kind| match kind {
@@ -185,7 +208,7 @@ pub fn run() {
             app.manage(ServerState(Arc::new(mode), version));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token])
+        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token, external::startup_argv, external::path_exists, set_start_at_login])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")
         .run(|_, _| {});
