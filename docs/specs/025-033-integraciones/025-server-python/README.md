@@ -34,8 +34,8 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Versión única y piso de los motores](fases/1-version-unica/plan-tdd.md) | C1, C2 | AC-1, AC-2, AC-3, AC-7 | pendiente | IMP |
-| F2 | [Dependencias de Python al día](fases/2-dependencias/plan-tdd.md) | C3 | AC-4, AC-5 | - | PEN |
+| F1 | [Versión única y piso de los motores](fases/1-version-unica/plan-tdd.md) | C1, C2 | AC-1, AC-2, AC-3, AC-7 | bd95ff2 | IMP |
+| F2 | [Dependencias de Python al día](fases/2-dependencias/plan-tdd.md) | C3 | AC-4, AC-5 | pendiente | IMP |
 | F3 | [Instalador con la Python nueva](fases/3-instalador/plan-tdd.md) | C4 | AC-6 | - | PEN |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
@@ -66,7 +66,7 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 | AC-1 | F1 | C1 | `tests/validators/test_python_version.py::test_ac1_venv_runs_pinned_version` | solo pytest |
 | AC-2 | F1 | C1 | `tests/validators/test_python_version.py::test_ac2_versions_match` | solo pytest |
 | AC-3 | F1 | C2 | `tests/validators/test_structure.py::test_ac3_floor_comes_from_recipes` | `uv run pytest -m local` y la corrida de 03 §2 |
-| AC-4 | F2 | C3 | `tests/validators/test_python_version.py::test_ac4_cotas_iguales_al_lock` | solo pytest |
+| AC-4 | F2 | C3 | `tests/validators/test_python_version.py::test_ac4_bounds_match_lock` | solo pytest |
 | AC-5 | F2 | C3 | `python -m devtools test-runner --type=all` | CI del PR en verde |
 | AC-6 | F3 | C4 | `client/src-tauri/src/bootstrap/prepare.rs::tests::recreates_venv_when_python_changes` | `python -m devtools app-check run --binary=<instalador nuevo> --scenario=installed` |
 | AC-7 | F1 | C2 | `server/tests/integration/test_venvs.py (-m local)` | `uv run pytest -m local` y la corrida de 03 §2 |

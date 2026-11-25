@@ -6,6 +6,8 @@ import re
 import sys
 from pathlib import Path
 
+import tomllib
+
 ROOT = Path(__file__).resolve().parents[2]
 PIN = ROOT / '.python-version'
 
@@ -34,3 +36,36 @@ def test_ac2_versions_match():
     assert found and found.group(1) == version, (
         f'prepare.rs PYTHON = {found and found.group(1)}; .python-version dice {version}'
     )
+
+
+def locked_versions() -> dict[str, str]:
+    lock = tomllib.loads((ROOT / 'uv.lock').read_text(encoding='utf-8'))
+    return {package['name']: package['version'] for package in lock['package']}
+
+
+def direct_requirements() -> list[tuple[str, str, str | None]]:
+    """(archivo, nombre, cota inferior) de cada dependencia directa del server y de la raíz del workspace."""
+    found = []
+    for rel in ('server/pyproject.toml', 'pyproject.toml'):
+        data = tomllib.loads((ROOT / rel).read_text(encoding='utf-8'))
+        specs = list(data.get('project', {}).get('dependencies', []))
+        for group in data.get('dependency-groups', {}).values():
+            specs += [spec for spec in group if isinstance(spec, str)]
+        for spec in specs:
+            match = re.fullmatch(r'([A-Za-z0-9][A-Za-z0-9._-]*)(?:>=([0-9][\w.]*))?', spec)
+            assert match, f'{rel}: no se lee la dependencia {spec!r}'
+            found.append((rel, match.group(1), match.group(2)))
+    return found
+
+
+def test_ac4_bounds_match_lock():
+    """AC-4: la cota inferior de cada dependencia directa es la versión del uv.lock (D-4)."""
+    locked = locked_versions()
+    problems = []
+    for rel, name, bound in direct_requirements():
+        key = re.sub(r'[-_.]+', '-', name).lower()
+        if key not in locked:
+            problems.append(f'{rel}: {name} no está en uv.lock')
+        elif bound != locked[key]:
+            problems.append(f'{rel}: {name} >={bound or "(sin cota)"}, uv.lock tiene {locked[key]}')
+    assert not problems, '\n'.join(problems)
