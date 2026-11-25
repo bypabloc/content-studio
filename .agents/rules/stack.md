@@ -13,6 +13,7 @@ description: Stack de content-studio (Python 3.15, uv, argparse, FastAPI y uvico
 | uv | Venv de desarrollo (`uv sync`), `uv run ruff/pytest` y el CLI `uv run studio <comando>` | `pyproject.toml`, `uv.lock` |
 | argparse | CLI `studio` (`serve`, `narration`, `music`, `jobs`), solo stdlib | `server/src/content_studio/cli/` |
 | FastAPI + uvicorn | API local en 127.0.0.1 con token Bearer y `/events` por SSE; `studio serve` la levanta junto con el worker de la cola | `server/src/content_studio/api/` |
+| `mcp` (SDK oficial, 2.3.0) | Servidor MCP por stdio de `studio mcp` (spec 029); el SDK se importa solo al arrancar el servidor | `server/src/content_studio/mcp_server/sdk.py`, `cli/mcp.py` |
 | sqlite3 (stdlib) en WAL | Base de trabajos (`var/content-studio.db`) con migraciones en SQL según `PRAGMA user_version` | `server/src/content_studio/db/` |
 | Un venv por motor | torch, numpy y la librería del motor, aislados; el comando se relanza en su venv (`common/process.use_venv`) | `paths.engines_dir()` |
 | Motores TTS | VoxCPM2, Qwen3-TTS, Chatterbox, CosyVoice 3, OmniVoice, IndexTTS (licencias en `AGENTS.md` y `registry.py`) | `server/src/content_studio/narration/engines/registry.py` (`ENGINES`) |

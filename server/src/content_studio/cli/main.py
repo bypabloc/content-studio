@@ -15,6 +15,7 @@ from content_studio.cli import api as api_cli
 from content_studio.cli import editor as editor_cli
 from content_studio.cli import library as library_cli
 from content_studio.cli import llm as llm_cli
+from content_studio.cli import mcp as mcp_cli
 from content_studio.cli import media as media_cli
 from content_studio.cli import mix as mix_cli
 from content_studio.cli import serve, submit
@@ -92,6 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
     llm_cli.add_subcommand(sub, _db_flag())
     media_cli.add_parsers(sub, _db_flag)
     api_cli.add_parser(sub, _db_flag)
+    mcp_cli.add_parser(sub, _db_flag)
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
     job_cmds = jobs_p.add_subparsers(dest='action', required=True, metavar='action')
@@ -218,6 +220,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
     if args.command == 'api':
         return api_cli.dispatch(args)
+    if args.command == 'mcp':
+        return mcp_cli.dispatch(args)
     if args.command == 'narration' and args.action == 'tts':
         codes = [
             submit.run('narration', params, args.db, main_checkout(paths.ROOT))

@@ -27,6 +27,7 @@ uv run studio narration tts --model qwen-0.6b --style expert --voice yesid --tex
 uv run studio narration voices --build all   # voces libres aprobadas en los 12 estilos
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
+uv run studio mcp config --client claude-code   # fragmento MCP para un asistente (spec 029); `studio mcp` sirve por stdio
 # uv run studio api up                    # server compartido en 127.0.0.1:41830: arranca o reutiliza el que responde; api status|down|token
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
@@ -50,6 +51,7 @@ server/src/content_studio/
 ├── services/                 un servicio por tipo de trabajo (narration, music); registry.py con SERVICES
 ├── jobs/                     cola y worker: queue, runner, worker
 ├── api/                      FastAPI y uvicorn: app, events (SSE), routes/, token Bearer
+├── mcp_server/               herramientas MCP (spec 029): catálogo, bridge stdio, SDK y configuración por cliente
 ├── db/                       SQLite (stdlib) en WAL con migraciones SQL: connection, schema, jobs, settings
 ├── narration/                parser (liviano), tts (main), styles, blocks, pipeline, audio, script, metadata, reference
 │   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES

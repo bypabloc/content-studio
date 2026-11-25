@@ -8,6 +8,7 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Música | Música de fondo instrumental por estilo | [music.md](music.md) |
 | Voces y grabación | Perfiles propios grabados o importados y catálogo de voces libres por estilo | [voices.md](voices.md) |
 | Servidor | API local y cola de trabajos, con el CLI `studio` | [server.md](server.md) |
+| Integraciones | Asistentes y agentes locales por MCP (stdio) que piden narraciones, música y conversiones sin abrir la app | [integrations.md](integrations.md) |
 | Cliente | Ventana de escritorio: shell, cola, tema, selectores y ajustes | [client.md](client.md) |
 | Motores y almacenamiento | Instalación de motores con recetas y carpetas elegibles | [engines.md](engines.md) |
 | Subtítulos | Subtítulos desde archivo, limpiador, narración o SRT/VTT, con editor, quemado y traducción | [subtitles.md](subtitles.md) |
