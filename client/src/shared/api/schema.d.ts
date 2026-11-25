@@ -887,6 +887,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/diarizations/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Diarization
+         * @description Turnos, hablantes, archivos y audios por hablante de un trabajo diarize (spec 037, AC-4).
+         */
+        get: operations["diarization_diarizations__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editor/projects/from-diarization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Project From Job
+         * @description Crea un proyecto del Editor con el audio y un marcador por turno; devuelve la ruta de su project.json (AC-6).
+         */
+        post: operations["project_from_job_editor_projects_from_diarization_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/mix/prepare": {
         parameters: {
             query?: never;
@@ -2127,6 +2167,14 @@ export interface components {
             path: string;
             /** Name */
             name?: string | null;
+        };
+        /**
+         * FromDiarizationIn
+         * @description El trabajo `diarize` del que sale el proyecto.
+         */
+        FromDiarizationIn: {
+            /** Job */
+            job: number;
         };
         /**
          * GpuInfo
@@ -4219,6 +4267,74 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    diarization_diarizations__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_from_job_editor_projects_from_diarization_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromDiarizationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -494,6 +494,7 @@
   "error.music_too_short": "A música é mais curta que a mistura: gere uma mais longa.",
   "error.narration_source": "Informe um texto ou um roteiro (script_path), não os dois nem nenhum.",
   "error.negative_start": "Um clipe começa antes do início do projeto (0 s).",
+  "error.no_diarization": "O trabalho ainda não tem turnos.",
   "error.no_job": "Este arquivo não veio de um trabalho: não há nada para repetir.",
   "error.no_thumbnail": "Este arquivo não tem miniatura.",
   "error.no_transcript": "Este arquivo não tem transcrição. Primeiro crie as legendas ou limpe o arquivo.",

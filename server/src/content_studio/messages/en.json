@@ -494,6 +494,7 @@
   "error.music_too_short": "The music is shorter than the mix: generate a longer one.",
   "error.narration_source": "Give either text or a script file (script_path), not both and not neither.",
   "error.negative_start": "A clip starts before the beginning of the project (0 s).",
+  "error.no_diarization": "The job has no turns yet.",
   "error.no_job": "This file did not come from a job: there is nothing to repeat.",
   "error.no_thumbnail": "This file has no thumbnail.",
   "error.no_transcript": "This file has no transcript. Create its subtitles or clean it first.",
