@@ -3,6 +3,8 @@
 from content_studio.services import (
     clean_analyze,
     clean_render,
+    diarize,
+    diarize_split,
     editor_proxy,
     editor_render,
     engine_install,
@@ -42,6 +44,8 @@ SERVICES = {
     'transcribe': transcribe,
     'clean.analyze': clean_analyze,
     'clean.render': clean_render,
+    'diarize': diarize,
+    'diarize.split': diarize_split,
     'music': music,
     'music.samples': music_samples,
     'narration.regenerate': narration_regenerate,

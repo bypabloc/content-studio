@@ -59,6 +59,78 @@ def _verify_assistant(recipe: recipes.Recipe) -> dict:
     return {'ok': True, 'checked_at': _checked_at(), 'size_bytes': gguf.stat().st_size}
 
 
+def _turns_problem(data: object) -> str | None:
+    """Lo que impide dar por bueno un turns.json con la forma de la spec 035, o None si está bien (AC-6)."""
+    if not isinstance(data, dict):
+        return 'turns.json must be a JSON object.'
+    if not isinstance(data.get('speakers'), list):
+        return 'turns.json: missing or invalid field "speakers".'
+    for key in ('diarization', 'exclusive_diarization'):
+        turns = data.get(key)
+        if not isinstance(turns, list) or not all(_is_turn(turn) for turn in turns):
+            return f'turns.json: missing or invalid field "{key}".'
+    duration = data.get('duration')
+    if not isinstance(duration, (int, float)) or not 5.95 <= duration <= 6.05:
+        return f'Expected 6 seconds of audio; turns.json reported {duration}.'
+    return None
+
+
+def _is_turn(turn: object) -> bool:
+    if not isinstance(turn, dict) or not isinstance(turn.get('speaker'), str):
+        return False
+    start, end = turn.get('start'), turn.get('end')
+    return isinstance(start, (int, float)) and isinstance(end, (int, float)) and 0 <= start <= end
+
+
+def _verify_diarization(python: Path, output_dir: Path) -> dict:
+    """pyannote: diariza 6 s de tono con su venv y confirma que turns.json tiene la forma de la spec 035 (AC-6)."""
+    source = output_dir / 'source' / 'tone-6s.wav'
+    source.parent.mkdir(parents=True, exist_ok=True)
+    made = _run(
+        [
+            'ffmpeg',
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-y',
+            '-f',
+            'lavfi',
+            '-i',
+            'sine=frequency=440:duration=6',
+            '-ar',
+            '16000',
+            '-ac',
+            '1',
+            '-c:a',
+            'pcm_s16le',
+            str(source),
+        ]
+    )
+    if made.returncode:
+        return _failure(made.stderr or made.stdout)
+    turns_dir = output_dir / 'diarization'
+    progress.emit(0.5, 'separating speakers')
+    diarized = _run(
+        [str(python), '-m', 'content_studio.diarization.diarize_main', '--input', str(source), '--out', str(turns_dir)]
+    )
+    if diarized.returncode:
+        return _failure(diarized.stderr or diarized.stdout)
+    try:
+        turns = json.loads((turns_dir / 'turns.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return _failure('turns.json is not valid JSON.')
+    problem = _turns_problem(turns)
+    if problem:
+        return _failure(problem)
+    progress.emit(1, 'verified')
+    return {
+        'ok': True,
+        'checked_at': _checked_at(),
+        'duration_s': turns['duration'],
+        'speakers': len(turns['speakers']),
+    }
+
+
 def verify_engine(engine: str, output_dir: Path) -> dict:
     """Genera audio con el motor y confirma que FFmpeg puede dejarlo en un segundo."""
     recipe = recipes.load(engine)
@@ -68,6 +140,8 @@ def verify_engine(engine: str, output_dir: Path) -> dict:
     python = process.python_de(installer.engine_venv(recipe, paths.engines_dir()))
     if not python.is_file():
         return _failure('engine_not_installed')
+    if recipe.family == 'diarization':
+        return _verify_diarization(python, output_dir)
 
     source_dir = output_dir / 'source'
     source_dir.mkdir(exist_ok=True)

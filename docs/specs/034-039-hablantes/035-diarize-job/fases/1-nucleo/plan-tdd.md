@@ -13,7 +13,7 @@
 #### Ciclo C1: palabra a hablante y bloques [AC-1, AC-2]
 
 - **RED**:
-  - `server/tests/unit/src/content_studio/diarization/test_assign.py::test_ac1_solape_hueco_y_lejos`: tabla con un solape parcial entre dos turnos, una palabra en un hueco de 0,4 s, otra a 1,5 s de todo, otra sin `end` y una lista de turnos vacía.
+  - `server/tests/unit/src/content_studio/diarization/test_assign.py::test_ac1_overlap_gap_and_far_words`: tabla con un solape parcial entre dos turnos, una palabra en un hueco de 0,4 s, otra a 1,5 s de todo, otra sin `end` y una lista de turnos vacía.
   - `test_blocks.py::test_ac2_corta_y_absorbe`.
   - Doctest de `segment_speaker`.
 - **GREEN**: `diarization/assign.py` y `diarization/blocks.py`. Verify: `uv run pytest server/tests/unit/src/content_studio/diarization -q`.

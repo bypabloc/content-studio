@@ -12,6 +12,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | — (`studio convert`, `normalize`, `trim`, `concat`, `split`) | Convertir y normalizar la sonoridad (ffmpeg), y recortar, unir y dividir medios | `server/src/content_studio/media/` | [convert.md](docs/process/01-done/convert.md) · [edit.md](docs/process/01-done/edit.md) |
 | — (`studio editor render`) | Editor no destructivo: títulos, velocidad, color/LUT, chroma, fusión, subtítulos, keyframes y exportación | `server/src/content_studio/editor/` · `client/src/features/editor/` | [editor.md](docs/process/01-done/editor.md) |
 | — (`studio llm`) | Asistente con un LLM local (llama.cpp con Gemma 4 E4B o Qwen3.5-9B): sugerencias para el guion, los subtítulos, la música y la publicación | `server/src/content_studio/llm/` | [llm.md](docs/process/01-done/llm.md) |
+| — (`studio diarize`) | Quién habla y cuándo: turnos por hablante con pyannote, audio por hablante y transcripción con el hablante de cada palabra | `server/src/content_studio/diarization/` | [diarization.md](docs/process/01-done/diarization.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 
@@ -33,6 +34,7 @@ uv run studio jobs list --kind music         # también: jobs cancel ID y jobs r
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
 uv run studio inbox add DIR --kind media.convert --param target=mp3   # lo que se suelte en DIR sale en DIR/done/
 uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)
+uv run studio diarize charla.wav --speakers 2   # → out/diarize/ (turnos, hablantes y speakers/ con --split)
 ```
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).

@@ -1,5 +1,6 @@
 """Prueba de humo común de los motores TTS y de música."""
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -131,3 +132,68 @@ def test_llama_cpp_is_verified_with_its_version(tmp_path, monkeypatch):
     assert calls == [[str(server), '--version']]
     monkeypatch.setattr(verification, '_run', lambda command: SimpleNamespace(returncode=1, stdout='', stderr='boom'))
     assert verification.verify_engine('llama-cpp', tmp_path / 'v')['ok'] is False
+
+
+VALID_TURNS = json.dumps(
+    {
+        'duration': 6.0,
+        'speakers': ['SPEAKER_00'],
+        'diarization': [{'start': 0.0, 'end': 2.5, 'speaker': 'SPEAKER_00'}],
+        'exclusive_diarization': [{'start': 0.0, 'end': 2.5, 'speaker': 'SPEAKER_00'}],
+    }
+)
+
+
+def _verify_diarization(monkeypatch, tmp_path, turns_text):
+    from content_studio.engines import verification
+
+    root = tmp_path / 'engines'
+    monkeypatch.setattr(paths, 'engines_dir', lambda: root)
+    monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
+    recipe = recipes.load('pyannote')
+    python = process.python_de(installer.engine_venv(recipe, root))
+    python.parent.mkdir(parents=True)
+    python.touch()
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        if command[0] == 'ffmpeg':
+            Path(command[-1]).write_bytes(b'RIFF six seconds')
+        elif command[0] == str(python):
+            folder = Path(command[command.index('--out') + 1])
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / 'turns.json').write_text(turns_text, encoding='utf-8')
+        return subprocess.CompletedProcess(command, 0, '', '')
+
+    monkeypatch.setattr(verification.subprocess, 'run', run)
+    return verification.verify_engine('pyannote', tmp_path / 'job-output'), calls
+
+
+def test_ac6_diarization_smoke_makes_six_seconds_and_accepts_valid_turns(tmp_path, monkeypatch):
+    """AC-6: pyannote diariza 6 s generados con ffmpeg y la verificación da por bueno un turns.json válido."""
+    result, calls = _verify_diarization(monkeypatch, tmp_path, VALID_TURNS)
+
+    assert calls[0][calls[0].index('-i') + 1] == 'sine=frequency=440:duration=6'
+    assert calls[1][0] == str(process.python_de(installer.engine_venv(recipes.load('pyannote'), tmp_path / 'engines')))
+    assert 'content_studio.diarization.diarize_main' in calls[1]
+    assert calls[1][calls[1].index('--input') + 1] == calls[0][-1]
+    assert result['ok'] is True
+    assert result['duration_s'] == 6.0
+    assert result['speakers'] == 1
+
+
+def test_ac6_turns_json_that_is_not_json_fails_with_its_reason(tmp_path, monkeypatch):
+    """AC-6: un turns.json que no es JSON falla con su motivo, no con Unsupported engine family."""
+    result, _ = _verify_diarization(monkeypatch, tmp_path, 'not json')
+
+    assert result['ok'] is False
+    assert 'turns.json is not valid JSON' in result['error']
+
+
+def test_ac6_turns_json_without_diarization_fails_with_its_field(tmp_path, monkeypatch):
+    """AC-6: sin el campo diarization, el fallo nombra el campo."""
+    result, _ = _verify_diarization(monkeypatch, tmp_path, json.dumps({'duration': 6.0, 'speakers': []}))
+
+    assert result['ok'] is False
+    assert 'missing or invalid field "diarization"' in result['error']
