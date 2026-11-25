@@ -69,7 +69,6 @@ LIBRARIES = {
     'chatterbox': 'chatterbox.mtl_tts',
     'omnivoice': 'omnivoice',
     'voxcpm2': 'voxcpm',
-    'pyannote': 'pyannote.audio',
     'cosyvoice3': 'cosyvoice.cli.cosyvoice',
     'indextts': 'indextts.infer_v2_5',
     'acestep': 'acestep.handler',
