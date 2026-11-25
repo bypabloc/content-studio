@@ -1,8 +1,8 @@
 {
   "engine": "pyannote",
   "family": "diarization",
-  "size_gb": 6,
-  "vram_gb": 2,
+  "size_gb": 5,
+  "vram_gb": 1.5,
   "cpu": true,
   "license": "MIT / CC-BY-4.0",
   "steps": [

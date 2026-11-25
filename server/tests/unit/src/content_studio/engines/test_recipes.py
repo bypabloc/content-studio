@@ -193,3 +193,10 @@ def test_ac3_pyannote_pins_torch_after_installing_pyannote_audio():
     assert later, 'falta fijar torch después de pyannote.audio'
     assert any(p.startswith('torchaudio==') for p in later[-1]['packages'])
     assert later[-1].get('index'), 'la fijación de torch necesita su índice de CUDA'
+
+
+def test_ac2_pyannote_vram_measured():
+    """C1 (spec 039): vram_gb es el pico medido (1,1 GB de pyannote sobre la línea base) hacia arriba a 0,5 GB."""
+    recipe = recipes.load('pyannote')
+    assert recipe.vram_gb == 1.5
+    assert recipe.size_gb == 5
