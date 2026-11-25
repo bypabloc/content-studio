@@ -3,11 +3,12 @@ name: calidad
 
 # test-runner --type=all (lint, spelling, validators, unit con cobertura y espejo, typecheck y tdd) y guard-tdd, con la
 # Python de .python-version (spec 025, D-3: una sola versión). Sin GPU: los tests `local` no corren aquí.
-# Es check requerido de dev (ruleset): el job se llama calidad, como exige el ruleset (ver DECISIONS ciclo 8).
+# No corre en los PR de bypabloc, el único colaborador: su verificación es local, con los hooks de git (pre-commit y
+# pre-push) y el shell_guard que impide saltarlos con --no-verify. Sí corre en los PR de otras personas y de Dependabot.
+# Ya no es check requerido de dev: un job saltado no reporta los nombres de la matriz.
+# cspell:ignore bypabloc
 on:
   pull_request:
-    branches: [main, dev]
-  push:
     branches: [main, dev]
 
 permissions:
@@ -15,6 +16,7 @@ permissions:
 
 jobs:
   calidad:
+    if: github.event.pull_request.user.login != 'bypabloc'
     runs-on: ubuntu-latest
     env:
       PYTHONIOENCODING: utf-8
@@ -36,6 +38,7 @@ jobs:
   # Gates del client (spec 005, D-9): e2e necesita Chromium, así que no va en `all`. Sin el Python de la matriz: devtools
   # es stdlib.
   client:
+    if: github.event.pull_request.user.login != 'bypabloc'
     runs-on: ubuntu-latest
     env:
       PYTHONIOENCODING: utf-8
@@ -55,6 +58,7 @@ jobs:
 
   # cargo check del crate de Tauri (D-9). En Windows: ubuntu no trae webkit2gtk. `generate_context!` necesita client/dist.
   tauri:
+    if: github.event.pull_request.user.login != 'bypabloc'
     runs-on: windows-latest
     env:
       PYTHONIOENCODING: utf-8

@@ -12,7 +12,7 @@ paths:
 
 | Pieza | Rol | Dónde |
 | :--- | :--- | :--- |
-| Python 3.15 (`.python-version`); piso de los motores desde sus recetas (hoy 3.10) | Server, devtools y CI en 3.15; el código de `narration/` y `music/` que corre en los venvs de los motores, en el piso (CosyVoice y HeartMuLa) | `server/src/content_studio/`, `devtools/python_floor.py` |
+| Python 3.15 (`.python-version`); piso de los motores desde sus recetas (hoy 3.10) | Server, devtools y CI en 3.15 (la CI solo corre en PR ajenos); el código de `narration/` y `music/` que corre en los venvs de los motores, en el piso (CosyVoice y HeartMuLa) | `server/src/content_studio/`, `devtools/python_floor.py` |
 | uv | Venv de desarrollo (`uv sync`), `uv run ruff/pytest` y el CLI `uv run studio <comando>` | `pyproject.toml`, `uv.lock` |
 | argparse | CLI `studio` (`serve`, `narration`, `music`, `jobs`), solo stdlib | `server/src/content_studio/cli/` |
 | FastAPI + uvicorn | API local en 127.0.0.1 con token Bearer y `/events` por SSE; `studio serve` la levanta junto con el worker de la cola | `server/src/content_studio/api/` |

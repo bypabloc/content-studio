@@ -92,10 +92,10 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch,
 ## Pruebas
 
 ```bash
-python -m devtools test-runner --type=all   # lo que corre CI (sin GPU)
+python -m devtools test-runner --type=all   # calidad sin GPU (los hooks de git la corren; la CI, solo en PR ajenos)
 uv run pytest            # doctests y bugs (sin GPU)
 uv run pytest -m local   # además, cada venv de motor importa su librería (solo en este equipo)
-python -m devtools test-runner --type=e2e   # Playwright sobre la app construida (Chromium; en la CI, el job client)
+python -m devtools test-runner --type=e2e   # Playwright sobre la app construida (Chromium; el pre-push la corre si cambia el client)
 ```
 
 ## Reglas
