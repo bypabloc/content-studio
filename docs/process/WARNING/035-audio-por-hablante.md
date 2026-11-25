@@ -6,3 +6,4 @@
 - **Cómo revertir**: `server/src/content_studio/diarization/speaker_audio.py`, función `split_command`, y su rama de archivo.
 - **Cómo comprobarla**: `uv run pytest server/tests/unit/src/content_studio/diarization/test_speaker_audio.py -q` (con ffmpeg real: largo y frecuencia conservados, cero fuera del turno). Antes de `main`: escuchar un clip y medir clics en la verificación final (FV).
 - **Pendiente**: ninguno en PENDING; la medición de clics es de la FV de la 035.
+- **Medido (2026-11-25)**: `speakers/SPEAKER_00.wav` de un clip de 2,500 s: 2,500 s y 16 kHz mono, −15,8 LUFS integrado (ebur128). El espectrograma lo revisa image-reader; la escucha de los bordes queda en la corrida real (PENDING `035-corrida-real`).

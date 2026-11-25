@@ -63,3 +63,7 @@ def split(args: argparse.Namespace) -> int:
         subprocess.run(command, check=True, capture_output=True, env=process.env_src())
         progress.emit(index / len(speakers), 'splitting')
     return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

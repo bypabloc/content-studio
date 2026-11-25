@@ -2,12 +2,15 @@
 
 import json
 import shutil
+import subprocess
+import sys
 import wave
 from pathlib import Path
 
 import pytest
 
 from content_studio import paths
+from content_studio.common import process
 from content_studio.diarization import job_main, run
 
 needs_ffmpeg = pytest.mark.skipif(shutil.which('ffmpeg') is None, reason='necesita ffmpeg en el PATH')
@@ -71,3 +74,18 @@ def test_ac5_split_writes_one_wav_per_speaker(tmp_path):
         with wave.open(str(out / 'speakers' / f'{speaker}.wav'), 'rb') as handle:
             assert handle.getframerate() == 16000
             assert abs(handle.getnframes() / 16000 - 4.0) <= 0.01
+
+
+def test_the_module_runs_as_a_command():
+    """La cola lanza `python -m ...job_main`: el módulo debe ejecutar su acción, no solo cargar."""
+    result = subprocess.run(
+        [sys.executable, '-m', 'content_studio.diarization.job_main', '--help'],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=process.env_src(),
+    )
+
+    assert result.returncode == 0
+    assert 'diarize' in result.stdout
+    assert 'split' in result.stdout
