@@ -218,3 +218,6 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el historial de git (commit `520e911`).
 | [023-recorrido-por-api](023-recorrido-por-api.md) | El recorrido integral se hizo sobre la API del server instalado | `main` |
 | [023-sin-pr-a-main](023-sin-pr-a-main.md) | El PR `dev → main` no se abre: lo pide el usuario (git-workflow.md manda sobre la spec) | `main` |
+| [025-matriz-ci](025-matriz-ci.md) | La CI corre una sola versión de Python (la de `.python-version`), sin matriz | `main` |
+| [025-argparse-prog](025-argparse-prog.md) | El fixture de parsers fija el `prog` de argparse, que Python 3.15 deriva del lanzador | `main` |
+| [025-nombres-en-ingles](025-nombres-en-ingles.md) | Tests y funciones nuevos de la 025 llevan nombre en inglés (el spell check de pre-commit en inglés) | `main` |

@@ -9,7 +9,7 @@ use serde::Serialize;
 use super::Mode;
 
 /// Versión de Python del venv de la app.
-pub const PYTHON: &str = "3.12";
+pub const PYTHON: &str = "3.15";
 
 /// Las carpetas de la app instalada: los datos (`%LOCALAPPDATA%\Content Studio`, o `CONTENT_STUDIO_HOME`, igual que
 /// `paths.data_dir()` del server), los recursos empaquetados y la versión de la app.

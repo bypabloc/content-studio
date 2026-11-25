@@ -14,15 +14,15 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C1: Versión única [AC-1, AC-2]
 
-- **RED**: `tests/validators/test_python_version.py::test_ac2_versiones_coinciden`
-  - WHEN `.python-version` dice 3.15 y `prepare.rs` dice 3.12 THEN el test falla nombrando el archivo que difiere; un segundo test (`test_ac1_venv_usa_la_version_fijada`) compara `sys.version_info` con el archivo.
+- **RED**: `tests/validators/test_python_version.py::test_ac2_versions_match`
+  - WHEN `.python-version` dice 3.15 y `prepare.rs` dice 3.12 THEN el test falla nombrando el archivo que difiere; un segundo test (`test_ac1_venv_runs_pinned_version`) compara `sys.version_info` con el archivo.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `.python-version`, `requires-python = ">=3.15"`, matriz de `calidad.yml` con `python-version-file: .python-version`. Verify: `uv run pytest tests/validators/test_python_version.py -q`.
 - **REFACTOR**: ninguno.
 
 #### Ciclo C2: Piso desde las recetas [AC-3, AC-7]
 
-- **RED**: `tests/validators/test_structure.py::test_ac3_piso_sale_de_las_recetas`
+- **RED**: `tests/validators/test_structure.py::test_ac3_floor_comes_from_recipes`
   - WHEN una receta de prueba declara 3.10 y otra 3.12 THEN el piso es (3, 10) y ruff/mypy de `pyproject.toml` deben decir lo mismo; hoy el valor está fijo en el test.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `engine_floor()` en `devtools/python_floor.py` (lee las recetas con `json`, stdlib); `test_structure.py` compila con `feature_version` de ese piso. Verify: `uv run pytest tests/validators -q`.
