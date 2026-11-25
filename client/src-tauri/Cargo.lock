@@ -545,7 +545,6 @@ dependencies = [
 name = "content-studio"
 version = "0.1.0"
 dependencies = [
- "getrandom 0.4.3",
  "serde",
  "serde_json",
  "tauri",
@@ -556,7 +555,6 @@ dependencies = [
  "tauri-plugin-process",
  "tauri-plugin-updater",
  "tauri-plugin-window-state",
- "windows",
 ]
 
 [[package]]

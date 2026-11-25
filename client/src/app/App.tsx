@@ -44,6 +44,13 @@ function Connected() {
       .catch((code: unknown) => setStatus({ kind: 'failed', code: String(code) }));
   }, []);
 
+  // Tras una caída (inactividad o cambio de token) la app pide la conexión otra vez: get_connection levanta el server.
+  const reconnect = useCallback(async () => {
+    const connection = await invoke<Connection>('get_connection');
+    setStatus({ kind: 'ready', connection });
+    return connection;
+  }, []);
+
   useEffect(() => {
     connect();
   }, [connect]);
@@ -55,7 +62,7 @@ function Connected() {
 
   if (status.kind === 'ready') {
     return (
-      <ApiProvider connection={status.connection}>
+      <ApiProvider connection={status.connection} reconnect={reconnect}>
         <Shell version={APP_VERSION} />
       </ApiProvider>
     );

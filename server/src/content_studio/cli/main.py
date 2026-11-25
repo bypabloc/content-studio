@@ -11,6 +11,7 @@ from contextlib import closing
 from pathlib import Path
 
 from content_studio import gpu_lock, paths, seed
+from content_studio.cli import api as api_cli
 from content_studio.cli import editor as editor_cli
 from content_studio.cli import library as library_cli
 from content_studio.cli import llm as llm_cli
@@ -44,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser('seed', help="copy the data of the installed app to its data folder, keeping the user's changes")
     serve_p = sub.add_parser('serve', help='local API on 127.0.0.1 with the job worker')
-    serve_p.add_argument('--port', type=int, default=0, help='0 picks a free port')
+    serve_p.add_argument('--port', type=int, default=None, help='default: api.port (41830); 0 picks a free port')
     serve_p.add_argument('--token', help='Bearer token; if omitted, one is generated and printed in the ready line')
 
     narration = sub.add_parser('narration', help='narration and voices')
@@ -90,6 +91,7 @@ def build_parser() -> argparse.ArgumentParser:
     library_cli.add_subcommand(sub, _db_flag())
     llm_cli.add_subcommand(sub, _db_flag())
     media_cli.add_parsers(sub, _db_flag)
+    api_cli.add_parser(sub, _db_flag)
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
     job_cmds = jobs_p.add_subparsers(dest='action', required=True, metavar='action')
@@ -214,6 +216,8 @@ def _openapi() -> int:
 def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'serve':
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
+    if args.command == 'api':
+        return api_cli.dispatch(args)
     if args.command == 'narration' and args.action == 'tts':
         codes = [
             submit.run('narration', params, args.db, main_checkout(paths.ROOT))

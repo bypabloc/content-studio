@@ -1,4 +1,4 @@
-"""`studio serve` (spec 004, D-5): una línea `ready` con el puerto (y el token si lo generó) cuando la API escucha."""
+"""`studio serve` (spec 004, D-5; spec 028): una línea `ready` con el puerto, sin token, cuando la API escucha."""
 
 from __future__ import annotations
 
@@ -47,12 +47,10 @@ def test_pick_free_port_returns_a_port_that_can_be_bound():
     assert 0 < port < 65536
 
 
-def test_serve_prints_ready_with_the_token_it_generated(monkeypatch, tmp_path, capsys):
+def test_serve_never_prints_a_token_it_generated(monkeypatch, tmp_path, capsys):
     assert _serve_with_fakes(monkeypatch, tmp_path, 9, None) == 0
 
-    ready = json.loads(capsys.readouterr().out)['ready']
-    assert ready['port'] == 9
-    assert len(ready['token']) >= 32
+    assert json.loads(capsys.readouterr().out) == {'ready': {'port': 9}}
 
 
 def test_serve_does_not_print_the_token_it_was_given(monkeypatch, tmp_path, capsys):

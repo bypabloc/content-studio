@@ -126,3 +126,44 @@ describe('createApi', () => {
     );
   });
 });
+
+describe('createApi: reconexión (spec 028, AC-8)', () => {
+  beforeEach(async () => setLocale('es'));
+
+  it('ante un fallo de red pide la conexión otra vez y repite la llamada con el token nuevo', async () => {
+    const fresh = { baseUrl: 'http://127.0.0.1:41830', token: 'tok2' };
+    const fetcher = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 1 }), { status: 201 }));
+    const reconnect = vi.fn(async () => fresh);
+
+    const result = await createApi(connection, fetcher, reconnect).post('/jobs', { kind: 'music' });
+
+    expect(reconnect).toHaveBeenCalledOnce();
+    expect(fetcher).toHaveBeenLastCalledWith(
+      'http://127.0.0.1:41830/jobs',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer tok2' }) }),
+    );
+    expect(result).toEqual({ id: 1 });
+  });
+
+  it('reintenta una sola vez: si la segunda llamada también falla, lanza el error', async () => {
+    const fetcher = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+    const reconnect = vi.fn(async () => connection);
+
+    await expect(createApi(connection, fetcher, reconnect).get('/queue')).rejects.toThrow('Failed to fetch');
+    expect(reconnect).toHaveBeenCalledOnce();
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('un 500 no reintenta ni pide la conexión', async () => {
+    const reconnect = vi.fn(async () => connection);
+    const error = await createApi(connection, reply({ code: 'boom' }, 500), reconnect)
+      .get('/queue')
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(reconnect).not.toHaveBeenCalled();
+  });
+});

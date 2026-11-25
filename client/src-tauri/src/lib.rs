@@ -1,22 +1,17 @@
-//! Content Studio (spec 005, D-2): la ventana de Tauri, el server local y el comando `get_connection`.
+//! Content Studio (spec 005, D-2; spec 028): la ventana de Tauri, el server compartido y el comando `get_connection`.
 
 mod bootstrap;
 mod server;
 
 use std::ffi::OsString;
-use std::io::BufReader;
 use std::path::PathBuf;
-use std::process::Child;
-use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::sync::Arc;
 
 use serde::Serialize;
 use tauri::webview::{PermissionKind, PermissionResponse};
-use tauri::{AppHandle, Emitter, Manager, RunEvent};
+use tauri::{AppHandle, Emitter, Manager};
 
-use server::ServerError;
-
-const READY_TIMEOUT: Duration = Duration::from_secs(30);
+use server::{Ready, Run, ServerError};
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -25,110 +20,113 @@ pub struct Connection {
     token: String,
 }
 
-struct Running {
-    child: Child,
-    connection: Connection,
-    #[cfg(windows)]
-    _job: server::job::KillOnClose,
+/// El server compartido de la instalación. La ventana se adjunta: no lo posee, así que sobrevive a su cierre (D-6).
+#[derive(Clone)]
+pub struct ServerState(Arc<bootstrap::Mode>, String);
+
+/// `studio api up --with-token`: arranca el server si no está vivo, o reutiliza el que responde (AC-1, AC-2).
+fn up(run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>) -> Result<Ready, ServerError> {
+    let answer = run(&["api", "up", "--with-token"])?;
+    if !answer.success {
+        return Err(ServerError::Exited);
+    }
+    server::parse_ready(&answer.stdout).ok_or(ServerError::Exited)
 }
 
-/// El server de la sesión: uno solo, que se reutiliza mientras siga vivo, el modo de la app y la versión (spec 022).
-#[derive(Clone)]
-pub struct ServerState(Arc<Mutex<Option<Running>>>, Arc<bootstrap::Mode>, String);
+/// Se adjunta al server compartido. Si es de otra versión, pide `api down` (sin fuerza: con un trabajo activo se niega
+/// y la ventana se queda con el server viejo) y arranca el de esta versión (AC-7, AC-9).
+pub fn attach(
+    run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>,
+    app_version: &str,
+) -> Result<Connection, ServerError> {
+    let mut ready = up(run)?;
+    if ready.version != app_version {
+        run(&["api", "down"])?;
+        ready = up(run)?;
+    }
+    Ok(Connection {
+        base_url: ready.url,
+        token: ready.token,
+    })
+}
+
+/// Detiene el server compartido antes de instalar una actualización: `api down --force`, también con trabajos
+/// corriendo (AC-9). Si `studio` se niega, la instalación no sigue: reemplazar archivos bajo un server vivo no.
+pub fn stop(run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>) -> Result<(), ServerError> {
+    let answer = run(&["api", "down", "--force"])?;
+    if answer.success {
+        Ok(())
+    } else {
+        Err(ServerError::Exited)
+    }
+}
+
+/// Cambia el token (spec 028): `api down` primero, que se niega con trabajos activos y entonces el token no cambia;
+/// con el server parado, `api token --rotate` escribe el nuevo. La ventana se reconecta después con `get_connection`.
+pub fn rotate(run: &mut dyn FnMut(&[&str]) -> Result<Run, ServerError>) -> Result<(), ServerError> {
+    if !run(&["api", "down"])?.success {
+        return Err(ServerError::Exited);
+    }
+    if run(&["api", "token", "--rotate"])?.success {
+        Ok(())
+    } else {
+        Err(ServerError::Exited)
+    }
+}
 
 impl ServerState {
-    /// En la app instalada, antes de arrancar el server prepara Python, el venv y los datos (`emit` avisa cada paso).
-    fn connect(
-        &self,
-        mut emit: impl FnMut(bootstrap::Progress),
-    ) -> Result<Connection, ServerError> {
-        let mut slot = self
-            .0
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(running) = slot.as_mut() {
-            if running.child.try_wait().ok().flatten().is_none() {
-                return Ok(running.connection.clone());
-            }
-        }
-        *slot = None;
-
-        let (program, before) = match self.1.as_ref() {
+    /// Qué ejecutar para hablar con `studio`: `uv run --project <raíz> studio` en un checkout, el de su venv instalado.
+    fn launcher(&self) -> (PathBuf, Vec<OsString>) {
+        match self.0.as_ref() {
             bootstrap::Mode::Dev { .. } => {
-                let mut before: Vec<OsString> = vec!["run".into(), "--project".into()];
-                before.push(project_root().into_os_string());
-                before.push("studio".into());
+                let before: Vec<OsString> = vec![
+                    "run".into(),
+                    "--project".into(),
+                    project_root().into_os_string(),
+                    "studio".into(),
+                ];
                 (PathBuf::from("uv"), before)
             }
             bootstrap::Mode::Installed { resources } => {
-                let layout = bootstrap::Layout::from_env(resources.clone(), &self.2);
-                let mut runner = bootstrap::CommandRunner { log: layout.log() };
-                bootstrap::prepare(&layout, &mut runner, &mut emit)
-                    .map_err(ServerError::Bootstrap)?;
+                let layout = bootstrap::Layout::from_env(resources.clone(), &self.1);
                 (layout.studio(), Vec::new())
             }
-        };
-        let token = new_token();
-        let mut child = server::spawn(&program, &before, &token, &self.1.server_env())?;
-        // En Windows el proceso nace suspendido: el Job lo recibe y solo después corre, así sus hijos quedan en el Job.
-        #[cfg(windows)]
-        let job = match server::job::KillOnClose::assign(&child)
-            .and_then(|job| server::job::resume(&child).map(|()| job))
-        {
-            Ok(job) => job,
-            Err(_) => {
-                let _ = child.kill();
-                return Err(ServerError::Spawn);
-            }
-        };
-        let stdout = child.stdout.take().ok_or(ServerError::Spawn)?;
-        let port = match server::wait_for_ready(BufReader::new(stdout), READY_TIMEOUT) {
-            Ok(port) => port,
-            Err(error) => {
-                let _ = child.kill();
-                let _ = child.wait();
-                return Err(error);
-            }
-        };
-        let connection = Connection {
-            base_url: format!("http://127.0.0.1:{port}"),
-            token,
-        };
-        *slot = Some(Running {
-            child,
-            connection: connection.clone(),
-            #[cfg(windows)]
-            _job: job,
-        });
-        Ok(connection)
-    }
-
-    fn stop(&self) {
-        let mut slot = self
-            .0
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(mut running) = slot.take() {
-            let _ = running.child.kill();
-            let _ = running.child.wait();
         }
     }
-}
 
-fn new_token() -> String {
-    let mut bytes = [0u8; 32];
-    getrandom::fill(&mut bytes).expect("el sistema debe dar bytes aleatorios");
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+    /// Prepara la app instalada (Python, venv y datos; `emit` avisa cada paso) y se adjunta al server.
+    fn connect(&self, mut emit: impl FnMut(bootstrap::Progress)) -> Result<Connection, ServerError> {
+        if let bootstrap::Mode::Installed { resources } = self.0.as_ref() {
+            let layout = bootstrap::Layout::from_env(resources.clone(), &self.1);
+            let mut runner = bootstrap::CommandRunner { log: layout.log() };
+            bootstrap::prepare(&layout, &mut runner, &mut emit).map_err(ServerError::Bootstrap)?;
+        }
+        let (program, before) = self.launcher();
+        let env = self.0.server_env();
+        attach(&mut |args| server::run_studio(&program, &before, &env, args), &self.1)
+    }
+
+    /// Cambia el token con el server parado (spec 028, AC-11).
+    fn change_token(&self) -> Result<(), ServerError> {
+        let (program, before) = self.launcher();
+        let env = self.0.server_env();
+        rotate(&mut |args| server::run_studio(&program, &before, &env, args))
+    }
+
+    /// Antes de instalar una actualización, detiene el server aunque tenga trabajos (spec 028, AC-9).
+    fn stop_for_update(&self) -> Result<(), ServerError> {
+        let (program, before) = self.launcher();
+        let env = self.0.server_env();
+        stop(&mut |args| server::run_studio(&program, &before, &env, args))
+    }
 }
 
 /// En desarrollo, la raíz del checkout (`client/src-tauri/../..`); la 015 la cambia por el uv incluido.
 fn project_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("..")
-        .join("..")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("..")
 }
 
-/// Async: la espera del `ready` bloquea hasta 30 s, así que va en un hilo aparte y no congela la ventana.
+/// Async: el arranque del server bloquea hasta que responde, así que va en un hilo aparte y no congela la ventana.
 #[tauri::command]
 async fn get_connection(app: AppHandle) -> Result<Connection, String> {
     let state = app.state::<ServerState>().inner().clone();
@@ -140,6 +138,26 @@ async fn get_connection(app: AppHandle) -> Result<Connection, String> {
     .await
     .map_err(|error| error.to_string())?
     .map_err(|error| error.code().to_string())
+}
+
+/// Lo llama el client antes de instalar una actualización (spec 028, AC-9).
+#[tauri::command]
+async fn stop_server_for_update(app: AppHandle) -> Result<(), String> {
+    let state = app.state::<ServerState>().inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.stop_for_update())
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.code().to_string())
+}
+
+/// Lo llama el panel de Integraciones (spec 028, AC-11): cambia el token y el client se reconecta con `get_connection`.
+#[tauri::command]
+async fn rotate_token(app: AppHandle) -> Result<(), String> {
+    let state = app.state::<ServerState>().inner().clone();
+    tauri::async_runtime::spawn_blocking(move || state.change_token())
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| error.code().to_string())
 }
 
 pub fn run() {
@@ -164,15 +182,14 @@ pub fn run() {
                     .plugin(tauri_plugin_updater::Builder::new().build())?;
             }
             let version = app.package_info().version.to_string();
-            app.manage(ServerState(Arc::default(), Arc::new(mode), version));
+            app.manage(ServerState(Arc::new(mode), version));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_connection])
+        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")
-        .run(|app, event| {
-            if let RunEvent::Exit = event {
-                app.state::<ServerState>().stop();
-            }
-        });
+        .run(|_, _| {});
 }
+
+#[cfg(test)]
+mod tests;

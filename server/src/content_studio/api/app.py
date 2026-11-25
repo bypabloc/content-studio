@@ -35,6 +35,7 @@ from content_studio.api.routes import (
     music,
     narration,
     queue,
+    server_control,
     settings,
     storage,
     subtitles,
@@ -105,6 +106,7 @@ def create_app(
     )
     app.state.db_path = db_path
     app.state.token = token
+    app.state.stop = None
     app.state.services = services
     app.state.worker = worker
     app.state.broker = broker or events.Broker()
@@ -123,6 +125,7 @@ def create_app(
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]
     app.include_router(health.router, dependencies=header_only)
+    app.include_router(server_control.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
     app.include_router(storage.router, dependencies=header_only)

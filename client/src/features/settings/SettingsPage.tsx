@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { AssistantSettings } from '@/features/assistant/AssistantSettings';
 import { MicrophonePicker } from '@/features/recording/MicrophonePicker';
 import { AboutSettings } from './AboutSettings';
+import { IntegrationsPanel } from './IntegrationsPanel';
 import { StorageSettings } from './StorageSettings';
 import { MICROPHONE_SETTING } from '@/features/recording/microphones';
 import { RECORDING_LOG, useRecordingLog } from '@/features/recording/recordingLog';
@@ -107,6 +108,8 @@ export function SettingsPage() {
       <AssistantSettings />
 
       <StorageSettings />
+
+      <IntegrationsPanel />
 
       <AboutSettings />
     </UIStack>
