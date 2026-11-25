@@ -203,6 +203,13 @@ describe('Shell [AC-7]', () => {
 
     expect(await screen.findByRole('button', { name: t('normalize.submit') })).toBeTruthy()
   })
+
+  it('spec 037: WHEN se abre Hablantes THEN muestra su formulario', async () => {
+    window.location.hash = '#/speakers'
+    renderShell()
+
+    expect(await screen.findByRole('button', { name: t('speakers.start') })).toBeTruthy()
+  })
 })
   it('spec 020: WHEN se abre la Biblioteca THEN muestra su panel y el vacío', async () => {
     window.location.hash = '#/library'

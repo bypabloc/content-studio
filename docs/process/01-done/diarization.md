@@ -9,6 +9,7 @@
 - Trabajo `diarize.split`: un WAV por hablante en `speakers/<id>.wav`, con silencio fuera de sus turnos exclusivos. Recibe la carpeta de turnos de una diarización.
 - Trabajo `transcribe` con `diarize: true`: `words.json` con `speaker` en cada palabra y segmento, junto a `speakers.json`.
 - Un audio de menos de 3 s, o con `num_speakers=1`, es un solo hablante sin cargar el modelo. El mismo audio con los mismos hablantes reusa su resultado (`<datos>/diarizations/<sha1>.json`).
+- Sección **Hablantes** (spec 037): identifica quién habla y cuándo sin transcribir. Muestra la línea de tiempo con los turnos, nombres editables (se guardan al instante), los archivos de turnos, un audio por hablante y «Abrir en el Editor» con un marcador por turno.
 
 **Dónde vive**: `server/src/content_studio/diarization/`. pyannote corre en `.venv-diarize` (receta `pyannote`, modelo `pyannote/speaker-diarization-community-1` con acceso restringido), sin red y sin telemetría. Los servicios están en `services/diarize.py`, `diarize_split.py` y `transcribe.py`.
 

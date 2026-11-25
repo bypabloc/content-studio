@@ -49,11 +49,23 @@ def _speakers(folder: Path) -> dict[str, dict[str, str]]:
     return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else {}
 
 
-def _split(folder: Path) -> dict[str, str] | None:
-    """Un WAV por hablante, si `diarize.split` los dejó; None si no hay ninguno."""
-    if not (folder / 'speakers').is_dir():
+def _split(conn: sqlite3.Connection, folder: Path) -> dict[str, str] | None:
+    """Un WAV por hablante del último `diarize.split` terminado de esta diarización; None si no hay ninguno.
+
+    El split escribe en su propia carpeta de trabajo, así que se busca por el trabajo que apunta a `folder`.
+    """
+    done = [
+        job
+        for job in store.list_jobs(conn, kind='diarize.split', status='done')
+        if Path(job['params'].get('turns', '')) == folder
+    ]
+    if not done:
         return None
-    wavs = {path.stem: str(path) for path in sorted((folder / 'speakers').glob('*.wav'))}
+    latest = max(done, key=lambda job: job['id'])
+    if not latest.get('output_dir'):
+        return None
+    speakers = Path(latest['output_dir']) / 'speakers'
+    wavs = {path.stem: str(path) for path in sorted(speakers.glob('*.wav'))} if speakers.is_dir() else {}
     return wavs or None
 
 
@@ -73,7 +85,7 @@ def diarization(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_c
             'rttm': str(folder / 'turns.rttm'),
             'csv': str(folder / 'turns.csv'),
         },
-        'split': _split(folder),
+        'split': _split(conn, folder),
     }
 
 

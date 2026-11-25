@@ -30,22 +30,27 @@ SPEAKERS = {
 
 
 def _job(api, kind: str = 'diarize', wavs: bool = True) -> int:
-    """Un trabajo terminado con turns.json, RTTM, CSV, speakers.json y, si se pide, un WAV por hablante."""
+    """Un trabajo terminado con sus archivos de turnos; con `wavs`, un `diarize.split` que separó los audios."""
     folder = api.tmp / 'out' / f'{kind}-job'
     folder.mkdir(parents=True, exist_ok=True)
     (folder / 'turns.json').write_text(json.dumps(TURNS), encoding='utf-8')
     (folder / 'turns.rttm').write_text('SPEAKER audio 1 0.000 1.000 <NA> <NA> SPEAKER_00 <NA> <NA>\n', encoding='utf-8')
     (folder / 'turns.csv').write_text('start,end,speaker,name\n0.000,1.000,SPEAKER_00,Hablante 1\n', encoding='utf-8')
     (folder / 'speakers.json').write_text(json.dumps(SPEAKERS), encoding='utf-8')
-    if wavs:
-        (folder / 'speakers').mkdir()
-        for speaker in ('SPEAKER_00', 'SPEAKER_01'):
-            (folder / 'speakers' / f'{speaker}.wav').write_bytes(b'RIFF')
     conn = connect(api.tmp / 'base.db')
     try:
         schema.migrate(conn)
         job_id = jobs_store.insert(conn, kind, 'gpu', {'input': 'C:/in/charla.wav'})
         jobs_store.update(conn, job_id, status='done', output_dir=str(folder))
+        if wavs:
+            split = api.tmp / 'out' / 'split-job'
+            (split / 'speakers').mkdir(parents=True)
+            for speaker in ('SPEAKER_00', 'SPEAKER_01'):
+                (split / 'speakers' / f'{speaker}.wav').write_bytes(b'RIFF')
+            split_id = jobs_store.insert(
+                conn, 'diarize.split', 'cpu', {'input': 'C:/in/charla.wav', 'turns': str(folder)}
+            )
+            jobs_store.update(conn, split_id, status='done', output_dir=str(split))
         conn.commit()
     finally:
         conn.close()

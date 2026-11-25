@@ -9,6 +9,7 @@ describe('navItems (spec 009, AC-3)', () => {
       ['narration', 'narration'],
       ['music', 'music'],
       ['transcription', 'transcription'],
+      ['speakers', 'speakers'],
       ['cleaner', 'scissors'],
       ['subtitles', 'subtitles'],
       ['convert', 'download'],
@@ -63,6 +64,17 @@ describe('navItems (spec 036, D-1)', () => {
       label: t('nav.transcription'),
     })
     const ids = navItems().map((item) => item.id)
-    expect(ids.indexOf('transcription')).toBe(ids.indexOf('cleaner') - 1)
+    expect(ids.indexOf('transcription')).toBeLessThan(ids.indexOf('cleaner'))
+  })
+})
+
+describe('navItems (spec 037, D-1)', () => {
+  it('WHEN the sections are listed THEN Hablantes is in Editar, right after Transcripción', () => {
+    expect(navItems().find((item) => item.id === 'speakers')).toMatchObject({
+      group: t('nav.group.edit'),
+      label: t('nav.speakers'),
+    })
+    const ids = navItems().map((item) => item.id)
+    expect(ids.indexOf('speakers')).toBe(ids.indexOf('transcription') + 1)
   })
 })

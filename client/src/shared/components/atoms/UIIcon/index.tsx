@@ -238,6 +238,7 @@ const ICONS = {
   editor: Film,
   scissors: Scissors,
   transcription: AudioLines,
+  speakers: Users,
   subtitles: Captions,
   magnet: Magnet,
   layers: Layers,

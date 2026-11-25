@@ -276,3 +276,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [035-split-por-carpeta](035-split-por-carpeta.md) | diarize.split recibe la carpeta de turnos y corta por turnos exclusivos | `main` (escucha de solapes en FV) |
 | [036-seccion-transcripcion](036-seccion-transcripcion.md) | Decisiones de la sección Transcripción y de la leyenda de hablantes (fase 2): átomos, claves nuevas y la vía de `shadcn/` | `main` |
 | [037-api-diarizacion](037-api-diarizacion.md) | Ruta de la diarización en `diarizations.py`, marcador con el esquema vigente y el código `no_diarization` | `main` |
+| [037-seccion-hablantes](037-seccion-hablantes.md) | Guardado con rollback que reinicia el borrador; audio por hablante por el trabajo `diarize.split`; `?project=` al montar el Editor; cobertura de `SpeakerResult`; flechas solo en unitarias; app-check sin encolar | `main` |
