@@ -11,7 +11,8 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 
 ## Qué hace hoy
 
-- Tauri 2 arranca `studio serve` con un token por sesión, lee su línea `ready` y lo cierra con la ventana. En Windows, un Job Object lo mata aunque la app se cierre mal.
+- Tauri 2 se adjunta al server compartido con `studio api up --with-token` (spec 028): no lo posee, así que el server sobrevive a la ventana. Antes de instalar una actualización detiene el server (`api down --force`).
+- Ajustes > Integraciones: dirección, puerto, minutos sin uso, copiar el token y cambiarlo. Cambiarlo detiene el server y la app reconecta con `get_connection`. Un fallo de red pide la conexión otra vez y repite la llamada una vez.
 - La API se pide con un cliente tipado desde OpenAPI (`shared/api/schema.d.ts`) y TanStack Query. Los eventos SSE actualizan la caché sin volver a pedir datos.
 - Cola: ver, reordenar con el ratón o el teclado (anuncios en español), pausar, cancelar y reintentar. Al terminar un trabajo avisa con un toast, y sin foco también con notificación y sonido (desactivables).
 - Selectores con ★ en la opción recomendada que recuerdan la última elección (tabla `settings`).
@@ -24,7 +25,7 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 
 ## Dónde vive
 
-- Código: `client/src/{app,features,shared}`. Componentes en `shared/components/{shadcn,atoms,molecules,organisms}`, formularios en `shared/forms/`, tokens y estilos en `styles/`, e idioma en `shared/i18n/`. El Rust está en `client/src-tauri/src/` (`server.rs`, `lib.rs`).
+- Código: `client/src/{app,features,shared}`. Componentes en `shared/components/{shadcn,atoms,molecules,organisms}`, formularios en `shared/forms/`, tokens y estilos en `styles/`, e idioma en `shared/i18n/`. El Rust está en `client/src-tauri/src/` (`server.rs`, `lib.rs` y sus pruebas en `tests.rs`).
 - Textos: `server/src/content_studio/messages/{es,en,pt}.json`, con el alias `@messages`.
 - Gates: `client-lint` (con la jerarquía de imports), `client-typecheck`, `client-unit` (con la auditoría del espejo y la cobertura), `ui-structure` (etiquetas nativas), `budget` (`client/budget.json`, 228 kB), `i18n` (catálogos, claves en uso y textos sueltos), `e2e` (`tests/e2e/`) y `tauri-check` (`cargo check`).
 
@@ -36,3 +37,4 @@ La ventana de escritorio Content Studio: levanta el server, muestra la barra lat
 - 2026-11-20: spec 009 (iconos): mapa de `UIIcon` con los nombres de content-studio, iconos de estado en la cola, selector de tema con íconos y el criterio de solo ícono.
 - 2026-11-20: spec 010 (client): «Mis voces», asistente de grabación con indicador «Micrófono en uso», región de la onda al importar, micrófono y registro en Ajustes, y borrar tomas a la papelera (PR #80).
 - 2026-11-25: spec 027 (dependencias): JavaScript y crates en su última versión estable, exactas; `getrandom` 0.4; TypeScript se queda en 5.9.3 (`WARNING/005`); edición 2024; la CSP permite el IPC de Tauri (`WARNING/027-csp-ipc`).
+- 2026-11-25: spec 028 (server compartido): la ventana se adjunta y no lo posee; Ajustes > Integraciones; reconexión tras la inactividad (`WARNING/028-rotar-token`, `028-reconexion-silenciosa`).

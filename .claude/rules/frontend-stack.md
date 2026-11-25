@@ -6,8 +6,8 @@ paths:
 
 # Frontend: stack, estructura y comandos (client/)
 
-El client es la ventana de escritorio de Tauri 2. React 19 con TypeScript 5.9 (no 7: `docs/process/WARNING/005-typescript-5.md`), Vite 8, Tailwind 4, TanStack Query para los datos del server y `@dnd-kit` para reordenar la cola. Las versiones fijadas están en la tabla de abajo. Tauri levanta el
-server (`studio serve`) en `client/src-tauri/src/server.rs` y el client le habla por HTTP con el token que da `get_connection` (`lib.rs`).
+El client es la ventana de escritorio de Tauri 2. React 19 con TypeScript 5.9 (no 7: `docs/process/WARNING/005-typescript-5.md`), Vite 8, Tailwind 4, TanStack Query para los datos del server y `@dnd-kit` para reordenar la cola. Las versiones fijadas están en la tabla de abajo. 
+Tauri se adjunta al server compartido con `studio api up --with-token` (`client/src-tauri/src/server.rs` y `lib.rs`): no lo posee, así que sobrevive a la ventana (spec 028). El client le habla por HTTP con el token que da `get_connection` y, si la red falla, pide la conexión otra vez.
 
 ## Comandos (con bun, desde la raíz)
 

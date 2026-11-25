@@ -27,6 +27,7 @@ uv run studio narration tts --model qwen-0.6b --style expert --voice yesid --tex
 uv run studio narration voices --build all   # voces libres aprobadas en los 12 estilos
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
+# uv run studio api up                    # server compartido en 127.0.0.1:41830: arranca o reutiliza el que responde; api status|down|token
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
 uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)

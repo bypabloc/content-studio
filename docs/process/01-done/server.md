@@ -1,6 +1,6 @@
 ---
 modulo: servidor
-actualizada: 2026-11-24
+actualizada: 2026-11-25
 ---
 
 # Servidor y CLI `studio`
@@ -16,12 +16,14 @@ Genera narración y música sin abrir la interfaz: una API local y una cola de t
 - Cancelar termina el proceso del trabajo y sus hijos (`taskkill /T /F` en Windows; SIGTERM al grupo y SIGKILL a los 5 s en POSIX).
 - Al arrancar, el server interrumpe solo los trabajos cuyo proceso murió (`owner_pid`); lo que la CLI tiene en curso sigue.
 - CLI: `studio serve`, `narration tts`, `narration voices`, `music` y `jobs list|cancel|retry`. Sin menú ni asistente.
+- Servidor compartido (spec 028): `studio api up|status|down|token`. Una sola instancia por instalación, en `127.0.0.1:41830` (configurable; si está ocupado, otro puerto). `api up` arranca el server o reutiliza el que responde (y con `--with-token` da el token a la ventana). `api down` se niega con trabajos activos, salvo `--force`. Apagado por inactividad (`api.idle_minutes`, 10 por defecto), aunque la ventana esté abierta; `api up` lo vuelve a levantar. El token persiste en `api-token`; `api token --rotate` lo cambia.
+- Guarda de Host: solo `127.0.0.1` o `localhost` con el puerto del server; si no, 400 `error.host_not_allowed`.
 - Salida: `out/<herramienta>/<AAAA-MM-DD>-<id>-<slug>/` con `params.json`; log en `logs/jobs/<id>.log`.
 - Idioma de la API: responde en el idioma de `Accept-Language` (`es`, `en` o `pt`; si no coincide, `es`). Cada error lleva `code`, `params` y el `message` ya traducido; un error sin texto propio usa `error.http.<status>`.
 
 ## Dónde vive
 
-- Código: `server/src/content_studio/{api,db,jobs,services,cli}/`, `gpu_lock.py` y `messages.py`.
+- Código: `server/src/content_studio/{api,db,jobs,services,cli}/`, `runtime/` (descubrimiento, instancia única e inactividad), `gpu_lock.py` y `messages.py`.
 - Textos: `server/src/content_studio/messages/{es,en,pt}.json`; el idioma de la petición se negocia en `messages.negotiate`.
 - Un tipo de trabajo nuevo es un módulo en `services/` y una línea en `SERVICES` (`services/registry.py`).
 
@@ -30,3 +32,4 @@ Genera narración y música sin abrir la interfaz: una API local y una cola de t
 - 2026-11-19: ficha inicial con la spec 004 (cola, API, SSE y CLI `studio`; se borran `cli.py` y el asistente).
 - 2026-11-19: spec 007 (i18n): la API responde en el idioma de `Accept-Language`; el catálogo pasa a `messages/{es,en,pt}.json`.
 - 2026-11-24: spec 025: el server corre en Python 3.15 (`.python-version`); el piso de los motores (hoy 3.10) sale de sus recetas.
+- 2026-11-25: spec 028 (server compartido): `studio api` y una sola instancia; la ventana se adjunta y no lo posee (`WARNING/028-serve-sin-token`, `028-apagado-y-guardas`).

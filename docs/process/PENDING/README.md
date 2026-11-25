@@ -16,6 +16,8 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [028-verificacion-instalada](028-verificacion-instalada.md) | Falta verificar con la app instalada: actualizar desde una versión anterior (AC-9) y reactivar desde la ventana real | Antes de publicar | Usuario y agente |
+| [028-arranque-en-frio](028-arranque-en-frio.md) | `app-check` falló 2 de 5 veces en la primera sección (una petición de la API pasó de 30 s), y `api up` agotó 30 s una vez | Después de publicar | Agente |
 | [028-suite-intermitente](028-suite-intermitente.md) | Un fallo intermitente en la suite completa, no reproducido en la pasada siguiente | Después de publicar | Agente |
 | [027-firma-updater](027-firma-updater.md) | El instalador se compila pero no se firma: falta la clave del updater | Antes de publicar | Usuario |
 | [027-capturas-visuales](027-capturas-visuales.md) | image-reader ve toasts sobre controles y tamaños sin formatear en Motores; sin línea base | Antes de publicar | Usuario |
