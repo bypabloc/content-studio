@@ -209,3 +209,5 @@ RMDir
 LOCALAPPDATA
 IDYES
 INSTDIR
+versiones
+regla

@@ -54,21 +54,23 @@ pub fn resume(child: &Child) -> windows::core::Result<()> {
 
 /// Reanuda cada hilo de `pid` que aparece en la instantánea de hilos.
 unsafe fn resume_threads(snapshot: HANDLE, pid: u32) -> windows::core::Result<()> {
-    let mut entry = THREADENTRY32 {
-        dwSize: std::mem::size_of::<THREADENTRY32>() as u32,
-        ..Default::default()
-    };
-    let mut more = Thread32First(snapshot, &mut entry).is_ok();
-    while more {
-        if entry.th32OwnerProcessID == pid {
-            let thread = OpenThread(THREAD_SUSPEND_RESUME, false, entry.th32ThreadID)?;
-            let previous = ResumeThread(thread);
-            let _ = CloseHandle(thread);
-            if previous == u32::MAX {
-                return Err(windows::core::Error::from_thread());
+    unsafe {
+        let mut entry = THREADENTRY32 {
+            dwSize: std::mem::size_of::<THREADENTRY32>() as u32,
+            ..Default::default()
+        };
+        let mut more = Thread32First(snapshot, &mut entry).is_ok();
+        while more {
+            if entry.th32OwnerProcessID == pid {
+                let thread = OpenThread(THREAD_SUSPEND_RESUME, false, entry.th32ThreadID)?;
+                let previous = ResumeThread(thread);
+                let _ = CloseHandle(thread);
+                if previous == u32::MAX {
+                    return Err(windows::core::Error::from_thread());
+                }
             }
+            more = Thread32Next(snapshot, &mut entry).is_ok();
         }
-        more = Thread32Next(snapshot, &mut entry).is_ok();
     }
     Ok(())
 }

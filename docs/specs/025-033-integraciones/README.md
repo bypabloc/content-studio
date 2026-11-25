@@ -10,7 +10,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | [025](025-server-python/README.md) | Server, devtools, CI e instalador en la Python más alta (3.15) con las dependencias al día | chore | Medium | 023 | DON |
 | [026](026-engines-python/README.md) | Venvs de los motores en la Python, torch y librerías más altas que soporte cada uno | chore | Large | 025 | DON |
-| [027](027-client-deps/README.md) | Client y Tauri con todas sus dependencias en la última versión | chore | Medium | 025 | PEN |
+| [027](027-client-deps/README.md) | Client y Tauri con todas sus dependencias en la última versión | chore | Medium | 025 | DON |
 | [028](028-shared-server/README.md) | Server compartido: arranque bajo demanda, descubrimiento, token persistente y apagado por inactividad | feature | Large | 027 | PEN |
 | [029](029-mcp/README.md) | Servidor MCP local (`studio mcp`) para LLMs y agentes | feature | Large | 028 | PEN |
 | [030](030-hot-folders/README.md) | Carpetas de entrada: soltar un archivo y recibir el resultado | feature | Large | 029 | PEN |
