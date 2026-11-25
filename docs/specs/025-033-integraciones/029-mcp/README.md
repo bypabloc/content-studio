@@ -34,7 +34,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Bridge y herramientas](fases/1-bridge/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-5, AC-11, AC-4, AC-8, AC-6, AC-7 | - | PEN |
+| F1 | [Bridge y herramientas](fases/1-bridge/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-5, AC-11, AC-4, AC-8, AC-6, AC-7 | - | IMP |
 | F2 | [Configuración por cliente](fases/2-configuracion/plan-tdd.md) | C6, C7 | AC-9, AC-10 | - | PEN |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
@@ -63,17 +63,17 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 
 | AC | Fase | Ciclo | Test | Verificación real |
 | :--- | :--- | :--- | :--- | :--- |
-| AC-1 | F1 | C1 | `server/tests/unit/src/content_studio/mcp_server/test_tools.py::test_ac1_diez_herramientas_sin_admin` | solo pytest |
-| AC-2 | F1 | C2 | `server/tests/integration/test_mcp_bridge.py::test_ac2_primera_llamada_arranca_el_server` | solo pytest |
-| AC-3 | F1 | C3 | `server/tests/integration/test_mcp_bridge.py::test_ac3_narrate_y_wait_devuelven_rutas` | 03 §2 |
-| AC-4 | F1 | C4 | `server/tests/unit/src/content_studio/mcp_server/test_tools.py::test_ac4_ruta_inexistente_da_input_not_found` | solo pytest |
-| AC-5 | F1 | C3 | `server/tests/integration/test_mcp_bridge.py::test_ac5_wait_emite_progreso_y_vence` | 03 §2 |
-| AC-6 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac6_cancel_termina_el_proceso` | solo pytest |
-| AC-7 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac7_waiting_gpu_dice_quien` | solo pytest |
-| AC-8 | F1 | C4 | `server/tests/integration/test_mcp_bridge.py::test_ac8_submit_job_invalido_devuelve_errores` | solo pytest |
+| AC-1 | F1 | C1 | `server/tests/integration/test_mcp_bridge.py::test_ac1_protocol_lists_ten_tools` y `server/tests/unit/src/content_studio/mcp_server/test_catalog.py::test_ac1_ten_tools_with_schemas_and_no_admin` | solo pytest |
+| AC-2 | F1 | C2 | `server/tests/integration/test_mcp_bridge.py::test_ac2_first_call_starts_the_server` | solo pytest |
+| AC-3 | F1 | C3 | `server/tests/integration/test_mcp_bridge.py::test_ac3_narrate_and_wait_return_paths_over_protocol` | 03 §2 |
+| AC-4 | F1 | C4 | `server/tests/unit/src/content_studio/mcp_server/test_tools.py::test_ac4_missing_input_path_gives_input_not_found` y `test_bridge.py::test_ac4_missing_input_path_is_error_and_not_queued` | solo pytest |
+| AC-5 | F1 | C3 | `server/tests/integration/test_mcp_bridge.py::test_ac5_wait_reports_progress_and_times_out_without_error` | 03 §2 |
+| AC-6 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac6_cancel_ends_the_process` | solo pytest |
+| AC-7 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac7_gpu_queued_says_who_holds_it` | solo pytest |
+| AC-8 | F1 | C4 | `server/tests/unit/src/content_studio/mcp_server/test_bridge.py::test_ac8_invalid_params_return_service_errors` | solo pytest |
 | AC-9 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_config.py::test_ac9_fragmento_valido_por_cliente` | solo pytest |
 | AC-10 | F2 | C7 | `client/tests/unit/src/features/settings/McpConfig.test.tsx` | e2e `happy-mcp-config` |
-| AC-11 | F1 | C3 | `server/tests/integration/test_mcp_bridge.py::test_ac3_narrate_y_wait_devuelven_rutas` | 03 §2, pasos 1 y 2 |
+| AC-11 | F1 | C3 | (sin pytest: verificación final) | 03 §2, pasos 1 y 2 |
 
 ## WARNING y PENDING
 

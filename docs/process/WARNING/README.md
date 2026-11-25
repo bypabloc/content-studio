@@ -17,6 +17,9 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [029-codigos-de-herramienta](029-codigos-de-herramienta.md) | Los códigos de error de las herramientas tienen texto en los tres idiomas; el validador i18n los declara | `main` |
+| [029-herramientas](029-herramientas.md) | Diez herramientas por tarea y `studio_submit_job` genérica, no una por motor | `main` |
+| [029-sdk-mcp](029-sdk-mcp.md) | El protocolo MCP usa el SDK oficial `mcp` 2.3.0 (dependencia nueva) | `main` |
 | [028-rotar-token](028-rotar-token.md) | Cambiar el token detiene el server (`api down`), rota con `api token --rotate` y la app se reconecta | `main` |
 | [028-reconexion-silenciosa](028-reconexion-silenciosa.md) | La reconexión no muestra «Reactivando el servidor…»; el SSE se reabre al cambiar la conexión | `main` |
 | [028-job-retirado](028-job-retirado.md) | La ventana ya no posee el server: se retira el Job, `windows` y `getrandom` | `main` |
