@@ -36,7 +36,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Bridge y herramientas](fases/1-bridge/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-5, AC-11, AC-4, AC-8, AC-6, AC-7 | 6f991d0 | IMP |
 | F2 | [Configuración por cliente](fases/2-configuracion/plan-tdd.md) | C6, C7 | AC-9, AC-10 | 0770cb5 | IMP |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | pendiente de push | IMP |
 
 ## Decisiones cerradas (no reabrir)
 
@@ -77,5 +77,5 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 
 ## WARNING y PENDING
 
-- WARNING: `029-sdk-mcp` (dependencia nueva, `stack.md` §5), `029-herramientas` (D-2).
+- WARNING: `029-sdk-mcp` (dependencia nueva, `stack.md` §5), `029-herramientas` (D-2), `029-codigos-de-herramienta`, `029-formatos-por-cliente`, `029-comando-de-arranque`, `029-tipos-de-trabajo`.
 - PENDING: `029-clientes-sin-probar` con los clientes de la tabla que no se pudieron probar de verdad.

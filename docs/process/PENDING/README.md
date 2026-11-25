@@ -16,6 +16,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [029-filebrowser-intermitente](029-filebrowser-intermitente.md) | Un test de FileBrowser (editor) expiró una vez en el gate; pasa aislado y en el reintento | Antes de publicar | Agente |
 | [029-clientes-sin-probar](029-clientes-sin-probar.md) | Ningún cliente MCP probado en la app; Jan y LM Studio sin forma stdio verificada | Verificación final de 029 | Agente y usuario |
 | [028-verificacion-instalada](028-verificacion-instalada.md) | Falta verificar con la app instalada: actualizar desde una versión anterior (AC-9) y reactivar desde la ventana real | Antes de publicar | Usuario y agente |
 | [028-arranque-en-frio](028-arranque-en-frio.md) | `app-check` falló 2 de 5 veces en la primera sección (una petición de la API pasó de 30 s), y `api up` agotó 30 s una vez | Después de publicar | Agente |
