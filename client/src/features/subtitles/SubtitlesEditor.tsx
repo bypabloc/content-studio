@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
 import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UICheckbox } from '@/shared/components/atoms/UICheckbox';
 import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
+import { UISpeakerLegend } from '@/shared/components/molecules/UISpeakerLegend';
 import { toast } from '@/shared/components/molecules/UIToast';
 import { t } from '@/shared/i18n/t';
 import { OpenJobOutputButton } from '@/shared/navigation/OpenJobOutputButton';
@@ -47,6 +49,7 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
   const [zoneKey, setZoneKey] = useState('none');
   const [burnJobId, setBurnJobId] = useState<number | null>(null);
   const [track, setTrack] = useState(ORIGINAL);
+  const [speakerLabels, setSpeakerLabels] = useState(false);
   const doc = draft ?? query.data ?? null;
 
   const burnJob = useQuery({
@@ -82,11 +85,18 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
   // Exportar (D-3): el documento como SRT, VTT o ASS en `out/subtitles/`; la ruta vuelve para mostrarla. Con una pista
   // traducida elegida (spec 021), se exporta esa pista como `<id>-<nombre>.<idioma>.<formato>`.
   const exported = useMutation({
-    mutationFn: (format: 'srt' | 'vtt' | 'ass') =>
-      api.post<{ path: string }>(
+    mutationFn: async (format: 'srt' | 'vtt' | 'ass') => {
+      // Lo que aún espera el guardado entra en el archivo: se guarda antes de pedir la exportación.
+      if (draft) await api.put(`/subtitles/${projectId}`, draft);
+      return api.post<{ path: string }>(
         `/subtitles/${projectId}/export`,
-        track === ORIGINAL ? { format } : { format, language: track },
-      ),
+        {
+          format,
+          ...(track === ORIGINAL ? {} : { language: track }),
+          ...(speakerLabels ? { speaker_labels: true } : {}),
+        },
+      );
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -157,10 +167,16 @@ export function SubtitlesEditor({ projectId }: { projectId: number }): React.JSX
           {t('subtitles.export.ass')}
         </UIButton>
       </UIStack>
+      {doc.speakers ? (
+        <UICheckbox label={t('subtitles.export.speaker_labels')} checked={speakerLabels} onChange={setSpeakerLabels} />
+      ) : null}
       {exported.data && <UIText variant="caption">{t('subtitles.export.done', { path: exported.data.path })}</UIText>}
       <UIStack direction="row" gap="lg" align="start">
         <UIStack gap="md">
           <CueList doc={doc} onChange={setDraft} />
+          {doc.speakers ? (
+            <UISpeakerLegend speakers={doc.speakers} onChange={(next) => setDraft({ ...doc, speakers: next })} />
+          ) : null}
         </UIStack>
         <UIStack gap="md">
           <StylePanel
