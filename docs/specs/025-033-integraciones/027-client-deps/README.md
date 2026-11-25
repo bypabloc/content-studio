@@ -35,7 +35,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Dependencias de JavaScript](fases/1-javascript/plan-tdd.md) | C1 | AC-1, AC-2, AC-3 | pendiente | IMP |
-| F2 | [Tauri y Rust](fases/2-rust/plan-tdd.md) | C2 | AC-1, AC-3, AC-4 | - | PEN |
+| F2 | [Tauri y Rust](fases/2-rust/plan-tdd.md) | C2 | AC-1, AC-3, AC-4 | pendiente | IMP |
 | F3 | [Tabla de versiones comprobada](fases/3-tabla/plan-tdd.md) | C3 | AC-5 | - | PEN |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
