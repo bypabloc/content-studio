@@ -32,6 +32,8 @@ export function McpConfig() {
   const config = useQuery({
     queryKey: ['integrations', 'mcp-config', client],
     queryFn: () => api.get<McpConfigOut>(`/integrations/mcp-config?client=${client}`),
+    // Es local y determinista: si falla, el aviso sale en el momento (sin los reintentos por defecto de la app).
+    retry: false,
   });
 
   const fragment = config.data?.fragment ?? '';
@@ -40,9 +42,18 @@ export function McpConfig() {
     <UIStack gap="sm">
       <UIText variant="heading">{t('settings.integrations.mcp_title')}</UIText>
       <UISelect label={t('settings.integrations.mcp_client')} options={CLIENTS} value={client} onChange={setClient} />
-      <UIButton variant="secondary" className="self-start" disabled={!config.data} onClick={() => void navigator.clipboard.writeText(fragment)}>
-        {t('settings.integrations.mcp_copy')}
-      </UIButton>
+      {config.isError ? (
+        <UIText variant="caption">{t('settings.integrations.mcp_failed')}</UIText>
+      ) : (
+        <UIButton
+          variant="secondary"
+          className="self-start"
+          disabled={!config.data}
+          onClick={() => void navigator.clipboard.writeText(fragment)}
+        >
+          {t('settings.integrations.mcp_copy')}
+        </UIButton>
+      )}
     </UIStack>
   );
 }

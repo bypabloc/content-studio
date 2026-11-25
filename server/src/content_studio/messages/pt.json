@@ -1083,6 +1083,7 @@
   "settings.integrations.idle": "Desligar o servidor após {minutes} min sem uso",
   "settings.integrations.mcp_client": "Aplicativo",
   "settings.integrations.mcp_copy": "Copiar configuração",
+  "settings.integrations.mcp_failed": "Não foi possível preparar a configuração. Verifique se o servidor está ativo.",
   "settings.integrations.mcp_title": "Conectar um assistente (MCP)",
   "settings.integrations.port": "Porta (aplicada ao reiniciar o servidor)",
   "settings.integrations.rotate_confirm": "Os aplicativos conectados deixarão de funcionar até você copiar o token novo. Trocar?",

@@ -15,15 +15,16 @@ const FRAGMENTS: Record<string, string> = {
 };
 
 /** Responde a GET /integrations/mcp-config?client=<c> con el fragmento de ese cliente. */
-function configFetch() {
+function configFetch(fail = false) {
   return vi.fn(async (url: string) => {
+    if (fail) return new Response(JSON.stringify({ code: 'internal' }), { status: 500 });
     const client = new URL(url).searchParams.get('client') ?? '';
     return new Response(JSON.stringify({ client, fragment: FRAGMENTS[client] }), { status: 200 });
   });
 }
 
-function renderConfig() {
-  vi.stubGlobal('fetch', configFetch());
+function renderConfig(fail = false) {
+  vi.stubGlobal('fetch', configFetch(fail));
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
@@ -53,5 +54,12 @@ describe('McpConfig (spec 029, AC-10)', () => {
     await userEvent.click(copy);
 
     expect(writeText).toHaveBeenCalledWith(FRAGMENTS.codex);
+  });
+
+  it('si la API no arma la configuración, avisa y no ofrece copiar', async () => {
+    renderConfig(true);
+
+    expect(await screen.findByText(t('settings.integrations.mcp_failed'))).toBeTruthy();
+    expect(screen.queryByRole('button', { name: t('settings.integrations.mcp_copy') })).toBeNull();
   });
 });

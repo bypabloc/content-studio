@@ -1083,6 +1083,7 @@
   "settings.integrations.idle": "Shut the server down after {minutes} min idle",
   "settings.integrations.mcp_client": "Application",
   "settings.integrations.mcp_copy": "Copy configuration",
+  "settings.integrations.mcp_failed": "The configuration could not be prepared. Check that the server is running.",
   "settings.integrations.mcp_title": "Connect an assistant (MCP)",
   "settings.integrations.port": "Port (applies when the server restarts)",
   "settings.integrations.rotate_confirm": "Connected apps will stop working until you copy the new token. Change it?",
