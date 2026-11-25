@@ -417,6 +417,7 @@
   "error.editor_text_raster_invalid": "The title must be a valid transparent PNG.",
   "error.empty_transcript": "The transcription contains no timed words.",
   "error.engine_external": "This engine was installed outside Content Studio and cannot be uninstalled by the app.",
+  "error.engine_gated": "Hugging Face did not grant access to the model. Accept its terms with your account and check that the token belongs to that account.",
   "error.engine_license_required": "Accept the engine license before installing it.",
   "error.engine_not_installed": "Engine {model} is not installed. Install it from Engines.",
   "error.engine_verify_failed": "The engine could not be verified. Check the job log.",

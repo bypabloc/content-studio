@@ -36,7 +36,7 @@ def test_ac3_retries_skip_completed_steps_and_record_the_owner(tmp_path, monkeyp
     calls = []
     successful = []
 
-    def execute(step, recipe, location, cache, report):
+    def execute(step, recipe, location, cache, report, token=None):
         kind = step['kind']
         calls.append(kind)
         fail = calls.count(kind) == 1 and kind == 'venv'
@@ -91,7 +91,7 @@ def test_download_byte_progress_stays_inside_its_step(tmp_path, monkeypatch):
 
     spans = []
 
-    def execute(step, selected, home, cache, span):
+    def execute(step, selected, home, cache, span, token=None):
         spans.append(span)
         if step['kind'] == 'hf':
             installer.progress.emit(round(span[0] + (span[1] - span[0]) * 0.5, 4), '4/8 bytes')
@@ -523,7 +523,7 @@ def test_ac3_interrupted_install_with_changed_recipe_rebuilds_every_step(tmp_pat
     calls = []
     fail_once = ['venv']
 
-    def execute(step, recipe, location, cache, report):
+    def execute(step, recipe, location, cache, report, token=None):
         calls.append(step['kind'])
         if fail_once and step['kind'] == fail_once[0]:
             fail_once.pop()
@@ -536,3 +536,64 @@ def test_ac3_interrupted_install_with_changed_recipe_rebuilds_every_step(tmp_pat
     calls.clear()
     installer.install(replace(first, sha256='receta-corregida'), tmp_path)
     assert calls == ['python', 'venv', 'verify']
+
+
+def _gated_recipe():
+    return Recipe(
+        'fake',
+        'diarization',
+        4.8,
+        0,
+        True,
+        'MIT',
+        (
+            {'kind': 'python', 'version': '3.14'},
+            {'kind': 'venv', 'path': '.venv'},
+            {'kind': 'hf', 'repo': 'owner/model', 'revision': '0' * 40, 'into': 'hf', 'gated': True},
+            {'kind': 'verify', 'import': 'json'},
+        ),
+    )
+
+
+def test_ac2_token_stays_out_of_install_json_and_log(tmp_path, monkeypatch):
+    """AC-2 (spec 034): el token llega al paso gated y no se escribe en install.json ni en el progreso."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    received = []
+
+    def execute(step, recipe, location, cache, report, token=None):
+        received.append((step['kind'], token))
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    result = installer.install(_gated_recipe(), tmp_path, token='hf_secreto_1234567890abcdef')
+
+    assert ('hf', 'hf_secreto_1234567890abcdef') in received
+    assert 'hf_secreto_1234567890abcdef' not in json.dumps(result)
+    assert 'hf_secreto_1234567890abcdef' not in (tmp_path / 'fake' / 'install.json').read_text(encoding='utf-8')
+
+
+def test_ac3_gated_recipe_without_token_is_not_installed(tmp_path, monkeypatch):
+    """AC-3 (spec 034): sin token, el instalador se niega antes de crear carpetas o descargar."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    monkeypatch.setattr(installer, 'execute_step', lambda *args, **kwargs: pytest.fail('no debe ejecutar pasos'))
+
+    with pytest.raises(installer.InstallError) as error:
+        installer.install(_gated_recipe(), tmp_path)
+
+    assert error.value.code == 'engine_token_required'
+    assert not (tmp_path / 'fake').exists()
+
+
+def test_ac3_gated_step_exit_25_ends_as_engine_gated(tmp_path, monkeypatch):
+    """AC-3 (spec 034): si el paso restringido sale con 25, el instalador responde engine_gated."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    assert installer.EXIT_CODES['engine_gated'] == 25
+
+    def execute(step, recipe, location, cache, report, token=None):
+        if step['kind'] == 'hf':
+            raise subprocess.CalledProcessError(25, ['hf'])
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    with pytest.raises(installer.InstallError) as error:
+        installer.install(_gated_recipe(), tmp_path, token='hf_secreto_1234567890abcdef')
+
+    assert error.value.code == 'engine_gated'

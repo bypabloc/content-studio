@@ -151,3 +151,32 @@ def test_ac1_every_engine_below_pinned_python_has_warning():
         if version < pinned and not warning_file.is_file():
             missing.append(recipe.engine)
     assert missing == [], f'sin ficha 026-<motor>-version: {missing}'
+
+
+def test_ac1_pyannote_recipe():
+    """AC-1 (spec 034): la receta de pyannote es de diarización, fija versiones y pide el repositorio restringido."""
+    recipe = recipes.load('pyannote')
+
+    assert (recipe.family, recipe.venv) == ('diarization', '.venv-diarize')
+    assert recipe.steps[0] == {'kind': 'python', 'version': '3.14'}
+    packages = [package for step in recipe.steps if step['kind'] == 'pip' for package in step['packages']]
+    for name in ('torch', 'torchaudio', 'pyannote.audio', 'torchcodec', 'huggingface-hub'):
+        assert any(package.split('==')[0] == name and '==' in package for package in packages), name
+    hf = next(step for step in recipe.steps if step['kind'] == 'hf')
+    assert hf['repo'] == 'pyannote/speaker-diarization-community-1'
+    assert re.fullmatch(r'[0-9a-f]{40}', hf['revision'])
+    assert hf['gated'] is True
+    assert hf['into'] == 'models/community-1'
+    assert recipe.gated is True
+    assert recipe.steps[-1] == {'kind': 'verify', 'import': 'pyannote.audio'}
+
+
+def test_ac1_gated_is_a_boolean_on_hf_steps():
+    """AC-1 (spec 034): un paso hf declara gated como booleano; cualquier otro valor se rechaza."""
+    hf = {'kind': 'hf', 'repo': 'owner/model', 'revision': '0' * 40, 'into': 'hf'}
+    data = _valid_recipe()
+    data['steps'][2] = {**hf, 'gated': True}
+    assert recipes.validate(data).gated is True
+    data['steps'][2] = {**hf, 'gated': 'yes'}
+    with pytest.raises(ValueError, match='gated'):
+        recipes.validate(data)

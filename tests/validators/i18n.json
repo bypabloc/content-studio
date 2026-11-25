@@ -9,6 +9,7 @@
     "llm.platform.",
     "llm.subtitles.flag.",
     "error.disk_full",
+    "error.engine_gated",
     "error.input_not_found",
     "error.inbox_folder_already_registered",
     "error.inbox_kind_not_accepted",

@@ -417,6 +417,7 @@
   "error.editor_text_raster_invalid": "O título deve ser um PNG transparente válido.",
   "error.empty_transcript": "A transcrição não contém palavras com tempo.",
   "error.engine_external": "Este motor foi instalado fora do Content Studio e não pode ser desinstalado pelo aplicativo.",
+  "error.engine_gated": "O Hugging Face não concedeu acesso ao modelo. Aceite os termos com a sua conta e confira se o token é dessa conta.",
   "error.engine_license_required": "Aceite a licença do motor antes de instalá-lo.",
   "error.engine_not_installed": "O motor {model} não está instalado. Instale-o em Motores.",
   "error.engine_verify_failed": "Não foi possível verificar o motor. Consulte o registro do trabalho.",
