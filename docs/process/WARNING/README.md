@@ -277,3 +277,4 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [036-seccion-transcripcion](036-seccion-transcripcion.md) | Decisiones de la sección Transcripción y de la leyenda de hablantes (fase 2): átomos, claves nuevas y la vía de `shadcn/` | `main` |
 | [037-api-diarizacion](037-api-diarizacion.md) | Ruta de la diarización en `diarizations.py`, marcador con el esquema vigente y el código `no_diarization` | `main` |
 | [037-seccion-hablantes](037-seccion-hablantes.md) | Guardado con rollback que reinicia el borrador; audio por hablante por el trabajo `diarize.split`; `?project=` al montar el Editor; cobertura de `SpeakerResult`; flechas solo en unitarias; app-check sin encolar | `main` |
+| [038-hablantes-subtitulos](038-hablantes-subtitulos.md) | Segmentación por hablante, campos opcionales del documento, ASS con \1c, SRT y VTT con el nombre, diarización dentro del trabajo de subtítulos | `main` |

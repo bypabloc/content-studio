@@ -226,3 +226,57 @@ def test_fonts_lists_the_bundled_families(api):
     assert response.status_code == 200
     bundled = {entry['family'] for entry in response.json() if entry['bundled']}
     assert {'Montserrat', 'Inter', 'Poppins'} <= bundled
+
+
+def test_ac2_from_transcript_with_speakers(api, monkeypatch):
+    """AC-2: un transcribe con hablantes lleva a su proyecto el hablante de cada palabra y su nombre."""
+    source = api.tmp / 'charla.wav'
+    source.write_bytes(b'audio')
+    body = {'kind': 'transcribe', 'params': {'input': str(source), 'model': 'large-v3-turbo', 'language': 'es'}}
+    job_id = api.client.post('/jobs', json=body, headers=api.headers).json()['id']
+    conn = connect(api.tmp / 'base.db')
+    output_dir = api.tmp / 'out' / 'transcribe-speakers'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    words = {
+        'language': 'es',
+        'segments': [
+            {
+                'words': [
+                    {'word': 'hola', 'start': 0.0, 'end': 0.4, 'speaker': 'SPEAKER_00'},
+                    {'word': 'mundo', 'start': 0.5, 'end': 0.9, 'speaker': 'SPEAKER_01'},
+                ]
+            }
+        ],
+    }
+    (output_dir / 'words.json').write_text(json.dumps(words), encoding='utf-8')
+    names = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}, 'SPEAKER_01': {'name': 'Luis', 'color': '#dc2626'}}
+    (output_dir / 'speakers.json').write_text(json.dumps(names), encoding='utf-8')
+    jobs_store.update(conn, job_id, status='done', output_dir=str(output_dir))
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: api.tmp / 'out')
+
+    created = api.client.post('/subtitles/from-transcript', json={'job_id': job_id}, headers=api.headers)
+
+    assert created.status_code == 201
+    document = api.client.get(f'/subtitles/{created.json()["id"]}', headers=api.headers).json()
+    assert document['speakers']['SPEAKER_01'] == {'name': 'Luis', 'color': '#dc2626'}
+    assert [cue['speaker'] for cue in document['cues']] == ['SPEAKER_00', 'SPEAKER_01']
+
+
+def test_ac4_export_with_speaker_labels_writes_the_name(api, monkeypatch):
+    """AC-4: exportar con `speaker_labels` pone el nombre del hablante delante del texto; sin la opción, no aparece."""
+    document = from_cleaner(WORDS, source_path='clean.mp4', language='es')
+    document['speakers'] = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}}
+    document['cues'][0]['speaker'] = 'SPEAKER_00'
+    doc_path = api.tmp / 'subtitles' / 'hablantes' / 'subtitles.json'
+    save(document, doc_path)
+    conn = connect(api.tmp / 'base.db')
+    project_id = subtitle_projects.insert(conn, 'hablantes', 'clean.mp4', str(doc_path))
+    out = api.tmp / 'out'
+    monkeypatch.setattr(subtitles_routes.paths, 'outputs_dir', lambda *args, **kwargs: out)
+
+    named = api.client.post(
+        f'/subtitles/{project_id}/export', json={'format': 'srt', 'speaker_labels': True}, headers=api.headers
+    )
+    assert 'Ana: hola mundo' in Path(named.json()['path']).read_text(encoding='utf-8')
+    plain = api.client.post(f'/subtitles/{project_id}/export', json={'format': 'srt'}, headers=api.headers)
+    assert 'Ana:' not in Path(plain.json()['path']).read_text(encoding='utf-8')

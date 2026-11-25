@@ -2741,6 +2741,11 @@ export interface components {
             format: string;
             /** Language */
             language?: string | null;
+            /**
+             * Speaker Labels
+             * @default false
+             */
+            speaker_labels: boolean;
         };
     };
     responses: never;

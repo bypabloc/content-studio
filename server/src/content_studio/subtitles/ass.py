@@ -68,10 +68,11 @@ def _classic(cue: dict[str, Any], style: dict[str, Any]) -> str:
     return _dialogue(cue['start'], cue['end'], '\\N'.join(lines))
 
 
-def _social(cue: dict[str, Any], style: dict[str, Any]) -> list[str]:
+def _social(cue: dict[str, Any], style: dict[str, Any], speakers: dict[str, Any]) -> list[str]:
     """Un Dialogue por palabra activa: el cue entero, con esa palabra en el color de resaltado (o el de su palabra
     clave) y el pop; las demás, en el color del estilo."""
-    fill = ass_color(style['color'])
+    speaker_color = _speaker_color(cue, speakers)
+    fill = speaker_color or ass_color(style['color'])
     highlight = ass_color(style['highlight_color'])
     lines = []
     for active in cue['words']:
@@ -86,7 +87,7 @@ def _social(cue: dict[str, Any], style: dict[str, Any]) -> list[str]:
             if keyword and keyword.get('emoji'):
                 text = f'{text} {keyword["emoji"]}'
             parts.append(text)
-        lines.append(_dialogue(active['start'], active['end'], ' '.join(parts)))
+        lines.append(_tint(_dialogue(active['start'], active['end'], ' '.join(parts)), speaker_color))
     return lines
 
 
@@ -98,14 +99,29 @@ def _karaoke(cue: dict[str, Any], style: dict[str, Any]) -> str:
     return _dialogue(cue['start'], cue['end'], ' '.join(parts))
 
 
+def _speaker_color(cue: dict[str, Any], speakers: dict[str, Any]) -> str | None:
+    """El color del hablante del cue en ASS (&HBBGGRR&); None si el cue no tiene hablante con color."""
+    speaker_id = cue.get('speaker')
+    speaker = speakers.get(speaker_id) if speaker_id is not None else None
+    return ass_color(speaker['color']) if speaker else None
+
+
+def _tint(line: str, color: str | None) -> str:
+    """Pone el color del hablante al principio del texto de un Dialogue, con la etiqueta de color de ASS."""
+    if color is None:
+        return line
+    return line.replace(',Default,,0,0,0,,', f',Default,,0,0,0,,{{\\1c{color}}}', 1)
+
+
 def to_ass(doc: dict[str, Any], style: dict[str, Any], play_res: tuple[int, int] = (1920, 1080)) -> str:
     """ASS del documento con el estilo dado. `play_res` es la resolución del video (o 1920×1080 si es solo audio)."""
+    speakers = doc.get('speakers') or {}
     lines = _header(style, play_res)
     for cue in doc['cues']:
         if style['mode'] == 'social':
-            lines.extend(_social(cue, style))
+            lines.extend(_social(cue, style, speakers))
         elif style['mode'] == 'karaoke':
             lines.append(_karaoke(cue, style))
         else:
-            lines.append(_classic(cue, style))
+            lines.append(_tint(_classic(cue, style), _speaker_color(cue, speakers)))
     return '\n'.join(lines) + '\n'

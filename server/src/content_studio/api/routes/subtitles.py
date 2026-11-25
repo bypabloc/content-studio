@@ -76,6 +76,14 @@ def create_project(
     return created
 
 
+def _transcript_word(word: dict[str, Any]) -> dict[str, Any]:
+    """Una palabra de words.json, con su hablante si la diarización se lo puso (spec 035)."""
+    kept: dict[str, Any] = {'word': word['word'], 'start': word['start'], 'end': word['end']}
+    if word.get('speaker') is not None:
+        kept['speaker'] = word['speaker']
+    return kept
+
+
 class TranscriptIn(BaseModel):
     """El trabajo `transcribe` ya terminado cuya transcripción se convertirá en un proyecto editable."""
 
@@ -98,16 +106,14 @@ def create_from_transcript(
         raise ApiError(409, 'source_not_done')
     try:
         result = json.loads(words_file.read_text(encoding='utf-8'))
-        words = [
-            {'word': word['word'], 'start': word['start'], 'end': word['end']}
-            for segment in result['segments']
-            for word in segment.get('words', [])
-        ]
+        words = [_transcript_word(word) for segment in result['segments'] for word in segment.get('words', [])]
         if not words:
             raise ValueError('empty_transcript')
         source = str(job['params']['input'])
         language = str(result.get('language') or 'es')
-        document = sources.from_words(words, source_path=source, kind='file', language=language)
+        speakers_file = output_dir / 'speakers.json'
+        speakers = json.loads(speakers_file.read_text(encoding='utf-8')) if speakers_file.is_file() else None
+        document = sources.from_words(words, source_path=source, kind='file', language=language, speakers=speakers)
     except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         raise ApiError(422, 'empty_transcript') from error
     name = Path(source).stem or f'editor-{body.job_id}'
@@ -129,6 +135,7 @@ class ExportIn(BaseModel):
 
     format: str
     language: str | None = None
+    speaker_labels: bool = False
 
 
 @router.post('/subtitles/{project_id}/export')
@@ -146,7 +153,7 @@ def export_project(
         document, suffix = export.with_track(document, body.language), f'{body.language}.{body.format}'
     target = paths.outputs_dir() / 'subtitles' / f'{project_id}-{Path(document["source"]["path"]).stem}.{suffix}'
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(export.render(document, body.format), encoding='utf-8')
+    target.write_text(export.render(document, body.format, speaker_labels=body.speaker_labels), encoding='utf-8')
     return {'path': str(target)}
 
 

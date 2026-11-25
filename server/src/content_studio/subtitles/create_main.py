@@ -17,9 +17,11 @@ from content_studio import paths
 from content_studio.clean import cuts as clean_cuts
 from content_studio.clean.plan import remap
 from content_studio.common import ffmpeg as ff
-from content_studio.common import process
+from content_studio.common import process, progress
 from content_studio.db import schema
 from content_studio.db.connection import connect
+from content_studio.diarization import assign, diarize_main, run
+from content_studio.diarization import speakers as diarization_speakers
 from content_studio.subtitles.document import save
 from content_studio.subtitles.sources import from_cleaner, from_import, from_narration, from_words
 from content_studio.transcription import cache, models, transcribe_main
@@ -48,12 +50,13 @@ def build_document(
     script: str = '',
     words: Sequence[dict] = (),
     raw: str = '',
+    speakers: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """El documento del origen: palabras con tiempos (limpiador, archivo o narración), el guion o un SRT/VTT."""
     if origin == 'cleaner':
-        return from_cleaner(words, source_path=source, language=language)
+        return from_cleaner(words, source_path=source, language=language, speakers=speakers)
     if origin == 'file':
-        return from_words(words, source_path=source, kind='file', language=language)
+        return from_words(words, source_path=source, kind='file', language=language, speakers=speakers)
     if origin == 'narration':
         return from_narration(script, words, source_path=source, language=language)
     if origin == 'import':
@@ -80,11 +83,33 @@ def _transcribe(source: Path, *, model: str, language: str, folder: Path) -> lis
         return _words_from_transcript(Path(hit))
     json_file = cache.json_path(cache.cache_key(str(source), stat.st_mtime, model, language))
     json_file.parent.mkdir(parents=True, exist_ok=True)
-    wav = folder / 'audio-16k.wav'
-    ff.ffmpeg('-y', '-i', str(source), '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', str(wav))
+    wav = _wav(source, folder)
     transcribe_main.transcribe(wav, language=language, out=json_file, model=transcribe_main._load_model(model))
     cache.store(conn, *key_args, str(json_file))
     return _words_from_transcript(json_file)
+
+
+def _wav(source: Path, folder: Path) -> Path:
+    """El audio a 16 kHz mono de la carpeta del trabajo: transcribir y diarizar lo comparten."""
+    wav = folder / 'audio-16k.wav'
+    if not wav.exists():
+        ff.ffmpeg('-y', '-i', str(source), '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', str(wav))
+    return wav
+
+
+def _diarize(source: Path, wav: Path, folder: Path, params: dict[str, Any]) -> dict[str, Any]:
+    """Diariza el audio con los hablantes que pidió el trabajo; el resultado queda en la carpeta `diarization/`."""
+    counts = {key: params[key] for key in diarize_main.SPEAKER_FLAGS if params.get(key) is not None}
+    return run.diarize_file(source, wav, folder / 'diarization', counts, progress.emit)
+
+
+def tag_speakers(
+    words: list[dict[str, Any]], result: dict[str, Any]
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, str]]]:
+    """Cada palabra con el hablante del turno que la cubre, y los nombres y colores de los hablantes (speakers.json)."""
+    return assign.assign_speakers(words, result['exclusive_diarization']), diarization_speakers.build(
+        result['speakers']
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -102,11 +127,14 @@ def main(argv: list[str] | None = None) -> int:
     origin = params['origin']
     source = params.get('input', '')
     language = params.get('language', 'auto')
+    speakers: dict[str, dict[str, str]] | None = None
     if origin in ('file', 'narration'):
         process.use_venv(transcribe_main._venv(), README, module='content_studio.subtitles.create_main')
         words = _transcribe(
             Path(source), model=params.get('model', models.recommended()), language=language, folder=folder
         )
+        if origin == 'file' and params.get('diarize'):
+            words, speakers = tag_speakers(words, _diarize(Path(source), _wav(Path(source), folder), folder, params))
     else:
         # Los cortes son los de su análisis (`analysis`): el transcript vive en la caché de transcripción (WARNING 014).
         analysis = Path(params.get('analysis', ''))
@@ -119,6 +147,7 @@ def main(argv: list[str] | None = None) -> int:
         script=params.get('script', ''),
         words=words,
         raw=raw,
+        speakers=speakers,
     )
     save(doc, folder / 'subtitles.json')
     print(json.dumps({'cues': len(doc['cues'])}), flush=True)

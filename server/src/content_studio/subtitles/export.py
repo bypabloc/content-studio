@@ -19,12 +19,14 @@ def with_track(document: dict[str, Any], language: str) -> dict[str, Any]:
     return {**document, 'language': language, 'cues': document.get('tracks', {})[language]}
 
 
-def render(document: dict[str, Any], fmt: str, play_res: tuple[int, int] = (1920, 1080)) -> str:
+def render(
+    document: dict[str, Any], fmt: str, play_res: tuple[int, int] = (1920, 1080), *, speaker_labels: bool = False
+) -> str:
     """El texto del documento en el formato pedido; un formato que no existe es un ValueError."""
     if fmt == 'srt':
-        return to_srt(document)
+        return to_srt(document, speaker_labels=speaker_labels)
     if fmt == 'vtt':
-        return to_vtt(document)
+        return to_vtt(document, speaker_labels=speaker_labels)
     if fmt == 'ass':
         return to_ass(document, {**preset('classic'), **document.get('style', {})}, play_res)
     raise ValueError(f'unknown export format: {fmt}')

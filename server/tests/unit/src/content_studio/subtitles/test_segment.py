@@ -56,3 +56,25 @@ def test_ac1_words_per_cue_gives_one_or_two_words_and_never_crosses_strong_punct
     assert sum(len(cue['words']) for cue in cues) == 30
     for cue in cues:
         assert all(word['word'][-1] not in '.?!' for word in cue['words'][:-1])
+
+
+def test_ac1_cuts_at_a_speaker_change():
+    """AC-1: ninguna palabra de dos hablantes queda en el mismo cue, y cada cue lleva el hablante de sus palabras."""
+    words = [
+        {'word': 'hola', 'start': 0.0, 'end': 0.4, 'speaker': 'SPEAKER_00'},
+        {'word': 'mundo', 'start': 0.5, 'end': 0.9, 'speaker': 'SPEAKER_01'},
+        {'word': 'buenas', 'start': 1.0, 'end': 1.4, 'speaker': 'SPEAKER_01'},
+        {'word': 'tardes', 'start': 1.5, 'end': 1.9, 'speaker': 'SPEAKER_00'},
+    ]
+
+    cues = segment(words)
+
+    assert [cue['text'] for cue in cues] == ['hola', 'mundo buenas', 'tardes']
+    assert [cue['speaker'] for cue in cues] == ['SPEAKER_00', 'SPEAKER_01', 'SPEAKER_00']
+
+
+def test_ac1_without_speakers_the_cue_keeps_its_shape():
+    """AC-1 (caracterización): sin hablantes, cada cue tiene solo start, end, text y words, como antes."""
+    cues = segment(_words(TEXT))
+
+    assert all(set(cue) == {'start', 'end', 'text', 'words'} for cue in cues)

@@ -32,6 +32,20 @@ def wrap_lines(words: Sequence[str], max_chars: int) -> list[str]:
     return lines
 
 
+def _runs(words: Sequence[dict]) -> list[list[dict]]:
+    """Trozos de palabras seguidas del mismo hablante: un cue nunca cruza de un hablante a otro (AC-1).
+
+    Sin hablantes, todo es un solo trozo y el resultado es el de siempre.
+    """
+    runs: list[list[dict]] = []
+    for word in words:
+        if runs and runs[-1][-1].get('speaker') == word.get('speaker'):
+            runs[-1].append(word)
+        else:
+            runs.append([word])
+    return runs
+
+
 def _sentences(words: Sequence[dict]) -> list[list[dict]]:
     """Trozos que terminan en puntuación fuerte, o en la última palabra."""
     sentences: list[list[dict]] = []
@@ -60,12 +74,15 @@ def _weak_cut(words: Sequence[dict]) -> int | None:
 
 
 def _cue(words: Sequence[dict]) -> dict:
-    return {
+    cue = {
         'start': words[0]['start'],
         'end': words[-1]['end'],
         'text': ' '.join(w['word'] for w in words),
         'words': list(words),
     }
+    if words[0].get('speaker') is not None:
+        cue['speaker'] = words[0]['speaker']
+    return cue
 
 
 def _pack(words: Sequence[dict], max_chars: int, max_lines: int, max_duration: float) -> list[list[dict]]:
@@ -109,7 +126,13 @@ def segment(
     if words_per_cue is not None:
         return [
             _cue(sentence[start : start + words_per_cue])
-            for sentence in _sentences(words)
+            for run in _runs(words)
+            for sentence in _sentences(run)
             for start in range(0, len(sentence), words_per_cue)
         ]
-    return [_cue(cue) for sentence in _sentences(words) for cue in _pack(sentence, max_chars, max_lines, max_duration)]
+    return [
+        _cue(cue)
+        for run in _runs(words)
+        for sentence in _sentences(run)
+        for cue in _pack(sentence, max_chars, max_lines, max_duration)
+    ]
