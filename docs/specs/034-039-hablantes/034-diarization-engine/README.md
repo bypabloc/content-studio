@@ -37,6 +37,7 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| F0 | Ajustes a la 026: receta en Python 3.14 (commit docs) | - | - | - | IMP |
 | F1 | [Receta, familia y token en la instalación](fases/1-receta-y-token/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3 | - | PEN |
 | F2 | [Credenciales y API](fases/2-credenciales/plan-tdd.md) | C4, C5 | AC-3, AC-4 | - | PEN |
 | F3 | [Client: tarjeta, token y atribución](fases/3-client/plan-tdd.md) | C6 | AC-5, AC-6 | - | PEN |
@@ -53,7 +54,7 @@ Instalar desde Motores el motor «Diarización (pyannote)»:
 
    Los dos llevan un texto que explica cómo aceptar las condiciones (agente, 2026-11-24).
 5. **D-5**: La receta `pyannote` queda así (agente, 2026-11-24):
-   * Python 3.12, con torch y torchaudio `2.11.0+cu128`, igual que Qwen;
+   * Python 3.14, con torch y torchaudio `2.11.0+cu128`, igual que `qwen-0.6b` (fase `0-ajustes`: la 026 lleva cada receta a la Python más alta que soporta);
    * `pyannote.audio==4.1.1`, `torchcodec==0.17.0` y `huggingface-hub==0.36.2`;
    * los pesos de `pyannote/speaker-diarization-community-1` en la revisión `3533c8cf8e369892e6b79ff1bf80f7b0286a54ee`, descargados a `models/community-1`.
 6. **D-6**: La familia nueva es `diarization`, con su grupo «Diarización» en Motores. La atribución CC-BY-4.0 va en la tarjeta y en Ajustes > Acerca de (agente, 2026-11-24).

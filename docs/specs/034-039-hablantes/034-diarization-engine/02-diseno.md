@@ -42,7 +42,7 @@ flowchart TD
   "cpu": true,
   "license": "MIT / CC-BY-4.0",
   "steps": [
-    {"kind": "python", "version": "3.12"},
+    {"kind": "python", "version": "3.14"},
     {"kind": "venv", "path": ".venv-diarize"},
     {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
     {"kind": "pip", "packages": ["pyannote.audio==4.1.1", "torchcodec==0.17.0", "huggingface-hub==0.36.2"]},
