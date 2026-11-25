@@ -5,5 +5,6 @@
 - **Descartadas**: dos compiladores (TypeScript 7 para `tsc` y 5.x solo para generar), que duplica herramientas; escribir los tipos a mano desde OpenAPI, que se desfasa del server.
 - **Cómo revertir**: subir `typescript` a 7.x en `client/package.json` cuando `openapi-typescript` declare soporte para su nueva API (revisar la `peerDependencies` de la versión nueva).
 - **Cómo comprobarla**: `cd client && bun run gen:api && bun run typecheck`.
+- **Revisado en la 027 (2026-11-25)**: la última 5.x sigue siendo 5.9.3. TypeScript 7.0.2 existe, pero `openapi-typescript` 7.13.0 no lo declara como peer.
 - **Pendiente**: ninguno; revisar al subir `openapi-typescript` (ver *Cómo revertir*).
 - **Antes de**: el merge a `dev`.

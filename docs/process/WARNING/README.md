@@ -17,6 +17,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [027-types-node-26](027-types-node-26.md) | @types/node sube a 26 (salto de versión mayor): typecheck, tests y build pasan | `main` |
 | [026-huella-sin-registro](026-huella-sin-registro.md) | Instalaciones previas a la huella salen outdated una vez: «Actualizar» rehace sus descargas | `main` |
 | [026-piso-f4](026-piso-f4.md) | F4 sin commit: el piso ya es 3.11 desde 9908005 y AC-5 lo cubre el test de la 025 | `main` |
 | [026-verificacion-familias](026-verificacion-familias.md) | Verificar en Motores falla para transcription y vision (sin caso en verification.py) | `main` |
