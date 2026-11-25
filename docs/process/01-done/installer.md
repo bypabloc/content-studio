@@ -30,3 +30,4 @@ Instalar Content Studio en Windows sin un checkout ni permisos de administrador,
 
 - 2026-11-24: spec 022.
 - 2026-11-24: verificación integral (023): instalación, motores recomendados y recorrido completo sobre la app instalada.
+- 2026-11-24: spec 025: el instalador prepara Python 3.15 (`.python-version`) y recrea el venv del server si cambió la versión de Python.

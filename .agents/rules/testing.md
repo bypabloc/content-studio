@@ -16,7 +16,7 @@ Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 | Doctest | El docstring de la función en `server/src/` | Funciones puras chicas: parsers, rutas, formatos | Sí |
 | Caracterización | `server/tests/integration/test_characterization.py` + `server/tests/integration/fixtures/` | Que la salida de los parsers y bloques no cambie sin querer | Sí |
 | Tamaño, espejo, cobertura, docstrings y tipos | `test-runner` (`devtools/tests/unit/test_runner/`) | Límites de `file-size.json`, espejo sin huérfanos, 80 % por archivo, D1 y mypy | Sí |
-| Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: sintaxis 3.10, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
+| Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: sintaxis del piso de las recetas, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
 | Bugs | `server/tests/integration/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
 | CLI `studio` | `server/tests/unit/src/content_studio/cli/` | Argparse: subcomandos, flags de narración y música, `serve` y `jobs` | Sí |
 | Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores registrados (`ENGINES`) | Sí |
