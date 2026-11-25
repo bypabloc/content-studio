@@ -125,6 +125,14 @@ def uninstall(engine: str, root: Path, force: bool = False) -> None:
     remove_paths(root, engine, manifest)
 
 
+def _pending_recipe(pending: Path) -> str | None:
+    """Huella de la receta del intento que quedó sin terminar (None si no la registró)."""
+    try:
+        return json.loads(pending.read_text(encoding='utf-8')).get('recipe_sha256')
+    except (OSError, ValueError):
+        return None
+
+
 def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     """Instala el motor y registra qué rutas pertenecen a la app."""
     root = root.resolve()
@@ -134,6 +142,8 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     pending = home / 'installing.json'
     own = current.get('owner') == 'app'
     stale = own and current.get('recipe_sha256') != recipe.sha256
+    if pending.is_file() and _pending_recipe(pending) != recipe.sha256:
+        stale = True  # un intento sin terminar con otra receta: sus pasos ya no valen (spec 026)
     if repair and not own:
         raise InstallError('engine_external')
     if not repair and own and not stale and current.get('recipe_version') == recipe.version and not pending.exists():
@@ -144,7 +154,7 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     if shutil.disk_usage(root).free + existing < recipe.size_gb * 1.2 * 10**9:
         raise InstallError('disk_full')
     home.mkdir(exist_ok=True)
-    _write_json(pending, {'owner': 'app', 'recipe_version': recipe.version})
+    _write_json(pending, {'owner': 'app', 'recipe_version': recipe.version, 'recipe_sha256': recipe.sha256})
     markers = home / 'steps'
     markers.mkdir(exist_ok=True)
     family = home / recipe.family

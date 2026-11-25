@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -514,3 +515,24 @@ def test_ac3_install_of_an_outdated_engine_reruns_every_step(tmp_path, monkeypat
 
     assert ran == ['python', 'venv', 'verify']
     assert result['recipe_sha256'] == 'b' * 64
+
+
+def test_ac3_interrupted_install_with_changed_recipe_rebuilds_every_step(tmp_path, monkeypatch):
+    """Un intento fallido deja pasos marcados; la receta corregida (misma versión) debe rehacerlos todos."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    calls = []
+    fail_once = ['venv']
+
+    def execute(step, recipe, location, cache, report):
+        calls.append(step['kind'])
+        if fail_once and step['kind'] == fail_once[0]:
+            fail_once.pop()
+            raise RuntimeError('pip falló')
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    first = _fake_recipe()
+    with pytest.raises(RuntimeError):
+        installer.install(first, tmp_path)
+    calls.clear()
+    installer.install(replace(first, sha256='receta-corregida'), tmp_path)
+    assert calls == ['python', 'venv', 'verify']
