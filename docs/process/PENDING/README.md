@@ -16,6 +16,7 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | Ficha | Qué | Cuándo | Quién |
 | :--- | :--- | :--- | :--- |
+| [026-verificacion-familias](026-verificacion-familias.md) | caso de verificación para transcription y vision | antes de publicar | agente |
 | [026-llm-casos-fallidos](026-llm-casos-fallidos.md) | asistente: el caso que falla en script_review (1 de 25 en cada modelo) | después de publicar | agente |
 | [026-heartmula-voz](026-heartmula-voz.md) | heartmula: prompt o revisión que no cante, o quitar el motor de la música instrumental | antes de publicar | usuario y agente |
 | [026-reintentar-faster-whisper](026-reintentar-faster-whisper.md) | faster-whisper en 3.15 y av nueva | después de publicar | agente |

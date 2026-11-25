@@ -17,6 +17,13 @@ El catálogo ofrece nueve recetas fijadas, instalaciones reanudables, verificaci
 
 El código está en `server/src/content_studio/engines/`, `storage/`, `system/` y `services/`. Las recetas viven en `engines/recipes/`. `paths.engines_dir()` resuelve la carpeta elegida; el valor predeterminado es `%LOCALAPPDATA%\Content Studio\engines` en Windows y `~/.local/share/content-studio/engines` en POSIX. Las voces y referencias siguen en `server/data/`.
 
+## Versiones y huella (spec 026, 2026-11-25)
+
+- La huella de una receta es el sha256 de sus bytes en disco; en este equipo (`autocrlf=true`) las recetas van en CRLF.
+- Un intento de instalación fallido ya no reutiliza pasos ni venv de la receta anterior: si la huella del intento pendiente no coincide, se rehace todo (commit `9d96a1a`).
+- Motores de transcripción (faster-whisper, 3.14) y visión (vision, 3.15) verifican su librería; el caso de «Verificar» en Motores para sus familias falta (ficha `026-verificacion-familias`).
+- Las instalaciones externas del usuario (indextts, omnivoice en el checkout principal) no se tocaron.
+
 ## Historial
 
 - 2026-11-21: Motores, almacenamiento elegible, bienvenida y herramientas del sistema (spec 012; PR pendiente).

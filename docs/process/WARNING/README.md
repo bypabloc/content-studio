@@ -17,6 +17,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [026-verificacion-familias](026-verificacion-familias.md) | Verificar en Motores falla para transcription y vision (sin caso en verification.py) | `main` |
 | [026-llama-cpp-version](026-llama-cpp-version.md) | llama.cpp b12686 (mejor que b12676 en script_review) | `main` |
 | [026-heartmula-voz](026-heartmula-voz.md) | heartmula canta en ambas revisiones: la música no es instrumental | `main` |
 | [026-faster-whisper-version](026-faster-whisper-version.md) | faster-whisper en 3.14 con av 18.1.1: onnxruntime y metadata_errors | `main` |
