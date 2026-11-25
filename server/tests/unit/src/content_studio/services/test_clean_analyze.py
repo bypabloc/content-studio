@@ -45,3 +45,9 @@ def test_build_command_passes_the_gap_padding_and_edges_to_analyze_main(tmp_path
     assert options['--padding'] == '0.15'
     assert options['--folder'] == str(tmp_path)
     assert '--edges' in command
+
+
+def test_ac8_build_command_passes_diarize_to_analyze_main(tmp_path: Path):
+    """AC-8: con «Identificar hablantes», el comando de analyze_main lleva --diarize; sin él, no."""
+    assert '--diarize' in clean_analyze.build_command({**PARAMS, 'diarize': True}, tmp_path)
+    assert '--diarize' not in clean_analyze.build_command(PARAMS, tmp_path)

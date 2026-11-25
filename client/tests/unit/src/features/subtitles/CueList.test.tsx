@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CueList } from '@/features/subtitles/CueList';
@@ -59,5 +60,32 @@ describe('CueList', () => {
     render(<CueList doc={marked} onChange={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: 'hola' }).getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+const speakerDoc: DocEdit = {
+  ...doc,
+  speakers: { SPEAKER_00: { name: 'Ana', color: '#2563eb' }, SPEAKER_01: { name: 'Luis', color: '#dc2626' } },
+  cues: doc.cues.map((cue, index) => ({ ...cue, speaker: index === 0 ? 'SPEAKER_00' : 'SPEAKER_01' })),
+};
+
+describe('CueList with speakers', () => {
+  afterEach(cleanup);
+
+  it('shows the speaker name of each cue', () => {
+    render(<CueList doc={speakerDoc} onChange={vi.fn()} />);
+
+    expect(screen.getAllByText('Ana').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Luis').length).toBeGreaterThan(0);
+  });
+
+  it('changes the speaker of a cue from its menu', async () => {
+    const onChange = vi.fn();
+    render(<CueList doc={speakerDoc} onChange={onChange} />);
+
+    await userEvent.click(screen.getAllByRole('combobox', { name: t('subtitles.cues.speaker') })[0]);
+    await userEvent.click(await screen.findByRole('option', { name: 'Luis' }));
+
+    expect(onChange.mock.calls[0][0].cues[0].speaker).toBe('SPEAKER_01');
   });
 });

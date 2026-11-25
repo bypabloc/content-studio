@@ -10,6 +10,7 @@ import { ClipView } from './ClipView';
 import { Ruler } from './Ruler';
 import { TrackHeader } from './TrackHeader';
 import { KeyframeLane } from './KeyframeLane';
+import { SubtitleLane } from './timeline/SubtitleLane';
 import { TransitionZone } from './TransitionZone';
 import type { Levels } from '@/features/recording/capture/useRecorder';
 import { pxToTime, selectInRange } from './model/timeline';
@@ -212,6 +213,7 @@ export function Timeline({
                 setRange(null);
               }}
             >
+              {track.kind === 'subtitles' ? <SubtitleLane projectId={track.subtitles_project} zoom={zoom} /> : null}
               {doc.clips
                 .filter((clip) => clip.track === track.id)
                 .map((clip) => (

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { deleteCue, mergeCues, setCueText, splitCue, toggleKeyword, type DocEdit, trackDoc } from '@/features/subtitles/cues';
+import { deleteCue, mergeCues, setCueSpeaker, setCueText, splitCue, toggleKeyword, type DocEdit, trackDoc } from '@/features/subtitles/cues';
 
 const word = (start: number, end: number, text: string) => ({ start, end, text, keyword: null });
 
@@ -73,5 +73,29 @@ describe('trackDoc', () => {
     expect(shown.cues[0].words.map((word) => word.text)).toEqual(['olá', 'mundo']);
     expect(shown.cues[0].words.at(-1)?.end).toBe(2);
     expect(trackDoc(doc, 'fr')).toBe(doc);
+  });
+});
+
+describe('cues with speakers', () => {
+  function withSpeakers(): DocEdit {
+    const base = doc();
+    return {
+      ...base,
+      speakers: { SPEAKER_00: { name: 'Ana', color: '#2563eb' }, SPEAKER_01: { name: 'Luis', color: '#dc2626' } },
+      cues: base.cues.map((cue, index) => ({ ...cue, speaker: index === 0 ? 'SPEAKER_00' : 'SPEAKER_01' })),
+    };
+  }
+
+  it('setCueSpeaker changes the speaker of one cue and keeps the others', () => {
+    const next = setCueSpeaker(withSpeakers(), 1, 'SPEAKER_00');
+
+    expect(next.cues.map((cue) => cue.speaker)).toEqual(['SPEAKER_00', 'SPEAKER_00']);
+  });
+
+  it('split keeps the speaker on both halves and merge takes the speaker of the first cue', () => {
+    const base = withSpeakers();
+
+    expect(splitCue(base, 0, 1).cues.map((cue) => cue.speaker)).toEqual(['SPEAKER_00', 'SPEAKER_00', 'SPEAKER_01']);
+    expect(mergeCues(base, 0).cues[0].speaker).toBe('SPEAKER_00');
   });
 });

@@ -638,7 +638,8 @@ export interface paths {
         };
         /**
          * Get Cuts
-         * @description El documento de cortes del análisis: parámetros, duración, idioma y cortes.
+         * @description El documento de cortes del análisis: parámetros, duración, idioma y cortes. Con hablantes, además las
+         *     palabras con su hablante (`words`) y el mapa de hablantes (`speakers`).
          */
         get: operations["get_cuts_clean__job_id__get"];
         put?: never;
@@ -2741,6 +2742,11 @@ export interface components {
             format: string;
             /** Language */
             language?: string | null;
+            /**
+             * Speaker Labels
+             * @default false
+             */
+            speaker_labels: boolean;
         };
     };
     responses: never;

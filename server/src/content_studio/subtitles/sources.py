@@ -89,41 +89,59 @@ def align(script: str, whisper_words: Sequence[dict]) -> list[dict[str, Any]]:
     ]
 
 
-def _document(cues: Sequence[dict], *, source_path: str, kind: str, language: str) -> dict[str, Any]:
-    built = [
-        {
+def _document(
+    cues: Sequence[dict],
+    *,
+    source_path: str,
+    kind: str,
+    language: str,
+    speakers: dict[str, dict] | None = None,
+) -> dict[str, Any]:
+    built = []
+    for number, cue in enumerate(cues, start=1):
+        item: dict[str, Any] = {
             'id': number,
             'start': cue['start'],
             'end': cue['end'],
             'text': cue['text'],
             'words': cue['words'],
         }
-        for number, cue in enumerate(cues, start=1)
-    ]
-    return new_document(source_path=source_path, kind=kind, language=language, cues=built)
+        if cue.get('speaker') is not None:
+            item['speaker'] = cue['speaker']
+        built.append(item)
+    return new_document(source_path=source_path, kind=kind, language=language, cues=built, speakers=speakers)
 
 
-def from_words(words: Sequence[dict], *, source_path: str, kind: str, language: str) -> dict[str, Any]:
+def _word(word: dict[str, Any]) -> dict[str, Any]:
+    """Una palabra del documento: su tiempo y su texto, y su hablante si la tiene."""
+    kept: dict[str, Any] = {'start': word['start'], 'end': word['end'], 'text': word['word']}
+    if word.get('speaker') is not None:
+        kept['speaker'] = word['speaker']
+    return kept
+
+
+def from_words(
+    words: Sequence[dict],
+    *,
+    source_path: str,
+    kind: str,
+    language: str,
+    speakers: dict[str, dict] | None = None,
+) -> dict[str, Any]:
     """Documento con los cues de `segment` a partir de palabras `{word, start, end}`.
 
     faster-whisper pone un espacio delante de cada palabra (« hola»): se quita para que el cue no tenga dobles espacios.
     """
     words = [{**word, 'word': word['word'].strip()} for word in words]
-    cues = [
-        {
-            'start': cue['start'],
-            'end': cue['end'],
-            'text': cue['text'],
-            'words': [{'start': w['start'], 'end': w['end'], 'text': w['word']} for w in cue['words']],
-        }
-        for cue in segment(words)
-    ]
-    return _document(cues, source_path=source_path, kind=kind, language=language)
+    cues = [{**cue, 'words': [_word(w) for w in cue['words']]} for cue in segment(words)]
+    return _document(cues, source_path=source_path, kind=kind, language=language, speakers=speakers)
 
 
-def from_cleaner(words: Sequence[dict], *, source_path: str, language: str) -> dict[str, Any]:
+def from_cleaner(
+    words: Sequence[dict], *, source_path: str, language: str, speakers: dict[str, dict] | None = None
+) -> dict[str, Any]:
     """Origen del limpiador: sus palabras ya están en el tiempo del limpio; no hay transcripción nueva."""
-    return from_words(words, source_path=source_path, kind='cleaner', language=language)
+    return from_words(words, source_path=source_path, kind='cleaner', language=language, speakers=speakers)
 
 
 def from_narration(script: str, whisper_words: Sequence[dict], *, source_path: str, language: str) -> dict[str, Any]:

@@ -39,10 +39,10 @@ En los tres hay un interruptor «Identificar hablantes».
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Subtítulos: server](fases/1-subtitulos-server/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3, AC-4 | - | PEN |
-| F2 | [Subtítulos: client](fases/2-subtitulos-client/plan-tdd.md) | C4, C5 | AC-5, AC-6 | - | PEN |
-| F3 | [Editor y Limpiador](fases/3-editor-limpiador/plan-tdd.md) | C6, C7 | AC-7, AC-8 | - | PEN |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F1 | [Subtítulos: server](fases/1-subtitulos-server/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-3, AC-4 | (ver historial de git) | IMP |
+| F2 | [Subtítulos: client](fases/2-subtitulos-client/plan-tdd.md) | C4, C5 | AC-5, AC-6 | (ver historial de git) | IMP |
+| F3 | [Editor y Limpiador](fases/3-editor-limpiador/plan-tdd.md) | C6, C7 | AC-7, AC-8 | (ver historial de git) | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | (ver historial de git) | IMP |
 
 ## Decisiones cerradas (no reabrir)
 

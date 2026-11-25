@@ -1,0 +1,50 @@
+{
+  "params": {
+    "input": "C:/fake/in/charla.mp4",
+    "min_gap": 0.5,
+    "padding": 0.15,
+    "edges": true,
+    "diarize": true
+  },
+  "duration": 60,
+  "transcript": "C:/fake/cache/transcription/9-transcript.json",
+  "diarization": "C:/fake/out/clean/9/diarization/turns.json",
+  "cuts": [
+    {
+      "start": 10,
+      "end": 12.5,
+      "enabled": true,
+      "edited": false
+    },
+    {
+      "start": 30,
+      "end": 31.2,
+      "enabled": true,
+      "edited": false
+    }
+  ],
+  "words": [
+    {
+      "start": 0.4,
+      "end": 0.9,
+      "word": "hola",
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 1,
+      "end": 1.5,
+      "word": "mundo",
+      "speaker": "SPEAKER_01"
+    }
+  ],
+  "speakers": {
+    "SPEAKER_00": {
+      "name": "Ana",
+      "color": "#2563eb"
+    },
+    "SPEAKER_01": {
+      "name": "Luis",
+      "color": "#dc2626"
+    }
+  }
+}

@@ -3,6 +3,8 @@
  * server guarda el resultado con PUT /subtitles/{id}.
  */
 
+import type { SpeakerMap } from '@/shared/components/molecules/UISpeakerLegend';
+
 export interface KeywordEdit {
   color?: string | null;
   emoji?: string | null;
@@ -21,6 +23,7 @@ export interface CueEdit {
   end: number;
   text: string;
   words: WordEdit[];
+  speaker?: string | null;
 }
 
 export interface DocEdit {
@@ -30,6 +33,7 @@ export interface DocEdit {
   cues: CueEdit[];
   style: Record<string, unknown>;
   tracks: Record<string, unknown>;
+  speakers?: SpeakerMap;
 }
 
 const joinWords = (words: WordEdit[]): string => words.map((word) => word.text).join(' ');
@@ -62,6 +66,12 @@ export function setCueText(doc: DocEdit, index: number, text: string): DocEdit {
         : spread(cue.start, cue.end, texts);
     return { ...cue, text, words };
   });
+  return withCues(doc, cues);
+}
+
+/** Cambia el hablante del cue; el resto del documento no cambia. */
+export function setCueSpeaker(doc: DocEdit, index: number, speaker: string): DocEdit {
+  const cues = doc.cues.map((cue, position) => (position === index ? { ...cue, speaker } : cue));
   return withCues(doc, cues);
 }
 

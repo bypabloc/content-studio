@@ -2,9 +2,20 @@ import { useState } from 'react'
 
 import { t } from '@/shared/i18n/t'
 
+import { UIBox } from '../../atoms/UIBox'
 import { UIStack } from '../../atoms/UIStack'
 import { UIText } from '../../atoms/UIText'
 import { Input } from '../../shadcn/input'
+
+/** El nombre de un hablante con su color, como chip de un cue o de un resultado. */
+export function UISpeakerChip({ name, color }: { name: string; color: string }): React.JSX.Element {
+  return (
+    <UIStack direction="row" gap="xs" align="center">
+      <UIBox as="span" aria-hidden="true" className="inline-block size-2.5 rounded-full" style={{ backgroundColor: color }} />
+      <UIText variant="caption">{name}</UIText>
+    </UIStack>
+  )
+}
 
 /** Nombre y color de un hablante, como los guarda speakers.json. */
 export interface Speaker {

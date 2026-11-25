@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "source": {
+    "path": "C:/fake/in/charla.mp4",
+    "kind": "file"
+  },
+  "language": "es",
+  "style": {},
+  "tracks": {},
+  "speakers": {
+    "SPEAKER_00": {
+      "name": "Ana",
+      "color": "#2563eb"
+    },
+    "SPEAKER_01": {
+      "name": "Hablante 2",
+      "color": "#dc2626"
+    }
+  },
+  "cues": [
+    {
+      "id": 1,
+      "start": 0,
+      "end": 2,
+      "text": "hola a todos",
+      "speaker": "SPEAKER_00",
+      "words": [
+        {
+          "start": 0,
+          "end": 0.5,
+          "text": "hola",
+          "keyword": null
+        },
+        {
+          "start": 0.5,
+          "end": 1,
+          "text": "a",
+          "keyword": null
+        },
+        {
+          "start": 1,
+          "end": 2,
+          "text": "todos",
+          "keyword": null
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "start": 2.5,
+      "end": 4,
+      "text": "buenas tardes",
+      "speaker": "SPEAKER_01",
+      "words": [
+        {
+          "start": 2.5,
+          "end": 3,
+          "text": "buenas",
+          "keyword": null
+        },
+        {
+          "start": 3,
+          "end": 4,
+          "text": "tardes",
+          "keyword": null
+        }
+      ]
+    }
+  ]
+}

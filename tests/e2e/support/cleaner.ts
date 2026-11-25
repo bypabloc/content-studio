@@ -38,8 +38,10 @@ function analysisOf(state: CleanState, path: string): Job | undefined {
 
 /** El documento de cortes del análisis: el fixture, con la entrada del trabajo que se revisa. */
 function document(state: CleanState, path: string): Record<string, unknown> {
-  const doc = apiFixture<{ params: Record<string, unknown> }>('clean/analysis');
   const found = analysisOf(state, path);
+  const doc = apiFixture<{ params: Record<string, unknown> }>(
+    found?.params.diarize === true ? 'clean/analysis-speakers' : 'clean/analysis',
+  );
   return { ...doc, params: { ...doc.params, input: found?.params.input ?? doc.params.input } };
 }
 

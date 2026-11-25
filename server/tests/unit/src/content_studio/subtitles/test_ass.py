@@ -96,3 +96,22 @@ def test_to_ass_matches_the_golden_file(name):
     golden = (FIXTURES / f'{name}.ass').read_text(encoding='utf-8')
 
     assert to_ass(data['doc'], data['style'], tuple(data['play_res'])) == golden
+
+
+def _spoken_doc() -> dict:
+    """El documento de _doc con un hablante (Ana, azul) en su único cue."""
+    doc = _doc()
+    doc['speakers'] = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}}
+    doc['cues'][0]['speaker'] = 'SPEAKER_00'
+    return doc
+
+
+def test_ac3_classic_and_social_paint_each_event_with_the_speaker_color():
+    """AC-3: classic y reels llevan \\1c con el color del hablante en cada evento; karaoke no cambia."""
+    speaker_color = '\\1c&HEB6325&'  # #2563eb en BGR
+
+    assert all(speaker_color in line for line in _dialogues(to_ass(_spoken_doc(), preset('classic'))))
+    assert all(
+        speaker_color in line for line in _dialogues(to_ass(_spoken_doc(), preset('reels'), play_res=(1080, 1920)))
+    )
+    assert to_ass(_spoken_doc(), preset('karaoke')) == to_ass(_doc(), preset('karaoke'))

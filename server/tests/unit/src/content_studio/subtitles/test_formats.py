@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from content_studio.subtitles.document import new_document
+from content_studio.subtitles.export import render
 from content_studio.subtitles.formats import parse_srt, parse_vtt, to_srt, to_vtt
 
 
@@ -101,3 +102,21 @@ def test_imported_words_share_the_cue_time_by_characters():
         ('ab', 0.0, 1.0),
         ('abcd', 1.0, 3.0),
     ]
+
+
+def _spoken_doc() -> dict:
+    doc = _doc()
+    doc['speakers'] = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}}
+    doc['cues'][0]['speaker'] = 'SPEAKER_00'
+    return doc
+
+
+def test_ac4_speaker_name_goes_into_srt_and_vtt_only_when_asked():
+    """AC-4: speaker_labels pone «Ana: » en el SRT y «<v Ana>» en el VTT; sin la opción, no aparece."""
+    doc = _spoken_doc()
+
+    assert 'Ana: Hola mundo, esto es' in to_srt(doc, speaker_labels=True)
+    assert '<v Ana>Hola mundo, esto es' in to_vtt(doc, speaker_labels=True)
+    assert 'Ana:' not in to_srt(doc)
+    assert '<v' not in to_vtt(doc)
+    assert render(doc, 'srt', speaker_labels=True) == to_srt(doc, speaker_labels=True)

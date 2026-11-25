@@ -24,20 +24,29 @@ def _fmt(seconds: float, separator: str) -> str:
     return f'{hours:02d}:{minutes:02d}:{secs:02d}{separator}{millis:03d}'
 
 
-def to_srt(doc: dict[str, Any]) -> str:
+def _labeled(cue: dict[str, Any], doc: dict[str, Any], speaker_labels: bool, fmt: str) -> str:
+    """El texto con el hablante delante: «Ana: » en SRT y «<v Ana>» en VTT; sin la opción, el texto."""
+    speaker = cue.get('speaker')
+    if not speaker_labels or speaker is None:
+        return cue['text']
+    name = doc.get('speakers', {}).get(speaker, {}).get('name', speaker)
+    return f'{name}: {cue["text"]}' if fmt == 'srt' else f'<v {name}>{cue["text"]}'
+
+
+def to_srt(doc: dict[str, Any], *, speaker_labels: bool = False) -> str:
     """Bloques numerados con coma en los milisegundos y los renglones de hasta 42 caracteres."""
     blocks = []
     for number, cue in enumerate(doc['cues'], start=1):
-        text = '\n'.join(wrap_lines(cue['text'].split(), LINE_CHARS))
+        text = '\n'.join(wrap_lines(_labeled(cue, doc, speaker_labels, 'srt').split(), LINE_CHARS))
         blocks.append(f'{number}\n{_fmt(cue["start"], ",")} --> {_fmt(cue["end"], ",")}\n{text}\n')
     return '\n'.join(blocks)
 
 
-def to_vtt(doc: dict[str, Any]) -> str:
+def to_vtt(doc: dict[str, Any], *, speaker_labels: bool = False) -> str:
     """WEBVTT con punto en los milisegundos."""
     blocks = ['WEBVTT\n']
     for cue in doc['cues']:
-        text = '\n'.join(wrap_lines(cue['text'].split(), LINE_CHARS))
+        text = '\n'.join(wrap_lines(_labeled(cue, doc, speaker_labels, 'vtt').split(), LINE_CHARS))
         blocks.append(f'{_fmt(cue["start"], ".")} --> {_fmt(cue["end"], ".")}\n{text}\n')
     return '\n'.join(blocks)
 

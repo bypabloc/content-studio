@@ -3,6 +3,8 @@
  * Las funciones son puras. `pyRound` sigue al `round` de Python, que lleva el empate al par.
  */
 
+import type { SpeakerMap } from '@/shared/components/molecules/UISpeakerLegend';
+
 export interface KeywordIn {
   color?: string | null;
   emoji?: string | null;
@@ -20,10 +22,12 @@ export interface CueIn {
   end: number;
   text: string;
   words: WordIn[];
+  speaker?: string | null;
 }
 
 export interface DocIn {
   cues: CueIn[];
+  speakers?: SpeakerMap;
 }
 
 export interface StyleIn {
@@ -140,8 +144,9 @@ function classic(cue: CueIn, style: StyleIn): string {
 }
 
 /** Un Dialogue por palabra activa: el cue entero, con esa palabra en el color de resaltado (o el de su palabra clave) y el pop. */
-function social(cue: CueIn, style: StyleIn): string[] {
-  const fill = assColor(style.color);
+function social(cue: CueIn, style: StyleIn, speakers: SpeakerMap): string[] {
+  const speaker = speakerColor(cue, speakers);
+  const fill = speaker ?? assColor(style.color);
   const highlight = assColor(style.highlight_color);
   return cue.words.map((active) => {
     const parts = cue.words.map((word) => {
@@ -155,7 +160,7 @@ function social(cue: CueIn, style: StyleIn): string[] {
       if (keyword?.emoji) text = `${text} ${keyword.emoji}`;
       return text;
     });
-    return dialogue(active.start, active.end, parts.join(' '));
+    return tint(dialogue(active.start, active.end, parts.join(' ')), speaker);
   });
 }
 
@@ -164,13 +169,25 @@ function karaoke(cue: CueIn, style: StyleIn): string {
   return dialogue(cue.start, cue.end, parts.join(' '));
 }
 
+/** El color del hablante del cue en ASS, o null si el cue no tiene hablante con color. */
+function speakerColor(cue: CueIn, speakers: SpeakerMap): string | null {
+  const speaker = cue.speaker ? speakers[cue.speaker] : undefined;
+  return speaker ? assColor(speaker.color) : null;
+}
+
+/** La etiqueta de color del hablante, al principio del texto del Dialogue: el mismo sitio que escribe el server. */
+function tint(line: string, color: string | null): string {
+  return color === null ? line : line.replace(',Default,,0,0,0,,', `,Default,,0,0,0,,{\\1c${color}}`);
+}
+
 /** ASS del documento con el estilo dado. `playRes` es la resolución del video (1920×1080 si es solo audio). */
 export function toAss(doc: DocIn, style: StyleIn, playRes: PlayRes = [1920, 1080]): string {
   const lines = header(style, playRes);
+  const speakers: SpeakerMap = doc.speakers ?? {};
   for (const cue of doc.cues) {
-    if (style.mode === 'social') lines.push(...social(cue, style));
+    if (style.mode === 'social') lines.push(...social(cue, style, speakers));
     else if (style.mode === 'karaoke') lines.push(karaoke(cue, style));
-    else lines.push(classic(cue, style));
+    else lines.push(tint(classic(cue, style), speakerColor(cue, speakers)));
   }
   return `${lines.join('\n')}\n`;
 }

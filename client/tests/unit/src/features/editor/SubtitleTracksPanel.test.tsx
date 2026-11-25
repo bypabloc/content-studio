@@ -134,3 +134,34 @@ describe('SubtitleTracksPanel', () => {
     expect(await screen.findByText(t('editor.subtitles.error'))).toBeTruthy();
   });
 });
+
+describe('SubtitleTracksPanel con hablantes', () => {
+  it('pide la identificación de hablantes al transcribir la mezcla cuando el motor está instalado (AC-7)', async () => {
+    mocks.api.get.mockImplementation((url: string) => {
+      if (url === '/subtitles') return Promise.resolve([]);
+      if (url === '/engines') return Promise.resolve([{ engine: 'pyannote', family: 'diarization', status: 'installed', models: [] }]);
+      if (url === '/jobs/10') return Promise.resolve({ id: 10, status: 'done', progress: 1, result: { output: 'mix.wav' } });
+      if (url === '/jobs/11') return Promise.resolve({ id: 11, status: 'done', progress: 1, result: null });
+      return Promise.reject(new Error(url));
+    });
+    mocks.api.post.mockImplementation((url: string, body: { kind?: string }) => {
+      if (url === '/jobs' && body.kind === 'editor.render') return Promise.resolve({ id: 10, status: 'queued', progress: 0 });
+      if (url === '/jobs' && body.kind === 'transcribe') return Promise.resolve({ id: 11, status: 'queued', progress: 0 });
+      if (url === '/subtitles/from-transcript') return Promise.resolve({ id: 7, name: 'mix' });
+      return Promise.reject(new Error(url));
+    });
+    render(<SubtitleTracksPanel doc={audioDoc} path="project.json" onAdd={vi.fn()} />);
+
+    const diarize = await screen.findByRole('switch', { name: t('editor.subtitles.diarize') });
+    await waitFor(() => expect(diarize.matches('[disabled], [aria-disabled="true"], [data-disabled]')).toBe(false));
+    await userEvent.click(diarize);
+    await userEvent.click(screen.getByRole('button', { name: t('editor.subtitles.transcribe') }));
+
+    await waitFor(() =>
+      expect(mocks.api.post).toHaveBeenNthCalledWith(2, '/jobs', {
+        kind: 'transcribe',
+        params: { input: 'mix.wav', model: 'large-v3-turbo', language: 'auto', diarize: true },
+      }),
+    );
+  });
+});

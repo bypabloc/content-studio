@@ -13,5 +13,5 @@ test('Nuevo: un archivo se transcribe en un proyecto nuevo con el origen «Trans
 
   await expect
     .poll(() => jobBodies(calls))
-    .toContainEqual({ kind: 'subtitles.create', params: { origin: 'file', input: 'C:/fake/in/charla.wav' } });
+    .toContainEqual({ kind: 'subtitles.create', params: expect.objectContaining({ origin: 'file', input: 'C:/fake/in/charla.wav' }) });
 });
