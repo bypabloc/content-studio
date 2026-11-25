@@ -17,6 +17,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
+| [027-csp-ipc](027-csp-ipc.md) | La CSP permite el IPC de Tauri (ipc: y http://ipc.localhost); cierra los errores de consola de app-check | `main` |
 | [027-edicion-2024](027-edicion-2024.md) | El crate de Tauri pasa a la edición 2024; un bloque `unsafe` explícito en `resume_threads` | `main` |
 | [027-getrandom-04](027-getrandom-04.md) | getrandom sube a 0.4.3 (mayor); su único uso compila igual | `main` |
 | [027-types-node-26](027-types-node-26.md) | @types/node sube a 26 (salto de versión mayor): typecheck, tests y build pasan | `main` |
