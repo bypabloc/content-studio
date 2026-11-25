@@ -35,7 +35,7 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Bridge y herramientas](fases/1-bridge/plan-tdd.md) | C1, C2, C3, C4, C5 | AC-1, AC-2, AC-3, AC-5, AC-11, AC-4, AC-8, AC-6, AC-7 | - | IMP |
-| F2 | [Configuración por cliente](fases/2-configuracion/plan-tdd.md) | C6, C7 | AC-9, AC-10 | - | PEN |
+| F2 | [Configuración por cliente](fases/2-configuracion/plan-tdd.md) | C6, C7 | AC-9, AC-10 | - | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)
@@ -71,7 +71,7 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 | AC-6 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac6_cancel_ends_the_process` | solo pytest |
 | AC-7 | F1 | C5 | `server/tests/integration/test_mcp_bridge.py::test_ac7_gpu_queued_says_who_holds_it` | solo pytest |
 | AC-8 | F1 | C4 | `server/tests/unit/src/content_studio/mcp_server/test_bridge.py::test_ac8_invalid_params_return_service_errors` | solo pytest |
-| AC-9 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_config.py::test_ac9_fragmento_valido_por_cliente` | solo pytest |
+| AC-9 | F2 | C6 | `server/tests/unit/src/content_studio/mcp_server/test_config.py::test_ac9_valid_fragment_per_client` y `server/tests/unit/src/content_studio/api/routes/test_integrations.py` | solo pytest |
 | AC-10 | F2 | C7 | `client/tests/unit/src/features/settings/McpConfig.test.tsx` | e2e `happy-mcp-config` |
 | AC-11 | F1 | C3 | (sin pytest: verificación final) | 03 §2, pasos 1 y 2 |
 

@@ -24,6 +24,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/integrations/mcp-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mcp Config
+         * @description El fragmento de `client` con el comando de `studio mcp` de esta instalación.
+         */
+        get: operations["mcp_config_integrations_mcp_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/server/stop": {
         parameters: {
             query?: never;
@@ -2131,6 +2151,19 @@ export interface components {
             release_in: number | null;
         };
         /**
+         * McpConfigOut
+         * @description El fragmento de un cliente: el archivo de configuración que pega el usuario.
+         */
+        McpConfigOut: {
+            /**
+             * Client
+             * @enum {string}
+             */
+            client: "claude-code" | "codex" | "vscode" | "cursor" | "claude-desktop" | "lm-studio" | "jan" | "anythingllm";
+            /** Fragment */
+            fragment: string;
+        };
+        /**
          * MediaInfo
          * @description Metadatos que necesita el editor para crear clips de audio y video.
          */
@@ -2435,6 +2468,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: boolean;
                     };
+                };
+            };
+        };
+    };
+    mcp_config_integrations_mcp_config_get: {
+        parameters: {
+            query: {
+                client: "claude-code" | "codex" | "vscode" | "cursor" | "claude-desktop" | "lm-studio" | "jan" | "anythingllm";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpConfigOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

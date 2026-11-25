@@ -10,6 +10,7 @@ alimiter
 alphaextract
 alphamerge
 anthemic
+anythingllm
 apad
 aresample
 areverse
@@ -32,6 +33,7 @@ chillwave
 chiptune
 chromakey
 ckpt
+claude
 colorchannelmixer
 compresslevel
 cosyvoice

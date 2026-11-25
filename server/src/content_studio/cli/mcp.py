@@ -1,4 +1,4 @@
-"""`studio mcp` (spec 029): el servidor MCP por stdio para Claude Code, Codex y los demás clientes locales."""
+"""`studio mcp` (spec 029): el servidor MCP por stdio, y `studio mcp config`, el fragmento de cada cliente."""
 
 from __future__ import annotations
 
@@ -7,14 +7,22 @@ import sys
 from collections.abc import Callable
 from typing import Any
 
+from content_studio.mcp_server.config import CLIENTS, fragment, launch_command
+
 
 def add_parser(sub: Any, db_flag: Callable[[], argparse.ArgumentParser]) -> None:
-    """Registra `studio mcp`: el protocolo por stdio, sin más opciones."""
-    sub.add_parser('mcp', parents=[db_flag()], help='MCP server over stdio for LLM clients and agents (spec 029)')
+    """Registra `studio mcp` (el protocolo por stdio) y `studio mcp config --client <c>`."""
+    mcp = sub.add_parser('mcp', parents=[db_flag()], help='MCP server over stdio for LLM clients and agents (spec 029)')
+    commands = mcp.add_subparsers(dest='mcp_command')
+    config = commands.add_parser('config', help='print the MCP config fragment of a client (spec 029)')
+    config.add_argument('--client', required=True, choices=CLIENTS, help='client to configure')
 
 
 def dispatch(args: argparse.Namespace) -> int:
-    """Arranca el bridge; el SDK `mcp` se importa solo aquí. Sin SDK, sale con 2 y lo dice por stderr."""
+    """Imprime el fragmento, o arranca el bridge; el SDK `mcp` se importa solo al arrancarlo."""
+    if getattr(args, 'mcp_command', None) == 'config':
+        print(fragment(args.client, launch_command()))
+        return 0
     from content_studio.mcp_server.bridge import run_stdio
 
     try:

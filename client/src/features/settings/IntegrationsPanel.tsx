@@ -8,6 +8,8 @@ import { UIField } from '@/shared/components/molecules/UIField';
 import { useSetting } from '@/shared/hooks/useSetting';
 import { t } from '@/shared/i18n/t';
 
+import { McpConfig } from './McpConfig';
+
 const DEFAULT_PORT = 41830;
 const DEFAULT_IDLE_MINUTES = 10;
 
@@ -68,6 +70,7 @@ export function IntegrationsPanel() {
         </UIButton>
       </UIStack>
       {failed && <UIText variant="caption">{t('settings.integrations.rotate_failed')}</UIText>}
+      <McpConfig />
     </UIStack>
   );
 }
