@@ -14,7 +14,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C3: Cotas iguales al lock [AC-4, AC-5]
 
-- **RED**: `tests/validators/test_python_version.py::test_ac4_cotas_iguales_al_lock`
+- **RED**: `tests/validators/test_python_version.py::test_ac4_bounds_match_lock`
   - WHEN `fastapi>=0.162.5` y el lock tiene otra versión THEN el test falla con el paquete y las dos versiones.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `uv lock --upgrade`, cotas nuevas en los dos `pyproject.toml` y las adaptaciones de API que pidan los tests. Verify: `uv run pytest -q` y `uv tree --outdated --depth 1` sin filas.

@@ -1,4 +1,4 @@
-"""Reglas de .agents/rules/codigo-python.md que se pueden comprobar: sintaxis 3.10, dependencias y
+"""Reglas de .agents/rules/codigo-python.md que se pueden comprobar: sintaxis del piso de las recetas, dependencias y
 la sincronía de reglas y skills entre .agents/ y .claude/ (agent-config-testing.md)."""
 
 from __future__ import annotations
@@ -11,9 +11,11 @@ from pathlib import Path
 import pytest
 
 from devtools import rules
+from devtools.python_floor import engine_floor
 
 ROOT = Path(__file__).resolve().parents[2]
 HOOKS = [ROOT / '.claude/hooks', ROOT / '.agents/hooks']
+FLOOR = engine_floor()
 
 
 def files() -> list[Path]:
@@ -36,11 +38,19 @@ def name(p: Path) -> str:
 
 
 @pytest.mark.parametrize('path', FILES, ids=name)
-def test_syntax_310(path):
-    """compile() con el intérprete de la matriz de CI y ast con la gramática de 3.10 (CosyVoice corre en 3.10)."""
+def test_syntax_floor(path):
+    """compile() con el intérprete del venv y ast con la gramática del piso de las recetas (spec 025, D-2)."""
     source = path.read_text(encoding='utf-8')
     compile(source, str(path), 'exec')
-    ast.parse(source, str(path), feature_version=(3, 10))
+    ast.parse(source, str(path), feature_version=FLOOR)
+
+
+def test_ac3_floor_comes_from_recipes():
+    """AC-3: ruff target-version y mypy python_version usan el piso que calcula engine_floor()."""
+    major, minor = FLOOR
+    pyproject = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
+    assert f'target-version = "py{major}{minor}"' in pyproject, f'ruff target-version no es py{major}{minor}'
+    assert f'python_version = "{major}.{minor}"' in pyproject, f'mypy python_version no es {major}.{minor}'
 
 
 def test_code_only_in_src():

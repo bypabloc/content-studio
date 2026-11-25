@@ -1,8 +1,8 @@
 # cspell:ignore calidad dtolnay swatinem
 name: calidad
 
-# test-runner --type=all (lint, spelling, validators, unit con cobertura y espejo, typecheck y tdd) y guard-tdd, en 3.10,
-# el mínimo por el venv de CosyVoice, y 3.12 (spec 003, D-6). Sin GPU: los tests `local` no corren aquí.
+# test-runner --type=all (lint, spelling, validators, unit con cobertura y espejo, typecheck y tdd) y guard-tdd, con la
+# Python de .python-version (spec 025, D-3: una sola versión). Sin GPU: los tests `local` no corren aquí.
 # No corre en los PR de bypabloc, el único colaborador: su verificación es local, con los hooks de git (pre-commit y
 # pre-push) y el shell_guard que impide saltarlos con --no-verify. Sí corre en los PR de otras personas y de Dependabot.
 # Ya no es check requerido de dev: un job saltado no reporta los nombres de la matriz.
@@ -18,17 +18,14 @@ jobs:
   calidad:
     if: github.event.pull_request.user.login != 'bypabloc'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ['3.10', '3.12']
     env:
       PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - uses: oven-sh/setup-bun@v2
-      - run: uv sync --group dev --python ${{ matrix.python }}
+      # uv toma la versión de .python-version (spec 025, D-3).
+      - run: uv sync --group dev
       - run: bun install --frozen-lockfile
       # Las pruebas de tomas, importación y chequeo llaman a ffmpeg y ffprobe (spec 010): el runner no los trae.
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg

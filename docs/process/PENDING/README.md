@@ -87,3 +87,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [023-recorrido-en-la-ui](023-recorrido-en-la-ui.md) | El recorrido encadenado no se hizo con la UI de la app instalada | Antes de publicar la v0.1.0 | Usuario y agente |
 | [023-detalles-del-recorrido](023-detalles-del-recorrido.md) | Detalles menores del recorrido: palabra clave con coma y origen viejo en la quema | Después del lote | Agente |
 | [022-release-dispatch](022-release-dispatch.md) | AC-10 real: correr `release.yml` en `workflow_dispatch` dry-run cuando esté en `main` | Al pasar el lote a main | Agente |
+| [025-pytest-local-candado](025-pytest-local-candado.md) | `gpu-turn run -- pytest -m local` se cuelga con el test de llm, que toma el candado por su cuenta | Agente |
+| [025-escucha-salidas](025-escucha-salidas.md) | Escuchar la música y la narración de AC-7 (el espectrograma muestra una caída de energía y un corte de banda en 16 kHz) | Usuario |

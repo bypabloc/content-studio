@@ -109,6 +109,8 @@ def parsers(commands: dict[str, tuple[str, types.ModuleType]]) -> dict:
                         mock.patch.object(mod, 'approved_voices', lambda _e: dict.fromkeys(APPROVED_VOICES, {}))
                     )
                 ap = mod.build_parser()
+            # Python 3.14+ deriva el prog de __main__ (pytest lo tiene): se fija para no depender del lanzador.
+            ap.prog = 'generar.py'
             out[key] = {
                 'script': script,
                 'docstring': mod.__doc__,

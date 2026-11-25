@@ -5,10 +5,10 @@ members = ["server"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8",
-    "ruff",
-    "numpy",
-    "soundfile",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+    "numpy>=2.5.5",
+    "soundfile>=0.14.0",
     "pytest-cov>=7.1.0",
     "mypy>=2.4.1",
 ]
