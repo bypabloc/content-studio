@@ -13,7 +13,7 @@ Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es
 
 | Spec | Qué | Tipo | Escala | Depende de | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| [034](034-diarization-engine/README.md) | Motor `pyannote`: receta, familia `diarization`, token de Hugging Face guardado sin exponerse e instalación de un repositorio restringido | feature | Large | — | PEN |
+| [034](034-diarization-engine/README.md) | Motor `pyannote`: receta, familia `diarization`, token de Hugging Face guardado sin exponerse e instalación de un repositorio restringido | feature | Large | — | IMP |
 | [035](035-diarize-job/README.md) | Trabajo `diarize`, unión palabra-hablante, `transcribe` con hablantes, exportaciones, audio por hablante, caché y `studio diarize` | feature | Large | 034 | PEN |
 | [036](036-transcription-section/README.md) | Sección **Transcripción**: modelo, idioma, «Identificar hablantes», texto por turnos, renombrar y exportar TXT | feature | Large | 035 | PEN |
 | [037](037-speakers-section/README.md) | Sección **Hablantes** (solo diarizar): línea de tiempo con colores, exportar turnos, un audio por hablante y abrir en el Editor | feature | Large | 036 | PEN |

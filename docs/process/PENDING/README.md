@@ -122,3 +122,4 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [031-inicio-logoff](031-inicio-logoff.md) | AC-8: que el server arranque al cerrar y abrir sesión (el valor `Run` ya se comprobó) | Antes de publicar 031 | Agente |
 | [031-desinstalar-carpeta](031-desinstalar-carpeta.md) | El desinstalador deja vacía la carpeta de instalación | Después de publicar 031 | Agente |
 | [032-033-fuera-del-lote](032-033-fuera-del-lote.md) | 032 (LAN) y 033 (verificación integral) quedan fuera del lote 025-031 según DECISIONS.md | Antes de empezar 032 | Usuario |
+| [034-instalacion-real](034-instalacion-real.md) | Instalación real de pyannote con el token del usuario (blocked — user-credential) | Antes de la corrida real de la 035 | Usuario |
