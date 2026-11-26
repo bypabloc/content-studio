@@ -20,7 +20,7 @@ NO RESPONDAS DE MEMORIA. Toda ruta o línea que devuelvas sale del grafo o de tu
 | CLI `studio` (argparse) | `server/src/content_studio/cli/` (`main.py`, `serve.py`, `submit.py`) |
 | Servicios de trabajos, API y cola | `server/src/content_studio/services/` (`registry.py` con `SERVICES`), `api/`, `jobs/` |
 | Rutas y procesos | `server/src/content_studio/paths.py`, `server/src/content_studio/common/` |
-| Narración | `server/src/content_studio/narration/` (`engines/registry.py`, `text/`, `evaluation/`, `voices/`, `grabar/`) |
+| Narración | `server/src/content_studio/narration/` (`engines/registry.py`, `text/`, `evaluation/`, `voices/`) |
 | Música | `server/src/content_studio/music/` (`styles.py`, `engines/registry.py`) |
 | devtools del flujo de agentes | `devtools/` (raíz) |
 | Tests y fixtures | `tests/`, `server/tests/fixtures/` |
