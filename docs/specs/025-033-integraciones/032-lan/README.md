@@ -36,8 +36,8 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | F1 | [Listener, dispositivos y emparejamiento](fases/1-acceso/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-11, AC-4, AC-7, AC-3 | 2c8dadd | IMP |
-| F2 | [Rutas remotas, subidas y MCP por HTTP](fases/2-superficie/plan-tdd.md) | C4, C5, C6 | AC-5, AC-6, AC-8 | fase 2 | IMP |
-| F3 | [Firewall y Ajustes](fases/3-firewall-y-ui/plan-tdd.md) | C7, C8 | AC-9, AC-10 | - | PEN |
+| F2 | [Rutas remotas, subidas y MCP por HTTP](fases/2-superficie/plan-tdd.md) | C4, C5, C6 | AC-5, AC-6, AC-8 | b629e6f | IMP |
+| F3 | [Firewall y Ajustes](fases/3-firewall-y-ui/plan-tdd.md) | C7, C8 | AC-9, AC-10 | fase 3 | IMP |
 | FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
 
 ## Decisiones cerradas (no reabrir)

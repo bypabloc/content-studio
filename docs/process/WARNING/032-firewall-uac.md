@@ -1,0 +1,7 @@
+# 032: La regla del firewall se crea con netsh elevado por ShellExecuteExW runas, solo para el perfil Privado
+
+- **Contexto**: D-5 pide una regla de entrada limitada al perfil Privado. El instalador es por usuario y sin admin, así que crear la regla exige elevación.
+- **Elegida**: el comando de Tauri `set_lan_firewall` (`client/src-tauri/src/firewall.rs`) lanza con `ShellExecuteExW` y el verbo `runas`. Al activar corre `cmd /c netsh … delete rule … & netsh … add rule name="Content Studio LAN" dir=in action=allow protocol=TCP localport=<puerto> profile=private`: una sola elevación, sin reglas duplicadas. Al desactivar, solo `delete`, y una regla que no existía no es error. Si el usuario rechaza el UAC, el comando devuelve `firewall_declined` y el panel lo muestra sin activar la red local. Al desactivar, primero se apaga el listener y después se borra la regla. Features nuevas del crate `windows`: `Win32_UI_Shell`, `Win32_System_Threading` y `Win32_UI_WindowsAndMessaging`.
+- **Descartadas**: dejar que Windows muestre su aviso al escuchar (sin admin no está verificado que aparezca, investigación §6). La API COM `INetFwPolicy2` (más código `unsafe` para lo mismo, y también pide elevación).
+- **Cómo revertir**: quitar `firewall.rs`, el comando en `lib.rs` y su llamada en `LanPanel.tsx`.
+- **Cómo comprobarla**: `cargo test --manifest-path client/src-tauri/Cargo.toml firewall`. Con la app instalada: activar, aceptar el UAC y `netsh advfirewall firewall show rule name="Content Studio LAN"` (03 §2, paso 1).

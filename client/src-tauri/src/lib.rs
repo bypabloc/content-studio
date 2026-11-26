@@ -2,6 +2,7 @@
 
 mod bootstrap;
 mod external;
+mod firewall;
 mod server;
 mod startup;
 
@@ -139,6 +140,14 @@ fn set_start_at_login(enabled: bool, state: tauri::State<'_, ServerState>) -> Re
     startup::apply(&mut startup::CurrentUserRun, true, &startup::server_command(&venv))
 }
 
+/// Red local (spec 032, AC-9): crea o borra la regla «Content Studio LAN» del perfil Privado; pide elevación (UAC).
+#[tauri::command]
+async fn set_lan_firewall(enabled: bool, port: u16) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || firewall::apply(&mut firewall::RunAs, enabled, port))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
 #[tauri::command]
 async fn get_connection(app: AppHandle) -> Result<Connection, String> {
     let state = app.state::<ServerState>().inner().clone();
@@ -208,7 +217,7 @@ pub fn run() {
             app.manage(ServerState(Arc::new(mode), version));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token, external::startup_argv, external::path_exists, set_start_at_login])
+        .invoke_handler(tauri::generate_handler![get_connection, stop_server_for_update, rotate_token, external::startup_argv, external::path_exists, set_start_at_login, set_lan_firewall])
         .build(tauri::generate_context!())
         .expect("Content Studio no pudo arrancar")
         .run(|_, _| {});
