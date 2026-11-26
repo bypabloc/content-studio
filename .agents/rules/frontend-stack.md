@@ -5,7 +5,7 @@ description: Stack y estructura de client/ (Tauri 2, React 19, Vite 8, Tailwind 
 
 # Frontend: stack, estructura y comandos (client/)
 
-El client es la ventana de escritorio de Tauri 2. React 19 con TypeScript 5.9 (no 7: `docs/process/WARNING/005-typescript-5.md`), Vite 8, Tailwind 4, TanStack Query para los datos del server y `@dnd-kit` para reordenar la cola. Las versiones fijadas están en la tabla de abajo. 
+El client es la ventana de escritorio de Tauri 2. React 19 con TypeScript 5.9 (no 7: openapi-typescript no lo soporta), Vite 8, Tailwind 4, TanStack Query para los datos del server y `@dnd-kit` para reordenar la cola. Las versiones fijadas están en la tabla de abajo. 
 Tauri se adjunta al server compartido con `studio api up --with-token` (`client/src-tauri/src/server.rs` y `lib.rs`): no lo posee, así que sobrevive a la ventana (spec 028). El client le habla por HTTP con el token que da `get_connection` y, si la red falla, pide la conexión otra vez.
 
 ## Comandos (con bun, desde la raíz)
@@ -47,7 +47,7 @@ Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que
 | :--- | :--- | :--- | :--- |
 | `react` | npm | 19.3.1 |  |
 | `react-dom` | npm | 19.3.1 |  |
-| `typescript` | npm | 5.9.3 | no 7: `WARNING/005-typescript-5.md` |
+| `typescript` | npm | 5.9.3 | no 7: openapi-typescript no lo soporta |
 | `vite` | npm | 8.3.8 |  |
 | `@vitejs/plugin-react` | npm | 6.3.0 |  |
 | `@tailwindcss/vite` | npm | 4.3.5 |  |
@@ -66,7 +66,7 @@ Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que
 | `@tauri-apps/plugin-opener` | npm | 2.7.3 |  |
 | `@tauri-apps/plugin-updater` | npm | 2.14.1 |  |
 | `@tauri-apps/plugin-process` | npm | 2.4.0 |  |
-| `geist` | npm | 1.9.2 | declarado sin importar (`WARNING/005-desvios-de-diseno.md`) |
+| `geist` | npm | 1.9.2 | declarado sin importar |
 | `@base-ui/react` | npm | 1.9.0 | raíz |
 | `shadcn` | npm | 4.23.0 | raíz, CLI |
 | `tauri` | crate | 2.12.7 |  |
@@ -77,9 +77,9 @@ Sin `^` ni `~` en los `package.json`: `bun update` solo mueve un rango, así que
 | `tauri-plugin-window-state` | crate | 2.5.0 |  |
 | `tauri-plugin-updater` | crate | 2.14.1 |  |
 | `tauri-plugin-process` | crate | 2.4.0 |  |
-| `tauri-plugin-deep-link` | crate | 2.6.3 | enlaces `content-studio://` (spec 031, WARNING/031-enlaces-y-instancia-unica.md) |
-| `tauri-plugin-single-instance` | crate | 2.5.5 | instancia única con la feature `deep-link` (spec 031, WARNING/031-enlaces-y-instancia-unica.md) |
-| `windows` | crate | 0.62.2 | inicio con Windows: valor `Run` de HKCU (spec 031, WARNING/031-inicio-con-windows.md) |
+| `tauri-plugin-deep-link` | crate | 2.6.3 | enlaces `content-studio://` (spec 031) |
+| `tauri-plugin-single-instance` | crate | 2.5.5 | instancia única con la feature `deep-link` (spec 031) |
+| `windows` | crate | 0.62.2 | inicio con Windows: valor `Run` de HKCU (spec 031) |
 
 ## Instalador y actualizaciones (spec 022)
 

@@ -1,8 +1,0 @@
-# La calidad se verifica en local, no en la CI de los PR de bypabloc
-
-- **Contexto**: el usuario pidió el 2026-11-24 desactivar la verificación de calidad de la CI (`calidad (3.10)` y `calidad (3.12)`): corre más rápido en local, y los hooks de git más el ruleset sin force-push ya impiden que entre algo sin comprobar. Se copia el criterio de klinikae (`merge-dev.yml`).
-- **Elegida**: los tres jobs de `calidad.yml` (`calidad`, `client` y `tauri`) llevan `if: github.event.pull_request.user.login != 'bypabloc'` y ya no corren en push a `main` ni a `dev`. Se quitaron `calidad (3.10)` y `calidad (3.12)` de los checks requeridos del ruleset `dev-solo-desde-prefijos`; queda `origen-permitido`. El `pre-push` suma `unit` y `tdd` (y `budget`, `e2e` y `tauri-check` si cambian `client/` o `tests/e2e/`), con `CS_PRE_PUSH_INNER` para que el push de los tests de hooks no recurse. `.agents/hooks/shell_guard.py` bloquea `--no-verify`, `git commit -n` y `git -c core.hooksPath`.
-- **Descartadas**: borrar `calidad.yml` (los PR de otras personas y de Dependabot quedarían sin verificar); dejar los checks requeridos (un job saltado con matriz no reporta `calidad (3.10)` y el PR quedaría bloqueado).
-- **Cómo revertir**: quitar los `if` de `calidad.yml`, volver a poner `push` en `on` y los dos checks en el ruleset (`gh api -X PUT repos/bypabloc/content-studio/rulesets/24475173`).
-- **Cómo comprobarla**: el PR de este cambio muestra los jobs de `calidad` como *skipped*; `uv run pytest .agents/hooks .claude/hooks/tests` cubre el bloqueo de `--no-verify` y el `pre-push`.
-- **Riesgo**: la cobertura en Linux y la Python 3.10 ya no se prueban en cada PR propio (`003-cobertura-ci`, `004-cobertura-linux-gpu-lock`, `024-cobertura-linux-launch` dejan de comprobarse ahí).

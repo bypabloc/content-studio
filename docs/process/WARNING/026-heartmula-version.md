@@ -1,8 +1,0 @@
-# 026: heartmula queda en Python 3.13 y en sus revisiones anteriores (la nueva recorta y ambas cantan)
-
-- **Contexto**: heartlib fija `torch<2.11` y `torchtune==0.4.0`; torchtune fija `datasets==2.14.4`, que usa `pa.PyExtensionType`, atributo que pyarrow 21 o más nueva ya no tiene. La receta anterior fijaba pyarrow 25.0.1 y la verificación fallaba con `AttributeError` al importar `datasets`. Revisiones probadas con 30 s de `lofi-chill`: la nueva (heartlib `164788308`, HF `41d4faaf` y `58ec14fd`) da -12,0 LUFS con pico +0,0003 dBFS (13 muestras al máximo: recorte leve); la anterior (heartlib `cd238827`, HF `54765694` y `e2363f7b`) da -11,8 LUFS con pico -1,2 dBFS, sin recorte. Las dos traen voz (ficha aparte).
-- **Elegida**: Python 3.13 con torch 2.10.0+cu128, torchaudio 2.10.0+cu128, torchvision 0.25.0+cu128, pyarrow 20.0.0 (la última con `PyExtensionType` y rueda cp313), huggingface-hub 0.36.2 y soundfile 0.14.0; revisiones anteriores (D-4: la nueva empeora la salida por el recorte).
-- **Descartadas**: 3.14 (no hay pyarrow con `PyExtensionType` y rueda cp314 en Windows); 3.15 (torch cu130 de 2.14 incumple `torch<2.11`); fijar `datasets` más nuevo (lo fija torchtune 0.4.0); la revisión nueva (recorte a 0 dBFS).
-- **Cómo revertir**: subir la versión de Python y las revisiones cuando torchtune o heartlib cambien sus pins.
-- **Cómo comprobarla**: `uv run studio engines install heartmula` (su verify importa heartlib) y `uv run studio music --model heartmula --style lofi-chill --duration 30`; el recorte se mira con `astats` (pico por encima de 0 dBFS).
-- **Pendiente**: [026-reintentar-heartmula](../PENDING/026-reintentar-heartmula.md) y la ficha [026-heartmula-voz](026-heartmula-voz.md).

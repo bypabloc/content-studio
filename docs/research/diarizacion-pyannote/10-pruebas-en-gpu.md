@@ -20,7 +20,7 @@ La línea base es 2228 MiB, ocupados por otros procesos antes de cada corrida. E
 | Diálogo de dos voces | 2 | 50,4 s | 10,5 % | 9,2 % | 0,0 % (101 palabras) |
 | Diálogo de tres voces | 3 | 72,6 s | 7,7 % | 6,4 % | 0,0 % (123 palabras) |
 
-Los clips son montajes de muestras de voz (`andrea`, `colombia-m`, `alba-mackenna`) con pausas de 0,8 s, no conversaciones reales. La referencia son los instantes de cada montaje (`referencia.json`), no una anotación a mano (ver `docs/process/WARNING/039-referencia-construida.md`). El DER se calcula por cuadros de 10 ms, con la asignación de hablantes que minimiza el error. El WDER usa el hablante de cada palabra de la transcripción, medido en su punto medio. El error del DER en dos voces viene de pausas dentro de un mismo hablante.
+Los clips son montajes de muestras de voz (`andrea`, `colombia-m`, `alba-mackenna`) con pausas de 0,8 s, no conversaciones reales. La referencia son los instantes de cada montaje (`referencia.json`), no una anotación a mano. El DER se calcula por cuadros de 10 ms, con la asignación de hablantes que minimiza el error. El WDER usa el hablante de cada palabra de la transcripción, medido en su punto medio. El error del DER en dos voces viene de pausas dentro de un mismo hablante.
 
 ## AC-1: mismos turnos en las cuatro entradas
 
@@ -28,7 +28,7 @@ Un mismo clip de dos voces, por la API: diarización (Hablantes), transcripción
 
 - Hablantes, Transcripción y Limpiador usan los mismos hablantes (`SPEAKER_00` y `SPEAKER_01`) y los mismos turnos: 4 palabras de 103 caen en pausas de la diarización (entre 0,1 y 0,5 s de un turno al siguiente). Con 0,5 s de tolerancia, no hay discrepancias.
 - Subtítulos: 13 cues, ninguno contradice la diarización.
-- **Pendiente**: que solo la primera vez se cargue el modelo. Los logs de los trabajos salen vacíos y no lo registran (`docs/process/PENDING/039-carga-una-vez.md`).
+- **Pendiente**: que solo la primera vez se cargue el modelo. Los logs de los trabajos salen vacíos y no lo registran.
 
 ## Qué cambió en la receta
 

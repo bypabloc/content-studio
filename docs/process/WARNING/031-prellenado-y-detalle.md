@@ -1,8 +1,0 @@
-# 031: valores iniciales de secciones y detalle desde un enlace
-
-- **Contexto**: un enlace `new/…` debe rellenar Narración, Música y Conversor, y `library/<id>` o `job/<id>` mostrar un detalle, sin encolar. Las páginas leen su estado inicial al montarse, y un enlace puede llegar con la sección ya abierta.
-- **Elegida**: un store en `shared/navigation/prefill.ts` y `usePrefillApply`, que aplica el valor en el render (el patrón `appliedJob` del resto de las secciones) y lo borra al salir. La voz y el estilo de Narración se guardan en su selector, como si el usuario los eligiera; el texto, el estilo y la duración de Música y el archivo del Conversor viven en la página. `job/<id>` consulta `GET /jobs/{id}`: la biblioteca no filtra por trabajo, y el error de la API sale si el id no existe.
-- **Descartadas**: solo parámetros del hash (no se aplican con la sección ya abierta); un efecto con `setState` (el lint `set-state-in-effect` lo prohíbe); no guardar voz y estilo (el selector no mostraría el valor); una lista de trabajos en la cola (la cola no tiene detalle por trabajo).
-- **Cómo revertir**: quitar `usePrefillApply` de las cuatro páginas y borrar `client/src/app/external/`, `client/src/shared/navigation/prefill.ts` y `client/src/features/library/JobDetail.tsx`.
-- **Cómo comprobarla**: `bun run --cwd client test` (`prefill.test.ts`, `JobDetail.test.tsx` y los casos «con un enlace» de narración, música y biblioteca). En la verificación final, el escenario e2e `happy-deeplink`.
-- **Pendiente**: `new/media.convert?target=…` se valida, pero no cambia el formato del Conversor (ver `docs/process/PENDING/031-convert-target.md`).

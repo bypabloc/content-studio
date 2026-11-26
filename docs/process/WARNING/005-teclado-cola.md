@@ -1,7 +1,0 @@
-# 005: reordenar la cola con teclado: sensor con coordenadas de fila y anuncios en es.json
-
-- **Contexto**: con los sensores por defecto de dnd-kit, la flecha no cambia el orden (el `over` queda sobre el mismo trabajo), y el e2e `queue/happy-reorder-pause-cancel-retry` no llegaba al `PUT /queue/order`. Además, los anuncios del lector de pantalla salían en inglés. dnd-kit mide las filas después de tomar el trabajo y registra su listener de teclas en un `setTimeout`, así que una tecla pulsada justo después se pierde.
-- **Elegida**: `KeyboardSensor` con `sortableKeyboardCoordinates` (la flecha salta a la fila vecina), y los anuncios e instrucciones salen de `es.json` (`features/queue/announce.ts`). El e2e espera el anuncio de cada tecla y, antes de la flecha, un turno del event loop.
-- **Descartadas**: los sensores por defecto con más espera fija (la prueba sería frágil); botones de subir y bajar (AC-6 pide arrastrar, y la accesibilidad de teclado ya la da dnd-kit); el arrastre con el ratón en el e2e (no cubre el teclado que pide el AC).
-- **Cómo revertir**: quitar `sensors` de `QueuePanel.tsx` y volver a los sensores por defecto, y dejar el e2e sin esperas de anuncio (la prueba de teclado fallará de nuevo).
-- **Cómo comprobarla**: `python -m devtools test-runner --type=e2e` (`queue/happy-reorder-pause-cancel-retry`) y `cd client && bunx vitest run tests/unit/src/features/queue/announce.test.ts`.

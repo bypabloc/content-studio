@@ -197,3 +197,26 @@ def test_ac6_turns_json_without_diarization_fails_with_its_field(tmp_path, monke
 
     assert result['ok'] is False
     assert 'missing or invalid field "diarization"' in result['error']
+
+
+def test_transcription_and_vision_verify_the_import_of_their_recipe(tmp_path, monkeypatch):
+    """026-verificacion-familias: faster-whisper y vision ya no dan «Unsupported engine family»."""
+    from content_studio.engines import verification
+
+    root = tmp_path / 'engines'
+    monkeypatch.setattr(paths, 'engines_dir', lambda: root)
+    monkeypatch.setenv('CONTENT_STUDIO_MODE', 'installed')
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, '', '')
+
+    monkeypatch.setattr(verification.subprocess, 'run', run)
+    for engine, module in (('faster-whisper', 'faster_whisper'), ('vision', 'cv2')):
+        python = process.python_de(installer.engine_venv(recipes.load(engine), root))
+        python.parent.mkdir(parents=True, exist_ok=True)
+        python.touch()
+        result = verification.verify_engine(engine, tmp_path / engine)
+        assert result['ok'] is True, result
+        assert calls[-1] == [str(python), '-c', f'import {module}']

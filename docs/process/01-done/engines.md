@@ -25,6 +25,11 @@ El código está en `server/src/content_studio/engines/`, `storage/`, `system/` 
 - Las instalaciones externas del usuario (indextts, omnivoice en el checkout principal) no se tocaron.
 - Motores restringidos (pyannote, spec 034): su tarjeta pide el token de Hugging Face, lo guarda sin mostrarlo y deja Instalar deshabilitado sin él. El token se pasa solo al entorno del paso `hf` restringido; un 401 o 403 de Hugging Face sale con código 25 (`engine_gated`).
 
+| Motor | Python | Motivo |
+| :--- | :---: | :--- |
+| faster-whisper | 3.14 | `onnxruntime` sin rueda cp315; av 19 quitó `metadata_errors` |
+| pyannote | 3.14 | torch cu128 sin rueda cp315 |
+
 ## Historial
 
 - 2026-11-21: Motores, almacenamiento elegible, bienvenida y herramientas del sistema (spec 012; PR pendiente).

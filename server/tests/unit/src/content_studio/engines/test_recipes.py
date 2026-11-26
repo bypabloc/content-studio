@@ -139,18 +139,25 @@ def test_ac1_rejects_an_invalid_download_or_run(step, message):
         recipes.validate(data)
 
 
-def test_ac1_every_engine_below_pinned_python_has_warning():
-    """AC-1 (spec 026): toda receta por debajo de .python-version tiene su ficha 026-<motor>-version."""
+def test_ac1_every_engine_below_pinned_python_has_its_reason():
+    """AC-1 (spec 026): toda receta por debajo de .python-version tiene su fila en una tabla de docs/process/01-done/:
+    motor, la misma versión de Python y el motivo en la última columna."""
     root = Path(__file__).resolve().parents[6]
     pinned = tuple(int(part) for part in (root / '.python-version').read_text(encoding='utf-8').strip().split('.')[:2])
+    rows: dict[str, list[list[str]]] = {}
+    for doc in (root / 'docs/process/01-done').glob('*.md'):
+        for line in doc.read_text(encoding='utf-8').splitlines():
+            if line.startswith('| '):
+                cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
+                rows.setdefault(cells[0], []).append(cells)
     missing = []
     for recipe in recipes.load_all():
         python = next(step['version'] for step in recipe.steps if step['kind'] == 'python')
         version = tuple(int(part) for part in python.split('.')[:2])
-        warning_file = root / 'docs/process/WARNING' / f'026-{recipe.engine}-version.md'
-        if version < pinned and not warning_file.is_file():
+        documented = any(len(cells) >= 3 and cells[1] == python and cells[-1] for cells in rows.get(recipe.engine, []))
+        if version < pinned and not documented:
             missing.append(recipe.engine)
-    assert missing == [], f'sin ficha 026-<motor>-version: {missing}'
+    assert missing == [], f'sin fila (motor, Python, motivo) en docs/process/01-done/: {missing}'
 
 
 def test_ac1_pyannote_recipe():

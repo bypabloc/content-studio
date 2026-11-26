@@ -20,7 +20,7 @@ El servidor habla MCP por stdio y pasa los trabajos por el server compartido de 
 | `jan` | no documentada | `mcpServers` | No verificado |
 | `anythingllm` | `storage\plugins\anythingllm_mcp_servers.json` | `mcpServers` | Forma oficial, sin probar en la app |
 
-Lo que no se probó de verdad está en [PENDING/029-clientes-sin-probar](../process/PENDING/029-clientes-sin-probar.md).
+El server se probó con el SDK y el inspector oficial de MCP. Los fragmentos de cada cliente no se probaron dentro de su aplicación.
 
 El comando que el cliente lanza es el `studio` de la instalación (`studio.exe mcp`); en un checkout, `uv run --project server studio mcp`.
 
