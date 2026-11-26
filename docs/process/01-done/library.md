@@ -19,13 +19,15 @@ Un solo lugar para lo que genera el estudio y lo que hay en las carpetas que el 
 - Espacio: barras por tipo, lo más pesado y las tomas no elegidas, con papelera en lote y una sola confirmación.
 - Miniaturas de video en `<datos>/cache/thumbs/`; la onda del audio se dibuja con `/media/peaks`.
 - CLI: `uv run studio library list|scan|tag|trash`.
+- Las carpetas de entrada (spec 030) no son carpetas vigiladas: no indexan nada en la biblioteca. Lo que se suelta en
+  una carpeta de entrada se procesa y su resultado queda en su `done/`, no aquí.
 
 ## Dónde vive
 
 - Server: `server/src/content_studio/library/` (index, scan, thumbs, query, text_search, tags, projects, actions, storage), `api/routes/library*.py`, `services/library_scan.py` y `cli/library.py`.
 - Cliente: `client/src/features/library/`, `shared/hooks/useFromJob.ts` y `shared/components/molecules/UIVirtualList/`.
 - Pruebas: `server/tests/unit/src/content_studio/library/`, `client/tests/unit/src/features/library/` y `tests/e2e/library/`.
-- Decisiones: [020-indice-inicial](../WARNING/020-indice-inicial.md), [020-busqueda-en-disco](../WARNING/020-busqueda-en-disco.md), [020-send2trash](../WARNING/020-send2trash.md) y [020-editar-y-repetir](../WARNING/020-editar-y-repetir.md).
+- Decisiones (historial de git de `docs/process/WARNING/`): 020-indice-inicial, 020-busqueda-en-disco, 020-send2trash y 020-editar-y-repetir.
 
 ## Verificación (2026-11-24)
 

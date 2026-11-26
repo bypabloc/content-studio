@@ -13,10 +13,13 @@ import { t } from '@/shared/i18n/t';
 import { useLanguage } from '@/shared/i18n/useLanguage';
 import { useTheme } from '@/shared/theme/useTheme';
 import { useUpdateNotice } from '@/shared/update/useUpdateNotice';
+import { useExternalRequests } from './external/useExternalRequests';
 import { navItems } from './nav';
 
 // La página de Música solo se carga al abrirla: así el JS de arranque queda bajo el presupuesto de client/budget.json.
 const MusicPage = lazy(() => import('@/features/music/MusicPage').then((module) => ({ default: module.MusicPage })));
+const TranscriptionPage = lazy(() => import('@/features/transcription/TranscriptionPage').then((module) => ({ default: module.TranscriptionPage })));
+const SpeakersPage = lazy(() => import('@/features/speakers/SpeakersPage').then((module) => ({ default: module.SpeakersPage })));
 const CleanerPage = lazy(() => import('@/features/cleaner/CleanerPage').then((module) => ({ default: module.CleanerPage })));
 const EnginesPage = lazy(() => import('@/features/engines/EnginesPage').then((module) => ({ default: module.EnginesPage })));
 const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })));
@@ -32,6 +35,7 @@ const WelcomeGate = lazy(() => import('@/features/welcome/WelcomeGate').then((mo
 
 /** La ventana ya conectada: la barra con las secciones, la cola y el tema; la paleta con Ctrl+K y los avisos. */
 export function Shell({ version }: { version: string }) {
+  useExternalRequests();
   useLanguage(); // aplica al idioma activo la preferencia del server (ui.language), una vez por la vida de la ventana
   useUpdateNotice();
   const [theme, setTheme] = useTheme();
@@ -68,6 +72,16 @@ export function Shell({ version }: { version: string }) {
         {section?.id === 'music' && (
           <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
             <MusicPage />
+          </Suspense>
+        )}
+        {section?.id === 'speakers' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <SpeakersPage />
+          </Suspense>
+        )}
+        {section?.id === 'transcription' && (
+          <Suspense fallback={<UISkeleton className="h-64 w-full rounded-xl" />}>
+            <TranscriptionPage />
           </Suspense>
         )}
         {section?.id === 'cleaner' && (

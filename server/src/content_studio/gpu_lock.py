@@ -62,7 +62,7 @@ def take(main: Path, job: str, command: list[str]) -> dict | None:
     owner = read(main)
     if owner:
         return owner
-    lock_file.unlink(missing_ok=True)  # candado huérfano: su proceso murió
+    _unlink(lock_file)  # candado huérfano: su proceso murió
     data = {'pid': os.getpid(), 'platform': sys.platform, 'work': job, 'command': ' '.join(command)}
     data['since'] = time.strftime('%Y-%m-%dT%H:%M:%S')
     try:
@@ -73,14 +73,29 @@ def take(main: Path, job: str, command: list[str]) -> dict | None:
     return None
 
 
+UNLINK_TRIES = 50  # en Windows, un lector abierto impide borrar el archivo: ~1 s de reintentos
+
+
+def _unlink(lock_file: Path) -> None:
+    """Borra el candado. Si otro proceso o hilo lo tiene abierto (un sondeo), reintenta; si sigue ocupado, falla."""
+    for _ in range(UNLINK_TRIES - 1):
+        try:
+            lock_file.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            time.sleep(0.02)
+    lock_file.unlink(missing_ok=True)
+
+
 def release(main: Path) -> None:
     """Suelta el turno si lo tiene esta sesión."""
     lock_file = lock(main)
     try:
-        if json.loads(lock_file.read_text(encoding='utf-8')).get('pid') == os.getpid():
-            lock_file.unlink()
+        owner = json.loads(lock_file.read_text(encoding='utf-8'))
     except (OSError, ValueError):
         return
+    if owner.get('pid') == os.getpid():
+        _unlink(lock_file)
 
 
 def acquire(main: Path, job: str, command: list[str], wait: bool = False, poll: float = 5.0) -> bool:

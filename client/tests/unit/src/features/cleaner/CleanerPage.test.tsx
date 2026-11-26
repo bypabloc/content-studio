@@ -218,3 +218,26 @@ describe('CleanerPage (spec 013, D-6)', () => {
   });
 
 });
+
+describe('CleanerPage con hablantes (AC-8)', () => {
+  it('con «Identificar hablantes» y el motor instalado, el análisis encola diarize: true', async () => {
+    const base = api.get.getMockImplementation()!;
+    api.get.mockImplementation(async (path: string) =>
+      path === '/engines' ? [...engines, { engine: 'pyannote', family: 'diarization', status: 'installed', models: [] }] : base(path),
+    );
+    renderPage();
+    await chooseFiles();
+
+    const diarize = await screen.findByRole('switch', { name: t('cleaner.diarize') });
+    await waitFor(() => expect(diarize.matches('[disabled], [aria-disabled="true"], [data-disabled]')).toBe(false));
+    await userEvent.click(diarize);
+    await userEvent.click(screen.getByRole('button', { name: t('cleaner.analyze') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/jobs', expect.objectContaining({
+        kind: 'clean.analyze',
+        params: expect.objectContaining({ diarize: true }),
+      })),
+    );
+  }, 20_000);
+});

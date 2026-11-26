@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from content_studio.subtitles.document import load, merge, new_document, save, set_text, shift, split
+from content_studio.subtitles.document import load, merge, new_document, save, set_speaker, set_text, shift, split
 
 
 def _cue(cue_id: int, words: list[tuple[str, float, float]]) -> dict:
@@ -82,3 +82,30 @@ def test_save_and_load_keep_the_document_and_its_version(tmp_path: Path):
 
     assert load(path) == _doc()
     assert json.loads(path.read_text(encoding='utf-8'))['version'] == 1
+
+
+def _spoken() -> dict:
+    """Dos cues: SPEAKER_00 (hola mundo) y SPEAKER_01 (a todos), con su hablante en cada palabra."""
+    doc = _doc()
+    doc['cues'][0]['speaker'] = 'SPEAKER_00'
+    doc['cues'][1]['speaker'] = 'SPEAKER_01'
+    for cue in doc['cues']:
+        for word in cue['words']:
+            word['speaker'] = cue['speaker']
+    return doc
+
+
+def test_ac2_split_merge_and_set_speaker_keep_the_speaker():
+    """AC-2: split conserva el hablante; merge toma el del primero; set_speaker cambia cue y palabras."""
+    doc = _spoken()
+
+    divided = split(doc, cue_id=1, at_word=1)
+    assert [cue['speaker'] for cue in divided['cues']] == ['SPEAKER_00', 'SPEAKER_00', 'SPEAKER_01']
+
+    assert merge(doc, first_id=1, second_id=2)['cues'][0]['speaker'] == 'SPEAKER_00'
+
+    renamed = set_speaker(doc, cue_id=2, speaker='SPEAKER_00')
+    second = next(cue for cue in renamed['cues'] if cue['id'] == 2)
+    assert second['speaker'] == 'SPEAKER_00'
+    assert {word['speaker'] for word in second['words']} == {'SPEAKER_00'}
+    assert doc['cues'][1]['speaker'] == 'SPEAKER_01'

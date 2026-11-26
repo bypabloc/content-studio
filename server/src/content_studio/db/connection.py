@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -22,4 +22,4 @@ def connect(path: Path) -> sqlite3.Connection:
 
 def utc_now() -> str:
     """Hora actual en UTC, ISO 8601 con segundos, para las columnas de tiempo."""
-    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+    return datetime.now(UTC).isoformat(timespec='seconds')

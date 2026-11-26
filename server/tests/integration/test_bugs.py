@@ -113,3 +113,55 @@ def test_approval_reads_the_english_keys(tmp_path, monkeypatch):
     monkeypatch.setattr(catalog, 'CATALOG', voices / 'catalog.json')
     assert list(catalog.approved_voices(['neutral'])) == ['ana']
     assert catalog.state('ana', ['neutral']) == 'approved'
+
+
+def test_server_launched_from_an_mcp_client_breaks_away_from_its_job(tmp_path, monkeypatch):
+    """Spec 033: el SDK de MCP mete `studio mcp` en un Job Object con KILL_ON_JOB_CLOSE; el server que lanza lo
+    heredaba y moría al cerrar el cliente, con los trabajos a medias. Ahora pide salir del job y, si el job no lo
+    permite, arranca igual."""
+    import subprocess
+
+    from content_studio.runtime import instance
+
+    breakaway = getattr(subprocess, 'CREATE_BREAKAWAY_FROM_JOB', 0x01000000)
+    seen: list[int] = []
+
+    def popen(command, **kwargs):
+        flags = kwargs.get('creationflags', 0)
+        seen.append(flags)
+        if flags & breakaway and len(seen) == 1:
+            raise PermissionError(5, 'access denied: the job does not allow breakaway')
+        return None
+
+    monkeypatch.setattr(instance.os, 'name', 'nt')
+    monkeypatch.setattr(instance.subprocess, 'Popen', popen)
+    monkeypatch.setattr(instance, 'log_path', lambda: tmp_path / 'server.log')
+
+    instance._launch(tmp_path / 'base.db', None)
+
+    assert seen[0] & breakaway
+    assert not seen[1] & breakaway
+    assert len(seen) == 2
+
+
+def test_narration_without_style_uses_the_default_of_the_engine():
+    """021-estilo-none-en-txt: sin --style, el trabajo no falla con «No existe el estilo None» y el motor usa su valor
+    por defecto (el style del JSON o expert)."""
+    from content_studio.services import narration
+
+    params = {'model': 'qwen-0.6b', 'file': ['guion.txt']}
+    codes = [error['code'] for error in narration.validate(params)]
+    assert 'unknown_style' not in codes
+    assert '--style' not in narration.build_command(params, Path('out'))
+
+
+def test_studio_json_reaches_a_pipe_as_utf8():
+    """021-cli-salida-cp1252: con stdout en una tubería, las tildes salen en UTF-8, no en cp1252."""
+    import os
+    import subprocess
+
+    code = 'from content_studio.common.process import console_utf8; console_utf8(); print("guía")'
+    env = {key: value for key, value in os.environ.items() if key not in ('PYTHONIOENCODING', 'PYTHONUTF8')}
+    env['PYTHONPATH'] = str(ROOT / 'server' / 'src')
+    out = subprocess.run([sys.executable, '-c', code], capture_output=True, env=env, check=True).stdout
+    assert out.decode('utf-8').strip() == 'guía'

@@ -39,7 +39,9 @@ def test_run_checks_license_and_installs_in_the_configured_roots(monkeypatch, tm
     monkeypatch.setattr(paths, 'db_path', lambda: tmp_path / 'db.sqlite')
     monkeypatch.setattr(paths, 'engines_dir', lambda: tmp_path / 'engines')
     monkeypatch.setattr(installer, 'check_license', lambda conn, engine: calls.append(('license', engine)))
-    monkeypatch.setattr(installer, 'install', lambda recipe, root, repair: calls.append((recipe.engine, root, repair)))
+    monkeypatch.setattr(
+        installer, 'install', lambda recipe, root, repair, token=None: calls.append((recipe.engine, root, repair))
+    )
 
     assert engine_install.run('qwen-0.6b', True) == 0
     assert calls == [('license', 'qwen-0.6b'), ('qwen-0.6b', tmp_path / 'engines', True)]
@@ -62,3 +64,11 @@ def test_run_returns_the_install_error_code_and_writes_it_to_stderr(monkeypatch,
 
     assert result == installer.EXIT_CODES['engine_license_required']
     assert capsys.readouterr().err.strip() == 'engine_license_required'
+
+
+def test_ac3_engine_exit_codes_name_the_gated_and_token_errors():
+    """AC-3 (spec 034): el código de salida 25 es engine_gated y el 26, engine_token_required."""
+    from content_studio.services import engine_install
+
+    assert engine_install.ERROR_CODES[25] == 'engine_gated'
+    assert engine_install.ERROR_CODES[26] == 'engine_token_required'

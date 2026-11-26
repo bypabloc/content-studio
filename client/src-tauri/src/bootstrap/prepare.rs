@@ -9,7 +9,7 @@ use serde::Serialize;
 use super::Mode;
 
 /// Versión de Python del venv de la app.
-pub const PYTHON: &str = "3.12";
+pub const PYTHON: &str = "3.15";
 
 /// Las carpetas de la app instalada: los datos (`%LOCALAPPDATA%\Content Studio`, o `CONTENT_STUDIO_HOME`, igual que
 /// `paths.data_dir()` del server), los recursos empaquetados y la versión de la app.
@@ -64,6 +64,11 @@ impl Layout {
         self.venv().join(".app-version")
     }
 
+    /// La versión de Python con la que se creó el venv: si cambia (D-5), el venv se recrea.
+    fn python_marker(&self) -> PathBuf {
+        self.venv().join(".python-installed")
+    }
+
     fn uv_env(&self) -> Vec<(&'static str, OsString)> {
         vec![
             (
@@ -95,6 +100,14 @@ pub trait Runner {
     ) -> Result<(), String>;
 }
 
+/// Borra el venv del server para recrearlo con otra Python. La carpeta queda vacía: `uv sync` la llena.
+fn clear_venv(layout: &Layout) -> std::io::Result<()> {
+    match std::fs::remove_dir_all(layout.venv()) {
+        Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err(error),
+        _ => std::fs::create_dir_all(layout.venv()),
+    }
+}
+
 /// Prepara Python, el venv del server y los datos de la app. Con el venv ya hecho para esta versión
 /// (`venv/.app-version`), solo siembra: no repite pasos ni necesita internet. Un error devuelve su código.
 pub fn prepare(
@@ -112,8 +125,9 @@ pub fn prepare(
     };
     let uv = layout.uv();
     let env = layout.uv_env();
-    let ready =
-        std::fs::read_to_string(layout.marker()).is_ok_and(|done| done.trim() == layout.version);
+    let ready = std::fs::read_to_string(layout.marker())
+        .is_ok_and(|done| done.trim() == layout.version)
+        && std::fs::read_to_string(layout.python_marker()).is_ok_and(|done| done.trim() == PYTHON);
     if ready {
         report("python", "skipped");
         report("sync", "skipped");
@@ -126,6 +140,12 @@ pub fn prepare(
         })?;
         report("python", "done");
         report("sync", "running");
+        let python_changed = std::fs::read_to_string(layout.python_marker())
+            .map_or(true, |done| done.trim() != PYTHON);
+        if python_changed && clear_venv(layout).is_err() {
+            report("sync", "failed");
+            return Err("bootstrap_sync_failed");
+        }
         let mut sync: Vec<OsString> = [
             "sync",
             "--frozen",
@@ -142,7 +162,9 @@ pub fn prepare(
         runner
             .run(&uv, &sync, &env)
             .and_then(|()| {
-                std::fs::write(layout.marker(), &layout.version).map_err(|error| error.to_string())
+                std::fs::write(layout.marker(), &layout.version)
+                    .map_err(|error| error.to_string())?;
+                std::fs::write(layout.python_marker(), PYTHON).map_err(|error| error.to_string())
             })
             .map_err(|_| {
                 report("sync", "failed");

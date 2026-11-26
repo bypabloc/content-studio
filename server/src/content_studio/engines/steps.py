@@ -17,6 +17,8 @@ from typing import Any
 from content_studio.common import process, progress
 from content_studio.engines.recipes import Recipe
 
+GATED_EXIT = 25  # Hugging Face niega el acceso al repositorio restringido (401 o 403)
+
 
 class ChecksumMismatch(ValueError):
     """El archivo descargado no coincide con el sha256 de la receta."""
@@ -90,7 +92,12 @@ def _git(step: dict, home: Path, env: dict[str, str]) -> None:
 
 
 def execute_step(
-    step: dict[str, Any], recipe: Recipe, home: Path, cache: Path, progress_span: tuple[float, float]
+    step: dict[str, Any],
+    recipe: Recipe,
+    home: Path,
+    cache: Path,
+    progress_span: tuple[float, float],
+    token: str | None = None,
 ) -> None:
     """Ejecuta un paso en el venv y caché del motor, con avance para cada descarga."""
     if step['kind'] == 'download':
@@ -108,6 +115,9 @@ def execute_step(
             'CONTENT_STUDIO_PROGRESS_END': str(progress_span[1]),
         }
     )
+    env.pop('HF_TOKEN', None)  # el token heredado no viaja a ningún paso
+    if step.get('gated') and token:
+        env['HF_TOKEN'] = token  # solo al paso restringido, nunca en argv ni en el JSON del paso
     kind = step['kind']
     if kind == 'python':
         _run(['uv', 'python', 'install', step['version']], env, home)
@@ -198,5 +208,23 @@ def _download(step: dict) -> None:
         observer.join()
 
 
+def _run_hf_step(argument: str) -> int:
+    """Corre el paso hf; si Hugging Face niega el acceso sale con 25 y el mensaje nunca lleva el token."""
+    from huggingface_hub.errors import HfHubHTTPError
+
+    step = json.loads(argument)
+    try:
+        _download(step)
+    except HfHubHTTPError as error:
+        if getattr(error.response, 'status_code', None) not in (401, 403):
+            raise
+        print(
+            f'Access denied to {step["repo"]}. Accept its conditions on Hugging Face and check the token.',
+            file=sys.stderr,
+        )
+        return GATED_EXIT
+    return 0
+
+
 if __name__ == '__main__':
-    _download(json.loads(sys.argv[1]))
+    sys.exit(_run_hf_step(sys.argv[1]))

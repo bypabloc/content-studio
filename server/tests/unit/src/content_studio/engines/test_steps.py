@@ -1,5 +1,6 @@
 """Progreso y ejecución de los pasos de receta, AC-3 de la spec 012."""
 
+import json
 import sys
 import threading
 from pathlib import Path
@@ -290,3 +291,51 @@ def test_download_uses_local_directory_and_filters_patterns(monkeypatch, tmp_pat
     assert seen['allow_patterns'] == ['*.bin']
     assert seen['ignore_patterns'] == ['ignored*']
     assert not (tmp_path / 'cache' / 'hub' / 'models--org--model' / 'refs' / 'main').exists()
+
+
+def test_ac2_token_en_env_no_en_argv(monkeypatch, tmp_path):
+    """AC-2 (spec 034): HF_TOKEN llega solo al entorno de un paso gated; argv y los demás pasos no lo reciben."""
+    calls = []
+    monkeypatch.setattr(steps.process, 'python_de', lambda venv: Path(sys.executable))
+    monkeypatch.setattr(steps, '_run', lambda command, env, cwd: calls.append((command, env)))
+    monkeypatch.setenv('HF_TOKEN', 'hf_heredado_que_no_debe_viajar')
+    gated = {'kind': 'hf', 'repo': 'owner/model', 'revision': '0' * 40, 'into': 'hf', 'gated': True}
+    plain = {'kind': 'pip', 'packages': ['torch==2.11.0+cu128']}
+
+    steps.execute_step(gated, _recipe(), tmp_path, tmp_path / 'cache', (0, 1), token='hf_secreto_1234567890abcdef')
+    steps.execute_step(plain, _recipe(), tmp_path, tmp_path / 'cache', (0, 1), token='hf_secreto_1234567890abcdef')
+
+    (gated_command, gated_env), (plain_command, plain_env) = calls
+    assert gated_env['HF_TOKEN'] == 'hf_secreto_1234567890abcdef'
+    assert not any(
+        'hf_secreto_1234567890abcdef' in part or 'hf_heredado' in part for part in gated_command + plain_command
+    )
+    assert 'HF_TOKEN' not in plain_env
+
+
+def test_ac3_gated_repo_exits_25(monkeypatch, capsys):
+    """AC-3 (spec 034): un 401 o 403 de Hugging Face sale con 25 y el mensaje no muestra el token."""
+    errors = ModuleType('huggingface_hub.errors')
+
+    class HfHubHTTPError(Exception):
+        def __init__(self, status):
+            super().__init__('denied')
+            self.response = SimpleNamespace(status_code=status)
+
+    errors.HfHubHTTPError = HfHubHTTPError
+    monkeypatch.setitem(sys.modules, 'huggingface_hub', ModuleType('huggingface_hub'))
+    monkeypatch.setitem(sys.modules, 'huggingface_hub.errors', errors)
+    monkeypatch.setenv('HF_TOKEN', 'hf_secreto_1234567890abcdef')
+    step = {'repo': 'pyannote/speaker-diarization-community-1', 'revision': 'x', 'into': 'models/community-1'}
+
+    for status in (401, 403):
+
+        def denied(_step, status=status):
+            raise HfHubHTTPError(status)
+
+        monkeypatch.setattr(steps, '_download', denied)
+        code = steps._run_hf_step(json.dumps(step))
+        err = capsys.readouterr().err
+        assert code == 25
+        assert 'Access denied to pyannote/speaker-diarization-community-1' in err
+        assert 'hf_secreto_1234567890abcdef' not in err

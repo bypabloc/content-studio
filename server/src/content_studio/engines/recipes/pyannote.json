@@ -1,0 +1,17 @@
+{
+  "engine": "pyannote",
+  "family": "diarization",
+  "size_gb": 5,
+  "vram_gb": 1.5,
+  "cpu": true,
+  "license": "MIT / CC-BY-4.0",
+  "steps": [
+    {"kind": "python", "version": "3.14"},
+    {"kind": "venv", "path": ".venv-diarize"},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "pip", "packages": ["pyannote.audio==4.1.1", "torchcodec==0.17.0", "huggingface-hub==0.36.2"]},
+    {"kind": "pip", "packages": ["torch==2.11.0+cu128", "torchaudio==2.11.0+cu128"], "index": "https://download.pytorch.org/whl/cu128"},
+    {"kind": "hf", "repo": "pyannote/speaker-diarization-community-1", "revision": "3533c8cf8e369892e6b79ff1bf80f7b0286a54ee", "into": "models/community-1", "gated": true, "allow_patterns": ["config.yaml", "segmentation/*", "embedding/*", "plda/*"]},
+    {"kind": "verify", "import": "pyannote.audio"}
+  ]
+}

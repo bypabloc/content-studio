@@ -1,3 +1,6 @@
+import { openUrl } from '@tauri-apps/plugin-opener';
+import { HF_MODEL_URL } from '@/features/engines/HfTokenField';
+import { UILink } from '@/shared/components/atoms/UILink';
 import { APP_VERSION } from '@/shared/version';
 import { UIButton } from '@/shared/components/atoms/UIButton';
 import { UIStack } from '@/shared/components/atoms/UIStack';
@@ -15,6 +18,19 @@ export function AboutSettings({ deps }: { deps?: UpdaterDeps }): React.JSX.Eleme
     <UIStack gap="md">
       <UIText variant="heading">{t('settings.about')}</UIText>
       <UIText variant="body">{t('app.version', { version: APP_VERSION })}</UIText>
+      <UIStack gap="xs">
+        <UIText variant="caption">{t('settings.about.diarization')}</UIText>
+        <UILink
+          href={HF_MODEL_URL}
+          variant="inline"
+          onClick={(event) => {
+            event.preventDefault();
+            void openUrl(HF_MODEL_URL);
+          }}
+        >
+          {t('settings.about.diarization_link')}
+        </UILink>
+      </UIStack>
       {message && <UIText variant="caption">{message}</UIText>}
       <UIStack direction="row" gap="sm">
         <UIButton variant="secondary" disabled={busy} onClick={() => void check()}>

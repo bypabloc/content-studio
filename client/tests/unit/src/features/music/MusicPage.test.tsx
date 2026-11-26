@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MusicPage } from '@/features/music/MusicPage';
 import type { components } from '@/shared/api/schema';
 import { label, t } from '@/shared/i18n/t';
+import { setPrefill } from '@/shared/navigation/prefill';
 
 type StyleOut = components['schemas']['StyleOut'];
 
@@ -223,4 +224,26 @@ describe('MusicPage (spec 011, D-6, AC-8)', () => {
     );
   });
 
+});
+
+describe('MusicPage con un enlace (spec 031, AC-3)', () => {
+  it('WHEN llega new/music con estilo y duración THEN Generar encola con ese estilo y esa duración', async () => {
+    const user = userEvent.setup();
+    setPrefill('music', { style: 'lofi-chill', duration: '90' });
+    renderPage();
+    await user.click(await screen.findByRole('button', { name: t('music.generate') }));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/jobs', {
+        kind: 'music',
+        params: expect.objectContaining({ style: ['lofi-chill'], duration: 90 }),
+      }),
+    );
+  });
+
+  it('WHEN el enlace no trae campos THEN la pantalla no encola nada', async () => {
+    setPrefill('music', {});
+    renderPage();
+    await screen.findByRole('button', { name: label('music.style', 'lofi-chill') });
+    expect(api.post).not.toHaveBeenCalledWith('/jobs', expect.anything());
+  });
 });

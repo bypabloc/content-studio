@@ -7,6 +7,7 @@ import { UIStack } from '@/shared/components/atoms/UIStack';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UIField } from '@/shared/components/molecules/UIField';
 import { t } from '@/shared/i18n/t';
+import { HfTokenField } from './HfTokenField';
 
 type EngineInfo = components['schemas']['EngineInfo'];
 type GpuInfo = components['schemas']['GpuInfo'];
@@ -18,6 +19,8 @@ type Props = {
   onAction: (action: EngineAction) => void;
   busy?: boolean;
   highlighted?: boolean;
+  /** El token de Hugging Face está guardado; sin él, un motor restringido no se instala. */
+  tokenConfigured?: boolean;
 };
 
 function bytesLabel(gb: number): string {
@@ -45,18 +48,20 @@ function statusLabel(status: string): string {
     installing: t('engines.status.installing'),
     installed: t('engines.status.installed'),
     broken: t('engines.status.broken'),
+    outdated: t('engines.status.outdated'),
     external: t('engines.status.external'),
   };
   return labels[status] ?? status;
 }
 
-export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = false }: Props): React.JSX.Element {
+export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = false, tokenConfigured = true }: Props): React.JSX.Element {
   const [confirmExternal, setConfirmExternal] = useState(false);
   const [typedName, setTypedName] = useState('');
   const external = engine.owner === 'external' || engine.status === 'external';
   const managed = engine.owner === 'app';
-  const installed = engine.status === 'installed' || engine.status === 'external';
+  const installed = ['installed', 'outdated', 'external'].includes(engine.status);
   const canInstall = Boolean(gpu) || engine.cpu;
+  const blockedByToken = engine.gated && !tokenConfigured;
   const verification = engine.verification as { ok?: boolean } | null;
 
   const uninstall = () => {
@@ -77,7 +82,7 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
             <UIText variant="heading">{engine.engine}</UIText>
             <UIStack direction="row" gap="xs" className="flex-wrap">
               <UIBadge>{statusLabel(engine.status)}</UIBadge>
-              {external ? <UIBadge tone="brand">{t('engines.status.external')}</UIBadge> : null}
+              {external && engine.status !== 'external' ? <UIBadge tone="brand">{t('engines.status.external')}</UIBadge> : null}
               <UIBadge tone={engine.commercial ? 'accent' : 'danger'}>{engine.license}</UIBadge>
             </UIStack>
           </UIStack>
@@ -88,21 +93,27 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
 
         <UIStack direction="row" gap="sm" className="flex-wrap">
           <UIBadge tone={vramLabel(engine.vram_gb, gpu) === t('engines.vram.no_fit') ? 'danger' : 'neutral'}>
-            {gpu ? `${vramLabel(engine.vram_gb, gpu)} · ${engine.vram_gb} / ${gpu.vram_gb} GB` : vramLabel(engine.vram_gb, gpu)}
+            {gpu ? `${vramLabel(engine.vram_gb, gpu)} · ${engine.vram_gb} / ${Number(gpu.vram_gb.toFixed(1))} GB` : vramLabel(engine.vram_gb, gpu)}
           </UIBadge>
           <UIBadge tone={engine.cpu ? 'accent' : 'neutral'}>
             {engine.cpu ? t('engines.cpu.supported') : t('engines.cpu.gpu_required')}
           </UIBadge>
         </UIStack>
 
+        {engine.gated ? <HfTokenField configured={tokenConfigured} /> : null}
         <UIText variant="caption">
           {verification ? (verification.ok ? t('engines.verification.ok') : t('engines.verification.failed')) : t('engines.verification.pending')}
         </UIText>
 
         <UIStack direction="row" gap="sm" className="flex-wrap">
           {engine.status === 'missing' ? (
-            <UIButton disabled={!canInstall || busy} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
+            <UIButton disabled={!canInstall || busy || blockedByToken} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
               {t('engines.action.install')}
+            </UIButton>
+          ) : null}
+          {engine.status === 'outdated' ? (
+            <UIButton disabled={busy} onClick={() => onAction({ type: 'install', engine: engine.engine })}>
+              {t('engines.action.update')}
             </UIButton>
           ) : null}
           {installed ? (

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { useApi } from '@/shared/api/context';
+import type { components } from '@/shared/api/schema';
 import { UIButton } from '@/shared/components/atoms/UIButton';
+import { UILink } from '@/shared/components/atoms/UILink';
 import { UIProgress } from '@/shared/components/atoms/UIProgress';
 import { UIStack } from '@/shared/components/atoms/UIStack';
+import { UISwitch } from '@/shared/components/atoms/UISwitch';
 import { UIText } from '@/shared/components/atoms/UIText';
 import { UISelect } from '@/shared/components/molecules/UISelect';
 import { t } from '@/shared/i18n/t';
@@ -12,6 +15,7 @@ import type { Doc, SubtitleTrack } from './model/types';
 
 type ProjectRow = { id: number; name: string };
 type Job = { id: number; status: string; progress: number; result: unknown };
+type EngineInfo = components['schemas']['EngineInfo'];
 
 function subtitleTrack(project: ProjectRow): SubtitleTrack {
   return {
@@ -54,9 +58,16 @@ export function SubtitleTracksPanel({
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState(false);
+  // Identificar hablantes (AC-7): solo con el motor de hablantes instalado; si no, el interruptor queda apagado.
+  const [speakers, setSpeakers] = useState(false);
+  const [engines, setEngines] = useState<EngineInfo[]>([]);
+  const speakersAvailable = engines.find((engine) => engine.engine === 'pyannote')?.status === 'installed';
 
   useEffect(() => {
     let active = true;
+    void api.get<EngineInfo[]>('/engines').then((rows) => {
+      if (active) setEngines(Array.isArray(rows) ? rows : []);
+    }).catch(() => undefined);
     void api.get<ProjectRow[]>('/subtitles').then((rows) => {
       if (active) setProjects(rows);
     }).catch(() => {
@@ -84,7 +95,7 @@ export function SubtitleTracksPanel({
       if (!mixPath) throw new Error('missing_mix');
       const transcript = await api.post<Job>('/jobs', {
         kind: 'transcribe',
-        params: { input: mixPath, model: 'large-v3-turbo', language: 'auto' },
+        params: { input: mixPath, model: 'large-v3-turbo', language: 'auto', ...(speakers && speakersAvailable ? { diarize: true } : {}) },
       });
       setActiveJob(transcript);
       const completedTranscript = await waitForJob((id) => api.get<Job>(`/jobs/${id}`), transcript.id, setActiveJob);
@@ -126,6 +137,18 @@ export function SubtitleTracksPanel({
           </UIButton>
         ) : null}
       </UIStack>
+      <UISwitch
+        label={t('editor.subtitles.diarize')}
+        description={speakersAvailable ? undefined : t('transcription.diarize.missing')}
+        checked={speakers && speakersAvailable}
+        disabled={!speakersAvailable || working}
+        onChange={setSpeakers}
+      />
+      {!speakersAvailable ? (
+        <UILink href="#/engines" variant="inline" className="underline">
+          {t('transcription.diarize.engines')}
+        </UILink>
+      ) : null}
       <UIButton variant="secondary" disabled={!hasAudio || working} loading={working} onClick={() => void transcribeMix()}>
         {working ? t('editor.subtitles.working') : t('editor.subtitles.transcribe')}
       </UIButton>

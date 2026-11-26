@@ -24,6 +24,15 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 - Código: `server/src/content_studio/music/` (estilos en `styles.py`, motores en `engines/` con `registry.py`). El trabajo que encola `studio` está en `server/src/content_studio/services/music.py`.
 - Datos: `server/data/music/` (README, investigación, venvs, modelos). Uso y rendimiento: [server/data/music/README.md](../../../server/data/music/README.md).
 
+## Versiones de los motores (spec 026, 2026-11-25)
+
+| Motor | Python | Salida de 30 s (verificada) | Nota |
+| :--- | :---: | :--- | :--- |
+| acestep | 3.12 | 30,0 s, -14,4 LUFS integrado, volumen medio -15,6 dB, pico -0,5 dBFS, sin voz (demucs -42,4 dB) | Su pyproject exige Python menor que 3.13 y torch 2.7.1 |
+| heartmula | 3.13 | 30,0 s, -11,8 LUFS, pico -1,2 dBFS con la revisión anterior; **con voz** (demucs -1,3 dB) | No cumple «siempre instrumental»: [WARNING/heartmula-canta](../WARNING/heartmula-canta.md) |
+
+HeartMuLa genera voz con el prompt instrumental: [WARNING/heartmula-canta](../WARNING/heartmula-canta.md).
+
 ## Historial
 
 - 2026-11-24: «Describir en español» sugiere caption, tonalidad, BPM y compás para el texto libre (spec 021).
@@ -34,7 +43,7 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 ## Verificación (2026-11-20)
 
 - Corrida real (ACE-Step, `lofi-chill` y `corporate-minimal`, 2 variantes, 30 s, `--evaluate --retries 1`): 4 pistas de 30,000 s, sin aviso `music_short`, volumen de −13,6 a −14,7 LUFS y pico real de −1,0 dBFS. Sin silencios de 0,3 s o más.
-- Espectrograma (revisión visual y `astats`): en `corporate-minimal` v2 la energía por encima de 6 kHz cae unos 25 dB desde ~19,5 s. Queda como pendiente de escucha en `docs/process/PENDING/011-caida-agudos-corporate.md`.
+- Espectrograma (revisión visual y `astats`): en `corporate-minimal` v2 la energía por encima de 6 kHz cae unos 25 dB desde ~19,5 s.
 - Pruebas: servidor 830 en verde; client con sus 8 etapas en verde; e2e 27/27 en desktop-chromium (cuatro de Música).
-- Muestras de los 126 presets: pendientes (`docs/process/PENDING/011-generar-muestras.md`).
+- Muestras de los 126 presets: pendientes (`docs/process/02-next/01-pulido-tras-la-auditoria.md`).
 

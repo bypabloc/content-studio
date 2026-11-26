@@ -34,7 +34,7 @@ def validate(params: dict) -> list[dict]:
         errors.append({'code': 'unknown_engine', 'params': {'model': model}})
     elif not ENGINES[model].installed():
         errors.append({'code': 'engine_not_installed', 'params': {'model': model}})
-    if params.get('style') not in STYLES:
+    if 'style' in params and params['style'] not in STYLES:  # sin estilo, el motor usa el del JSON o expert
         errors.append({'code': 'unknown_style', 'params': {'style': params.get('style')}})
     if 'voice' in params and params['voice'] not in approved_voices(STYLES):
         errors.append({'code': 'unknown_voice', 'params': {'voice': params['voice']}})
@@ -49,7 +49,9 @@ def validate(params: dict) -> list[dict]:
 
 def build_command(params: dict, output_dir: Path) -> list[str]:
     """Comando de `content_studio.narration.tts`; `--output` es la carpeta del trabajo (plan() la acepta)."""
-    args = ['--model', params['model'], '--style', params['style'], '--output', str(output_dir)]
+    args = ['--model', params['model'], '--output', str(output_dir)]
+    if 'style' in params:
+        args += ['--style', params['style']]
     for key, flag in FLAGS.items():
         if key in params:
             args += [flag, str(params[key])]

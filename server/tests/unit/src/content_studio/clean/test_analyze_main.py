@@ -147,3 +147,64 @@ def test_main_runs_the_analysis_in_the_whisper_venv_and_prints_the_result(tmp_pa
     assert seen['silences'] == [(1.0, 1.5)]
     result = json.loads(capsys.readouterr().out)
     assert result['params'] == {'min_gap': 0.5, 'padding': 0.15, 'edges': False}
+
+
+TURNS = {
+    'exclusive_diarization': [
+        {'start': 0.0, 'end': 1.5, 'speaker': 'SPEAKER_00'},
+        {'start': 1.5, 'end': 3.5, 'speaker': 'SPEAKER_01'},
+    ]
+}
+SPEAKERS = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}, 'SPEAKER_01': {'name': 'Hablante 2', 'color': '#dc2626'}}
+
+
+class FakeTurns:
+    """Hace de la diarización: deja turns.json y speakers.json en la carpeta que recibe (sin pyannote)."""
+
+    def __init__(self) -> None:
+        self.calls: list[Path] = []
+
+    def __call__(self, source: Path, out: Path) -> None:
+        self.calls.append(out)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / 'turns.json').write_text(json.dumps(TURNS), encoding='utf-8')
+        (out / 'speakers.json').write_text(json.dumps(SPEAKERS), encoding='utf-8')
+
+
+def test_ac8_diarize_points_cuts_json_at_the_turns(conn, source, tmp_path):
+    """AC-8: con hablantes, cuts.json apunta a los turnos del audio original y la diarización corre una vez."""
+    folder = tmp_path / 'job'
+    fake_turns = FakeTurns()
+
+    analyze_main.run(
+        conn,
+        source,
+        model='small',
+        language='es',
+        params={**PARAMS, 'diarize': True},
+        folder=folder,
+        transcribe=FakeTranscriber(),
+        diarize=fake_turns,
+    )
+
+    assert cuts.load(folder)['diarization'] == str(folder / 'diarization' / 'turns.json')
+    assert fake_turns.calls == [folder / 'diarization']
+
+
+def test_ac8_without_diarize_cuts_json_has_no_turns(conn, source, tmp_path):
+    """Sin «Identificar hablantes», el análisis no diariza y cuts.json no tiene turnos."""
+    fake_turns = FakeTurns()
+
+    analyze_main.run(
+        conn,
+        source,
+        model='small',
+        language='es',
+        params=PARAMS,
+        folder=tmp_path / 'job',
+        transcribe=FakeTranscriber(),
+        diarize=fake_turns,
+    )
+
+    assert 'diarization' not in cuts.load(tmp_path / 'job')
+    assert fake_turns.calls == []

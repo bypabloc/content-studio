@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -35,7 +36,7 @@ def test_ac3_retries_skip_completed_steps_and_record_the_owner(tmp_path, monkeyp
     calls = []
     successful = []
 
-    def execute(step, recipe, location, cache, report):
+    def execute(step, recipe, location, cache, report, token=None):
         kind = step['kind']
         calls.append(kind)
         fail = calls.count(kind) == 1 and kind == 'venv'
@@ -90,7 +91,7 @@ def test_download_byte_progress_stays_inside_its_step(tmp_path, monkeypatch):
 
     spans = []
 
-    def execute(step, selected, home, cache, span):
+    def execute(step, selected, home, cache, span, token=None):
         spans.append(span)
         if step['kind'] == 'hf':
             installer.progress.emit(round(span[0] + (span[1] - span[0]) * 0.5, 4), '4/8 bytes')
@@ -158,7 +159,7 @@ def test_uninstall_reports_when_the_engine_is_missing(tmp_path, monkeypatch):
 def test_install_is_idempotent_for_an_existing_matching_manifest(tmp_path, monkeypatch):
     home = tmp_path / 'fake'
     home.mkdir()
-    existing = {'owner': 'app', 'recipe_version': 1, 'paths': ['fake']}
+    existing = {'owner': 'app', 'recipe_version': 1, 'recipe_sha256': '', 'paths': ['fake']}
     (home / 'install.json').write_text(json.dumps(existing), encoding='utf-8')
     monkeypatch.setattr(installer, 'execute_step', lambda *args: pytest.fail('idempotent install ran a step'))
 
@@ -212,7 +213,9 @@ def test_repair_rebuilds_the_venv_and_preserves_weights(tmp_path, monkeypatch):
     cache.mkdir(parents=True)
     (venv / 'old').write_text('old', encoding='utf-8')
     (cache / 'weights').write_bytes(b'keep')
-    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_version': 0}), encoding='utf-8')
+    (home / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'recipe_version': 0, 'recipe_sha256': ''}), encoding='utf-8'
+    )
     for index in range(len(recipe.steps)):
         (markers / f'{recipe.version}-{index}.done').touch()
     monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
@@ -334,7 +337,9 @@ def test_list_engines_reports_active_owned_partial_external_and_missing_states(t
     ]
     root = tmp_path / 'engines'
     (root / 'voxcpm2').mkdir(parents=True)
-    (root / 'voxcpm2' / 'install.json').write_text(json.dumps({'owner': 'app', 'size_bytes': 7}), encoding='utf-8')
+    (root / 'voxcpm2' / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'size_bytes': 7, 'recipe_sha256': ''}), encoding='utf-8'
+    )
     (root / 'omnivoice').mkdir(parents=True)
     (root / 'omnivoice' / 'install.json').write_text(json.dumps({'owner': 'app', 'size_bytes': 9}), encoding='utf-8')
     (root / 'cosyvoice3').mkdir(parents=True)
@@ -467,3 +472,128 @@ def test_ac1_matching_checksum_extracts_into_the_engine_folder(tmp_path, monkeyp
 
     assert (tmp_path / 'fake' / 'assistant' / 'bin' / 'llama-server.exe').read_bytes() == b'binary'
     assert not list((tmp_path / 'hf').rglob('*.zip'))
+
+
+def test_ac3_changed_recipe_is_outdated(tmp_path, monkeypatch):
+    """AC-3 (spec 026): un motor instalado con la huella de otra receta sale outdated; con la misma, installed."""
+    recipe = Recipe(
+        'fake', 'narration', 1, 2, True, 'MIT',
+        ({'kind': 'python', 'version': '3.12'}, {'kind': 'venv', 'path': '.venv'}, {'kind': 'verify'}),
+        1, 'b' * 64,
+    )  # fmt: skip
+    home = tmp_path / 'fake'
+    home.mkdir()
+    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_sha256': 'a' * 64}), encoding='utf-8')
+    monkeypatch.setattr(installer.recipes, 'load_all', lambda: [recipe])
+    monkeypatch.setattr(installer.jobs, 'list_jobs', lambda conn, kind: [])
+    monkeypatch.setattr(installer.settings, 'get', lambda conn, key: None)
+    monkeypatch.setattr(installer, 'managed_ready', lambda recipe, base: True)
+
+    assert installer.list_engines(None, tmp_path)[0]['status'] == 'outdated'
+    (home / 'install.json').write_text(json.dumps({'owner': 'app', 'recipe_sha256': 'b' * 64}), encoding='utf-8')
+    assert installer.list_engines(None, tmp_path)[0]['status'] == 'installed'
+
+
+def test_ac3_install_of_an_outdated_engine_reruns_every_step(tmp_path, monkeypatch):
+    """AC-3 (spec 026): reinstalar con otra huella vuelve a correr todos los pasos y guarda la nueva."""
+    recipe = Recipe(
+        'fake', 'narration', 1, 2, True, 'MIT',
+        ({'kind': 'python', 'version': '3.12'}, {'kind': 'venv', 'path': '.venv'}, {'kind': 'verify'}),
+        1, 'b' * 64,
+    )  # fmt: skip
+    home = tmp_path / 'fake'
+    (home / 'steps').mkdir(parents=True)
+    (home / 'steps' / '1-0.done').touch()
+    (home / 'install.json').write_text(
+        json.dumps({'owner': 'app', 'recipe_version': 1, 'recipe_sha256': 'a' * 64, 'paths': ['fake']}),
+        encoding='utf-8',
+    )
+    ran = []
+    monkeypatch.setattr(installer, 'execute_step', lambda step, *args: ran.append(step['kind']))
+
+    result = installer.install(recipe, tmp_path)
+
+    assert ran == ['python', 'venv', 'verify']
+    assert result['recipe_sha256'] == 'b' * 64
+
+
+def test_ac3_interrupted_install_with_changed_recipe_rebuilds_every_step(tmp_path, monkeypatch):
+    """Un intento fallido deja pasos marcados; la receta corregida (misma versión) debe rehacerlos todos."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    calls = []
+    fail_once = ['venv']
+
+    def execute(step, recipe, location, cache, report, token=None):
+        calls.append(step['kind'])
+        if fail_once and step['kind'] == fail_once[0]:
+            fail_once.pop()
+            raise RuntimeError('pip falló')
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    first = _fake_recipe()
+    with pytest.raises(RuntimeError):
+        installer.install(first, tmp_path)
+    calls.clear()
+    installer.install(replace(first, sha256='receta-corregida'), tmp_path)
+    assert calls == ['python', 'venv', 'verify']
+
+
+def _gated_recipe():
+    return Recipe(
+        'fake',
+        'diarization',
+        4.8,
+        0,
+        True,
+        'MIT',
+        (
+            {'kind': 'python', 'version': '3.14'},
+            {'kind': 'venv', 'path': '.venv'},
+            {'kind': 'hf', 'repo': 'owner/model', 'revision': '0' * 40, 'into': 'hf', 'gated': True},
+            {'kind': 'verify', 'import': 'json'},
+        ),
+    )
+
+
+def test_ac2_token_stays_out_of_install_json_and_log(tmp_path, monkeypatch):
+    """AC-2 (spec 034): el token llega al paso gated y no se escribe en install.json ni en el progreso."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    received = []
+
+    def execute(step, recipe, location, cache, report, token=None):
+        received.append((step['kind'], token))
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    result = installer.install(_gated_recipe(), tmp_path, token='hf_secreto_1234567890abcdef')
+
+    assert ('hf', 'hf_secreto_1234567890abcdef') in received
+    assert 'hf_secreto_1234567890abcdef' not in json.dumps(result)
+    assert 'hf_secreto_1234567890abcdef' not in (tmp_path / 'fake' / 'install.json').read_text(encoding='utf-8')
+
+
+def test_ac3_gated_recipe_without_token_is_not_installed(tmp_path, monkeypatch):
+    """AC-3 (spec 034): sin token, el instalador se niega antes de crear carpetas o descargar."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    monkeypatch.setattr(installer, 'execute_step', lambda *args, **kwargs: pytest.fail('no debe ejecutar pasos'))
+
+    with pytest.raises(installer.InstallError) as error:
+        installer.install(_gated_recipe(), tmp_path)
+
+    assert error.value.code == 'engine_token_required'
+    assert not (tmp_path / 'fake').exists()
+
+
+def test_ac3_gated_step_exit_25_ends_as_engine_gated(tmp_path, monkeypatch):
+    """AC-3 (spec 034): si el paso restringido sale con 25, el instalador responde engine_gated."""
+    monkeypatch.setattr(installer.shutil, 'disk_usage', lambda path: SimpleNamespace(free=10**10))
+    assert installer.EXIT_CODES['engine_gated'] == 25
+
+    def execute(step, recipe, location, cache, report, token=None):
+        if step['kind'] == 'hf':
+            raise subprocess.CalledProcessError(25, ['hf'])
+
+    monkeypatch.setattr(installer, 'execute_step', execute)
+    with pytest.raises(installer.InstallError) as error:
+        installer.install(_gated_recipe(), tmp_path, token='hf_secreto_1234567890abcdef')
+
+    assert error.value.code == 'engine_gated'

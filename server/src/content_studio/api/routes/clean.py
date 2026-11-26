@@ -19,6 +19,7 @@ from content_studio.clean import cuts as cut_file
 from content_studio.clean.cuts import replan
 from content_studio.clean.plan import Span
 from content_studio.db import jobs as store
+from content_studio.diarization.assign import assign_speakers
 from content_studio.jobs import queue
 
 router = APIRouter()
@@ -57,11 +58,23 @@ def _words(document: dict) -> list[Span]:
     return [word for segment in transcript['segments'] for word in segment['words']]
 
 
+def _speaker_view(document: dict) -> dict:
+    """Las palabras con el hablante del turno que las cubre, y el mapa de hablantes con nombres y colores (AC-8)."""
+    turns_file = Path(document['diarization'])
+    turns = json.loads(turns_file.read_text(encoding='utf-8'))['exclusive_diarization']
+    speakers = json.loads((turns_file.parent / 'speakers.json').read_text(encoding='utf-8'))
+    words = [dict(word) for word in _words(document)]
+    return {'words': assign_speakers(words, turns), 'speakers': speakers}
+
+
 @router.get('/clean/{job_id}')
 def get_cuts(job_id: JobId, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
-    """El documento de cortes del análisis: parámetros, duración, idioma y cortes."""
+    """El documento de cortes del análisis: parámetros, duración, idioma y cortes. Con hablantes, además las
+    palabras con su hablante (`words`) y el mapa de hablantes (`speakers`)."""
     _, document, _ = _analysis(conn, job_id)
-    return document
+    if 'diarization' not in document:
+        return document
+    return {**document, **_speaker_view(document)}
 
 
 @router.post('/clean/{job_id}/plan')

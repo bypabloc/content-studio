@@ -13,9 +13,14 @@ from typing import Any
 VERSION = 1
 
 
-def new_document(*, source_path: str, kind: str, language: str, cues: list[dict]) -> dict[str, Any]:
-    """Documento nuevo con su versión, el origen (ruta y tipo), el idioma y los cues; estilo y pistas vacíos."""
-    return {
+def new_document(
+    *, source_path: str, kind: str, language: str, cues: list[dict], speakers: dict[str, dict] | None = None
+) -> dict[str, Any]:
+    """Documento nuevo con su versión, el origen (ruta y tipo), el idioma y los cues; estilo y pistas vacíos.
+
+    Con `speakers`, trae los hablantes con su nombre y color (D-1: campo opcional, la versión no cambia).
+    """
+    doc: dict[str, Any] = {
         'version': VERSION,
         'source': {'path': source_path, 'kind': kind},
         'language': language,
@@ -23,16 +28,22 @@ def new_document(*, source_path: str, kind: str, language: str, cues: list[dict]
         'style': {},
         'tracks': {},
     }
+    if speakers is not None:
+        doc['speakers'] = speakers
+    return doc
 
 
 def _cue_from_words(cue_id: int, words: list[dict]) -> dict[str, Any]:
-    return {
+    cue: dict[str, Any] = {
         'id': cue_id,
         'start': words[0]['start'],
         'end': words[-1]['end'],
         'text': ' '.join(word['text'] for word in words),
         'words': [dict(word) for word in words],
     }
+    if words[0].get('speaker') is not None:
+        cue['speaker'] = words[0]['speaker']
+    return cue
 
 
 def _index(doc: dict[str, Any], cue_id: int) -> int:
@@ -111,6 +122,16 @@ def set_text(doc: dict[str, Any], cue_id: int, text: str) -> dict[str, Any]:
         words[-1]['end'] = cue['end']
     cue['words'] = words
     cue['text'] = ' '.join(new_words)
+    return _with_cues(doc, cues)
+
+
+def set_speaker(doc: dict[str, Any], cue_id: int, speaker: str) -> dict[str, Any]:
+    """Cambia el hablante del cue y el de sus palabras, para que una unión posterior lo conserve."""
+    cues = copy.deepcopy(doc['cues'])
+    cue = cues[_index(doc, cue_id)]
+    cue['speaker'] = speaker
+    for word in cue['words']:
+        word['speaker'] = speaker
     return _with_cues(doc, cues)
 
 

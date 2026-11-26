@@ -6,7 +6,8 @@ paths:
 
 # Testing: tipos, ubicación y ciclo TDD
 
-Runner único de gates: `python -m devtools test-runner --type=all` (calidad, las etapas del client sin e2e y `budget`), igual que la CI. `e2e` va aparte (`--type=e2e`, job `client`). Por debajo corre `uv run pytest` (con `--doctest-modules`; sin GPU). `uv run pytest -m local` suma los que necesitan los venvs de los motores de este equipo. Ciclo y comandos: skill `tdd-workflow`.
+Runner único de gates: `python -m devtools test-runner --type=all` (calidad, las etapas del client sin e2e y `budget`). El pre-push corre `unit`, `typecheck`, `tdd` y `guard-tdd` (y `e2e` si cambia el client).
+`e2e` también se pide aparte (`--type=e2e`). Por debajo corre `uv run pytest` (con `--doctest-modules`; sin GPU). `uv run pytest -m local` suma los que necesitan los venvs de los motores de este equipo. Ciclo y comandos: skill `tdd-workflow`.
 
 Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 
@@ -17,7 +18,7 @@ Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 | Doctest | El docstring de la función en `server/src/` | Funciones puras chicas: parsers, rutas, formatos | Sí |
 | Caracterización | `server/tests/integration/test_characterization.py` + `server/tests/integration/fixtures/` | Que la salida de los parsers y bloques no cambie sin querer | Sí |
 | Tamaño, espejo, cobertura, docstrings y tipos | `test-runner` (`devtools/tests/unit/test_runner/`) | Límites de `file-size.json`, espejo sin huérfanos, 80 % por archivo, D1 y mypy | Sí |
-| Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: sintaxis 3.10, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
+| Estructura | `tests/validators/test_structure.py` | Reglas de `codigo-python.md`: sintaxis del piso de las recetas, código solo en `server/src/`, `.agents`/`.claude` en sincronía | Sí |
 | Bugs | `server/tests/integration/test_bugs.py` | Un test de regresión por bug, que lo reproduce | Sí |
 | CLI `studio` | `server/tests/unit/src/content_studio/cli/` | Argparse: subcomandos, flags de narración y música, `serve` y `jobs` | Sí |
 | Registro | `server/tests/unit/src/content_studio/narration/engines/test_registry.py` | Motores registrados (`ENGINES`) | Sí |
@@ -25,7 +26,7 @@ Un fallo que solo da la CI (Linux) no se reproduce en WSL (`command-output.md`).
 | Client unitario | `client/tests/unit/src/<ruta>/<módulo>.test.ts(x)`, espejo de `client/src/` (vitest + Testing Library) | Funciones, hooks y componentes; 80 % de cobertura por archivo (`client-unit`) | Sí |
 | e2e | `tests/e2e/<flujo>/happy-*.e2e.ts` y `neg-*.e2e.ts` (Playwright, Chromium, API simulada desde `tests/e2e/_api/`) | La app construida: flujos, axe y capturas (`e2e`) | Sí, en el job `client`; no en `all` |
 | Local | `server/tests/integration/test_venvs.py` (`@pytest.mark.local`) | Cada venv importa su librería | No (`-m local`) |
-| tdd efímero | `server/tests/tdd/test_<pieza>.py` o `devtools/tests/tdd/` | Razonar una pieza antes de su test permanente | **Nunca**: `guard-tdd` (pre-push y CI) falla si existe |
+| tdd efímero | `server/tests/tdd/test_<pieza>.py` o `devtools/tests/tdd/` | Razonar una pieza antes de su test permanente | **Nunca**: `guard-tdd` (pre-push) falla si existe |
 
 * Un test unitario va en su ruta espejo: `server/tests/unit/src/content_studio/<ruta>/test_<módulo>.py` o `devtools/tests/unit/<ruta>/test_<módulo>.py`. Lo que cruza módulos va a `server/tests/integration/`. La etapa `unit` falla si falta el espejo de un módulo (salvo lo que lista `tests/validators/mirror.baseline.json`) y exige 80 % de cobertura por archivo del changeset.
 * Un test del client va en `client/tests/unit/src/<ruta>/<módulo>.test.ts(x)` y corre con `bun run --cwd client test`.

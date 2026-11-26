@@ -6,9 +6,9 @@
   "cpu": true,
   "license": "MIT",
   "steps": [
-    {"kind": "python", "version": "3.12"},
+    {"kind": "python", "version": "3.14"},
     {"kind": "venv", "path": ".venv-whisper"},
-    {"kind": "pip", "packages": ["faster-whisper==1.2.1", "av==13.1.0", "nvidia-cublas-cu12==12.4.5.8", "nvidia-cudnn-cu12==9.1.0.70"]},
+    {"kind": "pip", "packages": ["faster-whisper==1.2.1", "av==18.1.1", "ctranslate2==4.9.1", "nvidia-cublas-cu12==12.4.5.8", "nvidia-cudnn-cu12==9.1.0.70"]},
     {"kind": "verify", "import": "faster_whisper"}
   ]
 }

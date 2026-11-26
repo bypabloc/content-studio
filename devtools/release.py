@@ -13,7 +13,7 @@ import json
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from . import paths, version
@@ -56,7 +56,7 @@ def latest(app_version: str, signature: str, url: str, body: str) -> dict:
     return {
         'version': app_version,
         'notes': body,
-        'pub_date': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'pub_date': datetime.now(UTC).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'platforms': {'windows-x86_64': {'signature': signature, 'url': url}},
     }
 

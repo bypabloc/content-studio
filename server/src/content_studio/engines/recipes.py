@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
 DIRECTORY = Path(__file__).with_name('recipes')
 ENGINE = re.compile(r'[a-z0-9]+(?:[.-][a-z0-9]+)*')
 COMMIT = re.compile(r'[0-9a-f]{40}')
-PYTHON = re.compile(r'3\.(?:10|11|12)(?:\.\d+)?')
+PYTHON = re.compile(r'3\.(?:1[0-5])(?:\.\d+)?')
 MODULE = re.compile(r'[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*')
 HF_REPO = re.compile(r'[\w.-]+/[\w.-]+')
 SHA256 = re.compile(r'[0-9a-f]{64}')
@@ -33,11 +34,17 @@ class Recipe:
     license: str
     steps: tuple[dict[str, Any], ...]
     version: int = 1
+    sha256: str = ''
 
     @property
     def venv(self) -> str:
         """Ruta del entorno dentro de la familia de la receta."""
         return next(str(step['path']) for step in self.steps if step['kind'] == 'venv')
+
+    @property
+    def gated(self) -> bool:
+        """True si algún paso hf declara un repositorio restringido en Hugging Face."""
+        return any(step.get('gated') for step in self.steps if step['kind'] == 'hf')
 
 
 def _matches(pattern: re.Pattern[str]) -> Callable[[object], bool]:
@@ -86,7 +93,7 @@ OPTIONAL: dict[str, dict[str, Callable[[object], bool]]] = {
         'exclude': _strings,
     },
     'git': {'recursive': _boolean},
-    'hf': {'allow_patterns': _strings, 'ignore_patterns': _strings},
+    'hf': {'allow_patterns': _strings, 'ignore_patterns': _strings, 'gated': _boolean},
     'verify': {
         'paths': lambda value: isinstance(value, list) and all(_relative(path) for path in value),
         'run': lambda value: isinstance(value, list) and bool(value) and _relative(value[0]) and _strings(value),
@@ -129,7 +136,7 @@ def validate(document: object) -> Recipe:
     engine, family = document.get('engine'), document.get('family')
     if not isinstance(engine, str) or not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    if family not in ('narration', 'music', 'system', 'transcription', 'vision', 'assistant'):
+    if family not in ('narration', 'music', 'system', 'transcription', 'vision', 'assistant', 'diarization'):
         raise ValueError('Invalid engine family')
     cpu, license_name = document.get('cpu'), document.get('license')
     if not isinstance(cpu, bool) or not isinstance(license_name, str) or not _text(license_name):
@@ -160,10 +167,11 @@ def load(engine: str) -> Recipe:
     """Carga la receta de un motor. El nombre debe coincidir con el archivo."""
     if not ENGINE.fullmatch(engine):
         raise ValueError('Invalid engine name')
-    recipe = validate(json.loads((DIRECTORY / f'{engine}.json').read_text(encoding='utf-8')))
+    raw = (DIRECTORY / f'{engine}.json').read_bytes()
+    recipe = validate(json.loads(raw.decode('utf-8')))
     if recipe.engine != engine:
         raise ValueError(f'Recipe filename mismatch: {engine}')
-    return recipe
+    return replace(recipe, sha256=hashlib.sha256(raw).hexdigest())
 
 
 def load_all() -> list[Recipe]:

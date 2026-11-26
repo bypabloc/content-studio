@@ -12,10 +12,12 @@ paths:
 
 | Pieza | Rol | Dónde |
 | :--- | :--- | :--- |
-| Python ≥ 3.10 (CI en 3.10 y 3.12) | Todo el código; 3.10 por el venv de CosyVoice | `server/src/content_studio/` |
+| Python 3.15 (`.python-version`); piso de los motores desde sus recetas (hoy 3.11) | Server, devtools y CI en 3.15 (la CI solo corre en PR ajenos); el código de `narration/` y `music/` que corre en los venvs de los motores, en el piso (CosyVoice e IndexTTS) | `server/src/content_studio/`, `devtools/python_floor.py` |
 | uv | Venv de desarrollo (`uv sync`), `uv run ruff/pytest` y el CLI `uv run studio <comando>` | `pyproject.toml`, `uv.lock` |
 | argparse | CLI `studio` (`serve`, `narration`, `music`, `jobs`), solo stdlib | `server/src/content_studio/cli/` |
 | FastAPI + uvicorn | API local en 127.0.0.1 con token Bearer y `/events` por SSE; `studio serve` la levanta junto con el worker de la cola | `server/src/content_studio/api/` |
+| `mcp` (SDK oficial, 2.3.0) | Servidor MCP por stdio de `studio mcp` (spec 029) y por Streamable HTTP en la red local (spec 032); el SDK se importa solo al arrancar el servidor | `server/src/content_studio/mcp_server/sdk.py`, `cli/mcp.py`, `lan/mcp_http.py` |
+| `cryptography` | Certificado autofirmado de la red local (spec 032, D-4); se importa solo al crearlo | `server/src/content_studio/lan/cert.py` |
 | sqlite3 (stdlib) en WAL | Base de trabajos (`var/content-studio.db`) con migraciones en SQL según `PRAGMA user_version` | `server/src/content_studio/db/` |
 | Un venv por motor | torch, numpy y la librería del motor, aislados; el comando se relanza en su venv (`common/process.use_venv`) | `paths.engines_dir()` |
 | Motores TTS | VoxCPM2, Qwen3-TTS, Chatterbox, CosyVoice 3, OmniVoice, IndexTTS (licencias en `AGENTS.md` y `registry.py`) | `server/src/content_studio/narration/engines/registry.py` (`ENGINES`) |

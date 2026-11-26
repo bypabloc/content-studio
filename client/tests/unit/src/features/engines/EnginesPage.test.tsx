@@ -18,17 +18,18 @@ const engines = [
     commercial: true,
     status: 'missing',
     owner: null,
+    gated: false,
     size_bytes: 0,
     job_id: null,
     verification: null,
   },
   {
     engine: 'acestep', family: 'music', size_gb: 12, vram_gb: 8, cpu: false, license: 'MIT', commercial: true,
-    status: 'installed', owner: 'app', size_bytes: 10, job_id: null, verification: { ok: false },
+    status: 'installed', owner: 'app', gated: false, size_bytes: 10, job_id: null, verification: { ok: false },
   },
   {
     engine: 'faster-whisper', family: 'transcription', size_gb: 4, vram_gb: 3, cpu: true, license: 'MIT', commercial: true,
-    status: 'external', owner: 'external', size_bytes: 20, job_id: null, verification: { ok: true },
+    status: 'external', owner: 'external', gated: false, size_bytes: 20, job_id: null, verification: { ok: true },
   },
 ];
 
@@ -109,5 +110,24 @@ describe('EnginesPage', () => {
     api.get.mockRejectedValue(new Error('offline'));
     renderPage();
     expect(await screen.findByText('No se pudo cargar la lista de motores.')).toBeTruthy();
+  });
+
+  it('AC-5: el grupo Diarización muestra pyannote y bloquea Instalar sin token', async () => {
+    const pyannote = {
+      engine: 'pyannote', family: 'diarization', size_gb: 6, vram_gb: 2, cpu: true, license: 'MIT / CC-BY-4.0',
+      commercial: true, status: 'missing', owner: null, gated: true, size_bytes: 0, job_id: null, verification: null,
+    };
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/engines') return [...engines, pyannote];
+      if (path === '/system') return { ffmpeg: null, git: null, gpu: { name: 'RTX', vram_gb: 8, driver: '1', cuda: '12' } };
+      if (path === '/credentials/huggingface') return { configured: false };
+      return {};
+    });
+    renderPage();
+
+    expect(await screen.findByText('Diarización')).toBeTruthy();
+    const card = await screen.findByRole('region', { name: 'pyannote' });
+    expect((within(card).getByRole('button', { name: 'Instalar' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(within(card).getByLabelText('Token de Hugging Face')).toBeTruthy();
   });
 });

@@ -232,4 +232,43 @@ describe('SubtitlesEditor', () => {
 
     expect(screen.queryByRole('combobox', { name: t('subtitles.editor.track') })).toBeNull();
   });
+
+
+const speakerDoc = {
+  ...doc,
+  speakers: { SPEAKER_00: { name: 'Ana', color: '#2563eb' }, SPEAKER_01: { name: 'Luis', color: '#dc2626' } },
+  cues: [
+    { ...doc.cues[0], speaker: 'SPEAKER_00' },
+    { ...doc.cues[1], speaker: 'SPEAKER_01' },
+  ],
+};
+
+describe('SubtitlesEditor with speakers', () => {
+  it('shows the speaker legend and exports the names when asked', async () => {
+    api.get.mockImplementation(async (path: string) => (path === '/subtitles/7' ? structuredClone(speakerDoc) : { key: 'x', value: undefined }));
+    renderEditor();
+
+    expect(await screen.findByRole('list', { name: t('speakers.legend.title') })).toBeTruthy();
+    await userEvent.click(screen.getByRole('checkbox', { name: t('subtitles.export.speaker_labels') }));
+    await userEvent.click(screen.getByRole('button', { name: t('subtitles.export.srt') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/subtitles/7/export', { format: 'srt', speaker_labels: true }));
+  });
+});
+
+  it('guarda el borrador antes de exportar, para que el archivo lleve el cambio recién hecho', async () => {
+    api.get.mockImplementation(async (path: string) => (path === '/subtitles/7' ? structuredClone(speakerDoc) : { key: 'x', value: undefined }));
+    renderEditor();
+
+    const name = await screen.findByLabelText(t('speakers.legend.rename', { name: 'Ana' }));
+    fireEvent.change(name, { target: { value: 'Ana M.' } });
+    fireEvent.keyDown(name, { key: 'Enter' });
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.export.srt') }));
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/subtitles/7/export', { format: 'srt' }));
+    const saved = api.put.mock.calls.find((call) => call[0] === '/subtitles/7');
+    expect(saved?.[1]).toMatchObject({ speakers: { SPEAKER_00: { name: 'Ana M.' } } });
+    expect(api.put.mock.invocationCallOrder[0]).toBeLessThan(api.post.mock.invocationCallOrder[0]);
+  });
+
 });

@@ -19,6 +19,13 @@ router = APIRouter()
 SELECTOR_PREFIX = 'select.'
 
 
+# Los secretos (secret.*) tienen su ruta propia: /credentials/huggingface (spec 034, AC-4).
+def _reject_secret(key: str) -> None:
+    """Ningún secreto se lee ni se escribe por la API genérica de ajustes."""
+    if key.startswith('secret.'):
+        raise ApiError(403, 'secret_setting')
+
+
 class SettingValue(BaseModel):
     """Cuerpo de PUT /settings/{key}: cualquier valor JSON."""
 
@@ -28,12 +35,14 @@ class SettingValue(BaseModel):
 @router.get('/settings/{key}', response_model=SettingOut)
 def read_setting(key: str, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Valor de la preferencia (None si nunca se guardó)."""
+    _reject_secret(key)
     return {'key': key, 'value': store.get(conn, key)}
 
 
 @router.put('/settings/{key}', response_model=SettingOut)
 def write_setting(key: str, body: SettingValue, conn: Annotated[sqlite3.Connection, Depends(get_conn)]) -> dict:
     """Guarda la preferencia y la devuelve."""
+    _reject_secret(key)
     if key.startswith('storage.'):
         raise ApiError(422, 'storage_requires_move')
     store.set_value(conn, key, body.value)

@@ -4,7 +4,7 @@ Una tarea por archivo, `NN-<slug>.md`, con la prioridad en el número (01 es lo 
 
 | Tarea | Qué |
 | :--- | :--- |
-| _(ninguna todavía)_ | |
+| [01-pulido-tras-la-auditoria](01-pulido-tras-la-auditoria.md) | Bugs menores, tests intermitentes, contraste y funciones diferidas de las specs 003 a 039 |
 
 ## Plantilla
 

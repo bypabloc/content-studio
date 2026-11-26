@@ -19,13 +19,18 @@ from content_studio.api.errors import ApiError
 from content_studio.api.routes import (
     catalog,
     clean,
+    credentials,
     diagnostics,
+    diarizations,
     editor,
     engines,
     files,
     fs,
     health,
+    inbox,
+    integrations,
     jobs,
+    lan,
     library,
     library_actions,
     library_organize,
@@ -35,7 +40,9 @@ from content_studio.api.routes import (
     music,
     narration,
     queue,
+    server_control,
     settings,
+    speakers,
     storage,
     subtitles,
     system,
@@ -43,8 +50,10 @@ from content_studio.api.routes import (
     voices_catalog,
     voices_import,
 )
+from content_studio.api.routes import remote as remote_routes
 from content_studio.db import connection, schema
 from content_studio.jobs.worker import Worker
+from content_studio.lan.pairing import Pairing
 from content_studio.library import index as library_index
 from content_studio.messages import negotiate, t
 from content_studio.services.registry import SERVICES
@@ -88,15 +97,35 @@ def create_app(
     worker: Worker | None = None,
     roots: Sequence[Path] | None = None,
     broker: events.Broker | None = None,
+    *,
+    remote: bool = False,
+    pairing: Pairing | None = None,
+    cert_path: Path | None = None,
+    lan_url: str | None = None,
+    max_upload_mb: int = 2048,
 ) -> FastAPI:
     """App con la base migrada y el token. `worker` (si corre) termina los procesos al cancelar un trabajo;
     `roots` son las carpetas que /files puede servir (por defecto out/, las referencias y el catálogo de voces);
-    `broker` entrega los eventos de /events (el worker debe publicar en el mismo)."""
+    `broker` entrega los eventos de /events (el worker debe publicar en el mismo).
+
+    Con `remote` (spec 032) es la app de la red local: solo la lista cerrada de `routes/remote.py`, con el token de
+    cada dispositivo; `pairing` es el PIN que comparte con la app local, `cert_path` da la huella y `lan_url` es su
+    propia dirección (la usa el MCP por HTTP)."""
     with closing(connection.connect(db_path)) as conn:
         backups = None if db_path == Path(':memory:') else db_path.parent / 'backups'  # spec 022, D-4
         schema.migrate(conn, backups)
         library_index.backfill(conn)  # una sola vez: los trabajos anteriores a la biblioteca (spec 020, AC-1)
     app = FastAPI(title='content-studio', version='0.1.0')
+    app.state.pairing = pairing or Pairing()
+    if remote:
+        app.state.db_path = db_path
+        app.state.services = services
+        app.state.worker = worker
+        app.state.cert_path = cert_path
+        app.state.max_upload_bytes = max_upload_mb * 1024 * 1024
+        app.add_exception_handler(StarletteHTTPException, _http_error)
+        remote_routes.include(app, lan_url)
+        return app
     app.add_middleware(
         CORSMiddleware,
         allow_origins=TAURI_ORIGINS,
@@ -105,6 +134,7 @@ def create_app(
     )
     app.state.db_path = db_path
     app.state.token = token
+    app.state.stop = None
     app.state.services = services
     app.state.worker = worker
     app.state.broker = broker or events.Broker()
@@ -123,7 +153,12 @@ def create_app(
     app.add_exception_handler(StarletteHTTPException, _http_error)
     header_only = [Depends(_token_guard(allow_query=False))]
     app.include_router(health.router, dependencies=header_only)
+    app.include_router(inbox.router, dependencies=header_only)
+    app.include_router(lan.router, dependencies=header_only)
+    app.include_router(integrations.router, dependencies=header_only)
+    app.include_router(server_control.router, dependencies=header_only)
     app.include_router(catalog.router, dependencies=header_only)
+    app.include_router(credentials.router, dependencies=header_only)
     app.include_router(settings.router, dependencies=header_only)
     app.include_router(storage.router, dependencies=header_only)
     app.include_router(system.router, dependencies=header_only)
@@ -133,6 +168,8 @@ def create_app(
     app.include_router(queue.router, dependencies=header_only)
     app.include_router(clean.router, dependencies=header_only)
     app.include_router(subtitles.router, dependencies=header_only)
+    app.include_router(speakers.router, dependencies=header_only)
+    app.include_router(diarizations.router, dependencies=header_only)
     app.include_router(mix.router, dependencies=header_only)
     app.include_router(library.router, dependencies=header_only)
     app.include_router(library_organize.router, dependencies=header_only)

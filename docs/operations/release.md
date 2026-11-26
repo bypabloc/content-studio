@@ -39,7 +39,7 @@ python -m devtools app-check run --scenario=installed --binary=<carpeta>/app/con
 
 ## Windows protegió tu PC
 
-El instalador no tiene firma de código ([PENDING/022-firma-de-codigo](../process/PENDING/022-firma-de-codigo.md)): SmartScreen muestra «Windows protegió tu PC». Se sigue con **Más información** > **Ejecutar de todas formas**. Las notas de cada Release lo explican.
+El instalador no tiene firma de código ([WARNING/firma-y-traducciones](../process/WARNING/firma-y-traducciones.md)): SmartScreen muestra «Windows protegió tu PC». Se sigue con **Más información** > **Ejecutar de todas formas**. Las notas de cada Release lo explican.
 
 ## Qué instala y qué conserva
 

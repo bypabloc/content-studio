@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from content_studio.clean import cuts as clean_cuts
+from content_studio.diarization import speakers as diarization_speakers
 from content_studio.subtitles import create_main
 from content_studio.subtitles.document import load
 
@@ -170,3 +171,97 @@ def test_transcribe_on_a_miss_extracts_the_audio_runs_whisper_and_stores_the_res
     assert calls['language'] == 'es'
     assert calls['model'] == 'model:tiny'
     assert calls['stored'] == str(json_file)
+
+
+def test_ac2_file_with_speakers_carries_each_cue_speaker_and_names():
+    """AC-2: un origen de archivo con hablantes trae `speakers` con nombre y color, y `speaker` en cada cue."""
+    names = {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}, 'SPEAKER_01': {'name': 'Luis', 'color': '#dc2626'}}
+    words = [
+        {'word': 'hola', 'start': 0.0, 'end': 0.4, 'speaker': 'SPEAKER_00'},
+        {'word': 'mundo', 'start': 0.5, 'end': 0.9, 'speaker': 'SPEAKER_01'},
+    ]
+
+    doc = create_main.build_document('file', source='charla.wav', language='es', words=words, speakers=names)
+    cleaner = create_main.build_document('cleaner', source='charla.mp4', language='es', words=words, speakers=names)
+
+    assert doc['speakers'] == names
+    assert [cue['speaker'] for cue in doc['cues']] == ['SPEAKER_00', 'SPEAKER_01']
+    assert [cue['speaker'] for cue in cleaner['cues']] == ['SPEAKER_00', 'SPEAKER_01']
+
+
+def test_ac2_words_take_the_speaker_of_their_turn():
+    """AC-2: tag_speakers pone a cada palabra el hablante de su turno y arma los nombres como speakers.json."""
+    result = {
+        'exclusive_diarization': [
+            {'start': 0.0, 'end': 0.6, 'speaker': 'SPEAKER_00'},
+            {'start': 0.6, 'end': 1.0, 'speaker': 'SPEAKER_01'},
+        ],
+        'speakers': ['SPEAKER_00', 'SPEAKER_01'],
+    }
+    words = [{'word': 'hola', 'start': 0.0, 'end': 0.4}, {'word': 'mundo', 'start': 0.6, 'end': 0.9}]
+
+    tagged, names = create_main.tag_speakers(words, result)
+
+    assert [word['speaker'] for word in tagged] == ['SPEAKER_00', 'SPEAKER_01']
+    assert names == diarization_speakers.build(['SPEAKER_00', 'SPEAKER_01'])
+
+
+def test_ac2_cleaner_keeps_each_words_speaker(tmp_path):
+    """AC-2: las palabras del limpiador conservan su hablante al pasar por los cortes."""
+    analysis = tmp_path / 'analysis'
+    analysis.mkdir()
+    clean_cuts.save(analysis, {'cuts': [{'start': 1.0, 'end': 2.0, 'enabled': True}], 'duration': 4.0})
+    words = [
+        {'word': 'uno', 'start': 0.2, 'end': 0.6, 'speaker': 'SPEAKER_00'},
+        {'word': 'tres', 'start': 2.5, 'end': 3.0, 'speaker': 'SPEAKER_01'},
+    ]
+
+    kept = create_main.clean_words(words, analysis)
+
+    assert [(word['word'], word['speaker']) for word in kept] == [('uno', 'SPEAKER_00'), ('tres', 'SPEAKER_01')]
+
+
+def test_ac8_cleaner_keeps_the_speakers_on_the_clean_timeline(tmp_path):
+    """AC-8: «Subtitular» desde el limpiador lleva los hablantes del análisis, en el tiempo del archivo limpio."""
+    cache = tmp_path / 'cache'
+    cache.mkdir()
+    transcript = cache / 'transcript.json'
+    transcript.write_text(json.dumps(WORDS), encoding='utf-8')
+    analysis = tmp_path / 'analysis'
+    analysis.mkdir()
+    turns = analysis / 'diarization' / 'turns.json'
+    turns.parent.mkdir()
+    turns.write_text(
+        json.dumps(
+            {
+                'exclusive_diarization': [
+                    {'start': 0.0, 'end': 0.45, 'speaker': 'SPEAKER_00'},
+                    {'start': 0.45, 'end': 1.0, 'speaker': 'SPEAKER_01'},
+                ]
+            }
+        ),
+        encoding='utf-8',
+    )
+    (turns.parent / 'speakers.json').write_text(
+        json.dumps(
+            {'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'}, 'SPEAKER_01': {'name': 'Luis', 'color': '#dc2626'}}
+        ),
+        encoding='utf-8',
+    )
+    clean_cuts.save(analysis, {'cuts': [], 'duration': 1.0, 'diarization': str(turns)})
+    folder = _job(
+        tmp_path,
+        {
+            'origin': 'cleaner',
+            'input': str(transcript),
+            'analysis': str(analysis),
+            'source': 'charla.mp4',
+            'language': 'es',
+        },
+    )
+
+    assert create_main.main(['--folder', str(folder)]) == 0
+
+    doc = load(folder / 'subtitles.json')
+    assert doc['speakers']['SPEAKER_01']['name'] == 'Luis'
+    assert [cue['speaker'] for cue in doc['cues']] == ['SPEAKER_00', 'SPEAKER_01']

@@ -17,5 +17,5 @@ test('neg: importar un .txt se rechaza y el aviso dice qué archivo sirve', asyn
   await page.getByRole('button', { name: 'Crear proyecto', exact: true }).click();
 
   await expect(page.getByText('«C:/fake/in/notas.txt» no es un SRT ni un VTT. Elige un archivo .srt o .vtt.')).toBeVisible();
-  expect(jobBodies(calls)).toEqual([{ kind: 'subtitles.create', params: { origin: 'import', input: 'C:/fake/in/notas.txt' } }]);
+  expect(jobBodies(calls)).toEqual([{ kind: 'subtitles.create', params: expect.objectContaining({ origin: 'import', input: 'C:/fake/in/notas.txt' }) }]);
 });

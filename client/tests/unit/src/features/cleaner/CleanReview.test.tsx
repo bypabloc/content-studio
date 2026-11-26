@@ -238,3 +238,37 @@ describe('CleanReview (spec 013, D-6, AC-7)', () => {
     });
   });
 });
+
+describe('CleanReview con hablantes (AC-8)', () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it('colorea cada palabra con el color de su hablante y muestra la leyenda con los nombres', async () => {
+    api.get.mockImplementation(async (path: string) => {
+      if (path === '/clean/7') {
+        return {
+          ...doc,
+          params: { input: '/media/charla.mp4' },
+          words: [
+            { start: 0, end: 0.5, word: 'hola', speaker: 'SPEAKER_00' },
+            { start: 0.5, end: 1, word: 'mundo', speaker: 'SPEAKER_01' },
+          ],
+          speakers: {
+            SPEAKER_00: { name: 'Ana', color: '#2563eb' },
+            SPEAKER_01: { name: 'Luis', color: '#dc2626' },
+          },
+        };
+      }
+      if (path.startsWith('/media/peaks')) return { peaks: [0.1, 0.4] };
+      return null;
+    });
+    renderReview();
+
+    expect((await screen.findByRole('button', { name: 'hola' })).style.borderBottomColor).toBe('rgb(37, 99, 235)');
+    expect(screen.getByRole('button', { name: 'mundo' }).style.borderBottomColor).toBe('rgb(220, 38, 38)');
+    expect(screen.getByText('Ana')).toBeTruthy();
+    expect(screen.getByText('Luis')).toBeTruthy();
+  });
+});

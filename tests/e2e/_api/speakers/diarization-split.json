@@ -1,0 +1,6 @@
+{
+  "split": {
+    "SPEAKER_00": "D:/out/diarize-job/speakers/SPEAKER_00.wav",
+    "SPEAKER_01": "D:/out/diarize-job/speakers/SPEAKER_01.wav"
+  }
+}

@@ -8,9 +8,11 @@ Una ficha por módulo funcional, de hasta 40 líneas, con front-matter `modulo` 
 | Música | Música de fondo instrumental por estilo | [music.md](music.md) |
 | Voces y grabación | Perfiles propios grabados o importados y catálogo de voces libres por estilo | [voices.md](voices.md) |
 | Servidor | API local y cola de trabajos, con el CLI `studio` | [server.md](server.md) |
+| Integraciones | Asistentes y agentes locales por MCP (stdio) que piden narraciones, música y conversiones sin abrir la app | [integrations.md](integrations.md) |
 | Cliente | Ventana de escritorio: shell, cola, tema, selectores y ajustes | [client.md](client.md) |
 | Motores y almacenamiento | Instalación de motores con recetas y carpetas elegibles | [engines.md](engines.md) |
 | Subtítulos | Subtítulos desde archivo, limpiador, narración o SRT/VTT, con editor, quemado y traducción | [subtitles.md](subtitles.md) |
+| Transcripción | Transcribir un audio o video con faster-whisper; con «Identificar hablantes», texto por hablante con nombres, exportar TXT y crear subtítulos | [transcription.md](transcription.md) |
 | Convertir y normalizar | Conversión de audio y video, presets de redes, GIF y normalizar la sonoridad (dos pasadas), con su A/B | [convert.md](convert.md) |
 | Recortar, unir y dividir | Recortes, uniones con fundido cruzado y divisiones de audio y video, por CLI y API | [edit.md](edit.md) |
 | Mezcla | Música bajo la voz con ducking, LUFS final y video opcional | [mix.md](mix.md) |

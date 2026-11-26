@@ -12,6 +12,7 @@ const qwen = {
   commercial: true,
   status: 'installed',
   owner: 'app',
+  gated: false,
   size_bytes: 7_000_000_000,
   job_id: null,
   verification: { ok: true, checked_at: '2026-11-21T00:00:00Z', duration_s: 1 },
@@ -34,6 +35,16 @@ describe('EngineCard', () => {
     expect(screen.getByRole('button', { name: 'Verificar' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reparar' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Desinstalar' })).toBeTruthy();
+  });
+
+  it('AC-7: un motor con otra receta muestra la actualización y Actualizar reinstala', () => {
+    const onAction = vi.fn();
+    render(<EngineCard engine={{ ...qwen, status: 'outdated' }} gpu={gpu} onAction={onAction} />);
+
+    expect(screen.getByText('Actualización disponible')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Verificar' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Actualizar' }));
+    expect(onAction).toHaveBeenCalledWith({ type: 'install', engine: 'qwen-0.6b' });
   });
 
   it('permite instalar con poca VRAM y muestra la advertencia', () => {
@@ -130,5 +141,19 @@ describe('EngineCard', () => {
 
     expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('7 GB'));
     expect(onAction).not.toHaveBeenCalled();
+  });
+
+  it('redondea la VRAM de la GPU y muestra «Externo» una sola vez', () => {
+    render(
+      <EngineCard
+        engine={{ ...qwen, status: 'external', owner: 'external' }}
+        gpu={{ ...gpu, vram_gb: 7.99609375 }}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/3\.2 \/ 8 GB/)).toBeTruthy();
+    expect(screen.queryByText(/7\.99609375/)).toBeNull();
+    expect(screen.getAllByText('Externo')).toHaveLength(1);
   });
 });

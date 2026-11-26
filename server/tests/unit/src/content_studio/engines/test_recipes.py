@@ -1,6 +1,7 @@
 """Recetas reproducibles y validadas, spec 012 AC-2."""
 
 import re
+from pathlib import Path
 
 import pytest
 
@@ -87,7 +88,7 @@ def test_ac5_the_vision_recipe_pins_opencv_and_only_the_yunet_model():
 
     assert (recipe.family, recipe.cpu, recipe.venv) == ('vision', True, '.venv-vision')
     pip = next(step for step in recipe.steps if step['kind'] == 'pip')
-    assert pip['packages'] == ['opencv-python==4.13.0.92', 'huggingface-hub==0.36.2']
+    assert pip['packages'] == ['opencv-python==5.1.0.95', 'huggingface-hub==2.4.0']
     hf = next(step for step in recipe.steps if step['kind'] == 'hf')
     assert hf['allow_patterns'] == ['face_detection_yunet_2023mar.onnx']
 
@@ -136,3 +137,73 @@ def test_ac1_rejects_an_invalid_download_or_run(step, message):
         del data['steps'][2]
     with pytest.raises(ValueError, match=message):
         recipes.validate(data)
+
+
+def test_ac1_every_engine_below_pinned_python_has_its_reason():
+    """AC-1 (spec 026): toda receta por debajo de .python-version tiene su fila en una tabla de docs/process/01-done/:
+    motor, la misma versión de Python y el motivo en la última columna."""
+    root = Path(__file__).resolve().parents[6]
+    pinned = tuple(int(part) for part in (root / '.python-version').read_text(encoding='utf-8').strip().split('.')[:2])
+    rows: dict[str, list[list[str]]] = {}
+    for doc in (root / 'docs/process/01-done').glob('*.md'):
+        for line in doc.read_text(encoding='utf-8').splitlines():
+            if line.startswith('| '):
+                cells = [cell.strip() for cell in line.strip().strip('|').split('|')]
+                rows.setdefault(cells[0], []).append(cells)
+    missing = []
+    for recipe in recipes.load_all():
+        python = next(step['version'] for step in recipe.steps if step['kind'] == 'python')
+        version = tuple(int(part) for part in python.split('.')[:2])
+        documented = any(len(cells) >= 3 and cells[1] == python and cells[-1] for cells in rows.get(recipe.engine, []))
+        if version < pinned and not documented:
+            missing.append(recipe.engine)
+    assert missing == [], f'sin fila (motor, Python, motivo) en docs/process/01-done/: {missing}'
+
+
+def test_ac1_pyannote_recipe():
+    """AC-1 (spec 034): la receta de pyannote es de diarización, fija versiones y pide el repositorio restringido."""
+    recipe = recipes.load('pyannote')
+
+    assert (recipe.family, recipe.venv) == ('diarization', '.venv-diarize')
+    assert recipe.steps[0] == {'kind': 'python', 'version': '3.14'}
+    packages = [package for step in recipe.steps if step['kind'] == 'pip' for package in step['packages']]
+    for name in ('torch', 'torchaudio', 'pyannote.audio', 'torchcodec', 'huggingface-hub'):
+        assert any(package.split('==')[0] == name and '==' in package for package in packages), name
+    hf = next(step for step in recipe.steps if step['kind'] == 'hf')
+    assert hf['repo'] == 'pyannote/speaker-diarization-community-1'
+    assert re.fullmatch(r'[0-9a-f]{40}', hf['revision'])
+    assert hf['gated'] is True
+    assert hf['into'] == 'models/community-1'
+    assert recipe.gated is True
+    assert recipe.steps[-1] == {'kind': 'verify', 'import': 'pyannote.audio'}
+
+
+def test_ac1_gated_is_a_boolean_on_hf_steps():
+    """AC-1 (spec 034): un paso hf declara gated como booleano; cualquier otro valor se rechaza."""
+    hf = {'kind': 'hf', 'repo': 'owner/model', 'revision': '0' * 40, 'into': 'hf'}
+    data = _valid_recipe()
+    data['steps'][2] = {**hf, 'gated': True}
+    assert recipes.validate(data).gated is True
+    data['steps'][2] = {**hf, 'gated': 'yes'}
+    with pytest.raises(ValueError, match='gated'):
+        recipes.validate(data)
+
+
+def test_ac3_pyannote_pins_torch_after_installing_pyannote_audio():
+    """Regresión: pyannote.audio sin fijar torch sube torch desde PyPI y torchaudio deja de cargar."""
+    steps = recipes.load('pyannote').steps
+    is_audio = [s['kind'] == 'pip' and any(p.startswith('pyannote.audio') for p in s['packages']) for s in steps]
+    audio = is_audio.index(True)
+    later = [
+        s for s in steps[audio + 1 :] if s['kind'] == 'pip' and any(p.startswith('torch==') for p in s['packages'])
+    ]
+    assert later, 'falta fijar torch después de pyannote.audio'
+    assert any(p.startswith('torchaudio==') for p in later[-1]['packages'])
+    assert later[-1].get('index'), 'la fijación de torch necesita su índice de CUDA'
+
+
+def test_ac2_pyannote_vram_measured():
+    """C1 (spec 039): vram_gb es el pico medido (1,1 GB de pyannote sobre la línea base) hacia arriba a 0,5 GB."""
+    recipe = recipes.load('pyannote')
+    assert recipe.vram_gb == 1.5
+    assert recipe.size_gb == 5

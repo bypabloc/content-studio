@@ -22,8 +22,17 @@ function alertOn(queryClient: QueryClient, key: string): boolean {
  * Da el cliente de la API a los hooks y abre la conexión de eventos (SSE) una vez: cada trabajo que termina
  * avisa según el foco de la ventana y los ajustes de avisos.
  */
-export function ApiProvider({ connection, children }: { connection: Connection; children: ReactNode }) {
-  const api = useMemo(() => createApi(connection), [connection]);
+export function ApiProvider({
+  connection,
+  reconnect,
+  children,
+}: {
+  connection: Connection;
+  /** Pide la conexión otra vez tras un fallo de red (spec 028, AC-8). */
+  reconnect?: () => Promise<Connection>;
+  children: ReactNode;
+}) {
+  const api = useMemo(() => createApi(connection, undefined, reconnect), [connection, reconnect]);
   const queryClient = useQueryClient();
 
   useEffect(() => {

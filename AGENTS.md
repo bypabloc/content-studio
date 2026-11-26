@@ -12,6 +12,7 @@ Los venvs y modelos se instalan bajo demanda en la carpeta de motores elegida en
 | — (`studio convert`, `normalize`, `trim`, `concat`, `split`) | Convertir y normalizar la sonoridad (ffmpeg), y recortar, unir y dividir medios | `server/src/content_studio/media/` | [convert.md](docs/process/01-done/convert.md) · [edit.md](docs/process/01-done/edit.md) |
 | — (`studio editor render`) | Editor no destructivo: títulos, velocidad, color/LUT, chroma, fusión, subtítulos, keyframes y exportación | `server/src/content_studio/editor/` · `client/src/features/editor/` | [editor.md](docs/process/01-done/editor.md) |
 | — (`studio llm`) | Asistente con un LLM local (llama.cpp con Gemma 4 E4B o Qwen3.5-9B): sugerencias para el guion, los subtítulos, la música y la publicación | `server/src/content_studio/llm/` | [llm.md](docs/process/01-done/llm.md) |
+| — (`studio diarize`) | Quién habla y cuándo: turnos por hablante con pyannote, audio por hablante y transcripción con el hablante de cada palabra | `server/src/content_studio/diarization/` | [diarization.md](docs/process/01-done/diarization.md) |
 
 **Antes de usar cualquiera de las dos, lee su README**: ahí están el uso, los flags, el rendimiento medido, los tips y los problemas conocidos.
 
@@ -27,9 +28,14 @@ uv run studio narration tts --model qwen-0.6b --style expert --voice yesid --tex
 uv run studio narration voices --build all   # voces libres aprobadas en los 12 estilos
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
+uv run studio mcp config --client claude-code   # fragmento MCP para un asistente (spec 029); `studio mcp` sirve por stdio
+# Red local (spec 032): apagada; Ajustes > Integraciones > Red local la activa con PIN y TLS (docs/operations/lan.md)
+# uv run studio api up                    # server compartido en 127.0.0.1:41830: arranca o reutiliza el que responde; api status|down|token
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA
+uv run studio inbox add DIR --kind media.convert --param target=mp3   # lo que se suelte en DIR sale en DIR/done/
 uv run studio convert charla.wav --target mp3 --option vbr=2   # → out/media/ (también normalize, trim, concat, split)
+uv run studio diarize charla.wav --speakers 2   # → out/diarize/ (turnos, hablantes y speakers/ con --split)
 ```
 
 **Client** (la app de escritorio, en `client/`, con Tauri): `bun run --cwd client tauri dev` abre «Content Studio» y levanta el server solo; `bun run --cwd client build` y `test` compilan y prueban. Reglas: [frontend-stack](.agents/rules/frontend-stack.md) y [ui-components](.agents/rules/ui-components.md).
@@ -49,6 +55,7 @@ server/src/content_studio/
 ├── services/                 un servicio por tipo de trabajo (narration, music); registry.py con SERVICES
 ├── jobs/                     cola y worker: queue, runner, worker
 ├── api/                      FastAPI y uvicorn: app, events (SSE), routes/, token Bearer
+├── mcp_server/               herramientas MCP (spec 029): catálogo, bridge stdio, SDK y configuración por cliente
 ├── db/                       SQLite (stdlib) en WAL con migraciones SQL: connection, schema, jobs, settings
 ├── narration/                parser (liviano), tts (main), styles, blocks, pipeline, audio, script, metadata, reference
 │   ├── engines/              EngineSpec + TTSEngine (Factory Method) y registry.py con ENGINES
@@ -66,7 +73,7 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch,
 
 - **Agregar un motor TTS o de música**: un archivo en `engines/`, una entrada en `engines/registry.py`, una receta fijada en `server/src/content_studio/engines/recipes/` y su librería en `LIBRARIES` (`server/tests/integration/test_venvs.py`).
 - **Agregar un servicio** (un tipo de trabajo): un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES`. La API y `studio` lo usan solos.
-- **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.10 como mínimo. Detalle en [codigo-python](.agents/rules/codigo-python.md).
+- **Tamaño por categoría**: fuente 300 líneas, tests 800 (`test-runner --type=validators`); Python 3.15 en el server, y el piso de los motores (hoy 3.11) sale de sus recetas. Detalle en [codigo-python](.agents/rules/codigo-python.md).
 
 ## Forma de trabajo y dónde buscar
 
@@ -92,10 +99,10 @@ Dos capas: los `parser.py`, los catálogos y `cli/` solo importan stdlib; torch,
 ## Pruebas
 
 ```bash
-python -m devtools test-runner --type=all   # lo que corre CI (sin GPU)
+python -m devtools test-runner --type=all   # calidad sin GPU (los hooks de git la corren; la CI, solo en PR ajenos)
 uv run pytest            # doctests y bugs (sin GPU)
 uv run pytest -m local   # además, cada venv de motor importa su librería (solo en este equipo)
-python -m devtools test-runner --type=e2e   # Playwright sobre la app construida (Chromium; en la CI, el job client)
+python -m devtools test-runner --type=e2e   # Playwright sobre la app construida (Chromium; el pre-push la corre si cambia el client)
 ```
 
 ## Reglas

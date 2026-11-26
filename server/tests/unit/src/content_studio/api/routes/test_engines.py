@@ -110,3 +110,20 @@ def test_verify_rejects_a_missing_engine(api, tmp_path, monkeypatch):
 
     assert response.status_code == 409
     assert response.json()['code'] == 'engine_not_installed'
+
+
+def test_ac3_without_token_returns_409(api):
+    """AC-3 (spec 034): sin token, pyannote no se encola y la lista lo marca como restringido."""
+    refused = api.client.post('/engines/pyannote/install', headers={**api.headers, 'accept-language': 'en'})
+
+    assert refused.status_code == 409
+    assert refused.json()['code'] == 'engine_token_required'
+    assert 'Hugging Face' in refused.json()['message']
+    entries = api.client.get('/engines', headers=api.headers).json()
+    assert next(entry for entry in entries if entry['engine'] == 'pyannote')['gated'] is True
+
+    api.client.put('/credentials/huggingface', json={'token': 'hf_' + 'b' * 34}, headers=api.headers)
+    queued = api.client.post('/engines/pyannote/install', headers=api.headers)
+    assert queued.status_code == 201
+    assert queued.json()['kind'] == 'engine.install'
+    assert queued.json()['params']['engine'] == 'pyannote'

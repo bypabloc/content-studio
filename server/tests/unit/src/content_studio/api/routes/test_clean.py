@@ -117,3 +117,39 @@ def test_a_job_that_is_not_a_clean_analysis_is_refused(api):
 
     assert response.status_code == 409
     assert response.json()['code'] == 'job_not_clean'
+
+
+def test_ac8_revision_with_speakers(api):
+    """AC-8: la revisión entrega cada palabra con su hablante y el mapa de hablantes con nombres y colores."""
+    job_id = _done_analysis(api)
+    folder = api.tmp / 'job'
+    turns = folder / 'diarization' / 'turns.json'
+    turns.parent.mkdir(parents=True, exist_ok=True)
+    turns.write_text(
+        json.dumps(
+            {
+                'exclusive_diarization': [
+                    {'start': 0.0, 'end': 1.5, 'speaker': 'SPEAKER_00'},
+                    {'start': 1.5, 'end': 3.5, 'speaker': 'SPEAKER_01'},
+                ]
+            }
+        ),
+        encoding='utf-8',
+    )
+    (turns.parent / 'speakers.json').write_text(
+        json.dumps(
+            {
+                'SPEAKER_00': {'name': 'Ana', 'color': '#2563eb'},
+                'SPEAKER_01': {'name': 'Hablante 2', 'color': '#dc2626'},
+            }
+        ),
+        encoding='utf-8',
+    )
+    document = json.loads((folder / 'cuts.json').read_text(encoding='utf-8'))
+    document['diarization'] = str(turns)
+    (folder / 'cuts.json').write_text(json.dumps(document), encoding='utf-8')
+
+    body = api.client.get(f'/clean/{job_id}', headers=api.headers).json()
+
+    assert [word['speaker'] for word in body['words']] == ['SPEAKER_00', 'SPEAKER_00', 'SPEAKER_01']
+    assert body['speakers']['SPEAKER_00'] == {'name': 'Ana', 'color': '#2563eb'}

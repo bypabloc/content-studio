@@ -14,6 +14,8 @@ vi.mock('@/shared/api/context', () => ({ useApi: () => api }));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open }));
 // El editor se prueba aparte (SubtitlesEditor, SubtitlesPreview): aquí solo se comprueba que se abre y se cierra.
 vi.mock('@/features/subtitles/SubtitlesPreview', () => ({ SubtitlesPreview: () => null }));
+// El selector del modelo tiene su prueba en Transcripción; aquí solo importan el modelo y el idioma que se encolan.
+vi.mock('@/shared/components/molecules/UIWhisperModelSelect', () => ({ UIWhisperModelSelect: () => null }));
 
 function renderPage() {
   return render(
@@ -49,7 +51,7 @@ describe('SubtitlesPage', () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith('/jobs', {
         kind: 'subtitles.create',
-        params: { origin: 'file', input: 'charla.wav' },
+        params: expect.objectContaining({ origin: 'file', input: 'charla.wav' }),
       }),
     );
   });
@@ -70,7 +72,7 @@ describe('SubtitlesPage', () => {
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith('/jobs', {
         kind: 'subtitles.create',
-        params: { origin: 'cleaner', input: 'D:/media/charla.wav' },
+        params: expect.objectContaining({ origin: 'cleaner', input: 'D:/media/charla.wav' }),
       }),
     );
   });
@@ -78,7 +80,7 @@ describe('SubtitlesPage', () => {
   it('opens a saved project in its editor and goes back to the list', async () => {
     const project = { id: 3, name: 'charla', source_path: 'charla.mp4', updated_at: '2026-11-22' };
     const doc = { version: 1, source: { path: 'charla.mp4', kind: 'file' }, language: 'es', style: {}, tracks: {}, cues: [] };
-    api.get.mockImplementation(async (path: string) => (path === '/subtitles' ? [project] : doc));
+    api.get.mockImplementation(async (path: string) => (path === '/subtitles' ? [project] : path === '/engines' ? [] : doc));
     renderPage();
 
     fireEvent.click(await screen.findByRole('button', { name: t('subtitles.home.open') }));
@@ -91,7 +93,7 @@ describe('SubtitlesPage', () => {
     window.location.hash = '#/subtitles?project=3';
     const project = { id: 3, name: 'charla', source_path: 'charla.mp4', updated_at: '2026-11-22' };
     const doc = { version: 1, source: { path: 'charla.mp4', kind: 'file' }, language: 'es', style: {}, tracks: {}, cues: [] };
-    api.get.mockImplementation(async (path: string) => (path === '/subtitles' ? [project] : doc));
+    api.get.mockImplementation(async (path: string) => (path === '/subtitles' ? [project] : path === '/engines' ? [] : doc));
     renderPage();
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/subtitles/3'));
@@ -110,4 +112,50 @@ describe('SubtitlesPage', () => {
     window.location.hash = '';
   });
 
+
+
+const DISABLED = '[disabled], [aria-disabled="true"], [data-disabled]';
+
+function engines(pyannoteStatus: string) {
+  return async (path: string) => {
+    if (path === '/engines') {
+      return [
+        { engine: 'faster-whisper', family: 'transcription', status: 'installed', models: [{ model: 'large-v3-turbo', recommended: true }] },
+        { engine: 'pyannote', family: 'diarization', status: pyannoteStatus, models: [] },
+      ];
+    }
+    if (path.startsWith('/settings/')) return { key: path.slice('/settings/'.length), value: null };
+    return [];
+  };
+}
+
+describe('SubtitlesPage with speakers', () => {
+  it('queues a file with its model, language and the speaker switch on', async () => {
+    api.get.mockImplementation(engines('installed'));
+    renderPage();
+    fireEvent.change(await screen.findByLabelText(t('subtitles.home.input')), { target: { value: 'charla.wav' } });
+    const diarize = await screen.findByRole('switch', { name: t('subtitles.home.diarize') });
+    await waitFor(() => expect(diarize.matches(DISABLED)).toBe(false));
+    await userEvent.click(diarize);
+
+    fireEvent.click(screen.getByRole('button', { name: t('subtitles.home.create') }));
+
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/jobs', {
+        kind: 'subtitles.create',
+        params: { origin: 'file', input: 'charla.wav', model: 'large-v3-turbo', language: 'auto', diarize: true },
+      }),
+    );
+  });
+
+  it('keeps the speaker switch off and links to Engines when pyannote is not installed', async () => {
+    api.get.mockImplementation(engines('missing'));
+    renderPage();
+
+    const toggle = await screen.findByRole('switch', { name: t('subtitles.home.diarize') });
+
+    expect(toggle.matches(DISABLED)).toBe(true);
+    expect(screen.getByRole('link', { name: t('transcription.diarize.engines') })).toBeTruthy();
+  });
+});
 });

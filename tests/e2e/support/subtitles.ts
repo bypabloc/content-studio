@@ -8,10 +8,14 @@ export const PROJECT = { id: 7, name: 'charla', source_path: 'C:/fake/in/charla.
  * Las respuestas de la sección Subtítulos: la lista de proyectos, el documento del proyecto 7 y la exportación. Con
  * `reject`, el envío de trabajos devuelve ese error del server (el mismo código que valida `subtitles_create` y `burn`).
  */
-export function subtitleReplies(options: { projects?: unknown[]; reject?: Failed['failed'] } = {}): Replies {
+export function subtitleReplies(
+  options: { projects?: unknown[]; reject?: Failed['failed']; doc?: string; engines?: string } = {},
+): Replies {
   return ({ method, path, body }) => {
     if (method === 'GET' && path === '/subtitles') return options.projects ?? [];
-    if (method === 'GET' && path === '/subtitles/7') return apiFixture('subtitles/doc');
+    if (method === 'GET' && path === '/subtitles/7') return apiFixture(options.doc ?? 'subtitles/doc');
+    if (method === 'GET' && path === '/engines' && options.engines) return apiFixture(options.engines);
+    if (method === 'PUT' && path === '/subtitles/7') return body;
     if (method === 'POST' && path === '/subtitles/7/export') {
       return { path: `C:/fake/out/subtitles/7-charla.${(body as { format: string }).format}` };
     }

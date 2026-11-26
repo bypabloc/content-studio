@@ -14,6 +14,8 @@ export interface Update {
 export interface UpdaterDeps {
   check(): Promise<Update | null>;
   relaunch(): Promise<void>;
+  /** Detiene el server compartido antes de instalar (spec 028, AC-9): la instalación no puede reemplazar sus archivos. */
+  stopServer?(): Promise<void>;
 }
 
 export type UpdateState =
@@ -28,6 +30,10 @@ export type UpdateState =
 const TAURI: UpdaterDeps = {
   check: async () => (await import('@tauri-apps/plugin-updater')).check(),
   relaunch: async () => (await import('@tauri-apps/plugin-process')).relaunch(),
+  stopServer: async () => {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('stop_server_for_update');
+  },
 };
 
 /**
@@ -59,8 +65,8 @@ export function useUpdater(deps: UpdaterDeps = TAURI) {
     const found = update.current;
     if (state.kind !== 'waiting' || running > 0 || !found) return;
     setState({ kind: 'installing', version: state.version });
-    found
-      .downloadAndInstall()
+    (deps.stopServer ? deps.stopServer() : Promise.resolve())
+      .then(() => found.downloadAndInstall())
       .then(() => deps.relaunch())
       .catch(() => setState({ kind: 'failed' }));
   }, [state, running, deps]);

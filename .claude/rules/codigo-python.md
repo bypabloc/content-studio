@@ -9,7 +9,9 @@
 ## Reglas
 
 - **Tamaño por categoría** (`tests/validators/file-size.json`): fuente 300 líneas, tests 800. Si un archivo se acerca, se divide por responsabilidad. La etapa `validators` lo exige sin excepciones; el baseline solo puede bajar. `test_structure.py` vigila que no haya `.py` sueltos en la raíz ni en `server/data/`.
-- **Python 3.10 como mínimo** (el venv de CosyVoice es 3.10), con `from __future__ import annotations` para escribir `X | None`. Nada de `tomllib`, `Self`, `ExceptionGroup`, `datetime.UTC` ni `match` con sintaxis nueva. CI corre en 3.10 y 3.12.
+- **Python: el server en `.python-version` (3.15, spec 025).** El piso de los motores (hoy 3.11, CosyVoice e IndexTTS) sale de sus recetas (`devtools/python_floor.py`).
+- El código que corre en los venvs de los motores (`narration/`, `music/`, `common/`) no usa nada más nuevo que el piso (3.11): ni `match` con sintaxis nueva ni sintaxis de 3.12 o más (`type X = …`, genéricos `class A[T]`).
+- Con `from __future__ import annotations` se escribe `X | None`. `test_structure.py` compila con el piso. El pre-push corre las pruebas con la Python del venv; la CI corre solo en los PR de otras personas.
 - **Dos capas.** En el nivel superior de un módulo solo va stdlib, salvo en `api/` y el comando `serve` (fastapi y uvicorn). torch, numpy, soundfile y las librerías de cada motor se importan dentro de funciones, así `--help`, los parsers y el catálogo funcionan sin el venv del motor.
 - **Factory Method solo con dos o más productos**: motores TTS, motores de música y tipos de trabajo (`services/`, con `SERVICES`: narración y música). Lo que tiene un solo producto (referencia, catálogo de voces, fuentes, grabar) es una función o un módulo. SOLID y KISS: nada de interfaces, configuración ni autodescubrimiento que hoy no se usen.
 - Type hints en las firmas de src (ruff ANN001/ANN201 lo exige; los tests quedan fuera). Comillas simples y 120 columnas (`ruff format`).
@@ -18,6 +20,7 @@
 
 - **Un motor TTS o de música**: un archivo en su `engines/`, una línea en el registro, una receta JSON con paquetes, commits y revisiones fijados en `server/src/content_studio/engines/recipes/`, y su librería en `LIBRARIES` de `server/tests/integration/test_venvs.py`.
 - **Un tipo de trabajo**: un módulo en `services/` con `RESOURCE`, `validate(params)` y `build_command(params, out_dir)`, y una línea en `SERVICES` (`services/registry.py`). La API y `studio` lo usan solos.
+- **Una herramienta MCP**: una entrada en `mcp_server/catalog.py` (nombre, descripción en inglés y esquemas) y su caso en el test de AC-1; su armado de `params` en `mcp_server/tools.py`.
 - **Un subcomando de `studio`**: una línea en `build_parser` de `cli/main.py`.
 - **Un comando de devtools**: un módulo con `main(argv)` y una línea en `COMMANDS` (`devtools.md`).
 - Algo de más de dos archivos: primero su spec (`plan-format.md`).

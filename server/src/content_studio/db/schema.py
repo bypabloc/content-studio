@@ -113,6 +113,48 @@ MIGRATIONS = [
     """,
     # 8 (spec 021, D-4): la ruta de publish.json del ítem; el contenido queda en disco.
     'ALTER TABLE library_items ADD COLUMN publish_path TEXT;',
+    # spec 030 (D-1 a D-3): carpetas de entrada y los archivos que tomaron; solo agrega (02 §3).
+    """
+    CREATE TABLE inbox_folders (
+      id INTEGER PRIMARY KEY,
+      path TEXT NOT NULL UNIQUE,
+      kind TEXT NOT NULL,
+      params TEXT NOT NULL,
+      keep_awake INTEGER NOT NULL DEFAULT 1,
+      paused INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE inbox_items (
+      id INTEGER PRIMARY KEY,
+      folder_id INTEGER NOT NULL REFERENCES inbox_folders(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      mtime REAL NOT NULL,
+      job_id INTEGER,
+      state TEXT NOT NULL CHECK (state IN ('pending', 'processing', 'done', 'failed')),
+      UNIQUE (folder_id, name, size, mtime)
+    );
+    """,
+    # spec 032 (02 §3): dispositivos de la red local, sus subidas y de quién es cada trabajo; solo agrega.
+    """
+    CREATE TABLE api_clients (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      token_sha256 TEXT NOT NULL UNIQUE,
+      scopes TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      last_seen TEXT,
+      revoked_at TEXT
+    );
+    CREATE TABLE uploads (
+      id INTEGER PRIMARY KEY,
+      client_id INTEGER NOT NULL REFERENCES api_clients(id),
+      path TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    ALTER TABLE jobs ADD COLUMN client_id INTEGER REFERENCES api_clients(id);
+    """,
 ]
 
 

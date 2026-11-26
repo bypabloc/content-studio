@@ -15,6 +15,7 @@ const GROUPS = [
   ['narration', 'engines.group.narration'],
   ['music', 'engines.group.music'],
   ['transcription', 'engines.group.transcription'],
+  ['diarization', 'engines.group.diarization'],
   ['assistant', 'engines.group.assistant'],
 ] as const;
 
@@ -34,6 +35,10 @@ export function EnginesPage(): React.JSX.Element {
   const queryClient = useQueryClient();
   const enginesQuery = useQuery({ queryKey: ['engines'], queryFn: () => api.get<EngineInfo[]>('/engines') });
   const systemQuery = useQuery({ queryKey: ['system'], queryFn: () => api.get<SystemInfo>('/system') });
+  const tokenQuery = useQuery({
+    queryKey: ['credentials', 'huggingface'],
+    queryFn: () => api.get<{ configured: boolean }>('/credentials/huggingface'),
+  });
   const mutation = useMutation({
     mutationFn: (action: EngineAction) => api.post(actionPath(action)),
     onSuccess: async () => {
@@ -71,6 +76,7 @@ export function EnginesPage(): React.JSX.Element {
                 gpu={systemQuery.data.gpu}
                 busy={mutation.isPending}
                 highlighted={engine.engine === selectedEngine}
+                tokenConfigured={tokenQuery.data?.configured === true}
                 onAction={(action) => mutation.mutate(action)}
               />
             ))}

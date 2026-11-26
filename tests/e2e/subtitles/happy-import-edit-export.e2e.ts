@@ -13,7 +13,7 @@ test('Importar un SRT, corregir un cue, guardarlo solo y exportar VTT', async ({
   await page.getByRole('button', { name: 'Crear proyecto', exact: true }).click();
   await expect
     .poll(() => jobBodies(calls))
-    .toContainEqual({ kind: 'subtitles.create', params: { origin: 'import', input: 'C:/fake/in/charla.srt' } });
+    .toContainEqual({ kind: 'subtitles.create', params: expect.objectContaining({ origin: 'import', input: 'C:/fake/in/charla.srt' }) });
 
   await page.getByRole('button', { name: 'Abrir', exact: true }).click();
   // El primer cue es el de la transcripción del documento: su campo de texto tiene la etiqueta de CueList.

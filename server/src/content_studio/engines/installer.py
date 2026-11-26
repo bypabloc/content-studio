@@ -6,6 +6,7 @@ import json
 import os
 import shutil
 import sqlite3
+import subprocess
 from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
@@ -17,7 +18,7 @@ from content_studio.db import jobs, settings
 from content_studio.db.connection import utc_now
 from content_studio.engines import recipes
 from content_studio.engines.recipes import Recipe
-from content_studio.engines.steps import ChecksumMismatch, _file_bytes, execute_step
+from content_studio.engines.steps import GATED_EXIT, ChecksumMismatch, _file_bytes, execute_step
 
 EXIT_CODES = {
     'disk_full': 20,
@@ -25,6 +26,8 @@ EXIT_CODES = {
     'engine_license_required': 22,
     'engine_not_installed': 23,
     'checksum_mismatch': 24,
+    'engine_gated': GATED_EXIT,
+    'engine_token_required': 26,
 }
 
 
@@ -125,7 +128,15 @@ def uninstall(engine: str, root: Path, force: bool = False) -> None:
     remove_paths(root, engine, manifest)
 
 
-def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
+def _pending_recipe(pending: Path) -> str | None:
+    """Huella de la receta del intento que quedó sin terminar (None si no la registró)."""
+    try:
+        return json.loads(pending.read_text(encoding='utf-8')).get('recipe_sha256')
+    except (OSError, ValueError):
+        return None
+
+
+def install(recipe: Recipe, root: Path, repair: bool = False, token: str | None = None) -> dict:
     """Instala el motor y registra qué rutas pertenecen a la app."""
     root = root.resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -133,22 +144,27 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
     current = read_manifest(home)
     pending = home / 'installing.json'
     own = current.get('owner') == 'app'
+    stale = own and current.get('recipe_sha256') != recipe.sha256
+    if pending.is_file() and _pending_recipe(pending) != recipe.sha256:
+        stale = True  # un intento sin terminar con otra receta: sus pasos ya no valen (spec 026)
     if repair and not own:
         raise InstallError('engine_external')
-    if not repair and own and current.get('recipe_version') == recipe.version and not pending.exists():
+    if not repair and own and not stale and current.get('recipe_version') == recipe.version and not pending.exists():
         return current
     if (home.exists() or cache.exists()) and not own and not pending.is_file():
         raise InstallError('engine_external')
     existing = _file_bytes(home) + _file_bytes(cache)
     if shutil.disk_usage(root).free + existing < recipe.size_gb * 1.2 * 10**9:
         raise InstallError('disk_full')
+    if recipe.gated and not token:
+        raise InstallError('engine_token_required')
     home.mkdir(exist_ok=True)
-    _write_json(pending, {'owner': 'app', 'recipe_version': recipe.version})
+    _write_json(pending, {'owner': 'app', 'recipe_version': recipe.version, 'recipe_sha256': recipe.sha256})
     markers = home / 'steps'
     markers.mkdir(exist_ok=True)
     family = home / recipe.family
     family.mkdir(exist_ok=True)
-    if repair:
+    if repair or stale:
         venv = family / recipe.venv
         if venv.exists():
             if not venv.resolve().is_relative_to(family) or venv.resolve() != venv:
@@ -157,6 +173,10 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
         for index, step in enumerate(recipe.steps):
             if step['kind'] in ('python', 'venv', 'pip', 'verify'):
                 (markers / f'{recipe.version}-{index}.done').unlink(missing_ok=True)
+        if stale:
+            # Otra huella puede cambiar también las descargas (revisiones de HF): se rehacen todos los pasos.
+            for done in markers.glob('*.done'):
+                done.unlink()
     for index, step in enumerate(recipe.steps):
         done = markers / f'{recipe.version}-{index}.done'
         if not done.is_file():
@@ -164,13 +184,18 @@ def install(recipe: Recipe, root: Path, repair: bool = False) -> dict:
             end = (index + 1) / len(recipe.steps)
             progress.emit(start, step['kind'])
             try:
-                execute_step(step, recipe, family, cache, (start, end))
+                execute_step(step, recipe, family, cache, (start, end), token)
             except ChecksumMismatch as error:
                 raise InstallError('checksum_mismatch') from error
+            except subprocess.CalledProcessError as error:
+                if error.returncode == EXIT_CODES['engine_gated']:
+                    raise InstallError('engine_gated') from error
+                raise
             done.touch()
     result = {
         'owner': 'app',
         'recipe_version': recipe.version,
+        'recipe_sha256': recipe.sha256,
         'installed_at': utc_now(),
         'paths': [path.relative_to(root).as_posix() for path in (home, cache)],
         'size_bytes': _file_bytes(home) + _file_bytes(cache),
@@ -226,6 +251,8 @@ def list_engines(conn: sqlite3.Connection, root: Path) -> list[dict]:
             owner = 'app'
             failed = isinstance(verification, dict) and not verification.get('ok')
             state = 'installed' if managed_ready(recipe, root) and not failed else 'broken'
+            if state == 'installed' and manifest.get('recipe_sha256') != recipe.sha256:
+                state = 'outdated'
         elif venv.is_dir() and not venv.is_relative_to(root):
             owner, state = 'external', 'external'
             size = _external_size(venv, venv.stat().st_mtime_ns)

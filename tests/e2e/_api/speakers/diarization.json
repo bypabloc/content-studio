@@ -1,0 +1,54 @@
+{
+  "source": "C:/fake/in/charla.wav",
+  "duration": 6,
+  "turns": [
+    {
+      "start": 0,
+      "end": 2,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 2,
+      "end": 5,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 5,
+      "end": 6,
+      "speaker": "SPEAKER_00"
+    }
+  ],
+  "exclusive_turns": [
+    {
+      "start": 0,
+      "end": 2,
+      "speaker": "SPEAKER_00"
+    },
+    {
+      "start": 2,
+      "end": 5,
+      "speaker": "SPEAKER_01"
+    },
+    {
+      "start": 5,
+      "end": 6,
+      "speaker": "SPEAKER_00"
+    }
+  ],
+  "speakers": {
+    "SPEAKER_00": {
+      "name": "Hablante 1",
+      "color": "#2563eb"
+    },
+    "SPEAKER_01": {
+      "name": "Hablante 2",
+      "color": "#dc2626"
+    }
+  },
+  "files": {
+    "json": "D:/out/diarize-job/turns.json",
+    "rttm": "D:/out/diarize-job/turns.rttm",
+    "csv": "D:/out/diarize-job/turns.csv"
+  },
+  "split": null
+}

@@ -11,9 +11,13 @@ from contextlib import closing
 from pathlib import Path
 
 from content_studio import gpu_lock, paths, seed
+from content_studio.cli import api as api_cli
+from content_studio.cli import diarize as diarize_cli
 from content_studio.cli import editor as editor_cli
+from content_studio.cli import inbox as inbox_cli
 from content_studio.cli import library as library_cli
 from content_studio.cli import llm as llm_cli
+from content_studio.cli import mcp as mcp_cli
 from content_studio.cli import media as media_cli
 from content_studio.cli import mix as mix_cli
 from content_studio.cli import serve, submit
@@ -44,7 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser('seed', help="copy the data of the installed app to its data folder, keeping the user's changes")
     serve_p = sub.add_parser('serve', help='local API on 127.0.0.1 with the job worker')
-    serve_p.add_argument('--port', type=int, default=0, help='0 picks a free port')
+    serve_p.add_argument('--port', type=int, default=None, help='default: api.port (41830); 0 picks a free port')
     serve_p.add_argument('--token', help='Bearer token; if omitted, one is generated and printed in the ready line')
 
     narration = sub.add_parser('narration', help='narration and voices')
@@ -88,8 +92,11 @@ def build_parser() -> argparse.ArgumentParser:
     mix_cli.add_subcommand(sub, _db_flag())
     editor_cli.add_subcommand(sub, _db_flag())
     library_cli.add_subcommand(sub, _db_flag())
+    inbox_cli.add_subcommand(sub, _db_flag())
     llm_cli.add_subcommand(sub, _db_flag())
     media_cli.add_parsers(sub, _db_flag)
+    api_cli.add_parser(sub, _db_flag)
+    mcp_cli.add_parser(sub, _db_flag)
 
     jobs_p = sub.add_parser('jobs', help='the queue: list, cancel and retry jobs')
     job_cmds = jobs_p.add_subparsers(dest='action', required=True, metavar='action')
@@ -112,6 +119,11 @@ def build_parser() -> argparse.ArgumentParser:
         if action == 'uninstall':
             command.add_argument('--force', action='store_true', help='confirm removal of the known external venv')
 
+    diarize_p = sub.add_parser('diarize', parents=[_db_flag()], help='who speaks when: diarize an audio file')
+    diarize_p.add_argument('input', type=Path, help='audio or video to diarize')
+    diarize_p.add_argument('--speakers', type=int, help='exact number of speakers, from 1 to 20')
+    diarize_p.add_argument('--min-speakers', type=int, help='lowest number of speakers, from 1 to 20')
+    diarize_p.add_argument('--max-speakers', type=int, help='highest number of speakers, from 1 to 20')
     sub.add_parser('openapi', help='print the API schema (OpenAPI JSON); no server and no database')
     return ap
 
@@ -214,6 +226,10 @@ def _openapi() -> int:
 def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'serve':
         return serve.serve(args.db, main_checkout(paths.ROOT), args.port, args.token)
+    if args.command == 'api':
+        return api_cli.dispatch(args)
+    if args.command == 'mcp':
+        return mcp_cli.dispatch(args)
     if args.command == 'narration' and args.action == 'tts':
         codes = [
             submit.run('narration', params, args.db, main_checkout(paths.ROOT))
@@ -228,6 +244,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return submit.run('music.samples', submit.samples_params(args), args.db, main_checkout(paths.ROOT))
     if args.command == 'music':
         return submit.run('music', submit.music_params(args), args.db, main_checkout(paths.ROOT))
+    if args.command == 'diarize':
+        return diarize_cli.run(args, main_checkout(paths.ROOT))
     if args.command == 'openapi':
         return _openapi()
     if args.command == 'seed':
@@ -240,6 +258,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return mix_cli.run(args)
     if args.command == 'editor':
         return editor_cli.run(args)
+    if args.command == 'inbox':
+        return inbox_cli.run(args)
     if args.command == 'library':
         return library_cli.run(args)
     if args.command == 'llm':

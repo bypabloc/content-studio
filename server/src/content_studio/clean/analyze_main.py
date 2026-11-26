@@ -16,12 +16,14 @@ from content_studio import paths
 from content_studio.clean import cuts
 from content_studio.clean.plan import plan
 from content_studio.common import ffmpeg as ff
-from content_studio.common import process
+from content_studio.common import process, progress
 from content_studio.db import schema
 from content_studio.db.connection import connect
+from content_studio.diarization.run import diarize_file
 from content_studio.transcription import cache, models, transcribe_main
 
 Transcribe = Callable[[Path, Path], None]
+Diarize = Callable[[Path, Path], None]  # (audio original, carpeta de la diarización): deja turns.json
 README = 'server/data/narration/README.md'
 
 
@@ -35,6 +37,7 @@ def run(
     folder: Path,
     transcribe: Transcribe,
     silences: Sequence[tuple[float, float | None]] = (),
+    diarize: Diarize | None = None,
 ) -> dict:
     """Transcribe `source` (o usa la caché), calcula los cortes y los guarda en `folder/cuts.json`.
 
@@ -62,30 +65,49 @@ def run(
         edges=params['edges'],
         silences=audible,
     )
-    cuts.save(
-        folder,
-        {
-            'params': params,
-            'model': model,
-            'language': transcript['language'],
-            'duration': duration,
-            'transcript': json_path,
-            'silences': [list(span) for span in audible],
-            'cuts': found,
-        },
-    )
+    document = {
+        'params': params,
+        'model': model,
+        'language': transcript['language'],
+        'duration': duration,
+        'transcript': json_path,
+        'silences': [list(span) for span in audible],
+        'cuts': found,
+    }
+    if diarize is not None and params.get('diarize'):
+        turns_dir = folder / 'diarization'
+        diarize(source, turns_dir)
+        document['diarization'] = str(turns_dir / 'turns.json')
+    cuts.save(folder, document)
     return {'cuts': len(found), 'duration': duration, 'cached': hit is not None}
+
+
+def _wav16(source: Path, folder: Path) -> Path:
+    """El audio de 16 kHz mono de `source` en la carpeta del trabajo; se extrae una vez."""
+    wav = folder / 'audio-16k.wav'
+    if not wav.exists():
+        ff.ffmpeg('-y', '-i', str(source), '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', str(wav))
+    return wav
 
 
 def _transcriber(model: str, language: str, folder: Path) -> Transcribe:
     """El transcriptor real: extrae el audio a 16 kHz mono y lo transcribe con faster-whisper."""
 
     def transcribe_source(source: Path, json_file: Path) -> None:
-        wav = folder / 'audio-16k.wav'
-        ff.ffmpeg('-y', '-i', str(source), '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'pcm_s16le', str(wav))
-        transcribe_main.transcribe(wav, language=language, out=json_file, model=transcribe_main._load_model(model))
+        transcribe_main.transcribe(
+            _wav16(source, folder), language=language, out=json_file, model=transcribe_main._load_model(model)
+        )
 
     return transcribe_source
+
+
+def _turns_of(folder: Path) -> Diarize:
+    """La diarización real: el mismo audio de 16 kHz y `diarize_file`, que reusa su caché por archivo."""
+
+    def find_turns(source: Path, out: Path) -> None:
+        diarize_file(source, _wav16(source, folder), out, {}, progress.emit)
+
+    return find_turns
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -99,6 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
     edges = parser.add_mutually_exclusive_group()
     edges.add_argument('--edges', dest='edges', action='store_true', default=True, help='cut the start and the end')
     edges.add_argument('--no-edges', dest='edges', action='store_false', help='keep the start and the end')
+    parser.add_argument('--diarize', action='store_true', help='identify the speakers (pyannote) and keep their turns')
     parser.add_argument('--folder', required=True, help='job folder where cuts.json goes')
     return parser
 
@@ -112,6 +135,8 @@ def main(argv: list[str] | None = None) -> int:
     conn = connect(paths.db_path())
     schema.migrate(conn)
     params = {'min_gap': args.min_gap, 'padding': args.padding, 'edges': args.edges}
+    if args.diarize:
+        params['diarize'] = True
     result = run(
         conn,
         Path(args.input),
@@ -121,6 +146,7 @@ def main(argv: list[str] | None = None) -> int:
         folder=folder,
         transcribe=_transcriber(args.model, args.language, folder),
         silences=ff.silences(Path(args.input)),
+        diarize=_turns_of(folder) if args.diarize else None,
     )
     print(json.dumps(result), flush=True)
     return 0

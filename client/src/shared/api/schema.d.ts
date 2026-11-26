@@ -24,6 +24,194 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/inbox/folders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Folders
+         * @description Las carpetas registradas, en orden de alta.
+         */
+        get: operations["list_folders_inbox_folders_get"];
+        put?: never;
+        /**
+         * Create Folder
+         * @description Registra la carpeta. 422 con `code` si la ruta, el tipo o los parámetros no sirven.
+         */
+        post: operations["create_folder_inbox_folders_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inbox/folders/{folder_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pause Folder
+         * @description Pausa la carpeta (o la reanuda con paused en false): mientras está pausada no toma archivos.
+         */
+        post: operations["pause_folder_inbox_folders__folder_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/inbox/folders/{folder_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove Folder
+         * @description Quita la carpeta del registro; sus archivos no se tocan. 404 si no existe.
+         */
+        delete: operations["remove_folder_inbox_folders__folder_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lan/pairing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * New Pin
+         * @description Un PIN de 6 dígitos para emparejar un dispositivo; vale 5 minutos y una sola vez (AC-3).
+         */
+        post: operations["new_pin_lan_pairing_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lan/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Devices
+         * @description Los dispositivos emparejados y vigentes.
+         */
+        get: operations["devices_lan_devices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lan/devices/{client_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke
+         * @description Revoca un dispositivo: su próxima petición da 401 (AC-4).
+         */
+        delete: operations["revoke_lan_devices__client_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lan/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read
+         * @description Ajustes, dirección, huella y si el listener escucha.
+         */
+        get: operations["read_lan_settings_get"];
+        /**
+         * Update
+         * @description Guarda los ajustes y, con el server en marcha, levanta o apaga el listener al momento.
+         */
+        put: operations["update_lan_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/integrations/mcp-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mcp Config
+         * @description El fragmento de `client` con el comando de `studio mcp` de esta instalación.
+         */
+        get: operations["mcp_config_integrations_mcp_config_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop
+         * @description Pide a `serve` que termine: cierra la API, borra api.json y suelta el lock.
+         */
+        post: operations["stop_server_stop_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/catalog/{kind}": {
         parameters: {
             query?: never;
@@ -42,6 +230,34 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/credentials/huggingface": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Huggingface
+         * @description Indica si hay un token guardado.
+         */
+        get: operations["read_huggingface_credentials_huggingface_get"];
+        /**
+         * Write Huggingface
+         * @description Guarda el token si tiene la forma de Hugging Face (hf_ seguido de caracteres).
+         */
+        put: operations["write_huggingface_credentials_huggingface_put"];
+        post?: never;
+        /**
+         * Clear Huggingface
+         * @description Borra el token guardado.
+         */
+        delete: operations["clear_huggingface_credentials_huggingface_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -506,7 +722,8 @@ export interface paths {
         };
         /**
          * Get Cuts
-         * @description El documento de cortes del análisis: parámetros, duración, idioma y cortes.
+         * @description El documento de cortes del análisis: parámetros, duración, idioma y cortes. Con hablantes, además las
+         *     palabras con su hablante (`words`) y el mapa de hablantes (`speakers`).
          */
         get: operations["get_cuts_clean__job_id__get"];
         put?: never;
@@ -686,6 +903,110 @@ export interface paths {
          * @description Quita el registro y mueve la carpeta del proyecto a `subtitles/.trash/`: no borra archivos.
          */
         delete: operations["delete_project_subtitles__project_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Transcript
+         * @description Los segmentos del trabajo con su hablante, y el mapa de nombres y colores.
+         */
+        get: operations["transcript_jobs__job_id__transcript_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/speakers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Speakers
+         * @description El mapa de hablantes; 409 si el trabajo no identificó hablantes.
+         */
+        get: operations["get_speakers_jobs__job_id__speakers_get"];
+        /**
+         * Put Speakers
+         * @description Guarda nombres y colores; 422 si el id no existe, o el nombre o el color no son válidos.
+         */
+        put: operations["put_speakers_jobs__job_id__speakers_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/transcript/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Transcript
+         * @description Escribe transcript.txt en la carpeta del trabajo, con los nombres actuales.
+         */
+        post: operations["export_transcript_jobs__job_id__transcript_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/diarizations/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Diarization
+         * @description Turnos, hablantes, archivos y audios por hablante de un trabajo diarize (spec 037, AC-4).
+         */
+        get: operations["diarization_diarizations__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/editor/projects/from-diarization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Project From Job
+         * @description Crea un proyecto del Editor con el audio y un marcador por turno; devuelve la ruta de su project.json (AC-6).
+         */
+        post: operations["project_from_job_editor_projects_from_diarization_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1805,6 +2126,14 @@ export interface components {
             file: string;
         };
         /**
+         * Configured
+         * @description Solo dice si hay un token guardado; nunca su valor.
+         */
+        Configured: {
+            /** Configured */
+            configured: boolean;
+        };
+        /**
          * CreateIn
          * @description El nombre del proyecto nuevo.
          */
@@ -1906,18 +2235,13 @@ export interface components {
             verification: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Gated
+             * @default false
+             */
+            gated: boolean;
             /** Models */
             models?: components["schemas"]["WhisperModel"][] | null;
-        };
-        /**
-         * ExportIn
-         * @description El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida.
-         */
-        ExportIn: {
-            /** Format */
-            format: string;
-            /** Language */
-            language?: string | null;
         };
         /**
          * FolderIn
@@ -1928,6 +2252,14 @@ export interface components {
             path: string;
             /** Name */
             name?: string | null;
+        };
+        /**
+         * FromDiarizationIn
+         * @description El trabajo `diarize` del que sale el proyecto.
+         */
+        FromDiarizationIn: {
+            /** Job */
+            job: number;
         };
         /**
          * GpuInfo
@@ -1949,6 +2281,14 @@ export interface components {
             detail?: components["schemas"]["ValidationError"][];
         };
         /**
+         * HuggingFaceToken
+         * @description Cuerpo de PUT: el token de lectura del usuario.
+         */
+        HuggingFaceToken: {
+            /** Token */
+            token: string;
+        };
+        /**
          * ImportIn
          * @description Un tramo de un audio o un video, con el permiso del dueño (D-4).
          */
@@ -1966,6 +2306,28 @@ export interface components {
              * @default false
              */
             consent: boolean;
+        };
+        /**
+         * InboxFolder
+         * @description Una carpeta de entrada tal como la devuelve la API.
+         */
+        InboxFolder: {
+            /** Id */
+            id: number;
+            /** Path */
+            path: string;
+            /** Kind */
+            kind: string;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Keep Awake */
+            keep_awake: boolean;
+            /** Paused */
+            paused: boolean;
+            /** Created At */
+            created_at: string;
         };
         /**
          * IssueOut
@@ -2051,6 +2413,22 @@ export interface components {
             group_key?: string | null;
         };
         /**
+         * LanSettingsIn
+         * @description Cuerpo de PUT /lan/settings: solo lo que cambia.
+         */
+        LanSettingsIn: {
+            /** Enabled */
+            enabled?: boolean | null;
+            /** Address */
+            address?: string | null;
+            /** Port */
+            port?: number | null;
+            /** Max Upload Mb */
+            max_upload_mb?: number | null;
+            /** Keep Awake */
+            keep_awake?: boolean | null;
+        };
+        /**
          * Language
          * @description Un idioma de traducción, con su nombre en su idioma.
          */
@@ -2111,6 +2489,19 @@ export interface components {
             release_in: number | null;
         };
         /**
+         * McpConfigOut
+         * @description El fragmento de un cliente: el archivo de configuración que pega el usuario.
+         */
+        McpConfigOut: {
+            /**
+             * Client
+             * @enum {string}
+             */
+            client: "claude-code" | "codex" | "vscode" | "cursor" | "claude-desktop" | "lm-studio" | "jan" | "anythingllm";
+            /** Fragment */
+            fragment: string;
+        };
+        /**
          * MediaInfo
          * @description Metadatos que necesita el editor para crear clips de audio y video.
          */
@@ -2150,6 +2541,28 @@ export interface components {
             name: string;
         };
         /**
+         * NewFolder
+         * @description Cuerpo de POST /inbox/folders: la carpeta, el tipo de trabajo que hace con cada archivo y sus parámetros.
+         */
+        NewFolder: {
+            /** Path */
+            path: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Keep Awake
+             * @default true
+             */
+            keep_awake: boolean;
+        };
+        /**
          * NewJob
          * @description Cuerpo de POST /jobs: el tipo de trabajo y sus parámetros, como los pide su servicio.
          */
@@ -2160,6 +2573,17 @@ export interface components {
             params: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * PauseIn
+         * @description Cuerpo de POST /inbox/folders/{id}/pause: true pausa la carpeta y false la reanuda.
+         */
+        PauseIn: {
+            /**
+             * Paused
+             * @default true
+             */
+            paused: boolean;
         };
         /**
          * PlanIn
@@ -2275,6 +2699,16 @@ export interface components {
             value: unknown;
         };
         /**
+         * SpeakerIn
+         * @description Nombre y color de un hablante, como los guarda speakers.json.
+         */
+        SpeakerIn: {
+            /** Name */
+            name: string;
+            /** Color */
+            color: string;
+        };
+        /**
          * StorageMove
          * @description Raíz que se va a mover y su destino.
          */
@@ -2388,6 +2822,32 @@ export interface components {
             /** Downloaded */
             downloaded: boolean;
         };
+        /**
+         * ExportIn
+         * @description Cuerpo de la exportación: si el texto lleva la hora de cada bloque.
+         */
+        content_studio__api__routes__speakers__ExportIn: {
+            /**
+             * Timestamps
+             * @default false
+             */
+            timestamps: boolean;
+        };
+        /**
+         * ExportIn
+         * @description El formato de la exportación (`srt`, `vtt` o `ass`) y, si se pide, el idioma de una pista traducida.
+         */
+        content_studio__api__routes__subtitles__ExportIn: {
+            /** Format */
+            format: string;
+            /** Language */
+            language?: string | null;
+            /**
+             * Speaker Labels
+             * @default false
+             */
+            speaker_labels: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -2398,6 +2858,306 @@ export interface components {
 export type $defs = Record<string, never>;
 export interface operations {
     health_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    list_folders_inbox_folders_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"][];
+                };
+            };
+        };
+    };
+    create_folder_inbox_folders_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewFolder"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_folder_inbox_folders__folder_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                folder_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PauseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InboxFolder"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_folder_inbox_folders__folder_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                folder_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    new_pin_lan_pairing_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    devices_lan_devices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    revoke_lan_devices__client_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_lan_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    update_lan_settings_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LanSettingsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mcp_config_integrations_mcp_config_get: {
+        parameters: {
+            query: {
+                client: "claude-code" | "codex" | "vscode" | "cursor" | "claude-desktop" | "lm-studio" | "jan" | "anythingllm";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpConfigOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stop_server_stop_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -2450,6 +3210,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_huggingface_credentials_huggingface_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
+                };
+            };
+        };
+    };
+    write_huggingface_credentials_huggingface_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HuggingFaceToken"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_huggingface_credentials_huggingface_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Configured"];
                 };
             };
         };
@@ -3401,7 +4234,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ExportIn"];
+                "application/json": components["schemas"]["content_studio__api__routes__subtitles__ExportIn"];
             };
         };
         responses: {
@@ -3536,6 +4369,216 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    transcript_jobs__job_id__transcript_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_speakers_jobs__job_id__speakers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_speakers_jobs__job_id__speakers_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: components["schemas"]["SpeakerIn"];
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_transcript_jobs__job_id__transcript_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["content_studio__api__routes__speakers__ExportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    diarization_diarizations__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    project_from_job_editor_projects_from_diarization_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FromDiarizationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
             };
             /** @description Validation Error */
             422: {
