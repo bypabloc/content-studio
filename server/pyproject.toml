@@ -1,6 +1,6 @@
 [project]
 name = "content-studio"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local narration (TTS with voice cloning) and background music for videos, on an 8 GB GPU."
 requires-python = ">=3.15"
 # La CLI `studio` usa argparse (sin dependencias).
