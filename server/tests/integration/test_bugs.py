@@ -142,3 +142,26 @@ def test_server_launched_from_an_mcp_client_breaks_away_from_its_job(tmp_path, m
     assert seen[0] & breakaway
     assert not seen[1] & breakaway
     assert len(seen) == 2
+
+
+def test_narration_without_style_uses_the_default_of_the_engine():
+    """021-estilo-none-en-txt: sin --style, el trabajo no falla con «No existe el estilo None» y el motor usa su valor
+    por defecto (el style del JSON o expert)."""
+    from content_studio.services import narration
+
+    params = {'model': 'qwen-0.6b', 'file': ['guion.txt']}
+    codes = [error['code'] for error in narration.validate(params)]
+    assert 'unknown_style' not in codes
+    assert '--style' not in narration.build_command(params, Path('out'))
+
+
+def test_studio_json_reaches_a_pipe_as_utf8():
+    """021-cli-salida-cp1252: con stdout en una tubería, las tildes salen en UTF-8, no en cp1252."""
+    import os
+    import subprocess
+
+    code = 'from content_studio.common.process import console_utf8; console_utf8(); print("guía")'
+    env = {key: value for key, value in os.environ.items() if key not in ('PYTHONIOENCODING', 'PYTHONUTF8')}
+    env['PYTHONPATH'] = str(ROOT / 'server' / 'src')
+    out = subprocess.run([sys.executable, '-c', code], capture_output=True, env=env, check=True).stdout
+    assert out.decode('utf-8').strip() == 'guía'

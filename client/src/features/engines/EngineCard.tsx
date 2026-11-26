@@ -82,7 +82,7 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
             <UIText variant="heading">{engine.engine}</UIText>
             <UIStack direction="row" gap="xs" className="flex-wrap">
               <UIBadge>{statusLabel(engine.status)}</UIBadge>
-              {external ? <UIBadge tone="brand">{t('engines.status.external')}</UIBadge> : null}
+              {external && engine.status !== 'external' ? <UIBadge tone="brand">{t('engines.status.external')}</UIBadge> : null}
               <UIBadge tone={engine.commercial ? 'accent' : 'danger'}>{engine.license}</UIBadge>
             </UIStack>
           </UIStack>
@@ -93,7 +93,7 @@ export function EngineCard({ engine, gpu, onAction, busy = false, highlighted = 
 
         <UIStack direction="row" gap="sm" className="flex-wrap">
           <UIBadge tone={vramLabel(engine.vram_gb, gpu) === t('engines.vram.no_fit') ? 'danger' : 'neutral'}>
-            {gpu ? `${vramLabel(engine.vram_gb, gpu)} · ${engine.vram_gb} / ${gpu.vram_gb} GB` : vramLabel(engine.vram_gb, gpu)}
+            {gpu ? `${vramLabel(engine.vram_gb, gpu)} · ${engine.vram_gb} / ${Number(gpu.vram_gb.toFixed(1))} GB` : vramLabel(engine.vram_gb, gpu)}
           </UIBadge>
           <UIBadge tone={engine.cpu ? 'accent' : 'neutral'}>
             {engine.cpu ? t('engines.cpu.supported') : t('engines.cpu.gpu_required')}

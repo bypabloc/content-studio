@@ -142,4 +142,18 @@ describe('EngineCard', () => {
     expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('7 GB'));
     expect(onAction).not.toHaveBeenCalled();
   });
+
+  it('redondea la VRAM de la GPU y muestra «Externo» una sola vez', () => {
+    render(
+      <EngineCard
+        engine={{ ...qwen, status: 'external', owner: 'external' }}
+        gpu={{ ...gpu, vram_gb: 7.99609375 }}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/3\.2 \/ 8 GB/)).toBeTruthy();
+    expect(screen.queryByText(/7\.99609375/)).toBeNull();
+    expect(screen.getAllByText('Externo')).toHaveLength(1);
+  });
 });

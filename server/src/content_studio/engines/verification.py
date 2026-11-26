@@ -131,6 +131,18 @@ def _verify_diarization(python: Path, output_dir: Path) -> dict:
     }
 
 
+def _verify_import(python: Path, recipe: recipes.Recipe) -> dict:
+    """Familias sin salida de audio (transcription, vision): el import del paso `verify` de su receta."""
+    modules = [step['import'] for step in recipe.steps if step.get('kind') == 'verify' and step.get('import')]
+    if not modules:
+        return _failure(f'Unsupported engine family: {recipe.family}')
+    checked = _run([str(python), '-c', '; '.join(f'import {module}' for module in modules)])
+    if checked.returncode:
+        return _failure(checked.stderr or checked.stdout)
+    progress.emit(1, 'verified')
+    return {'ok': True, 'checked_at': _checked_at()}
+
+
 def verify_engine(engine: str, output_dir: Path) -> dict:
     """Genera audio con el motor y confirma que FFmpeg puede dejarlo en un segundo."""
     recipe = recipes.load(engine)
@@ -142,6 +154,8 @@ def verify_engine(engine: str, output_dir: Path) -> dict:
         return _failure('engine_not_installed')
     if recipe.family == 'diarization':
         return _verify_diarization(python, output_dir)
+    if recipe.family not in ('narration', 'music'):
+        return _verify_import(python, recipe)
 
     source_dir = output_dir / 'source'
     source_dir.mkdir(exist_ok=True)
