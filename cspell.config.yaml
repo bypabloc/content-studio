@@ -95,6 +95,10 @@ overrides:
   - filename: 'client/**/components/organisms/**'
     language: en,es
     words: [animables, audiograma, editables, enfocable, milisegundos, montos, renderiza]
+  # Agentes de Codex: prosa en español para el agente, como .claude/agents/*.md (que no se revisa por ser .md).
+  - filename: '.codex/agents/**'
+    language: en,es
+    words: [showspectrumpic]
   # Formularios (spec 008, T4): useForm tiene comentarios en español; «recalcula» no está en el diccionario es-es.
   - filename: 'client/**/shared/forms/**'
     language: en,es

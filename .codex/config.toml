@@ -1,0 +1,18 @@
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Sin red, el sandbox de Windows corre como CodexSandboxOffline: git fetch, push y gh fallan siempre.
+network_access = true
+# Los worktrees de cada spec viven fuera del repo. `.git` sigue en solo lectura (Codex lo protege aunque se agregue
+# aquí): fetch, commit y worktree add escalan, y `auto_review` aprueba esas escaladas sin preguntarte.
+# Relativa a .codex/ (Codex la resuelve desde la carpeta de este archivo): desde el checkout principal es la carpeta
+# hermana content-studio-worktrees/, en cualquier equipo. Dentro de un worktree no existe y no estorba.
+writable_roots = ['../../content-studio-worktrees']
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "60"
