@@ -1,5 +1,7 @@
 # Integraciones locales: MCP, API estable, carpeta caliente y Windows (noviembre de 2026)
 
+> Implementado en las specs 025 a 032 (lote cerrado por la 033, 2026-11-25). El estado vigente está en [`docs/process/01-done/integrations.md`](../../process/01-done/integrations.md).
+
 Investigación del 2026-11-24. La pregunta: cómo pueden otras apps de la PC, los LLM y agentes locales y otros equipos de la LAN pedirle trabajos a content-studio (narrar, música, limpiar, convertir, subtítulos) y recibir el archivo resultante. El server debe poder arrancar bajo demanda con la app cerrada. Las internas de la PC y la LAN están dentro del alcance; el acceso desde internet, no.
 
 **Cómo leer este documento**: §1 es el estado del código (con evidencia del repo); §2 a §6, cada mecanismo con fuentes; §7, la propuesta y las decisiones que necesita su spec. Lo marcado **no verificado** salió de fuentes secundarias o no se pudo leer. Las versiones de PyPI se consultaron el 2026-11-24 con `https://pypi.org/pypi/<paquete>/json`.

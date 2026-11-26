@@ -134,3 +134,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [039-aviso-motor-en-app-check](039-aviso-motor-en-app-check.md) | app-check muestra «Instala el motor» con pyannote instalado: motores aislados o modo real sin motores | Antes de publicar en main | Agente |
 | [032-prueba-con-otro-equipo](032-prueba-con-otro-equipo.md) | Probar la red local desde un celular u otra PC real, y el MCP por HTTP desde un cliente de otra PC | Antes de publicar en main | Usuario y agente |
 | [032-firewall-instalada](032-firewall-instalada.md) | Activar la red local en la app instalada, aceptar el UAC y ver la regla del firewall | Antes de publicar en main | Usuario |
+| [033-app-instalada](033-app-instalada.md) | Recorrer la verificación integral sobre la app instalada: instalador, enlaces, «Enviar a» y MCP con la app cerrada | Antes de publicar en main | Usuario y agente |
+| [033-server-muere-con-cliente-sdk](033-server-muere-con-cliente-sdk.md) | El server que arranca studio mcp muere al cerrar un cliente MCP hecho con el SDK de Python | Después de publicar | Agente |
+| [033-server-colgado-al-detener](033-server-colgado-al-detener.md) | Un server dejó de escuchar tras POST /server/stop pero no terminó y retuvo api.lock | Antes de publicar en main | Agente |
