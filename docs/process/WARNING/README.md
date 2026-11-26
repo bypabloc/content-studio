@@ -17,7 +17,7 @@ Nombre: `<spec>-<tema>.md` (sin spec, `<tema>.md`). Formato:
 
 | Ficha | Qué | Antes de |
 | :--- | :--- | :--- |
-| [publicar-v0.1.0](publicar-v0.1.0.md) | Secrets del updater, decisión sobre la firma de código, revisión humana de `en`/`pt` y pedido del PR `dev → main` | `main` |
+| [firma-y-traducciones](firma-y-traducciones.md) | Firma de código del instalador (SmartScreen) y revisión humana de `en.json` y `pt.json` | Difundir el instalador |
 | [verificacion-app-instalada](verificacion-app-instalada.md) | Instalar encima, actualizar desde una versión anterior, UAC y red local desde otro equipo, inicio con Windows y hablantes con un clip real | `main` |
 | [licencias-indextts-omnivoice](licencias-indextts-omnivoice.md) | IndexTTS y OmniVoice sin verificar hasta que se acepte su licencia no comercial | `main` |
 | [heartmula-canta](heartmula-canta.md) | HeartMuLa genera voz con el prompt instrumental: quitarlo, seguir probando o avisar | `main` |
