@@ -6,6 +6,7 @@ Un error de la API llega como ApiFailure con su estado y su cuerpo JSON; un serv
 from __future__ import annotations
 
 import json
+import ssl
 import urllib.error
 import urllib.request
 from typing import Any
@@ -24,12 +25,22 @@ class ApiFailure(Exception):
 class Api:
     """Las llamadas de las herramientas: JSON con el Bearer del server compartido."""
 
-    def __init__(self, base_url: str, token: str, *, language: str = 'es', timeout: float = 30) -> None:
-        """Una conexión a la API en `base_url`, con el token de la instalación."""
+    def __init__(
+        self,
+        base_url: str,
+        token: str,
+        *,
+        language: str = 'es',
+        timeout: float = 30,
+        context: ssl.SSLContext | None = None,
+    ) -> None:
+        """Una conexión a la API en `base_url`, con el token de la instalación; `context` fija el certificado de la
+        red local (spec 032)."""
         self.base_url = base_url.rstrip('/')
         self._token = token
         self._language = language
         self._timeout = timeout
+        self._context = context
 
     def get(self, path: str) -> Any:
         """GET de `path`: el JSON de la respuesta."""
@@ -47,7 +58,11 @@ class Api:
         if data is not None:
             request.add_header('Content-Type', 'application/json')
         try:
-            with urllib.request.urlopen(request, timeout=self._timeout) as response:
+            if self._context is None:
+                opened = urllib.request.urlopen(request, timeout=self._timeout)
+            else:
+                opened = urllib.request.urlopen(request, timeout=self._timeout, context=self._context)
+            with opened as response:
                 raw = response.read()
         except urllib.error.HTTPError as error:
             raise ApiFailure(error.code, _decode(error.read())) from None

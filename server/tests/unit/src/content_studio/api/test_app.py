@@ -6,8 +6,65 @@ dominio (ficha WARNING 007-job-id-entero). Por eso estas pruebas usan un id num�
 
 from __future__ import annotations
 
+from contextlib import closing
+
+from fastapi.testclient import TestClient
+from starlette.routing import Route
+
 from content_studio import messages, paths
 from content_studio.api.app import create_app
+from content_studio.db import connection
+from content_studio.lan import cert, clients
+
+REMOTE_ROUTES = {
+    ('POST', '/pair'),
+    ('GET', '/health'),
+    ('GET', '/catalog/{kind}'),
+    ('GET', '/voices/profiles'),
+    ('POST', '/uploads'),
+    ('POST', '/jobs'),
+    ('GET', '/jobs'),
+    ('GET', '/jobs/{job_id}'),
+    ('POST', '/jobs/{job_id}/cancel'),
+    ('GET', '/jobs/{job_id}/outputs'),
+    ('GET', '/files'),
+    ('POST', '/mcp'),
+    ('GET', '/mcp'),
+    ('DELETE', '/mcp'),
+}
+DOCS = {'/openapi.json', '/docs', '/docs/oauth2-redirect', '/redoc'}
+
+
+def test_ac5_remote_without_admin_routes(tmp_path):
+    """La app de la red local tiene exactamente la lista cerrada de 02 §2: lo demás no existe (404)."""
+    db = tmp_path / 'base.db'
+    cert_path, _ = cert.ensure(tmp_path, '127.0.0.2')
+    app = create_app(db, 'local', remote=True, cert_path=cert_path, lan_url='https://127.0.0.2:41831')
+    # FastAPI envuelve cada router incluido: las rutas de la API salen del esquema OpenAPI y /mcp, de las propias.
+    routes = {(method.upper(), path) for path, item in app.openapi()['paths'].items() for method in item}
+    routes |= {
+        (method, route.path)
+        for route in app.routes
+        if isinstance(route, Route) and route.path not in DOCS
+        for method in (route.methods or set()) - {'HEAD'}
+    }
+    with closing(connection.connect(db)) as conn:
+        _, token = clients.create(conn, 'celular')
+    client = TestClient(app)
+    headers = {'Authorization': f'Bearer {token}'}
+
+    assert routes == REMOTE_ROUTES
+    for path in (
+        '/engines',
+        '/storage',
+        '/settings/ui.theme',
+        '/fs/list',
+        '/library',
+        '/inbox/folders',
+        '/lan/devices',
+    ):
+        assert client.get(path, headers=headers).status_code == 404, path
+    assert client.post('/lan/pairing', headers=headers).status_code == 404
 
 
 def test_ac2_job_not_found_answers_in_the_accepted_language(api):

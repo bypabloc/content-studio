@@ -1,0 +1,7 @@
+# 032: El MCP de la red local es Streamable HTTP sin estado y llama a la API de la LAN con el token del dispositivo
+
+- **Contexto**: D-6 pide el MCP en `/mcp` del listener de la LAN con el token del dispositivo. El puente de la 029 llama a la API local con el token de la instalación, que se salta las guardas de la red local.
+- **Elegida**: `lan/mcp_http.py` monta el `StreamableHTTPSessionManager` del SDK en modo `stateless`, detrás de `DeviceGate`. La puerta da 403 `origin_not_allowed` a un `Origin` distinto de la URL del listener y 401 a quien no es un dispositivo vigente con `jobs`. El token queda en un `ContextVar`, y el puente (`Bridge(remote=True)`) llama a la propia app de la LAN por HTTPS con ese token, confiando solo en el certificado propio. Así el MCP remoto pasa por las mismas guardas que la API: sus trabajos, sus subidas (`upload:<id>` en `input_path`) y sin `studio_watch_folder` ni tipos de administración. La protección contra DNS rebinding del SDK queda apagada: la cubren el token por header y la validación del `Origin`.
+- **Descartadas**: sesiones con estado (el token por sesión del SDK exige su capa OAuth). Un proxy aparte (un proceso más, ya descartado en D-6). Llamar a la base directamente desde el puente (duplicaría las guardas).
+- **Cómo revertir**: quitar `mcp_http.mount` de `api/routes/remote.py::include`.
+- **Cómo comprobarla**: `uv run pytest server/tests/integration/test_lan.py -k ac8 -q` (cliente MCP HTTP del SDK sobre TLS real).

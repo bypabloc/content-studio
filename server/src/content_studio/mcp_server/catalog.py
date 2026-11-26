@@ -242,3 +242,5 @@ TOOLS: tuple[ToolDef, ...] = (
     ),
 )
 TOOL_NAMES = tuple(tool.name for tool in TOOLS)
+# Spec 032 (AC-8): lo que no se publica por la red local, porque nombra carpetas de esta PC.
+LOCAL_ONLY = frozenset({'studio_watch_folder'})

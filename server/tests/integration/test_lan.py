@@ -11,6 +11,7 @@ import urllib.request
 from contextlib import closing
 from types import SimpleNamespace
 
+import anyio
 import pytest
 from fastapi.testclient import TestClient
 
@@ -140,3 +141,44 @@ def test_disabling_stops_the_listener(lan):
     assert lan.listener.apply() == {'running': False, 'url': None}
     with pytest.raises(OSError):
         socket.create_connection((ADDRESS, port), timeout=1).close()
+
+
+def _pair(lan, url: str) -> str:
+    pin = lan.app.state.pairing.new()['pin']
+    return _call(f'{url}/pair', _pinned(lan), body={'pin': pin, 'name': 'cliente mcp'})[1]['token']
+
+
+def test_ac8_mcp_http_lists_and_checks_origin(lan):
+    import httpx2
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamable_http_client
+
+    url = _enable(lan)
+    token = _pair(lan, url)
+
+    async def scenario() -> tuple[list[str], str]:
+        headers = {'Authorization': f'Bearer {token}'}
+        async with (
+            httpx2.AsyncClient(verify=_pinned(lan), headers=headers, timeout=30) as http,
+            streamable_http_client(f'{url}/mcp', http_client=http) as (read, write),
+            ClientSession(read, write) as session,
+        ):
+            await session.initialize()
+            listed = await session.list_tools()
+            jobs = await session.call_tool('studio_get_job', {})
+        return [tool.name for tool in listed.tools], jobs.content[0].text
+
+    names, jobs = anyio.run(scenario)
+
+    assert 'studio_narrate' in names
+    assert 'studio_watch_folder' not in names
+    assert json.loads(jobs) == {'jobs': []}
+    body = {'jsonrpc': '2.0', 'id': 1, 'method': 'tools/list'}
+    request = urllib.request.Request(f'{url}/mcp', data=json.dumps(body).encode(), method='POST')
+    for name, value in (('Authorization', f'Bearer {token}'), ('Origin', 'https://evil.example')):
+        request.add_header(name, value)
+    request.add_header('Content-Type', 'application/json')
+    with pytest.raises(urllib.error.HTTPError) as caught:
+        urllib.request.urlopen(request, context=_pinned(lan), timeout=10)
+    assert caught.value.code == 403
+    assert _call(f'{url}/mcp', _pinned(lan), body=body)[0] == 401

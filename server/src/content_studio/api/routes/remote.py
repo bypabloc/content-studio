@@ -23,7 +23,8 @@ from content_studio.api.routes import jobs as local_jobs
 from content_studio.api.schemas import Job
 from content_studio.db import connection
 from content_studio.db import jobs as store
-from content_studio.lan import cert, clients
+from content_studio.jobs import queue
+from content_studio.lan import cert, clients, guard
 from content_studio.lan.pairing import PairingError
 from content_studio.narration import profiles
 
@@ -57,6 +58,13 @@ class PairIn(BaseModel):
     name: str = Field(min_length=1, max_length=80)
 
 
+class NewJob(BaseModel):
+    """Cuerpo de POST /jobs desde la red local: las rutas van como `upload:<id>`."""
+
+    kind: str
+    params: dict
+
+
 @pair_router.post('/pair')
 def pair(body: PairIn, request: Request, conn: Conn) -> dict:
     """Canjea el PIN por el token del dispositivo (que se muestra solo esta vez) y la huella del certificado."""
@@ -75,6 +83,23 @@ def pair(body: PairIn, request: Request, conn: Conn) -> dict:
 def voice_profiles() -> list[dict]:
     """Los perfiles de voz, para elegir con cuál narrar."""
     return profiles.list_profiles()
+
+
+@jobs_router.post('/jobs', status_code=201, response_model=Job)
+def create_job(body: NewJob, request: Request, conn: Conn) -> dict:
+    """Encola un trabajo del dispositivo: tipo permitido y entradas solo como subidas suyas (AC-6)."""
+    client = request.state.client
+    params = guard.remote_params(conn, client['id'], body.kind, body.params)
+    services = request.app.state.services
+    if body.kind not in services:
+        raise ApiError(422, 'unknown_kind', kind=body.kind)
+    try:
+        job_id = queue.enqueue(conn, body.kind, params, services)
+    except queue.InvalidJob as error:
+        first = error.errors[0]
+        raise ApiError(422, first['code'], extra={'errors': error.errors}, **first['params']) from error
+    store.update(conn, job_id, client_id=client['id'])
+    return _own(conn, request, job_id)
 
 
 def _own(conn: sqlite3.Connection, request: Request, job_id: int) -> dict:
@@ -125,11 +150,16 @@ def get_file(path: str, request: Request, conn: Conn) -> FileResponse:
 
 def include(app: FastAPI, lan_url: str | None) -> None:
     """Monta la lista cerrada de 02 §2 en la app de la red local."""
+    from content_studio.api.routes import uploads
+    from content_studio.lan import mcp_http
+
     jobs_only = [Depends(device('jobs'))]
     files_only = [Depends(device('files'))]
     app.include_router(pair_router)
     app.include_router(health.router, dependencies=jobs_only)
     app.include_router(catalog.router, dependencies=jobs_only)
     app.include_router(jobs_router, dependencies=jobs_only)
+    app.include_router(uploads.router, dependencies=files_only)
     app.include_router(files_router, dependencies=files_only)
-    app.state.lan_url = lan_url
+    if lan_url:
+        mcp_http.mount(app, lan_url)
