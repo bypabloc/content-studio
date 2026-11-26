@@ -232,3 +232,15 @@ rttm
 itertracks
 lavfi
 diarizations
+SECP
+gethostname
+DGRAM
+cafile
+streamable
+HTTPASGI
+netsh
+advfirewall
+localport
+HRESULT
+NOCLOSEPROCESS
+SHELLEXECUTEINFOW

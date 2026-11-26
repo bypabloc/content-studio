@@ -18,6 +18,7 @@ EDITABLE = {
     'started_at',
     'finished_at',
     'position',
+    'client_id',  # el dispositivo de la red local que lo pidió (spec 032, AC-7)
 }
 
 

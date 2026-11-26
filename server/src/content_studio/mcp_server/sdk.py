@@ -24,7 +24,8 @@ def build_server(bridge: Bridge) -> Any:
     from mcp.server import Server
 
     async def on_list_tools(ctx: Any, params: Any) -> Any:  # noqa: ARG001
-        return types.ListToolsResult(tools=[_tool(types, definition) for definition in catalog.TOOLS])
+        definitions = [d for d in catalog.TOOLS if not (bridge.remote and d.name in catalog.LOCAL_ONLY)]
+        return types.ListToolsResult(tools=[_tool(types, definition) for definition in definitions])
 
     async def on_call_tool(ctx: Any, params: Any) -> Any:
         token = (ctx.meta or {}).get('progress_token')

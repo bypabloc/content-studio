@@ -29,6 +29,7 @@ uv run studio narration voices --build all   # voces libres aprobadas en los 12 
 uv run studio music --model acestep --style lofi-chill corporate --duration 30            # → out/music/
 uv run studio serve --port 8000 --token T    # API en 127.0.0.1 con el worker de la cola
 uv run studio mcp config --client claude-code   # fragmento MCP para un asistente (spec 029); `studio mcp` sirve por stdio
+# Red local (spec 032): apagada; Ajustes > Integraciones > Red local la activa con PIN y TLS (docs/operations/lan.md)
 # uv run studio api up                    # server compartido en 127.0.0.1:41830: arranca o reutiliza el que responde; api status|down|token
 uv run studio jobs list --kind music         # también: jobs cancel ID y jobs retry ID
 uv run studio library list --kind music      # también: library scan --add DIR, tag ID NOMBRE y trash RUTA

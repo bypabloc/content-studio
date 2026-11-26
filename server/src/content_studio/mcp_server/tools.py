@@ -6,6 +6,7 @@ El catálogo de herramientas está en `catalog.py`. No importa el SDK `mcp`: `sd
 from __future__ import annotations
 
 import mimetypes
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +39,9 @@ MCP_KINDS = frozenset(
 )
 
 
+Resolve = Callable[[str], Path | str]
+
+
 class ToolError(Exception):
     """Un error de la herramienta (`isError: true`): código del catálogo de errores y sus parámetros."""
 
@@ -59,8 +63,14 @@ def resolve_input(value: str) -> Path:
     return resolved
 
 
-def build_job(name: str, args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def keep_reference(value: str) -> str:
+    """Desde la red local (spec 032) la entrada es un `upload:<id>`: no se busca en esta PC, la valida la API."""
+    return str(value)
+
+
+def build_job(name: str, args: dict[str, Any], remote: bool = False) -> tuple[str, dict[str, Any]]:
     """El `kind` y los `params` del trabajo que crea la herramienta `name`, los mismos que arma `studio`."""
+    resolve: Resolve = keep_reference if remote else resolve_input
     builders = {
         'studio_narrate': _narrate,
         'studio_make_music': _music,
@@ -71,10 +81,10 @@ def build_job(name: str, args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     }
     if name not in builders:
         raise ToolError('unknown_tool', {'name': name})
-    return builders[name](args)
+    return builders[name](args, resolve)
 
 
-def _narrate(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _narrate(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:
     has_text, has_file = bool(args.get('text')), bool(args.get('script_path'))
     if has_text == has_file:  # exactamente uno: un texto o un guion
         raise ToolError('narration_source')
@@ -85,13 +95,13 @@ def _narrate(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     if args.get('voice'):
         params['voice'] = args['voice']
     if has_file:
-        params['file'] = [str(resolve_input(args['script_path']))]
+        params['file'] = [str(resolve(args['script_path']))]
     else:
         params['text'] = args['text']
     return 'narration', params
 
 
-def _music(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _music(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:  # noqa: ARG001
     if not args.get('style'):
         raise ToolError('missing_style')
     params: dict[str, Any] = {'model': args.get('model') or DEFAULT_MUSIC_MODEL, 'style': list(args['style'])}
@@ -106,30 +116,30 @@ def _recommended_whisper() -> str:
     return whisper.recommended()
 
 
-def _transcribe(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _transcribe(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:
     params = {
-        'input': str(resolve_input(args['input_path'])),
+        'input': str(resolve(args['input_path'])),
         'model': args.get('model') or _recommended_whisper(),
         'language': args.get('language') or 'auto',
     }
     return 'transcribe', params
 
 
-def _clean(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _clean(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:
     params = {
-        'input': str(resolve_input(args['input_path'])),
+        'input': str(resolve(args['input_path'])),
         'model': args.get('model') or _recommended_whisper(),
         'language': args.get('language') or 'auto',
     }
     return 'clean.analyze', params
 
 
-def _convert(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
-    params = {'input': str(resolve_input(args['input_path'])), 'target': args['target'], 'options': {}}
+def _convert(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:
+    params = {'input': str(resolve(args['input_path'])), 'target': args['target'], 'options': {}}
     return 'media.convert', params
 
 
-def _submit(args: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+def _submit(args: dict[str, Any], resolve: Resolve) -> tuple[str, dict[str, Any]]:  # noqa: ARG001
     if not args.get('kind'):
         raise ToolError('missing_kind')
     kind = str(args['kind'])

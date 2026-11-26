@@ -281,3 +281,8 @@ Las de la 001 y la 002 se aplicaron y se borraron. Su texto completo sigue en el
 | [038-subtitulos-cliente](038-subtitulos-cliente.md) | Color del hablante en el ASS como en el server; modelo e idioma compartidos con Transcripción; chip en `shared` (`UISpeakerChip`); exportar guarda el borrador antes; aserciones de `POST /jobs` con `objectContaining` | `main` |
 | [038-editor-limpiador](038-editor-limpiador.md) | Carril de subtítulos de solo lectura con el color del hablante; análisis del Limpiador con diarize, revisión coloreada y Subtitular con hablantes en el tiempo limpio | `main` |
 | [039-referencia-construida](039-referencia-construida.md) | Clips de DER montados con muestras de voz, con su referencia exacta, en lugar de anotados a mano | Antes de publicar en main | Agente |
+| [032-lan-opt-in](032-lan-opt-in.md) | La red local es un segundo listener con TLS, apagado por defecto, que se enciende y se apaga sin reiniciar el server | `main` |
+| [032-cryptography](032-cryptography.md) | Dependencia nueva explícita: cryptography para generar el certificado autofirmado | `main` |
+| [032-subida-cruda](032-subida-cruda.md) | POST /uploads recibe el archivo crudo con ?name=, no multipart | `main` |
+| [032-mcp-http-sin-estado](032-mcp-http-sin-estado.md) | El MCP de la red local es Streamable HTTP sin estado y llama a la API de la LAN con el token del dispositivo | `main` |
+| [032-firewall-uac](032-firewall-uac.md) | La regla del firewall se crea con netsh elevado por ShellExecuteExW runas, solo para el perfil Privado | `main` |

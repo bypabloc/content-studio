@@ -20,6 +20,7 @@ from content_studio.db import connection, jobs, schema, settings
 from content_studio.db.connection import utc_now
 from content_studio.inbox import scanner as inbox
 from content_studio.jobs.worker import Worker
+from content_studio.lan.server import LanError, LanListener
 from content_studio.runtime import discovery, idle, instance
 from content_studio.system import tools
 
@@ -124,6 +125,8 @@ def _run(db: Path, main: Path, port: int, token: str, folder: Path) -> int:
     guarded = HostGuard(ActivityGuard(app, clock), ['127.0.0.1', 'localhost'])
     server = uvicorn.Server(uvicorn.Config(guarded, host='127.0.0.1', port=port, log_level='warning'))
     app.state.stop = lambda: setattr(server, 'should_exit', True)
+    lan = LanListener(db, app, clock)  # spec 032: apagado salvo que se active la red local
+    app.state.lan = lan
     tools.detect()
     worker.start()
     thread = threading.Thread(target=server.run, daemon=True)
@@ -145,11 +148,16 @@ def _run(db: Path, main: Path, port: int, token: str, folder: Path) -> int:
     )
     print(ready_line(port), flush=True)
     try:
+        lan.apply()
+    except LanError as error:
+        print(f'LAN listener not started ({error}); check api.lan.port in Settings > Integrations', file=sys.stderr)
+    try:
         thread.join()
     except KeyboardInterrupt:
         server.should_exit = True
         thread.join(5)
     discovery.clear(folder)
+    lan.stop()
     inbox_stop.set()
     worker.stop()
     return 0

@@ -4,7 +4,7 @@ Pedido del usuario (2026-11-24): que las apps de la PC, los LLM y agentes locale
 
 Formato: [`plan-format.md`](../../../.agents/rules/plan-format.md). Cada spec es una rama desde `origin/dev` y un PR a `dev`, en orden. La 033 hace la verificación integral y borra esta carpeta.
 
-Alcance: este lote cierra en la 031. `DECISIONS.md` (2026-11-24) dice «Lote completo 025-031»; la 032 y la 033 quedan PEN hasta que el usuario confirme que entran (ver [PENDING](../../process/PENDING/032-033-fuera-del-lote.md)).
+Alcance: el 2026-11-25 el usuario pidió implementar también la 032 y la 033 y cerrar el lote.
 
 ## Specs
 
@@ -17,7 +17,7 @@ Alcance: este lote cierra en la 031. `DECISIONS.md` (2026-11-24) dice «Lote com
 | [029](029-mcp/README.md) | Servidor MCP local (`studio mcp`) para LLMs y agentes | feature | Large | 028 | DON |
 | [030](030-hot-folders/README.md) | Carpetas de entrada: soltar un archivo y recibir el resultado | feature | Large | 029 | DON |
 | [031](031-windows-integration/README.md) | Windows: enlaces `content-studio://`, «Enviar a» e inicio con Windows | feature | Medium | 030 | DON |
-| [032](032-lan/README.md) | Red local: emparejar dispositivos, tokens con permisos, subir archivos y MCP por HTTP | feature | Large | 031 | PEN |
+| [032](032-lan/README.md) | Red local: emparejar dispositivos, tokens con permisos, subir archivos y MCP por HTTP | feature | Large | 031 | DON |
 | [033](033-integral-verification/README.md) | Verificación integral y cierre del lote | chore | Micro | 032 | PEN |
 
 ## Decisiones del usuario que valen para todo el lote

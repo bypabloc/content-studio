@@ -35,10 +35,10 @@ Estados: `PEN` (pendiente) o `IMP` (implementada, con su commit). El estado va e
 
 | Fase | Qué | Ciclos | AC | Commit | Estado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| F1 | [Listener, dispositivos y emparejamiento](fases/1-acceso/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-11, AC-4, AC-7, AC-3 | - | PEN |
-| F2 | [Rutas remotas, subidas y MCP por HTTP](fases/2-superficie/plan-tdd.md) | C4, C5, C6 | AC-5, AC-6, AC-8 | - | PEN |
-| F3 | [Firewall y Ajustes](fases/3-firewall-y-ui/plan-tdd.md) | C7, C8 | AC-9, AC-10 | - | PEN |
-| FV | [Verificación final](03-verificacion-final.md) | - | todos | - | PEN |
+| F1 | [Listener, dispositivos y emparejamiento](fases/1-acceso/plan-tdd.md) | C1, C2, C3 | AC-1, AC-2, AC-11, AC-4, AC-7, AC-3 | 2c8dadd | IMP |
+| F2 | [Rutas remotas, subidas y MCP por HTTP](fases/2-superficie/plan-tdd.md) | C4, C5, C6 | AC-5, AC-6, AC-8 | b629e6f | IMP |
+| F3 | [Firewall y Ajustes](fases/3-firewall-y-ui/plan-tdd.md) | C7, C8 | AC-9, AC-10 | 47557dc | IMP |
+| FV | [Verificación final](03-verificacion-final.md) | - | todos | cierre | IMP |
 
 ## Decisiones cerradas (no reabrir)
 
@@ -67,14 +67,14 @@ Todo AC tiene al menos un test. Se completa al redactar y se marca al implementa
 
 | AC | Fase | Ciclo | Test | Verificación real |
 | :--- | :--- | :--- | :--- | :--- |
-| AC-1 | F1 | C1 | `server/tests/integration/test_lan.py::test_ac1_apagado_solo_loopback` | solo pytest |
-| AC-2 | F1 | C1 | `server/tests/integration/test_lan.py::test_ac2_listener_tls_con_huella` | solo pytest |
-| AC-3 | F1 | C3 | `server/tests/unit/src/content_studio/lan/test_pairing.py::test_ac3_pin_un_uso_vence_y_bloquea` | solo pytest |
-| AC-4 | F1 | C2 | `server/tests/unit/src/content_studio/lan/test_clients.py::test_ac4_sin_token_revocado_o_local_da_401` | solo pytest |
-| AC-5 | F2 | C4 | `server/tests/unit/src/content_studio/api/test_app.py::test_ac5_remote_sin_rutas_admin` | solo pytest |
-| AC-6 | F2 | C5 | `server/tests/unit/src/content_studio/lan/test_guard.py::test_ac6_upload_si_ruta_no` | solo pytest |
-| AC-7 | F1 | C2 | `server/tests/integration/test_lan.py::test_ac7_solo_sus_trabajos` | solo pytest |
-| AC-8 | F2 | C6 | `server/tests/integration/test_lan.py::test_ac8_mcp_http_lista_y_valida_origin` | 03 §2, paso 3 |
+| AC-1 | F1 | C1 | `server/tests/integration/test_lan.py::test_ac1_off_only_loopback` | solo pytest |
+| AC-2 | F1 | C1 | `server/tests/integration/test_lan.py::test_ac2_tls_listener_with_fingerprint` | solo pytest |
+| AC-3 | F1 | C3 | `server/tests/unit/src/content_studio/lan/test_pairing.py::test_ac3_pin_single_use_expires_and_locks` | solo pytest |
+| AC-4 | F1 | C2 | `server/tests/unit/src/content_studio/lan/test_clients.py::test_ac4_no_revoked_or_local_token_is_401` | solo pytest |
+| AC-5 | F2 | C4 | `server/tests/unit/src/content_studio/api/test_app.py::test_ac5_remote_without_admin_routes` | solo pytest |
+| AC-6 | F2 | C5 | `server/tests/unit/src/content_studio/lan/test_guard.py::test_ac6_upload_yes_path_no` | solo pytest |
+| AC-7 | F1 | C2 | `server/tests/integration/test_lan.py::test_ac7_only_own_jobs` | solo pytest |
+| AC-8 | F2 | C6 | `server/tests/integration/test_lan.py::test_ac8_mcp_http_lists_and_checks_origin` | 03 §2, paso 3 |
 | AC-9 | F3 | C7 | `client/src-tauri/src/firewall.rs::tests::builds_private_profile_rule` | 03 §2, paso 1 |
 | AC-10 | F3 | C8 | `client/tests/unit/src/features/settings/LanPanel.test.tsx` | e2e `happy-lan-pairing` |
 | AC-11 | F1 | C1 | `server/tests/integration/test_lan.py::test_ac11_keep_awake` | solo pytest |

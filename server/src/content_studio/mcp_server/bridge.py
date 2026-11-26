@@ -51,9 +51,12 @@ class Bridge:
         api: Callable[[], Api] | None = None,
         poll_s: float = 1.0,
         main: Path | None = None,
+        remote: bool = False,
     ) -> None:
-        """El puente de esta base; `api` y `main` se cambian en las pruebas."""
+        """El puente de esta base; `api` y `main` se cambian en las pruebas. `remote` es el MCP de la red local
+        (spec 032): sin `studio_watch_folder` y con las entradas como `upload:<id>`, que valida la API."""
         self._db = db
+        self.remote = remote
         self._api = api or self._connect
         self._poll_s = poll_s
         self._main = main or main_checkout(paths.ROOT)
@@ -83,7 +86,7 @@ class Bridge:
             api.post(f'/jobs/{job_id}/cancel')
             view, outputs = self._snapshot(api, job_id)
             return _ok(view, outputs)
-        if name == 'studio_watch_folder':
+        if name == 'studio_watch_folder' and not self.remote:
             body = {
                 'path': args.get('path', ''),
                 'kind': args.get('kind', ''),
@@ -91,18 +94,20 @@ class Bridge:
                 'keep_awake': args.get('keep_awake', True),
             }
             return _ok(api.post('/inbox/folders', body))
-        kind, params = tools.build_job(name, args)
+        kind, params = tools.build_job(name, args, remote=self.remote)
         return _ok(tools.job_view(api.post('/jobs', {'kind': kind, 'params': params}), []))
 
     def _capabilities(self, api: Api) -> dict[str, Any]:
+        from content_studio.lan.guard import REMOTE_KINDS
         from content_studio.media.formats import TARGETS
         from content_studio.services.registry import SERVICES
 
+        allowed = tools.MCP_KINDS & REMOTE_KINDS if self.remote else tools.MCP_KINDS
         return {
             'narration': api.get('/catalog/narration'),
             'music': api.get('/catalog/music'),
             'conversion_targets': sorted(TARGETS),
-            'job_kinds': sorted(kind for kind in SERVICES if kind in tools.MCP_KINDS),
+            'job_kinds': sorted(kind for kind in SERVICES if kind in allowed),
         }
 
     def _get_jobs(self, api: Api, args: dict[str, Any]) -> ToolResult:

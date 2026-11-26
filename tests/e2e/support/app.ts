@@ -69,6 +69,9 @@ export async function openApp(
         },
         invoke: async (command: string, args: { event?: string; handler?: number; options?: { multiple?: boolean } } = {}) => {
           (window as unknown as { __commands: string[] }).__commands.push(command);
+          // Un comando que la prueba hizo fallar (failCommand) rechaza con su error, como el Err de Rust.
+          const failure = (window as unknown as { __failCommands?: Record<string, string> }).__failCommands?.[command];
+          if (failure !== undefined) throw failure;
           if (command === 'get_connection') {
             tries += 1;
             if (connect === 'spawn_failed') throw 'server_spawn_failed';
@@ -116,6 +119,17 @@ export function emitEvent(page: Page, event: string, payload: unknown): Promise<
   return page.evaluate(
     ({ name, data }) => (window as unknown as { __emitEvent: (e: string, p: unknown) => void }).__emitEvent(name, data),
     { name: event, data: payload },
+  );
+}
+
+/** Hace que el comando de Tauri `command` falle con `error` (el firewall rechazado de la red local, spec 032). */
+export function failCommand(page: Page, command: string, error: string): Promise<void> {
+  return page.evaluate(
+    ({ name, value }) => {
+      const target = window as unknown as { __failCommands?: Record<string, string> };
+      target.__failCommands = { ...target.__failCommands, [name]: value };
+    },
+    { name: command, value: error },
   );
 }
 

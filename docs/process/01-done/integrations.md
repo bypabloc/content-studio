@@ -29,14 +29,17 @@ con content-studio: piden una narración o una música, esperan el resultado y r
 - Enlaces `content-studio://` (spec 031): `open/<sección>`, `job/<id>`, `library/<id>` y `new/<tipo>` abren o prellenan una sección, y con la app abierta el enlace llega a su ventana. Nunca encolan: el usuario pulsa el botón de la sección.
 - «Enviar a» del Explorador (spec 031): «Convertir a MP3», «Normalizar», «Limpiar silencios» y «Transcribir» encolan un trabajo por archivo y avisan cuántos entraron y cuántos se saltaron; «Abrir en el Editor» abre los archivos en el Editor.
 - Inicio con Windows (spec 031): Ajustes > Sistema > «Iniciar el servidor con Windows» escribe el valor `Run` de HKCU, apagado por defecto.
+- Red local (spec 032), apagada por defecto: Ajustes > Integraciones > Red local abre un segundo listener con TLS en la IP elegida (`:41831`) y la regla de firewall «Content Studio LAN» solo para redes privadas (pide UAC). Un dispositivo se empareja con un PIN de 6 dígitos (5 min, un uso, 5 intentos) y recibe su token, que se puede revocar. Desde la LAN solo sube archivos (`upload:<id>`), pide narración, música, conversión, normalización o análisis de silencios, ve sus trabajos y baja sus salidas; también por MCP en `/mcp` (Streamable HTTP). Guía: `docs/operations/lan.md`.
 
 ## Dónde vive
 
 - `server/src/content_studio/mcp_server/` (catálogo, herramientas, puente, SDK y configuración por cliente),
   `cli/mcp.py` y `api/routes/integrations.py`.
 - Cliente: `client/src/features/settings/McpConfig.tsx`, dentro de `IntegrationsPanel.tsx`.
+- Red local: `server/src/content_studio/lan/` (dispositivos, PIN, certificado, guarda, listener y MCP por HTTP), `api/routes/{remote,uploads,lan}.py`, `client/src-tauri/src/firewall.rs` y `client/src/features/settings/LanPanel.tsx`.
 
 ## Historial
 
 - 2026-11-25: spec 029: servidor MCP por stdio y configuración por cliente.
 - 2026-11-25: enlaces `content-studio://`, «Enviar a» e inicio con Windows (spec 031)
+- 2026-11-25: red local con emparejamiento por PIN, TLS, subidas y MCP por HTTP (spec 032)
