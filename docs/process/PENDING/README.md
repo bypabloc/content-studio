@@ -121,7 +121,6 @@ Nombre: `<spec>-<tema>.md`. Formato:
 | [031-convert-target](031-convert-target.md) | `new/media.convert` no cambia el formato del Conversor (solo rellena el archivo) | Antes de publicar 031 | Agente |
 | [031-inicio-logoff](031-inicio-logoff.md) | AC-8: que el server arranque al cerrar y abrir sesión (el valor `Run` ya se comprobó) | Antes de publicar 031 | Agente |
 | [031-desinstalar-carpeta](031-desinstalar-carpeta.md) | El desinstalador deja vacía la carpeta de instalación | Después de publicar 031 | Agente |
-| [032-033-fuera-del-lote](032-033-fuera-del-lote.md) | 032 (LAN) y 033 (verificación integral) quedan fuera del lote 025-031 según DECISIONS.md | Antes de empezar 032 | Usuario |
 | [035-corrida-real](035-corrida-real.md) | Corrida real de pyannote (VRAM, WDER y escucha): el usuario pone el token de Hugging Face | `main` |
 | [036-corrida-real](036-corrida-real.md) | Corrida real con hablantes (pyannote, con el token del usuario) y revisión de capturas con hablantes | Antes de publicar | Usuario y agente |
 | [037-corrida-real](037-corrida-real.md) | Corrida real de Hablantes con pyannote, medición de los WAV por hablante y revisión de los proyectos del Editor | Antes de publicar en `main` | Usuario y agente |
@@ -133,3 +132,5 @@ Nombre: `<spec>-<tema>.md`. Formato:
 
 | [039-carga-una-vez](039-carga-una-vez.md) | El AC-1 de carga del modelo una sola vez no se ve en los logs de los trabajos | Antes de publicar en main | Agente |
 | [039-aviso-motor-en-app-check](039-aviso-motor-en-app-check.md) | app-check muestra «Instala el motor» con pyannote instalado: motores aislados o modo real sin motores | Antes de publicar en main | Agente |
+| [032-prueba-con-otro-equipo](032-prueba-con-otro-equipo.md) | Probar la red local desde un celular u otra PC real, y el MCP por HTTP desde un cliente de otra PC | Antes de publicar en main | Usuario y agente |
+| [032-firewall-instalada](032-firewall-instalada.md) | Activar la red local en la app instalada, aceptar el UAC y ver la regla del firewall | Antes de publicar en main | Usuario |
