@@ -29,7 +29,7 @@ Música de fondo instrumental para videos, en local, sin voz ni letra.
 | Motor | Python | Salida de 30 s (verificada) | Nota |
 | :--- | :---: | :--- | :--- |
 | acestep | 3.12 | 30,0 s, -14,4 LUFS integrado, volumen medio -15,6 dB, pico -0,5 dBFS, sin voz (demucs -42,4 dB) | Su pyproject exige Python menor que 3.13 y torch 2.7.1 |
-| heartmula | 3.13 | 30,0 s, -11,8 LUFS, pico -1,2 dBFS con la revisión anterior; **con voz** (demucs -1,3 dB) | No cumple «siempre instrumental»: ficha WARNING `026-heartmula-voz` |
+| heartmula | 3.13 | 30,0 s, -11,8 LUFS, pico -1,2 dBFS con la revisión anterior; **con voz** (demucs -1,3 dB) | No cumple «siempre instrumental»: [WARNING/heartmula-canta](../WARNING/heartmula-canta.md) |
 
 HeartMuLa genera voz con el prompt instrumental: [WARNING/heartmula-canta](../WARNING/heartmula-canta.md).
 
