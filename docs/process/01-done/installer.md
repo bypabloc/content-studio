@@ -26,7 +26,7 @@ Instalar Content Studio en Windows sin un checkout ni permisos de administrador,
 - Cliente: `client/src/bootstrap/`, `shared/update/` y `features/settings/AboutSettings.tsx`.
 - Server: `server/src/content_studio/seed.py`, el modo instalado en `paths.py` y el respaldo en `db/`.
 - Devtools: `devtools/version.py`, `bundle.py` y `release.py`. Publicar: [release.md](../../operations/release.md).
-- Decisiones: [022-datos-al-desinstalar](../WARNING/022-datos-al-desinstalar.md), [022-recursos-del-bundle](../WARNING/022-recursos-del-bundle.md) y [022-updater](../WARNING/022-updater.md); pendiente [022-firma-de-codigo](../PENDING/022-firma-de-codigo.md).
+- Decisiones (historial de git de `docs/process/WARNING/`): 022-datos-al-desinstalar, 022-recursos-del-bundle y 022-updater. La firma de código la decide el usuario en [WARNING/publicar-v0.1.0](../WARNING/publicar-v0.1.0.md).
 
 ## Historial
 

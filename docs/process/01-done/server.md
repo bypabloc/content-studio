@@ -37,4 +37,4 @@ Genera narración y música sin abrir la interfaz: una API local y una cola de t
 - 2026-11-24: spec 025: el server corre en Python 3.15 (`.python-version`); el piso de los motores (hoy 3.10) sale de sus recetas.
 - 2026-11-25: spec 029 (MCP): `studio mcp` y `studio mcp config`; `GET /integrations/mcp-config` para Ajustes.
 - 2026-11-25: spec 032 (red local): segundo listener opt-in, dispositivos con token y subidas.
-- 2026-11-25: spec 028 (server compartido): `studio api` y una sola instancia; la ventana se adjunta y no lo posee (`WARNING/028-serve-sin-token`, `028-apagado-y-guardas`).
+- 2026-11-25: spec 028 (server compartido): `studio api` y una sola instancia; la ventana se adjunta y no lo posee.

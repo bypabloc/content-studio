@@ -21,8 +21,8 @@ Pone la música bajo la voz con ducking y normaliza el resultado a un LUFS final
 - Código: `server/src/content_studio/mix/` (`render.py`, `envelope.py`, `project.py`, `render_main.py`), `services/mix_render.py`, `api/routes/mix.py` y `cli/mix.py`. La sonoridad usa `media/normalize.py` (015).
 - Cliente: `client/src/features/mix/`.
 - Pruebas: unitarias en `server/tests/unit/src/content_studio/mix/` y `services/test_mix_render.py`; e2e en `tests/e2e/mix/`.
-- Decisiones: WARNING [016-valores-ducking](../WARNING/016-valores-ducking.md).
-- Pendientes: [016-lufs-real-fuera-de-ac3](../PENDING/016-lufs-real-fuera-de-ac3.md) (el LUFS de -14 no se cumple con mezclas de picos) y [016-escucha-y-capturas](../PENDING/016-escucha-y-capturas.md).
+- Decisiones (historial de git de `docs/process/WARNING/`): 016-valores-ducking.
+- Pendiente: la decisión sobre el LUFS de las mezclas con picos, en [PENDING/lufs-de-la-mezcla](../PENDING/lufs-de-la-mezcla.md).
 
 ## Historial
 

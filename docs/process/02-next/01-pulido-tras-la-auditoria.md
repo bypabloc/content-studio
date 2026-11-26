@@ -1,0 +1,54 @@
+---
+prioridad: 01
+estado: PEN
+---
+
+# Pulido pendiente que dejaron las specs 003 a 039
+
+- **Objetivo**: corregir lo que quedó suelto en las fichas de `PENDING/` y `WARNING/` cerradas el 2026-11-25. Ninguno bloquea `main`, y cada uno lo puede hacer el agente sin decisión del usuario. El detalle de cada ficha está en el historial de git (`git log --all -- docs/process/PENDING/<ficha>.md`).
+- **Alcance**, por área:
+  - **Bugs**:
+    - La cola muestra crudos los tipos de trabajo que no son `music` ni `narration` (`JobRow.kindLabel`).
+    - `content-studio://new/media.convert?target=` no cambia el formato (`FormatPicker` no acepta un valor inicial).
+    - Al quemar subtítulos se hace `-c:a copy`, que falla con PCM dentro de un MP4 (`subtitles/burn.py`).
+    - `repair` rechaza un motor cuya primera instalación no terminó (`engine_external`).
+    - La descarga de HF pasa los 260 caracteres con una carpeta de motores profunda.
+    - Publicar busca la transcripción por la ruta literal.
+    - Las palabras clave sugeridas conservan la puntuación («timbre,»).
+    - `subtitles.burn` guarda la `source_path` vieja.
+    - El desinstalador deja vacía la carpeta de instalación.
+  - **Server compartido**:
+    - Un server dejó de escuchar tras `/server/stop` y retuvo `api.lock`; no se reprodujo.
+    - El server que lanza `studio mcp` muere al cerrar un cliente del SDK de Python (Job Object sin breakaway).
+    - `studio jobs cancel` de un trabajo ajeno no sale por SSE.
+  - **app-check y pruebas**:
+    - 403 en `/media/peaks` de las voces dentro de la base aislada.
+    - `--data=real` no ve los motores del usuario (aviso de pyannote).
+    - `gpu-turn run -- pytest -m local` se cuelga con el test de llm.
+    - Tests intermitentes: `test_llm_warm`, `FileBrowser`, axe en en/pt de `happy-language` y el arranque en frío de `app-check`.
+    - Pruebas que faltan: el arrastre con el ratón en la cola, los avisos sin foco y el anuncio vacío.
+  - **UI**:
+    - Contraste del tema oscuro: botón primario, texto tenue, interruptor apagado, barra de desplazamiento y selector de Hablantes.
+    - El toast «Trabajo terminado» tapa controles.
+    - La lista de idiomas está repetida en Subtítulos, Transcripción y Limpiador.
+    - `UIText` con `className`.
+    - `_row` en `UIRowTable` y `UIRepeatGroup`.
+    - Soltar un guion antes de que cargue el catálogo lo descarta sin aviso.
+    - Los 422 de FastAPI no pasan por el catálogo.
+  - **Funciones diferidas**:
+    - Arrastrar a la ranura de Mezcla.
+    - Capítulos de Publicar que salten en el reproductor.
+    - Trayectoria de «Seguir a la persona».
+    - Evaluar con whisper solo el párrafo regenerado, y la caché de la referencia.
+    - Log de carga y reúso del modelo de diarización.
+    - Bitrates de los presets de redes.
+    - Masterización de la narración sobre `media/normalize.py`.
+    - Más operaciones en las carpetas de entrada de Ajustes.
+  - **Motores y asistente**:
+    - Subir acestep, cosyvoice3, faster-whisper, heartmula, qwen y voxcpm2 de Python cuando haya ruedas (onnxruntime y pyahocorasick cp315).
+    - Quitar `openai-whisper` de la receta de CosyVoice si no se importa.
+    - Casos de `llm-eval`: tildes perdidas en frío, glosario aplicado de más y el caso que falla en `script_review`.
+    - Generar las 126 muestras de 10 s de Música con la GPU.
+- **Qué lo habilita hoy**: el código de cada spec ya está en `dev`.
+- **Dependencias**: ninguna.
+- **Preguntas abiertas**: ninguna; cada punto se puede hacer en su propia spec.

@@ -22,7 +22,7 @@ Convierte audio y video a los formatos estándar, a presets de redes con encuadr
 - Código: `server/src/content_studio/media/` (`convert`, `presets`, `reframe`, `normalize`, `formats`), `services/media_{convert,normalize,reframe_track}.py`, `vision/` (seguir a la persona con YuNet) y `cli/media.py`.
 - Cliente: `client/src/features/convert/` y `client/src/features/normalize/`.
 - Pruebas: unitarias en `server/tests/unit/src/content_studio/media/` y `cli/test_media.py`; cliente en `client/tests/unit/src/features/{convert,normalize}/`; e2e en `tests/e2e/convert/` y `tests/e2e/normalize/` (sobre `_api/media/`).
-- Decisiones: WARNING [015-armador-de-comandos](../WARNING/015-armador-de-comandos.md), [015-render-de-conversion](../WARNING/015-render-de-conversion.md), [015-presets-y-encuadre](../WARNING/015-presets-y-encuadre.md), [015-normalizar](../WARNING/015-normalizar.md), [015-seguir-a-la-persona](../WARNING/015-seguir-a-la-persona.md) y [015-pantallas-convertir-normalizar](../WARNING/015-pantallas-convertir-normalizar.md).
+- Decisiones (historial de git de `docs/process/WARNING/`): 015-armador-de-comandos, 015-render-de-conversion, 015-presets-y-encuadre, 015-normalizar, 015-seguir-a-la-persona y 015-pantallas-convertir-normalizar.
 
 ## Historial
 
@@ -30,5 +30,4 @@ Convierte audio y video a los formatos estándar, a presets de redes con encuadr
 
 ## Verificación (2026-11-22)
 
-- Corridas reales: formatos con su duración y códec, GIF de 5 s a 15 fps, y normalizaciones medidas con `ebur128`. El video cumple −1 dBTP con un techo de −2 para los códecs con pérdida ([015-verificacion-final](../WARNING/015-verificacion-final.md)).
-- Escucha y revisión pendientes: [015-escucha-y-revision](../PENDING/015-escucha-y-revision.md).
+- Corridas reales: formatos con su duración y códec, GIF de 5 s a 15 fps, y normalizaciones medidas con `ebur128`. El video cumple −1 dBTP con un techo de −2 para los códecs con pérdida (015-verificacion-final).

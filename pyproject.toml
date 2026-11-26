@@ -59,7 +59,7 @@ ignore_missing_imports = true
 check_untyped_defs = true
 exclude = ["^devtools/tests/"]
 
-# Deuda de tipos heredada (spec 003, D-4): cada módulo sale de esta lista al corregir sus errores. Ver PENDING/003-bajar-baselines.md.
+# Deuda de tipos heredada (spec 003, D-4): cada módulo sale de esta lista al corregir sus errores.
 [[tool.mypy.overrides]]
 module = [
     "content_studio.common.process",

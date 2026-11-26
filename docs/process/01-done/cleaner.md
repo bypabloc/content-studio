@@ -21,7 +21,7 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 - Código: `server/src/content_studio/clean/` (plan de cortes, render, exportaciones y análisis), `server/src/content_studio/transcription/` (servicio de faster-whisper), `server/src/content_studio/api/routes/clean.py` (API de revisión).
 - Cliente: `client/src/features/cleaner/` (sección, revisión y cortes), `client/src/shared/components/molecules/UIWhisperModelSelect/` y `client/src/shared/media/useSyncedMedia.ts`.
 - Pruebas: e2e en `tests/e2e/cleaner/` (cuatro specs sobre la API grabada en `tests/e2e/_api/clean/`).
-- Decisiones: [WARNING 013-plan-y-render](../WARNING/013-plan-y-render.md), [013-transcripcion-cache](../WARNING/013-transcripcion-cache.md), [013-limpiador-lote-y-revision](../WARNING/013-limpiador-lote-y-revision.md), [013-evaluacion-faster-whisper](../WARNING/013-evaluacion-faster-whisper.md) y [013-cuda-windows](../WARNING/013-cuda-windows.md).
+- Decisiones (historial de git de `docs/process/WARNING/`): 013-plan-y-render, 013-transcripcion-cache, 013-limpiador-lote-y-revision, 013-evaluacion-faster-whisper y 013-cuda-windows.
 
 ## Historial
 
@@ -32,5 +32,4 @@ Quita los silencios entre palabras de un audio o de un video, con cortes limpios
 - e2e en desktop-chromium: 36 de 36 pasan, con los cuatro del limpiador.
 - Corrida real (video de 232 s, large-v3-turbo): silencios ≥0,8 s = 0; sincronía 3 ms; informe = archivo; VRAM de la transcripción +1,28 GB; sin clics en las uniones; EDL con 42 eventos y XML con 42 clips. Lote de 3 archivos con `--auto` OK.
 - Evaluación de narración con `--evaluate` (faster-whisper) en real: transcripción = texto pedido, sin observaciones (AC-10).
-- Regiones de la revisión: se dibujan al recibir «ready» (fix 8); posiciones medidas en el DOM con la duración del archivo. Ver [WARNING 013-regiones-duracion-del-analisis](../WARNING/013-regiones-duracion-del-analisis.md).
-- Pendiente: escucha del usuario y revisión manual de la UI, en [PENDING 013-escucha-y-revision-manual](../PENDING/013-escucha-y-revision-manual.md).
+- Regiones de la revisión: se dibujan al recibir «ready» (fix 8); posiciones medidas en el DOM con la duración del archivo.

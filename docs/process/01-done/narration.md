@@ -27,8 +27,8 @@ Voz en off para videos, en español neutro latinoamericano, clonando una voz de 
 
 ## Límites conocidos
 
-- La toma regenerada no se evalúa con whisper: Comparar la muestra como «Sin evaluar» ([WARNING 006-regenerar-sin-evaluacion](../WARNING/006-regenerar-sin-evaluacion.md)). Pendiente: [PENDING 006-evaluar-toma-regenerada](../PENDING/006-evaluar-toma-regenerada.md).
-- El modo archivo de la CLI (`--output archivo.wav`) comparte `blocks/` entre tomas de una misma carpeta: [PENDING 006-cli-carpeta-compartida](../PENDING/006-cli-carpeta-compartida.md).
+- La toma regenerada no se evalúa con whisper: Comparar la muestra como «Sin evaluar».
+- El modo archivo de la CLI (`--output archivo.wav`) comparte `blocks/` entre tomas de una misma carpeta; `studio` no acepta `--output`, así que solo afecta a `python -m content_studio.narration.tts`.
 
 ## Versiones de los motores (spec 026, 2026-11-25)
 
@@ -44,12 +44,11 @@ Python y torch por motor, con su salida corta de verificación (duración, LUFS 
 | omnivoice | 3.14 | 2.11.0+cu128 | Sin verificar | Falta aceptar la licencia CC-BY-NC (la aceptación es del usuario) |
 | indextts | 3.11 | 2.8.0+cu128 | Sin verificar | Techo 3.11 del upstream; licencia bilibili pendiente |
 
-Fichas: `docs/process/WARNING/026-*-version.md`.
 
 ## Historial
 
 - 2026-11-24: «Revisar con IA» propone cambios por párrafo con el asistente local (spec 021).
-- 2026-11-21: spec 013 (limpiador y faster-whisper): `--evaluate` y el chequeo de tomas usan el servicio de faster-whisper, no el comando `whisper` (AC-10). Ver [WARNING 013-evaluacion-faster-whisper](../WARNING/013-evaluacion-faster-whisper.md).
+- 2026-11-21: spec 013 (limpiador y faster-whisper): `--evaluate` y el chequeo de tomas usan el servicio de faster-whisper, no el comando `whisper` (AC-10).
 - 2026-11-18: ficha inicial al adoptar `docs/process/`.
 - 2026-11-20: spec 010 (voces y grabación): perfiles de voz con tomas y referencia elegida, grabación guiada con prueba de sala y chequeo, importar tramos de audio o video y favoritas en el catálogo (PR #80).
 - 2026-11-19: CLI `studio` (004): `python cli.py narration tts` pasa a `uv run studio narration tts`; la salida va a `out/narration/<fecha>-<id>-<slug>/`. `grabar` se retiró en la 010.

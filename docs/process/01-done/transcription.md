@@ -25,7 +25,7 @@ Transcribe un audio o un video con faster-whisper y muestra el texto. Con «Iden
 
 ## Pendiente
 
-- La corrida real con hablantes, con el token de Hugging Face del usuario: `docs/process/PENDING/036-corrida-real.md`.
+- La corrida real con hablantes en la app instalada: `docs/process/WARNING/verificacion-app-instalada.md`.
 
 ## Historial
 
