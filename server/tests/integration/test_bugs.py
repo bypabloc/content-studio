@@ -113,3 +113,32 @@ def test_approval_reads_the_english_keys(tmp_path, monkeypatch):
     monkeypatch.setattr(catalog, 'CATALOG', voices / 'catalog.json')
     assert list(catalog.approved_voices(['neutral'])) == ['ana']
     assert catalog.state('ana', ['neutral']) == 'approved'
+
+
+def test_server_launched_from_an_mcp_client_breaks_away_from_its_job(tmp_path, monkeypatch):
+    """Spec 033: el SDK de MCP mete `studio mcp` en un Job Object con KILL_ON_JOB_CLOSE; el server que lanza lo
+    heredaba y moría al cerrar el cliente, con los trabajos a medias. Ahora pide salir del job y, si el job no lo
+    permite, arranca igual."""
+    import subprocess
+
+    from content_studio.runtime import instance
+
+    breakaway = getattr(subprocess, 'CREATE_BREAKAWAY_FROM_JOB', 0x01000000)
+    seen: list[int] = []
+
+    def popen(command, **kwargs):
+        flags = kwargs.get('creationflags', 0)
+        seen.append(flags)
+        if flags & breakaway and len(seen) == 1:
+            raise PermissionError(5, 'access denied: the job does not allow breakaway')
+        return None
+
+    monkeypatch.setattr(instance.os, 'name', 'nt')
+    monkeypatch.setattr(instance.subprocess, 'Popen', popen)
+    monkeypatch.setattr(instance, 'log_path', lambda: tmp_path / 'server.log')
+
+    instance._launch(tmp_path / 'base.db', None)
+
+    assert seen[0] & breakaway
+    assert not seen[1] & breakaway
+    assert len(seen) == 2

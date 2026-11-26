@@ -16,6 +16,8 @@ from content_studio import paths
 from content_studio.runtime import discovery
 
 LOCK = 'api.lock'
+# CREATE_BREAKAWAY_FROM_JOB de Windows; subprocess solo lo expone en Windows.
+BREAKAWAY_FROM_JOB = getattr(subprocess, 'CREATE_BREAKAWAY_FROM_JOB', 0x01000000)
 
 
 class AlreadyRunning(RuntimeError):
@@ -106,6 +108,15 @@ def _launch(db: Path, port: int | None) -> None:
         else {'start_new_session': True}
     )
     with log.open('ab') as out:
+        if os.name == 'nt':
+            # El SDK de MCP mete `studio mcp` en un Job Object que mata a sus hijos al cerrarse: el server sale del job
+            # para sobrevivir al cliente; si el job no lo permite, arranca igual dentro (spec 033).
+            breakaway = {'creationflags': detached['creationflags'] | BREAKAWAY_FROM_JOB}
+            try:
+                subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=out, **breakaway)
+                return
+            except OSError:
+                pass
         subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=out, **detached)
 
 

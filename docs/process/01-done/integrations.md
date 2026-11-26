@@ -43,3 +43,4 @@ con content-studio: piden una narración o una música, esperan el resultado y r
 - 2026-11-25: spec 029: servidor MCP por stdio y configuración por cliente.
 - 2026-11-25: enlaces `content-studio://`, «Enviar a» e inicio con Windows (spec 031)
 - 2026-11-25: red local con emparejamiento por PIN, TLS, subidas y MCP por HTTP (spec 032)
+- 2026-11-25: verificación integral del lote 025-032 (spec 033): las cuatro puertas en un server; el server lanzado desde `studio mcp` pide salir del Job Object del cliente
