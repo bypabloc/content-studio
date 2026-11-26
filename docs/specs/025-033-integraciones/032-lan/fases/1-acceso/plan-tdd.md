@@ -14,7 +14,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C1: Listener opt-in con TLS [AC-1, AC-2, AC-11]
 
-- **RED**: `server/tests/integration/test_lan.py::test_ac1_apagado_solo_loopback`
+- **RED**: `server/tests/integration/test_lan.py::test_ac1_off_only_loopback`
   - Given los ajustes por defecto When arranca `serve` Then ningún socket fuera de loopback; activado sobre 127.0.0.2 (en el test), escucha con TLS.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `lan/cert.py`, `lan/server.py` y el arranque en `serve.py`. Verify: `uv run pytest server/tests/integration/test_lan.py -q`.
@@ -22,7 +22,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C2: Tokens por dispositivo [AC-4, AC-7]
 
-- **RED**: `server/tests/unit/src/content_studio/lan/test_clients.py::test_ac4_sin_token_revocado_o_local_da_401`
+- **RED**: `server/tests/unit/src/content_studio/lan/test_clients.py::test_ac4_no_revoked_or_local_token_is_401`
   - WHEN se usa un token revocado THEN `authenticate` devuelve None; en la API, 401; los trabajos de otro dispositivo, 404.
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `lan/clients.py`, la columna `jobs.client_id` y el filtro. Verify: `uv run pytest server/tests -k lan -q`.
@@ -30,7 +30,7 @@ Ordenados por dependencia (utilidades → parser y registro → motor, servicio 
 
 #### Ciclo C3: Emparejamiento [AC-3]
 
-- **RED**: `server/tests/unit/src/content_studio/lan/test_pairing.py::test_ac3_pin_un_uso_vence_y_bloquea`
+- **RED**: `server/tests/unit/src/content_studio/lan/test_pairing.py::test_ac3_pin_single_use_expires_and_locks`
   - Given un reloj falso When se usa el PIN dos veces, tras 5 min o con 5 errores Then falla con `pairing_invalid` o `pairing_locked` (429).
   - Falla por el motivo esperado, no por setup.
 - **GREEN**: `lan/pairing.py`, `POST /pair` (LAN) y `POST /lan/pairing` (local). Verify: `uv run pytest server/tests/unit/src/content_studio/lan -q`.

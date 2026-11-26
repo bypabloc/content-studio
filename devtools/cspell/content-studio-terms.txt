@@ -232,3 +232,7 @@ rttm
 itertracks
 lavfi
 diarizations
+SECP
+gethostname
+DGRAM
+cafile

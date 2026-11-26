@@ -168,6 +168,7 @@ name = "content-studio"
 version = "0.1.0"
 source = { editable = "server" }
 dependencies = [
+    { name = "cryptography" },
     { name = "fastapi" },
     { name = "mcp" },
     { name = "send2trash" },
@@ -181,6 +182,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", specifier = ">=50.0.2" },
     { name = "fastapi", specifier = ">=0.165.0" },
     { name = "mcp", specifier = ">=2.3.0" },
     { name = "send2trash", specifier = ">=2.2.0" },

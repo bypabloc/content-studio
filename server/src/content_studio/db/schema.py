@@ -135,6 +135,26 @@ MIGRATIONS = [
       UNIQUE (folder_id, name, size, mtime)
     );
     """,
+    # spec 032 (02 §3): dispositivos de la red local, sus subidas y de quién es cada trabajo; solo agrega.
+    """
+    CREATE TABLE api_clients (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      token_sha256 TEXT NOT NULL UNIQUE,
+      scopes TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      last_seen TEXT,
+      revoked_at TEXT
+    );
+    CREATE TABLE uploads (
+      id INTEGER PRIMARY KEY,
+      client_id INTEGER NOT NULL REFERENCES api_clients(id),
+      path TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    ALTER TABLE jobs ADD COLUMN client_id INTEGER REFERENCES api_clients(id);
+    """,
 ]
 
 
